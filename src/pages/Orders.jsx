@@ -76,9 +76,12 @@ export default function Orders() {
   const [showLabelsModal, setShowLabelsModal] = useState(false)
   const [labelsConfig, setLabelsConfig] = useState({
     quantity: 30,
-    template: 'A4_30UP',
+    template: 'AVERY_5160',
     includeSku: true,
-    includeName: true
+    includeName: true,
+    offsetXmm: 0,
+    offsetYmm: 0,
+    testPrint: false
   })
 
   useEffect(() => {
@@ -136,15 +139,18 @@ export default function Orders() {
       // Obtenir projecte per SKU i nom
       const project = await getProject(selectedOrder.project_id)
 
-      // Generar PDF
-      const doc = generateFnskuLabelsPdf({
+      // Generar PDF (async ara)
+      const doc = await generateFnskuLabelsPdf({
         fnsku: identifiers.fnsku,
         sku: project.sku || '',
         productName: project.name || '',
         quantity: labelsConfig.quantity,
         template: labelsConfig.template,
         includeSku: labelsConfig.includeSku,
-        includeName: labelsConfig.includeName
+        includeName: labelsConfig.includeName,
+        offsetXmm: labelsConfig.offsetXmm || 0,
+        offsetYmm: labelsConfig.offsetYmm || 0,
+        testPrint: labelsConfig.testPrint || false
       })
 
       // Descarregar
@@ -737,7 +743,7 @@ export default function Orders() {
                       fontSize: '14px'
                     }}
                   >
-                    <option value="A4_30UP">A4 - 30 etiquetes (3x10)</option>
+                    <option value="AVERY_5160">Avery 5160 - 30 etiquetes (3x10)</option>
                     <option value="LABEL_40x30">Una etiqueta per pàgina (40x30mm)</option>
                   </select>
                 </div>
@@ -768,6 +774,75 @@ export default function Orders() {
                     />
                     <span style={{ fontSize: '13px', color: darkMode ? '#e5e7eb' : '#374151' }}>Incloure Nom</span>
                   </label>
+                  <label style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    cursor: 'pointer'
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={labelsConfig.testPrint}
+                      onChange={e => setLabelsConfig({ ...labelsConfig, testPrint: e.target.checked })}
+                    />
+                    <span style={{ fontSize: '13px', color: darkMode ? '#e5e7eb' : '#374151' }}>Mode Test Print (guies)</span>
+                  </label>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '12px' }}>
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      marginBottom: '6px',
+                      fontSize: '13px',
+                      fontWeight: '500',
+                      color: darkMode ? '#e5e7eb' : '#374151'
+                    }}>
+                      Offset X (mm)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={labelsConfig.offsetXmm}
+                      onChange={e => setLabelsConfig({ ...labelsConfig, offsetXmm: parseFloat(e.target.value) || 0 })}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid',
+                        borderColor: darkMode ? '#374151' : '#d1d5db',
+                        backgroundColor: darkMode ? '#15151f' : '#f9fafb',
+                        color: darkMode ? '#ffffff' : '#111827',
+                        fontSize: '14px'
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      marginBottom: '6px',
+                      fontSize: '13px',
+                      fontWeight: '500',
+                      color: darkMode ? '#e5e7eb' : '#374151'
+                    }}>
+                      Offset Y (mm)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={labelsConfig.offsetYmm}
+                      onChange={e => setLabelsConfig({ ...labelsConfig, offsetYmm: parseFloat(e.target.value) || 0 })}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid',
+                        borderColor: darkMode ? '#374151' : '#d1d5db',
+                        backgroundColor: darkMode ? '#15151f' : '#f9fafb',
+                        color: darkMode ? '#ffffff' : '#111827',
+                        fontSize: '14px'
+                      }}
+                    />
+                  </div>
                 </div>
                 <button
                   onClick={handleGenerateLabels}
@@ -780,7 +855,7 @@ export default function Orders() {
                     fontSize: '14px',
                     fontWeight: '500',
                     cursor: 'pointer',
-                    marginTop: '8px'
+                    marginTop: '12px'
                   }}
                 >
                   Generar i Descarregar PDF
