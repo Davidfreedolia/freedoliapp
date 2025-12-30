@@ -210,14 +210,13 @@ export default function Finances() {
         supplier_id: editingExpense.supplier_id || null
       }
       
-      // Obtener user_id
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('No hi ha usuari autenticat')
+      // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
+      const { user_id, ...dataToSave } = data
 
       if (editingExpense.id) {
-        await supabase.from('expenses').update(data).eq('id', editingExpense.id)
+        await supabase.from('expenses').update(dataToSave).eq('id', editingExpense.id)
       } else {
-        await supabase.from('expenses').insert({ ...data, user_id: user.id })
+        await supabase.from('expenses').insert(dataToSave)
       }
       
       await loadData()
@@ -272,14 +271,13 @@ export default function Finances() {
         amount: parseFloat(editingIncome.amount)
       }
       
-      // Obtener user_id
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('No hi ha usuari autenticat')
+      // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
+      const { user_id, ...dataToSave } = data
 
       if (editingIncome.id) {
-        await supabase.from('incomes').update(data).eq('id', editingIncome.id)
+        await supabase.from('incomes').update(dataToSave).eq('id', editingIncome.id)
       } else {
-        await supabase.from('incomes').insert({ ...data, user_id: user.id })
+        await supabase.from('incomes').insert(dataToSave)
       }
       
       await loadData()

@@ -216,14 +216,13 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
         updated_at: new Date().toISOString()
       }
 
-      // Obtener user_id
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('No hi ha usuari autenticat')
+      // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
+      const { user_id, ...dataToSave } = briefingData
 
       // Upsert (insert o update)
       const { error } = await supabase
         .from('briefings')
-        .upsert({ ...briefingData, user_id: user.id }, { onConflict: 'project_id' })
+        .upsert(dataToSave, { onConflict: 'project_id' })
 
       if (error) throw error
       

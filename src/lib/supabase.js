@@ -87,10 +87,11 @@ export const getProject = async (id) => {
 }
 
 export const createProject = async (project) => {
-  const userId = await getCurrentUserId()
+  // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
+  const { user_id, ...projectData } = project
   const { data, error } = await supabase
     .from('projects')
-    .insert([{ ...project, user_id: userId }])
+    .insert([projectData])
     .select()
     .single()
   if (error) throw error
@@ -98,9 +99,11 @@ export const createProject = async (project) => {
 }
 
 export const updateProject = async (id, updates) => {
+  // Eliminar user_id si ve del client (no es pot canviar)
+  const { user_id, ...updateData } = updates
   const { data, error } = await supabase
     .from('projects')
-    .update(updates)
+    .update(updateData)
     .eq('id', id)
     .select()
     .single()
@@ -135,10 +138,11 @@ export const getSupplier = async (id) => {
 }
 
 export const createSupplier = async (supplier) => {
-  const userId = await getCurrentUserId()
+  // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
+  const { user_id, ...supplierData } = supplier
   const { data, error } = await supabase
     .from('suppliers')
-    .insert([{ ...supplier, user_id: userId }])
+    .insert([supplierData])
     .select()
     .single()
   if (error) throw error
@@ -146,9 +150,11 @@ export const createSupplier = async (supplier) => {
 }
 
 export const updateSupplier = async (id, updates) => {
+  // Eliminar user_id si ve del client (no es pot canviar)
+  const { user_id, ...updateData } = updates
   const { data, error } = await supabase
     .from('suppliers')
-    .update({ ...updates, updated_at: new Date().toISOString() })
+    .update({ ...updateData, updated_at: new Date().toISOString() })
     .eq('id', id)
     .select()
     .single()
@@ -215,10 +221,11 @@ export const getPurchaseOrder = async (id) => {
 }
 
 export const createPurchaseOrder = async (po) => {
-  const userId = await getCurrentUserId()
+  // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
+  const { user_id, ...poData } = po
   const { data, error } = await supabase
     .from('purchase_orders')
-    .insert([{ ...po, user_id: userId }])
+    .insert([poData])
     .select()
     .single()
   if (error) throw error
@@ -226,9 +233,11 @@ export const createPurchaseOrder = async (po) => {
 }
 
 export const updatePurchaseOrder = async (id, updates) => {
+  // Eliminar user_id si ve del client (no es pot canviar)
+  const { user_id, ...updateData } = updates
   const { data, error } = await supabase
     .from('purchase_orders')
-    .update({ ...updates, updated_at: new Date().toISOString() })
+    .update({ ...updateData, updated_at: new Date().toISOString() })
     .eq('id', id)
     .select()
     .single()
@@ -257,10 +266,11 @@ export const getDocuments = async (projectId) => {
 }
 
 export const createDocument = async (doc) => {
-  const userId = await getCurrentUserId()
+  // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
+  const { user_id, ...docData } = doc
   const { data, error } = await supabase
     .from('documents')
-    .insert([{ ...doc, user_id: userId }])
+    .insert([docData])
     .select()
     .single()
   if (error) throw error
@@ -288,10 +298,11 @@ export const getPayments = async (projectId = null) => {
 }
 
 export const createPayment = async (payment) => {
-  const userId = await getCurrentUserId()
+  // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
+  const { user_id, ...paymentData } = payment
   const { data, error } = await supabase
     .from('payments')
-    .insert([{ ...payment, user_id: userId }])
+    .insert([paymentData])
     .select()
     .single()
   if (error) throw error
@@ -299,9 +310,11 @@ export const createPayment = async (payment) => {
 }
 
 export const updatePayment = async (id, updates) => {
+  // Eliminar user_id si ve del client (no es pot canviar)
+  const { user_id, ...updateData } = updates
   const { data, error } = await supabase
     .from('payments')
-    .update(updates)
+    .update(updateData)
     .eq('id', id)
     .select()
     .single()
@@ -433,10 +446,11 @@ export const getWarehouse = async (id) => {
 }
 
 export const createWarehouse = async (warehouse) => {
-  const userId = await getCurrentUserId()
+  // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
+  const { user_id, ...warehouseData } = warehouse
   const { data, error } = await supabase
     .from('warehouses')
-    .insert([{ ...warehouse, user_id: userId }])
+    .insert([warehouseData])
     .select()
     .single()
   if (error) throw error
@@ -444,9 +458,11 @@ export const createWarehouse = async (warehouse) => {
 }
 
 export const updateWarehouse = async (id, updates) => {
+  // Eliminar user_id si ve del client (no es pot canviar)
+  const { user_id, ...updateData } = updates
   const { data, error } = await supabase
     .from('warehouses')
-    .update({ ...updates, updated_at: new Date().toISOString() })
+    .update({ ...updateData, updated_at: new Date().toISOString() })
     .eq('id', id)
     .select()
     .single()
@@ -474,13 +490,15 @@ export const getCompanySettings = async () => {
 }
 
 export const updateCompanySettings = async (settings) => {
+  // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
+  const { user_id, ...settingsData } = settings
   const userId = await getCurrentUserId()
   const existing = await getCompanySettings()
 
   if (existing) {
     const { data, error } = await supabase
       .from('company_settings')
-      .update({ ...settings, updated_at: new Date().toISOString() })
+      .update({ ...settingsData, updated_at: new Date().toISOString() })
       .eq('id', existing.id)
       .eq('user_id', userId)
       .select()
@@ -491,7 +509,7 @@ export const updateCompanySettings = async (settings) => {
 
   const { data, error } = await supabase
     .from('company_settings')
-    .insert([{ ...settings, user_id: userId }])
+    .insert([settingsData])
     .select()
     .single()
   if (error) throw error

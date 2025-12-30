@@ -1,210 +1,176 @@
-# Configuració Autenticació Supabase Auth + RLS
+# Pas a Pas: Configuració Autenticació Supabase Auth + RLS
 
-## 📋 Pasos per configurar l'autenticació
+Aquest document explica com configurar l'autenticació Supabase Auth amb Row Level Security (RLS) al projecte Freedoliapp.
 
-### 1. Executar el script SQL
+## 📋 Prerequisits
 
-1. Obre el **Supabase Dashboard** (https://supabase.com/dashboard)
-2. Selecciona el teu projecte
-3. Ves a **SQL Editor** (menú lateral)
-4. Crea una nova query: clica **New Query**
-5. Obre el fitxer `supabase-auth-setup.sql` del projecte
-6. Copia tot el contingut i enganxa'l a l'editor SQL
-7. Clica **Run** (o prem `Ctrl+Enter`)
-8. Verifica que no hi hagi errors (hauria de mostrar "Success")
+- Projecte Supabase creat a [supabase.com](https://supabase.com)
+- Credencials de Supabase (URL i anon key) disponibles
+- Accés al SQL Editor de Supabase
 
-⚠️ **IMPORTANT**: Si tens dades existents, hauràs de decidir:
-- **Opció A**: Eliminar-les i començar de nou (millor per desenvolupament)
-- **Opció B**: Assignar-les manualment a un usuari (veure secció al final del SQL)
+---
 
-### 2. Configurar Auth Settings a Supabase
+## 🔧 Pas 1: Activar Auth a Supabase
 
-#### 2.1. Habilitar Email Provider
+1. Entra al Dashboard del teu projecte Supabase
+2. Vés a **Authentication** > **Providers** (menú lateral)
+3. Activa **Email** provider:
+   - Toggle **"Enable Email provider"** a ON
+   - Configuració recomanada:
+     - ✅ Confirm email: **OFF** (per desenvolupament, activa'l en producció)
+     - ✅ Secure email change: **ON**
+4. **Guarda** els canvis
 
-1. Al Dashboard, ves a **Authentication** > **Providers**
-2. Assegura't que **Email** estigui habilitat (toggle ON)
-3. Configuració opcional:
-   - **Confirm email**: Activa't si vols que els usuaris confirmen el correu
-   - **Secure email change**: Recomanat activar
+---
 
-#### 2.2. Configurar Site URL i Redirect URLs
+## 🔗 Pas 2: Configurar Redirect URLs
 
-1. Ves a **Authentication** > **URL Configuration**
+### 2.1 Local (Desenvolupament)
 
-2. **Site URL**: 
-   ```
-   http://localhost:5173
-   ```
-   (per desenvolupament local)
+1. Vés a **Authentication** > **URL Configuration**
+2. A **Site URL**, posa: `http://localhost:5173` (o el port que facis servir)
+3. A **Redirect URLs**, afegeix:
+   - `http://localhost:5173`
+   - `http://localhost:5173/`
 
-3. **Redirect URLs**: Afegeix aquestes URLs (una per línia):
-   ```
-   http://localhost:5173
-   http://localhost:5173/
-   http://localhost:5173/login
-   ```
-   
-   Si tens una URL de producció (ex: Vercel), afegeix també:
-   ```
-   https://tu-app.vercel.app
-   https://tu-app.vercel.app/
-   https://tu-app.vercel.app/login
-   ```
+### 2.2 Producció (Vercel)
 
-#### 2.3. Configurar Email Templates (Opcional)
+1. Després de fer deploy a Vercel, obtén la URL del teu projecte (ex: `https://freedoliapp.vercel.app`)
+2. Vés a **Authentication** > **URL Configuration**
+3. A **Redirect URLs**, afegeix:
+   - `https://tu-app.vercel.app`
+   - `https://tu-app.vercel.app/`
+4. (Opcional) Actualitza **Site URL** amb la URL de producció
 
-1. Ves a **Authentication** > **Email Templates**
-2. Pots personalitzar els templates de:
-   - Confirm signup
-   - Magic Link
-   - Change Email Address
-   - Reset Password
+---
 
-Per defecte, Supabase envia emails funcionals, però pots personalitzar-los amb HTML.
+## 💾 Pas 3: Executar SQL Script
 
-### 3. Provar l'autenticació en local
+1. Vés a **SQL Editor** al Dashboard de Supabase
+2. Clica **New Query**
+3. Obre el fitxer `supabase-auth-setup.sql` del projecte
+4. Copia tot el contingut i enganxa'l al SQL Editor
+5. **IMPORTANT**: Si tens dades existents sense `user_id`:
+   - Descomenta les línies UPDATE de la secció 2
+   - Ajusta l'email o la lògica segons les teves necessitats
+   - Executa-les **abans** de les comandes ALTER COLUMN ... SET NOT NULL
+6. Clica **Run** (o `Ctrl+Enter` / `Cmd+Enter`)
+7. Verifica que no hi hagi errors (haurien d'aparèixer missatges de confirmació)
 
-#### 3.1. Crear un usuari de prova
+### ⚠️ Nota sobre Dades Existents
 
-**Mètode 1: Per l'aplicació (Recomanat)**
+Si ja tens dades a la base de dades:
+
+**Opció A: Assignar a un usuari específic**
+```sql
+-- Descomenta i executa aquestes línies abans del SET NOT NULL
+UPDATE projects SET user_id = (SELECT id FROM auth.users WHERE email = 'tu-email@example.com' LIMIT 1) WHERE user_id IS NULL;
+-- (i així per totes les taules)
+```
+
+**Opció B: Eliminar dades de prova**
+```sql
+DELETE FROM projects WHERE user_id IS NULL;
+-- (i així per totes les taules)
+```
+
+---
+
+## 🧪 Pas 4: Provar-ho Local
+
+### 4.1 Configurar Variables d'Entorn
+
+Assegura't que el fitxer `.env` (o `.env.local`) conté:
+
+```env
+VITE_SUPABASE_URL=https://tu-project.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+### 4.2 Crear Primer Usuari
 
 1. Inicia el servidor de desenvolupament:
    ```bash
    npm run dev
    ```
 
-2. Obre http://localhost:5173
-3. Hauries de veure la pantalla de Login
-4. Clica a **"Enllaç màgic"** o utilitza **email/password**
-5. Si utilitzes email/password:
-   - Primer cal registrar-se (Supabase crea automàticament l'usuari al primer login)
-   - O crea l'usuari manualment al Dashboard (veure Mètode 2)
+2. Obre el navegador a `http://localhost:5173`
 
-**Mètode 2: Crear usuari manualment al Dashboard**
+3. Hauries de ser redirigit a `/login`
 
-1. Ves a **Authentication** > **Users**
-2. Clica **Add user** > **Create new user**
-3. Introdueix:
-   - **Email**: `test@example.com`
-   - **Password**: (genera una contrasenya segura o introdueix una)
-   - **Auto Confirm User**: Activa aquesta opció per no necessitar confirmació d'email
-4. Clica **Create user**
+4. Crea un compte:
+   - **Opció 1 (Email/Password)**: Introdueix email i contrasenya, clica "Iniciar sessió"
+   - **Opció 2 (Magic Link)**: Introdueix email, clica "Enviar enllaç", revisa el correu i clica l'enllaç
 
-#### 3.2. Provar el login
+5. Després del login, hauries de veure el Dashboard
 
-1. Ves a http://localhost:5173/login
-2. **Amb email/password**:
-   - Introdueix l'email i contrasenya
-   - Clica "Iniciar sessió"
-   - Hauries de ser redirigit al Dashboard
+### 4.3 Verificar que Funciona
 
-3. **Amb magic link**:
-   - Toggle a "Enllaç màgic"
-   - Introdueix l'email
-   - Clica "Enviar enllaç"
-   - Revisa el teu correu (o l'emissor de Supabase si estàs en desenvolupament)
-   - Clica l'enllaç del correu
-   - Hauries de ser redirigit i autenticat
+1. **Comprovar que veus les teves dades**:
+   - Crea un projecte nou des del Dashboard
+   - Verifica que apareix a la llista
 
-#### 3.3. Provar RLS (Row Level Security)
+2. **Comprovar RLS**:
+   - Tanca sessió (botó logout)
+   - Crea un segon compte amb un email diferent
+   - Verifica que NO veus les dades del primer usuari
 
-1. Després de fer login, crea alguns registres (projectes, proveïdors, etc.)
-2. Tanca sessió (botó logout al header)
-3. Crea un **segon usuari** al Dashboard
-4. Fes login amb el segon usuari
-5. **Verifica**: Hauries de veure una llista buida (no veuràs els registres del primer usuari)
-6. Crea alguns registres nous amb el segon usuari
-7. Fes logout i torna a fer login amb el primer usuari
-8. **Verifica**: Només veuràs els teus propis registres
-
-### 4. Configurar per Producció (Vercel)
-
-Quan despleguis a Vercel:
-
-1. **Variables d'entorn**: Assegura't que tens configurades:
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_ANON_KEY`
-
-2. **Redirect URLs**: Afegeix la URL de producció al Supabase Dashboard:
-   - Authentication > URL Configuration > Redirect URLs
-   - Afegeix: `https://tu-app.vercel.app` i variants
-
-3. **Site URL**: Canvia temporalment la Site URL al Dashboard per provar, o deixa-la amb la de producció
-
-### 5. Troubleshooting
-
-#### Problema: "No hi ha usuari autenticat" al crear registres
-
-**Solució**: Assegura't que has fet login correctament. Revisa la consola del navegador per errors.
-
-#### Problema: Magic link no arriba
-
-**Causes possibles**:
-- Revisa la carpeta de spam
-- Si estàs en desenvolupament, els emails poden tardar uns minuts
-- Verifica que l'email estigui correctament escrit
-
-**Solució temporal**: Utilitza email/password o crea l'usuari manualment al Dashboard amb "Auto Confirm User" activat.
-
-#### Problema: Veig dades d'altres usuaris
-
-**Causes possibles**:
-- RLS no està habilitat
-- Les polítiques no s'han creat correctament
-- Els registres existents no tenen `user_id`
-
-**Solució**:
-1. Verifica al Dashboard > Authentication > Policies que les polítiques existeixen
-2. Executa de nou el script SQL si cal
-3. Per dades existents, assegura't que tenen `user_id` assignat
-
-#### Problema: Error 401 (Unauthorized) a totes les peticions
-
-**Causes possibles**:
-- RLS està habilitat però no hi ha polítiques
-- La sessió ha expirat
-
-**Solució**:
-1. Verifica que el script SQL s'ha executat correctament
-2. Fes logout i login de nou
-3. Revisa les polítiques RLS al Dashboard
-
-### 6. Seguretat addicional (Opcional)
-
-#### Deshabilitar registre públic
-
-Si no vols que es puguin crear comptes des de l'app:
-
-1. Ves a **Authentication** > **Settings**
-2. Desactiva **Enable email signup** (només administradors podran crear usuaris)
-
-#### Límit d'intents de login
-
-1. Ves a **Authentication** > **Settings**
-2. Configura **Rate Limits** per prevenir bruteforce attacks
+3. **Comprovar que sense login no veus res**:
+   - Tanca sessió
+   - Intenta accedir directament a `http://localhost:5173/projects`
+   - Hauries de ser redirigit a `/login`
 
 ---
 
-## ✅ Checklist final
+## ✅ Verificació Final
 
-Abans de considerar-ho completat:
+### Funcionalitats que han de funcionar:
 
-- [ ] Script SQL executat sense errors
-- [ ] Site URL configurada correctament
-- [ ] Redirect URLs configurades (local i producció)
-- [ ] Email provider habilitat
-- [ ] Usuari de prova creat
-- [ ] Login funciona (email/password i magic link)
-- [ ] Logout funciona
-- [ ] RLS funciona (usuaris només veuen les seves dades)
-- [ ] Crear registres funciona (projectes, proveïdors, etc.)
-- [ ] Variables d'entorn configurades a Vercel (si aplica)
+- ✅ Login amb email/password
+- ✅ Login amb magic link
+- ✅ Redirecció a `/login` si no hi ha sessió
+- ✅ Cada usuari només veu les seves dades
+- ✅ Crear projectes, proveïdors, comandes, etc. (s'assignen automàticament al usuari autenticat)
+- ✅ Logout funciona correctament
+
+### Si alguna cosa no funciona:
+
+1. **"No hi ha usuari autenticat"**:
+   - Verifica que les variables d'entorn estan correctes
+   - Verifica que Auth està activat a Supabase
+
+2. **"Permission denied" o errors de RLS**:
+   - Verifica que has executat tot el SQL script
+   - Verifica que les policies RLS estan creades (Authentication > Policies)
+
+3. **Redirect URLs no funcionen**:
+   - Verifica que les URLs són exactes (inclouen el port per local)
+   - Verifica que no hi ha espais ni caràcters estranys
 
 ---
 
-## 📚 Recursos addicionals
+## 🚀 Desplegament a Producció
 
-- [Documentació Supabase Auth](https://supabase.com/docs/guides/auth)
-- [Documentació RLS](https://supabase.com/docs/guides/auth/row-level-security)
-- [Supabase Dashboard](https://supabase.com/dashboard)
+Després de fer deploy a Vercel:
 
+1. Afegeix les variables d'entorn a Vercel:
+   - Vercel Dashboard > Project > Settings > Environment Variables
+   - Afegeix `VITE_SUPABASE_URL` i `VITE_SUPABASE_ANON_KEY`
+
+2. Actualitza Redirect URLs a Supabase amb la URL de producció
+
+3. Fes un redeploy del projecte
+
+4. Prova el login amb la URL de producció
+
+---
+
+## 📚 Referències
+
+- [Supabase Auth Docs](https://supabase.com/docs/guides/auth)
+- [RLS Documentation](https://supabase.com/docs/guides/auth/row-level-security)
+- [Redirect URLs Guide](https://supabase.com/docs/guides/auth/redirect-urls)
+
+---
+
+**Nota**: Aquest setup utilitza `DEFAULT auth.uid()` a la base de dades, així que el `user_id` s'assigna automàticament. El codi de l'aplicació elimina qualsevol `user_id` que pugui venir del client per seguretat.

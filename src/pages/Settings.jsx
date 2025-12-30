@@ -143,14 +143,13 @@ export default function Settings() {
         await supabase.from('signatures').update({ is_default: false }).neq('id', editingSignature.id || '')
       }
 
-      // Obtener user_id
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('No hi ha usuari autenticat')
+      // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
+      const { user_id, ...dataToSave } = editingSignature
 
       if (editingSignature.id) {
-        await supabase.from('signatures').update(editingSignature).eq('id', editingSignature.id)
+        await supabase.from('signatures').update(dataToSave).eq('id', editingSignature.id)
       } else {
-        await supabase.from('signatures').insert({ ...editingSignature, user_id: user.id })
+        await supabase.from('signatures').insert(dataToSave)
       }
 
       await loadSettings()
