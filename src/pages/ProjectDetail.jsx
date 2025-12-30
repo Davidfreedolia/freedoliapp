@@ -79,38 +79,35 @@ export default function ProjectDetail() {
 
   const loadDriveFolders = async () => {
     try {
-      // Si ja té carpeta a Drive, carregar-la
-      if (project.drive_folder_id) {
-        const contents = await driveService.listFolderContents(project.drive_folder_id)
-        const folders = {}
-        for (const item of contents) {
-          if (item.mimeType === 'application/vnd.google-apps.folder') {
-            folders[item.name] = item
-          }
-        }
-        setProjectFolders({ main: { id: project.drive_folder_id }, subfolders: folders })
-        
-        // Seleccionar carpeta segons fase actual
-        const folderName = PHASE_FOLDER_MAP[project.current_phase]
-        if (folders[folderName]) {
-          setSelectedFolder(folders[folderName])
-        }
-      } else {
-        // Crear carpetes si no existeixen
-        const folders = await driveService.createProjectFolders(project.project_code, project.name)
-        setProjectFolders(folders)
-        
-        // Guardar ID a la BD
+      // Usar ensureProjectDriveFolders per garantir idempotència
+      const folders = await driveService.ensureProjectDriveFolders({
+        id: project.id,
+        project_code: project.project_code,
+        sku: project.sku,
+        name: project.name,
+        drive_folder_id: project.drive_folder_id
+      })
+      
+      setProjectFolders(folders)
+      
+      // Si no tenia drive_folder_id, guardar-lo ara
+      if (!project.drive_folder_id && folders.main.id) {
         await updateProject(id, { drive_folder_id: folders.main.id })
-        
-        // Seleccionar carpeta segons fase
-        const folderName = PHASE_FOLDER_MAP[project.current_phase]
-        if (folders.subfolders[folderName]) {
-          setSelectedFolder(folders.subfolders[folderName])
-        }
+        setProject({ ...project, drive_folder_id: folders.main.id })
+      }
+      
+      // Seleccionar carpeta segons fase actual
+      const folderName = PHASE_FOLDER_MAP[project.current_phase]
+      if (folders.subfolders && folders.subfolders[folderName]) {
+        setSelectedFolder(folders.subfolders[folderName])
       }
     } catch (err) {
       console.error('Error amb carpetes Drive:', err)
+      if (err.message === 'AUTH_REQUIRED') {
+        alert('Reconnecta Google Drive. La sessió ha expirat.')
+      } else {
+        alert('Error gestionant carpetes de Drive: ' + (err.message || 'Error desconegut'))
+      }
     }
   }
 
@@ -133,24 +130,40 @@ export default function ProjectDetail() {
   }
 
   const handleUploadComplete = async (files) => {
-    // Guardar referències a Supabase
+    // Guardar referències a Supabase (evita duplicats automàticament)
+    let savedCount = 0
+    let errorCount = 0
+    
     for (const file of files) {
       try {
         await createDocument({
           project_id: id,
           name: file.name,
-          file_url: file.driveUrl,
-          drive_file_id: file.driveId,
+          file_url: file.webViewLink || file.driveUrl,
+          drive_file_id: file.id,
           category: getCategoryForPhase(project.current_phase),
           file_size: file.size
         })
+        savedCount++
       } catch (err) {
         console.error('Error guardant document:', err)
+        errorCount++
+        // No crear document si upload ha fallat (no hauria de passar si uploadFiles funciona)
       }
     }
+    
     // Recarregar documents
-    const docs = await getDocuments(id)
-    setDocuments(docs || [])
+    try {
+      const docs = await getDocuments(id)
+      setDocuments(docs || [])
+    } catch (err) {
+      console.error('Error recarregant documents:', err)
+    }
+    
+    // Mostrar feedback si hi ha errors
+    if (errorCount > 0) {
+      alert(`${errorCount} document(s) no s'han pogut guardar correctament.`)
+    }
   }
 
   const getCategoryForPhase = (phase) => {

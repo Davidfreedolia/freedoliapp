@@ -268,6 +268,48 @@ export const getDocuments = async (projectId) => {
 export const createDocument = async (doc) => {
   // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
   const { user_id, ...docData } = doc
+  
+  // Evitar duplicats: comprovar si ja existeix document amb mateix drive_file_id
+  if (docData.drive_file_id) {
+    const { data: existing } = await supabase
+      .from('documents')
+      .select('id')
+      .eq('drive_file_id', docData.drive_file_id)
+      .eq('project_id', docData.project_id)
+      .maybeSingle()
+    
+    if (existing) {
+      // Ja existeix, retornar l'existent (o llançar error segons preferència)
+      return existing
+    }
+  }
+  
+  // Comprovar també per nom + projecte (fallback si no tenim drive_file_id)
+  if (docData.name && docData.project_id) {
+    const { data: existingByName } = await supabase
+      .from('documents')
+      .select('id')
+      .eq('name', docData.name)
+      .eq('project_id', docData.project_id)
+      .maybeSingle()
+    
+    if (existingByName) {
+      // Si ja existeix però no té drive_file_id, actualitzar-lo
+      if (docData.drive_file_id) {
+        const { data: updated, error: updateError } = await supabase
+          .from('documents')
+          .update({ drive_file_id: docData.drive_file_id, file_url: docData.file_url })
+          .eq('id', existingByName.id)
+          .select()
+          .single()
+        if (updateError) throw updateError
+        return updated
+      }
+      return existingByName
+    }
+  }
+  
+  // Crear nou document
   const { data, error } = await supabase
     .from('documents')
     .insert([docData])

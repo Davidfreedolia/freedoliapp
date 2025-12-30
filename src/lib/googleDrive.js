@@ -6,6 +6,41 @@ const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || ''
 // Scopes necessaris
 const SCOPES = 'https://www.googleapis.com/auth/drive.file'
 
+// ==================== HELPERS ====================
+
+/**
+ * Helper per registrar errors de Drive de forma estructurada
+ * @param {string} context - Context on ha ocorregut l'error (ex: 'uploadFile', 'createFolder')
+ * @param {Error|string} error - Error object o missatge
+ * @param {object} metadata - Informació addicional (opcional)
+ */
+function logDriveError(context, error, metadata = {}) {
+  const errorMessage = error instanceof Error ? error.message : error
+  const errorStack = error instanceof Error ? error.stack : null
+  
+  console.error('[Drive Error]', {
+    context,
+    error: errorMessage,
+    stack: errorStack,
+    timestamp: new Date().toISOString(),
+    ...metadata
+  })
+}
+
+/**
+ * Helper per mostrar errors a l'usuari
+ * Per ara utilitza alert(), però es pot canviar a toast/notification system
+ * @param {string} message - Missatge per mostrar
+ * @param {boolean} critical - Si és crític, mostra alert. Si no, només log.
+ */
+function showDriveError(message, critical = true) {
+  if (critical) {
+    alert(`Google Drive: ${message}`)
+  } else {
+    console.warn('[Drive Warning]', message)
+  }
+}
+
 // IDs de les carpetes a Drive (david@freedolia.com)
 export const DRIVE_FOLDERS = {
   root: '1JkWv8R7JfmuVlkUH_yPx3iLSk1sgEao6',
@@ -343,9 +378,23 @@ class GoogleDriveService {
     return !!this.accessToken
   }
 
-  // Verificar si el token és vàlid
+  // Verificar si el token és vàlid i refrescar si cal
   async verifyToken() {
     if (!this.accessToken) return false
+    
+    // Comprovar si el token ha expirat segons localStorage
+    const savedTime = localStorage.getItem('gdrive_token_time')
+    if (savedTime) {
+      const tokenAge = Date.now() - parseInt(savedTime)
+      // Tokens duren ~1 hora (3600000 ms), refrescar als 55 minuts
+      if (tokenAge > 3300000) {
+        logDriveError('verifyToken', 'Token expirat segons timestamp', { tokenAge })
+        this.accessToken = null
+        localStorage.removeItem('gdrive_token')
+        localStorage.removeItem('gdrive_token_time')
+        return false
+      }
+    }
     
     // Esperar que Drive API estigui disponible
     if (!window.gapi?.client?.drive) {
@@ -358,20 +407,44 @@ class GoogleDriveService {
       await window.gapi.client.drive.about.get({ fields: 'user' })
       return true
     } catch (err) {
-      console.warn('Token invàlid:', err)
-      this.accessToken = null
-      localStorage.removeItem('gdrive_token')
-      localStorage.removeItem('gdrive_token_time')
+      // Error 401 = token expirat o invàlid
+      if (err.status === 401 || err.code === 401) {
+        logDriveError('verifyToken', 'Token expirat o invàlid (401)', { error: err })
+        this.accessToken = null
+        localStorage.removeItem('gdrive_token')
+        localStorage.removeItem('gdrive_token_time')
+        if (window.gapi?.client) {
+          window.gapi.client.setToken(null)
+        }
+        return false
+      }
+      
+      // Altres errors
+      logDriveError('verifyToken', err, { status: err.status, code: err.code })
       return false
     }
   }
 
-  // Helper per assegurar que Drive API està disponible
-  async ensureDriveReady() {
+  // Assegurar autenticació vàlida (verificar i reconectar si cal)
+  async ensureAuthenticated() {
+    // Si no hi ha token, no és un error d'autenticació expirada
     if (!this.accessToken) {
-      throw new Error('No connectat a Drive')
+      throw new Error('AUTH_REQUIRED')
     }
     
+    const isValid = await this.verifyToken()
+    
+    if (!isValid) {
+      // Token expirat o invàlid, cal reconectar
+      throw new Error('AUTH_REQUIRED')
+    }
+    
+    return true
+  }
+
+  // Helper per assegurar que Drive API està disponible i autenticat
+  async ensureDriveReady() {
+    // Primer assegurar que Drive API està inicialitzat
     if (!window.gapi?.client?.drive) {
       // Intentar inicialitzar si no està
       if (!this.isInitialized) {
@@ -382,8 +455,25 @@ class GoogleDriveService {
       try {
         await waitFor(() => window.gapi?.client?.drive, 5000)
       } catch (e) {
+        logDriveError('ensureDriveReady', 'Drive API no disponible', { error: e })
         throw new Error('Drive API no disponible')
       }
+    }
+    
+    // Després verificar autenticació (només si ja està inicialitzat)
+    // Si no hi ha token, no és error durant la inicialització, només quan es fa una operació
+    if (!this.accessToken) {
+      throw new Error('AUTH_REQUIRED')
+    }
+    
+    try {
+      await this.ensureAuthenticated()
+    } catch (err) {
+      if (err.message === 'AUTH_REQUIRED') {
+        // No mostrar alert aquí, només llançar error (els components gestionaran el missatge)
+        throw new Error('AUTH_REQUIRED')
+      }
+      throw err
     }
     
     return true
@@ -392,37 +482,56 @@ class GoogleDriveService {
   // ==================== OPERACIONS AMB CARPETES ====================
 
   async findOrCreateFolder(name, parentId = null) {
-    await this.ensureDriveReady()
-
-    let query = `name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false`
-    if (parentId) {
-      query += ` and '${parentId}' in parents`
+    try {
+      await this.ensureDriveReady()
+    } catch (err) {
+      if (err.message === 'AUTH_REQUIRED') {
+        throw err
+      }
+      logDriveError('findOrCreateFolder', err, { folderName: name })
+      throw new Error('No connectat a Google Drive')
     }
 
-    const response = await window.gapi.client.drive.files.list({
-      q: query,
-      fields: 'files(id, name, webViewLink)',
-      spaces: 'drive'
-    })
+    try {
+      let query = `name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false`
+      if (parentId) {
+        query += ` and '${parentId}' in parents`
+      }
 
-    if (response.result.files && response.result.files.length > 0) {
-      return response.result.files[0]
+      const response = await window.gapi.client.drive.files.list({
+        q: query,
+        fields: 'files(id, name, webViewLink)',
+        spaces: 'drive'
+      })
+
+      if (response.result.files && response.result.files.length > 0) {
+        return response.result.files[0]
+      }
+
+      const fileMetadata = {
+        name: name,
+        mimeType: 'application/vnd.google-apps.folder',
+      }
+      if (parentId) {
+        fileMetadata.parents = [parentId]
+      }
+
+      const createResponse = await window.gapi.client.drive.files.create({
+        resource: fileMetadata,
+        fields: 'id, name, webViewLink'
+      })
+
+      return createResponse.result
+    } catch (err) {
+      if (err.status === 401 || err.code === 401) {
+        this.accessToken = null
+        localStorage.removeItem('gdrive_token')
+        localStorage.removeItem('gdrive_token_time')
+        throw new Error('AUTH_REQUIRED')
+      }
+      logDriveError('findOrCreateFolder', err, { folderName: name, parentId })
+      throw new Error('Error creant o buscant carpeta a Drive: ' + (err.message || 'Error desconegut'))
     }
-
-    const fileMetadata = {
-      name: name,
-      mimeType: 'application/vnd.google-apps.folder',
-    }
-    if (parentId) {
-      fileMetadata.parents = [parentId]
-    }
-
-    const createResponse = await window.gapi.client.drive.files.create({
-      resource: fileMetadata,
-      fields: 'id, name, webViewLink'
-    })
-
-    return createResponse.result
   }
 
   async createProjectFolders(projectCode, projectName) {
@@ -442,46 +551,218 @@ class GoogleDriveService {
     }
   }
 
-  async listFolderContents(folderId) {
-    await this.ensureDriveReady()
+  /**
+   * Assegura que un projecte té carpetes a Drive (IDEMPOTENT)
+   * - Si drive_folder_id existeix i és vàlid → retorna info de carpetes existents
+   * - Si drive_folder_id és null però existeix carpeta amb el nom → reutilitza-la
+   * - Si no existeix → crea noves carpetes
+   * @param {object} project - Objecte projecte amb: id, project_code (o sku), name, drive_folder_id (opcional)
+   * @returns {object} { main: {id, name, webViewLink}, subfolders: {...} }
+   */
+  async ensureProjectDriveFolders(project) {
+    try {
+      await this.ensureDriveReady()
+    } catch (err) {
+      if (err.message === 'AUTH_REQUIRED') {
+        throw err
+      }
+      logDriveError('ensureProjectDriveFolders', err, { projectId: project.id })
+      throw new Error('No s\'ha pogut connectar a Google Drive')
+    }
 
-    const response = await window.gapi.client.drive.files.list({
-      q: `'${folderId}' in parents and trashed=false`,
-      fields: 'files(id, name, mimeType, webViewLink, webContentLink, size, createdTime, modifiedTime)',
-      orderBy: 'name'
-    })
-    return response.result.files || []
+    const projectCode = project.sku || project.project_code || project.code
+    const folderName = `${projectCode}_${project.name}`
+
+    // CAS 1: Si ja té drive_folder_id, verificar que existeix i retornar info
+    if (project.drive_folder_id) {
+      try {
+        const folderInfo = await this.getFileInfo(project.drive_folder_id)
+        
+        // Verificar que és una carpeta i no està a la paperera
+        if (folderInfo.mimeType === 'application/vnd.google-apps.folder') {
+          // Carregar subcarpetes
+          const contents = await this.listFolderContents(project.drive_folder_id)
+          const subfolders = {}
+          for (const item of contents) {
+            if (item.mimeType === 'application/vnd.google-apps.folder') {
+              subfolders[item.name] = item
+            }
+          }
+
+          return {
+            main: folderInfo,
+            subfolders: subfolders
+          }
+        } else {
+          logDriveError('ensureProjectDriveFolders', 'drive_folder_id no és una carpeta', { 
+            drive_folder_id: project.drive_folder_id,
+            mimeType: folderInfo.mimeType 
+          })
+          // Continuar per crear nova carpeta
+        }
+      } catch (err) {
+        // Error 404 = carpeta no existeix o no hi tens accés
+        if (err.status === 404 || err.code === 404) {
+          logDriveError('ensureProjectDriveFolders', 'drive_folder_id no existeix (404)', {
+            drive_folder_id: project.drive_folder_id
+          })
+          // Continuar per buscar o crear nova carpeta
+        } else {
+          logDriveError('ensureProjectDriveFolders', err, { drive_folder_id: project.drive_folder_id })
+          throw new Error('Error verificant carpeta existent a Drive')
+        }
+      }
+    }
+
+    // CAS 2: Buscar carpeta existent amb el nom esperat
+    try {
+      const query = `name='${folderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false and '${DRIVE_FOLDERS.projects}' in parents`
+      const response = await window.gapi.client.drive.files.list({
+        q: query,
+        fields: 'files(id, name, webViewLink)',
+        spaces: 'drive'
+      })
+
+      if (response.result.files && response.result.files.length > 0) {
+        // Trobada carpeta existent, reutilitzar-la
+        const existingFolder = response.result.files[0]
+        
+        // Carregar subcarpetes
+        const contents = await this.listFolderContents(existingFolder.id)
+        const subfolders = {}
+        for (const item of contents) {
+          if (item.mimeType === 'application/vnd.google-apps.folder') {
+            subfolders[item.name] = item
+          }
+        }
+
+        logDriveError('ensureProjectDriveFolders', 'Carpeta existent reutilitzada', { 
+          folderId: existingFolder.id,
+          folderName 
+        }, false) // No és error, és informació
+
+        return {
+          main: existingFolder,
+          subfolders: subfolders
+        }
+      }
+    } catch (err) {
+      logDriveError('ensureProjectDriveFolders', 'Error buscant carpeta existent', { error: err })
+      // Continuar per crear nova carpeta
+    }
+
+    // CAS 3: Crear noves carpetes
+    try {
+      const folders = await this.createProjectFolders(projectCode, project.name)
+      logDriveError('ensureProjectDriveFolders', 'Carpetes creades', { 
+        folderId: folders.main.id,
+        folderName 
+      }, false) // No és error, és informació
+      return folders
+    } catch (err) {
+      logDriveError('ensureProjectDriveFolders', 'Error creant carpetes', { error: err })
+      throw new Error('Error creant carpetes a Google Drive: ' + (err.message || 'Error desconegut'))
+    }
+  }
+
+  async listFolderContents(folderId) {
+    try {
+      await this.ensureDriveReady()
+    } catch (err) {
+      if (err.message === 'AUTH_REQUIRED') {
+        throw err
+      }
+      logDriveError('listFolderContents', err, { folderId })
+      throw new Error('No connectat a Google Drive')
+    }
+
+    try {
+      const response = await window.gapi.client.drive.files.list({
+        q: `'${folderId}' in parents and trashed=false`,
+        fields: 'files(id, name, mimeType, webViewLink, webContentLink, size, createdTime, modifiedTime)',
+        orderBy: 'name'
+      })
+      return response.result.files || []
+    } catch (err) {
+      if (err.status === 401 || err.code === 401) {
+        this.accessToken = null
+        localStorage.removeItem('gdrive_token')
+        localStorage.removeItem('gdrive_token_time')
+        throw new Error('AUTH_REQUIRED')
+      }
+      logDriveError('listFolderContents', err, { folderId, status: err.status })
+      throw new Error('Error llistant contingut de carpeta: ' + (err.message || 'Error desconegut'))
+    }
   }
 
   // ==================== OPERACIONS AMB FITXERS ====================
 
   async uploadFile(file, folderId, customName = null) {
-    if (!this.accessToken) {
-      throw new Error('No connectat a Drive')
+    try {
+      await this.ensureDriveReady()
+    } catch (err) {
+      if (err.message === 'AUTH_REQUIRED') {
+        throw err
+      }
+      logDriveError('uploadFile', err, { fileName: file.name })
+      throw new Error('No connectat a Google Drive')
     }
 
-    const metadata = {
-      name: customName || file.name,
-      parents: [folderId]
+    const fileName = customName || file.name
+
+    try {
+      const metadata = {
+        name: fileName,
+        parents: [folderId]
+      }
+
+      const form = new FormData()
+      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }))
+      form.append('file', file)
+
+      const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink,webContentLink', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`
+        },
+        body: form
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        let errorMessage = `Error pujant fitxer: ${response.status}`
+        
+        // Errors comuns
+        if (response.status === 401) {
+          errorMessage = 'Sessió expirada. Reconecta Google Drive.'
+          this.accessToken = null
+          localStorage.removeItem('gdrive_token')
+          localStorage.removeItem('gdrive_token_time')
+          throw new Error('AUTH_REQUIRED')
+        } else if (response.status === 403) {
+          errorMessage = 'No tens permisos per pujar fitxers a aquesta carpeta.'
+        } else if (response.status === 413) {
+          errorMessage = 'El fitxer és massa gran.'
+        }
+        
+        logDriveError('uploadFile', errorMessage, {
+          status: response.status,
+          fileName,
+          errorText
+        })
+        
+        throw new Error(errorMessage)
+      }
+
+      const result = await response.json()
+      return result
+    } catch (err) {
+      if (err.message === 'AUTH_REQUIRED') {
+        throw err
+      }
+      logDriveError('uploadFile', err, { fileName })
+      throw err
     }
-
-    const form = new FormData()
-    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }))
-    form.append('file', file)
-
-    const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink,webContentLink', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${this.accessToken}`
-      },
-      body: form
-    })
-
-    if (!response.ok) {
-      throw new Error(`Upload failed: ${response.status}`)
-    }
-
-    return await response.json()
   }
 
   async uploadPdfBlob(blob, fileName, folderId) {
@@ -490,91 +771,207 @@ class GoogleDriveService {
   }
 
   async deleteFile(fileId) {
-    await this.ensureDriveReady()
-    await window.gapi.client.drive.files.delete({ fileId })
-    return true
+    try {
+      await this.ensureDriveReady()
+    } catch (err) {
+      if (err.message === 'AUTH_REQUIRED') {
+        throw err
+      }
+      logDriveError('deleteFile', err, { fileId })
+      throw new Error('No connectat a Google Drive')
+    }
+    
+    try {
+      await window.gapi.client.drive.files.delete({ fileId })
+      return true
+    } catch (err) {
+      if (err.status === 401 || err.code === 401) {
+        this.accessToken = null
+        localStorage.removeItem('gdrive_token')
+        localStorage.removeItem('gdrive_token_time')
+        throw new Error('AUTH_REQUIRED')
+      }
+      logDriveError('deleteFile', err, { fileId, status: err.status })
+      throw err
+    }
   }
 
   async getFileInfo(fileId) {
-    await this.ensureDriveReady()
-    const response = await window.gapi.client.drive.files.get({
-      fileId: fileId,
-      fields: 'id, name, mimeType, webViewLink, webContentLink, size, createdTime, modifiedTime'
-    })
-    return response.result
+    try {
+      await this.ensureDriveReady()
+    } catch (err) {
+      if (err.message === 'AUTH_REQUIRED') {
+        throw err
+      }
+      logDriveError('getFileInfo', err, { fileId })
+      throw new Error('No connectat a Google Drive')
+    }
+
+    try {
+      const response = await window.gapi.client.drive.files.get({
+        fileId: fileId,
+        fields: 'id, name, mimeType, webViewLink, webContentLink, size, createdTime, modifiedTime'
+      })
+      return response.result
+    } catch (err) {
+      if (err.status === 401 || err.code === 401) {
+        this.accessToken = null
+        localStorage.removeItem('gdrive_token')
+        localStorage.removeItem('gdrive_token_time')
+        throw new Error('AUTH_REQUIRED')
+      }
+      logDriveError('getFileInfo', err, { fileId, status: err.status, code: err.code })
+      throw err
+    }
   }
 
   async searchFiles(query, folderId = null) {
-    await this.ensureDriveReady()
-
-    let q = `name contains '${query}' and trashed=false`
-    if (folderId) {
-      q += ` and '${folderId}' in parents`
+    try {
+      await this.ensureDriveReady()
+    } catch (err) {
+      if (err.message === 'AUTH_REQUIRED') {
+        throw err
+      }
+      logDriveError('searchFiles', err, { query, folderId })
+      throw new Error('No connectat a Google Drive')
     }
 
-    const response = await window.gapi.client.drive.files.list({
-      q: q,
-      fields: 'files(id, name, mimeType, webViewLink, webContentLink, size, createdTime)',
-      orderBy: 'modifiedTime desc'
-    })
-    return response.result.files || []
+    try {
+      let q = `name contains '${query}' and trashed=false`
+      if (folderId) {
+        q += ` and '${folderId}' in parents`
+      }
+
+      const response = await window.gapi.client.drive.files.list({
+        q: q,
+        fields: 'files(id, name, mimeType, webViewLink, webContentLink, size, createdTime)',
+        orderBy: 'modifiedTime desc'
+      })
+      return response.result.files || []
+    } catch (err) {
+      if (err.status === 401 || err.code === 401) {
+        this.accessToken = null
+        localStorage.removeItem('gdrive_token')
+        localStorage.removeItem('gdrive_token_time')
+        throw new Error('AUTH_REQUIRED')
+      }
+      logDriveError('searchFiles', err, { query, folderId, status: err.status })
+      throw err
+    }
   }
 
   async getShareableLink(fileId) {
-    await this.ensureDriveReady()
-
-    await window.gapi.client.drive.permissions.create({
-      fileId: fileId,
-      resource: {
-        role: 'reader',
-        type: 'anyone'
+    try {
+      await this.ensureDriveReady()
+    } catch (err) {
+      if (err.message === 'AUTH_REQUIRED') {
+        throw err
       }
-    })
+      logDriveError('getShareableLink', err, { fileId })
+      throw new Error('No connectat a Google Drive')
+    }
 
-    const response = await window.gapi.client.drive.files.get({
-      fileId: fileId,
-      fields: 'webViewLink, webContentLink'
-    })
+    try {
+      await window.gapi.client.drive.permissions.create({
+        fileId: fileId,
+        resource: {
+          role: 'reader',
+          type: 'anyone'
+        }
+      })
 
-    return response.result
+      const response = await window.gapi.client.drive.files.get({
+        fileId: fileId,
+        fields: 'webViewLink, webContentLink'
+      })
+
+      return response.result
+    } catch (err) {
+      if (err.status === 401 || err.code === 401) {
+        this.accessToken = null
+        localStorage.removeItem('gdrive_token')
+        localStorage.removeItem('gdrive_token_time')
+        throw new Error('AUTH_REQUIRED')
+      }
+      logDriveError('getShareableLink', err, { fileId, status: err.status })
+      throw err
+    }
   }
 
   async moveFile(fileId, newFolderId, oldFolderId = null) {
-    await this.ensureDriveReady()
-
-    let removeParents = ''
-    if (oldFolderId) {
-      removeParents = oldFolderId
-    } else {
-      const file = await window.gapi.client.drive.files.get({
-        fileId: fileId,
-        fields: 'parents'
-      })
-      removeParents = file.result.parents ? file.result.parents.join(',') : ''
+    try {
+      await this.ensureDriveReady()
+    } catch (err) {
+      if (err.message === 'AUTH_REQUIRED') {
+        throw err
+      }
+      logDriveError('moveFile', err, { fileId, newFolderId })
+      throw new Error('No connectat a Google Drive')
     }
 
-    const response = await window.gapi.client.drive.files.update({
-      fileId: fileId,
-      addParents: newFolderId,
-      removeParents: removeParents,
-      fields: 'id, name, parents, webViewLink'
-    })
+    try {
+      let removeParents = ''
+      if (oldFolderId) {
+        removeParents = oldFolderId
+      } else {
+        const file = await window.gapi.client.drive.files.get({
+          fileId: fileId,
+          fields: 'parents'
+        })
+        removeParents = file.result.parents ? file.result.parents.join(',') : ''
+      }
 
-    return response.result
+      const response = await window.gapi.client.drive.files.update({
+        fileId: fileId,
+        addParents: newFolderId,
+        removeParents: removeParents,
+        fields: 'id, name, parents, webViewLink'
+      })
+
+      return response.result
+    } catch (err) {
+      if (err.status === 401 || err.code === 401) {
+        this.accessToken = null
+        localStorage.removeItem('gdrive_token')
+        localStorage.removeItem('gdrive_token_time')
+        throw new Error('AUTH_REQUIRED')
+      }
+      logDriveError('moveFile', err, { fileId, newFolderId, status: err.status })
+      throw err
+    }
   }
 
   async copyFile(fileId, newName, folderId) {
-    await this.ensureDriveReady()
+    try {
+      await this.ensureDriveReady()
+    } catch (err) {
+      if (err.message === 'AUTH_REQUIRED') {
+        throw err
+      }
+      logDriveError('copyFile', err, { fileId, newName, folderId })
+      throw new Error('No connectat a Google Drive')
+    }
 
-    const response = await window.gapi.client.drive.files.copy({
-      fileId: fileId,
-      resource: {
-        name: newName,
-        parents: [folderId]
-      },
-      fields: 'id, name, webViewLink'
-    })
-    return response.result
+    try {
+      const response = await window.gapi.client.drive.files.copy({
+        fileId: fileId,
+        resource: {
+          name: newName,
+          parents: [folderId]
+        },
+        fields: 'id, name, webViewLink'
+      })
+      return response.result
+    } catch (err) {
+      if (err.status === 401 || err.code === 401) {
+        this.accessToken = null
+        localStorage.removeItem('gdrive_token')
+        localStorage.removeItem('gdrive_token_time')
+        throw new Error('AUTH_REQUIRED')
+      }
+      logDriveError('copyFile', err, { fileId, newName, folderId, status: err.status })
+      throw err
+    }
   }
 }
 
@@ -592,6 +989,7 @@ export const useDrive = () => {
     setOnAuthChange: (callback) => { driveService.onAuthChange = callback },
     
     createProjectFolders: (code, name) => driveService.createProjectFolders(code, name),
+    ensureProjectDriveFolders: (project) => driveService.ensureProjectDriveFolders(project),
     listFolderContents: (folderId) => driveService.listFolderContents(folderId),
     findOrCreateFolder: (name, parentId) => driveService.findOrCreateFolder(name, parentId),
     

@@ -39,11 +39,13 @@ export default function FileUploader({ folderId, onUploadComplete, label = 'Arro
     setUploading(true)
     setError(null)
     const uploaded = []
+    const failed = []
 
     for (const file of files) {
       try {
         // Validar mida (max 10MB)
         if (file.size > 10 * 1024 * 1024) {
+          failed.push({ name: file.name, error: 'Fitxer massa gran (màx 10MB)' })
           setError(`${file.name} és massa gran (màx 10MB)`)
           continue
         }
@@ -52,17 +54,40 @@ export default function FileUploader({ folderId, onUploadComplete, label = 'Arro
         uploaded.push({
           name: file.name,
           id: result.id,
+          driveId: result.id,  // Per compatibilitat
+          driveUrl: result.webViewLink,  // Per compatibilitat
+          webViewLink: result.webViewLink,
           size: file.size
         })
       } catch (err) {
         console.error('Error uploading file:', err)
-        setError(`Error pujant ${file.name}`)
+        
+        // Si és error d'autenticació, no continuar amb altres fitxers
+        if (err.message === 'AUTH_REQUIRED') {
+          setError('Sessió expirada. Reconecta Google Drive.')
+          setUploading(false)
+          alert('Reconnecta Google Drive. La sessió ha expirat.')
+          return
+        }
+        
+        failed.push({ 
+          name: file.name, 
+          error: err.message || 'Error desconegut' 
+        })
+        setError(`Error pujant ${file.name}: ${err.message || 'Error desconegut'}`)
       }
     }
 
     setUploadedFiles(prev => [...prev, ...uploaded])
     setUploading(false)
 
+    // Mostrar resum d'errors si n'hi ha
+    if (failed.length > 0) {
+      const errorMsg = `${failed.length} fitxer(s) no s'han pogut pujar:\n${failed.map(f => `- ${f.name}: ${f.error}`).join('\n')}`
+      alert(errorMsg)
+    }
+
+    // Només cridar onUploadComplete amb els que s'han pujat correctament
     if (onUploadComplete && uploaded.length > 0) {
       onUploadComplete(uploaded)
     }

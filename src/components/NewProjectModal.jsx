@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { X, Loader, FolderPlus, Hash, Tag } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { createProject, generateProjectCode } from '../lib/supabase'
+import { createProject, updateProject, generateProjectCode } from '../lib/supabase'
 import { driveService } from '../lib/googleDrive'
 
 const PHASES = [
@@ -55,30 +55,43 @@ export default function NewProjectModal({ isOpen, onClose }) {
 
     setLoading(true)
     try {
-      // Crear carpetes a Drive si connectat
-      let driveFolderId = null
-      if (driveConnected) {
-        setCreatingFolders(true)
-        try {
-          // Usar el SKU per les carpetes (més net)
-          const folders = await driveService.createProjectFolders(projectCodes.sku, formData.name)
-          driveFolderId = folders.main.id
-        } catch (err) {
-          console.error('Error creant carpetes Drive:', err)
-        }
-        setCreatingFolders(false)
-      }
-
-      // Crear projecte a Supabase amb el nou format
-      await createProject({
+      // Crear projecte primer a Supabase (sense drive_folder_id encara)
+      const newProject = await createProject({
         project_code: projectCodes.projectCode,  // PR-FRDL250001
         sku: projectCodes.sku,                    // FRDL250001
         name: formData.name.trim(),
         description: formData.description.trim() || null,
         current_phase: 1,
         status: 'active',
-        drive_folder_id: driveFolderId
+        drive_folder_id: null  // S'assignarà després
       })
+
+      // Crear carpetes a Drive si connectat (idempotent)
+      let driveFolderId = null
+      if (driveConnected) {
+        setCreatingFolders(true)
+        try {
+          const folders = await driveService.ensureProjectDriveFolders({
+            id: newProject.id,
+            project_code: projectCodes.projectCode,
+            sku: projectCodes.sku,
+            name: formData.name.trim(),
+            drive_folder_id: null
+          })
+          driveFolderId = folders.main.id
+          
+          // Actualitzar projecte amb drive_folder_id
+          await updateProject(newProject.id, { drive_folder_id: driveFolderId })
+        } catch (err) {
+          console.error('Error creant carpetes Drive:', err)
+          if (err.message === 'AUTH_REQUIRED') {
+            alert('Reconnecta Google Drive. La sessió ha expirat.')
+          } else {
+            alert('Error creant carpetes a Drive: ' + (err.message || 'Error desconegut'))
+          }
+        }
+        setCreatingFolders(false)
+      }
 
       await refreshProjects()
       setFormData({ name: '', description: '' })
