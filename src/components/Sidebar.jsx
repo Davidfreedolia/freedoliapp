@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { 
   LayoutDashboard, 
@@ -31,6 +32,14 @@ const menuItems = [
 
 export default function Sidebar() {
   const { sidebarCollapsed, setSidebarCollapsed, darkMode } = useApp()
+  const [logoError, setLogoError] = useState(false)
+
+  const handleLogoError = (e) => {
+    if (darkMode && !logoError) {
+      setLogoError(true)
+      e.target.src = "/logo.png"
+    }
+  }
 
   return (
     <aside style={{
@@ -41,8 +50,9 @@ export default function Sidebar() {
       {/* Logo */}
       <div style={styles.logoContainer}>
         <img 
-          src="/logo.png" 
+          src={darkMode && !logoError ? "/logo-dark.png" : "/logo.png"} 
           alt="Freedolia" 
+          onError={handleLogoError}
           style={{
             ...styles.logo,
             width: sidebarCollapsed ? '40px' : '140px'
@@ -102,7 +112,6 @@ export default function Sidebar() {
 const styles = {
   sidebar: {
     height: '100vh',
-    borderRight: '1px solid var(--border-color)',
     display: 'flex',
     flexDirection: 'column',
     position: 'fixed',
@@ -114,8 +123,7 @@ const styles = {
   logoContainer: {
     padding: '20px',
     display: 'flex',
-    justifyContent: 'center',
-    borderBottom: '1px solid var(--border-color)'
+    justifyContent: 'center'
   },
   logo: {
     height: 'auto',
@@ -123,14 +131,12 @@ const styles = {
     transition: 'width 0.3s ease'
   },
   driveContainer: {
-    padding: '16px',
-    borderBottom: '1px solid var(--border-color)'
+    padding: '16px'
   },
   driveContainerCompact: {
     padding: '12px',
     display: 'flex',
-    justifyContent: 'center',
-    borderBottom: '1px solid var(--border-color)'
+    justifyContent: 'center'
   },
   nav: {
     flex: 1,

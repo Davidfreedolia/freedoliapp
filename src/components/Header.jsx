@@ -1,8 +1,16 @@
-import { Sun, Moon, Bell } from 'lucide-react'
+import { Sun, Moon, Bell, LogOut } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
+import { supabase } from '../lib/supabase'
 
 export default function Header({ title }) {
   const { darkMode, setDarkMode } = useApp()
+  const navigate = useNavigate()
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    navigate('/login')
+  }
 
   return (
     <header style={{
@@ -40,6 +48,18 @@ export default function Header({ title }) {
             <Moon size={20} color="#6b7280" />
           )}
         </button>
+
+        {/* Logout */}
+        <button 
+          onClick={handleLogout}
+          style={{
+            ...styles.iconButton,
+            backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6'
+          }}
+          title="Tancar sessió"
+        >
+          <LogOut size={20} color={darkMode ? '#9ca3af' : '#6b7280'} />
+        </button>
       </div>
     </header>
   )
@@ -52,7 +72,6 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderBottom: '1px solid',
     position: 'sticky',
     top: 0,
     zIndex: 50

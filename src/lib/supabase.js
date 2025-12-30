@@ -52,6 +52,17 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 })
 
 // ============================================
+// HELPERS
+// ============================================
+
+// Obtenir user_id de la sessió actual
+const getCurrentUserId = async () => {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('No hi ha usuari autenticat')
+  return user.id
+}
+
+// ============================================
 // FUNCIONS API
 // ============================================
 
@@ -76,9 +87,10 @@ export const getProject = async (id) => {
 }
 
 export const createProject = async (project) => {
+  const userId = await getCurrentUserId()
   const { data, error } = await supabase
     .from('projects')
-    .insert([project])
+    .insert([{ ...project, user_id: userId }])
     .select()
     .single()
   if (error) throw error
@@ -123,9 +135,10 @@ export const getSupplier = async (id) => {
 }
 
 export const createSupplier = async (supplier) => {
+  const userId = await getCurrentUserId()
   const { data, error } = await supabase
     .from('suppliers')
-    .insert([supplier])
+    .insert([{ ...supplier, user_id: userId }])
     .select()
     .single()
   if (error) throw error
@@ -202,9 +215,10 @@ export const getPurchaseOrder = async (id) => {
 }
 
 export const createPurchaseOrder = async (po) => {
+  const userId = await getCurrentUserId()
   const { data, error } = await supabase
     .from('purchase_orders')
-    .insert([po])
+    .insert([{ ...po, user_id: userId }])
     .select()
     .single()
   if (error) throw error
@@ -243,9 +257,10 @@ export const getDocuments = async (projectId) => {
 }
 
 export const createDocument = async (doc) => {
+  const userId = await getCurrentUserId()
   const { data, error } = await supabase
     .from('documents')
-    .insert([doc])
+    .insert([{ ...doc, user_id: userId }])
     .select()
     .single()
   if (error) throw error
@@ -273,9 +288,10 @@ export const getPayments = async (projectId = null) => {
 }
 
 export const createPayment = async (payment) => {
+  const userId = await getCurrentUserId()
   const { data, error } = await supabase
     .from('payments')
-    .insert([payment])
+    .insert([{ ...payment, user_id: userId }])
     .select()
     .single()
   if (error) throw error
@@ -417,9 +433,10 @@ export const getWarehouse = async (id) => {
 }
 
 export const createWarehouse = async (warehouse) => {
+  const userId = await getCurrentUserId()
   const { data, error } = await supabase
     .from('warehouses')
-    .insert([warehouse])
+    .insert([{ ...warehouse, user_id: userId }])
     .select()
     .single()
   if (error) throw error
@@ -445,9 +462,11 @@ export const deleteWarehouse = async (id) => {
 
 // CONFIGURACIÓ EMPRESA
 export const getCompanySettings = async () => {
+  const userId = await getCurrentUserId()
   const { data, error } = await supabase
     .from('company_settings')
     .select('*')
+    .eq('user_id', userId)
     .limit(1)
     .single()
   if (error && error.code !== 'PGRST116') throw error
@@ -455,6 +474,7 @@ export const getCompanySettings = async () => {
 }
 
 export const updateCompanySettings = async (settings) => {
+  const userId = await getCurrentUserId()
   const existing = await getCompanySettings()
 
   if (existing) {
@@ -462,6 +482,7 @@ export const updateCompanySettings = async (settings) => {
       .from('company_settings')
       .update({ ...settings, updated_at: new Date().toISOString() })
       .eq('id', existing.id)
+      .eq('user_id', userId)
       .select()
       .single()
     if (error) throw error
@@ -470,7 +491,7 @@ export const updateCompanySettings = async (settings) => {
 
   const { data, error } = await supabase
     .from('company_settings')
-    .insert([settings])
+    .insert([{ ...settings, user_id: userId }])
     .select()
     .single()
   if (error) throw error

@@ -210,10 +210,14 @@ export default function Finances() {
         supplier_id: editingExpense.supplier_id || null
       }
       
+      // Obtener user_id
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('No hi ha usuari autenticat')
+
       if (editingExpense.id) {
         await supabase.from('expenses').update(data).eq('id', editingExpense.id)
       } else {
-        await supabase.from('expenses').insert(data)
+        await supabase.from('expenses').insert({ ...data, user_id: user.id })
       }
       
       await loadData()
@@ -268,10 +272,14 @@ export default function Finances() {
         amount: parseFloat(editingIncome.amount)
       }
       
+      // Obtener user_id
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('No hi ha usuari autenticat')
+
       if (editingIncome.id) {
         await supabase.from('incomes').update(data).eq('id', editingIncome.id)
       } else {
-        await supabase.from('incomes').insert(data)
+        await supabase.from('incomes').insert({ ...data, user_id: user.id })
       }
       
       await loadData()

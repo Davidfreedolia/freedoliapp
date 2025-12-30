@@ -152,10 +152,14 @@ export default function Inventory() {
         updated_at: new Date().toISOString()
       }
 
+      // Obtener user_id
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('No hi ha usuari autenticat')
+
       if (selectedItem.id) {
         await supabase.from('inventory').update(payload).eq('id', selectedItem.id)
       } else {
-        await supabase.from('inventory').insert(payload)
+        await supabase.from('inventory').insert({ ...payload, user_id: user.id })
       }
 
       await loadData()
@@ -172,11 +176,16 @@ export default function Inventory() {
     if (!selectedItem || newMovement.quantity === 0) return
     setSaving(true)
     try {
+      // Obtener user_id
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('No hi ha usuari autenticat')
+
       // Registrar moviment
       await supabase.from('inventory_movements').insert({
         inventory_id: selectedItem.id,
         movement_type: newMovement.type,
         quantity: newMovement.quantity,
+        user_id: user.id,
         notes: newMovement.notes
       })
 

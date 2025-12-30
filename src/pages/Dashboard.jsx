@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { 
   FolderKanban, 
@@ -5,15 +6,86 @@ import {
   CheckCircle2, 
   Wallet,
   ArrowRight,
+  Users,
+  Truck,
+  Warehouse,
+  Plus,
+  Package,
   TrendingUp,
-  Clock
+  Sun,
+  Moon,
+  Bell
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import Header from '../components/Header'
+import { getPurchaseOrders } from '../lib/supabase'
+import { supabase } from '../lib/supabase'
+import NewProjectModal from '../components/NewProjectModal'
 
 export default function Dashboard() {
-  const { stats, projects, loading, darkMode } = useApp()
+  const { stats, projects, loading, darkMode, setDarkMode } = useApp()
   const navigate = useNavigate()
+  const [showNewProjectModal, setShowNewProjectModal] = useState(false)
+  const [ordersInProgress, setOrdersInProgress] = useState([])
+  const [loadingOrders, setLoadingOrders] = useState(true)
+  const [financialData, setFinancialData] = useState([])
+
+  useEffect(() => {
+    loadOrdersInProgress()
+    loadFinancialData()
+  }, [])
+
+  const loadOrdersInProgress = async () => {
+    setLoadingOrders(true)
+    try {
+      const orders = await getPurchaseOrders()
+      // Filtrar comandes que estan en curs (no cancel·lades ni completades)
+      const inProgress = (orders || []).filter(order => 
+        !['cancelled', 'received'].includes(order.status)
+      )
+      setOrdersInProgress(inProgress.slice(0, 5)) // Mostrar les 5 primeres
+    } catch (err) {
+      console.error('Error carregant comandes:', err)
+    }
+    setLoadingOrders(false)
+  }
+
+  const loadFinancialData = async () => {
+    try {
+      const [expensesRes, incomesRes] = await Promise.all([
+        supabase.from('expenses').select('amount, expense_date').order('expense_date', { ascending: false }),
+        supabase.from('incomes').select('amount, income_date').order('income_date', { ascending: false })
+      ])
+      
+      const expenses = expensesRes.data || []
+      const incomes = incomesRes.data || []
+      
+      // Agrupar per mes
+      const monthly = {}
+      expenses.forEach(e => {
+        if (e.expense_date) {
+          const month = e.expense_date.substring(0, 7) // YYYY-MM
+          if (!monthly[month]) monthly[month] = { income: 0, expenses: 0 }
+          monthly[month].expenses += parseFloat(e.amount || 0)
+        }
+      })
+      incomes.forEach(i => {
+        if (i.income_date) {
+          const month = i.income_date.substring(0, 7) // YYYY-MM
+          if (!monthly[month]) monthly[month] = { income: 0, expenses: 0 }
+          monthly[month].income += parseFloat(i.amount || 0)
+        }
+      })
+      
+      const sorted = Object.keys(monthly).sort().slice(-6) // Últims 6 mesos
+      setFinancialData(sorted.map(month => ({
+        month,
+        ...monthly[month],
+        profit: monthly[month].income - monthly[month].expenses
+      })))
+    } catch (err) {
+      console.error('Error carregant dades financeres:', err)
+    }
+  }
 
   const recentProjects = projects.slice(0, 5)
 
@@ -44,22 +116,111 @@ export default function Dashboard() {
     }
   ]
 
-  const getPhaseInfo = (phase) => {
-    const phases = {
-      1: { name: 'Recerca', icon: '🔍', color: '#6366f1' },
-      2: { name: 'Viabilitat', icon: '📊', color: '#8b5cf6' },
-      3: { name: 'Proveïdors', icon: '🏭', color: '#ec4899' },
-      4: { name: 'Mostres', icon: '📦', color: '#f59e0b' },
-      5: { name: 'Producció', icon: '⚙️', color: '#10b981' },
-      6: { name: 'Listing', icon: '📝', color: '#3b82f6' },
-      7: { name: 'Live', icon: '🚀', color: '#22c55e' }
+  const getOrderStatusInfo = (status) => {
+    const statuses = {
+      draft: { name: 'Esborrany', color: '#6b7280' },
+      sent: { name: 'Enviat', color: '#3b82f6' },
+      confirmed: { name: 'Confirmat', color: '#8b5cf6' },
+      partial_paid: { name: 'Pagat parcial', color: '#f59e0b' },
+      paid: { name: 'Pagat', color: '#22c55e' },
+      in_production: { name: 'En producció', color: '#ec4899' },
+      shipped: { name: 'Enviat', color: '#06b6d4' },
+      received: { name: 'Rebut', color: '#10b981' },
+      cancelled: { name: 'Cancel·lat', color: '#ef4444' }
     }
-    return phases[phase] || phases[1]
+    return statuses[status] || statuses.draft
   }
+
+
+  // Gràfica de finances senzilla
+  const maxValue = financialData.length > 0
+    ? Math.max(...financialData.map(d => Math.max(d.income, d.expenses)), 1)
+    : 1
 
   return (
     <div style={styles.container}>
-      <Header title="Dashboard" />
+      {/* Botons d'accions ràpides en lloc del Header */}
+      <div style={{
+        ...styles.headerActions,
+        backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
+        borderColor: darkMode ? '#2a2a3a' : '#e5e7eb'
+      }}>
+        <div style={styles.quickActionsHeader}>
+          <button
+            onClick={() => setShowNewProjectModal(true)}
+            style={{
+              ...styles.actionButton,
+              backgroundColor: darkMode ? '#15151f' : '#f3f4f6',
+              color: darkMode ? '#ffffff' : '#111827'
+            }}
+          >
+            <Plus size={16} />
+            <FolderKanban size={18} color="#4f46e5" />
+            Nou Projecte
+          </button>
+          <button
+            onClick={() => navigate('/suppliers')}
+            style={{
+              ...styles.actionButton,
+              backgroundColor: darkMode ? '#15151f' : '#f3f4f6',
+              color: darkMode ? '#ffffff' : '#111827'
+            }}
+          >
+            <Plus size={16} />
+            <Users size={18} color="#22c55e" />
+            Nou Proveïdor
+          </button>
+          <button
+            onClick={() => navigate('/forwarders')}
+            style={{
+              ...styles.actionButton,
+              backgroundColor: darkMode ? '#15151f' : '#f3f4f6',
+              color: darkMode ? '#ffffff' : '#111827'
+            }}
+          >
+            <Plus size={16} />
+            <Truck size={18} color="#f59e0b" />
+            Nou Transitari
+          </button>
+          <button
+            onClick={() => navigate('/warehouses')}
+            style={{
+              ...styles.actionButton,
+              backgroundColor: darkMode ? '#15151f' : '#f3f4f6',
+              color: darkMode ? '#ffffff' : '#111827'
+            }}
+          >
+            <Plus size={16} />
+            <Warehouse size={18} color="#3b82f6" />
+            Nou Magatzem
+          </button>
+        </div>
+        
+        <div style={styles.headerActionsRight}>
+          {/* Notificacions */}
+          <button style={{
+            ...styles.iconButton,
+            backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6'
+          }}>
+            <Bell size={20} color={darkMode ? '#9ca3af' : '#6b7280'} />
+          </button>
+
+          {/* Toggle Dark Mode */}
+          <button 
+            onClick={() => setDarkMode(!darkMode)}
+            style={{
+              ...styles.iconButton,
+              backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6'
+            }}
+          >
+            {darkMode ? (
+              <Sun size={20} color="#fbbf24" />
+            ) : (
+              <Moon size={20} color="#6b7280" />
+            )}
+          </button>
+        </div>
+      </div>
 
       <div style={styles.content}>
         {/* Stats Grid */}
@@ -91,7 +252,7 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* Projectes recents */}
+        {/* Comandes en curs */}
         <div style={{
           ...styles.section,
           backgroundColor: darkMode ? '#15151f' : '#ffffff'
@@ -101,60 +262,53 @@ export default function Dashboard() {
               ...styles.sectionTitle,
               color: darkMode ? '#ffffff' : '#111827'
             }}>
-              <Clock size={20} />
-              Projectes Recents
+              <Package size={20} />
+              Comandes en curs
             </h2>
             <button 
-              onClick={() => navigate('/projects')}
+              onClick={() => navigate('/orders')}
               style={styles.viewAllButton}
             >
-              Veure tots <ArrowRight size={16} />
+              Veure totes <ArrowRight size={16} />
             </button>
           </div>
 
-          {loading ? (
+          {loadingOrders ? (
             <div style={styles.loading}>Carregant...</div>
-          ) : recentProjects.length === 0 ? (
+          ) : ordersInProgress.length === 0 ? (
             <div style={styles.empty}>
-              <p>No hi ha projectes encara</p>
-              <button 
-                onClick={() => navigate('/projects')}
-                style={styles.createButton}
-              >
-                Crear primer projecte
-              </button>
+              <p>No hi ha comandes en curs</p>
             </div>
           ) : (
-            <div style={styles.projectsList}>
-              {recentProjects.map(project => {
-                const phase = getPhaseInfo(project.current_phase)
+            <div style={styles.ordersList}>
+              {ordersInProgress.map(order => {
+                const statusInfo = getOrderStatusInfo(order.status)
                 return (
                   <div 
-                    key={project.id}
-                    style={styles.projectItem}
-                    onClick={() => navigate(`/projects/${project.id}`)}
+                    key={order.id}
+                    style={styles.orderItem}
+                    onClick={() => navigate(`/orders`)}
                   >
-                    <div style={styles.projectInfo}>
+                    <div style={styles.orderInfo}>
                       <span style={{
-                        ...styles.projectCode,
-                        color: darkMode ? '#6b7280' : '#9ca3af'
-                      }}>
-                        {project.project_code}
-                      </span>
-                      <span style={{
-                        ...styles.projectName,
+                        ...styles.orderNumber,
                         color: darkMode ? '#ffffff' : '#111827'
                       }}>
-                        {project.name}
+                        {order.po_number}
+                      </span>
+                      <span style={{
+                        ...styles.orderProject,
+                        color: darkMode ? '#6b7280' : '#9ca3af'
+                      }}>
+                        {order.project?.name || 'Sense projecte'}
                       </span>
                     </div>
                     <div style={{
-                      ...styles.phaseBadge,
-                      backgroundColor: `${phase.color}15`,
-                      color: phase.color
+                      ...styles.statusBadge,
+                      backgroundColor: `${statusInfo.color}15`,
+                      color: statusInfo.color
                     }}>
-                      <span>{phase.icon}</span>
-                      <span>{phase.name}</span>
+                      {statusInfo.name}
                     </div>
                     <ArrowRight size={18} color="#9ca3af" />
                   </div>
@@ -164,38 +318,71 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Quick Actions */}
-        <div style={styles.quickActions}>
-          <h3 style={{
-            ...styles.quickTitle,
-            color: darkMode ? '#9ca3af' : '#6b7280'
+        {/* Gràfica de finances */}
+        {financialData.length > 0 && (
+          <div style={{
+            ...styles.section,
+            backgroundColor: darkMode ? '#15151f' : '#ffffff'
           }}>
-            Accions ràpides
-          </h3>
-          <div style={styles.actionsGrid}>
-            <button 
-              onClick={() => navigate('/projects')}
-              style={{
-                ...styles.actionButton,
-                backgroundColor: darkMode ? '#15151f' : '#ffffff'
-              }}
-            >
-              <FolderKanban size={20} color="#4f46e5" />
-              <span style={{ color: darkMode ? '#ffffff' : '#111827' }}>Nou Projecte</span>
-            </button>
-            <button 
-              onClick={() => navigate('/suppliers')}
-              style={{
-                ...styles.actionButton,
-                backgroundColor: darkMode ? '#15151f' : '#ffffff'
-              }}
-            >
-              <TrendingUp size={20} color="#22c55e" />
-              <span style={{ color: darkMode ? '#ffffff' : '#111827' }}>Nou Proveïdor</span>
-            </button>
+            <div style={styles.sectionHeader}>
+              <h2 style={{
+                ...styles.sectionTitle,
+                color: darkMode ? '#ffffff' : '#111827'
+              }}>
+                <TrendingUp size={20} />
+                Analítica de Finances
+              </h2>
+            </div>
+            <div style={styles.chartContainer}>
+              <div style={styles.chartBars}>
+                {financialData.map((data, index) => (
+                  <div key={index} style={styles.chartBarGroup}>
+                    <div style={styles.barLabels}>
+                      <div style={{
+                        ...styles.bar,
+                        height: `${(data.income / maxValue) * 100}%`,
+                        backgroundColor: '#22c55e'
+                      }} />
+                      <div style={{
+                        ...styles.bar,
+                        height: `${(data.expenses / maxValue) * 100}%`,
+                        backgroundColor: '#ef4444',
+                        marginTop: '4px'
+                      }} />
+                    </div>
+                    <div style={styles.barLabel}>
+                      {new Date(data.month + '-01').toLocaleDateString('ca-ES', { month: 'short', year: '2-digit' })}
+                    </div>
+                    <div style={styles.barValues}>
+                      <span style={{ color: '#22c55e', fontSize: '11px' }}>
+                        +{data.income.toLocaleString('ca-ES', { maximumFractionDigits: 0 })}€
+                      </span>
+                      <span style={{ color: '#ef4444', fontSize: '11px' }}>
+                        -{data.expenses.toLocaleString('ca-ES', { maximumFractionDigits: 0 })}€
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={styles.chartLegend}>
+                <div style={styles.legendItem}>
+                  <div style={{ ...styles.legendColor, backgroundColor: '#22c55e' }} />
+                  <span>Ingressos</span>
+                </div>
+                <div style={styles.legendItem}>
+                  <div style={{ ...styles.legendColor, backgroundColor: '#ef4444' }} />
+                  <span>Despeses</span>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
+
+      <NewProjectModal 
+        isOpen={showNewProjectModal} 
+        onClose={() => setShowNewProjectModal(false)} 
+      />
     </div>
   )
 }
@@ -205,6 +392,48 @@ const styles = {
     flex: 1,
     display: 'flex',
     flexDirection: 'column'
+  },
+  headerActions: {
+    height: '70px',
+    padding: '0 32px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    position: 'sticky',
+    top: 0,
+    zIndex: 50
+  },
+  quickActionsHeader: {
+    display: 'flex',
+    gap: '12px',
+    flex: 1
+  },
+  headerActionsRight: {
+    display: 'flex',
+    gap: '12px'
+  },
+  iconButton: {
+    width: '40px',
+    height: '40px',
+    border: 'none',
+    borderRadius: '10px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.2s ease'
+  },
+  actionButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '10px 16px',
+    borderRadius: '10px',
+    border: 'none',
+    fontSize: '14px',
+    fontWeight: '500',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease'
   },
   content: {
     padding: '32px',
@@ -254,8 +483,7 @@ const styles = {
     padding: '20px 24px',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    borderBottom: '1px solid var(--border-color)'
+    justifyContent: 'space-between'
   },
   sectionTitle: {
     margin: 0,
@@ -286,77 +514,98 @@ const styles = {
     textAlign: 'center',
     color: '#6b7280'
   },
-  createButton: {
-    marginTop: '16px',
-    padding: '12px 24px',
-    backgroundColor: '#4f46e5',
-    color: '#ffffff',
-    border: 'none',
-    borderRadius: '10px',
-    fontSize: '14px',
-    fontWeight: '500',
-    cursor: 'pointer'
-  },
-  projectsList: {
+  ordersList: {
     display: 'flex',
     flexDirection: 'column'
   },
-  projectItem: {
+  orderItem: {
     padding: '16px 24px',
     display: 'flex',
     alignItems: 'center',
     gap: '16px',
-    borderBottom: '1px solid var(--border-color)',
     cursor: 'pointer',
     transition: 'background-color 0.2s'
   },
-  projectInfo: {
+  orderInfo: {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
     gap: '4px'
   },
-  projectCode: {
-    fontSize: '12px',
-    fontWeight: '500'
-  },
-  projectName: {
+  orderNumber: {
     fontSize: '15px',
     fontWeight: '500'
   },
-  phaseBadge: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
+  orderProject: {
+    fontSize: '12px',
+    fontWeight: '500'
+  },
+  statusBadge: {
     padding: '6px 12px',
     borderRadius: '20px',
     fontSize: '13px',
     fontWeight: '500'
   },
-  quickActions: {
-    marginTop: '8px'
+  chartContainer: {
+    padding: '24px'
   },
-  quickTitle: {
-    fontSize: '13px',
-    fontWeight: '500',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
+  chartBars: {
+    display: 'flex',
+    gap: '16px',
+    alignItems: 'flex-end',
+    height: '200px',
     marginBottom: '16px'
   },
-  actionsGrid: {
+  chartBarGroup: {
+    flex: 1,
     display: 'flex',
-    gap: '16px'
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '8px'
   },
-  actionButton: {
+  barLabels: {
+    flex: 1,
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-end',
+    gap: '2px'
+  },
+  bar: {
+    width: '100%',
+    minHeight: '4px',
+    borderRadius: '4px 4px 0 0',
+    transition: 'height 0.3s ease'
+  },
+  barLabel: {
+    fontSize: '11px',
+    color: '#6b7280',
+    textAlign: 'center',
+    fontWeight: '500'
+  },
+  barValues: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
+    fontSize: '11px',
+    textAlign: 'center'
+  },
+  chartLegend: {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '24px',
+    paddingTop: '16px'
+  },
+  legendItem: {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
-    padding: '16px 24px',
-    borderRadius: '12px',
-    border: '1px solid var(--border-color)',
+    gap: '8px',
     fontSize: '14px',
-    fontWeight: '500',
-    cursor: 'pointer',
-    transition: 'all 0.2s'
+    color: '#6b7280'
+  },
+  legendColor: {
+    width: '12px',
+    height: '12px',
+    borderRadius: '2px'
   }
 }

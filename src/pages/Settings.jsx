@@ -42,6 +42,7 @@ export default function Settings() {
   const [signatures, setSignatures] = useState([])
   const [showSignatureModal, setShowSignatureModal] = useState(false)
   const [editingSignature, setEditingSignature] = useState(null)
+  const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef(null)
   
   const [saving, setSaving] = useState(false)
@@ -95,7 +96,29 @@ export default function Settings() {
   const handleFileSelect = (e) => {
     const file = e.target.files[0]
     if (!file) return
-    
+    processFile(file)
+  }
+
+  const handleDragOver = (e) => {
+    e.preventDefault()
+    setDragOver(true)
+  }
+
+  const handleDragLeave = (e) => {
+    e.preventDefault()
+    setDragOver(false)
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    setDragOver(false)
+    const file = e.dataTransfer.files[0]
+    if (file) {
+      processFile(file)
+    }
+  }
+
+  const processFile = (file) => {
     if (!file.type.startsWith('image/')) {
       alert('Selecciona una imatge')
       return
@@ -120,10 +143,14 @@ export default function Settings() {
         await supabase.from('signatures').update({ is_default: false }).neq('id', editingSignature.id || '')
       }
 
+      // Obtener user_id
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('No hi ha usuari autenticat')
+
       if (editingSignature.id) {
         await supabase.from('signatures').update(editingSignature).eq('id', editingSignature.id)
       } else {
-        await supabase.from('signatures').insert(editingSignature)
+        await supabase.from('signatures').insert({ ...editingSignature, user_id: user.id })
       }
 
       await loadSettings()
@@ -402,13 +429,25 @@ export default function Settings() {
 
               <div style={styles.uploadSection}>
                 <label style={styles.label}>Imatge de la signatura *</label>
-                <div onClick={() => fileInputRef.current?.click()} style={{...styles.uploadZone, borderColor: editingSignature.signature_image ? '#22c55e' : (darkMode ? '#374151' : '#d1d5db')}}>
+                <div 
+                  onClick={() => fileInputRef.current?.click()} 
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  style={{
+                    ...styles.uploadZone, 
+                    borderColor: dragOver ? '#4f46e5' : (editingSignature.signature_image ? '#22c55e' : (darkMode ? '#374151' : '#d1d5db')),
+                    backgroundColor: dragOver ? (darkMode ? '#1f1f2e' : '#eef2ff') : 'transparent'
+                  }}
+                >
                   {editingSignature.signature_image ? (
                     <img src={editingSignature.signature_image} alt="Signatura" style={styles.uploadedImage} />
                   ) : (
                     <>
-                      <Upload size={32} color="#9ca3af" />
-                      <p style={{margin: '8px 0 0', color: '#6b7280'}}>Clica per pujar la imatge</p>
+                      <Upload size={32} color={dragOver ? '#4f46e5' : '#9ca3af'} />
+                      <p style={{margin: '8px 0 0', color: darkMode ? '#9ca3af' : '#6b7280'}}>
+                        {dragOver ? 'Deixa anar per pujar' : 'Arrossega la imatge aquí o clica per seleccionar'}
+                      </p>
                       <span style={{fontSize: '12px', color: '#9ca3af'}}>PNG amb fons transparent recomanat</span>
                     </>
                   )}
