@@ -235,6 +235,10 @@ export const createPurchaseOrder = async (po) => {
 export const updatePurchaseOrder = async (id, updates) => {
   // Eliminar user_id si ve del client (no es pot canviar)
   const { user_id, ...updateData } = updates
+  
+  // El trigger de la BD actualitzarà logistics_updated_at automàticament
+  // quan canvien logistics_status o tracking_number, però per seguretat
+  // també el gestionem al client si cal
   const { data, error } = await supabase
     .from('purchase_orders')
     .update({ ...updateData, updated_at: new Date().toISOString() })
@@ -460,6 +464,172 @@ export const getProjectSku = async (projectId) => {
     .single()
   if (error) throw error
   return data?.sku || null
+}
+
+// ============================================
+// PRODUCT IDENTIFIERS (GTIN, ASIN, FNSKU)
+// ============================================
+
+export const getProductIdentifiers = async (projectId) => {
+  const { data, error } = await supabase
+    .from('product_identifiers')
+    .select('*')
+    .eq('project_id', projectId)
+    .single()
+  if (error && error.code !== 'PGRST116') throw error // PGRST116 = no rows found
+  return data
+}
+
+export const upsertProductIdentifiers = async (projectId, identifiers) => {
+  // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
+  const { user_id, ...identifiersData } = identifiers
+  const { data, error } = await supabase
+    .from('product_identifiers')
+    .upsert({
+      project_id: projectId,
+      ...identifiersData,
+      updated_at: new Date().toISOString()
+    }, {
+      onConflict: 'user_id,project_id'
+    })
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+// ============================================
+// GTIN POOL
+// ============================================
+
+export const getGtinPool = async (status = null) => {
+  let query = supabase
+    .from('gtin_pool')
+    .select('*')
+    .order('created_at', { ascending: false })
+  
+  if (status) {
+    query = query.eq('status', status)
+  }
+  
+  const { data, error } = await query
+  if (error) throw error
+  return data
+}
+
+export const getAvailableGtinCodes = async () => {
+  const { data, error } = await supabase
+    .from('gtin_pool')
+    .select('*')
+    .eq('status', 'available')
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data
+}
+
+export const assignGtinFromPool = async (gtinPoolId, projectId) => {
+  // Primer obtenir el GTIN del pool
+  const { data: gtinData, error: gtinError } = await supabase
+    .from('gtin_pool')
+    .select('*')
+    .eq('id', gtinPoolId)
+    .single()
+  if (gtinError) throw gtinError
+  
+  if (gtinData.status !== 'available') {
+    throw new Error('Aquest GTIN ja està assignat o arxivat')
+  }
+  
+  // Actualitzar el pool a "assigned"
+  const { error: updateError } = await supabase
+    .from('gtin_pool')
+    .update({
+      status: 'assigned',
+      assigned_to_project_id: projectId,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', gtinPoolId)
+  if (updateError) throw updateError
+  
+  // Actualitzar o crear product_identifiers amb el GTIN
+  const { data: existingIdentifiers } = await getProductIdentifiers(projectId)
+  
+  const identifiersData = {
+    gtin_type: gtinData.gtin_type,
+    gtin_code: gtinData.gtin_code,
+    exemption_reason: gtinData.exemption_reason
+  }
+  
+  if (existingIdentifiers) {
+    // Actualitzar existent
+    const { data, error } = await supabase
+      .from('product_identifiers')
+      .update({
+        ...identifiersData,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', existingIdentifiers.id)
+      .select()
+      .single()
+    if (error) throw error
+    return data
+  } else {
+    // Crear nou
+    const { data, error } = await supabase
+      .from('product_identifiers')
+      .insert([{
+        project_id: projectId,
+        ...identifiersData
+      }])
+      .select()
+      .single()
+    if (error) throw error
+    return data
+  }
+}
+
+export const addGtinToPool = async (gtinData) => {
+  // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
+  const { user_id, ...poolData } = gtinData
+  const { data, error } = await supabase
+    .from('gtin_pool')
+    .insert([poolData])
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+export const getUnassignedGtinCodes = async () => {
+  const { data, error } = await supabase
+    .from('gtin_pool')
+    .select('*')
+    .eq('status', 'available')
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data
+}
+
+export const getProjectsMissingGtin = async () => {
+  // Projectes actius que no tenen GTIN assignat (ni GTIN_EXEMPT)
+  const { data: projects, error: projectsError } = await supabase
+    .from('projects')
+    .select('id, name, project_code, sku, status')
+    .eq('status', 'active')
+  if (projectsError) throw projectsError
+  
+  const { data: identifiers, error: identifiersError } = await supabase
+    .from('product_identifiers')
+    .select('project_id, gtin_type, gtin_code')
+  if (identifiersError) throw identifiersError
+  
+  const projectsWithIdentifiers = new Set(identifiers.map(i => i.project_id))
+  const missingGtin = projects.filter(p => 
+    !projectsWithIdentifiers.has(p.id) || 
+    identifiers.find(i => i.project_id === p.id && !i.gtin_code && i.gtin_type !== 'GTIN_EXEMPT')
+  )
+  
+  return missingGtin
 }
 
 // MAGATZEMS

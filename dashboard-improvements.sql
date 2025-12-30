@@ -1,4 +1,8 @@
 -- ============================================
+-- ⚠️ IMPORTANT: AQUEST ÉS EL FITXER SQL CORRECTE ⚠️
+-- ============================================
+-- NO executis el fitxer .md (documentació), executa AQUEST fitxer .sql
+-- 
 -- DASHBOARD IMPROVEMENTS SQL
 -- ============================================
 -- Aquest script afegeix:

@@ -36,6 +36,8 @@ import Header from '../components/Header'
 import NewPOModal from '../components/NewPOModal'
 import LogisticsFlow from '../components/LogisticsFlow'
 import { generatePOPdf } from '../lib/generatePOPdf'
+import { generateFnskuLabelsPdf } from '../lib/generateFnskuLabelsPdf'
+import { getProductIdentifiers, getProject } from '../lib/supabase'
 
 // Estats de la PO
 const PO_STATUSES = {
@@ -71,6 +73,13 @@ export default function Orders() {
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [selectedOrder, setSelectedOrder] = useState(null)
   const [loadingDetail, setLoadingDetail] = useState(false)
+  const [showLabelsModal, setShowLabelsModal] = useState(false)
+  const [labelsConfig, setLabelsConfig] = useState({
+    quantity: 30,
+    template: 'A4_30UP',
+    includeSku: true,
+    includeName: true
+  })
 
   useEffect(() => {
     loadData()
@@ -107,6 +116,44 @@ export default function Orders() {
       setShowDetailModal(false)
     }
     setLoadingDetail(false)
+  }
+
+  // Generar etiquetes FNSKU
+  const handleGenerateLabels = async () => {
+    if (!selectedOrder?.project_id) {
+      alert('Error: La comanda no té projecte associat')
+      return
+    }
+
+    try {
+      // Obtenir identificadors del projecte
+      const identifiers = await getProductIdentifiers(selectedOrder.project_id)
+      if (!identifiers || !identifiers.fnsku) {
+        alert('Error: El projecte no té FNSKU informat. Afegeix-lo a la secció d\'Identificadors del projecte.')
+        return
+      }
+
+      // Obtenir projecte per SKU i nom
+      const project = await getProject(selectedOrder.project_id)
+
+      // Generar PDF
+      const doc = generateFnskuLabelsPdf({
+        fnsku: identifiers.fnsku,
+        sku: project.sku || '',
+        productName: project.name || '',
+        quantity: labelsConfig.quantity,
+        template: labelsConfig.template,
+        includeSku: labelsConfig.includeSku,
+        includeName: labelsConfig.includeName
+      })
+
+      // Descarregar
+      doc.save(`FNSKU-labels-${identifiers.fnsku}-${Date.now()}.pdf`)
+      setShowLabelsModal(false)
+    } catch (err) {
+      console.error('Error generant etiquetes:', err)
+      alert('Error generant etiquetes: ' + (err.message || 'Error desconegut'))
+    }
   }
 
   // Descarregar PDF
@@ -585,9 +632,161 @@ export default function Orders() {
                       />
                     </div>
                   )}
+
+                  {/* Generar Etiquetes FNSKU */}
+                  <div style={styles.detailSection}>
+                    <h4 style={styles.detailSectionTitle}>🏷️ Etiquetes FNSKU</h4>
+                    <button
+                      onClick={() => setShowLabelsModal(true)}
+                      style={{
+                        padding: '10px 20px',
+                        backgroundColor: '#4f46e5',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Generar Etiquetes FNSKU
+                    </button>
+                  </div>
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Modal Generar Etiquetes */}
+      {showLabelsModal && (
+        <div style={styles.modalOverlay} onClick={() => setShowLabelsModal(false)}>
+          <div
+            style={{
+              ...styles.detailModal,
+              backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
+              maxWidth: '500px'
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={styles.detailHeader}>
+              <h3 style={{
+                ...styles.detailTitle,
+                color: darkMode ? '#ffffff' : '#111827'
+              }}>
+                Generar Etiquetes FNSKU
+              </h3>
+              <button
+                onClick={() => setShowLabelsModal(false)}
+                style={styles.closeButton}
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div style={styles.detailBody}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                  <label style={{
+                    display: 'block',
+                    marginBottom: '6px',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    color: darkMode ? '#e5e7eb' : '#374151'
+                  }}>
+                    Quantitat d'etiquetes
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={labelsConfig.quantity}
+                    onChange={e => setLabelsConfig({ ...labelsConfig, quantity: parseInt(e.target.value) || 1 })}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid',
+                      borderColor: darkMode ? '#374151' : '#d1d5db',
+                      backgroundColor: darkMode ? '#15151f' : '#f9fafb',
+                      color: darkMode ? '#ffffff' : '#111827',
+                      fontSize: '14px'
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{
+                    display: 'block',
+                    marginBottom: '6px',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    color: darkMode ? '#e5e7eb' : '#374151'
+                  }}>
+                    Plantilla
+                  </label>
+                  <select
+                    value={labelsConfig.template}
+                    onChange={e => setLabelsConfig({ ...labelsConfig, template: e.target.value })}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid',
+                      borderColor: darkMode ? '#374151' : '#d1d5db',
+                      backgroundColor: darkMode ? '#15151f' : '#f9fafb',
+                      color: darkMode ? '#ffffff' : '#111827',
+                      fontSize: '14px'
+                    }}
+                  >
+                    <option value="A4_30UP">A4 - 30 etiquetes (3x10)</option>
+                    <option value="LABEL_40x30">Una etiqueta per pàgina (40x30mm)</option>
+                  </select>
+                </div>
+                <div style={{ display: 'flex', gap: '16px' }}>
+                  <label style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    cursor: 'pointer'
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={labelsConfig.includeSku}
+                      onChange={e => setLabelsConfig({ ...labelsConfig, includeSku: e.target.checked })}
+                    />
+                    <span style={{ fontSize: '13px', color: darkMode ? '#e5e7eb' : '#374151' }}>Incloure SKU</span>
+                  </label>
+                  <label style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    cursor: 'pointer'
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={labelsConfig.includeName}
+                      onChange={e => setLabelsConfig({ ...labelsConfig, includeName: e.target.checked })}
+                    />
+                    <span style={{ fontSize: '13px', color: darkMode ? '#e5e7eb' : '#374151' }}>Incloure Nom</span>
+                  </label>
+                </div>
+                <button
+                  onClick={handleGenerateLabels}
+                  style={{
+                    padding: '12px 24px',
+                    backgroundColor: '#4f46e5',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    marginTop: '8px'
+                  }}
+                >
+                  Generar i Descarregar PDF
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

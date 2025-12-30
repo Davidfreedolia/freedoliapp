@@ -15,7 +15,9 @@ import {
   Sun,
   Moon,
   Bell,
-  Settings
+  Settings,
+  Barcode,
+  AlertTriangle
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { getPurchaseOrders, getDashboardPreferences } from '../lib/supabase'
@@ -39,12 +41,32 @@ export default function Dashboard() {
     activity_feed: false
   })
   const [loadingPreferences, setLoadingPreferences] = useState(true)
+  const [gtinCoverage, setGtinCoverage] = useState({ missingGtin: 0, availableCodes: 0 })
+  const [loadingGtinCoverage, setLoadingGtinCoverage] = useState(true)
 
   useEffect(() => {
     loadDashboardPreferences()
     loadOrdersInProgress()
     loadFinancialData()
+    loadGtinCoverage()
   }, [])
+
+  const loadGtinCoverage = async () => {
+    setLoadingGtinCoverage(true)
+    try {
+      const [missingGtin, availableCodes] = await Promise.all([
+        getProjectsMissingGtin(),
+        getUnassignedGtinCodes()
+      ])
+      setGtinCoverage({
+        missingGtin: missingGtin?.length || 0,
+        availableCodes: availableCodes?.length || 0
+      })
+    } catch (err) {
+      console.error('Error carregant GTIN coverage:', err)
+    }
+    setLoadingGtinCoverage(false)
+  }
 
   const loadOrdersInProgress = async () => {
     setLoadingOrders(true)
@@ -297,6 +319,92 @@ export default function Dashboard() {
             </div>
           ))}
         </div>
+
+        {/* GTIN Coverage KPI */}
+        {!loadingGtinCoverage && (
+          <div style={{
+            ...styles.section,
+            backgroundColor: darkMode ? '#15151f' : '#ffffff'
+          }}>
+            <div style={styles.sectionHeader}>
+              <h2 style={{
+                ...styles.sectionTitle,
+                color: darkMode ? '#ffffff' : '#111827'
+              }}>
+                <Barcode size={20} />
+                GTIN Coverage
+              </h2>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', padding: '20px' }}>
+              <div style={{
+                padding: '16px',
+                borderRadius: '12px',
+                border: '1px solid',
+                borderColor: gtinCoverage.missingGtin > 0 ? '#f59e0b' : (darkMode ? '#374151' : '#e5e7eb'),
+                backgroundColor: gtinCoverage.missingGtin > 0 ? '#fef3c7' : (darkMode ? '#1f1f2e' : '#f9fafb')
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <AlertTriangle size={18} color={gtinCoverage.missingGtin > 0 ? '#f59e0b' : '#6b7280'} />
+                  <span style={{
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    color: darkMode ? '#9ca3af' : '#6b7280'
+                  }}>
+                    SKUs sense GTIN
+                  </span>
+                </div>
+                <span style={{
+                  fontSize: '28px',
+                  fontWeight: '700',
+                  color: gtinCoverage.missingGtin > 0 ? '#f59e0b' : (darkMode ? '#ffffff' : '#111827')
+                }}>
+                  {gtinCoverage.missingGtin}
+                </span>
+              </div>
+              <div style={{
+                padding: '16px',
+                borderRadius: '12px',
+                border: '1px solid',
+                borderColor: gtinCoverage.availableCodes < gtinCoverage.missingGtin ? '#ef4444' : (darkMode ? '#374151' : '#e5e7eb'),
+                backgroundColor: gtinCoverage.availableCodes < gtinCoverage.missingGtin ? '#fee2e2' : (darkMode ? '#1f1f2e' : '#f9fafb')
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <Barcode size={18} color={gtinCoverage.availableCodes < gtinCoverage.missingGtin ? '#ef4444' : '#22c55e'} />
+                  <span style={{
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    color: darkMode ? '#9ca3af' : '#6b7280'
+                  }}>
+                    Codis disponibles al pool
+                  </span>
+                </div>
+                <span style={{
+                  fontSize: '28px',
+                  fontWeight: '700',
+                  color: gtinCoverage.availableCodes < gtinCoverage.missingGtin ? '#ef4444' : (darkMode ? '#ffffff' : '#111827')
+                }}>
+                  {gtinCoverage.availableCodes}
+                </span>
+              </div>
+              {gtinCoverage.availableCodes < gtinCoverage.missingGtin && (
+                <div style={{
+                  gridColumn: 'span 2',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  backgroundColor: '#fee2e2',
+                  border: '1px solid #fca5a5'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <AlertTriangle size={16} color="#991b1b" />
+                    <span style={{ fontSize: '13px', color: '#991b1b', fontWeight: '500' }}>
+                      ⚠️ Alerta: Hi ha menys codis disponibles ({gtinCoverage.availableCodes}) que SKUs pendents ({gtinCoverage.missingGtin})
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Tracking Logístic Widget */}
         {dashboardWidgets.logistics_tracking && !loadingPreferences && (

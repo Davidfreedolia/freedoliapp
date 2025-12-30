@@ -12,10 +12,13 @@ import {
   RefreshCw,
   PieChart,
   BarChart3,
-  Activity
+  Activity,
+  Barcode,
+  AlertCircle
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { supabase } from '../lib/supabase'
+import { getUnassignedGtinCodes, getProjectsMissingGtin } from '../lib/supabase'
 import Header from '../components/Header'
 
 // Colors per categories
@@ -43,6 +46,8 @@ export default function Analytics() {
   const [incomes, setIncomes] = useState([])
   const [orders, setOrders] = useState([])
   const [inventory, setInventory] = useState([])
+  const [unassignedGtins, setUnassignedGtins] = useState([])
+  const [missingGtinProjects, setMissingGtinProjects] = useState([])
 
   useEffect(() => {
     loadData()
@@ -91,6 +96,14 @@ export default function Analytics() {
       if (filterProject) inventoryQuery = inventoryQuery.eq('project_id', filterProject)
       const { data: inventoryData } = await inventoryQuery
       setInventory(inventoryData || [])
+
+      // GTIN Pool - Unassigned codes
+      const unassigned = await getUnassignedGtinCodes()
+      setUnassignedGtins(unassigned || [])
+
+      // Projects missing GTIN
+      const missing = await getProjectsMissingGtin()
+      setMissingGtinProjects(missing || [])
 
     } catch (err) {
       console.error('Error carregant dades:', err)
@@ -398,6 +411,63 @@ export default function Analytics() {
                 {Object.keys(ordersByStatus).length === 0 && (
                   <p style={{ color: '#6b7280', gridColumn: 'span 4' }}>No hi ha comandes</p>
                 )}
+              </div>
+            </div>
+
+            {/* GTIN Management */}
+            <div style={styles.chartsGrid}>
+              {/* Unassigned GTIN Codes */}
+              <div style={{ ...styles.chartCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
+                <h3 style={{ ...styles.chartTitle, color: darkMode ? '#ffffff' : '#111827' }}>
+                  <Barcode size={18} color="#4f46e5" />
+                  Codis GTIN no Assignats ({unassignedGtins.length})
+                </h3>
+                <div style={styles.categoryList}>
+                  {unassignedGtins.length === 0 ? (
+                    <p style={{ color: '#6b7280', textAlign: 'center' }}>Tots els codis estan assignats</p>
+                  ) : (
+                    unassignedGtins.slice(0, 10).map(gtin => (
+                      <div key={gtin.id} style={styles.categoryItem}>
+                        <div style={styles.categoryInfo}>
+                          <span style={{ ...styles.categoryDot, backgroundColor: '#4f46e5' }} />
+                          <div>
+                            <span style={{ color: darkMode ? '#ffffff' : '#111827', fontWeight: '500', fontFamily: 'monospace' }}>
+                              {gtin.gtin_code || 'GTIN_EXEMPT'}
+                            </span>
+                            <p style={{ margin: 0, fontSize: '11px', color: '#6b7280' }}>{gtin.gtin_type}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* SKUs Missing GTIN */}
+              <div style={{ ...styles.chartCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
+                <h3 style={{ ...styles.chartTitle, color: darkMode ? '#ffffff' : '#111827' }}>
+                  <AlertCircle size={18} color="#f59e0b" />
+                  SKUs sense GTIN ({missingGtinProjects.length})
+                </h3>
+                <div style={styles.categoryList}>
+                  {missingGtinProjects.length === 0 ? (
+                    <p style={{ color: '#6b7280', textAlign: 'center' }}>Tots els SKUs tenen GTIN</p>
+                  ) : (
+                    missingGtinProjects.slice(0, 10).map(project => (
+                      <div key={project.id} style={styles.categoryItem}>
+                        <div style={styles.categoryInfo}>
+                          <span style={{ ...styles.categoryDot, backgroundColor: '#f59e0b' }} />
+                          <div>
+                            <span style={{ color: darkMode ? '#ffffff' : '#111827', fontWeight: '500' }}>
+                              {project.name}
+                            </span>
+                            <p style={{ margin: 0, fontSize: '11px', color: '#6b7280' }}>{project.project_code} / {project.sku}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             </div>
 

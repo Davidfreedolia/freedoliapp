@@ -8,7 +8,8 @@ import {
   Package,
   CheckCircle2,
   Clock,
-  ArrowRight
+  ArrowRight,
+  AlertTriangle
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { getProjects, getPurchaseOrders } from '../lib/supabase'
@@ -37,6 +38,7 @@ export default function LogisticsTrackingWidget({ darkMode }) {
   const [projects, setProjects] = useState([])
   const [ordersByProject, setOrdersByProject] = useState({})
   const [loading, setLoading] = useState(true)
+  const [showOnlyStale, setShowOnlyStale] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -87,6 +89,38 @@ export default function LogisticsTrackingWidget({ darkMode }) {
     return ((index + 1) / LOGISTICS_STAGES.length) * 100
   }
 
+  // Calcular dies des de l'última actualització
+  const getDaysSinceUpdate = (logisticsUpdatedAt) => {
+    if (!logisticsUpdatedAt) return null
+    const now = new Date()
+    const updated = new Date(logisticsUpdatedAt)
+    const diffTime = now - updated
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+    return diffDays
+  }
+
+  // Determinar si és "stale" (>14 dies) o "needs update" (>7 dies)
+  const getUpdateStatus = (logisticsUpdatedAt) => {
+    const days = getDaysSinceUpdate(logisticsUpdatedAt)
+    if (days === null) return null
+    if (days > 14) return 'stale' // Vermell
+    if (days > 7) return 'needs_update' // Taronja
+    return 'current' // Actualitzat
+  }
+
+  // Filtrar projectes segons si són "stale" o no
+  const getFilteredProjects = () => {
+    const projectsWithTracking = projects.filter(p => ordersByProject[p.id])
+    
+    if (!showOnlyStale) return projectsWithTracking
+    
+    return projectsWithTracking.filter(project => {
+      const order = ordersByProject[project.id]
+      const status = getUpdateStatus(order.logistics_updated_at)
+      return status === 'stale' || status === 'needs_update'
+    })
+  }
+
   if (loading) {
     return (
       <div style={{
@@ -107,9 +141,9 @@ export default function LogisticsTrackingWidget({ darkMode }) {
     )
   }
 
-  const projectsWithTracking = projects.filter(p => ordersByProject[p.id])
+  const filteredProjects = getFilteredProjects()
 
-  if (projectsWithTracking.length === 0) {
+  if (filteredProjects.length === 0 && !showOnlyStale) {
     return (
       <div style={{
         ...styles.section,
@@ -131,7 +165,7 @@ export default function LogisticsTrackingWidget({ darkMode }) {
           </button>
         </div>
         <div style={styles.empty}>
-          <p>No hi ha comandes amb tracking actiu</p>
+          <p>{showOnlyStale ? 'No hi ha comandes pendents d\'actualització' : 'No hi ha comandes amb tracking actiu'}</p>
         </div>
       </div>
     )
@@ -150,20 +184,36 @@ export default function LogisticsTrackingWidget({ darkMode }) {
           <Truck size={20} />
           Tracking Logístic
         </h2>
-        <button 
-          onClick={() => navigate('/orders')}
-          style={styles.viewAllButton}
-        >
-          Veure totes <ArrowRight size={16} />
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button
+            onClick={() => setShowOnlyStale(!showOnlyStale)}
+            style={{
+              ...styles.filterButton,
+              backgroundColor: showOnlyStale ? (darkMode ? '#ef4444' : '#fee2e2') : 'transparent',
+              color: showOnlyStale ? (darkMode ? '#ffffff' : '#991b1b') : (darkMode ? '#9ca3af' : '#6b7280'),
+              borderColor: showOnlyStale ? (darkMode ? '#ef4444' : '#fca5a5') : (darkMode ? '#374151' : '#d1d5db')
+            }}
+          >
+            <AlertTriangle size={14} />
+            Només pendents
+          </button>
+          <button 
+            onClick={() => navigate('/orders')}
+            style={styles.viewAllButton}
+          >
+            Veure totes <ArrowRight size={16} />
+          </button>
+        </div>
       </div>
 
       <div style={styles.projectsList}>
-        {projectsWithTracking.map(project => {
+        {filteredProjects.map(project => {
           const order = ordersByProject[project.id]
           const statusInfo = getStatusInfo(order.logistics_status)
           const StatusIcon = statusInfo.icon
           const progress = getProgressPercentage(order.logistics_status)
+          const updateStatus = getUpdateStatus(order.logistics_updated_at)
+          const daysSinceUpdate = getDaysSinceUpdate(order.logistics_updated_at)
 
           return (
             <div 
@@ -173,18 +223,50 @@ export default function LogisticsTrackingWidget({ darkMode }) {
             >
               <div style={styles.projectHeader}>
                 <div style={styles.projectInfo}>
-                  <span style={{
-                    ...styles.projectName,
-                    color: darkMode ? '#ffffff' : '#111827'
-                  }}>
-                    {project.name}
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{
+                      ...styles.projectName,
+                      color: darkMode ? '#ffffff' : '#111827'
+                    }}>
+                      {project.name}
+                    </span>
+                    {updateStatus === 'stale' && (
+                      <span style={{
+                        ...styles.updateBadge,
+                        backgroundColor: '#fee2e2',
+                        color: '#991b1b',
+                        borderColor: '#fca5a5'
+                      }}>
+                        <AlertTriangle size={12} />
+                        Stale
+                      </span>
+                    )}
+                    {updateStatus === 'needs_update' && (
+                      <span style={{
+                        ...styles.updateBadge,
+                        backgroundColor: '#fef3c7',
+                        color: '#92400e',
+                        borderColor: '#fcd34d'
+                      }}>
+                        <AlertTriangle size={12} />
+                        Needs update
+                      </span>
+                    )}
+                  </div>
                   <span style={{
                     ...styles.projectCode,
                     color: darkMode ? '#6b7280' : '#9ca3af'
                   }}>
                     {project.project_code}
                   </span>
+                  {daysSinceUpdate !== null && (
+                    <span style={{
+                      ...styles.lastUpdateText,
+                      color: darkMode ? '#9ca3af' : '#6b7280'
+                    }}>
+                      Última actualització: fa {daysSinceUpdate} {daysSinceUpdate === 1 ? 'dia' : 'dies'}
+                    </span>
+                  )}
                 </div>
                 <div style={{
                   ...styles.statusBadge,
@@ -329,6 +411,21 @@ const styles = {
   projectCode: {
     fontSize: '12px',
     fontWeight: '500'
+  },
+  lastUpdateText: {
+    fontSize: '11px',
+    fontWeight: '400',
+    marginTop: '2px'
+  },
+  updateBadge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '4px',
+    padding: '2px 8px',
+    borderRadius: '6px',
+    fontSize: '11px',
+    fontWeight: '600',
+    border: '1px solid'
   },
   statusBadge: {
     display: 'flex',

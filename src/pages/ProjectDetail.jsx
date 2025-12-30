@@ -20,6 +20,7 @@ import { driveService, PROJECT_SUBFOLDERS } from '../lib/googleDrive'
 import Header from '../components/Header'
 import FileUploader from '../components/FileUploader'
 import FileBrowser from '../components/FileBrowser'
+import IdentifiersSection from '../components/IdentifiersSection'
 
 const PHASES = [
   { id: 1, name: 'Recerca', icon: '🔍', color: '#6366f1', description: 'Investigació de producte i mercat' },
@@ -283,6 +284,9 @@ export default function ProjectDetail() {
             </div>
           </div>
         </div>
+
+        {/* Identifiers Section */}
+        <IdentifiersSection projectId={id} darkMode={darkMode} />
 
         {/* Drive Integration */}
         <div style={styles.driveSection}>
