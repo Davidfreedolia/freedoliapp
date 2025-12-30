@@ -20,7 +20,7 @@ import {
   AlertTriangle
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { getPurchaseOrders, getDashboardPreferences } from '../lib/supabase'
+import { getPurchaseOrders, getDashboardPreferences, getPosNotReady } from '../lib/supabase'
 import { supabase } from '../lib/supabase'
 import NewProjectModal from '../components/NewProjectModal'
 import LogisticsTrackingWidget from '../components/LogisticsTrackingWidget'
@@ -34,10 +34,13 @@ export default function Dashboard() {
   const [ordersInProgress, setOrdersInProgress] = useState([])
   const [loadingOrders, setLoadingOrders] = useState(true)
   const [financialData, setFinancialData] = useState([])
+  const [posNotReady, setPosNotReady] = useState([])
+  const [loadingPosNotReady, setLoadingPosNotReady] = useState(true)
   const [dashboardWidgets, setDashboardWidgets] = useState({
     logistics_tracking: true,
     finance_chart: true,
     orders_in_progress: true,
+    pos_not_ready: true,
     activity_feed: false
   })
   const [loadingPreferences, setLoadingPreferences] = useState(true)
@@ -49,6 +52,7 @@ export default function Dashboard() {
     loadOrdersInProgress()
     loadFinancialData()
     loadGtinCoverage()
+    loadPosNotReady()
   }, [])
 
   const loadGtinCoverage = async () => {
@@ -83,6 +87,17 @@ export default function Dashboard() {
     setLoadingOrders(false)
   }
 
+  const loadPosNotReady = async () => {
+    setLoadingPosNotReady(true)
+    try {
+      const notReady = await getPosNotReady(5)
+      setPosNotReady(notReady || [])
+    } catch (err) {
+      console.error('Error carregant POs not ready:', err)
+    }
+    setLoadingPosNotReady(false)
+  }
+
   const loadDashboardPreferences = async () => {
     setLoadingPreferences(true)
     try {
@@ -92,6 +107,7 @@ export default function Dashboard() {
           logistics_tracking: prefs.widgets.logistics_tracking !== false,
           finance_chart: prefs.widgets.finance_chart !== false,
           orders_in_progress: prefs.widgets.orders_in_progress !== false,
+          pos_not_ready: prefs.widgets.pos_not_ready !== false,
           activity_feed: prefs.widgets.activity_feed === true
         })
       }
@@ -474,6 +490,71 @@ export default function Dashboard() {
                   </div>
                 )
               })}
+            </div>
+          )}
+        </div>
+        )}
+
+        {/* POs not ready */}
+        {dashboardWidgets.pos_not_ready && (
+        <div style={{
+          ...styles.section,
+          backgroundColor: darkMode ? '#15151f' : '#ffffff'
+        }}>
+          <div style={styles.sectionHeader}>
+            <h2 style={{
+              ...styles.sectionTitle,
+              color: darkMode ? '#ffffff' : '#111827'
+            }}>
+              <AlertTriangle size={20} />
+              POs no llestes per Amazon
+            </h2>
+            <button 
+              onClick={() => navigate('/orders')}
+              style={styles.viewAllButton}
+            >
+              Veure totes <ArrowRight size={16} />
+            </button>
+          </div>
+
+          {loadingPosNotReady ? (
+            <div style={styles.loading}>Carregant...</div>
+          ) : posNotReady.length === 0 ? (
+            <div style={styles.empty}>
+              <p>Totes les POs estan llestes per Amazon! 🎉</p>
+            </div>
+          ) : (
+            <div style={styles.ordersList}>
+              {posNotReady.map(po => (
+                <div 
+                  key={po.id}
+                  style={styles.orderItem}
+                  onClick={() => navigate(`/orders`)}
+                >
+                  <div style={styles.orderInfo}>
+                    <span style={{
+                      ...styles.orderNumber,
+                      color: darkMode ? '#ffffff' : '#111827'
+                    }}>
+                      {po.po_number}
+                    </span>
+                    <span style={{
+                      ...styles.orderProject,
+                      color: darkMode ? '#6b7280' : '#9ca3af'
+                    }}>
+                      {po.projects?.name || 'Sense projecte'}
+                    </span>
+                  </div>
+                  <div style={{
+                    ...styles.statusBadge,
+                    backgroundColor: '#f59e0b15',
+                    color: '#f59e0b'
+                  }}>
+                    Missing {po.missingCount}
+                  </div>
+                  <ArrowRight size={18} color="#9ca3af" />
+                </div>
+              ))}
             </div>
           )}
         </div>

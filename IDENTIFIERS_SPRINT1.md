@@ -188,3 +188,4 @@ await getProjectsMissingGtin()
 
 **Última actualització**: Sprint 1 - Base implementada (SQL + UI bàsica + assignació pool)
 
+

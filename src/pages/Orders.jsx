@@ -35,9 +35,11 @@ import {
 import Header from '../components/Header'
 import NewPOModal from '../components/NewPOModal'
 import LogisticsFlow from '../components/LogisticsFlow'
+import AmazonReadySection from '../components/AmazonReadySection'
 import { generatePOPdf } from '../lib/generatePOPdf'
 import { generateFnskuLabelsPdf } from '../lib/generateFnskuLabelsPdf'
-import { getProductIdentifiers, getProject } from '../lib/supabase'
+import { getProductIdentifiers, getProject, getPoAmazonReadiness, upsertPoAmazonReadiness, updatePoAmazonReadinessLabels } from '../lib/supabase'
+import { computePoAmazonReady } from '../lib/amazonReady'
 
 // Estats de la PO
 const PO_STATUSES = {
@@ -83,6 +85,9 @@ export default function Orders() {
     offsetYmm: 0,
     testPrint: false
   })
+  const [amazonReadiness, setAmazonReadiness] = useState(null)
+  const [amazonReadyStatus, setAmazonReadyStatus] = useState({ ready: false, missing: [] })
+  const [showAmazonReadySection, setShowAmazonReadySection] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -96,13 +101,74 @@ export default function Orders() {
         getProjects(),
         getSuppliers()
       ])
-      setOrders(ordersData || [])
+      
+      // Carregar estat Amazon Ready per cada PO
+      if (ordersData && ordersData.length > 0) {
+        const ordersWithReadiness = await Promise.all(
+          ordersData.map(async (order) => {
+            if (!order.project_id) return { ...order, amazonReadyStatus: null }
+            
+            try {
+              const [readiness, identifiers] = await Promise.all([
+                getPoAmazonReadiness(order.id),
+                getProductIdentifiers(order.project_id)
+              ])
+              
+              const readyStatus = computePoAmazonReady({
+                po: order,
+                identifiers,
+                readiness
+              })
+              
+              return { ...order, amazonReadyStatus: readyStatus }
+            } catch (err) {
+              console.error(`Error carregant Amazon readiness per PO ${order.id}:`, err)
+              return { ...order, amazonReadyStatus: null }
+            }
+          })
+        )
+        setOrders(ordersWithReadiness)
+      } else {
+        setOrders(ordersData || [])
+      }
+      
       setProjects(projectsData || [])
       setSuppliers(suppliersData || [])
     } catch (err) {
       console.error('Error carregant dades:', err)
     }
     setLoading(false)
+  }
+
+  // Carregar Amazon readiness
+  const loadAmazonReadiness = async (poId, projectId, poData = null) => {
+    try {
+      const readiness = await getPoAmazonReadiness(poId)
+      let finalReadiness = readiness
+      
+      // Si no existeix, crear registre inicial
+      if (!readiness && poId && projectId) {
+        finalReadiness = await upsertPoAmazonReadiness(poId, projectId, {
+          needs_fnsku: true
+        })
+      }
+      
+      setAmazonReadiness(finalReadiness)
+      
+      // Calcular estat ready
+      if (finalReadiness) {
+        const identifiers = await getProductIdentifiers(projectId)
+        const po = poData || selectedOrder
+        const status = computePoAmazonReady({
+          po: po,
+          identifiers,
+          readiness: finalReadiness
+        })
+        setAmazonReadyStatus(status)
+      }
+    } catch (err) {
+      console.error('Error carregant Amazon readiness:', err)
+    }
   }
 
   // Veure detall PO
@@ -113,6 +179,11 @@ export default function Orders() {
     try {
       const fullOrder = await getPurchaseOrder(order.id)
       setSelectedOrder(fullOrder)
+      
+      // Carregar Amazon readiness
+      if (fullOrder.project_id) {
+        await loadAmazonReadiness(fullOrder.id, fullOrder.project_id, fullOrder)
+      }
     } catch (err) {
       console.error('Error carregant detall:', err)
       alert('Error carregant el detall de la comanda')
@@ -155,6 +226,22 @@ export default function Orders() {
 
       // Descarregar
       doc.save(`FNSKU-labels-${identifiers.fnsku}-${Date.now()}.pdf`)
+      
+      // Actualitzar Amazon readiness amb les etiquetes generades
+      try {
+        await updatePoAmazonReadinessLabels(selectedOrder.id, {
+          quantity: labelsConfig.quantity,
+          template: labelsConfig.template
+        })
+        // Recarregar readiness
+        if (selectedOrder?.project_id) {
+          await loadAmazonReadiness(selectedOrder.id, selectedOrder.project_id)
+        }
+      } catch (err) {
+        console.error('Error actualitzant Amazon readiness:', err)
+        // No bloquejar si falla aquesta actualització
+      }
+      
       setShowLabelsModal(false)
     } catch (err) {
       console.error('Error generant etiquetes:', err)
@@ -374,7 +461,21 @@ export default function Orders() {
                   return (
                     <tr key={order.id} style={styles.tr}>
                       <td style={{ ...styles.td, color: darkMode ? '#ffffff' : '#111827' }}>
-                        <span style={styles.poNumber}>{order.po_number}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={styles.poNumber}>{order.po_number}</span>
+                          {order.amazonReadyStatus && (
+                            <span style={{
+                              padding: '2px 8px',
+                              borderRadius: '4px',
+                              fontSize: '11px',
+                              fontWeight: '500',
+                              backgroundColor: order.amazonReadyStatus.ready ? '#10b98115' : '#f59e0b15',
+                              color: order.amazonReadyStatus.ready ? '#10b981' : '#f59e0b'
+                            }}>
+                              {order.amazonReadyStatus.ready ? 'Ready' : `Missing ${order.amazonReadyStatus.missing.length}`}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td style={{ ...styles.td, color: darkMode ? '#ffffff' : '#111827' }}>
                         {order.project?.name || '-'}
@@ -628,6 +729,51 @@ export default function Orders() {
                       </p>
                     </div>
                   )}
+
+                  {/* Amazon Ready Section */}
+                  <div style={styles.detailSection}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <h4 style={styles.detailSectionTitle}>📦 Amazon Ready</h4>
+                      <button
+                        onClick={() => setShowAmazonReadySection(!showAmazonReadySection)}
+                        style={{
+                          padding: '6px 12px',
+                          backgroundColor: 'transparent',
+                          color: darkMode ? '#ffffff' : '#111827',
+                          border: '1px solid',
+                          borderColor: darkMode ? '#374151' : '#d1d5db',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {showAmazonReadySection ? 'Ocultar' : 'Mostrar'}
+                      </button>
+                    </div>
+                    
+                    {showAmazonReadySection && (
+                      <AmazonReadySection
+                        po={selectedOrder}
+                        readiness={amazonReadiness}
+                        readyStatus={amazonReadyStatus}
+                        onUpdate={async (data) => {
+                          if (selectedOrder?.id && selectedOrder?.project_id) {
+                            const updated = await upsertPoAmazonReadiness(selectedOrder.id, selectedOrder.project_id, data)
+                            setAmazonReadiness(updated)
+                            // Recalcular estat
+                            const identifiers = await getProductIdentifiers(selectedOrder.project_id)
+                            const status = computePoAmazonReady({
+                              po: selectedOrder,
+                              identifiers,
+                              readiness: updated
+                            })
+                            setAmazonReadyStatus(status)
+                          }
+                        }}
+                        darkMode={darkMode}
+                      />
+                    )}
+                  </div>
 
                   {/* Flux Logístic */}
                   {selectedOrder.status !== 'draft' && selectedOrder.status !== 'cancelled' && (

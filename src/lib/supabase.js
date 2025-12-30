@@ -632,6 +632,133 @@ export const getProjectsMissingGtin = async () => {
   return missingGtin
 }
 
+// ============================================
+// AMAZON READINESS (PO)
+// ============================================
+
+export const getPoAmazonReadiness = async (purchaseOrderId) => {
+  const userId = await getCurrentUserId()
+  const { data, error } = await supabase
+    .from('po_amazon_readiness')
+    .select('*')
+    .eq('purchase_order_id', purchaseOrderId)
+    .eq('user_id', userId)
+    .single()
+  if (error && error.code !== 'PGRST116') throw error // PGRST116 = no rows found
+  return data
+}
+
+export const upsertPoAmazonReadiness = async (purchaseOrderId, projectId, readinessData) => {
+  // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
+  const { user_id, ...data } = readinessData
+  const userId = await getCurrentUserId()
+  
+  const { data: result, error } = await supabase
+    .from('po_amazon_readiness')
+    .upsert({
+      purchase_order_id: purchaseOrderId,
+      project_id: projectId,
+      ...data,
+      updated_at: new Date().toISOString()
+    }, {
+      onConflict: 'user_id,purchase_order_id'
+    })
+    .select()
+    .single()
+  if (error) throw error
+  return result
+}
+
+export const updatePoAmazonReadinessLabels = async (purchaseOrderId, labelsData) => {
+  const userId = await getCurrentUserId()
+  const { data, error } = await supabase
+    .from('po_amazon_readiness')
+    .update({
+      labels_generated_at: new Date().toISOString(),
+      labels_qty: labelsData.quantity,
+      labels_template: labelsData.template,
+      updated_at: new Date().toISOString()
+    })
+    .eq('purchase_order_id', purchaseOrderId)
+    .eq('user_id', userId)
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+export const getPosNotReady = async (limit = 5) => {
+  const userId = await getCurrentUserId()
+  
+  // Obtenir totes les POs amb readiness
+  const { data: readinessData, error: readinessError } = await supabase
+    .from('po_amazon_readiness')
+    .select(`
+      *,
+      purchase_orders (
+        id,
+        po_number,
+        status,
+        project_id,
+        projects (
+          id,
+          name,
+          sku
+        )
+      )
+    `)
+    .eq('user_id', userId)
+    .order('updated_at', { ascending: false })
+    .limit(limit * 3) // Obtenir més per filtrar després
+  
+  if (readinessError) throw readinessError
+  
+  if (!readinessData || readinessData.length === 0) return []
+  
+  // Obtenir identifiers per cada projecte
+  const projectIds = [...new Set(readinessData.map(r => r.project_id))]
+  const { data: identifiersData, error: identifiersError } = await supabase
+    .from('product_identifiers')
+    .select('project_id, fnsku')
+    .in('project_id', projectIds)
+    .eq('user_id', userId)
+  
+  if (identifiersError) throw identifiersError
+  
+  // Crear map de identifiers per project_id
+  const identifiersMap = {}
+  identifiersData?.forEach(id => {
+    identifiersMap[id.project_id] = id
+  })
+  
+  // Calcular readiness per cada PO
+  const { computePoAmazonReady } = await import('./amazonReady')
+  const notReady = []
+  for (const readiness of readinessData) {
+    if (!readiness.purchase_orders) continue
+    const identifiers = identifiersMap[readiness.project_id]
+    const { ready, missing } = computePoAmazonReady({
+      po: readiness.purchase_orders,
+      identifiers,
+      readiness
+    })
+    
+    if (!ready && readiness.purchase_orders) {
+      notReady.push({
+        ...readiness.purchase_orders,
+        project: readiness.purchase_orders.projects,
+        readiness,
+        missingCount: missing.length,
+        missing
+      })
+    }
+    
+    if (notReady.length >= limit) break
+  }
+  
+  return notReady
+}
+
 // MAGATZEMS
 export const getWarehouses = async () => {
   const { data, error } = await supabase
