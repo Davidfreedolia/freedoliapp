@@ -117,13 +117,8 @@ export default function ProjectDetail() {
       setProject({ ...project, current_phase: newPhase })
       await refreshProjects()
       
-      // Canviar carpeta seleccionada
-      if (projectFolders) {
-        const folderName = PHASE_FOLDER_MAP[newPhase]
-        if (projectFolders.subfolders[folderName]) {
-          setSelectedFolder(projectFolders.subfolders[folderName])
-        }
-      }
+      // Redirigir al Dashboard després d'editar el projecte
+      navigate('/')
     } catch (err) {
       console.error('Error actualitzant fase:', err)
     }
