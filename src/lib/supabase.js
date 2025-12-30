@@ -558,4 +558,73 @@ export const updateCompanySettings = async (settings) => {
   return data
 }
 
+// DASHBOARD PREFERENCES
+export const getDashboardPreferences = async () => {
+  const userId = await getCurrentUserId()
+  const { data, error } = await supabase
+    .from('dashboard_preferences')
+    .select('*')
+    .eq('user_id', userId)
+    .limit(1)
+    .single()
+  if (error && error.code !== 'PGRST116') throw error
+  return data
+}
+
+export const updateDashboardPreferences = async (preferences) => {
+  const { user_id, ...prefsData } = preferences
+  const userId = await getCurrentUserId()
+  const existing = await getDashboardPreferences()
+
+  // Widgets default si no existeix configuració
+  const defaultWidgets = {
+    logistics_tracking: true,
+    finance_chart: true,
+    orders_in_progress: true,
+    activity_feed: false
+  }
+
+  if (existing) {
+    const { data, error } = await supabase
+      .from('dashboard_preferences')
+      .update({ 
+        widgets: prefsData.widgets || existing.widgets || defaultWidgets,
+        updated_at: new Date().toISOString() 
+      })
+      .eq('id', existing.id)
+      .eq('user_id', userId)
+      .select()
+      .single()
+    if (error) throw error
+    return data
+  }
+
+  const { data, error } = await supabase
+    .from('dashboard_preferences')
+    .insert([{
+      widgets: prefsData.widgets || defaultWidgets
+    }])
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+// AUDIT LOG
+export const getAuditLogs = async (limit = 50, statusFilter = null) => {
+  let query = supabase
+    .from('audit_log')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+  if (statusFilter) {
+    query = query.eq('status', statusFilter)
+  }
+
+  const { data, error } = await query
+  if (error) throw error
+  return data || []
+}
+
 export default supabase

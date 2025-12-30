@@ -309,3 +309,7 @@ Després de fer totes les proves, hauries de tenir:
 
 **Si totes les proves passen, la integració és robusta i llesta per producció!** 🎉
 
+
+
+
+

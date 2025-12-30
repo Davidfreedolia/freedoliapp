@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { X, Loader, FolderPlus, Hash, Tag } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { createProject, updateProject, generateProjectCode } from '../lib/supabase'
 import { driveService } from '../lib/googleDrive'
+import { logSuccess, logError } from '../lib/auditLog'
+import { handleError } from '../lib/errorHandling'
 
 const PHASES = [
   { id: 1, name: 'Recerca', icon: '🔍' },
@@ -16,6 +19,7 @@ const PHASES = [
 
 export default function NewProjectModal({ isOpen, onClose }) {
   const { refreshProjects, darkMode, driveConnected } = useApp()
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [creatingFolders, setCreatingFolders] = useState(false)
   const [generatingCode, setGeneratingCode] = useState(false)
@@ -66,6 +70,13 @@ export default function NewProjectModal({ isOpen, onClose }) {
         drive_folder_id: null  // S'assignarà després
       })
 
+      // Audit log: projecte creat
+      await logSuccess('project', 'create', newProject.id, 'Project created successfully', {
+        project_code: projectCodes.projectCode,
+        sku: projectCodes.sku,
+        name: formData.name.trim()
+      })
+
       // Crear carpetes a Drive si connectat (idempotent)
       let driveFolderId = null
       if (driveConnected) {
@@ -83,12 +94,9 @@ export default function NewProjectModal({ isOpen, onClose }) {
           // Actualitzar projecte amb drive_folder_id
           await updateProject(newProject.id, { drive_folder_id: driveFolderId })
         } catch (err) {
-          console.error('Error creant carpetes Drive:', err)
-          if (err.message === 'AUTH_REQUIRED') {
-            alert('Reconnecta Google Drive. La sessió ha expirat.')
-          } else {
-            alert('Error creant carpetes a Drive: ' + (err.message || 'Error desconegut'))
-          }
+          // Audit log: error creant carpetes
+          await logError('drive', 'ensure_folders', err, { project_id: newProject.id })
+          await handleError('drive', 'ensure_folders', err, { notify: true })
         }
         setCreatingFolders(false)
       }
@@ -97,9 +105,15 @@ export default function NewProjectModal({ isOpen, onClose }) {
       setFormData({ name: '', description: '' })
       setProjectCodes({ projectCode: '', sku: '' })
       onClose()
+      // Redirigir al Dashboard després de crear projecte
+      navigate('/')
     } catch (err) {
-      console.error('Error creant projecte:', err)
-      alert('Error creant el projecte: ' + err.message)
+      // Audit log: error creant projecte
+      await logError('project', 'create', err, { 
+        project_code: projectCodes.projectCode,
+        name: formData.name.trim()
+      })
+      await handleError('project', 'create', err, { notify: true })
     }
     setLoading(false)
   }

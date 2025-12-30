@@ -255,3 +255,7 @@ Després d'executar el script, verifica:
 
 **Si tot està correcte, ja tens Auth + RLS completament implementat!** 🎉
 
+
+
+
+

@@ -125,7 +125,9 @@ export default function NewPOModal({
     carton_size: '',
     shipping_mark: '',
     notes: '',
-    status: 'draft'
+    status: 'draft',
+    tracking_number: '',
+    logistics_status: ''
   })
 
   // Seleccionar magatzem i auto-completar camps
@@ -298,6 +300,8 @@ export default function NewPOModal({
         shipping_mark: formData.shipping_mark || null,
         notes: formData.notes || null,
         status: formData.status || 'draft',
+        tracking_number: formData.tracking_number || null,
+        logistics_status: formData.logistics_status || null,
         total_amount: calculateTotal(),
         items: JSON.stringify(formData.items),
         buyer_info: JSON.stringify(buyerInfo)
@@ -307,14 +311,34 @@ export default function NewPOModal({
 
       if (editingOrder) {
         await updatePurchaseOrder(editingOrder.id, poData)
+        // Audit log: PO actualitzat
+        const { logSuccess } = await import('../lib/auditLog')
+        await logSuccess('purchase_order', 'update', editingOrder.id, 'Purchase order updated', {
+          po_number: poData.po_number,
+          project_id: poData.project_id
+        })
       } else {
-        await createPurchaseOrder(poData)
+        const newPO = await createPurchaseOrder(poData)
+        // Audit log: PO creat
+        const { logSuccess } = await import('../lib/auditLog')
+        await logSuccess('purchase_order', 'create', newPO.id, 'Purchase order created', {
+          po_number: poData.po_number,
+          project_id: poData.project_id,
+          supplier_id: poData.supplier_id
+        })
       }
       
       onSave()
     } catch (err) {
       console.error('Error guardant PO:', err)
-      alert('Error guardant la comanda: ' + err.message)
+      // Audit log: error
+      const { logError, handleError } = await import('../lib/auditLog')
+      const { handleError: handleErr } = await import('../lib/errorHandling')
+      await logError('purchase_order', editingOrder ? 'update' : 'create', err, {
+        po_number: formData.po_number,
+        project_id: formData.project_id
+      })
+      await handleErr('purchase_order', editingOrder ? 'update' : 'create', err, { notify: true })
     }
     setLoading(false)
   }
@@ -875,6 +899,44 @@ export default function NewPOModal({
                   }}
                 />
               </div>
+            </div>
+          </div>
+
+          {/* Tracking & Logistics Status */}
+          <div style={styles.formRow}>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Tracking Number</label>
+              <input
+                type="text"
+                value={formData.tracking_number}
+                onChange={e => setFormData({...formData, tracking_number: e.target.value})}
+                placeholder="ABC123456789"
+                style={{
+                  ...styles.input,
+                  backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                  color: darkMode ? '#ffffff' : '#111827'
+                }}
+              />
+            </div>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Estat Logístic</label>
+              <select
+                value={formData.logistics_status}
+                onChange={e => setFormData({...formData, logistics_status: e.target.value})}
+                style={{
+                  ...styles.input,
+                  backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                  color: darkMode ? '#ffffff' : '#111827'
+                }}
+              >
+                <option value="">Selecciona estat</option>
+                <option value="production">Producció</option>
+                <option value="pickup">Recollida</option>
+                <option value="in_transit">En trànsit</option>
+                <option value="customs">Duanes</option>
+                <option value="amazon_fba">Amazon FBA</option>
+                <option value="delivered">Lliurat</option>
+              </select>
             </div>
           </div>
 

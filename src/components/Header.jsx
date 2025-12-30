@@ -2,14 +2,35 @@ import { Sun, Moon, Bell, LogOut } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { supabase } from '../lib/supabase'
+import { logSuccess } from '../lib/auditLog'
 
 export default function Header({ title }) {
   const { darkMode, setDarkMode } = useApp()
   const navigate = useNavigate()
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
-    navigate('/login')
+    try {
+      // Obtenir user_id abans de fer logout
+      const { data: { session } } = await supabase.auth.getSession()
+      const userId = session?.user?.id
+
+      await supabase.auth.signOut()
+      
+      // Audit log: logout
+      if (userId) {
+        try {
+          await logSuccess('user', 'logout', userId, 'User logged out successfully')
+        } catch (err) {
+          console.warn('[Header] Failed to log audit:', err)
+        }
+      }
+      
+      navigate('/login')
+    } catch (err) {
+      console.error('Error during logout:', err)
+      // Continuar amb logout encara que falli l'audit log
+      navigate('/login')
+    }
   }
 
   return (

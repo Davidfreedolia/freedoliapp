@@ -41,3 +41,7 @@ export default function ProtectedRoute({ children }) {
   return authenticated ? children : <Navigate to="/login" replace />
 }
 
+
+
+
+

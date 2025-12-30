@@ -3,6 +3,15 @@
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || ''
 
+// Import dinàmic per evitar cicles de dependències
+let auditLogModule = null
+async function getAuditLog() {
+  if (!auditLogModule) {
+    auditLogModule = await import('./auditLog')
+  }
+  return auditLogModule
+}
+
 // Scopes necessaris
 const SCOPES = 'https://www.googleapis.com/auth/drive.file'
 
@@ -205,23 +214,16 @@ class GoogleDriveService {
       }
 
       try {
+        // Crear el token client (el callback es definirà després a authenticate)
         this.tokenClient = window.google.accounts.oauth2.initTokenClient({
           client_id: GOOGLE_CLIENT_ID,
           scope: SCOPES,
+          // Callback inicial (es reassignarà a authenticate)
           callback: (response) => {
-            if (response.access_token) {
-              this.accessToken = response.access_token
-              if (window.gapi?.client) {
-                window.gapi.client.setToken({ access_token: response.access_token })
-              }
-              localStorage.setItem('gdrive_token', response.access_token)
-              localStorage.setItem('gdrive_token_time', Date.now().toString())
-              if (this.onAuthChange) this.onAuthChange(true)
-            }
+            console.warn('Token client callback called but not handled - this should not happen')
           },
           error_callback: (error) => {
-            console.error('OAuth error:', error)
-            if (this.onAuthChange) this.onAuthChange(false)
+            console.error('OAuth error in init callback:', error)
           }
         })
         this.gisLoaded = true
@@ -658,9 +660,37 @@ class GoogleDriveService {
         folderId: folders.main.id,
         folderName 
       }, false) // No és error, és informació
+      
+      // Audit log: carpetes creades correctament
+      try {
+        const { logSuccess } = await getAuditLog()
+        await logSuccess('drive', 'ensure_folders', null, 'Drive folders created successfully', {
+          project_id: project.id,
+          folder_id: folders.main.id,
+          folder_name: folderName
+        })
+      } catch (auditErr) {
+        // No fallar si l'audit log falla
+        console.warn('[Drive] Failed to log audit:', auditErr)
+      }
+      
       return folders
     } catch (err) {
       logDriveError('ensureProjectDriveFolders', 'Error creant carpetes', { error: err })
+      
+      // Audit log: error creant carpetes
+      try {
+        const { logError } = await getAuditLog()
+        await logError('drive', 'ensure_folders', err, {
+          project_id: project.id,
+          project_code: projectCode,
+          folder_name: folderName
+        })
+      } catch (auditErr) {
+        // No fallar si l'audit log falla
+        console.warn('[Drive] Failed to log audit error:', auditErr)
+      }
+      
       throw new Error('Error creant carpetes a Google Drive: ' + (err.message || 'Error desconegut'))
     }
   }

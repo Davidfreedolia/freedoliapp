@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { Mail, Lock, Send } from 'lucide-react'
+import { logSuccess, logError } from '../lib/auditLog'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -45,9 +46,16 @@ export default function Login() {
 
       // Redirigir després d'un login exitós
       if (data.session) {
+        // Audit log: login exitós
+        await logSuccess('user', 'login', data.session.user.id, 'User logged in successfully', {
+          email: email,
+          method: 'password'
+        })
         navigate('/', { replace: true })
       }
     } catch (err) {
+      // Audit log: error login
+      await logError('user', 'login', err, { email: email, method: 'password' })
       setError(err.message)
     } finally {
       setLoading(false)
@@ -68,8 +76,17 @@ export default function Login() {
       })
 
       if (error) throw error
+      
+      // Audit log: magic link enviat
+      await logSuccess('user', 'login', null, 'Magic link sent', {
+        email: email,
+        method: 'magic_link'
+      })
+      
       setMagicLinkSent(true)
     } catch (err) {
+      // Audit log: error enviant magic link
+      await logError('user', 'login', err, { email: email, method: 'magic_link' })
       setError(err.message)
     } finally {
       setLoading(false)

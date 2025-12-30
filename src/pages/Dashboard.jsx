@@ -14,22 +14,34 @@ import {
   TrendingUp,
   Sun,
   Moon,
-  Bell
+  Bell,
+  Settings
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { getPurchaseOrders } from '../lib/supabase'
+import { getPurchaseOrders, getDashboardPreferences } from '../lib/supabase'
 import { supabase } from '../lib/supabase'
 import NewProjectModal from '../components/NewProjectModal'
+import LogisticsTrackingWidget from '../components/LogisticsTrackingWidget'
+import CustomizeDashboardModal from '../components/CustomizeDashboardModal'
 
 export default function Dashboard() {
   const { stats, projects, loading, darkMode, setDarkMode } = useApp()
   const navigate = useNavigate()
   const [showNewProjectModal, setShowNewProjectModal] = useState(false)
+  const [showCustomizeModal, setShowCustomizeModal] = useState(false)
   const [ordersInProgress, setOrdersInProgress] = useState([])
   const [loadingOrders, setLoadingOrders] = useState(true)
   const [financialData, setFinancialData] = useState([])
+  const [dashboardWidgets, setDashboardWidgets] = useState({
+    logistics_tracking: true,
+    finance_chart: true,
+    orders_in_progress: true,
+    activity_feed: false
+  })
+  const [loadingPreferences, setLoadingPreferences] = useState(true)
 
   useEffect(() => {
+    loadDashboardPreferences()
     loadOrdersInProgress()
     loadFinancialData()
   }, [])
@@ -47,6 +59,28 @@ export default function Dashboard() {
       console.error('Error carregant comandes:', err)
     }
     setLoadingOrders(false)
+  }
+
+  const loadDashboardPreferences = async () => {
+    setLoadingPreferences(true)
+    try {
+      const prefs = await getDashboardPreferences()
+      if (prefs?.widgets) {
+        setDashboardWidgets({
+          logistics_tracking: prefs.widgets.logistics_tracking !== false,
+          finance_chart: prefs.widgets.finance_chart !== false,
+          orders_in_progress: prefs.widgets.orders_in_progress !== false,
+          activity_feed: prefs.widgets.activity_feed === true
+        })
+      }
+    } catch (err) {
+      console.error('Error carregant preferències dashboard:', err)
+    }
+    setLoadingPreferences(false)
+  }
+
+  const handlePreferencesSave = (newWidgets) => {
+    setDashboardWidgets(newWidgets)
   }
 
   const loadFinancialData = async () => {
@@ -197,6 +231,18 @@ export default function Dashboard() {
         </div>
         
         <div style={styles.headerActionsRight}>
+          {/* Personalitzar Dashboard */}
+          <button 
+            onClick={() => setShowCustomizeModal(true)}
+            style={{
+              ...styles.iconButton,
+              backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6'
+            }}
+            title="Personalitzar Dashboard"
+          >
+            <Settings size={20} color={darkMode ? '#9ca3af' : '#6b7280'} />
+          </button>
+
           {/* Notificacions */}
           <button style={{
             ...styles.iconButton,
@@ -252,7 +298,13 @@ export default function Dashboard() {
           ))}
         </div>
 
+        {/* Tracking Logístic Widget */}
+        {dashboardWidgets.logistics_tracking && !loadingPreferences && (
+          <LogisticsTrackingWidget darkMode={darkMode} />
+        )}
+
         {/* Comandes en curs */}
+        {dashboardWidgets.orders_in_progress && (
         <div style={{
           ...styles.section,
           backgroundColor: darkMode ? '#15151f' : '#ffffff'
@@ -317,9 +369,10 @@ export default function Dashboard() {
             </div>
           )}
         </div>
+        )}
 
         {/* Gràfica de finances */}
-        {financialData.length > 0 && (
+        {dashboardWidgets.finance_chart && financialData.length > 0 && (
           <div style={{
             ...styles.section,
             backgroundColor: darkMode ? '#15151f' : '#ffffff'
@@ -382,6 +435,12 @@ export default function Dashboard() {
       <NewProjectModal 
         isOpen={showNewProjectModal} 
         onClose={() => setShowNewProjectModal(false)} 
+      />
+
+      <CustomizeDashboardModal
+        isOpen={showCustomizeModal}
+        onClose={() => setShowCustomizeModal(false)}
+        onSave={handlePreferencesSave}
       />
     </div>
   )

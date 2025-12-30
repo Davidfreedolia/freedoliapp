@@ -11,16 +11,22 @@ import {
   Trash2,
   Upload,
   Star,
-  X
+  X,
+  FileText,
+  AlertCircle,
+  CheckCircle2
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { getCompanySettings, updateCompanySettings, supabase } from '../lib/supabase'
+import { getCompanySettings, updateCompanySettings, supabase, getAuditLogs } from '../lib/supabase'
 import Header from '../components/Header'
 
 export default function Settings() {
   const { darkMode } = useApp()
   
   const [activeTab, setActiveTab] = useState('company')
+  const [auditLogs, setAuditLogs] = useState([])
+  const [statusFilter, setStatusFilter] = useState(null)
+  const [loadingLogs, setLoadingLogs] = useState(false)
   
   const [companyData, setCompanyData] = useState({
     company_name: 'Freedolia',
@@ -53,6 +59,12 @@ export default function Settings() {
     loadSettings()
   }, [])
 
+  useEffect(() => {
+    if (activeTab === 'audit') {
+      loadAuditLogs()
+    }
+  }, [activeTab, statusFilter])
+
   const loadSettings = async () => {
     setLoading(true)
     try {
@@ -67,6 +79,18 @@ export default function Settings() {
       console.error('Error carregant configuració:', err)
     }
     setLoading(false)
+  }
+
+  const loadAuditLogs = async () => {
+    setLoadingLogs(true)
+    try {
+      const logs = await getAuditLogs(50, statusFilter)
+      setAuditLogs(logs || [])
+    } catch (err) {
+      console.error('Error carregant audit logs:', err)
+      setAuditLogs([])
+    }
+    setLoadingLogs(false)
   }
 
   const handleSave = async () => {
@@ -217,6 +241,16 @@ export default function Settings() {
             }}
           >
             <PenTool size={18} /> Signatures
+          </button>
+          <button
+            onClick={() => setActiveTab('audit')}
+            style={{
+              ...styles.tab,
+              backgroundColor: activeTab === 'audit' ? '#4f46e5' : 'transparent',
+              color: activeTab === 'audit' ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280')
+            }}
+          >
+            <FileText size={18} /> Audit Log
           </button>
         </div>
 
@@ -488,6 +522,11 @@ const styles = {
   checkboxLabel: { display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#6b7280', cursor: 'pointer', marginTop: '20px' },
   saveButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: '#4f46e5', color: '#ffffff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
   addButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: '#4f46e5', color: '#ffffff', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
+  filterButton: { display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', border: '1px solid', borderRadius: '8px', fontSize: '13px', fontWeight: '500', cursor: 'pointer' },
+  auditLogList: { display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '600px', overflowY: 'auto' },
+  auditLogItem: { padding: '16px', borderRadius: '8px', border: '1px solid var(--border-color)', borderLeftWidth: '4px' },
+  auditLogHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' },
+  statusBadge: { padding: '4px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: '600' },
   signaturesGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' },
   emptySignatures: { gridColumn: '1 / -1', padding: '48px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', color: '#6b7280' },
   signatureCard: { padding: '16px', borderRadius: '12px', border: '2px solid', position: 'relative' },

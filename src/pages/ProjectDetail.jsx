@@ -133,10 +133,11 @@ export default function ProjectDetail() {
     // Guardar referències a Supabase (evita duplicats automàticament)
     let savedCount = 0
     let errorCount = 0
+    const { logSuccess, logError } = await import('../lib/auditLog')
     
     for (const file of files) {
       try {
-        await createDocument({
+        const doc = await createDocument({
           project_id: id,
           name: file.name,
           file_url: file.webViewLink || file.driveUrl,
@@ -145,10 +146,23 @@ export default function ProjectDetail() {
           file_size: file.size
         })
         savedCount++
+        // Audit log: document pujat correctament
+        await logSuccess('document', 'upload', doc.id, 'Document uploaded to Drive', {
+          project_id: id,
+          file_name: file.name,
+          file_size: file.size,
+          drive_file_id: file.id
+        })
       } catch (err) {
         console.error('Error guardant document:', err)
         errorCount++
-        // No crear document si upload ha fallat (no hauria de passar si uploadFiles funciona)
+        // Audit log: error pujant document
+        await logError('document', 'upload', err, {
+          project_id: id,
+          file_name: file.name,
+          file_size: file.size,
+          drive_file_id: file.id
+        })
       }
     }
     

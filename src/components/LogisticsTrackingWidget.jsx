@@ -1,0 +1,409 @@
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { 
+  Truck, 
+  Factory, 
+  Ship, 
+  Warehouse, 
+  Package,
+  CheckCircle2,
+  Clock,
+  ArrowRight
+} from 'lucide-react'
+import { useApp } from '../context/AppContext'
+import { getProjects, getPurchaseOrders } from '../lib/supabase'
+
+// Estats del flux logístic (simplificat per dashboard)
+const LOGISTICS_STAGES = [
+  { id: 'production', name: 'Producció', icon: Factory, color: '#8b5cf6' },
+  { id: 'pickup', name: 'Recollida', icon: Truck, color: '#f59e0b' },
+  { id: 'in_transit', name: 'En trànsit', icon: Ship, color: '#06b6d4' },
+  { id: 'customs', name: 'Duanes', icon: Package, color: '#ec4899' },
+  { id: 'amazon_fba', name: 'Amazon FBA', icon: Warehouse, color: '#ff9900' },
+  { id: 'delivered', name: 'Lliurat', icon: CheckCircle2, color: '#22c55e' }
+]
+
+const LOGISTICS_STATUS_LABELS = {
+  production: 'Producció',
+  pickup: 'Recollida',
+  in_transit: 'En trànsit',
+  customs: 'Duanes',
+  amazon_fba: 'Amazon FBA',
+  delivered: 'Lliurat'
+}
+
+export default function LogisticsTrackingWidget({ darkMode }) {
+  const navigate = useNavigate()
+  const [projects, setProjects] = useState([])
+  const [ordersByProject, setOrdersByProject] = useState({})
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  const loadData = async () => {
+    setLoading(true)
+    try {
+      // Carregar projectes actius
+      const allProjects = await getProjects()
+      const activeProjects = (allProjects || []).filter(p => p.status === 'active')
+      setProjects(activeProjects)
+
+      // Carregar comandes amb tracking
+      const orders = await getPurchaseOrders()
+      const ordersWithTracking = (orders || []).filter(o => 
+        o.logistics_status && !['cancelled', 'received'].includes(o.status)
+      )
+
+      // Agrupar per projecte (agafar la PO més recent per projecte)
+      const grouped = {}
+      ordersWithTracking.forEach(order => {
+        if (order.project_id) {
+          if (!grouped[order.project_id] || 
+              new Date(order.created_at) > new Date(grouped[order.project_id].created_at)) {
+            grouped[order.project_id] = order
+          }
+        }
+      })
+      setOrdersByProject(grouped)
+    } catch (err) {
+      console.error('Error carregant dades de tracking:', err)
+    }
+    setLoading(false)
+  }
+
+  const getStatusInfo = (status) => {
+    const stage = LOGISTICS_STAGES.find(s => s.id === status)
+    if (!stage) {
+      return { name: status || 'Pendent', color: '#9ca3af', icon: Clock }
+    }
+    return stage
+  }
+
+  const getProgressPercentage = (status) => {
+    const index = LOGISTICS_STAGES.findIndex(s => s.id === status)
+    if (index === -1) return 0
+    return ((index + 1) / LOGISTICS_STAGES.length) * 100
+  }
+
+  if (loading) {
+    return (
+      <div style={{
+        ...styles.section,
+        backgroundColor: darkMode ? '#15151f' : '#ffffff'
+      }}>
+        <div style={styles.sectionHeader}>
+          <h2 style={{
+            ...styles.sectionTitle,
+            color: darkMode ? '#ffffff' : '#111827'
+          }}>
+            <Truck size={20} />
+            Tracking Logístic
+          </h2>
+        </div>
+        <div style={styles.loading}>Carregant...</div>
+      </div>
+    )
+  }
+
+  const projectsWithTracking = projects.filter(p => ordersByProject[p.id])
+
+  if (projectsWithTracking.length === 0) {
+    return (
+      <div style={{
+        ...styles.section,
+        backgroundColor: darkMode ? '#15151f' : '#ffffff'
+      }}>
+        <div style={styles.sectionHeader}>
+          <h2 style={{
+            ...styles.sectionTitle,
+            color: darkMode ? '#ffffff' : '#111827'
+          }}>
+            <Truck size={20} />
+            Tracking Logístic
+          </h2>
+          <button 
+            onClick={() => navigate('/orders')}
+            style={styles.viewAllButton}
+          >
+            Veure totes <ArrowRight size={16} />
+          </button>
+        </div>
+        <div style={styles.empty}>
+          <p>No hi ha comandes amb tracking actiu</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{
+      ...styles.section,
+      backgroundColor: darkMode ? '#15151f' : '#ffffff'
+    }}>
+      <div style={styles.sectionHeader}>
+        <h2 style={{
+          ...styles.sectionTitle,
+          color: darkMode ? '#ffffff' : '#111827'
+        }}>
+          <Truck size={20} />
+          Tracking Logístic
+        </h2>
+        <button 
+          onClick={() => navigate('/orders')}
+          style={styles.viewAllButton}
+        >
+          Veure totes <ArrowRight size={16} />
+        </button>
+      </div>
+
+      <div style={styles.projectsList}>
+        {projectsWithTracking.map(project => {
+          const order = ordersByProject[project.id]
+          const statusInfo = getStatusInfo(order.logistics_status)
+          const StatusIcon = statusInfo.icon
+          const progress = getProgressPercentage(order.logistics_status)
+
+          return (
+            <div 
+              key={project.id}
+              style={styles.projectCard}
+              onClick={() => navigate(`/projects/${project.id}`)}
+            >
+              <div style={styles.projectHeader}>
+                <div style={styles.projectInfo}>
+                  <span style={{
+                    ...styles.projectName,
+                    color: darkMode ? '#ffffff' : '#111827'
+                  }}>
+                    {project.name}
+                  </span>
+                  <span style={{
+                    ...styles.projectCode,
+                    color: darkMode ? '#6b7280' : '#9ca3af'
+                  }}>
+                    {project.project_code}
+                  </span>
+                </div>
+                <div style={{
+                  ...styles.statusBadge,
+                  backgroundColor: `${statusInfo.color}15`,
+                  color: statusInfo.color
+                }}>
+                  <StatusIcon size={14} />
+                  {statusInfo.name}
+                </div>
+              </div>
+
+              {/* Barra de progrés */}
+              <div style={styles.progressContainer}>
+                <div style={styles.progressBar}>
+                  <div style={{
+                    ...styles.progressFill,
+                    width: `${progress}%`,
+                    backgroundColor: statusInfo.color
+                  }} />
+                </div>
+                <div style={styles.stagesIndicator}>
+                  {LOGISTICS_STAGES.map((stage, idx) => {
+                    const StageIcon = stage.icon
+                    const isCompleted = idx < LOGISTICS_STAGES.findIndex(s => s.id === order.logistics_status)
+                    const isCurrent = stage.id === order.logistics_status
+                    
+                    return (
+                      <div key={stage.id} style={styles.stageDot}>
+                        <div style={{
+                          ...styles.stageIcon,
+                          backgroundColor: isCompleted || isCurrent ? `${stage.color}20` : (darkMode ? '#1f1f2e' : '#f3f4f6'),
+                          borderColor: isCompleted || isCurrent ? stage.color : (darkMode ? '#374151' : '#e5e7eb')
+                        }}>
+                          <StageIcon size={10} color={isCompleted || isCurrent ? stage.color : '#9ca3af'} />
+                        </div>
+                        {idx < LOGISTICS_STAGES.length - 1 && (
+                          <div style={{
+                            ...styles.stageConnector,
+                            backgroundColor: isCompleted ? stage.color : (darkMode ? '#374151' : '#e5e7eb')
+                          }} />
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Tracking number */}
+              {order.tracking_number && (
+                <div style={styles.trackingInfo}>
+                  <span style={styles.trackingLabel}>Tracking:</span>
+                  <span style={{
+                    ...styles.trackingNumber,
+                    color: darkMode ? '#9ca3af' : '#6b7280'
+                  }}>
+                    {order.tracking_number}
+                  </span>
+                </div>
+              )}
+
+              <ArrowRight size={18} color="#9ca3af" style={styles.arrowIcon} />
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+const styles = {
+  section: {
+    borderRadius: '16px',
+    border: '1px solid var(--border-color)',
+    overflow: 'hidden',
+    marginBottom: '32px'
+  },
+  sectionHeader: {
+    padding: '20px 24px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottom: '1px solid var(--border-color)'
+  },
+  sectionTitle: {
+    margin: 0,
+    fontSize: '16px',
+    fontWeight: '600',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px'
+  },
+  viewAllButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    background: 'none',
+    border: 'none',
+    color: '#4f46e5',
+    fontSize: '14px',
+    fontWeight: '500',
+    cursor: 'pointer'
+  },
+  loading: {
+    padding: '48px',
+    textAlign: 'center',
+    color: '#6b7280'
+  },
+  empty: {
+    padding: '48px',
+    textAlign: 'center',
+    color: '#6b7280'
+  },
+  projectsList: {
+    display: 'flex',
+    flexDirection: 'column'
+  },
+  projectCard: {
+    padding: '20px 24px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s',
+    position: 'relative'
+  },
+  projectHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: '12px'
+  },
+  projectInfo: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px'
+  },
+  projectName: {
+    fontSize: '15px',
+    fontWeight: '600'
+  },
+  projectCode: {
+    fontSize: '12px',
+    fontWeight: '500'
+  },
+  statusBadge: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    padding: '6px 12px',
+    borderRadius: '20px',
+    fontSize: '13px',
+    fontWeight: '500',
+    flexShrink: 0
+  },
+  progressContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px'
+  },
+  progressBar: {
+    width: '100%',
+    height: '6px',
+    backgroundColor: '#e5e7eb',
+    borderRadius: '3px',
+    overflow: 'hidden'
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: '3px',
+    transition: 'width 0.3s ease'
+  },
+  stagesIndicator: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%'
+  },
+  stageDot: {
+    display: 'flex',
+    alignItems: 'center',
+    flex: 1
+  },
+  stageIcon: {
+    width: '20px',
+    height: '20px',
+    borderRadius: '50%',
+    border: '2px solid',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0
+  },
+  stageConnector: {
+    flex: 1,
+    height: '2px',
+    margin: '0 4px'
+  },
+  trackingInfo: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    fontSize: '12px'
+  },
+  trackingLabel: {
+    fontWeight: '500',
+    color: '#6b7280'
+  },
+  trackingNumber: {
+    fontFamily: 'monospace',
+    fontWeight: '500'
+  },
+  arrowIcon: {
+    position: 'absolute',
+    right: '24px',
+    top: '50%',
+    transform: 'translateY(-50%)'
+  }
+}
+
+
+
