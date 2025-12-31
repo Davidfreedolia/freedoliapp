@@ -417,8 +417,52 @@ export default function Dashboard() {
           ...styles.headerActionsRight,
           flexDirection: isMobile ? 'row' : 'row',
           width: isMobile ? '100%' : 'auto',
-          justifyContent: isMobile ? 'space-between' : 'flex-end'
+          justifyContent: isMobile ? 'space-between' : 'flex-end',
+          gap: '8px'
         }}>
+          {/* Toggle Edit Layout */}
+          {!isMobile && (
+            <button 
+              onClick={() => setEditLayout(!editLayout)}
+              style={{
+                ...styles.iconButton,
+                backgroundColor: editLayout ? '#4f46e5' : (darkMode ? '#1f1f2e' : '#f3f4f6'),
+                color: editLayout ? '#ffffff' : 'inherit'
+              }}
+              title={editLayout ? "Desactivar edició de layout" : "Editar layout"}
+            >
+              <Settings size={20} color={editLayout ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280')} />
+            </button>
+          )}
+          
+          {/* Save Layout */}
+          {editLayout && !isMobile && (
+            <>
+              <button 
+                onClick={handleSaveLayout}
+                style={{
+                  ...styles.iconButton,
+                  backgroundColor: '#22c55e',
+                  color: '#ffffff'
+                }}
+                title="Guardar layout"
+              >
+                <Save size={20} color="#ffffff" />
+              </button>
+              <button 
+                onClick={handleResetLayout}
+                style={{
+                  ...styles.iconButton,
+                  backgroundColor: '#f59e0b',
+                  color: '#ffffff'
+                }}
+                title="Restaurar layout per defecte"
+              >
+                <X size={20} color="#ffffff" />
+              </button>
+            </>
+          )}
+          
           {/* Personalitzar Dashboard */}
           <button 
             onClick={() => setShowCustomizeModal(true)}
