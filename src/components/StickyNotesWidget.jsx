@@ -1,22 +1,34 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, X, Check, Pin, PinOff } from 'lucide-react'
-import { getStickyNotes, createStickyNote, updateStickyNote, deleteStickyNote, markStickyNoteDone } from '../lib/supabase'
+import { Plus, X, Check, Trash2, Pin, PinOff } from 'lucide-react'
+import { useBreakpoint } from '../hooks/useBreakpoint'
+import { 
+  getStickyNotes, 
+  createStickyNote, 
+  updateStickyNote, 
+  deleteStickyNote, 
+  markStickyNoteDone 
+} from '../lib/supabase'
 
-const COLORS = {
-  yellow: { bg: '#fef9c3', border: '#fde047', text: '#713f12' },
-  blue: { bg: '#dbeafe', border: '#93c5fd', text: '#1e3a8a' },
-  green: { bg: '#dcfce7', border: '#86efac', text: '#166534' },
-  pink: { bg: '#fce7f3', border: '#f9a8d4', text: '#831843' },
-  orange: { bg: '#fed7aa', border: '#fdba74', text: '#9a3412' }
-}
+const COLORS = [
+  { value: 'yellow', label: 'Groc', bg: '#fef3c7', border: '#fbbf24' },
+  { value: 'blue', label: 'Blau', bg: '#dbeafe', border: '#3b82f6' },
+  { value: 'green', label: 'Verd', bg: '#d1fae5', border: '#22c55e' },
+  { value: 'pink', label: 'Rosa', bg: '#fce7f3', border: '#ec4899' },
+  { value: 'orange', label: 'Taronja', bg: '#fed7aa', border: '#f97316' },
+  { value: 'purple', label: 'Morat', bg: '#e9d5ff', border: '#a855f7' }
+]
 
 export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
   const { t } = useTranslation()
+  const { isMobile, isTablet } = useBreakpoint()
+  const { sidebarCollapsed } = useApp()
+  const { sidebarCollapsed } = useApp()
   const [notes, setNotes] = useState([])
   const [loading, setLoading] = useState(true)
   const [showAddForm, setShowAddForm] = useState(false)
-  const [newNote, setNewNote] = useState({ title: '', content: '', color: 'yellow', pinned: true })
+  const [newNote, setNewNote] = useState({ content: '', title: '', color: 'yellow' })
+  const [editingId, setEditingId] = useState(null)
 
   useEffect(() => {
     loadNotes()
@@ -25,7 +37,7 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
   const loadNotes = async () => {
     setLoading(true)
     try {
-      const allNotes = await getStickyNotes({ status: 'open' })
+      const allNotes = await getStickyNotes()
       setNotes(allNotes || [])
     } catch (err) {
       console.error('Error loading sticky notes:', err)
@@ -38,12 +50,18 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
     if (!newNote.content.trim()) return
     
     try {
-      await createStickyNote(newNote)
-      setNewNote({ title: '', content: '', color: 'yellow', pinned: true })
+      await createStickyNote({
+        content: newNote.content,
+        title: newNote.title || null,
+        color: newNote.color,
+        pinned: true,
+        status: 'open'
+      })
+      setNewNote({ content: '', title: '', color: 'yellow' })
       setShowAddForm(false)
       loadNotes()
     } catch (err) {
-      console.error('Error creating sticky note:', err)
+      console.error('Error creating note:', err)
     }
   }
 
@@ -52,12 +70,12 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
       await markStickyNoteDone(id)
       loadNotes()
     } catch (err) {
-      console.error('Error marking note as done:', err)
+      console.error('Error marking note done:', err)
     }
   }
 
   const handleDelete = async (id) => {
-    if (!confirm(t('stickyNotes.confirmDelete', 'Vols eliminar aquesta nota?'))) return
+    if (!confirm(t('stickyNotes.confirmDelete', 'Segur que vols eliminar aquesta nota?'))) return
     
     try {
       await deleteStickyNote(id)
@@ -76,20 +94,113 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
     }
   }
 
-  const handleColorChange = async (id, color) => {
+  const handleUpdateColor = async (id, color) => {
     try {
       await updateStickyNote(id, { color })
       loadNotes()
     } catch (err) {
-      console.error('Error changing color:', err)
+      console.error('Error updating color:', err)
     }
   }
 
-  const pinnedNotes = notes.filter(n => n.pinned && n.status === 'open')
-  const unpinnedNotes = notes.filter(n => !n.pinned && n.status === 'open')
+  const openNotes = notes.filter(n => n.status === 'open')
+  const pinnedOpenNotes = openNotes.filter(n => n.pinned)
 
+  // Overlay mode: show pinned notes at top
+  if (showOverlay && pinnedOpenNotes.length > 0) {
+    return (
+      <div style={{
+        position: 'fixed',
+        top: '70px',
+        left: isMobile ? '0' : '260px',
+        right: '0',
+        zIndex: 100,
+        display: 'flex',
+        gap: '12px',
+        padding: '12px',
+        flexWrap: 'wrap',
+        pointerEvents: 'none'
+      }}>
+        {pinnedOpenNotes.map(note => {
+          const colorConfig = COLORS.find(c => c.value === note.color) || COLORS[0]
+          return (
+            <div
+              key={note.id}
+              style={{
+                backgroundColor: colorConfig.bg,
+                border: `2px solid ${colorConfig.border}`,
+                borderRadius: '8px',
+                padding: '12px',
+                minWidth: '200px',
+                maxWidth: '300px',
+                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                pointerEvents: 'auto',
+                position: 'relative'
+              }}
+            >
+              {note.title && (
+                <div style={{
+                  fontWeight: '600',
+                  fontSize: '14px',
+                  marginBottom: '6px',
+                  color: darkMode ? '#111827' : '#111827'
+                }}>
+                  {note.title}
+                </div>
+              )}
+              <div style={{
+                fontSize: '13px',
+                color: darkMode ? '#374151' : '#4b5563',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word'
+              }}>
+                {note.content}
+              </div>
+              <div style={{
+                display: 'flex',
+                gap: '4px',
+                marginTop: '8px',
+                justifyContent: 'flex-end'
+              }}>
+                <button
+                  onClick={() => handleMarkDone(note.id)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '4px',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}
+                  title={t('stickyNotes.markDone', 'Marcar com fet')}
+                >
+                  <Check size={16} color="#22c55e" />
+                </button>
+                <button
+                  onClick={() => handleDelete(note.id)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '4px',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}
+                  title={t('stickyNotes.delete', 'Eliminar')}
+                >
+                  <X size={16} color="#ef4444" />
+                </button>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+
+  // Widget mode
   const styles = {
-    widget: {
+    container: {
       backgroundColor: darkMode ? '#15151f' : '#ffffff',
       borderRadius: '12px',
       padding: '20px',
@@ -124,26 +235,25 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
       fontWeight: '500'
     },
     addForm: {
-      marginBottom: '16px',
-      padding: '12px',
       backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
       borderRadius: '8px',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+      padding: '12px',
+      marginBottom: '16px'
     },
     input: {
       width: '100%',
       padding: '8px',
-      marginBottom: '8px',
       backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
       border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
       borderRadius: '6px',
       color: darkMode ? '#ffffff' : '#111827',
-      fontSize: '14px'
+      fontSize: '14px',
+      marginBottom: '8px'
     },
     textarea: {
       width: '100%',
       padding: '8px',
-      marginBottom: '8px',
       backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
       border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
       borderRadius: '6px',
@@ -153,162 +263,110 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
       resize: 'vertical',
       fontFamily: 'inherit'
     },
-    formActions: {
-      display: 'flex',
-      gap: '8px',
-      alignItems: 'center'
-    },
     colorSelector: {
       display: 'flex',
-      gap: '6px'
+      gap: '6px',
+      marginBottom: '8px',
+      flexWrap: 'wrap'
     },
     colorButton: {
       width: '24px',
       height: '24px',
       borderRadius: '4px',
-      border: '2px solid transparent',
+      border: '2px solid',
       cursor: 'pointer',
-      transition: 'all 0.2s'
+      padding: 0
+    },
+    formActions: {
+      display: 'flex',
+      gap: '8px',
+      justifyContent: 'flex-end'
+    },
+    button: {
+      padding: '6px 12px',
+      borderRadius: '6px',
+      border: 'none',
+      cursor: 'pointer',
+      fontSize: '14px',
+      fontWeight: '500',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '6px'
     },
     notesList: {
       display: 'flex',
       flexDirection: 'column',
       gap: '12px',
       flex: 1,
-      overflowY: 'auto'
+      overflowY: 'auto',
+      maxHeight: '400px'
     },
-    note: {
-      padding: '12px',
+    noteCard: {
       borderRadius: '8px',
-      border: '1px solid',
+      padding: '12px',
       position: 'relative',
-      minHeight: '80px'
+      border: '2px solid',
+      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
     },
     noteHeader: {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'flex-start',
-      marginBottom: '8px'
+      marginBottom: '6px'
     },
     noteTitle: {
-      fontSize: '14px',
       fontWeight: '600',
-      margin: 0,
+      fontSize: '14px',
+      color: darkMode ? '#111827' : '#111827',
       flex: 1
+    },
+    noteContent: {
+      fontSize: '13px',
+      color: darkMode ? '#374151' : '#4b5563',
+      whiteSpace: 'pre-wrap',
+      wordBreak: 'break-word',
+      marginBottom: '8px'
     },
     noteActions: {
       display: 'flex',
       gap: '4px',
-      alignItems: 'center'
+      justifyContent: 'flex-end',
+      flexWrap: 'wrap'
     },
     actionButton: {
-      padding: '4px',
-      backgroundColor: 'transparent',
+      background: 'none',
       border: 'none',
-      borderRadius: '4px',
       cursor: 'pointer',
+      padding: '4px',
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'center',
-      opacity: 0.7,
-      transition: 'opacity 0.2s'
-    },
-    noteContent: {
-      fontSize: '13px',
-      lineHeight: '1.5',
-      whiteSpace: 'pre-wrap',
-      wordBreak: 'break-word'
-    },
-    empty: {
-      textAlign: 'center',
-      padding: '40px 20px',
-      color: darkMode ? '#6b7280' : '#9ca3af',
-      fontSize: '14px'
+      borderRadius: '4px',
+      transition: 'background-color 0.2s'
     },
     loading: {
-      textAlign: 'center',
-      padding: '40px 20px',
-      color: darkMode ? '#6b7280' : '#9ca3af',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: '40px',
+      color: darkMode ? '#9ca3af' : '#6b7280',
       fontSize: '14px'
+    },
+    empty: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '40px',
+      color: darkMode ? '#9ca3af' : '#6b7280',
+      fontSize: '14px',
+      textAlign: 'center'
     }
   }
 
-  // Overlay mode: show only pinned notes as small cards
-  if (showOverlay) {
-    if (pinnedNotes.length === 0) return null
-
-    return (
-      <div style={{
-        position: 'fixed',
-        top: '80px',
-        right: '20px',
-        zIndex: 1000,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '12px',
-        maxWidth: '300px',
-        maxHeight: 'calc(100vh - 120px)',
-        overflowY: 'auto'
-      }}>
-        {pinnedNotes.map(note => {
-          const colorStyle = COLORS[note.color] || COLORS.yellow
-          return (
-            <div
-              key={note.id}
-              style={{
-                ...styles.note,
-                backgroundColor: colorStyle.bg,
-                borderColor: colorStyle.border,
-                color: colorStyle.text,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                minWidth: '250px'
-              }}
-            >
-              <div style={styles.noteHeader}>
-                {note.title && (
-                  <h4 style={{ ...styles.noteTitle, color: colorStyle.text }}>
-                    {note.title}
-                  </h4>
-                )}
-                <div style={styles.noteActions}>
-                  <button
-                    onClick={() => handleTogglePin(note.id, note.pinned)}
-                    style={{ ...styles.actionButton, color: colorStyle.text }}
-                    title={t('stickyNotes.unpin', 'Despenjar')}
-                  >
-                    <PinOff size={14} />
-                  </button>
-                  <button
-                    onClick={() => handleMarkDone(note.id)}
-                    style={{ ...styles.actionButton, color: colorStyle.text }}
-                    title={t('stickyNotes.markDone', 'Marcar com fet')}
-                  >
-                    <Check size={14} />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(note.id)}
-                    style={{ ...styles.actionButton, color: colorStyle.text }}
-                    title={t('stickyNotes.delete', 'Eliminar')}
-                  >
-                    <X size={14} />
-                  </button>
-                </div>
-              </div>
-              <div style={{ ...styles.noteContent, color: colorStyle.text }}>
-                {note.content}
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    )
-  }
-
-  // Widget mode: full widget in dashboard
   return (
-    <div style={styles.widget}>
+    <div style={styles.container}>
       <div style={styles.header}>
-        <h3 style={styles.title}>{t('stickyNotes.title', 'Notes')}</h3>
+        <h3 style={styles.title}>{t('stickyNotes.title', 'Notes Ràpides')}</h3>
         {!showAddForm && (
           <button
             onClick={() => setShowAddForm(true)}
@@ -330,60 +388,49 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
             style={styles.input}
           />
           <textarea
-            placeholder={t('stickyNotes.contentPlaceholder', 'Contingut...')}
+            placeholder={t('stickyNotes.contentPlaceholder', 'Contingut de la nota...')}
             value={newNote.content}
             onChange={(e) => setNewNote({ ...newNote, content: e.target.value })}
             style={styles.textarea}
           />
-          <div style={styles.formActions}>
-            <div style={styles.colorSelector}>
-              {Object.keys(COLORS).map(color => (
-                <button
-                  key={color}
-                  onClick={() => setNewNote({ ...newNote, color })}
-                  style={{
-                    ...styles.colorButton,
-                    backgroundColor: COLORS[color].bg,
-                    borderColor: newNote.color === color ? COLORS[color].border : 'transparent'
-                  }}
-                  title={color}
-                />
-              ))}
-            </div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: darkMode ? '#9ca3af' : '#6b7280', cursor: 'pointer' }}>
-              <input
-                type="checkbox"
-                checked={newNote.pinned}
-                onChange={(e) => setNewNote({ ...newNote, pinned: e.target.checked })}
-                style={{ cursor: 'pointer' }}
+          <div style={styles.colorSelector}>
+            {COLORS.map(color => (
+              <button
+                key={color.value}
+                onClick={() => setNewNote({ ...newNote, color: color.value })}
+                style={{
+                  ...styles.colorButton,
+                  backgroundColor: color.bg,
+                  borderColor: newNote.color === color.value ? color.border : 'transparent'
+                }}
+                title={color.label}
               />
-              <Pin size={14} />
-              {t('stickyNotes.pin', 'Penjar')}
-            </label>
-            <button
-              onClick={handleAddNote}
-              style={{
-                ...styles.addButton,
-                backgroundColor: '#4f46e5',
-                color: '#ffffff',
-                border: 'none',
-                marginLeft: 'auto'
-              }}
-            >
-              {t('common.save', 'Guardar')}
-            </button>
+            ))}
+          </div>
+          <div style={styles.formActions}>
             <button
               onClick={() => {
                 setShowAddForm(false)
-                setNewNote({ title: '', content: '', color: 'yellow', pinned: true })
+                setNewNote({ content: '', title: '', color: 'yellow' })
               }}
               style={{
-                ...styles.addButton,
-                backgroundColor: 'transparent',
-                border: 'none'
+                ...styles.button,
+                backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6',
+                color: darkMode ? '#ffffff' : '#111827'
               }}
             >
-              <X size={16} />
+              {t('common.cancel', 'Cancel·lar')}
+            </button>
+            <button
+              onClick={handleAddNote}
+              style={{
+                ...styles.button,
+                backgroundColor: '#4f46e5',
+                color: '#ffffff'
+              }}
+            >
+              <Plus size={16} />
+              {t('stickyNotes.add', 'Afegir')}
             </button>
           </div>
         </div>
@@ -391,105 +438,74 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
 
       {loading ? (
         <div style={styles.loading}>{t('common.loading', 'Carregant...')}</div>
-      ) : notes.length === 0 ? (
+      ) : openNotes.length === 0 ? (
         <div style={styles.empty}>
-          {t('stickyNotes.empty', 'No hi ha notes. Clica "Afegir" per crear-ne una.')}
+          <p>{t('stickyNotes.empty', 'No hi ha notes. Afegeix una nota ràpida!')}</p>
         </div>
       ) : (
         <div style={styles.notesList}>
-          {pinnedNotes.map(note => {
-            const colorStyle = COLORS[note.color] || COLORS.yellow
+          {openNotes.map(note => {
+            const colorConfig = COLORS.find(c => c.value === note.color) || COLORS[0]
             return (
               <div
                 key={note.id}
                 style={{
-                  ...styles.note,
-                  backgroundColor: colorStyle.bg,
-                  borderColor: colorStyle.border,
-                  color: colorStyle.text
+                  ...styles.noteCard,
+                  backgroundColor: colorConfig.bg,
+                  borderColor: colorConfig.border
                 }}
               >
                 <div style={styles.noteHeader}>
                   {note.title && (
-                    <h4 style={{ ...styles.noteTitle, color: colorStyle.text }}>
-                      {note.title}
-                    </h4>
+                    <div style={styles.noteTitle}>{note.title}</div>
                   )}
-                  <div style={styles.noteActions}>
+                  <div style={{ display: 'flex', gap: '4px' }}>
                     <button
                       onClick={() => handleTogglePin(note.id, note.pinned)}
-                      style={{ ...styles.actionButton, color: colorStyle.text }}
-                      title={t('stickyNotes.unpin', 'Despenjar')}
+                      style={{
+                        ...styles.actionButton,
+                        backgroundColor: note.pinned ? 'rgba(0,0,0,0.1)' : 'transparent'
+                      }}
+                      title={note.pinned ? t('stickyNotes.unpin', 'Desenganxar') : t('stickyNotes.pin', 'Enganxar')}
                     >
-                      <PinOff size={14} />
+                      {note.pinned ? <Pin size={14} /> : <PinOff size={14} />}
                     </button>
-                    <button
-                      onClick={() => handleMarkDone(note.id)}
-                      style={{ ...styles.actionButton, color: colorStyle.text }}
-                      title={t('stickyNotes.markDone', 'Marcar com fet')}
-                    >
-                      <Check size={14} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(note.id)}
-                      style={{ ...styles.actionButton, color: colorStyle.text }}
-                      title={t('stickyNotes.delete', 'Eliminar')}
-                    >
-                      <X size={14} />
-                    </button>
+                    <div style={{ display: 'flex', gap: '2px' }}>
+                      {COLORS.map(color => (
+                        <button
+                          key={color.value}
+                          onClick={() => handleUpdateColor(note.id, color.value)}
+                          style={{
+                            width: '16px',
+                            height: '16px',
+                            borderRadius: '2px',
+                            backgroundColor: color.bg,
+                            border: `1px solid ${note.color === color.value ? color.border : 'transparent'}`,
+                            cursor: 'pointer',
+                            padding: 0
+                          }}
+                          title={color.label}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
-                <div style={{ ...styles.noteContent, color: colorStyle.text }}>
-                  {note.content}
-                </div>
-              </div>
-            )
-          })}
-          
-          {unpinnedNotes.map(note => {
-            const colorStyle = COLORS[note.color] || COLORS.yellow
-            return (
-              <div
-                key={note.id}
-                style={{
-                  ...styles.note,
-                  backgroundColor: colorStyle.bg,
-                  borderColor: colorStyle.border,
-                  color: colorStyle.text
-                }}
-              >
-                <div style={styles.noteHeader}>
-                  {note.title && (
-                    <h4 style={{ ...styles.noteTitle, color: colorStyle.text }}>
-                      {note.title}
-                    </h4>
-                  )}
-                  <div style={styles.noteActions}>
-                    <button
-                      onClick={() => handleTogglePin(note.id, note.pinned)}
-                      style={{ ...styles.actionButton, color: colorStyle.text }}
-                      title={t('stickyNotes.pin', 'Penjar')}
-                    >
-                      <Pin size={14} />
-                    </button>
-                    <button
-                      onClick={() => handleMarkDone(note.id)}
-                      style={{ ...styles.actionButton, color: colorStyle.text }}
-                      title={t('stickyNotes.markDone', 'Marcar com fet')}
-                    >
-                      <Check size={14} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(note.id)}
-                      style={{ ...styles.actionButton, color: colorStyle.text }}
-                      title={t('stickyNotes.delete', 'Eliminar')}
-                    >
-                      <X size={14} />
-                    </button>
-                  </div>
-                </div>
-                <div style={{ ...styles.noteContent, color: colorStyle.text }}>
-                  {note.content}
+                <div style={styles.noteContent}>{note.content}</div>
+                <div style={styles.noteActions}>
+                  <button
+                    onClick={() => handleMarkDone(note.id)}
+                    style={styles.actionButton}
+                    title={t('stickyNotes.markDone', 'Marcar com fet')}
+                  >
+                    <Check size={16} color="#22c55e" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(note.id)}
+                    style={styles.actionButton}
+                    title={t('stickyNotes.delete', 'Eliminar')}
+                  >
+                    <Trash2 size={16} color="#ef4444" />
+                  </button>
                 </div>
               </div>
             )
@@ -499,4 +515,3 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
     </div>
   )
 }
-

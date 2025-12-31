@@ -67,6 +67,7 @@ export default function Dashboard() {
     waiting_manufacturer: true,
     activity_feed: false,
     tasks: true,
+    sticky_notes: true,
     // Daily Ops widgets
     waiting_manufacturer_ops: true,
     pos_not_amazon_ready: true,
@@ -197,7 +198,8 @@ export default function Dashboard() {
           pos_not_amazon_ready: prefs.enabledWidgets?.pos_not_amazon_ready !== false,
           shipments_in_transit: prefs.enabledWidgets?.shipments_in_transit !== false,
           research_no_decision: prefs.enabledWidgets?.research_no_decision !== false,
-          stale_tracking: prefs.enabledWidgets?.stale_tracking !== false
+          stale_tracking: prefs.enabledWidgets?.stale_tracking !== false,
+          sticky_notes: prefs.widgets?.sticky_notes !== false
         })
       }
       if (prefs?.widgetOrder) {
@@ -218,7 +220,8 @@ export default function Dashboard() {
           shipments_in_transit: prefs?.enabledWidgets?.shipments_in_transit !== false,
           research_no_decision: prefs?.enabledWidgets?.research_no_decision !== false,
           stale_tracking: prefs?.enabledWidgets?.stale_tracking !== false,
-          tasks: dashboardWidgets.tasks !== false
+          tasks: dashboardWidgets.tasks !== false,
+          sticky_notes: dashboardWidgets.sticky_notes !== false
         }
         const defaultLayout = generateLayoutFromEnabled(enabledWidgets)
         setLayout(defaultLayout)
@@ -254,7 +257,8 @@ export default function Dashboard() {
       shipments_in_transit: dashboardWidgets.shipments_in_transit !== false,
       research_no_decision: dashboardWidgets.research_no_decision !== false,
       stale_tracking: dashboardWidgets.stale_tracking !== false,
-      tasks: dashboardWidgets.tasks !== false
+      tasks: dashboardWidgets.tasks !== false,
+      sticky_notes: dashboardWidgets.sticky_notes !== false
     }
     const defaultLayout = generateLayoutFromEnabled(enabledWidgets)
     setLayout(defaultLayout)
@@ -359,7 +363,11 @@ export default function Dashboard() {
     : 1
 
   return (
-    <div style={styles.container}>
+    <>
+      {/* Sticky Notes Overlay (pinned notes) */}
+      <StickyNotesWidget darkMode={darkMode} showOverlay={true} />
+      
+      <div style={styles.container}>
       {/* Botons d'accions ràpides en lloc del Header */}
       <div style={{
         ...styles.headerActions,
@@ -1039,6 +1047,9 @@ export default function Dashboard() {
             {dashboardWidgets.tasks && (
               <TasksWidget darkMode={darkMode} limit={10} />
             )}
+            {dashboardWidgets.sticky_notes && (
+              <StickyNotesWidget darkMode={darkMode} showOverlay={false} />
+            )}
           </div>
         )}
       </div>
@@ -1054,6 +1065,7 @@ export default function Dashboard() {
         onSave={handlePreferencesSave}
       />
     </div>
+    </>
   )
 }
 
