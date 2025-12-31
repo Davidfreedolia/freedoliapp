@@ -37,6 +37,7 @@ import {
   upsertPoAmazonReadiness,
   updatePoAmazonReadinessLabels
 } from '../lib/supabase'
+import ShipmentTrackingSection from '../components/ShipmentTrackingSection'
 import Header from '../components/Header'
 import NewPOModal from '../components/NewPOModal'
 import LogisticsFlow from '../components/LogisticsFlow'
@@ -734,8 +735,15 @@ export default function Orders() {
             })}
           </div>
         ) : (
-          <div style={{ ...styles.tableContainer, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <table style={styles.table}>
+          <div style={{ 
+            ...styles.tableContainer, 
+            backgroundColor: darkMode ? '#15151f' : '#ffffff',
+            overflowX: isMobile ? 'visible' : 'auto'
+          }}>
+            <table style={{
+              ...styles.table,
+              minWidth: isMobile ? 'auto' : '800px'
+            }}>
               <thead>
                 <tr>
                   <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>PO #</th>
@@ -882,8 +890,24 @@ export default function Orders() {
 
       {/* Modal Detall PO */}
       {showDetailModal && (
-        <div style={styles.modalOverlay} onClick={() => setShowDetailModal(false)}>
-          <div style={{ ...styles.detailModal, backgroundColor: darkMode ? '#15151f' : '#ffffff' }} onClick={e => e.stopPropagation()}>
+        <div style={{
+          ...styles.modalOverlay,
+          ...(isMobile ? {
+            padding: 0,
+            backgroundColor: darkMode ? '#0a0a0f' : '#ffffff'
+          } : {})
+        }} onClick={() => setShowDetailModal(false)}>
+          <div style={{ 
+            ...styles.detailModal, 
+            backgroundColor: darkMode ? '#15151f' : '#ffffff',
+            ...(isMobile ? {
+              width: '100%',
+              height: '100%',
+              maxWidth: 'none',
+              maxHeight: 'none',
+              borderRadius: 0
+            } : {})
+          }} onClick={e => e.stopPropagation()}>
             {loadingDetail ? (
               <div style={styles.modalLoading}>
                 <Loader size={32} color="#4f46e5" className="spin" />
@@ -1193,6 +1217,14 @@ export default function Orders() {
                       Generar Etiquetes FNSKU
                     </button>
                   </div>
+
+                  {/* Shipment Tracking Section */}
+                  <div style={styles.detailSection}>
+                    <ShipmentTrackingSection 
+                      po={selectedOrder} 
+                      darkMode={darkMode}
+                    />
+                  </div>
                 </div>
               </>
             )}
@@ -1451,7 +1483,7 @@ const styles = {
   empty: { padding: '64px', textAlign: 'center', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' },
   createButton: { display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', backgroundColor: '#4f46e5', color: '#ffffff', border: '1px solid #3730a3', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
   tableContainer: { borderRadius: '16px', border: '1px solid var(--border-color)', overflow: 'hidden' },
-  table: { width: '100%', borderCollapse: 'collapse' },
+  table: { width: '100%', borderCollapse: 'collapse', tableLayout: 'auto' },
   th: { padding: '14px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', borderBottom: '1px solid var(--border-color)' },
   tr: { borderBottom: '1px solid var(--border-color)' },
   td: { padding: '14px 16px', fontSize: '14px' },

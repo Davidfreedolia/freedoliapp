@@ -1,0 +1,55 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "generate": "Generate",
+    "upload": "Upload",
+    "download": "Download",
+    "markAsSent": "Mark as sent",
+    "restore": "Restore",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "projects": "Projects",
+    "suppliers": "Suppliers",
+    "forwarders": "Forwarders",
+    "warehouses": "Warehouses",
+    "orders": "Orders",
+    "finances": "Finances",
+    "inventory": "Inventory",
+    "analytics": "Analytics",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "waitingManufacturer": {
+      "title": "Waiting Manufacturer",
+      "empty": "No POs waiting to be sent to manufacturer"
+    },
+    "posNotAmazonReady": {
+      "title": "POs Not Amazon Ready",
+      "empty": "All POs are ready for Amazon"
+    },
+    "shipmentsInTransit": {
+      "title": "Shipments In Transit",
+      "empty": "No shipments in transit",
+      "tableNotExists": "po_shipments table does not exist yet"
+    },
+    "researchNoDecision": {
+      "title": "Research No Decision",
+      "empty": "All research projects have a decision"
+    },
+    "staleTracking": {
+      "title": "Stale Tracking",
+      "empty": "No stale tracking"
+    }
+  },
+  "errors": {
+    "driveDisconnected": "Google Drive is not connected",
+    "missingFields": "Missing required fields",
+    "notAllowed": "You don't have permission to perform this action"
+  }
+}
+

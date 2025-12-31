@@ -13,3 +13,4 @@ UPDATE gtin_pool
 SET assigned_at = updated_at 
 WHERE status = 'assigned' AND assigned_at IS NULL;
 
+

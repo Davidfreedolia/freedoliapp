@@ -1,0 +1,55 @@
+{
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "generate": "Generar",
+    "upload": "Subir",
+    "download": "Descargar",
+    "markAsSent": "Marcar como enviado",
+    "restore": "Restaurar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "projects": "Proyectos",
+    "suppliers": "Proveedores",
+    "forwarders": "Transitarios",
+    "warehouses": "Almacenes",
+    "orders": "Pedidos",
+    "finances": "Finanzas",
+    "inventory": "Inventario",
+    "analytics": "Analítica",
+    "settings": "Configuración"
+  },
+  "dashboard": {
+    "waitingManufacturer": {
+      "title": "Esperando Fabricante",
+      "empty": "No hay POs esperando envío al fabricante"
+    },
+    "posNotAmazonReady": {
+      "title": "POs No Preparadas para Amazon",
+      "empty": "Todas las POs están listas para Amazon"
+    },
+    "shipmentsInTransit": {
+      "title": "Envíos en Tránsito",
+      "empty": "No hay envíos en tránsito",
+      "tableNotExists": "La tabla po_shipments no existe aún"
+    },
+    "researchNoDecision": {
+      "title": "Investigación Sin Decisión",
+      "empty": "Todos los proyectos en investigación tienen decisión"
+    },
+    "staleTracking": {
+      "title": "Tracking Desactualizado",
+      "empty": "No hay tracking desactualizado"
+    }
+  },
+  "errors": {
+    "driveDisconnected": "Google Drive no está conectado",
+    "missingFields": "Faltan campos obligatorios",
+    "notAllowed": "No tienes permiso para realizar esta acción"
+  }
+}
+

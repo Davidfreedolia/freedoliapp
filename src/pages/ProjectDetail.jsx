@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { 
   ArrowLeft, 
   ChevronRight, 
@@ -50,6 +51,7 @@ export default function ProjectDetail() {
   const navigate = useNavigate()
   const { darkMode, driveConnected, refreshProjects } = useApp()
   const { isMobile, isTablet } = useBreakpoint()
+  const { t } = useTranslation()
   
   const [project, setProject] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -258,7 +260,7 @@ export default function ProjectDetail() {
               onClick={handleRestoreProject}
               style={styles.restoreButton}
             >
-              Restaurar Projecte
+              {t('common.restore')} Projecte
             </button>
           </div>
         )}
@@ -289,7 +291,12 @@ export default function ProjectDetail() {
             Progrés del Projecte
           </h3>
           
-          <div style={styles.timeline}>
+          <div style={{
+            ...styles.timeline,
+            flexWrap: isMobile ? 'wrap' : 'nowrap',
+            gap: isMobile ? '12px' : '0',
+            overflowX: 'visible'
+          }}>
             {PHASES.map((phase, index) => {
               const isActive = phase.id === project.current_phase
               const isCompleted = phase.id < project.current_phase
@@ -314,7 +321,7 @@ export default function ProjectDetail() {
                   }}>
                     {phase.name}
                   </span>
-                  {index < PHASES.length - 1 && (
+                  {index < PHASES.length - 1 && !isMobile && (
                     <div style={{
                       ...styles.timelineConnector,
                       backgroundColor: isCompleted ? phase.color : 'var(--border-color)'

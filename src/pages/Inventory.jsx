@@ -395,8 +395,15 @@ export default function Inventory() {
             })}
           </div>
         ) : (
-          <div style={{ ...styles.tableContainer, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <table style={styles.table}>
+          <div style={{ 
+            ...styles.tableContainer, 
+            backgroundColor: darkMode ? '#15151f' : '#ffffff',
+            overflowX: isMobile ? 'visible' : 'auto'
+          }}>
+            <table style={{
+              ...styles.table,
+              minWidth: isMobile ? 'auto' : '800px'
+            }}>
               <thead>
                 <tr style={{ backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb' }}>
                   <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>Producte</th>
@@ -676,7 +683,7 @@ const styles = {
   loading: { padding: '64px', textAlign: 'center', color: '#6b7280' },
   empty: { padding: '64px', textAlign: 'center', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' },
   tableContainer: { borderRadius: '16px', border: '1px solid var(--border-color)', overflow: 'auto' },
-  table: { width: '100%', borderCollapse: 'collapse', minWidth: '900px' },
+  table: { width: '100%', borderCollapse: 'collapse' },
   th: { padding: '14px 12px', textAlign: 'left', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', borderBottom: '1px solid var(--border-color)' },
   tr: { borderBottom: '1px solid var(--border-color)' },
   td: { padding: '12px', fontSize: '14px', color: '#6b7280' },

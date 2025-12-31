@@ -5,6 +5,7 @@ import Sidebar from './components/Sidebar'
 import ProtectedRoute from './components/ProtectedRoute'
 import PageLoader from './components/PageLoader'
 import { useBreakpoint } from './hooks/useBreakpoint'
+import './i18n'
 
 // Login (no lazy, es carrega primer)
 import Login from './pages/Login'

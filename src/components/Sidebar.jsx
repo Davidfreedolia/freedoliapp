@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { 
   LayoutDashboard, 
   FolderKanban, 
@@ -63,21 +64,22 @@ const prefetchRoute = (path) => {
 const prefetchedRoutes = new Set()
 
 const menuItems = [
-  { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
-  { path: '/projects', icon: FolderKanban, label: 'Projectes' },
-  { path: '/suppliers', icon: Users, label: 'Proveïdors' },
-  { path: '/forwarders', icon: Truck, label: 'Transitaris' },
-  { path: '/warehouses', icon: Warehouse, label: 'Magatzems' },
-  { path: '/orders', icon: FileText, label: 'Comandes' },
-  { path: '/finances', icon: Receipt, label: 'Finances' },
-  { path: '/inventory', icon: Package, label: 'Inventari' },
-  { path: '/analytics', icon: TrendingUp, label: 'Analytics' },
-  { path: '/settings', icon: Settings, label: 'Configuració' },
+  { path: '/', icon: LayoutDashboard, labelKey: 'sidebar.dashboard' },
+  { path: '/projects', icon: FolderKanban, labelKey: 'sidebar.projects' },
+  { path: '/suppliers', icon: Users, labelKey: 'sidebar.suppliers' },
+  { path: '/forwarders', icon: Truck, labelKey: 'sidebar.forwarders' },
+  { path: '/warehouses', icon: Warehouse, labelKey: 'sidebar.warehouses' },
+  { path: '/orders', icon: FileText, labelKey: 'sidebar.orders' },
+  { path: '/finances', icon: Receipt, labelKey: 'sidebar.finances' },
+  { path: '/inventory', icon: Package, labelKey: 'sidebar.inventory' },
+  { path: '/analytics', icon: TrendingUp, labelKey: 'sidebar.analytics' },
+  { path: '/settings', icon: Settings, labelKey: 'sidebar.settings' },
 ]
 
 export default function Sidebar() {
   const { sidebarCollapsed, setSidebarCollapsed, darkMode } = useApp()
   const { isMobile, isTablet, isDesktop } = useBreakpoint()
+  const { t } = useTranslation()
   const [logoError, setLogoError] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -174,7 +176,7 @@ export default function Sidebar() {
             })}
           >
             <item.icon size={20} />
-            {!shouldCollapse && <span>{item.label}</span>}
+            {!shouldCollapse && <span>{t(item.labelKey)}</span>}
           </NavLink>
         ))}
       </nav>

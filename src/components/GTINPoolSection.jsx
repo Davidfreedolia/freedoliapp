@@ -902,8 +902,7 @@ const styles = {
   },
   table: {
     width: '100%',
-    borderCollapse: 'collapse',
-    minWidth: '800px'
+    borderCollapse: 'collapse'
   },
   th: {
     padding: '14px 12px',

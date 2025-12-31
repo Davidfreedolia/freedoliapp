@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { 
   Save, 
   Building2, 
@@ -15,10 +16,11 @@ import {
   FileText,
   AlertCircle,
   CheckCircle2,
-  Barcode
+  Barcode,
+  Globe
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { getCompanySettings, updateCompanySettings, supabase, getAuditLogs } from '../lib/supabase'
+import { getCompanySettings, updateCompanySettings, supabase, getAuditLogs, updateLanguage } from '../lib/supabase'
 import Header from '../components/Header'
 import GTINPoolSection from '../components/GTINPoolSection'
 import { useBreakpoint } from '../hooks/useBreakpoint'
@@ -26,8 +28,11 @@ import { getModalStyles } from '../utils/responsiveStyles'
 
 export default function Settings() {
   const { darkMode } = useApp()
+  const { t, i18n } = useTranslation()
+  const { isMobile } = useBreakpoint()
   
   const [activeTab, setActiveTab] = useState('company')
+  const [currentLanguage, setCurrentLanguage] = useState(i18n.language || 'ca')
   const [auditLogs, setAuditLogs] = useState([])
   const [statusFilter, setStatusFilter] = useState(null)
   const [loadingLogs, setLoadingLogs] = useState(false)
@@ -61,7 +66,22 @@ export default function Settings() {
 
   useEffect(() => {
     loadSettings()
+    // Cargar idioma desde company_settings
+    loadLanguage()
   }, [])
+
+  const loadLanguage = async () => {
+    try {
+      const settings = await getCompanySettings()
+      if (settings?.language && ['ca', 'en', 'es'].includes(settings.language)) {
+        setCurrentLanguage(settings.language)
+        i18n.changeLanguage(settings.language)
+        localStorage.setItem('freedolia_language', settings.language)
+      }
+    } catch (err) {
+      console.warn('Error carregant idioma:', err)
+    }
+  }
 
   useEffect(() => {
     if (activeTab === 'audit') {
@@ -283,6 +303,53 @@ export default function Settings() {
               <button onClick={handleSave} disabled={saving} style={{...styles.saveButton, backgroundColor: saved ? '#22c55e' : '#4f46e5'}}>
                 {saved ? <><Check size={16} /> Guardat!</> : saving ? 'Guardant...' : <><Save size={16} /> Guardar</>}
               </button>
+            </div>
+
+            {/* Language Selector */}
+            <div style={{
+              ...styles.subsection,
+              marginBottom: '32px',
+              padding: '20px',
+              borderRadius: '12px',
+              border: '1px solid var(--border-color)',
+              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
+            }}>
+              <h3 style={{
+                ...styles.subsectionTitle,
+                color: darkMode ? '#ffffff' : '#111827',
+                marginBottom: '16px'
+              }}>
+                <Globe size={16} />
+                Idioma / Language
+              </h3>
+              <div style={styles.formGroup}>
+                <label style={{
+                  ...styles.label,
+                  color: darkMode ? '#e5e7eb' : '#374151'
+                }}>
+                  Selecciona l'idioma
+                </label>
+                <select
+                  value={currentLanguage}
+                  onChange={async (e) => {
+                    const newLang = e.target.value
+                    setCurrentLanguage(newLang)
+                    i18n.changeLanguage(newLang)
+                    await updateLanguage(newLang)
+                  }}
+                  style={{
+                    ...styles.input,
+                    backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
+                    color: darkMode ? '#ffffff' : '#111827',
+                    borderColor: darkMode ? '#374151' : '#d1d5db',
+                    maxWidth: '300px'
+                  }}
+                >
+                  <option value="ca">Català</option>
+                  <option value="en">English</option>
+                  <option value="es">Español</option>
+                </select>
+              </div>
             </div>
 
             <p style={styles.sectionDescription}>Aquestes dades s'utilitzaran per generar els documents (PO, Briefings...)</p>

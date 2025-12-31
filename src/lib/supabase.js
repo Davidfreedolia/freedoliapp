@@ -893,7 +893,8 @@ export const getPosWaitingManufacturer = async (limit = 10) => {
         projects (
           id,
           name,
-          sku
+          sku,
+          sku_internal
         ),
         suppliers (
           id,
@@ -904,7 +905,7 @@ export const getPosWaitingManufacturer = async (limit = 10) => {
     .eq('user_id', userId)
     .not('manufacturer_pack_generated_at', 'is', null)
     .is('manufacturer_pack_sent_at', null)
-    .order('manufacturer_pack_generated_at', { ascending: false })
+    .order('manufacturer_pack_generated_at', { ascending: true })
     .limit(limit)
   
   if (error) throw error
@@ -917,7 +918,7 @@ export const getPosWaitingManufacturer = async (limit = 10) => {
   })).filter(po => po.id) // Filtrar nulls
 }
 
-export const getPosNotReady = async (limit = 5) => {
+export const getPosNotReady = async (limit = 10) => {
   const userId = await getCurrentUserId()
   
   // Obtenir totes les POs amb readiness
@@ -933,7 +934,8 @@ export const getPosNotReady = async (limit = 5) => {
         projects (
           id,
           name,
-          sku
+          sku,
+          sku_internal
         )
       )
     `)
@@ -979,7 +981,7 @@ export const getPosNotReady = async (limit = 5) => {
         project: readiness.purchase_orders.projects,
         readiness,
         missingCount: missing.length,
-        missing
+        missing: missing.slice(0, 2) // Top 2 missing fields
       })
     }
     
@@ -987,6 +989,192 @@ export const getPosNotReady = async (limit = 5) => {
   }
   
   return notReady
+}
+
+// DAILY OPS WIDGETS
+export const getShipmentsInTransit = async (limit = 10) => {
+  const userId = await getCurrentUserId()
+  
+  try {
+    // Verificar si existeix la taula po_shipments
+    const { data, error } = await supabase
+      .from('po_shipments')
+      .select(`
+        id,
+        carrier,
+        eta_date,
+        status,
+        tracking_number,
+        pro_number,
+        updated_at,
+        purchase_orders (
+          id,
+          po_number,
+          projects (
+            id,
+            name,
+            sku_internal
+          )
+        )
+      `)
+      .eq('user_id', userId)
+      .in('status', ['picked_up', 'in_transit'])
+      .order('eta_date', { ascending: true })
+      .limit(limit)
+    
+    if (error) {
+      // Si la taula no existeix, retornar array buit
+      if (error.code === '42P01') return []
+      throw error
+    }
+    
+    return (data || []).map(shipment => ({
+      id: shipment.id,
+      po_number: shipment.purchase_orders?.po_number,
+      carrier: shipment.carrier,
+      eta_date: shipment.eta_date,
+      tracking_number: shipment.tracking_number,
+      pro_number: shipment.pro_number,
+      project: shipment.purchase_orders?.projects
+    }))
+  } catch (err) {
+    // Si hi ha error (taula no existeix), retornar array buit
+    if (err.code === '42P01') return []
+    throw err
+  }
+}
+
+export const getResearchNoDecision = async (limit = 10) => {
+  const userId = await getCurrentUserId()
+  
+  const { data, error } = await supabase
+    .from('projects')
+    .select('id, name, sku_internal, project_code, current_phase, decision, created_at')
+    .eq('user_id', userId)
+    .eq('current_phase', 1)
+    .or('decision.is.null,decision.eq.HOLD')
+    .order('created_at', { ascending: false })
+    .limit(limit)
+  
+  if (error) throw error
+  
+  return (data || []).filter(p => !p.decision || p.decision === 'HOLD')
+}
+
+export const getStaleTracking = async (limit = 10, staleDays = 7) => {
+  const userId = await getCurrentUserId()
+  
+  const cutoffDate = new Date()
+  cutoffDate.setDate(cutoffDate.getDate() - staleDays)
+  
+  const { data, error } = await supabase
+    .from('purchase_orders')
+    .select(`
+      id,
+      po_number,
+      tracking_number,
+      updated_at,
+      projects (
+        id,
+        name,
+        sku_internal
+      )
+    `)
+    .eq('user_id', userId)
+    .not('tracking_number', 'is', null)
+    .lt('updated_at', cutoffDate.toISOString())
+    .order('updated_at', { ascending: true })
+    .limit(limit)
+  
+  if (error) throw error
+  
+  return (data || []).map(po => {
+    const daysStale = Math.floor((new Date() - new Date(po.updated_at)) / (1000 * 60 * 60 * 24))
+    return {
+      ...po,
+      daysStale
+    }
+  })
+}
+
+// SHIPMENT TRACKING
+export const getPoShipment = async (poId) => {
+  const userId = await getCurrentUserId()
+  
+  const { data, error } = await supabase
+    .from('po_shipments')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('purchase_order_id', poId)
+    .single()
+  
+  if (error && error.code !== 'PGRST116') throw error
+  return data
+}
+
+export const upsertPoShipment = async (poId, payload) => {
+  const userId = await getCurrentUserId()
+  
+  // Strip user_id si ve en payload
+  const { user_id, ...cleanPayload } = payload
+  
+  // Verificar si existeix
+  const existing = await getPoShipment(poId)
+  
+  const shipmentData = {
+    ...cleanPayload,
+    purchase_order_id: poId,
+    user_id: userId
+  }
+  
+  if (existing) {
+    const { data, error } = await supabase
+      .from('po_shipments')
+      .update(shipmentData)
+      .eq('id', existing.id)
+      .eq('user_id', userId)
+      .select()
+      .single()
+    
+    if (error) throw error
+    return data
+  }
+  
+  const { data, error } = await supabase
+    .from('po_shipments')
+    .insert([shipmentData])
+    .select()
+    .single()
+  
+  if (error) throw error
+  return data
+}
+
+export const setShipmentStatus = async (poId, status) => {
+  const userId = await getCurrentUserId()
+  
+  const validStatuses = ['planned', 'booked', 'picked_up', 'in_transit', 'delivered']
+  if (!validStatuses.includes(status)) {
+    throw new Error(`Invalid status: ${status}`)
+  }
+  
+  const existing = await getPoShipment(poId)
+  
+  if (!existing) {
+    // Crear shipment amb status si no existeix
+    return await upsertPoShipment(poId, { status })
+  }
+  
+  const { data, error } = await supabase
+    .from('po_shipments')
+    .update({ status })
+    .eq('id', existing.id)
+    .eq('user_id', userId)
+    .select()
+    .single()
+  
+  if (error) throw error
+  return data
 }
 
 // MAGATZEMS
@@ -1078,11 +1266,33 @@ export const updateCompanySettings = async (settings) => {
 
   const { data, error } = await supabase
     .from('company_settings')
-    .insert([settingsData])
+    .insert([{ ...settingsData, user_id: userId }])
     .select()
     .single()
   if (error) throw error
   return data
+}
+
+// Language settings
+export const updateLanguage = async (language) => {
+  const userId = await getCurrentUserId()
+  
+  // Guardar a localStorage immediatament
+  localStorage.setItem('freedolia_language', language)
+  
+  // Guardar a company_settings
+  try {
+    const existing = await getCompanySettings()
+    await updateCompanySettings({
+      ...existing,
+      language
+    })
+  } catch (err) {
+    console.warn('Error guardant idioma a company_settings:', err)
+    // Continuar igual, ja està a localStorage
+  }
+  
+  return language
 }
 
 // DASHBOARD PREFERENCES
@@ -1110,8 +1320,23 @@ export const updateDashboardPreferences = async (preferences) => {
     orders_in_progress: true,
     pos_not_ready: true,
     waiting_manufacturer: true,
-    activity_feed: false
+    activity_feed: false,
+    // Daily Ops widgets
+    waiting_manufacturer_ops: true,
+    pos_not_amazon_ready: true,
+    shipments_in_transit: true,
+    research_no_decision: true,
+    stale_tracking: true
   }
+
+  // Default widget order
+  const defaultWidgetOrder = [
+    'waiting_manufacturer_ops',
+    'pos_not_amazon_ready',
+    'shipments_in_transit',
+    'research_no_decision',
+    'stale_tracking'
+  ]
 
   // Fusiona widgets nous amb els existents per preservar tots els widgets
   let widgetsToSave = defaultWidgets
@@ -1122,11 +1347,37 @@ export const updateDashboardPreferences = async (preferences) => {
     widgetsToSave = { ...widgetsToSave, ...prefsData.widgets }
   }
 
+  // Manejar enabledWidgets (si ve en prefsData)
+  let enabledWidgets = existing?.enabledWidgets || {}
+  if (prefsData.enabledWidgets) {
+    enabledWidgets = { ...enabledWidgets, ...prefsData.enabledWidgets }
+  }
+
+  // Manejar widgetOrder (si ve en prefsData)
+  let widgetOrder = existing?.widgetOrder || defaultWidgetOrder
+  if (prefsData.widgetOrder) {
+    widgetOrder = prefsData.widgetOrder
+  }
+
+  // Manejar staleDays (si ve en prefsData)
+  let staleDays = existing?.staleDays || 7
+  if (prefsData.staleDays !== undefined) {
+    staleDays = prefsData.staleDays
+  }
+
+  // Preparar dades per guardar
+  const dataToSave = {
+    widgets: widgetsToSave,
+    enabledWidgets,
+    widgetOrder,
+    staleDays
+  }
+
   if (existing) {
     const { data, error } = await supabase
       .from('dashboard_preferences')
       .update({ 
-        widgets: widgetsToSave,
+        ...dataToSave,
         updated_at: new Date().toISOString() 
       })
       .eq('id', existing.id)
@@ -1140,7 +1391,7 @@ export const updateDashboardPreferences = async (preferences) => {
   const { data, error } = await supabase
     .from('dashboard_preferences')
     .insert([{
-      widgets: widgetsToSave,
+      ...dataToSave,
       user_id: userId
     }])
     .select()

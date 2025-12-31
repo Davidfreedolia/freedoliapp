@@ -26,6 +26,13 @@ import { supabase } from '../lib/supabase'
 import NewProjectModal from '../components/NewProjectModal'
 import LogisticsTrackingWidget from '../components/LogisticsTrackingWidget'
 import CustomizeDashboardModal from '../components/CustomizeDashboardModal'
+import {
+  WaitingManufacturerWidget,
+  PosNotAmazonReadyWidget,
+  ShipmentsInTransitWidget,
+  ResearchNoDecisionWidget,
+  StaleTrackingWidget
+} from '../components/DailyOpsWidgets'
 
 export default function Dashboard() {
   const { stats, projects, loading, darkMode, setDarkMode } = useApp()
@@ -44,8 +51,22 @@ export default function Dashboard() {
     orders_in_progress: true,
     pos_not_ready: true,
     waiting_manufacturer: true,
-    activity_feed: false
+    activity_feed: false,
+    // Daily Ops widgets
+    waiting_manufacturer_ops: true,
+    pos_not_amazon_ready: true,
+    shipments_in_transit: true,
+    research_no_decision: true,
+    stale_tracking: true
   })
+  const [widgetOrder, setWidgetOrder] = useState([
+    'waiting_manufacturer_ops',
+    'pos_not_amazon_ready',
+    'shipments_in_transit',
+    'research_no_decision',
+    'stale_tracking'
+  ])
+  const [staleDays, setStaleDays] = useState(7)
   const [loadingPreferences, setLoadingPreferences] = useState(true)
   const [gtinCoverage, setGtinCoverage] = useState({ missingGtin: 0, availableCodes: 0 })
   const [loadingGtinCoverage, setLoadingGtinCoverage] = useState(true)
@@ -136,8 +157,20 @@ export default function Dashboard() {
           orders_in_progress: prefs.widgets.orders_in_progress !== false,
           pos_not_ready: prefs.widgets.pos_not_ready !== false,
           waiting_manufacturer: prefs.widgets.waiting_manufacturer !== false,
-          activity_feed: prefs.widgets.activity_feed === true
+          activity_feed: prefs.widgets.activity_feed === true,
+          // Daily Ops widgets
+          waiting_manufacturer_ops: prefs.enabledWidgets?.waiting_manufacturer_ops !== false,
+          pos_not_amazon_ready: prefs.enabledWidgets?.pos_not_amazon_ready !== false,
+          shipments_in_transit: prefs.enabledWidgets?.shipments_in_transit !== false,
+          research_no_decision: prefs.enabledWidgets?.research_no_decision !== false,
+          stale_tracking: prefs.enabledWidgets?.stale_tracking !== false
         })
+      }
+      if (prefs?.widgetOrder) {
+        setWidgetOrder(prefs.widgetOrder)
+      }
+      if (prefs?.staleDays) {
+        setStaleDays(prefs.staleDays)
       }
     } catch (err) {
       console.error('Error carregant preferències dashboard:', err)
@@ -316,7 +349,12 @@ export default function Dashboard() {
           )}
         </div>
         
-        <div style={styles.headerActionsRight}>
+        <div style={{
+          ...styles.headerActionsRight,
+          flexDirection: isMobile ? 'row' : 'row',
+          width: isMobile ? '100%' : 'auto',
+          justifyContent: isMobile ? 'space-between' : 'flex-end'
+        }}>
           {/* Personalitzar Dashboard */}
           <button 
             onClick={() => setShowCustomizeModal(true)}
@@ -432,7 +470,13 @@ export default function Dashboard() {
                 GTIN Coverage
               </h2>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', padding: '20px' }}>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(200px, 1fr))', 
+              gap: '16px', 
+              padding: '20px',
+              overflowX: 'visible'
+            }}>
               <div style={{
                 padding: '16px',
                 borderRadius: '12px',
@@ -485,7 +529,7 @@ export default function Dashboard() {
               </div>
               {gtinCoverage.availableCodes < gtinCoverage.missingGtin && (
                 <div style={{
-                  gridColumn: 'span 2',
+                  gridColumn: isMobile ? 'span 1' : 'span 2',
                   padding: '12px',
                   borderRadius: '8px',
                   backgroundColor: '#fee2e2',
@@ -656,8 +700,15 @@ export default function Dashboard() {
                 Analítica de Finances
               </h2>
             </div>
-            <div style={styles.chartContainer}>
-              <div style={styles.chartBars}>
+            <div style={{
+              ...styles.chartContainer,
+              overflowX: isMobile ? 'auto' : 'visible',
+              width: '100%'
+            }}>
+              <div style={{
+                ...styles.chartBars,
+                minWidth: isMobile ? '400px' : 'auto'
+              }}>
                 {financialData.map((data, index) => (
                   <div key={index} style={styles.chartBarGroup}>
                     <div style={styles.barLabels}>
@@ -698,6 +749,66 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Daily Ops Widgets */}
+        {!loadingPreferences && (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile ? '1fr' : (isTablet ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)'),
+            gap: '24px',
+            marginTop: '32px'
+          }}>
+            {widgetOrder.map(widgetId => {
+              if (!dashboardWidgets[widgetId]) return null
+              
+              switch (widgetId) {
+                case 'waiting_manufacturer_ops':
+                  return (
+                    <WaitingManufacturerWidget
+                      key={widgetId}
+                      darkMode={darkMode}
+                      limit={10}
+                    />
+                  )
+                case 'pos_not_amazon_ready':
+                  return (
+                    <PosNotAmazonReadyWidget
+                      key={widgetId}
+                      darkMode={darkMode}
+                      limit={10}
+                    />
+                  )
+                case 'shipments_in_transit':
+                  return (
+                    <ShipmentsInTransitWidget
+                      key={widgetId}
+                      darkMode={darkMode}
+                      limit={10}
+                    />
+                  )
+                case 'research_no_decision':
+                  return (
+                    <ResearchNoDecisionWidget
+                      key={widgetId}
+                      darkMode={darkMode}
+                      limit={10}
+                    />
+                  )
+                case 'stale_tracking':
+                  return (
+                    <StaleTrackingWidget
+                      key={widgetId}
+                      darkMode={darkMode}
+                      limit={10}
+                      staleDays={staleDays}
+                    />
+                  )
+                default:
+                  return null
+              }
+            })}
           </div>
         )}
       </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Barcode, Package, Save, Plus, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { Barcode, Package, Save, Plus, AlertCircle, CheckCircle2, X } from 'lucide-react'
 import {
   getProductIdentifiers,
   upsertProductIdentifiers,
@@ -20,6 +21,7 @@ const GTIN_TYPES = [
 
 export default function IdentifiersSection({ projectId, darkMode }) {
   const { isMobile } = useBreakpoint()
+  const { t } = useTranslation()
   const modalStyles = getModalStyles(isMobile, darkMode)
   const [identifiers, setIdentifiers] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -334,7 +336,7 @@ export default function IdentifiersSection({ projectId, darkMode }) {
           }}
         >
           <Save size={16} />
-          {saving ? 'Guardant...' : 'Guardar'}
+          {saving ? t('common.loading') : t('common.save')}
         </button>
       </div>
 

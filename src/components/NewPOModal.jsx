@@ -44,6 +44,7 @@ export default function NewPOModal({
 }) {
   const { darkMode } = useApp()
   const { isMobile } = useBreakpoint()
+  const { t } = useTranslation()
   const modalStyles = getModalStyles(isMobile, darkMode)
   const [loading, setLoading] = useState(false)
   const [generatingPO, setGeneratingPO] = useState(false)
@@ -965,7 +966,7 @@ export default function NewPOModal({
         {/* Footer */}
         <div style={styles.footer}>
           <button onClick={onClose} style={styles.cancelButton}>
-            Cancel·lar
+            {t('common.cancel')}
           </button>
           <button 
             onClick={handleSave} 

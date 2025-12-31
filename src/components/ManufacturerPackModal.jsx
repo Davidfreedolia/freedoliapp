@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { X, Download, Upload, Loader, AlertTriangle, CheckCircle2, Package } from 'lucide-react'
 import { generateManufacturerPack } from '../lib/generateManufacturerPack'
 import { getCompanySettings, updateManufacturerPackGenerated, markManufacturerPackAsSent } from '../lib/supabase'
@@ -544,7 +545,7 @@ export default function ManufacturerPackModal({
                     opacity: loading ? 0.6 : 1
                   }}
                 >
-                  ✓ Mark as Sent
+                  ✓ {t('common.markAsSent')}
                 </button>
               </>
             )}
@@ -562,7 +563,7 @@ export default function ManufacturerPackModal({
             fontSize: '13px',
             color: '#92400e'
           }}>
-            ⚠️ Google Drive is not connected. Connect Drive to enable automatic upload to project folder.
+            ⚠️ {t('errors.driveDisconnected')}
           </div>
         )}
 

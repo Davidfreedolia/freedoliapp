@@ -1,0 +1,55 @@
+{
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancel·lar",
+    "generate": "Generar",
+    "upload": "Pujar",
+    "download": "Descarregar",
+    "markAsSent": "Marcar com enviat",
+    "restore": "Restaurar",
+    "loading": "Carregant...",
+    "error": "Error",
+    "success": "Èxit"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "projects": "Projectes",
+    "suppliers": "Proveïdors",
+    "forwarders": "Transitaris",
+    "warehouses": "Magatzems",
+    "orders": "Comandes",
+    "finances": "Finances",
+    "inventory": "Inventari",
+    "analytics": "Analítica",
+    "settings": "Configuració"
+  },
+  "dashboard": {
+    "waitingManufacturer": {
+      "title": "Waiting Manufacturer",
+      "empty": "No hi ha POs esperant enviament al fabricant"
+    },
+    "posNotAmazonReady": {
+      "title": "POs Not Amazon Ready",
+      "empty": "Totes les POs estan llestes per Amazon"
+    },
+    "shipmentsInTransit": {
+      "title": "Shipments In Transit",
+      "empty": "No hi ha enviaments en trànsit",
+      "tableNotExists": "La taula po_shipments no existeix encara"
+    },
+    "researchNoDecision": {
+      "title": "Research No Decision",
+      "empty": "Tots els projectes en recerca tenen decisió"
+    },
+    "staleTracking": {
+      "title": "Stale Tracking",
+      "empty": "No hi ha tracking stale"
+    }
+  },
+  "errors": {
+    "driveDisconnected": "Google Drive no està connectat",
+    "missingFields": "Falten camps obligatoris",
+    "notAllowed": "No tens permís per realitzar aquesta acció"
+  }
+}
+
