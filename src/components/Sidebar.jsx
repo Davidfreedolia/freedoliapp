@@ -12,6 +12,7 @@ import {
   Package,
   TrendingUp,
   Settings,
+  Calendar as CalendarIcon,
   ChevronLeft,
   ChevronRight,
   X,
@@ -55,6 +56,9 @@ const prefetchRoute = (path) => {
     case '/settings':
       import('../pages/Settings.jsx').catch(() => {})
       break
+    case '/calendar':
+      import('../pages/Calendar.jsx').catch(() => {})
+      break
     default:
       break
   }
@@ -72,6 +76,7 @@ const menuItems = [
   { path: '/orders', icon: FileText, labelKey: 'sidebar.orders' },
   { path: '/finances', icon: Receipt, labelKey: 'sidebar.finances' },
   { path: '/inventory', icon: Package, labelKey: 'sidebar.inventory' },
+  { path: '/calendar', icon: CalendarIcon, labelKey: 'sidebar.calendar' },
   { path: '/analytics', icon: TrendingUp, labelKey: 'sidebar.analytics' },
   { path: '/settings', icon: Settings, labelKey: 'sidebar.settings' },
 ]

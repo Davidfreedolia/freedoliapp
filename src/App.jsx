@@ -24,6 +24,7 @@ const Analytics = React.lazy(() => import('./pages/Analytics'))
 const Suppliers = React.lazy(() => import('./pages/Suppliers'))
 const Forwarders = React.lazy(() => import('./pages/Forwarders'))
 const Warehouses = React.lazy(() => import('./pages/Warehouses'))
+const Calendar = React.lazy(() => import('./pages/Calendar'))
 
 function AppContent() {
   const { sidebarCollapsed, darkMode } = useApp()

@@ -1890,6 +1890,204 @@ export const bulkMarkShipmentsDelivered = async (poIds) => {
 }
 
 // SUPPLIER QUOTES
+// Get all calendar events (tasks, shipments, manufacturer packs, quotes)
+export const getCalendarEvents = async (filters = {}) => {
+  const userId = await getCurrentUserId()
+  const events = []
+  
+  try {
+    // 1) Tasks
+    if (filters.types?.includes('task') !== false) {
+      const taskFilters = { ...filters }
+      if (!filters.showCompleted) {
+        taskFilters.status = 'open'
+      }
+      const tasks = await getTasks(taskFilters)
+      if (tasks) {
+        tasks.forEach(task => {
+          if (task.due_date) {
+            events.push({
+              id: `task-${task.id}`,
+              title: task.title,
+              start: new Date(task.due_date),
+              end: new Date(task.due_date),
+              type: 'task',
+              entity_type: task.entity_type,
+              entity_id: task.entity_id,
+              project_id: task.entity_type === 'project' ? task.entity_id : null,
+              status: task.status,
+              priority: task.priority,
+              resource: task
+            })
+          }
+        })
+      }
+    }
+    
+    // 2) Shipments
+    if (filters.types?.includes('shipment') !== false) {
+      const { data: shipments, error: shipmentsError } = await supabase
+        .from('po_shipments')
+        .select(`
+          *,
+          purchase_orders!inner(
+            id,
+            po_number,
+            projects(id, name)
+          )
+        `)
+        .eq('user_id', userId)
+      
+      if (!shipmentsError && shipments) {
+        shipments.forEach(shipment => {
+          const po = shipment.purchase_orders
+          const project = po?.projects
+          
+          // Pickup event
+          if (shipment.pickup_date) {
+            events.push({
+              id: `shipment-pickup-${shipment.id}`,
+              title: `Pickup: ${po?.po_number || 'PO'} (${shipment.carrier || 'N/A'})`,
+              start: new Date(shipment.pickup_date),
+              end: new Date(shipment.pickup_date),
+              type: 'shipment',
+              entity_type: 'purchase_order',
+              entity_id: po?.id,
+              project_id: project?.id,
+              status: shipment.status,
+              shipment_type: shipment.shipment_type,
+              resource: shipment
+            })
+          }
+          
+          // ETA event
+          if (shipment.eta_date) {
+            events.push({
+              id: `shipment-eta-${shipment.id}`,
+              title: `ETA: ${po?.po_number || 'PO'} (${shipment.carrier || 'N/A'})`,
+              start: new Date(shipment.eta_date),
+              end: new Date(shipment.eta_date),
+              type: 'shipment',
+              entity_type: 'purchase_order',
+              entity_id: po?.id,
+              project_id: project?.id,
+              status: shipment.status,
+              shipment_type: shipment.shipment_type,
+              resource: shipment
+            })
+          }
+        })
+      }
+    }
+    
+    // 3) Manufacturer packs
+    if (filters.types?.includes('manufacturer') !== false) {
+      const { data: pos, error: posError } = await supabase
+        .from('purchase_orders')
+        .select(`
+          id,
+          po_number,
+          manufacturer_pack_generated_at,
+          manufacturer_pack_sent_at,
+          projects(id, name)
+        `)
+        .eq('user_id', userId)
+        .not('manufacturer_pack_generated_at', 'is', null)
+      
+      if (!posError && pos) {
+        pos.forEach(po => {
+          // Pack generated event
+          if (po.manufacturer_pack_generated_at) {
+            events.push({
+              id: `manufacturer-generated-${po.id}`,
+              title: `Pack generated: ${po.po_number}`,
+              start: new Date(po.manufacturer_pack_generated_at),
+              end: new Date(po.manufacturer_pack_generated_at),
+              type: 'manufacturer',
+              entity_type: 'purchase_order',
+              entity_id: po.id,
+              project_id: po.projects?.id,
+              status: po.manufacturer_pack_sent_at ? 'sent' : 'pending',
+              resource: po
+            })
+          }
+          
+          // Pack sent event
+          if (po.manufacturer_pack_sent_at) {
+            events.push({
+              id: `manufacturer-sent-${po.id}`,
+              title: `Pack sent: ${po.po_number}`,
+              start: new Date(po.manufacturer_pack_sent_at),
+              end: new Date(po.manufacturer_pack_sent_at),
+              type: 'manufacturer',
+              entity_type: 'purchase_order',
+              entity_id: po.id,
+              project_id: po.projects?.id,
+              status: 'sent',
+              resource: po
+            })
+          }
+        })
+      }
+    }
+    
+    // 4) Quotes (only if validity_date column exists)
+    if (filters.types?.includes('quote') !== false) {
+      try {
+        const { data: quotes, error: quotesError } = await supabase
+          .from('supplier_quotes')
+          .select(`
+            *,
+            projects(id, name),
+            suppliers(id, name)
+          `)
+          .eq('user_id', userId)
+        
+        if (quotesError) {
+          // If column doesn't exist, skip quotes
+          if (quotesError.code === '42703') {
+            console.warn('validity_date column does not exist in supplier_quotes, skipping quote events')
+          } else {
+            throw quotesError
+          }
+        } else if (quotes) {
+      
+      if (!quotesError && quotes) {
+          quotes.forEach(quote => {
+            if (quote.validity_date) {
+              events.push({
+                id: `quote-${quote.id}`,
+                title: `Quote expires: ${quote.projects?.name || 'Project'} (${quote.suppliers?.name || 'Supplier'})`,
+                start: new Date(quote.validity_date),
+                end: new Date(quote.validity_date),
+                type: 'quote',
+                entity_type: 'quote',
+                entity_id: quote.id,
+                project_id: quote.project_id,
+                status: 'active',
+                resource: quote
+              })
+            }
+          })
+        }
+      } catch (err) {
+        // Skip quotes if there's an error (e.g., column doesn't exist)
+        console.warn('Error loading quote events:', err)
+      }
+    }
+    
+    // Filter by project if specified
+    if (filters.projectId) {
+      return events.filter(e => e.project_id === filters.projectId)
+    }
+    
+    return events
+  } catch (err) {
+    console.error('Error getting calendar events:', err)
+    return []
+  }
+}
+
 export const getSupplierQuotes = async (projectId) => {
   const userId = await getCurrentUserId()
   const { data, error } = await supabase

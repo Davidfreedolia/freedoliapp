@@ -20,6 +20,7 @@
     "orders": "Orders",
     "finances": "Finances",
     "inventory": "Inventory",
+    "calendar": "Calendar",
     "analytics": "Analytics",
     "settings": "Settings"
   },

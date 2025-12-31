@@ -20,6 +20,7 @@
     "orders": "Comandes",
     "finances": "Finances",
     "inventory": "Inventari",
+    "calendar": "Calendari",
     "analytics": "Analítica",
     "settings": "Configuració"
   },
@@ -48,6 +49,31 @@
     "tasks": {
       "empty": "Totes les tasques completades. Tot al dia."
     }
+  },
+  "calendar": {
+    "title": "Calendari",
+    "filters": "Filtres",
+    "project": "Projecte",
+    "allProjects": "Tots els projectes",
+    "eventTypes": "Tipus d'esdeveniments",
+    "showCompleted": "Mostrar completats",
+    "type": {
+      "task": "Tasques",
+      "shipment": "Enviaments",
+      "manufacturer": "Packs Fabricant",
+      "quote": "Pressupostos"
+    },
+    "next": "Següent",
+    "previous": "Anterior",
+    "today": "Avui",
+    "month": "Mes",
+    "week": "Setmana",
+    "day": "Dia",
+    "agenda": "Agenda",
+    "date": "Data",
+    "time": "Hora",
+    "event": "Esdeveniment",
+    "noEvents": "No hi ha esdeveniments en aquest rang"
   },
   "errors": {
     "driveDisconnected": "Google Drive no està connectat",
