@@ -20,7 +20,7 @@ import {
   AlertTriangle
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { getPurchaseOrders, getDashboardPreferences, getPosNotReady, getProjectsMissingGtin, getUnassignedGtinCodes } from '../lib/supabase'
+import { getPurchaseOrders, getDashboardPreferences, getPosNotReady, getProjectsMissingGtin, getUnassignedGtinCodes, getPosWaitingManufacturer } from '../lib/supabase'
 import { supabase } from '../lib/supabase'
 import NewProjectModal from '../components/NewProjectModal'
 import LogisticsTrackingWidget from '../components/LogisticsTrackingWidget'
@@ -41,11 +41,14 @@ export default function Dashboard() {
     finance_chart: true,
     orders_in_progress: true,
     pos_not_ready: true,
+    waiting_manufacturer: true,
     activity_feed: false
   })
   const [loadingPreferences, setLoadingPreferences] = useState(true)
   const [gtinCoverage, setGtinCoverage] = useState({ missingGtin: 0, availableCodes: 0 })
   const [loadingGtinCoverage, setLoadingGtinCoverage] = useState(true)
+  const [posWaitingManufacturer, setPosWaitingManufacturer] = useState([])
+  const [loadingWaitingManufacturer, setLoadingWaitingManufacturer] = useState(true)
 
   useEffect(() => {
     loadDashboardPreferences()
@@ -53,6 +56,7 @@ export default function Dashboard() {
     loadFinancialData()
     loadGtinCoverage()
     loadPosNotReady()
+    loadPosWaitingManufacturer()
   }, [])
 
   const loadGtinCoverage = async () => {
@@ -98,6 +102,17 @@ export default function Dashboard() {
     setLoadingPosNotReady(false)
   }
 
+  const loadPosWaitingManufacturer = async () => {
+    setLoadingWaitingManufacturer(true)
+    try {
+      const waiting = await getPosWaitingManufacturer(5)
+      setPosWaitingManufacturer(waiting || [])
+    } catch (err) {
+      console.error('Error carregant POs waiting manufacturer:', err)
+    }
+    setLoadingWaitingManufacturer(false)
+  }
+
   const loadDashboardPreferences = async () => {
     setLoadingPreferences(true)
     try {
@@ -108,6 +123,7 @@ export default function Dashboard() {
           finance_chart: prefs.widgets.finance_chart !== false,
           orders_in_progress: prefs.widgets.orders_in_progress !== false,
           pos_not_ready: prefs.widgets.pos_not_ready !== false,
+          waiting_manufacturer: prefs.widgets.waiting_manufacturer !== false,
           activity_feed: prefs.widgets.activity_feed === true
         })
       }

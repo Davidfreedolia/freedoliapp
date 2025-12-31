@@ -749,6 +749,104 @@ export const updatePoAmazonReadinessLabels = async (purchaseOrderId, labelsData)
   return data
 }
 
+export const updateManufacturerPackGenerated = async (purchaseOrderId, version) => {
+  const userId = await getCurrentUserId()
+  
+  // Buscar o crear readiness record
+  const existing = await getPoAmazonReadiness(purchaseOrderId)
+  let projectId = null
+  
+  if (!existing) {
+    // Necessitem project_id per crear el registre
+    const { data: poData } = await supabase
+      .from('purchase_orders')
+      .select('project_id')
+      .eq('id', purchaseOrderId)
+      .single()
+    if (poData) projectId = poData.project_id
+  } else {
+    projectId = existing.project_id
+  }
+  
+  if (!projectId) {
+    throw new Error('PO must have a project_id to track manufacturer pack')
+  }
+  
+  const { data, error } = await supabase
+    .from('po_amazon_readiness')
+    .upsert({
+      purchase_order_id: purchaseOrderId,
+      project_id: projectId,
+      manufacturer_pack_version: version,
+      manufacturer_pack_generated_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }, {
+      onConflict: 'user_id,purchase_order_id',
+      ignoreDuplicates: false
+    })
+    .eq('user_id', userId)
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+export const markManufacturerPackAsSent = async (purchaseOrderId) => {
+  const userId = await getCurrentUserId()
+  const { data, error } = await supabase
+    .from('po_amazon_readiness')
+    .update({
+      manufacturer_pack_sent_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    })
+    .eq('purchase_order_id', purchaseOrderId)
+    .eq('user_id', userId)
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+export const getPosWaitingManufacturer = async (limit = 10) => {
+  const userId = await getCurrentUserId()
+  
+  const { data, error } = await supabase
+    .from('po_amazon_readiness')
+    .select(`
+      *,
+      purchase_orders (
+        id,
+        po_number,
+        status,
+        order_date,
+        project_id,
+        projects (
+          id,
+          name,
+          sku
+        ),
+        suppliers (
+          id,
+          name
+        )
+      )
+    `)
+    .eq('user_id', userId)
+    .not('manufacturer_pack_generated_at', 'is', null)
+    .is('manufacturer_pack_sent_at', null)
+    .order('manufacturer_pack_generated_at', { ascending: false })
+    .limit(limit)
+  
+  if (error) throw error
+  
+  return (data || []).map(r => ({
+    ...r.purchase_orders,
+    readiness: r,
+    packGeneratedAt: r.manufacturer_pack_generated_at,
+    packVersion: r.manufacturer_pack_version || 1
+  })).filter(po => po.id) // Filtrar nulls
+}
+
 export const getPosNotReady = async (limit = 5) => {
   const userId = await getCurrentUserId()
   
@@ -984,6 +1082,42 @@ export const getAuditLogs = async (limit = 50, statusFilter = null) => {
   const { data, error } = await query
   if (error) throw error
   return data || []
+}
+
+// ============================================
+// PROFITABILITY CALCULATOR
+// ============================================
+
+export const getProjectProfitability = async (projectId) => {
+  const userId = await getCurrentUserId()
+  const { data, error } = await supabase
+    .from('project_profitability_basic')
+    .select('*')
+    .eq('project_id', projectId)
+    .eq('user_id', userId)
+    .single()
+  if (error && error.code !== 'PGRST116') throw error // PGRST116 = no rows found
+  return data
+}
+
+export const upsertProjectProfitability = async (projectId, profitabilityData) => {
+  // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
+  const { user_id, ...data } = profitabilityData
+  const userId = await getCurrentUserId()
+  
+  const { data: result, error } = await supabase
+    .from('project_profitability_basic')
+    .upsert({
+      project_id: projectId,
+      ...data,
+      updated_at: new Date().toISOString()
+    }, {
+      onConflict: 'user_id,project_id'
+    })
+    .select()
+    .single()
+  if (error) throw error
+  return result
 }
 
 export default supabase

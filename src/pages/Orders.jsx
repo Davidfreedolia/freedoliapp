@@ -127,7 +127,24 @@ export default function Orders() {
                 readiness
               })
               
-              return { ...order, amazonReadyStatus: readyStatus }
+              // Manufacturer pack status
+              let packStatus = null
+              if (readiness) {
+                if (readiness.manufacturer_pack_sent_at) {
+                  packStatus = 'sent'
+                } else if (readiness.manufacturer_pack_generated_at) {
+                  packStatus = 'generated'
+                }
+              }
+              
+              return { 
+                ...order, 
+                amazonReadyStatus: readyStatus,
+                manufacturerPackStatus: packStatus,
+                manufacturerPackVersion: readiness?.manufacturer_pack_version || null,
+                manufacturerPackGeneratedAt: readiness?.manufacturer_pack_generated_at || null,
+                manufacturerPackSentAt: readiness?.manufacturer_pack_sent_at || null
+              }
             } catch (err) {
               console.error(`Error carregant Amazon readiness per PO ${order.id}:`, err)
               return { ...order, amazonReadyStatus: null }
@@ -706,14 +723,34 @@ export default function Orders() {
                         {formatCurrency(order.total_amount, order.currency)}
                       </td>
                       <td style={styles.td}>
-                        <span style={{
-                          ...styles.statusBadge,
-                          backgroundColor: `${status.color}15`,
-                          color: status.color
-                        }}>
-                          <StatusIcon size={14} />
-                          {status.name}
-                        </span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
+                          <span style={{
+                            ...styles.statusBadge,
+                            backgroundColor: `${status.color}15`,
+                            color: status.color
+                          }}>
+                            <StatusIcon size={14} />
+                            {status.name}
+                          </span>
+                          {/* Manufacturer Pack Badge */}
+                          {order.manufacturerPackStatus && (
+                            <span style={{
+                              ...styles.statusBadge,
+                              fontSize: '11px',
+                              padding: '2px 6px',
+                              backgroundColor: 
+                                order.manufacturerPackStatus === 'sent' ? '#d1fae515' :
+                                order.manufacturerPackStatus === 'generated' ? '#fef3c715' : '#e5e7eb15',
+                              color: 
+                                order.manufacturerPackStatus === 'sent' ? '#10b981' :
+                                order.manufacturerPackStatus === 'generated' ? '#f59e0b' : '#6b7280'
+                            }}>
+                              {order.manufacturerPackStatus === 'sent' && '✓ Pack Sent'}
+                              {order.manufacturerPackStatus === 'generated' && '📦 Pack Generated'}
+                              {order.manufacturerPackVersion > 1 && ` (v${order.manufacturerPackVersion})`}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td style={styles.td}>
                         <div style={styles.actionsCell}>
@@ -1111,6 +1148,13 @@ export default function Orders() {
           readiness={amazonReadiness}
           identifiers={manufacturerPackIdentifiers}
           darkMode={darkMode}
+          onRefresh={async () => {
+            // Recarregar readiness després de marcar com enviat
+            if (selectedOrder?.project_id) {
+              const updatedReadiness = await getPoAmazonReadiness(selectedOrder.id)
+              setAmazonReadiness(updatedReadiness)
+            }
+          }}
         />
       )}
 

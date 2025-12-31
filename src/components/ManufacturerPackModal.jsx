@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { X, Download, Upload, Loader, AlertTriangle, CheckCircle2, Package } from 'lucide-react'
 import { generateManufacturerPack } from '../lib/generateManufacturerPack'
-import { getCompanySettings } from '../lib/supabase'
+import { getCompanySettings, updateManufacturerPackGenerated, markManufacturerPackAsSent } from '../lib/supabase'
 import { driveService } from '../lib/googleDrive'
 import { logAudit } from '../lib/auditLog'
 import { computePoAmazonReady } from '../lib/amazonReady'
@@ -119,8 +119,8 @@ export default function ManufacturerPackModal({
     setError(null)
 
     try {
-      // Generar ZIP
-      const zipBlob = await generateManufacturerPack({
+      // Generar ZIP (retorna { zipBlob, version })
+      const result = await generateManufacturerPack({
         poData: po,
         supplier,
         project,
@@ -131,11 +131,22 @@ export default function ManufacturerPackModal({
         fnskuLabelsConfig: labelsConfig
       })
 
-      // Descarregar ZIP
+      const { zipBlob, version } = result
+
+      // Guardar versió i timestamp de generació
+      try {
+        await updateManufacturerPackGenerated(po.id, version)
+      } catch (dbError) {
+        console.error('Error guardant versió del pack:', dbError)
+        // No bloquejar si falla guardar a BD
+      }
+
+      // Descarregar ZIP amb versió al nom
+      const versionSuffix = version > 1 ? `_v${version}` : ''
       const url = URL.createObjectURL(zipBlob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `ManufacturerPack_${po.po_number || po.id}.zip`
+      a.download = `ManufacturerPack_${po.po_number || po.id}${versionSuffix}.zip`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -159,12 +170,13 @@ export default function ManufacturerPackModal({
               purchaseOrdersFolder.id
             )
 
-            // Pujar ZIP
-            const zipFile = new File([zipBlob], `ManufacturerPack_${po.po_number || po.id}.zip`, {
+            // Pujar ZIP amb versió al nom
+            const versionSuffix = version > 1 ? `_v${version}` : ''
+            const zipFile = new File([zipBlob], `ManufacturerPack_${po.po_number || po.id}${versionSuffix}.zip`, {
               type: 'application/zip'
             })
 
-            await driveService.uploadFile(zipFile, poFolder.id, `ManufacturerPack_${po.po_number || po.id}.zip`)
+            await driveService.uploadFile(zipFile, poFolder.id, `ManufacturerPack_${po.po_number || po.id}${versionSuffix}.zip`)
             driveUploaded = true
           }
         } catch (driveError) {
@@ -191,7 +203,8 @@ export default function ManufacturerPackModal({
             },
             drive_uploaded: driveUploaded,
             labels_template: labelsConfig.template,
-            labels_quantity: labelsConfig.quantity
+            labels_quantity: labelsConfig.quantity,
+            pack_version: version
           }
         })
       } catch (auditError) {
@@ -470,6 +483,69 @@ export default function ManufacturerPackModal({
                 <option value="ZEBRA_40x30">Zebra 40x30mm</option>
               </select>
             </div>
+          </div>
+        )}
+
+        {/* Pack Status */}
+        {readiness?.manufacturer_pack_generated_at && (
+          <div style={{
+            padding: '12px',
+            borderRadius: '8px',
+            backgroundColor: readiness.manufacturer_pack_sent_at ? '#d1fae5' : '#fef3c7',
+            border: `1px solid ${readiness.manufacturer_pack_sent_at ? '#10b981' : '#fbbf24'}`,
+            marginBottom: '16px',
+            fontSize: '13px',
+            color: readiness.manufacturer_pack_sent_at ? '#065f46' : '#92400e'
+          }}>
+            {readiness.manufacturer_pack_sent_at ? (
+              <>
+                ✅ Pack sent to manufacturer on {new Date(readiness.manufacturer_pack_sent_at).toLocaleDateString()}
+                {readiness.manufacturer_pack_version > 1 && (
+                  <span> (Version {readiness.manufacturer_pack_version})</span>
+                )}
+              </>
+            ) : (
+              <>
+                📦 Pack generated on {new Date(readiness.manufacturer_pack_generated_at).toLocaleDateString()}
+                {readiness.manufacturer_pack_version > 1 && (
+                  <span> (Version {readiness.manufacturer_pack_version})</span>
+                )}
+                <br />
+                <button
+                  onClick={async () => {
+                    try {
+                      setLoading(true)
+                      await markManufacturerPackAsSent(po.id)
+                      // Recarregar readiness per actualitzar UI
+                      if (onRefresh) {
+                        await onRefresh()
+                      }
+                      // Tancar modal després de marcar com enviat
+                      onClose()
+                    } catch (err) {
+                      setError('Error marking pack as sent: ' + (err.message || 'Unknown error'))
+                    } finally {
+                      setLoading(false)
+                    }
+                  }}
+                  disabled={loading}
+                  style={{
+                    marginTop: '8px',
+                    padding: '6px 12px',
+                    backgroundColor: '#10b981',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    opacity: loading ? 0.6 : 1
+                  }}
+                >
+                  ✓ Mark as Sent
+                </button>
+              </>
+            )}
           </div>
         )}
 

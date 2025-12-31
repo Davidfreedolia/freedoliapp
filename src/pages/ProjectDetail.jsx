@@ -21,6 +21,7 @@ import Header from '../components/Header'
 import FileUploader from '../components/FileUploader'
 import FileBrowser from '../components/FileBrowser'
 import IdentifiersSection from '../components/IdentifiersSection'
+import ProfitabilityCalculator from '../components/ProfitabilityCalculator'
 
 const PHASES = [
   { id: 1, name: 'Recerca', icon: '🔍', color: '#6366f1', description: 'Investigació de producte i mercat' },
@@ -287,6 +288,15 @@ export default function ProjectDetail() {
 
         {/* Identifiers Section */}
         <IdentifiersSection projectId={id} darkMode={darkMode} />
+
+        {/* Quick Profitability Calculator - Visible a fase Research (1) */}
+        {project.current_phase === 1 && (
+          <div style={{
+            marginBottom: '24px'
+          }}>
+            <ProfitabilityCalculator projectId={id} darkMode={darkMode} />
+          </div>
+        )}
 
         {/* Drive Integration */}
         <div style={styles.driveSection}>

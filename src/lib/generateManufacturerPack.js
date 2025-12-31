@@ -40,18 +40,23 @@ export const generateManufacturerPack = async (options) => {
       template: 'A4_30UP',
       includeSku: true,
       includeName: true
-    }
+    },
+    version = null // Si es passa, usa aquesta versió; si no, calcula la següent
   } = options
 
   const zip = new JSZip()
   const poNumber = poData.po_number || `PO_${poData.id}`
+  
+  // Calcular versió del pack
+  const packVersion = version !== null ? version : ((amazonReadiness?.manufacturer_pack_version || 0) + 1)
+  const versionSuffix = packVersion > 1 ? `_v${packVersion}` : ''
 
   // Generar PO PDF
   if (selection.includePO) {
     try {
       const poPdf = await generatePOPdf(poData, supplier, companySettings)
       const poPdfBlob = poPdf.output('blob')
-      zip.file(`PO_${poNumber}.pdf`, poPdfBlob)
+      zip.file(`PO_${poNumber}${versionSuffix}.pdf`, poPdfBlob)
     } catch (error) {
       console.error('Error generant PO PDF:', error)
       throw new Error('Error generant PO PDF: ' + (error.message || 'Error desconegut'))
@@ -74,7 +79,7 @@ export const generateManufacturerPack = async (options) => {
         testPrint: fnskuLabelsConfig.testPrint || false
       })
       const labelsPdfBlob = labelsPdf.output('blob')
-      zip.file(`FNSKU_Labels_${poNumber}.pdf`, labelsPdfBlob)
+      zip.file(`FNSKU_Labels_${poNumber}${versionSuffix}.pdf`, labelsPdfBlob)
     } catch (error) {
       console.error('Error generant FNSKU labels PDF:', error)
       throw new Error('Error generant FNSKU labels PDF: ' + (error.message || 'Error desconegut'))
@@ -92,7 +97,7 @@ export const generateManufacturerPack = async (options) => {
         amazonReadiness
       )
       const packingListBlob = packingListPdf.output('blob')
-      zip.file(`PackingList_${poNumber}.pdf`, packingListBlob)
+      zip.file(`PackingList_${poNumber}${versionSuffix}.pdf`, packingListBlob)
     } catch (error) {
       console.error('Error generant Packing List PDF:', error)
       throw new Error('Error generant Packing List PDF: ' + (error.message || 'Error desconegut'))
@@ -109,7 +114,7 @@ export const generateManufacturerPack = async (options) => {
         1 // labels per page (1 o 2)
       )
       const cartonLabelsBlob = cartonLabelsPdf.output('blob')
-      zip.file(`CartonLabels_${poNumber}.pdf`, cartonLabelsBlob)
+      zip.file(`CartonLabels_${poNumber}${versionSuffix}.pdf`, cartonLabelsBlob)
     } catch (error) {
       console.error('Error generant Carton Labels PDF:', error)
       throw new Error('Error generant Carton Labels PDF: ' + (error.message || 'Error desconegut'))
@@ -118,6 +123,11 @@ export const generateManufacturerPack = async (options) => {
 
   // Generar ZIP
   const zipBlob = await zip.generateAsync({ type: 'blob' })
-  return zipBlob
+  
+  // Retornar també la versió generada per poder-la guardar a BD
+  return {
+    zipBlob,
+    version: packVersion
+  }
 }
 

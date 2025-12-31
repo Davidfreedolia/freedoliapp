@@ -181,3 +181,4 @@ INSERT INTO gtin_pool (gtin_code, gtin_type, status) VALUES
 **Última actualització**: Sprints 1, 2 i 3 completats ✅
 
 
+
