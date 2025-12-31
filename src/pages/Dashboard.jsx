@@ -40,6 +40,7 @@ import {
 } from '../components/DailyOpsWidgets'
 import TasksWidget from '../components/TasksWidget'
 import AlertsBadge from '../components/AlertsBadge'
+import StickyNotesWidget from '../components/StickyNotesWidget'
 import { 
   getDefaultLayout, 
   generateLayoutFromEnabled, 
@@ -942,6 +943,14 @@ export default function Dashboard() {
                       <TasksWidget
                         darkMode={darkMode}
                         limit={10}
+                      />
+                    )
+                    break
+                  case WIDGET_IDS.STICKY_NOTES:
+                    widgetComponent = (
+                      <StickyNotesWidget
+                        darkMode={darkMode}
+                        showOverlay={false}
                       />
                     )
                     break

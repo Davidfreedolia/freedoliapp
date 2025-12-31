@@ -2410,4 +2410,76 @@ export const quickMarkPackAsSent = async (poId) => {
   return data
 }
 
+// Sticky Notes functions
+export const getStickyNotes = async (filters = {}) => {
+  const userId = await getCurrentUserId()
+  let query = supabase
+    .from('sticky_notes')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+  
+  if (filters.status) {
+    query = query.eq('status', filters.status)
+  }
+  if (filters.pinned !== undefined) {
+    query = query.eq('pinned', filters.pinned)
+  }
+  
+  const { data, error } = await query
+  if (error) throw error
+  return data || []
+}
+
+export const createStickyNote = async (note) => {
+  const { user_id, ...noteData } = note
+  const userId = await getCurrentUserId()
+  
+  const { data, error } = await supabase
+    .from('sticky_notes')
+    .insert([{
+      ...noteData,
+      user_id: userId
+    }])
+    .select()
+    .single()
+  
+  if (error) throw error
+  return data
+}
+
+export const updateStickyNote = async (id, updates) => {
+  const userId = await getCurrentUserId()
+  
+  const { data, error } = await supabase
+    .from('sticky_notes')
+    .update(updates)
+    .eq('id', id)
+    .eq('user_id', userId)
+    .select()
+    .single()
+  
+  if (error) throw error
+  return data
+}
+
+export const deleteStickyNote = async (id) => {
+  const userId = await getCurrentUserId()
+  
+  const { data, error } = await supabase
+    .from('sticky_notes')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', userId)
+    .select()
+    .single()
+  
+  if (error) throw error
+  return data
+}
+
+export const markStickyNoteDone = async (id) => {
+  return await updateStickyNote(id, { status: 'done' })
+}
+
 export default supabase

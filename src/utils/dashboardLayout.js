@@ -10,7 +10,8 @@ export const WIDGET_IDS = {
   SHIPMENTS_IN_TRANSIT: 'shipments_in_transit',
   RESEARCH_NO_DECISION: 'research_no_decision',
   STALE_TRACKING: 'stale_tracking',
-  TASKS: 'tasks'
+  TASKS: 'tasks',
+  STICKY_NOTES: 'sticky_notes'
 }
 
 // Default layout (12 columns grid)
@@ -21,7 +22,8 @@ export const getDefaultLayout = () => {
     { i: WIDGET_IDS.SHIPMENTS_IN_TRANSIT, x: 8, y: 0, w: 4, h: 3, minW: 2, minH: 2 },
     { i: WIDGET_IDS.RESEARCH_NO_DECISION, x: 0, y: 3, w: 4, h: 3, minW: 2, minH: 2 },
     { i: WIDGET_IDS.STALE_TRACKING, x: 4, y: 3, w: 4, h: 3, minW: 2, minH: 2 },
-    { i: WIDGET_IDS.TASKS, x: 8, y: 3, w: 4, h: 4, minW: 2, minH: 2 }
+    { i: WIDGET_IDS.TASKS, x: 8, y: 3, w: 4, h: 4, minW: 2, minH: 2 },
+    { i: WIDGET_IDS.STICKY_NOTES, x: 0, y: 6, w: 4, h: 4, minW: 2, minH: 2 }
   ]
 }
 
@@ -32,7 +34,8 @@ export const WIDGET_MIN_SIZES = {
   [WIDGET_IDS.SHIPMENTS_IN_TRANSIT]: { w: 2, h: 2 },
   [WIDGET_IDS.RESEARCH_NO_DECISION]: { w: 2, h: 2 },
   [WIDGET_IDS.STALE_TRACKING]: { w: 2, h: 2 },
-  [WIDGET_IDS.TASKS]: { w: 2, h: 2 }
+  [WIDGET_IDS.TASKS]: { w: 2, h: 2 },
+  [WIDGET_IDS.STICKY_NOTES]: { w: 2, h: 2 }
 }
 
 // Generate layout from enabled widgets

@@ -75,6 +75,18 @@
     "event": "Evento",
     "noEvents": "No hay eventos en este rango"
   },
+  "stickyNotes": {
+    "title": "Notas",
+    "add": "Añadir",
+    "titlePlaceholder": "Título (opcional)",
+    "contentPlaceholder": "Contenido...",
+    "pin": "Fijar",
+    "unpin": "Desfijar",
+    "markDone": "Marcar como hecho",
+    "delete": "Eliminar",
+    "confirmDelete": "¿Quieres eliminar esta nota?",
+    "empty": "No hay notas. Haz clic en \"Añadir\" para crear una."
+  },
   "errors": {
     "driveDisconnected": "Google Drive no está conectado",
     "missingFields": "Faltan campos obligatorios",

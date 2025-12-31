@@ -75,6 +75,18 @@
     "event": "Esdeveniment",
     "noEvents": "No hi ha esdeveniments en aquest rang"
   },
+  "stickyNotes": {
+    "title": "Notes",
+    "add": "Afegir",
+    "titlePlaceholder": "Títol (opcional)",
+    "contentPlaceholder": "Contingut...",
+    "pin": "Penjar",
+    "unpin": "Despenjar",
+    "markDone": "Marcar com fet",
+    "delete": "Eliminar",
+    "confirmDelete": "Vols eliminar aquesta nota?",
+    "empty": "No hi ha notes. Clica \"Afegir\" per crear-ne una."
+  },
   "errors": {
     "driveDisconnected": "Google Drive no està connectat",
     "missingFields": "Falten camps obligatoris",
