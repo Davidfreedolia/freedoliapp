@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useBreakpoint } from '../hooks/useBreakpoint'
+import GridLayout from 'react-grid-layout'
+import 'react-grid-layout/css/styles.css'
+import 'react-resizable/css/styles.css'
 import { 
   FolderKanban, 
   PlayCircle, 
@@ -18,10 +21,12 @@ import {
   Bell,
   Settings,
   Barcode,
-  AlertTriangle
+  AlertTriangle,
+  Save,
+  X
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { getPurchaseOrders, getDashboardPreferences, getPosNotReady, getProjectsMissingGtin, getUnassignedGtinCodes, getPosWaitingManufacturer } from '../lib/supabase'
+import { getPurchaseOrders, getDashboardPreferences, getPosNotReady, getProjectsMissingGtin, getUnassignedGtinCodes, getPosWaitingManufacturer, updateDashboardPreferences } from '../lib/supabase'
 import { supabase } from '../lib/supabase'
 import NewProjectModal from '../components/NewProjectModal'
 import LogisticsTrackingWidget from '../components/LogisticsTrackingWidget'
@@ -35,6 +40,12 @@ import {
 } from '../components/DailyOpsWidgets'
 import TasksWidget from '../components/TasksWidget'
 import AlertsBadge from '../components/AlertsBadge'
+import { 
+  getDefaultLayout, 
+  generateLayoutFromEnabled, 
+  validateLayout,
+  WIDGET_IDS 
+} from '../utils/dashboardLayout'
 
 export default function Dashboard() {
   const { stats, projects, loading, darkMode, setDarkMode } = useApp()
@@ -75,6 +86,8 @@ export default function Dashboard() {
   const [loadingGtinCoverage, setLoadingGtinCoverage] = useState(true)
   const [posWaitingManufacturer, setPosWaitingManufacturer] = useState([])
   const [loadingWaitingManufacturer, setLoadingWaitingManufacturer] = useState(true)
+  const [editLayout, setEditLayout] = useState(false)
+  const [layout, setLayout] = useState([])
 
   useEffect(() => {
     loadDashboardPreferences()
@@ -175,10 +188,58 @@ export default function Dashboard() {
       if (prefs?.staleDays) {
         setStaleDays(prefs.staleDays)
       }
+      
+      // Load layout
+      if (prefs?.layout && validateLayout(prefs.layout)) {
+        setLayout(prefs.layout)
+      } else {
+        // Generate default layout
+        const enabledWidgets = {
+          waiting_manufacturer_ops: prefs?.enabledWidgets?.waiting_manufacturer_ops !== false,
+          pos_not_amazon_ready: prefs?.enabledWidgets?.pos_not_amazon_ready !== false,
+          shipments_in_transit: prefs?.enabledWidgets?.shipments_in_transit !== false,
+          research_no_decision: prefs?.enabledWidgets?.research_no_decision !== false,
+          stale_tracking: prefs?.enabledWidgets?.stale_tracking !== false,
+          tasks: dashboardWidgets.tasks !== false
+        }
+        const defaultLayout = generateLayoutFromEnabled(enabledWidgets)
+        setLayout(defaultLayout)
+      }
     } catch (err) {
       console.error('Error carregant preferències dashboard:', err)
     }
     setLoadingPreferences(false)
+  }
+  
+  const handleLayoutChange = (newLayout) => {
+    if (editLayout) {
+      setLayout(newLayout)
+    }
+  }
+  
+  const handleSaveLayout = async () => {
+    try {
+      await updateDashboardPreferences({ layout })
+      setEditLayout(false)
+      // Show success message
+      alert('Layout guardat correctament')
+    } catch (err) {
+      console.error('Error guardant layout:', err)
+      alert('Error guardant el layout')
+    }
+  }
+  
+  const handleResetLayout = () => {
+    const enabledWidgets = {
+      waiting_manufacturer_ops: dashboardWidgets.waiting_manufacturer_ops !== false,
+      pos_not_amazon_ready: dashboardWidgets.pos_not_amazon_ready !== false,
+      shipments_in_transit: dashboardWidgets.shipments_in_transit !== false,
+      research_no_decision: dashboardWidgets.research_no_decision !== false,
+      stale_tracking: dashboardWidgets.stale_tracking !== false,
+      tasks: dashboardWidgets.tasks !== false
+    }
+    const defaultLayout = generateLayoutFromEnabled(enabledWidgets)
+    setLayout(defaultLayout)
   }
 
   const handlePreferencesSave = (newWidgets) => {
@@ -750,18 +811,104 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Tasks Widget */}
-        {dashboardWidgets.tasks && (
+        {/* Daily Ops Widgets with Grid Layout (Desktop/Tablet) */}
+        {!loadingPreferences && !isMobile && layout.length > 0 && (
           <div style={{ marginTop: '32px' }}>
-            <TasksWidget darkMode={darkMode} limit={10} />
+            <GridLayout
+              className="layout"
+              layout={layout}
+              cols={12}
+              rowHeight={60}
+              width={typeof window !== 'undefined' ? Math.max(window.innerWidth - (isTablet ? 72 : 260) - 64, 800) : 1200}
+              isDraggable={editLayout}
+              isResizable={editLayout}
+              onLayoutChange={handleLayoutChange}
+              style={{
+                backgroundColor: 'transparent'
+              }}
+            >
+              {layout.map(item => {
+                const widgetId = item.i
+                if (!dashboardWidgets[widgetId]) return null
+                
+                let widgetComponent = null
+                switch (widgetId) {
+                  case WIDGET_IDS.WAITING_MANUFACTURER:
+                    widgetComponent = (
+                      <WaitingManufacturerWidget
+                        darkMode={darkMode}
+                        limit={10}
+                      />
+                    )
+                    break
+                  case WIDGET_IDS.NOT_AMAZON_READY:
+                    widgetComponent = (
+                      <PosNotAmazonReadyWidget
+                        darkMode={darkMode}
+                        limit={10}
+                      />
+                    )
+                    break
+                  case WIDGET_IDS.SHIPMENTS_IN_TRANSIT:
+                    widgetComponent = (
+                      <ShipmentsInTransitWidget
+                        darkMode={darkMode}
+                        limit={10}
+                      />
+                    )
+                    break
+                  case WIDGET_IDS.RESEARCH_NO_DECISION:
+                    widgetComponent = (
+                      <ResearchNoDecisionWidget
+                        darkMode={darkMode}
+                        limit={10}
+                      />
+                    )
+                    break
+                  case WIDGET_IDS.STALE_TRACKING:
+                    widgetComponent = (
+                      <StaleTrackingWidget
+                        darkMode={darkMode}
+                        limit={10}
+                        staleDays={staleDays}
+                      />
+                    )
+                    break
+                  case WIDGET_IDS.TASKS:
+                    widgetComponent = (
+                      <TasksWidget
+                        darkMode={darkMode}
+                        limit={10}
+                      />
+                    )
+                    break
+                  default:
+                    return null
+                }
+                
+                return (
+                  <div key={item.i} style={{
+                    backgroundColor: darkMode ? '#15151f' : '#ffffff',
+                    borderRadius: '8px',
+                    padding: '16px',
+                    border: editLayout ? '2px dashed #4f46e5' : '1px solid',
+                    borderColor: editLayout ? '#4f46e5' : (darkMode ? '#374151' : '#e5e7eb'),
+                    height: '100%',
+                    overflow: 'auto'
+                  }}>
+                    {widgetComponent}
+                  </div>
+                )
+              })}
+            </GridLayout>
           </div>
         )}
-
-        {/* Daily Ops Widgets */}
-        {!loadingPreferences && (
+        
+        {/* Mobile: Simple grid (no drag) */}
+        {!loadingPreferences && isMobile && (
           <div style={{
             display: 'grid',
-            gridTemplateColumns: isMobile ? '1fr' : (isTablet ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)'),
+            gridTemplateColumns: '1fr',
             gap: '24px',
             marginTop: '32px'
           }}>
@@ -814,6 +961,9 @@ export default function Dashboard() {
                   return null
               }
             })}
+            {dashboardWidgets.tasks && (
+              <TasksWidget darkMode={darkMode} limit={10} />
+            )}
           </div>
         )}
       </div>

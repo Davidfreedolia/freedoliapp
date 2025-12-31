@@ -1542,13 +1542,20 @@ export const updateDashboardPreferences = async (preferences) => {
     alertThresholds = { ...alertThresholds, ...prefsData.alertThresholds }
   }
 
+  // Manejar layout (si ve en prefsData)
+  let layout = existing?.layout || null
+  if (prefsData.layout) {
+    layout = prefsData.layout
+  }
+
   // Preparar dades per guardar
   const dataToSave = {
     widgets: widgetsToSave,
     enabledWidgets,
     widgetOrder,
     staleDays,
-    alert_thresholds: alertThresholds
+    alert_thresholds: alertThresholds,
+    layout
   }
 
   if (existing) {
