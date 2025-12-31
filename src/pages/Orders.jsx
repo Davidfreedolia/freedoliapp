@@ -38,6 +38,7 @@ import {
   updatePoAmazonReadinessLabels
 } from '../lib/supabase'
 import ShipmentTrackingSection from '../components/ShipmentTrackingSection'
+import TasksSection from '../components/TasksSection'
 import Header from '../components/Header'
 import NewPOModal from '../components/NewPOModal'
 import LogisticsFlow from '../components/LogisticsFlow'
@@ -1225,6 +1226,17 @@ export default function Orders() {
                       darkMode={darkMode}
                     />
                   </div>
+
+                  {/* Tasks Section */}
+                  {selectedOrder && (
+                    <div style={styles.detailSection}>
+                      <TasksSection 
+                        entityType="purchase_order" 
+                        entityId={selectedOrder.id} 
+                        darkMode={darkMode} 
+                      />
+                    </div>
+                  )}
                 </div>
               </>
             )}

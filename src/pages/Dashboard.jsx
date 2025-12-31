@@ -33,6 +33,7 @@ import {
   ResearchNoDecisionWidget,
   StaleTrackingWidget
 } from '../components/DailyOpsWidgets'
+import TasksWidget from '../components/TasksWidget'
 
 export default function Dashboard() {
   const { stats, projects, loading, darkMode, setDarkMode } = useApp()
@@ -52,6 +53,7 @@ export default function Dashboard() {
     pos_not_ready: true,
     waiting_manufacturer: true,
     activity_feed: false,
+    tasks: true,
     // Daily Ops widgets
     waiting_manufacturer_ops: true,
     pos_not_amazon_ready: true,
@@ -749,6 +751,13 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Tasks Widget */}
+        {dashboardWidgets.tasks && (
+          <div style={{ marginTop: '32px' }}>
+            <TasksWidget darkMode={darkMode} limit={10} />
           </div>
         )}
 

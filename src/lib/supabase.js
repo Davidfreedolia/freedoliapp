@@ -1463,4 +1463,113 @@ export const upsertProjectProfitability = async (projectId, profitabilityData) =
   return result
 }
 
+// TASKS
+export const getTasks = async (filters = {}) => {
+  const userId = await getCurrentUserId()
+  let query = supabase
+    .from('tasks')
+    .select('*')
+    .eq('user_id', userId)
+    .order('due_date', { ascending: true, nullsLast: true })
+    .order('created_at', { ascending: false })
+  
+  if (filters.status) {
+    query = query.eq('status', filters.status)
+  }
+  if (filters.entityType) {
+    query = query.eq('entity_type', filters.entityType)
+  }
+  if (filters.entityId) {
+    query = query.eq('entity_id', filters.entityId)
+  }
+  
+  const { data, error } = await query
+  if (error) throw error
+  return data || []
+}
+
+export const getOpenTasks = async (limit = 10) => {
+  const userId = await getCurrentUserId()
+  const { data, error } = await supabase
+    .from('tasks')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('status', 'open')
+    .order('due_date', { ascending: true, nullsLast: true })
+    .order('priority', { ascending: false })
+    .limit(limit)
+  
+  if (error) throw error
+  return data || []
+}
+
+export const createTask = async (task) => {
+  const { user_id, ...taskData } = task
+  const userId = await getCurrentUserId()
+  
+  const { data, error } = await supabase
+    .from('tasks')
+    .insert([{
+      ...taskData,
+      user_id: userId
+    }])
+    .select()
+    .single()
+  
+  if (error) throw error
+  return data
+}
+
+export const updateTask = async (id, updates) => {
+  const userId = await getCurrentUserId()
+  const { user_id, ...updateData } = updates
+  
+  const { data, error } = await supabase
+    .from('tasks')
+    .update(updateData)
+    .eq('id', id)
+    .eq('user_id', userId)
+    .select()
+    .single()
+  
+  if (error) throw error
+  return data
+}
+
+export const deleteTask = async (id) => {
+  const userId = await getCurrentUserId()
+  const { error } = await supabase
+    .from('tasks')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', userId)
+  
+  if (error) throw error
+}
+
+export const markTaskDone = async (id) => {
+  return await updateTask(id, { status: 'done' })
+}
+
+export const snoozeTask = async (id, days = 3) => {
+  const userId = await getCurrentUserId()
+  const { data: task } = await supabase
+    .from('tasks')
+    .select('due_date')
+    .eq('id', id)
+    .eq('user_id', userId)
+    .single()
+  
+  if (!task) throw new Error('Task not found')
+  
+  const newDueDate = task.due_date 
+    ? new Date(new Date(task.due_date).getTime() + days * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    : new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+  
+  return await updateTask(id, { 
+    status: 'open',
+    due_date: newDueDate 
+  })
+}
+
 export default supabase

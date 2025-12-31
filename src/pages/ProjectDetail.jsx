@@ -23,6 +23,7 @@ import FileUploader from '../components/FileUploader'
 import FileBrowser from '../components/FileBrowser'
 import IdentifiersSection from '../components/IdentifiersSection'
 import ProfitabilityCalculator from '../components/ProfitabilityCalculator'
+import TasksSection from '../components/TasksSection'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 
 const PHASES = [
@@ -350,6 +351,13 @@ export default function ProjectDetail() {
 
         {/* Identifiers Section */}
         <IdentifiersSection projectId={id} darkMode={darkMode} />
+
+        {/* Tasks Section */}
+        <TasksSection 
+          entityType="project" 
+          entityId={id} 
+          darkMode={darkMode} 
+        />
 
         {/* Quick Profitability Calculator - Visible a fase Research (1) */}
         {project.current_phase === 1 && (
