@@ -50,10 +50,34 @@
       "empty": "Todas las tareas completadas. Todo al día."
     }
   },
+  "calendar": {
+    "title": "Calendario",
+    "filters": "Filtros",
+    "project": "Proyecto",
+    "allProjects": "Todos los proyectos",
+    "eventTypes": "Tipos de eventos",
+    "showCompleted": "Mostrar completados",
+    "type": {
+      "task": "Tareas",
+      "shipment": "Envíos",
+      "manufacturer": "Packs Fabricante",
+      "quote": "Presupuestos"
+    },
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "today": "Hoy",
+    "month": "Mes",
+    "week": "Semana",
+    "day": "Día",
+    "agenda": "Agenda",
+    "date": "Fecha",
+    "time": "Hora",
+    "event": "Evento",
+    "noEvents": "No hay eventos en este rango"
+  },
   "errors": {
     "driveDisconnected": "Google Drive no está conectado",
     "missingFields": "Faltan campos obligatorios",
     "notAllowed": "No tienes permiso para realizar esta acción"
   }
 }
-

@@ -50,10 +50,34 @@
       "empty": "All tasks completed. Everything up to date."
     }
   },
+  "calendar": {
+    "title": "Calendar",
+    "filters": "Filters",
+    "project": "Project",
+    "allProjects": "All projects",
+    "eventTypes": "Event types",
+    "showCompleted": "Show completed",
+    "type": {
+      "task": "Tasks",
+      "shipment": "Shipments",
+      "manufacturer": "Manufacturer Packs",
+      "quote": "Quotes"
+    },
+    "next": "Next",
+    "previous": "Previous",
+    "today": "Today",
+    "month": "Month",
+    "week": "Week",
+    "day": "Day",
+    "agenda": "Agenda",
+    "date": "Date",
+    "time": "Time",
+    "event": "Event",
+    "noEvents": "No events in this range"
+  },
   "errors": {
     "driveDisconnected": "Google Drive is not connected",
     "missingFields": "Missing required fields",
     "notAllowed": "You don't have permission to perform this action"
   }
 }
-

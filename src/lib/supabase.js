@@ -2051,8 +2051,6 @@ export const getCalendarEvents = async (filters = {}) => {
             throw quotesError
           }
         } else if (quotes) {
-      
-      if (!quotesError && quotes) {
           quotes.forEach(quote => {
             if (quote.validity_date) {
               events.push({
