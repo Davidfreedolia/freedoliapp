@@ -26,7 +26,7 @@
   "dashboard": {
     "waitingManufacturer": {
       "title": "Esperando Fabricante",
-      "empty": "No hay POs esperando envío al fabricante"
+      "empty": "Todos los packs del fabricante enviados. Nada bloqueado."
     },
     "posNotAmazonReady": {
       "title": "POs No Preparadas para Amazon",
@@ -34,16 +34,19 @@
     },
     "shipmentsInTransit": {
       "title": "Envíos en Tránsito",
-      "empty": "No hay envíos en tránsito",
-      "tableNotExists": "La tabla po_shipments no existe aún"
+      "empty": "Todos los envíos entregados. Todo al día.",
+      "tableNotExists": "El seguimiento de envíos no está configurado aún"
     },
     "researchNoDecision": {
       "title": "Investigación Sin Decisión",
-      "empty": "Todos los proyectos en investigación tienen decisión"
+      "empty": "No hay investigación pendiente. Buen trabajo."
     },
     "staleTracking": {
       "title": "Tracking Desactualizado",
-      "empty": "No hay tracking desactualizado"
+      "empty": "Todos los trackings actualizados"
+    },
+    "tasks": {
+      "empty": "Todas las tareas completadas. Todo al día."
     }
   },
   "errors": {

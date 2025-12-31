@@ -26,7 +26,7 @@
   "dashboard": {
     "waitingManufacturer": {
       "title": "Waiting Manufacturer",
-      "empty": "No POs waiting to be sent to manufacturer"
+      "empty": "All manufacturer packs sent. Nothing blocked."
     },
     "posNotAmazonReady": {
       "title": "POs Not Amazon Ready",
@@ -34,16 +34,19 @@
     },
     "shipmentsInTransit": {
       "title": "Shipments In Transit",
-      "empty": "No shipments in transit",
-      "tableNotExists": "po_shipments table does not exist yet"
+      "empty": "All shipments delivered. Everything up to date.",
+      "tableNotExists": "Shipment tracking is not configured yet"
     },
     "researchNoDecision": {
       "title": "Research No Decision",
-      "empty": "All research projects have a decision"
+      "empty": "No pending research. Good job."
     },
     "staleTracking": {
       "title": "Stale Tracking",
-      "empty": "No stale tracking"
+      "empty": "All tracking updated"
+    },
+    "tasks": {
+      "empty": "All tasks completed. Everything up to date."
     }
   },
   "errors": {

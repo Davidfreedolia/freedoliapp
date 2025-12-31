@@ -189,7 +189,7 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
         </div>
         <div style={widgetStyles.empty}>
           <p style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
-            No open tasks
+            {t('dashboard.tasks.empty')}
           </p>
         </div>
       </div>

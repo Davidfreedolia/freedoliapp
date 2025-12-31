@@ -26,7 +26,7 @@
   "dashboard": {
     "waitingManufacturer": {
       "title": "Waiting Manufacturer",
-      "empty": "No hi ha POs esperant enviament al fabricant"
+      "empty": "Tots els packs enviats al fabricant. Res bloquejat."
     },
     "posNotAmazonReady": {
       "title": "POs Not Amazon Ready",
@@ -34,16 +34,19 @@
     },
     "shipmentsInTransit": {
       "title": "Shipments In Transit",
-      "empty": "No hi ha enviaments en trànsit",
-      "tableNotExists": "La taula po_shipments no existeix encara"
+      "empty": "Tots els enviaments entregats. Tot al dia.",
+      "tableNotExists": "El seguiment d'enviaments no està configurat encara"
     },
     "researchNoDecision": {
       "title": "Research No Decision",
-      "empty": "Tots els projectes en recerca tenen decisió"
+      "empty": "No hi ha recerca pendent. Bon treball."
     },
     "staleTracking": {
       "title": "Stale Tracking",
-      "empty": "No hi ha tracking stale"
+      "empty": "Tots els trackings actualitzats"
+    },
+    "tasks": {
+      "empty": "Totes les tasques completades. Tot al dia."
     }
   },
   "errors": {

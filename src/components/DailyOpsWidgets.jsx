@@ -403,12 +403,12 @@ export function ShipmentsInTransitWidget({ darkMode, limit = 10 }) {
             ...widgetStyles.title,
             color: darkMode ? '#ffffff' : '#111827'
           }}>
-            Shipments In Transit
+            {t('dashboard.shipmentsInTransit.title')}
           </h3>
         </div>
         <div style={widgetStyles.empty}>
           <p style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
-            No hi ha enviaments en trànsit
+            {t('dashboard.shipmentsInTransit.empty')}
           </p>
         </div>
       </div>
