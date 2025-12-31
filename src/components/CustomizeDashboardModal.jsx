@@ -137,9 +137,10 @@ export default function CustomizeDashboardModal({ isOpen, onClose, onSave }) {
         widgets,
         enabledWidgets,
         widgetOrder,
-        staleDays
+        staleDays,
+        alertThresholds
       })
-      if (onSave) onSave({ widgets, enabledWidgets, widgetOrder, staleDays })
+      if (onSave) onSave({ widgets, enabledWidgets, widgetOrder, staleDays, alertThresholds })
       onClose()
     } catch (err) {
       console.error('Error guardant preferències:', err)
