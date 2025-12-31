@@ -6,6 +6,8 @@ import { createProject, updateProject, generateProjectCode } from '../lib/supaba
 import { driveService } from '../lib/googleDrive'
 import { logSuccess, logError } from '../lib/auditLog'
 import { handleError } from '../lib/errorHandling'
+import { useBreakpoint } from '../hooks/useBreakpoint'
+import { getModalStyles } from '../utils/responsiveStyles'
 
 const PHASES = [
   { id: 1, name: 'Recerca', icon: '🔍' },
@@ -20,6 +22,8 @@ const PHASES = [
 export default function NewProjectModal({ isOpen, onClose }) {
   const { refreshProjects, darkMode, driveConnected } = useApp()
   const navigate = useNavigate()
+  const { isMobile } = useBreakpoint()
+  const modalStyles = getModalStyles(isMobile, darkMode)
   const [loading, setLoading] = useState(false)
   const [creatingFolders, setCreatingFolders] = useState(false)
   const [generatingCode, setGeneratingCode] = useState(false)
@@ -125,11 +129,14 @@ export default function NewProjectModal({ isOpen, onClose }) {
   }
 
   return (
-    <div style={styles.overlay} onClick={handleClose}>
+    <div style={{
+      ...styles.overlay,
+      ...modalStyles.overlay
+    }} onClick={handleClose}>
       <div 
         style={{
           ...styles.modal,
-          backgroundColor: darkMode ? '#15151f' : '#ffffff'
+          ...modalStyles.modal
         }}
         onClick={e => e.stopPropagation()}
       >

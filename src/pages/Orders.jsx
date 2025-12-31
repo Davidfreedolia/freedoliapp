@@ -45,6 +45,7 @@ import ManufacturerPackModal from '../components/ManufacturerPackModal'
 import { generatePOPdf } from '../lib/generatePOPdf'
 import { generateFnskuLabelsPdf } from '../lib/generateFnskuLabelsPdf'
 import { computePoAmazonReady } from '../lib/amazonReady'
+import { useBreakpoint } from '../hooks/useBreakpoint'
 
 // Estats de la PO
 const PO_STATUSES = {
@@ -62,6 +63,7 @@ const PO_STATUSES = {
 export default function Orders() {
   const { darkMode } = useApp()
   const navigate = useNavigate()
+  const { isMobile, isTablet } = useBreakpoint()
   const [searchParams] = useSearchParams()
   
   const [orders, setOrders] = useState([])
@@ -566,9 +568,16 @@ export default function Orders() {
     <div style={styles.container}>
       <Header title="Comandes (PO)" />
 
-      <div style={styles.content}>
+      <div style={{
+        ...styles.content,
+        padding: isMobile ? '16px' : '32px'
+      }}>
         {/* Toolbar */}
-        <div style={styles.toolbar}>
+        <div style={{
+          ...styles.toolbar,
+          flexDirection: isMobile ? 'column' : 'row',
+          gap: isMobile ? '12px' : '16px'
+        }}>
           <div style={{
             ...styles.searchContainer,
             backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
@@ -672,6 +681,58 @@ export default function Orders() {
               Nova Comanda
             </button>
           </div>
+        ) : isMobile ? (
+          // Mobile: Cards
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {filteredOrders.map(order => {
+              const status = PO_STATUSES[order.status] || PO_STATUSES.draft
+              const StatusIcon = status.icon
+              return (
+                <div
+                  key={order.id}
+                  style={{
+                    padding: '16px',
+                    borderRadius: '12px',
+                    border: '1px solid var(--border-color)',
+                    backgroundColor: darkMode ? '#15151f' : '#ffffff'
+                  }}
+                  onClick={() => handleViewOrder(order)}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                    <div>
+                      <div style={{ fontWeight: '600', color: darkMode ? '#ffffff' : '#111827', marginBottom: '4px' }}>
+                        {order.po_number}
+                      </div>
+                      <div style={{ fontSize: '14px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
+                        {order.project?.name || '-'}
+                      </div>
+                    </div>
+                    <span style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '4px 10px',
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      backgroundColor: `${status.color}15`,
+                      color: status.color
+                    }}>
+                      <StatusIcon size={14} />
+                      {status.name}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
+                    <div>Proveïdor: {order.supplier?.name || '-'}</div>
+                    <div>Data: {formatDate(order.order_date)}</div>
+                    <div style={{ fontWeight: '600', color: darkMode ? '#ffffff' : '#111827' }}>
+                      {formatCurrency(order.total_amount, order.currency)}
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         ) : (
           <div style={{ ...styles.tableContainer, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
             <table style={styles.table}>
@@ -679,7 +740,7 @@ export default function Orders() {
                 <tr>
                   <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>PO #</th>
                   <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>Projecte</th>
-                  <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>Proveïdor</th>
+                  {!isTablet && <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>Proveïdor</th>}
                   <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>Data</th>
                   <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>Import</th>
                   <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>Estat</th>
@@ -713,9 +774,11 @@ export default function Orders() {
                       <td style={{ ...styles.td, color: darkMode ? '#ffffff' : '#111827' }}>
                         {order.project?.name || '-'}
                       </td>
-                      <td style={{ ...styles.td, color: darkMode ? '#9ca3af' : '#6b7280' }}>
-                        {order.supplier?.name || '-'}
-                      </td>
+                      {!isTablet && (
+                        <td style={{ ...styles.td, color: darkMode ? '#9ca3af' : '#6b7280' }}>
+                          {order.supplier?.name || '-'}
+                        </td>
+                      )}
                       <td style={{ ...styles.td, color: darkMode ? '#9ca3af' : '#6b7280' }}>
                         {formatDate(order.order_date)}
                       </td>

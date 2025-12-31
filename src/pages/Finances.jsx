@@ -33,6 +33,8 @@ import {
   getSuppliers
 } from '../lib/supabase'
 import Header from '../components/Header'
+import { useBreakpoint } from '../hooks/useBreakpoint'
+import { getModalStyles } from '../utils/responsiveStyles'
 
 // Categories de despeses
 const EXPENSE_CATEGORIES = {
@@ -69,6 +71,8 @@ const PAYMENT_STATUS = {
 
 export default function Finances() {
   const { darkMode } = useApp()
+  const { isMobile, isTablet } = useBreakpoint()
+  const modalStyles = getModalStyles(isMobile, darkMode)
   
   const [activeTab, setActiveTab] = useState('overview')
   const [expenses, setExpenses] = useState([])
@@ -214,9 +218,11 @@ export default function Finances() {
       const { user_id, ...dataToSave } = data
 
       if (editingExpense.id) {
-        await supabase.from('expenses').update(dataToSave).eq('id', editingExpense.id)
+        const { error } = await supabase.from('expenses').update(dataToSave).eq('id', editingExpense.id)
+        if (error) throw error
       } else {
-        await supabase.from('expenses').insert(dataToSave)
+        const { error } = await supabase.from('expenses').insert(dataToSave)
+        if (error) throw error
       }
       
       await loadData()
@@ -275,9 +281,11 @@ export default function Finances() {
       const { user_id, ...dataToSave } = data
 
       if (editingIncome.id) {
-        await supabase.from('incomes').update(dataToSave).eq('id', editingIncome.id)
+        const { error } = await supabase.from('incomes').update(dataToSave).eq('id', editingIncome.id)
+        if (error) throw error
       } else {
-        await supabase.from('incomes').insert(dataToSave)
+        const { error } = await supabase.from('incomes').insert(dataToSave)
+        if (error) throw error
       }
       
       await loadData()
@@ -665,8 +673,8 @@ export default function Finances() {
 
       {/* Modal Despesa */}
       {showExpenseModal && editingExpense && (
-        <div style={styles.modalOverlay} onClick={() => setShowExpenseModal(false)}>
-          <div style={{...styles.modal, backgroundColor: darkMode ? '#15151f' : '#ffffff'}} onClick={e => e.stopPropagation()}>
+        <div style={{...styles.modalOverlay, ...modalStyles.overlay}} onClick={() => setShowExpenseModal(false)}>
+          <div style={{...styles.modal, ...modalStyles.modal}} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeader}>
               <h3 style={{...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827'}}>
                 {editingExpense.id ? 'Editar Despesa' : (editingExpense.is_global ? 'Nova Despesa Global' : 'Nova Despesa de Projecte')}
@@ -690,7 +698,7 @@ export default function Finances() {
                   </div>
                 )}
                 
-                <div style={styles.formGroup}>
+                <div style={{...styles.formGroup, ...(editingExpense.is_global && { gridColumn: 'span 1' })}}>
                   <label style={styles.label}>Categoria *</label>
                   <select
                     value={editingExpense.category}
@@ -775,7 +783,7 @@ export default function Finances() {
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Proveïdor</label>
                   <select
-                    value={editingExpense.supplier_id}
+                    value={editingExpense.supplier_id || ''}
                     onChange={e => {
                       if (e.target.value === '__other__') {
                         setEditingExpense({...editingExpense, supplier_id: '', supplier_name: ''})
@@ -791,12 +799,12 @@ export default function Finances() {
                   </select>
                 </div>
 
-                {editingExpense.supplier_id === '' && editingExpense.supplier_name !== undefined && (
-                  <div style={styles.formGroup}>
+                {(!editingExpense.supplier_id || editingExpense.supplier_id === '') && (
+                  <div style={{...styles.formGroup, gridColumn: 'span 2'}}>
                     <label style={styles.label}>Nom Proveïdor</label>
                     <input
                       type="text"
-                      value={editingExpense.supplier_name}
+                      value={editingExpense.supplier_name || ''}
                       onChange={e => setEditingExpense({...editingExpense, supplier_name: e.target.value})}
                       placeholder="Nom del proveïdor..."
                       style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
@@ -866,8 +874,8 @@ export default function Finances() {
 
       {/* Modal Ingrés */}
       {showIncomeModal && editingIncome && (
-        <div style={styles.modalOverlay} onClick={() => setShowIncomeModal(false)}>
-          <div style={{...styles.modal, backgroundColor: darkMode ? '#15151f' : '#ffffff'}} onClick={e => e.stopPropagation()}>
+        <div style={{...styles.modalOverlay, ...modalStyles.overlay}} onClick={() => setShowIncomeModal(false)}>
+          <div style={{...styles.modal, ...modalStyles.modal}} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeader}>
               <h3 style={{...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827'}}>
                 {editingIncome.id ? 'Editar Ingrés' : 'Nou Ingrés'}
@@ -1002,7 +1010,7 @@ export default function Finances() {
 
 const styles = {
   container: { flex: 1, display: 'flex', flexDirection: 'column' },
-  content: { padding: '32px', overflowY: 'auto' },
+  content: { padding: '16px', overflowY: 'auto' },
   tabs: { display: 'flex', gap: '8px', marginBottom: '24px' },
   tab: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer', transition: 'all 0.2s' },
   toolbar: { display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' },

@@ -22,6 +22,7 @@ import FileUploader from '../components/FileUploader'
 import FileBrowser from '../components/FileBrowser'
 import IdentifiersSection from '../components/IdentifiersSection'
 import ProfitabilityCalculator from '../components/ProfitabilityCalculator'
+import { useBreakpoint } from '../hooks/useBreakpoint'
 
 const PHASES = [
   { id: 1, name: 'Recerca', icon: '🔍', color: '#6366f1', description: 'Investigació de producte i mercat' },
@@ -48,6 +49,7 @@ export default function ProjectDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { darkMode, driveConnected, refreshProjects } = useApp()
+  const { isMobile, isTablet } = useBreakpoint()
   
   const [project, setProject] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -114,6 +116,12 @@ export default function ProjectDetail() {
   }
 
   const handlePhaseChange = async (newPhase) => {
+    // Bloquejar canvi de fase si està DISCARDED
+    if (project.decision === 'DISCARDED') {
+      alert('No es pot canviar la fase d\'un projecte descartat. Restaura el projecte primer.')
+      return
+    }
+    
     try {
       await updateProject(id, { current_phase: newPhase })
       setProject({ ...project, current_phase: newPhase })
@@ -123,6 +131,20 @@ export default function ProjectDetail() {
       navigate('/')
     } catch (err) {
       console.error('Error actualitzant fase:', err)
+    }
+  }
+
+  const handleRestoreProject = async () => {
+    if (!confirm('Estàs segur que vols restaurar aquest projecte? Tornarà a l\'estat HOLD.')) return
+    
+    try {
+      await updateProject(id, { decision: 'HOLD' })
+      setProject({ ...project, decision: 'HOLD' })
+      await refreshProjects()
+      alert('Projecte restaurat correctament')
+    } catch (err) {
+      console.error('Error restaurant projecte:', err)
+      alert('Error restaurant projecte: ' + err.message)
     }
   }
 
@@ -207,7 +229,40 @@ export default function ProjectDetail() {
     <div style={styles.container}>
       <Header title={project.name} />
 
-      <div style={styles.content}>
+      <div style={{
+        ...styles.content,
+        padding: isMobile ? '16px' : '32px'
+      }}>
+        {/* Banner DISCARDED */}
+        {project.decision === 'DISCARDED' && (
+          <div style={{
+            ...styles.discardedBanner,
+            backgroundColor: darkMode ? '#7f1d1d' : '#fef2f2',
+            borderColor: '#ef4444'
+          }}>
+            <AlertCircle size={20} color="#ef4444" />
+            <div style={{ flex: 1 }}>
+              <strong style={{ color: '#ef4444', display: 'block', marginBottom: '4px' }}>
+                Aquest projecte ha estat descartat
+              </strong>
+              <span style={{ color: darkMode ? '#fca5a5' : '#991b1b', fontSize: '13px' }}>
+                {project.discarded_reason || 'No s\'ha proporcionat una raó.'}
+                {project.discarded_at && (
+                  <span style={{ display: 'block', marginTop: '4px' }}>
+                    Data: {new Date(project.discarded_at).toLocaleDateString('ca-ES')}
+                  </span>
+                )}
+              </span>
+            </div>
+            <button
+              onClick={handleRestoreProject}
+              style={styles.restoreButton}
+            >
+              Restaurar Projecte
+            </button>
+          </div>
+        )}
+
         {/* Back button & Project info */}
         <div style={styles.topBar}>
           <button onClick={() => navigate('/projects')} style={styles.backButton}>
@@ -439,6 +494,25 @@ const styles = {
     display: 'flex',
     flexDirection: 'column'
   },
+  discardedBanner: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '16px 20px',
+    borderRadius: '12px',
+    border: '2px solid',
+    marginBottom: '24px'
+  },
+  restoreButton: {
+    padding: '10px 20px',
+    backgroundColor: '#4f46e5',
+    color: '#ffffff',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '14px',
+    fontWeight: '500',
+    cursor: 'pointer'
+  },
   content: {
     padding: '32px',
     overflowY: 'auto'
@@ -547,8 +621,8 @@ const styles = {
   },
   driveSection: {
     display: 'grid',
-    gridTemplateColumns: '280px 1fr',
-    gap: '24px',
+    gridTemplateColumns: isMobile ? '1fr' : (isTablet ? '200px 1fr' : '280px 1fr'),
+    gap: isMobile ? '16px' : '24px',
     marginBottom: '24px'
   },
   foldersPanel: {

@@ -25,11 +25,13 @@ import {
 } from '../lib/supabase'
 import Header from '../components/Header'
 import { generateBriefingPdf } from '../lib/generateBriefingPdf'
+import { useBreakpoint } from '../hooks/useBreakpoint'
 
 export default function Briefing() {
   const { projectId } = useParams()
   const navigate = useNavigate()
   const { darkMode } = useApp()
+  const { isMobile } = useBreakpoint()
   
   const [project, setProject] = useState(null)
   const [companySettings, setCompanySettings] = useState(null)

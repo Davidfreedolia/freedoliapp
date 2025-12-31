@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useBreakpoint } from '../hooks/useBreakpoint'
 import { 
   Plus, 
   Search, 
@@ -27,17 +28,23 @@ const PHASES = {
 export default function Projects() {
   const { projects, refreshProjects, darkMode } = useApp()
   const navigate = useNavigate()
+  const { isMobile, isTablet } = useBreakpoint()
   const [showModal, setShowModal] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterPhase, setFilterPhase] = useState(null)
+  const [showDiscarded, setShowDiscarded] = useState(false)
   const [menuOpen, setMenuOpen] = useState(null)
 
   const filteredProjects = projects.filter(project => {
     const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          project.project_code.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesPhase = filterPhase ? project.current_phase === filterPhase : true
-    return matchesSearch && matchesPhase
+    // Per defecte, ocultar DISCARDED
+    const matchesDiscarded = showDiscarded ? true : (project.decision !== 'DISCARDED')
+    return matchesSearch && matchesPhase && matchesDiscarded
   })
+  
+  const discardedCount = projects.filter(p => p.decision === 'DISCARDED').length
 
   const handleDelete = async (e, project) => {
     e.stopPropagation()
@@ -57,9 +64,16 @@ export default function Projects() {
     <div style={styles.container}>
       <Header title="Projectes" />
 
-      <div style={styles.content}>
+      <div style={{
+        ...styles.content,
+        padding: isMobile ? '16px' : '32px'
+      }}>
         {/* Toolbar */}
-        <div style={styles.toolbar}>
+        <div style={{
+          ...styles.toolbar,
+          flexDirection: isMobile ? 'column' : 'row',
+          gap: isMobile ? '12px' : '16px'
+        }}>
           <div style={styles.searchContainer}>
             <Search size={18} color="#9ca3af" />
             <input
@@ -75,14 +89,20 @@ export default function Projects() {
             />
           </div>
 
-          <div style={styles.filters}>
+          <div style={{
+            ...styles.filters,
+            width: isMobile ? '100%' : 'auto',
+            flexDirection: isMobile ? 'column' : 'row',
+            gap: isMobile ? '8px' : '12px'
+          }}>
             <select
               value={filterPhase || ''}
               onChange={e => setFilterPhase(e.target.value ? parseInt(e.target.value) : null)}
               style={{
                 ...styles.filterSelect,
                 backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                color: darkMode ? '#ffffff' : '#111827'
+                color: darkMode ? '#ffffff' : '#111827',
+                width: isMobile ? '100%' : 'auto'
               }}
             >
               <option value="">Totes les fases</option>
@@ -92,9 +112,34 @@ export default function Projects() {
                 </option>
               ))}
             </select>
+            {discardedCount > 0 && (
+              <label style={{
+                display: 'flex',
+                alignItems: 'center',
+                fontSize: '13px',
+                cursor: 'pointer',
+                padding: '12px 16px',
+                borderRadius: '10px',
+                border: '1px solid var(--border-color)',
+                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                color: darkMode ? '#9ca3af' : '#6b7280',
+                width: isMobile ? '100%' : 'auto'
+              }}>
+                <input
+                  type="checkbox"
+                  checked={showDiscarded}
+                  onChange={e => setShowDiscarded(e.target.checked)}
+                  style={{ marginRight: '6px' }}
+                />
+                Mostrar descartats ({discardedCount})
+              </label>
+            )}
           </div>
 
-          <button onClick={() => setShowModal(true)} style={styles.newButton}>
+          <button onClick={() => setShowModal(true)} style={{
+            ...styles.newButton,
+            width: isMobile ? '100%' : 'auto'
+          }}>
             <Plus size={18} />
             Nou Projecte
           </button>
@@ -119,7 +164,11 @@ export default function Projects() {
             )}
           </div>
         ) : (
-          <div style={styles.projectsGrid}>
+          <div style={{
+            ...styles.projectsGrid,
+            gridTemplateColumns: isMobile ? '1fr' : (isTablet ? 'repeat(auto-fill, minmax(280px, 1fr))' : 'repeat(auto-fill, minmax(320px, 1fr))'),
+            gap: isMobile ? '12px' : '20px'
+          }}>
             {filteredProjects.map(project => {
               const phase = PHASES[project.current_phase] || PHASES[1]
               const progress = ((project.current_phase) / 7) * 100

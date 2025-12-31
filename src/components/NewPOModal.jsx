@@ -20,6 +20,8 @@ import {
   getWarehouses,
   getCompanySettings
 } from '../lib/supabase'
+import { useBreakpoint } from '../hooks/useBreakpoint'
+import { getModalStyles } from '../utils/responsiveStyles'
 
 // Incoterms comuns
 const INCOTERMS = [
@@ -41,6 +43,8 @@ export default function NewPOModal({
   suppliers 
 }) {
   const { darkMode } = useApp()
+  const { isMobile } = useBreakpoint()
+  const modalStyles = getModalStyles(isMobile, darkMode)
   const [loading, setLoading] = useState(false)
   const [generatingPO, setGeneratingPO] = useState(false)
   const [warehouses, setWarehouses] = useState([])
@@ -349,11 +353,11 @@ export default function NewPOModal({
   const selectedSupplier = suppliers.find(s => s.id === formData.supplier_id)
 
   return (
-    <div style={styles.overlay}>
+    <div style={{...styles.overlay, ...modalStyles.overlay}}>
       <div 
         style={{
           ...styles.modal,
-          backgroundColor: darkMode ? '#15151f' : '#ffffff'
+          ...modalStyles.modal
         }}
         onClick={e => e.stopPropagation()}
       >

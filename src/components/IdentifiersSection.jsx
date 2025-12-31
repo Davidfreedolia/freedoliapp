@@ -4,8 +4,13 @@ import {
   getProductIdentifiers,
   upsertProductIdentifiers,
   getAvailableGtinCodes,
-  assignGtinFromPool
+  assignGtinFromPool,
+  releaseGtinFromProject,
+  supabase,
+  getCurrentUserId
 } from '../lib/supabase'
+import { useBreakpoint } from '../hooks/useBreakpoint'
+import { getModalStyles } from '../utils/responsiveStyles'
 
 const GTIN_TYPES = [
   { value: 'EAN', label: 'EAN' },
@@ -14,11 +19,14 @@ const GTIN_TYPES = [
 ]
 
 export default function IdentifiersSection({ projectId, darkMode }) {
+  const { isMobile } = useBreakpoint()
+  const modalStyles = getModalStyles(isMobile, darkMode)
   const [identifiers, setIdentifiers] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [availableGtins, setAvailableGtins] = useState([])
   const [showAssignModal, setShowAssignModal] = useState(false)
+  const [assignedGtinFromPool, setAssignedGtinFromPool] = useState(null)
   const [formData, setFormData] = useState({
     gtin_type: '',
     gtin_code: '',
@@ -44,6 +52,30 @@ export default function IdentifiersSection({ projectId, darkMode }) {
           asin: data.asin || '',
           fnsku: data.fnsku || ''
         })
+        
+        // Comprovar si aquest GTIN ve del pool
+        if (data.gtin_code) {
+          const userId = await getCurrentUserId()
+          if (userId) {
+            const { data: poolGtin } = await supabase
+              .from('gtin_pool')
+              .select('id, status, assigned_to_project_id')
+              .eq('gtin_code', data.gtin_code)
+              .eq('user_id', userId)
+              .eq('assigned_to_project_id', projectId)
+              .single()
+            
+            if (poolGtin && poolGtin.status === 'assigned') {
+              setAssignedGtinFromPool(poolGtin.id)
+            } else {
+              setAssignedGtinFromPool(null)
+            }
+          }
+        } else {
+          setAssignedGtinFromPool(null)
+        }
+      } else {
+        setAssignedGtinFromPool(null)
       }
       
       // Carregar GTINs disponibles del pool
@@ -93,6 +125,21 @@ export default function IdentifiersSection({ projectId, darkMode }) {
     }
   }
 
+  const handleReleaseGtin = async () => {
+    if (!assignedGtinFromPool) return
+    if (!confirm('Estàs segur que vols alliberar aquest GTIN? Es podrà assignar a un altre projecte.')) return
+
+    try {
+      await releaseGtinFromProject(assignedGtinFromPool)
+      // Netejar product_identifiers (opcional, deixar per històric)
+      await loadData()
+      alert('GTIN alliberat correctament')
+    } catch (err) {
+      console.error('Error alliberant GTIN:', err)
+      alert('Error alliberant GTIN: ' + (err.message || 'Error desconegut'))
+    }
+  }
+
   const handleGtinTypeChange = (gtinType) => {
     setFormData({
       ...formData,
@@ -126,19 +173,34 @@ export default function IdentifiersSection({ projectId, darkMode }) {
           <Barcode size={20} />
           Identificadors Amazon
         </h3>
-        <button
-          onClick={() => setShowAssignModal(true)}
-          disabled={availableGtins.length === 0}
-          style={{
-            ...styles.assignButton,
-            backgroundColor: availableGtins.length > 0 ? '#4f46e5' : (darkMode ? '#374151' : '#e5e7eb'),
-            color: availableGtins.length > 0 ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280'),
-            cursor: availableGtins.length > 0 ? 'pointer' : 'not-allowed'
-          }}
-        >
-          <Plus size={14} />
-          Assignar del pool ({availableGtins.length})
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {assignedGtinFromPool && (
+            <button
+              onClick={handleReleaseGtin}
+              style={{
+                ...styles.releaseButton,
+                backgroundColor: darkMode ? '#374151' : '#e5e7eb',
+                color: darkMode ? '#9ca3af' : '#6b7280'
+              }}
+            >
+              <X size={14} />
+              Alliberar GTIN
+            </button>
+          )}
+          <button
+            onClick={() => setShowAssignModal(true)}
+            disabled={availableGtins.length === 0}
+            style={{
+              ...styles.assignButton,
+              backgroundColor: availableGtins.length > 0 ? '#4f46e5' : (darkMode ? '#374151' : '#e5e7eb'),
+              color: availableGtins.length > 0 ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280'),
+              cursor: availableGtins.length > 0 ? 'pointer' : 'not-allowed'
+            }}
+          >
+            <Plus size={14} />
+            Assignar del pool ({availableGtins.length})
+          </button>
+        </div>
       </div>
 
       <div style={styles.form}>
@@ -278,10 +340,11 @@ export default function IdentifiersSection({ projectId, darkMode }) {
 
       {/* Modal Assign from Pool */}
       {showAssignModal && (
-        <div style={styles.modalOverlay} onClick={() => setShowAssignModal(false)}>
+        <div style={{...styles.modalOverlay, ...modalStyles.overlay}} onClick={() => setShowAssignModal(false)}>
           <div
             style={{
               ...styles.modal,
+              ...modalStyles.modal,
               backgroundColor: darkMode ? '#1f1f2e' : '#ffffff'
             }}
             onClick={e => e.stopPropagation()}
@@ -380,6 +443,18 @@ const styles = {
     border: '1px solid var(--border-color, #e5e7eb)',
     fontSize: '13px',
     fontWeight: '500',
+    transition: 'all 0.2s'
+  },
+  releaseButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    padding: '8px 16px',
+    borderRadius: '8px',
+    border: '1px solid var(--border-color, #e5e7eb)',
+    fontSize: '13px',
+    fontWeight: '500',
+    cursor: 'pointer',
     transition: 'all 0.2s'
   },
   form: {

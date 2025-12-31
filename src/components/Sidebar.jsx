@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import { 
   LayoutDashboard, 
@@ -12,10 +12,13 @@ import {
   TrendingUp,
   Settings,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  X,
+  Menu
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import DriveStatus from './DriveStatus'
+import { useBreakpoint } from '../hooks/useBreakpoint'
 
 // Prefetch functions per rutes probables
 // Carrega el chunk abans que es necessiti per millorar UX
@@ -74,7 +77,22 @@ const menuItems = [
 
 export default function Sidebar() {
   const { sidebarCollapsed, setSidebarCollapsed, darkMode } = useApp()
+  const { isMobile, isTablet, isDesktop } = useBreakpoint()
   const [logoError, setLogoError] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
+
+  // En mobile, sidebar sempre col·lapsat (drawer)
+  // En tablet, sempre icon-only
+  // En desktop, controlat per sidebarCollapsed
+  const shouldCollapse = isMobile ? true : (isTablet ? true : sidebarCollapsed)
+  const isDrawer = isMobile
+
+  useEffect(() => {
+    // En desktop, no mostrar drawer
+    if (isDesktop) {
+      setMobileOpen(false)
+    }
+  }, [isDesktop])
 
   const handleLogoError = (e) => {
     if (darkMode && !logoError) {
@@ -83,12 +101,143 @@ export default function Sidebar() {
     }
   }
 
+  const handleCloseDrawer = () => {
+    setMobileOpen(false)
+  }
+
+  const sidebarContent = (
+    <>
+      {/* Logo */}
+      <div style={{
+        ...styles.logoContainer,
+        position: 'relative'
+      }}>
+        <img 
+          src={darkMode && !logoError ? "/logo-dark.png" : "/logo.png"} 
+          alt="Freedolia" 
+          onError={handleLogoError}
+          style={{
+            ...styles.logo,
+            width: shouldCollapse ? '40px' : '140px'
+          }}
+        />
+        {isMobile && (
+          <button
+            onClick={handleCloseDrawer}
+            style={styles.closeButton}
+          >
+            <X size={20} />
+          </button>
+        )}
+      </div>
+
+      {/* Estat Google Drive */}
+      {!shouldCollapse && (
+        <div style={styles.driveContainer}>
+          <DriveStatus compact={false} />
+        </div>
+      )}
+      {shouldCollapse && (
+        <div style={styles.driveContainerCompact}>
+          <DriveStatus compact={true} />
+        </div>
+      )}
+
+      {/* Menú */}
+      <nav style={styles.nav}>
+        {menuItems.map(item => (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            onClick={() => {
+              // Tancar drawer en mobile quan es clica un item
+              if (isMobile) {
+                setMobileOpen(false)
+              }
+            }}
+            onMouseEnter={() => {
+              // Prefetch rutes quan es fa hover (només una vegada per ruta)
+              if (!prefetchedRoutes.has(item.path) && item.path !== '/') {
+                prefetchedRoutes.add(item.path)
+                prefetchRoute(item.path)
+              }
+            }}
+            style={({ isActive }) => ({
+              ...styles.navItem,
+              backgroundColor: isActive 
+                ? (darkMode ? 'rgba(99, 102, 241, 0.2)' : 'rgba(79, 70, 229, 0.1)')
+                : 'transparent',
+              color: isActive
+                ? '#4f46e5'
+                : (darkMode ? '#9ca3af' : '#6b7280'),
+              justifyContent: shouldCollapse ? 'center' : 'flex-start'
+            })}
+          >
+            <item.icon size={20} />
+            {!shouldCollapse && <span>{item.label}</span>}
+          </NavLink>
+        ))}
+      </nav>
+
+      {/* Toggle collapse (només desktop) */}
+      {isDesktop && (
+        <button 
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          style={styles.collapseButton}
+        >
+          {sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+        </button>
+      )}
+    </>
+  )
+
+  if (isMobile) {
+    return (
+      <>
+        {/* Botó menu mobile */}
+        <button
+          onClick={() => setMobileOpen(true)}
+          style={{
+            ...styles.mobileMenuButton,
+            backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
+            color: darkMode ? '#ffffff' : '#111827'
+          }}
+        >
+          <Menu size={24} />
+        </button>
+
+        {/* Drawer overlay */}
+        {mobileOpen && (
+          <div
+            style={styles.drawerOverlay}
+            onClick={handleCloseDrawer}
+          >
+            <aside
+              style={{
+                ...styles.sidebar,
+                ...styles.drawer,
+                backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
+                transform: mobileOpen ? 'translateX(0)' : 'translateX(-100%)'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {sidebarContent}
+            </aside>
+          </div>
+        )}
+      </>
+    )
+  }
+
   return (
     <aside style={{
       ...styles.sidebar,
-      width: sidebarCollapsed ? '72px' : '260px',
+      width: shouldCollapse ? '72px' : '260px',
       backgroundColor: darkMode ? '#0a0a0f' : '#ffffff'
     }}>
+      {sidebarContent}
+    </aside>
+  )
       {/* Logo */}
       <div style={styles.logoContainer}>
         <img 
@@ -212,6 +361,51 @@ const styles = {
     border: 'none',
     borderRadius: '8px',
     cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+    color: '#6b7280'
+  },
+  mobileMenuButton: {
+    position: 'fixed',
+    top: '16px',
+    left: '16px',
+    zIndex: 1000,
+    padding: '10px',
+    border: '1px solid var(--border-color)',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+  },
+  drawerOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    zIndex: 999,
+    transition: 'opacity 0.3s ease'
+  },
+  drawer: {
+    transform: 'translateX(-100%)',
+    transition: 'transform 0.3s ease',
+    boxShadow: '2px 0 8px rgba(0,0,0,0.1)'
+  },
+  closeButton: {
+    position: 'absolute',
+    top: '16px',
+    right: '16px',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    color: '#6b7280',
+    padding: '8px',
+    borderRadius: '6px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center'

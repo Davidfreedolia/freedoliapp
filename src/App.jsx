@@ -24,6 +24,24 @@ const Warehouses = React.lazy(() => import('./pages/Warehouses'))
 
 function AppContent() {
   const { sidebarCollapsed, darkMode } = useApp()
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const [isTablet, setIsTablet] = useState(window.innerWidth >= 768 && window.innerWidth < 1024)
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768)
+      setIsTablet(window.innerWidth >= 768 && window.innerWidth < 1024)
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  // Calcular margin-left segons breakpoint
+  const getMarginLeft = () => {
+    if (isMobile) return '0' // Mobile: sidebar és drawer, no ocupa espai
+    if (isTablet) return '72px' // Tablet: icon-only
+    return sidebarCollapsed ? '72px' : '260px' // Desktop: controlat per sidebarCollapsed
+  }
 
   return (
     <div style={{
@@ -34,10 +52,11 @@ function AppContent() {
       <Sidebar />
       <main style={{
         flex: 1,
-        marginLeft: sidebarCollapsed ? '72px' : '260px',
+        marginLeft: getMarginLeft(),
         transition: 'margin-left 0.3s ease',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        width: isMobile ? '100%' : 'auto'
       }}>
         <Suspense fallback={<PageLoader darkMode={darkMode} />}>
           <Routes>

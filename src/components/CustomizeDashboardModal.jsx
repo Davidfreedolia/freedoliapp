@@ -2,22 +2,30 @@ import { useState, useEffect } from 'react'
 import { X, Save, Check } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { getDashboardPreferences, updateDashboardPreferences } from '../lib/supabase'
+import { useBreakpoint } from '../hooks/useBreakpoint'
+import { getModalStyles } from '../utils/responsiveStyles'
 
 const AVAILABLE_WIDGETS = [
   { id: 'logistics_tracking', name: 'Tracking Logístic', description: 'Mostra l\'estat de les comandes per projecte' },
   { id: 'finance_chart', name: 'Gràfica de Finances', description: 'Analítica de ingressos i despeses' },
   { id: 'orders_in_progress', name: 'Comandes en Curs', description: 'Llista de comandes actives' },
+  { id: 'pos_not_ready', name: 'POs No Preparades', description: 'Comandes que necessiten atenció' },
+  { id: 'waiting_manufacturer', name: 'Esperant Fabricant', description: 'POs esperant fabricant' },
   { id: 'activity_feed', name: 'Activitat Recent', description: 'Últims esdeveniments del sistema' }
 ]
 
 export default function CustomizeDashboardModal({ isOpen, onClose, onSave }) {
   const { darkMode } = useApp()
+  const { isMobile } = useBreakpoint()
+  const modalStyles = getModalStyles(isMobile, darkMode)
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [widgets, setWidgets] = useState({
     logistics_tracking: true,
     finance_chart: true,
     orders_in_progress: true,
+    pos_not_ready: true,
+    waiting_manufacturer: true,
     activity_feed: false
   })
 
@@ -36,6 +44,8 @@ export default function CustomizeDashboardModal({ isOpen, onClose, onSave }) {
           logistics_tracking: prefs.widgets.logistics_tracking !== false,
           finance_chart: prefs.widgets.finance_chart !== false,
           orders_in_progress: prefs.widgets.orders_in_progress !== false,
+          pos_not_ready: prefs.widgets.pos_not_ready !== false,
+          waiting_manufacturer: prefs.widgets.waiting_manufacturer !== false,
           activity_feed: prefs.widgets.activity_feed === true
         })
       }
@@ -68,11 +78,11 @@ export default function CustomizeDashboardModal({ isOpen, onClose, onSave }) {
   if (!isOpen) return null
 
   return (
-    <div style={styles.overlay} onClick={onClose}>
+    <div style={{...styles.overlay, ...modalStyles.overlay}} onClick={onClose}>
       <div 
         style={{
           ...styles.modal,
-          backgroundColor: darkMode ? '#1f1f2e' : '#ffffff'
+          ...modalStyles.modal
         }}
         onClick={(e) => e.stopPropagation()}
       >

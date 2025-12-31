@@ -14,11 +14,15 @@ import {
   X,
   FileText,
   AlertCircle,
-  CheckCircle2
+  CheckCircle2,
+  Barcode
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { getCompanySettings, updateCompanySettings, supabase, getAuditLogs } from '../lib/supabase'
 import Header from '../components/Header'
+import GTINPoolSection from '../components/GTINPoolSection'
+import { useBreakpoint } from '../hooks/useBreakpoint'
+import { getModalStyles } from '../utils/responsiveStyles'
 
 export default function Settings() {
   const { darkMode } = useApp()
@@ -171,9 +175,11 @@ export default function Settings() {
       const { user_id, ...dataToSave } = editingSignature
 
       if (editingSignature.id) {
-        await supabase.from('signatures').update(dataToSave).eq('id', editingSignature.id)
+        const { error } = await supabase.from('signatures').update(dataToSave).eq('id', editingSignature.id)
+        if (error) throw error
       } else {
-        await supabase.from('signatures').insert(dataToSave)
+        const { error } = await supabase.from('signatures').insert(dataToSave)
+        if (error) throw error
       }
 
       await loadSettings()
@@ -219,7 +225,10 @@ export default function Settings() {
     <div style={styles.container}>
       <Header title="Configuració" />
 
-      <div style={styles.content}>
+      <div style={{
+        ...styles.content,
+        padding: isMobile ? '16px' : '32px'
+      }}>
         {/* Tabs */}
         <div style={styles.tabs}>
           <button
@@ -241,6 +250,16 @@ export default function Settings() {
             }}
           >
             <PenTool size={18} /> Signatures
+          </button>
+          <button
+            onClick={() => setActiveTab('gtin')}
+            style={{
+              ...styles.tab,
+              backgroundColor: activeTab === 'gtin' ? '#4f46e5' : 'transparent',
+              color: activeTab === 'gtin' ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280')
+            }}
+          >
+            <Barcode size={18} /> GTIN Pool
           </button>
           <button
             onClick={() => setActiveTab('audit')}
@@ -422,12 +441,124 @@ export default function Settings() {
             </div>
           </div>
         )}
+
+        {/* GTIN Pool Tab */}
+        {activeTab === 'gtin' && (
+          <GTINPoolSection darkMode={darkMode} />
+        )}
+
+        {/* Audit Log Tab */}
+        {activeTab === 'audit' && (
+          <div style={{...styles.section, backgroundColor: darkMode ? '#15151f' : '#ffffff'}}>
+            <div style={styles.sectionHeader}>
+              <h2 style={{...styles.sectionTitle, color: darkMode ? '#ffffff' : '#111827'}}>
+                <FileText size={20} /> Audit Log
+              </h2>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  onClick={() => setStatusFilter(null)}
+                  style={{
+                    ...styles.filterButton,
+                    backgroundColor: statusFilter === null ? '#4f46e5' : 'transparent',
+                    color: statusFilter === null ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280'),
+                    borderColor: darkMode ? '#374151' : '#d1d5db'
+                  }}
+                >
+                  Tots
+                </button>
+                <button
+                  onClick={() => setStatusFilter('success')}
+                  style={{
+                    ...styles.filterButton,
+                    backgroundColor: statusFilter === 'success' ? '#22c55e' : 'transparent',
+                    color: statusFilter === 'success' ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280'),
+                    borderColor: darkMode ? '#374151' : '#d1d5db'
+                  }}
+                >
+                  <CheckCircle2 size={14} /> Èxits
+                </button>
+                <button
+                  onClick={() => setStatusFilter('error')}
+                  style={{
+                    ...styles.filterButton,
+                    backgroundColor: statusFilter === 'error' ? '#ef4444' : 'transparent',
+                    color: statusFilter === 'error' ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280'),
+                    borderColor: darkMode ? '#374151' : '#d1d5db'
+                  }}
+                >
+                  <AlertCircle size={14} /> Errors
+                </button>
+              </div>
+            </div>
+
+            {loadingLogs ? (
+              <div style={styles.loading}>Carregant logs...</div>
+            ) : auditLogs.length === 0 ? (
+              <div style={{ padding: '48px', textAlign: 'center', color: '#6b7280' }}>
+                No hi ha logs d'auditoria
+              </div>
+            ) : (
+              <div style={styles.auditLogList}>
+                {auditLogs.map(log => (
+                  <div key={log.id} style={{
+                    ...styles.auditLogItem,
+                    borderLeftColor: log.status === 'success' ? '#22c55e' : '#ef4444',
+                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
+                  }}>
+                    <div style={styles.auditLogHeader}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                          <span style={{
+                            ...styles.statusBadge,
+                            backgroundColor: log.status === 'success' ? '#22c55e15' : '#ef444415',
+                            color: log.status === 'success' ? '#22c55e' : '#ef4444'
+                          }}>
+                            {log.status === 'success' ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
+                            {log.status === 'success' ? 'Èxit' : 'Error'}
+                          </span>
+                          <span style={{ color: darkMode ? '#ffffff' : '#111827', fontWeight: '600' }}>
+                            {log.entity_type} • {log.action}
+                          </span>
+                        </div>
+                        {log.message && (
+                          <p style={{ margin: '4px 0', color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '14px' }}>
+                            {log.message}
+                          </p>
+                        )}
+                        {log.meta && Object.keys(log.meta).length > 0 && (
+                          <details style={{ marginTop: '8px' }}>
+                            <summary style={{ cursor: 'pointer', color: '#6b7280', fontSize: '12px' }}>
+                              Detalls
+                            </summary>
+                            <pre style={{
+                              marginTop: '8px',
+                              padding: '8px',
+                              backgroundColor: darkMode ? '#15151f' : '#ffffff',
+                              borderRadius: '6px',
+                              fontSize: '11px',
+                              overflow: 'auto'
+                            }}>
+                              {JSON.stringify(log.meta, null, 2)}
+                            </pre>
+                          </details>
+                        )}
+                      </div>
+                      <span style={{ color: '#9ca3af', fontSize: '12px', whiteSpace: 'nowrap' }}>
+                        {new Date(log.created_at).toLocaleString('ca-ES')}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Modal Signatura */}
       {showSignatureModal && editingSignature && (
-        <div style={styles.modalOverlay} onClick={() => setShowSignatureModal(false)}>
-          <div style={{...styles.modal, backgroundColor: darkMode ? '#15151f' : '#ffffff'}} onClick={e => e.stopPropagation()}>
+        <div style={{...styles.modalOverlay, ...modalStyles.overlay}} onClick={() => setShowSignatureModal(false)}>
+          <div style={{...styles.modal, ...modalStyles.modal}} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeader}>
               <h3 style={{...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827'}}>
                 {editingSignature.id ? 'Editar Signatura' : 'Nova Signatura'}

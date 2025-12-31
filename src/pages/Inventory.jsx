@@ -20,6 +20,8 @@ import {
 import { useApp } from '../context/AppContext'
 import { supabase } from '../lib/supabase'
 import Header from '../components/Header'
+import { useBreakpoint } from '../hooks/useBreakpoint'
+import { getModalStyles } from '../utils/responsiveStyles'
 
 // Tipus de moviment
 const MOVEMENT_TYPES = {
@@ -36,6 +38,8 @@ const MOVEMENT_TYPES = {
 
 export default function Inventory() {
   const { darkMode } = useApp()
+  const { isMobile, isTablet } = useBreakpoint()
+  const modalStyles = getModalStyles(isMobile, darkMode)
   
   const [inventory, setInventory] = useState([])
   const [movements, setMovements] = useState([])
@@ -156,9 +160,11 @@ export default function Inventory() {
       const { user_id, ...dataToSave } = payload
 
       if (selectedItem.id) {
-        await supabase.from('inventory').update(dataToSave).eq('id', selectedItem.id)
+        const { error } = await supabase.from('inventory').update(dataToSave).eq('id', selectedItem.id)
+        if (error) throw error
       } else {
-        await supabase.from('inventory').insert(dataToSave)
+        const { error } = await supabase.from('inventory').insert(dataToSave)
+        if (error) throw error
       }
 
       await loadData()
@@ -176,12 +182,13 @@ export default function Inventory() {
     setSaving(true)
     try {
       // Registrar moviment (user_id s'assigna automàticament)
-      await supabase.from('inventory_movements').insert({
+      const { error: movementError } = await supabase.from('inventory_movements').insert({
         inventory_id: selectedItem.id,
         movement_type: newMovement.type,
         quantity: newMovement.quantity,
         notes: newMovement.notes
       })
+      if (movementError) throw movementError
 
       // Actualitzar stock segons tipus
       const updates = {}
@@ -200,7 +207,8 @@ export default function Inventory() {
       }
 
       if (Object.keys(updates).length > 0) {
-        await supabase.from('inventory').update(updates).eq('id', selectedItem.id)
+        const { error: updateError } = await supabase.from('inventory').update(updates).eq('id', selectedItem.id)
+        if (updateError) throw updateError
       }
 
       await loadData()
@@ -230,9 +238,15 @@ export default function Inventory() {
     <div style={styles.container}>
       <Header title="Inventari" />
 
-      <div style={styles.content}>
+      <div style={{
+        ...styles.content,
+        padding: isMobile ? '16px' : '32px'
+      }}>
         {/* Stats */}
-        <div style={styles.statsRow}>
+        <div style={{
+          ...styles.statsRow,
+          gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(150px, 1fr))'
+        }}>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
             <Package size={24} color="#4f46e5" />
             <div>
@@ -322,6 +336,64 @@ export default function Inventory() {
               <Plus size={18} /> Afegir Producte
             </button>
           </div>
+        ) : isMobile ? (
+          // Mobile: Cards
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {filteredInventory.map(item => {
+              const stockStatus = getStockStatus(item)
+              return (
+                <div
+                  key={item.id}
+                  style={{
+                    padding: '16px',
+                    borderRadius: '12px',
+                    border: '1px solid var(--border-color)',
+                    backgroundColor: darkMode ? '#15151f' : '#ffffff'
+                  }}
+                >
+                  <div style={{ marginBottom: '12px' }}>
+                    <div style={{ fontWeight: '600', color: darkMode ? '#ffffff' : '#111827', marginBottom: '4px' }}>
+                      {item.sku}
+                    </div>
+                    <div style={{ fontSize: '13px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
+                      {item.product_name}
+                    </div>
+                    {item.project && (
+                      <span style={styles.projectBadge}>{item.project.name}</span>
+                    )}
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', marginBottom: '12px', fontSize: '13px' }}>
+                    <div>🏭 Prod: {item.units_in_production || 0}</div>
+                    <div>🚢 Trànsit: {item.units_in_transit || 0}</div>
+                    <div>🏢 Transit: {item.units_in_forwarder || 0}</div>
+                    <div style={{ fontWeight: '600', color: '#ff9900' }}>📦 FBA: {item.units_amazon_fba || 0}</div>
+                    <div>🏠 FBM: {item.units_amazon_fbm || 0}</div>
+                    <div style={{ fontWeight: '700' }}>Total: {item.total_units || 0}</div>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{
+                      padding: '4px 10px',
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      backgroundColor: `${stockStatus.color}15`,
+                      color: stockStatus.color
+                    }}>
+                      {stockStatus.label}
+                    </span>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button onClick={() => { setSelectedItem(item); setShowMovementModal(true) }} style={styles.actionButton}>
+                        <Plus size={14} />
+                      </button>
+                      <button onClick={() => showHistory(item)} style={styles.actionButton}>
+                        <History size={14} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         ) : (
           <div style={{ ...styles.tableContainer, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
             <table style={styles.table}>
@@ -329,10 +401,10 @@ export default function Inventory() {
                 <tr style={{ backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb' }}>
                   <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>Producte</th>
                   <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>🏭 Prod.</th>
-                  <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>🚢 Trànsit</th>
-                  <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>🏢 Transit.</th>
+                  {!isTablet && <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>🚢 Trànsit</th>}
+                  {!isTablet && <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>🏢 Transit.</th>}
                   <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>📦 FBA</th>
-                  <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>🏠 FBM</th>
+                  {!isTablet && <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>🏠 FBM</th>}
                   <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>Total</th>
                   <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>Estat</th>
                   <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>Accions</th>
@@ -353,10 +425,10 @@ export default function Inventory() {
                         </div>
                       </td>
                       <td style={{ ...styles.td, textAlign: 'center' }}>{item.units_in_production || 0}</td>
-                      <td style={{ ...styles.td, textAlign: 'center' }}>{item.units_in_transit || 0}</td>
-                      <td style={{ ...styles.td, textAlign: 'center' }}>{item.units_in_forwarder || 0}</td>
+                      {!isTablet && <td style={{ ...styles.td, textAlign: 'center' }}>{item.units_in_transit || 0}</td>}
+                      {!isTablet && <td style={{ ...styles.td, textAlign: 'center' }}>{item.units_in_forwarder || 0}</td>}
                       <td style={{ ...styles.td, textAlign: 'center', fontWeight: '600', color: '#ff9900' }}>{item.units_amazon_fba || 0}</td>
-                      <td style={{ ...styles.td, textAlign: 'center' }}>{item.units_amazon_fbm || 0}</td>
+                      {!isTablet && <td style={{ ...styles.td, textAlign: 'center' }}>{item.units_amazon_fbm || 0}</td>}
                       <td style={{ ...styles.td, textAlign: 'center', fontWeight: '700', color: darkMode ? '#ffffff' : '#111827' }}>{item.total_units || 0}</td>
                       <td style={styles.td}>
                         <span style={{
@@ -388,8 +460,8 @@ export default function Inventory() {
 
       {/* Modal Editar/Nou */}
       {showMovementModal && selectedItem && (
-        <div style={styles.modalOverlay}>
-          <div style={{ ...styles.modal, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
+        <div style={{...styles.modalOverlay, ...modalStyles.overlay}}>
+          <div style={{ ...styles.modal, ...modalStyles.modal }}>
             <div style={styles.modalHeader}>
               <h3 style={{ ...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827' }}>
                 {selectedItem.id ? 'Editar Producte' : 'Nou Producte'}
@@ -504,8 +576,8 @@ export default function Inventory() {
 
       {/* Modal Historial */}
       {showHistoryModal && selectedItem && (
-        <div style={styles.modalOverlay}>
-          <div style={{ ...styles.modal, backgroundColor: darkMode ? '#15151f' : '#ffffff', maxWidth: '700px' }}>
+        <div style={{...styles.modalOverlay, ...modalStyles.overlay}}>
+          <div style={{ ...styles.modal, ...modalStyles.modal, maxWidth: isMobile ? '100%' : '700px' }}>
             <div style={styles.modalHeader}>
               <h3 style={{ ...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827' }}>
                 📦 {selectedItem.sku} - Moviments

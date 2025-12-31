@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useBreakpoint } from '../hooks/useBreakpoint'
 import { 
   FolderKanban, 
   PlayCircle, 
@@ -29,6 +30,7 @@ import CustomizeDashboardModal from '../components/CustomizeDashboardModal'
 export default function Dashboard() {
   const { stats, projects, loading, darkMode, setDarkMode } = useApp()
   const navigate = useNavigate()
+  const { isMobile, isTablet } = useBreakpoint()
   const [showNewProjectModal, setShowNewProjectModal] = useState(false)
   const [showCustomizeModal, setShowCustomizeModal] = useState(false)
   const [ordersInProgress, setOrdersInProgress] = useState([])
@@ -185,7 +187,10 @@ export default function Dashboard() {
     }
   }
 
-  const recentProjects = projects.slice(0, 5)
+  // Excloure DISCARDED dels projectes recents
+  const recentProjects = projects
+    .filter(p => p.decision !== 'DISCARDED')
+    .slice(0, 5)
 
   const statCards = [
     {
@@ -213,6 +218,9 @@ export default function Dashboard() {
       color: '#f59e0b'
     }
   ]
+  
+  // Contador de projectes descartats (clicable)
+  const discardedCount = stats.discardedProjects || 0
 
   const getOrderStatusInfo = (status) => {
     const statuses = {
@@ -241,57 +249,71 @@ export default function Dashboard() {
       <div style={{
         ...styles.headerActions,
         backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-        borderColor: darkMode ? '#2a2a3a' : '#e5e7eb'
+        borderColor: darkMode ? '#2a2a3a' : '#e5e7eb',
+        flexDirection: isMobile ? 'column' : 'row',
+        padding: isMobile ? '12px' : '0 32px',
+        gap: isMobile ? '8px' : '0'
       }}>
-        <div style={styles.quickActionsHeader}>
+        <div style={{
+          ...styles.quickActionsHeader,
+          flexDirection: isMobile ? 'column' : 'row',
+          width: isMobile ? '100%' : 'auto',
+          gap: isMobile ? '8px' : '12px'
+        }}>
           <button
             onClick={() => setShowNewProjectModal(true)}
             style={{
               ...styles.actionButton,
               backgroundColor: darkMode ? '#15151f' : '#f3f4f6',
-              color: darkMode ? '#ffffff' : '#111827'
+              color: darkMode ? '#ffffff' : '#111827',
+              width: isMobile ? '100%' : 'auto',
+              justifyContent: isMobile ? 'center' : 'flex-start'
             }}
           >
             <Plus size={16} />
             <FolderKanban size={18} color="#4f46e5" />
             Nou Projecte
           </button>
-          <button
-            onClick={() => navigate('/suppliers')}
-            style={{
-              ...styles.actionButton,
-              backgroundColor: darkMode ? '#15151f' : '#f3f4f6',
-              color: darkMode ? '#ffffff' : '#111827'
-            }}
-          >
-            <Plus size={16} />
-            <Users size={18} color="#22c55e" />
-            Nou Proveïdor
-          </button>
-          <button
-            onClick={() => navigate('/forwarders')}
-            style={{
-              ...styles.actionButton,
-              backgroundColor: darkMode ? '#15151f' : '#f3f4f6',
-              color: darkMode ? '#ffffff' : '#111827'
-            }}
-          >
-            <Plus size={16} />
-            <Truck size={18} color="#f59e0b" />
-            Nou Transitari
-          </button>
-          <button
-            onClick={() => navigate('/warehouses')}
-            style={{
-              ...styles.actionButton,
-              backgroundColor: darkMode ? '#15151f' : '#f3f4f6',
-              color: darkMode ? '#ffffff' : '#111827'
-            }}
-          >
-            <Plus size={16} />
-            <Warehouse size={18} color="#3b82f6" />
-            Nou Magatzem
-          </button>
+          {!isMobile && (
+            <>
+              <button
+                onClick={() => navigate('/suppliers')}
+                style={{
+                  ...styles.actionButton,
+                  backgroundColor: darkMode ? '#15151f' : '#f3f4f6',
+                  color: darkMode ? '#ffffff' : '#111827'
+                }}
+              >
+                <Plus size={16} />
+                <Users size={18} color="#22c55e" />
+                Nou Proveïdor
+              </button>
+              <button
+                onClick={() => navigate('/forwarders')}
+                style={{
+                  ...styles.actionButton,
+                  backgroundColor: darkMode ? '#15151f' : '#f3f4f6',
+                  color: darkMode ? '#ffffff' : '#111827'
+                }}
+              >
+                <Plus size={16} />
+                <Truck size={18} color="#f59e0b" />
+                Nou Transitari
+              </button>
+              <button
+                onClick={() => navigate('/warehouses')}
+                style={{
+                  ...styles.actionButton,
+                  backgroundColor: darkMode ? '#15151f' : '#f3f4f6',
+                  color: darkMode ? '#ffffff' : '#111827'
+                }}
+              >
+                <Plus size={16} />
+                <Warehouse size={18} color="#3b82f6" />
+                Nou Magatzem
+              </button>
+            </>
+          )}
         </div>
         
         <div style={styles.headerActionsRight}>
@@ -332,9 +354,16 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div style={styles.content}>
+      <div style={{
+        ...styles.content,
+        padding: isMobile ? '16px' : '32px'
+      }}>
         {/* Stats Grid */}
-        <div style={styles.statsGrid}>
+        <div style={{
+          ...styles.statsGrid,
+          gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(240px, 1fr))',
+          gap: isMobile ? '12px' : '20px'
+        }}>
           {statCards.map((stat, index) => (
             <div 
               key={index}
@@ -361,6 +390,32 @@ export default function Dashboard() {
             </div>
           ))}
         </div>
+
+        {/* Discarded Projects Counter */}
+        {discardedCount > 0 && (
+          <div style={{
+            ...styles.discardedCounter,
+            backgroundColor: darkMode ? '#15151f' : '#ffffff',
+            borderColor: darkMode ? '#374151' : '#e5e7eb'
+          }}>
+            <AlertTriangle size={16} color="#6b7280" />
+            <span style={{
+              fontSize: '13px',
+              color: darkMode ? '#9ca3af' : '#6b7280'
+            }}>
+              Projectes descartats: {discardedCount}
+            </span>
+            <button
+              onClick={() => navigate('/projects?showDiscarded=true')}
+              style={{
+                ...styles.discardedLink,
+                color: '#4f46e5'
+              }}
+            >
+              Veure →
+            </button>
+          </div>
+        )}
 
         {/* GTIN Coverage KPI */}
         {!loadingGtinCoverage && (
@@ -747,6 +802,23 @@ const styles = {
   statLabel: {
     fontSize: '14px',
     color: '#6b7280'
+  },
+  discardedCounter: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '12px 20px',
+    borderRadius: '12px',
+    border: '1px solid',
+    marginBottom: '24px'
+  },
+  discardedLink: {
+    background: 'none',
+    border: 'none',
+    fontSize: '13px',
+    fontWeight: '500',
+    cursor: 'pointer',
+    textDecoration: 'underline'
   },
   section: {
     borderRadius: '16px',

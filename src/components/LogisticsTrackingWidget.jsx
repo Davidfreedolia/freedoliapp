@@ -47,9 +47,11 @@ export default function LogisticsTrackingWidget({ darkMode }) {
   const loadData = async () => {
     setLoading(true)
     try {
-      // Carregar projectes actius
+      // Carregar projectes actius (excloure DISCARDED)
       const allProjects = await getProjects()
-      const activeProjects = (allProjects || []).filter(p => p.status === 'active')
+      const activeProjects = (allProjects || []).filter(p => 
+        p.status === 'active' && p.decision !== 'DISCARDED'
+      )
       setProjects(activeProjects)
 
       // Carregar comandes amb tracking

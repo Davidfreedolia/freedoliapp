@@ -102,9 +102,11 @@ export default function LogisticsFlow({ orderId, projectId, compact = false }) {
       }
 
       if (flowData?.id) {
-        await supabase.from('logistics_flow').update(payload).eq('id', flowData.id)
+        const { error } = await supabase.from('logistics_flow').update(payload).eq('id', flowData.id)
+        if (error) throw error
       } else {
-        await supabase.from('logistics_flow').insert(payload)
+        const { error } = await supabase.from('logistics_flow').insert(payload)
+        if (error) throw error
       }
 
       setFlowData({ ...flowData, stages: editData })

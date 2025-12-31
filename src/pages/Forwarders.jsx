@@ -33,6 +33,8 @@ import {
   supabase
 } from '../lib/supabase'
 import Header from '../components/Header'
+import { useBreakpoint } from '../hooks/useBreakpoint'
+import { getModalStyles } from '../utils/responsiveStyles'
 
 // Països i ciutats
 const COUNTRIES_CITIES = {
@@ -61,6 +63,8 @@ const INCOTERMS = ['EXW', 'FOB', 'CIF', 'CFR', 'DDP', 'DAP', 'FCA', 'CPT']
 
 export default function Forwarders() {
   const { darkMode } = useApp()
+  const { isMobile, isTablet } = useBreakpoint()
+  const modalStyles = getModalStyles(isMobile, darkMode)
   
   const [forwarders, setForwarders] = useState([])
   const [warehouses, setWarehouses] = useState([])
@@ -311,9 +315,16 @@ export default function Forwarders() {
     <div style={styles.container}>
       <Header title="Transitaris" />
 
-      <div style={styles.content}>
+      <div style={{
+        ...styles.content,
+        padding: isMobile ? '16px' : '32px'
+      }}>
         {/* Toolbar */}
-        <div style={styles.toolbar}>
+        <div style={{
+          ...styles.toolbar,
+          flexDirection: isMobile ? 'column' : 'row',
+          gap: isMobile ? '12px' : '16px'
+        }}>
           <div style={{
             ...styles.searchContainer,
             backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
@@ -466,8 +477,8 @@ export default function Forwarders() {
 
       {/* Modal Transitari */}
       {showForwarderModal && editingForwarder && (
-        <div style={styles.modalOverlay}>
-          <div style={{ ...styles.modal, backgroundColor: darkMode ? '#15151f' : '#ffffff' }} onClick={e => e.stopPropagation()}>
+        <div style={{...styles.modalOverlay, ...modalStyles.overlay}}>
+          <div style={{ ...styles.modal, ...modalStyles.modal }} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeader}>
               <h3 style={{ ...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827' }}>
                 {editingForwarder.id ? 'Editar Transitari' : 'Nou Transitari'}
@@ -628,8 +639,8 @@ export default function Forwarders() {
 
       {/* Modal Magatzem */}
       {showWarehouseModal && editingWarehouse && (
-        <div style={styles.modalOverlay}>
-          <div style={{ ...styles.modal, backgroundColor: darkMode ? '#15151f' : '#ffffff' }} onClick={e => e.stopPropagation()}>
+        <div style={{...styles.modalOverlay, ...modalStyles.overlay}}>
+          <div style={{ ...styles.modal, ...modalStyles.modal }} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeader}>
               <h3 style={{ ...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827' }}>
                 {editingWarehouse.id ? 'Editar Magatzem' : 'Nou Magatzem'}

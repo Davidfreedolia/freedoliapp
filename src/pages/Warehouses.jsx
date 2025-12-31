@@ -22,6 +22,8 @@ import {
   deleteWarehouse
 } from '../lib/supabase'
 import Header from '../components/Header'
+import { useBreakpoint } from '../hooks/useBreakpoint'
+import { getModalStyles } from '../utils/responsiveStyles'
 
 // Magatzems Amazon FBA pre-definits
 const AMAZON_FBA_WAREHOUSES = [
@@ -62,6 +64,8 @@ const WAREHOUSE_TYPES = [
 
 export default function Warehouses() {
   const { darkMode } = useApp()
+  const { isMobile, isTablet } = useBreakpoint()
+  const modalStyles = getModalStyles(isMobile, darkMode)
   
   const [warehouses, setWarehouses] = useState([])
   const [loading, setLoading] = useState(true)
@@ -227,9 +231,16 @@ export default function Warehouses() {
     <div style={styles.container}>
       <Header title="Magatzems" />
 
-      <div style={styles.content}>
+      <div style={{
+        ...styles.content,
+        padding: isMobile ? '16px' : '32px'
+      }}>
         {/* Toolbar */}
-        <div style={styles.toolbar}>
+        <div style={{
+          ...styles.toolbar,
+          flexDirection: isMobile ? 'column' : 'row',
+          gap: isMobile ? '12px' : '16px'
+        }}>
           <div style={{
             ...styles.searchContainer,
             backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
@@ -309,7 +320,11 @@ export default function Warehouses() {
             </div>
           </div>
         ) : (
-          <div style={styles.warehousesGrid}>
+          <div style={{
+            ...styles.warehousesGrid,
+            gridTemplateColumns: isMobile ? '1fr' : (isTablet ? 'repeat(auto-fill, minmax(280px, 1fr))' : 'repeat(auto-fill, minmax(300px, 1fr))'),
+            gap: isMobile ? '12px' : '16px'
+          }}>
             {filteredWarehouses.map(warehouse => {
               const typeInfo = getTypeInfo(warehouse.type)
               
@@ -371,8 +386,8 @@ export default function Warehouses() {
 
       {/* Modal Magatzem */}
       {showModal && editingWarehouse && (
-        <div style={styles.modalOverlay} onClick={() => setShowModal(false)}>
-          <div style={{ ...styles.modal, backgroundColor: darkMode ? '#15151f' : '#ffffff' }} onClick={e => e.stopPropagation()}>
+        <div style={{...styles.modalOverlay, ...modalStyles.overlay}} onClick={() => setShowModal(false)}>
+          <div style={{ ...styles.modal, ...modalStyles.modal }} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeader}>
               <h3 style={{ ...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827' }}>
                 {editingWarehouse.id ? 'Editar Magatzem' : 'Nou Magatzem'}
@@ -439,8 +454,8 @@ export default function Warehouses() {
 
       {/* Modal Amazon FBA */}
       {showAmazonModal && (
-        <div style={styles.modalOverlay} onClick={() => setShowAmazonModal(false)}>
-          <div style={{ ...styles.modal, ...styles.amazonModal, backgroundColor: darkMode ? '#15151f' : '#ffffff' }} onClick={e => e.stopPropagation()}>
+        <div style={{...styles.modalOverlay, ...modalStyles.overlay}} onClick={() => setShowAmazonModal(false)}>
+          <div style={{ ...styles.modal, ...styles.amazonModal, ...modalStyles.modal, maxWidth: isMobile ? '100%' : '700px' }} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeader}>
               <h3 style={{ ...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827' }}>
                 📦 Afegir Magatzems Amazon FBA

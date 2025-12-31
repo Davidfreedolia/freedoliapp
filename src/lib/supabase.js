@@ -67,11 +67,20 @@ const getCurrentUserId = async () => {
 // ============================================
 
 // PROJECTES
-export const getProjects = async () => {
-  const { data, error } = await supabase
+export const getProjects = async (includeDiscarded = false) => {
+  const userId = await getCurrentUserId()
+  let query = supabase
     .from('projects')
     .select('*')
+    .eq('user_id', userId)
     .order('created_at', { ascending: false })
+  
+  // Per defecte, excloure DISCARDED
+  if (!includeDiscarded) {
+    query = query.or('decision.is.null,decision.neq.DISCARDED')
+  }
+  
+  const { data, error } = await query
   if (error) throw error
   return data
 }
@@ -376,18 +385,30 @@ export const deletePayment = async (id) => {
 
 // ESTADÍSTIQUES DASHBOARD
 export const getDashboardStats = async () => {
+  const userId = await getCurrentUserId()
   const { data: projects } = await supabase
     .from('projects')
-    .select('id, status, current_phase')
+    .select('id, status, current_phase, decision')
+    .eq('user_id', userId)
+
+  // Excloure DISCARDED dels stats
+  const activeProjects = projects?.filter((p) => 
+    p.status === 'active' && p.decision !== 'DISCARDED'
+  ).length || 0
+  const completedProjects = projects?.filter((p) => 
+    p.status === 'completed' && p.decision !== 'DISCARDED'
+  ).length || 0
+  const totalProjects = projects?.filter((p) => 
+    p.decision !== 'DISCARDED'
+  ).length || 0
+  const discardedProjects = projects?.filter((p) => 
+    p.decision === 'DISCARDED'
+  ).length || 0
 
   const { data: payments } = await supabase
     .from('payments')
     .select('amount, currency, type')
     .eq('status', 'completed')
-
-  const activeProjects = projects?.filter((p) => p.status === 'active').length || 0
-  const completedProjects =
-    projects?.filter((p) => p.status === 'completed').length || 0
 
   const totalInvested =
     payments?.reduce((sum, p) => {
@@ -397,9 +418,10 @@ export const getDashboardStats = async () => {
     }, 0) || 0
 
   return {
-    totalProjects: projects?.length || 0,
+    totalProjects,
     activeProjects,
     completedProjects,
+    discardedProjects,
     totalInvested,
   }
 }
@@ -503,9 +525,19 @@ export const upsertProductIdentifiers = async (projectId, identifiers) => {
 // ============================================
 
 export const getGtinPool = async (status = null) => {
+  const userId = await getCurrentUserId()
   let query = supabase
     .from('gtin_pool')
-    .select('*')
+    .select(`
+      *,
+      projects:assigned_to_project_id (
+        id,
+        name,
+        sku_internal,
+        project_code
+      )
+    `)
+    .eq('user_id', userId)
     .order('created_at', { ascending: false })
   
   if (status) {
@@ -546,7 +578,7 @@ export const assignGtinFromPool = async (gtinPoolId, projectId) => {
     .update({
       status: 'assigned',
       assigned_to_project_id: projectId,
-      updated_at: new Date().toISOString()
+      assigned_at: new Date().toISOString()
     })
     .eq('id', gtinPoolId)
   if (updateError) throw updateError
@@ -600,6 +632,40 @@ export const addGtinToPool = async (gtinData) => {
   return data
 }
 
+export const releaseGtinFromProject = async (gtinPoolId) => {
+  const userId = await getCurrentUserId()
+  
+  // Obtenir el GTIN
+  const { data: gtinData, error: gtinError } = await supabase
+    .from('gtin_pool')
+    .select('assigned_to_project_id')
+    .eq('id', gtinPoolId)
+    .eq('user_id', userId)
+    .single()
+  if (gtinError) throw gtinError
+  
+  if (!gtinData.assigned_to_project_id) {
+    throw new Error('Aquest GTIN no està assignat a cap projecte')
+  }
+  
+  // Alliberar el GTIN
+  const { error: updateError } = await supabase
+    .from('gtin_pool')
+    .update({
+      status: 'available',
+      assigned_to_project_id: null,
+      assigned_at: null
+    })
+    .eq('id', gtinPoolId)
+    .eq('user_id', userId)
+  if (updateError) throw updateError
+  
+  // Opcional: Netejar product_identifiers (o deixar-lo per històric)
+  // Per ara el deixem per no perdre informació
+  
+  return true
+}
+
 export const getUnassignedGtinCodes = async () => {
   const { data, error } = await supabase
     .from('gtin_pool')
@@ -612,10 +678,14 @@ export const getUnassignedGtinCodes = async () => {
 
 export const getProjectsMissingGtin = async () => {
   // Projectes actius que no tenen GTIN assignat (ni GTIN_EXEMPT)
+  // Excloure DISCARDED
+  const userId = await getCurrentUserId()
   const { data: projects, error: projectsError } = await supabase
     .from('projects')
-    .select('id, name, project_code, sku, status')
+    .select('id, name, project_code, sku, status, decision')
     .eq('status', 'active')
+    .eq('user_id', userId)
+    .or('decision.is.null,decision.neq.DISCARDED')
   if (projectsError) throw projectsError
   
   const { data: identifiers, error: identifiersError } = await supabase
@@ -1038,14 +1108,25 @@ export const updateDashboardPreferences = async (preferences) => {
     logistics_tracking: true,
     finance_chart: true,
     orders_in_progress: true,
+    pos_not_ready: true,
+    waiting_manufacturer: true,
     activity_feed: false
+  }
+
+  // Fusiona widgets nous amb els existents per preservar tots els widgets
+  let widgetsToSave = defaultWidgets
+  if (existing?.widgets) {
+    widgetsToSave = { ...defaultWidgets, ...existing.widgets }
+  }
+  if (prefsData.widgets) {
+    widgetsToSave = { ...widgetsToSave, ...prefsData.widgets }
   }
 
   if (existing) {
     const { data, error } = await supabase
       .from('dashboard_preferences')
       .update({ 
-        widgets: prefsData.widgets || existing.widgets || defaultWidgets,
+        widgets: widgetsToSave,
         updated_at: new Date().toISOString() 
       })
       .eq('id', existing.id)
@@ -1059,7 +1140,8 @@ export const updateDashboardPreferences = async (preferences) => {
   const { data, error } = await supabase
     .from('dashboard_preferences')
     .insert([{
-      widgets: prefsData.widgets || defaultWidgets
+      widgets: widgetsToSave,
+      user_id: userId
     }])
     .select()
     .single()

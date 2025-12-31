@@ -20,6 +20,7 @@ import { useApp } from '../context/AppContext'
 import { supabase } from '../lib/supabase'
 import { getUnassignedGtinCodes, getProjectsMissingGtin } from '../lib/supabase'
 import Header from '../components/Header'
+import { useBreakpoint } from '../hooks/useBreakpoint'
 
 // Colors per categories
 const CATEGORY_COLORS = {
@@ -35,6 +36,7 @@ const CATEGORY_COLORS = {
 
 export default function Analytics() {
   const { darkMode } = useApp()
+  const { isMobile } = useBreakpoint()
   
   const [loading, setLoading] = useState(true)
   const [dateRange, setDateRange] = useState('30') // dies

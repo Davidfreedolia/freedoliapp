@@ -19,6 +19,8 @@ export default function ManufacturerPackModal({
   identifiers,
   darkMode
 }) {
+  const { isMobile } = useBreakpoint()
+  const modalStyles = getModalStyles(isMobile, darkMode)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [companySettings, setCompanySettings] = useState(null)

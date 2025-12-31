@@ -29,6 +29,8 @@ import {
   supabase
 } from '../lib/supabase'
 import Header from '../components/Header'
+import { useBreakpoint } from '../hooks/useBreakpoint'
+import { getModalStyles } from '../utils/responsiveStyles'
 
 // Tipus de proveïdors
 const SUPPLIER_TYPES = [
@@ -70,6 +72,8 @@ const COUNTRIES_CITIES = {
 
 export default function Suppliers() {
   const { darkMode } = useApp()
+  const { isMobile, isTablet } = useBreakpoint()
+  const modalStyles = getModalStyles(isMobile, darkMode)
   
   const [suppliers, setSuppliers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -235,9 +239,16 @@ export default function Suppliers() {
     <div style={styles.container}>
       <Header title="Proveïdors" />
 
-      <div style={styles.content}>
+      <div style={{
+        ...styles.content,
+        padding: isMobile ? '16px' : '32px'
+      }}>
         {/* Toolbar */}
-        <div style={styles.toolbar}>
+        <div style={{
+          ...styles.toolbar,
+          flexDirection: isMobile ? 'column' : 'row',
+          gap: isMobile ? '12px' : '16px'
+        }}>
           <div style={{
             ...styles.searchContainer,
             backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
@@ -333,7 +344,11 @@ export default function Suppliers() {
             </button>
           </div>
         ) : (
-          <div style={styles.suppliersGrid}>
+          <div style={{
+            ...styles.suppliersGrid,
+            gridTemplateColumns: isMobile ? '1fr' : (isTablet ? 'repeat(auto-fill, minmax(280px, 1fr))' : 'repeat(auto-fill, minmax(320px, 1fr))'),
+            gap: isMobile ? '12px' : '20px'
+          }}>
             {filteredSuppliers.map(supplier => {
               const typeInfo = getTypeInfo(supplier.type)
               const TypeIcon = typeInfo.icon
