@@ -53,7 +53,7 @@ export function WaitingManufacturerWidget({ darkMode, limit = 10 }) {
         ...widgetStyles.container,
         backgroundColor: darkMode ? '#15151f' : '#ffffff'
       }}>
-        <div style={widgetStyles.loading}>Carregant...</div>
+        <div style={widgetStyles.loading}>{t('common.loading')}</div>
       </div>
     )
   }
@@ -185,7 +185,7 @@ export function PosNotAmazonReadyWidget({ darkMode, limit = 10 }) {
         ...widgetStyles.container,
         backgroundColor: darkMode ? '#15151f' : '#ffffff'
       }}>
-        <div style={widgetStyles.loading}>Carregant...</div>
+        <div style={widgetStyles.loading}>{t('common.loading')}</div>
       </div>
     )
   }
@@ -351,7 +351,7 @@ export function ShipmentsInTransitWidget({ darkMode, limit = 10 }) {
         ...widgetStyles.container,
         backgroundColor: darkMode ? '#15151f' : '#ffffff'
       }}>
-        <div style={widgetStyles.loading}>Carregant...</div>
+        <div style={widgetStyles.loading}>{t('common.loading')}</div>
       </div>
     )
   }
@@ -500,7 +500,7 @@ export function ResearchNoDecisionWidget({ darkMode, limit = 10 }) {
         ...widgetStyles.container,
         backgroundColor: darkMode ? '#15151f' : '#ffffff'
       }}>
-        <div style={widgetStyles.loading}>Carregant...</div>
+        <div style={widgetStyles.loading}>{t('common.loading')}</div>
       </div>
     )
   }
@@ -622,7 +622,7 @@ export function StaleTrackingWidget({ darkMode, limit = 10, staleDays = 7 }) {
         ...widgetStyles.container,
         backgroundColor: darkMode ? '#15151f' : '#ffffff'
       }}>
-        <div style={widgetStyles.loading}>Carregant...</div>
+        <div style={widgetStyles.loading}>{t('common.loading')}</div>
       </div>
     )
   }
