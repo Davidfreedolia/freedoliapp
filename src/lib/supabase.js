@@ -1572,4 +1572,143 @@ export const snoozeTask = async (id, days = 3) => {
   })
 }
 
+// SUPPLIER QUOTES
+export const getSupplierQuotes = async (projectId) => {
+  const userId = await getCurrentUserId()
+  const { data, error } = await supabase
+    .from('supplier_quotes')
+    .select(`
+      *,
+      suppliers (
+        id,
+        name,
+        country
+      ),
+      supplier_quote_price_breaks (
+        id,
+        min_qty,
+        unit_price
+      )
+    `)
+    .eq('user_id', userId)
+    .eq('project_id', projectId)
+    .order('created_at', { ascending: false })
+  
+  if (error) throw error
+  return data || []
+}
+
+export const getSupplierQuote = async (quoteId) => {
+  const userId = await getCurrentUserId()
+  const { data, error } = await supabase
+    .from('supplier_quotes')
+    .select(`
+      *,
+      suppliers (
+        id,
+        name,
+        country
+      ),
+      supplier_quote_price_breaks (
+        id,
+        min_qty,
+        unit_price
+      )
+    `)
+    .eq('id', quoteId)
+    .eq('user_id', userId)
+    .single()
+  
+  if (error) throw error
+  return data
+}
+
+export const createSupplierQuote = async (quote) => {
+  const { user_id, price_breaks, ...quoteData } = quote
+  const userId = await getCurrentUserId()
+  
+  // Insert quote
+  const { data: quoteResult, error: quoteError } = await supabase
+    .from('supplier_quotes')
+    .insert([{
+      ...quoteData,
+      user_id: userId
+    }])
+    .select()
+    .single()
+  
+  if (quoteError) throw quoteError
+  
+  // Insert price breaks if provided
+  if (price_breaks && price_breaks.length > 0) {
+    const priceBreaksData = price_breaks.map(pb => ({
+      quote_id: quoteResult.id,
+      min_qty: pb.min_qty,
+      unit_price: pb.unit_price
+    }))
+    
+    const { error: breaksError } = await supabase
+      .from('supplier_quote_price_breaks')
+      .insert(priceBreaksData)
+    
+    if (breaksError) throw breaksError
+  }
+  
+  // Return quote with price breaks
+  return await getSupplierQuote(quoteResult.id)
+}
+
+export const updateSupplierQuote = async (quoteId, updates) => {
+  const { user_id, price_breaks, ...updateData } = updates
+  const userId = await getCurrentUserId()
+  
+  // Update quote
+  const { error: quoteError } = await supabase
+    .from('supplier_quotes')
+    .update(updateData)
+    .eq('id', quoteId)
+    .eq('user_id', userId)
+  
+  if (quoteError) throw quoteError
+  
+  // Update price breaks if provided
+  if (price_breaks !== undefined) {
+    // Delete existing price breaks
+    const { error: deleteError } = await supabase
+      .from('supplier_quote_price_breaks')
+      .delete()
+      .eq('quote_id', quoteId)
+    
+    if (deleteError) throw deleteError
+    
+    // Insert new price breaks
+    if (price_breaks.length > 0) {
+      const priceBreaksData = price_breaks.map(pb => ({
+        quote_id: quoteId,
+        min_qty: pb.min_qty,
+        unit_price: pb.unit_price
+      }))
+      
+      const { error: insertError } = await supabase
+        .from('supplier_quote_price_breaks')
+        .insert(priceBreaksData)
+      
+      if (insertError) throw insertError
+    }
+  }
+  
+  return await getSupplierQuote(quoteId)
+}
+
+export const deleteSupplierQuote = async (quoteId) => {
+  const userId = await getCurrentUserId()
+  const { error } = await supabase
+    .from('supplier_quotes')
+    .delete()
+    .eq('id', quoteId)
+    .eq('user_id', userId)
+  
+  if (error) throw error
+}
+
 export default supabase

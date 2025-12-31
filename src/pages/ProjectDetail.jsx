@@ -24,6 +24,7 @@ import FileBrowser from '../components/FileBrowser'
 import IdentifiersSection from '../components/IdentifiersSection'
 import ProfitabilityCalculator from '../components/ProfitabilityCalculator'
 import TasksSection from '../components/TasksSection'
+import QuotesSection from '../components/QuotesSection'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 
 const PHASES = [
@@ -365,6 +366,15 @@ export default function ProjectDetail() {
             marginBottom: '24px'
           }}>
             <ProfitabilityCalculator projectId={id} darkMode={darkMode} />
+          </div>
+        )}
+
+        {/* Supplier Quotes Section - Visible desde fase 2 (Viabilitat) */}
+        {project.current_phase >= 2 && (
+          <div style={{
+            marginBottom: '24px'
+          }}>
+            <QuotesSection projectId={id} darkMode={darkMode} />
           </div>
         )}
 
