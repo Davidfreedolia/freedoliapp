@@ -88,6 +88,7 @@ export default function Dashboard() {
   const [loadingWaitingManufacturer, setLoadingWaitingManufacturer] = useState(true)
   const [editLayout, setEditLayout] = useState(false)
   const [layout, setLayout] = useState([])
+  const [gridWidth, setGridWidth] = useState(1200)
 
   useEffect(() => {
     loadDashboardPreferences()
@@ -863,10 +864,12 @@ export default function Dashboard() {
               layout={layout}
               cols={12}
               rowHeight={60}
-              width={typeof window !== 'undefined' ? Math.max(window.innerWidth - (isTablet ? 72 : 260) - 64, 800) : 1200}
+              width={gridWidth}
               isDraggable={editLayout}
               isResizable={editLayout}
               onLayoutChange={handleLayoutChange}
+              compactType={null}
+              preventCollision={false}
               style={{
                 backgroundColor: 'transparent'
               }}
@@ -930,6 +933,8 @@ export default function Dashboard() {
                     return null
                 }
                 
+                if (!widgetComponent) return null
+                
                 return (
                   <div key={item.i} style={{
                     backgroundColor: darkMode ? '#15151f' : '#ffffff',
@@ -938,7 +943,8 @@ export default function Dashboard() {
                     border: editLayout ? '2px dashed #4f46e5' : '1px solid',
                     borderColor: editLayout ? '#4f46e5' : (darkMode ? '#374151' : '#e5e7eb'),
                     height: '100%',
-                    overflow: 'auto'
+                    overflow: 'auto',
+                    boxSizing: 'border-box'
                   }}>
                     {widgetComponent}
                   </div>
