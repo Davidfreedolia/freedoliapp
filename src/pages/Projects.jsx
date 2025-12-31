@@ -254,7 +254,39 @@ export default function Projects() {
                       <span>{phase.icon}</span>
                       <span>{phase.name}</span>
                     </div>
-                    <ArrowRight size={18} color="#9ca3af" />
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      {project.decision === 'DISCARDED' && (
+                        <button
+                          onClick={async (e) => {
+                            e.stopPropagation()
+                            try {
+                              const { updateProject } = await import('../lib/supabase')
+                              const { showToast } = await import('../components/Toast')
+                              await updateProject(project.id, { decision: 'HOLD' })
+                              showToast('Project restored', 'success')
+                              await loadData()
+                            } catch (err) {
+                              const { showToast } = await import('../components/Toast')
+                              showToast('Error: ' + (err.message || 'Unknown error'), 'error')
+                            }
+                          }}
+                          style={{
+                            padding: '4px 8px',
+                            backgroundColor: '#10b981',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            fontSize: '11px',
+                            fontWeight: '500',
+                            cursor: 'pointer'
+                          }}
+                          title="Restore project"
+                        >
+                          Restore
+                        </button>
+                      )}
+                      <ArrowRight size={18} color="#9ca3af" />
+                    </div>
                   </div>
                 </div>
               )

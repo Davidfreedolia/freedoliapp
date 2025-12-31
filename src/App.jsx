@@ -152,6 +152,7 @@ function AppContent() {
           </Routes>
         </Suspense>
       </main>
+      <ToastContainer darkMode={darkMode} />
     </div>
   )
 }

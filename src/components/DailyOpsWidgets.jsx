@@ -19,6 +19,7 @@ import {
   getStaleTracking,
   quickMarkPackAsSent
 } from '../lib/supabase'
+import { showToast } from './Toast'
 
 // Widget: Waiting Manufacturer
 export function WaitingManufacturerWidget({ darkMode, limit = 10 }) {
@@ -146,10 +147,11 @@ export function WaitingManufacturerWidget({ darkMode, limit = 10 }) {
                     setActionLoading(po.id)
                     try {
                       await quickMarkPackAsSent(po.id)
+                      showToast('Pack marked as sent', 'success')
                       await loadData()
                     } catch (err) {
                       console.error('Error marking pack as sent:', err)
-                      alert('Error: ' + (err.message || 'Unknown error'))
+                      showToast('Error: ' + (err.message || 'Unknown error'), 'error')
                     } finally {
                       setActionLoading(null)
                     }
@@ -299,7 +301,12 @@ export function PosNotAmazonReadyWidget({ darkMode, limit = 10 }) {
               )}
             </div>
             <button
-              onClick={() => navigate(`/orders`)}
+              onClick={(e) => {
+                e.stopPropagation()
+                // Navigate to PO detail with focus on missing fields
+                const missingField = po.missing && po.missing.length > 0 ? po.missing[0] : null
+                navigate(`/orders?po=${po.id}${missingField ? `&focus=${missingField}` : ''}`)
+              }}
               style={{
                 ...widgetStyles.actionButton,
                 backgroundColor: '#ef4444',

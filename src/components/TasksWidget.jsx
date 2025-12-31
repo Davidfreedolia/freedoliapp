@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { CheckCircle2, Clock, MoreVertical, Calendar, ArrowRight, AlertCircle } from 'lucide-react'
 import { getOpenTasks, markTaskDone, snoozeTask } from '../lib/supabase'
+import { showToast } from './Toast'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { formatDistanceToNow, parseISO, format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -34,20 +35,24 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
     setActionLoading(taskId)
     try {
       await markTaskDone(taskId)
+      showToast('Task marked as done', 'success')
       await loadTasks()
     } catch (err) {
       console.error('Error marking task done:', err)
+      showToast('Error: ' + (err.message || 'Unknown error'), 'error')
     }
     setActionLoading(null)
   }
 
-  const handleSnooze = async (taskId) => {
+  const handleSnooze = async (taskId, days = 3) => {
     setActionLoading(taskId)
     try {
-      await snoozeTask(taskId, 3)
+      await snoozeTask(taskId, days)
+      showToast(`Task snoozed +${days} day${days > 1 ? 's' : ''}`, 'success')
       await loadTasks()
     } catch (err) {
       console.error('Error snoozing task:', err)
+      showToast('Error: ' + (err.message || 'Unknown error'), 'error')
     }
     setActionLoading(null)
   }
@@ -220,17 +225,32 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
                   <CheckCircle2 size={14} />
                 </button>
                 <button
-                  onClick={() => handleSnooze(task.id)}
+                  onClick={() => handleSnooze(task.id, 1)}
                   disabled={actionLoading === task.id}
                   style={{
                     ...widgetStyles.actionButton,
                     backgroundColor: '#f59e0b',
                     color: '#ffffff',
-                    opacity: actionLoading === task.id ? 0.6 : 1
+                    opacity: actionLoading === task.id ? 0.6 : 1,
+                    fontSize: '11px'
+                  }}
+                  title="Snooze +1d"
+                >
+                  +1d
+                </button>
+                <button
+                  onClick={() => handleSnooze(task.id, 3)}
+                  disabled={actionLoading === task.id}
+                  style={{
+                    ...widgetStyles.actionButton,
+                    backgroundColor: '#f59e0b',
+                    color: '#ffffff',
+                    opacity: actionLoading === task.id ? 0.6 : 1,
+                    fontSize: '11px'
                   }}
                   title="Snooze +3d"
                 >
-                  <Clock size={14} />
+                  +3d
                 </button>
                 <button
                   onClick={() => handleOpenEntity(task)}

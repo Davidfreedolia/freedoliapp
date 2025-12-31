@@ -734,6 +734,56 @@ export default function Orders() {
                       {formatCurrency(order.total_amount, order.currency)}
                     </div>
                   </div>
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleViewOrder(order)
+                      }}
+                      style={{
+                        flex: 1,
+                        padding: '8px 12px',
+                        backgroundColor: '#4f46e5',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Open
+                    </button>
+                    {order.manufacturerPackStatus === 'generated' && (
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation()
+                          try {
+                            const { quickMarkPackAsSent } = await import('../lib/supabase')
+                            const { showToast } = await import('../components/Toast')
+                            await quickMarkPackAsSent(order.id)
+                            showToast('Pack marked as sent', 'success')
+                            await loadData()
+                          } catch (err) {
+                            const { showToast } = await import('../components/Toast')
+                            showToast('Error: ' + (err.message || 'Unknown error'), 'error')
+                          }
+                        }}
+                        style={{
+                          padding: '8px 12px',
+                          backgroundColor: '#10b981',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          fontWeight: '500',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        ✓ Sent
+                      </button>
+                    )}
+                  </div>
                 </div>
               )
             })}
