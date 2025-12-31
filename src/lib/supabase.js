@@ -685,8 +685,11 @@ export const getProjectsMissingGtin = async () => {
     .select('id, name, project_code, sku, status, decision')
     .eq('status', 'active')
     .eq('user_id', userId)
-    .or('decision.is.null,decision.neq.DISCARDED')
+  
   if (projectsError) throw projectsError
+  
+  // Filter DISCARDED client-side to avoid query issues
+  const filteredProjects = (projects || []).filter(p => !p.decision || p.decision !== 'DISCARDED')
   
   const { data: identifiers, error: identifiersError } = await supabase
     .from('product_identifiers')
