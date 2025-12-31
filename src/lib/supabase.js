@@ -2084,6 +2084,90 @@ export const updateDecisionLog = async (id, updates) => {
   return data
 }
 
+// Planned vs Actual: Get PO related to a quote (same supplier + project)
+export const getPoForQuote = async (quoteId) => {
+  const userId = await getCurrentUserId()
+  
+  // Get quote
+  const { data: quote, error: quoteError } = await supabase
+    .from('supplier_quotes')
+    .select('supplier_id, project_id')
+    .eq('id', quoteId)
+    .eq('user_id', userId)
+    .single()
+  
+  if (quoteError || !quote) return null
+  
+  // Find PO with same supplier and project
+  const { data: pos, error: poError } = await supabase
+    .from('purchase_orders')
+    .select('*')
+    .eq('supplier_id', quote.supplier_id)
+    .eq('project_id', quote.project_id)
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+  
+  if (poError || !pos || pos.length === 0) return null
+  
+  return pos[0]
+}
+
+// Planned vs Actual: Get quote related to a PO (same supplier + project)
+export const getQuoteForPo = async (poId) => {
+  const userId = await getCurrentUserId()
+  
+  // Get PO
+  const { data: po, error: poError } = await supabase
+    .from('purchase_orders')
+    .select('supplier_id, project_id')
+    .eq('id', poId)
+    .eq('user_id', userId)
+    .single()
+  
+  if (poError || !po) return null
+  
+  // Find quote with same supplier and project (most recent)
+  const { data: quotes, error: quoteError } = await supabase
+    .from('supplier_quotes')
+    .select(`
+      *,
+      supplier_quote_price_breaks (
+        min_qty,
+        unit_price
+      )
+    `)
+    .eq('supplier_id', po.supplier_id)
+    .eq('project_id', po.project_id)
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+  
+  if (quoteError || !quotes || quotes.length === 0) return null
+  
+  return quotes[0]
+}
+
+// Planned vs Actual: Get shipment for PO
+export const getShipmentForPo = async (poId) => {
+  const userId = await getCurrentUserId()
+  
+  try {
+    const { data, error } = await supabase
+      .from('po_shipments')
+      .select('*')
+      .eq('purchase_order_id', poId)
+      .eq('user_id', userId)
+      .single()
+    
+    if (error && error.code !== 'PGRST116') throw error
+    return data || null
+  } catch (err) {
+    // Table might not exist
+    return null
+  }
+}
+
 // Quick action: Mark Manufacturer Pack as Sent
 export const quickMarkPackAsSent = async (poId) => {
   const userId = await getCurrentUserId()

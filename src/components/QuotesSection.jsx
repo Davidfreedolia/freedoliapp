@@ -19,11 +19,14 @@ import {
   updateSupplierQuote, 
   deleteSupplierQuote,
   getSuppliers,
-  getProjectProfitability
+  getProjectProfitability,
+  getPoForQuote,
+  getShipmentForPo
 } from '../lib/supabase'
 import { calculateQuickProfitability } from '../lib/profitability'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import DecisionLog from './DecisionLog'
+import PlannedVsActual from './PlannedVsActual'
 
 const CURRENCIES = ['USD', 'EUR', 'CNY', 'GBP']
 const INCOTERMS = ['EXW', 'FCA', 'FAS', 'FOB', 'CFR', 'CIF', 'CPT', 'CIP', 'DAP', 'DPU', 'DDP']

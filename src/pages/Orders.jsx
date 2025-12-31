@@ -37,11 +37,14 @@ import {
   getProject,
   getPoAmazonReadiness,
   upsertPoAmazonReadiness,
-  updatePoAmazonReadinessLabels
+  updatePoAmazonReadinessLabels,
+  getQuoteForPo,
+  getShipmentForPo
 } from '../lib/supabase'
 import ShipmentTrackingSection from '../components/ShipmentTrackingSection'
 import TasksSection from '../components/TasksSection'
 import DecisionLog from '../components/DecisionLog'
+import PlannedVsActual from '../components/PlannedVsActual'
 import Header from '../components/Header'
 import NewPOModal from '../components/NewPOModal'
 import LogisticsFlow from '../components/LogisticsFlow'
@@ -88,6 +91,8 @@ export default function Orders() {
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [selectedOrder, setSelectedOrder] = useState(null)
   const [loadingDetail, setLoadingDetail] = useState(false)
+  const [selectedQuote, setSelectedQuote] = useState(null)
+  const [selectedShipment, setSelectedShipment] = useState(null)
   const [showLabelsModal, setShowLabelsModal] = useState(false)
   const [labelsConfig, setLabelsConfig] = useState({
     quantity: 30,
@@ -218,6 +223,14 @@ export default function Orders() {
       if (fullOrder.project_id) {
         await loadAmazonReadiness(fullOrder.id, fullOrder.project_id, fullOrder)
       }
+      
+      // Load quote and shipment for Planned vs Actual
+      const [quote, shipment] = await Promise.all([
+        getQuoteForPo(fullOrder.id),
+        getShipmentForPo(fullOrder.id)
+      ])
+      setSelectedQuote(quote)
+      setSelectedShipment(shipment)
     } catch (err) {
       console.error('Error carregant detall:', err)
       alert('Error carregant el detall de la comanda')
