@@ -31,6 +31,7 @@ import {
 import Header from '../components/Header'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
+import SupplierMemory from '../components/SupplierMemory'
 
 // Tipus de proveïdors
 const SUPPLIER_TYPES = [
@@ -442,6 +443,9 @@ export default function Suppliers() {
                       ))}
                     </div>
                   )}
+
+                  {/* Supplier Memory */}
+                  <SupplierMemory supplierId={supplier.id} darkMode={darkMode} />
                 </div>
               )
             })}
