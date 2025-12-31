@@ -1316,6 +1316,166 @@ export const getDashboardPreferences = async () => {
   return data
 }
 
+// Get actionable alerts based on thresholds
+export const getAlerts = async (thresholds = {}) => {
+  const userId = await getCurrentUserId()
+  const alerts = []
+  
+  const {
+    manufacturerPackDays = 3,
+    researchDays = 7
+  } = thresholds
+  
+  // 1. Manufacturer Pack alerts: generated_at > X days and not sent
+  try {
+    const { data: packs, error } = await supabase
+      .from('po_amazon_readiness')
+      .select(`
+        id,
+        purchase_order_id,
+        manufacturer_pack_generated_at,
+        manufacturer_pack_sent_at,
+        purchase_orders (
+          id,
+          po_number,
+          projects (
+            id,
+            name,
+            sku_internal
+          )
+        )
+      `)
+      .eq('user_id', userId)
+      .not('manufacturer_pack_generated_at', 'is', null)
+      .is('manufacturer_pack_sent_at', null)
+    
+    if (!error && packs) {
+      const now = new Date()
+      packs.forEach(pack => {
+        if (pack.manufacturer_pack_generated_at && pack.purchase_orders) {
+          const generatedDate = new Date(pack.manufacturer_pack_generated_at)
+          const daysSince = Math.floor((now - generatedDate) / (1000 * 60 * 60 * 24))
+          
+          if (daysSince > manufacturerPackDays) {
+            alerts.push({
+              type: 'manufacturer_pack',
+              severity: daysSince > manufacturerPackDays * 2 ? 'high' : 'medium',
+              message: `Pack generat fa ${daysSince} dies`,
+              entityType: 'purchase_order',
+              entityId: pack.purchase_order_id,
+              poNumber: pack.purchase_orders.po_number,
+              projectName: pack.purchase_orders.projects?.name,
+              daysSince
+            })
+          }
+        }
+      })
+    }
+  } catch (err) {
+    console.error('Error getting manufacturer pack alerts:', err)
+  }
+  
+  // 2. Shipment alerts: eta_date < today and status != delivered
+  try {
+    const { data: shipments, error } = await supabase
+      .from('po_shipments')
+      .select(`
+        id,
+        purchase_order_id,
+        eta_date,
+        status,
+        carrier,
+        purchase_orders (
+          id,
+          po_number,
+          projects (
+            id,
+            name
+          )
+        )
+      `)
+      .eq('user_id', userId)
+      .not('eta_date', 'is', null)
+      .neq('status', 'delivered')
+    
+    if (!error && shipments) {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      
+      shipments.forEach(shipment => {
+        if (shipment.eta_date && shipment.purchase_orders) {
+          const etaDate = new Date(shipment.eta_date)
+          etaDate.setHours(0, 0, 0, 0)
+          
+          if (etaDate < today) {
+            const daysOverdue = Math.floor((today - etaDate) / (1000 * 60 * 60 * 24))
+            alerts.push({
+              type: 'shipment',
+              severity: 'high',
+              message: `Enviament amb ETA passat (${daysOverdue} dies)`,
+              entityType: 'purchase_order',
+              entityId: shipment.purchase_order_id,
+              poNumber: shipment.purchase_orders.po_number,
+              projectName: shipment.purchase_orders.projects?.name,
+              carrier: shipment.carrier,
+              etaDate: shipment.eta_date,
+              daysOverdue
+            })
+          }
+        }
+      })
+    }
+  } catch (err) {
+    // Table might not exist
+    if (err.code !== '42P01') {
+      console.error('Error getting shipment alerts:', err)
+    }
+  }
+  
+  // 3. Research alerts: phase = Research and no decision > X days
+  try {
+    const { data: projects, error } = await supabase
+      .from('projects')
+      .select('id, name, sku_internal, current_phase, decision, created_at')
+      .eq('user_id', userId)
+      .eq('current_phase', 1)
+      .or('decision.is.null,decision.eq.HOLD')
+      .order('created_at', { ascending: true })
+    
+    if (!error && projects) {
+      const now = new Date()
+      projects.forEach(project => {
+        const createdDate = new Date(project.created_at)
+        const daysSince = Math.floor((now - createdDate) / (1000 * 60 * 60 * 24))
+        
+        if (daysSince > researchDays) {
+          alerts.push({
+            type: 'research',
+            severity: daysSince > researchDays * 2 ? 'high' : 'medium',
+            message: `Recerca sense decisió fa ${daysSince} dies`,
+            entityType: 'project',
+            entityId: project.id,
+            projectName: project.name,
+            sku: project.sku_internal,
+            daysSince
+          })
+        }
+      })
+    }
+  } catch (err) {
+    console.error('Error getting research alerts:', err)
+  }
+  
+  return alerts.sort((a, b) => {
+    // Sort by severity (high first) then by days
+    const severityOrder = { high: 3, medium: 2, low: 1 }
+    if (severityOrder[a.severity] !== severityOrder[b.severity]) {
+      return severityOrder[b.severity] - severityOrder[a.severity]
+    }
+    return (b.daysSince || b.daysOverdue || 0) - (a.daysSince || a.daysOverdue || 0)
+  })
+}
+
 export const updateDashboardPreferences = async (preferences) => {
   const { user_id, ...prefsData } = preferences
   const userId = await getCurrentUserId()
@@ -1373,12 +1533,22 @@ export const updateDashboardPreferences = async (preferences) => {
     staleDays = prefsData.staleDays
   }
 
+  // Manejar alertThresholds (si ve en prefsData)
+  let alertThresholds = existing?.alert_thresholds || {
+    manufacturerPackDays: 3,
+    researchDays: 7
+  }
+  if (prefsData.alertThresholds) {
+    alertThresholds = { ...alertThresholds, ...prefsData.alertThresholds }
+  }
+
   // Preparar dades per guardar
   const dataToSave = {
     widgets: widgetsToSave,
     enabledWidgets,
     widgetOrder,
-    staleDays
+    staleDays,
+    alert_thresholds: alertThresholds
   }
 
   if (existing) {

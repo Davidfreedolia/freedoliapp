@@ -34,6 +34,7 @@ import {
   StaleTrackingWidget
 } from '../components/DailyOpsWidgets'
 import TasksWidget from '../components/TasksWidget'
+import AlertsBadge from '../components/AlertsBadge'
 
 export default function Dashboard() {
   const { stats, projects, loading, darkMode, setDarkMode } = useApp()
@@ -369,13 +370,8 @@ export default function Dashboard() {
             <Settings size={20} color={darkMode ? '#9ca3af' : '#6b7280'} />
           </button>
 
-          {/* Notificacions */}
-          <button style={{
-            ...styles.iconButton,
-            backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6'
-          }}>
-            <Bell size={20} color={darkMode ? '#9ca3af' : '#6b7280'} />
-          </button>
+          {/* Alerts Badge */}
+          <AlertsBadge darkMode={darkMode} />
 
           {/* Toggle Dark Mode */}
           <button 

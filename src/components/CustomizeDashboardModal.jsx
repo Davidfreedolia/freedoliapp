@@ -53,6 +53,10 @@ export default function CustomizeDashboardModal({ isOpen, onClose, onSave }) {
     'stale_tracking'
   ])
   const [staleDays, setStaleDays] = useState(7)
+  const [alertThresholds, setAlertThresholds] = useState({
+    manufacturerPackDays: 3,
+    researchDays: 7
+  })
 
   useEffect(() => {
     if (isOpen) {
@@ -88,6 +92,9 @@ export default function CustomizeDashboardModal({ isOpen, onClose, onSave }) {
       }
       if (prefs?.staleDays) {
         setStaleDays(prefs.staleDays)
+      }
+      if (prefs?.alert_thresholds || prefs?.alertThresholds) {
+        setAlertThresholds(prefs.alert_thresholds || prefs.alertThresholds)
       }
     } catch (err) {
       console.error('Error carregant preferències:', err)
