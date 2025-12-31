@@ -2042,6 +2042,19 @@ export const createDecisionLog = async (decision) => {
   const { user_id, ...decisionData } = decision
   const userId = await getCurrentUserId()
   
+  // Check if decision already exists for this entity (1 decisión activa por entidad)
+  const existing = await getDecisionLog(decisionData.entity_type, decisionData.entity_id)
+  
+  if (existing) {
+    // Update existing instead of creating new
+    return await updateDecisionLog(existing.id, {
+      decision: decisionData.decision,
+      reason: decisionData.reason || null,
+      notes: decisionData.notes || null
+    })
+  }
+  
+  // Create new
   const { data, error } = await supabase
     .from('decision_log')
     .insert([{

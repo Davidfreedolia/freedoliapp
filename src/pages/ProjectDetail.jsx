@@ -13,7 +13,10 @@ import {
   AlertCircle,
   ClipboardList,
   ShoppingCart,
-  Package
+  Package,
+  CheckCircle2,
+  Clock,
+  XCircle
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { getProject, updateProject, getDocuments, createDocument } from '../lib/supabase'
@@ -360,6 +363,36 @@ export default function ProjectDetail() {
           entityId={id} 
           darkMode={darkMode} 
         />
+
+        {/* Decision Block - Visible a fase Research (1) */}
+        {project.current_phase === 1 && (
+          <div style={{
+            marginBottom: '24px',
+            padding: '20px',
+            borderRadius: '12px',
+            backgroundColor: darkMode ? '#15151f' : '#ffffff',
+            border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+          }}>
+            <h3 style={{
+              margin: '0 0 16px 0',
+              fontSize: '16px',
+              fontWeight: '600',
+              color: darkMode ? '#ffffff' : '#111827'
+            }}>
+              Decision
+            </h3>
+            <DecisionLog 
+              entityType="project" 
+              entityId={id} 
+              darkMode={darkMode}
+              allowedDecisions={[
+                { value: 'go', label: 'GO', icon: CheckCircle2, color: '#10b981' },
+                { value: 'hold', label: 'HOLD', icon: Clock, color: '#f59e0b' },
+                { value: 'discarded', label: 'DISCARDED', icon: XCircle, color: '#ef4444' }
+              ]}
+            />
+          </div>
+        )}
 
         {/* Quick Profitability Calculator - Visible a fase Research (1) */}
         {project.current_phase === 1 && (

@@ -16,6 +16,7 @@ import {
   Truck,
   DollarSign,
   CheckCircle,
+  CheckCircle2,
   Clock,
   AlertCircle,
   Send,

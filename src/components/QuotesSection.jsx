@@ -811,6 +811,20 @@ export default function QuotesSection({ projectId, darkMode }) {
                       <DecisionIcon size={16} />
                       {profitability.decision}
                     </div>
+
+                    {/* Decision Log for Quote */}
+                    <div style={{ marginTop: '12px' }}>
+                      <DecisionLog 
+                        entityType="quote" 
+                        entityId={quote.id} 
+                        darkMode={darkMode}
+                        requiredReason={true}
+                        allowedDecisions={[
+                          { value: 'selected', label: 'SELECTED', icon: CheckCircle2, color: '#3b82f6' },
+                          { value: 'rejected', label: 'REJECTED', icon: XCircle, color: '#ef4444' }
+                        ]}
+                      />
+                    </div>
                   </div>
                 </div>
               )

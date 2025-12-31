@@ -13,31 +13,32 @@ const DECISION_OPTIONS = [
 
 const REASON_OPTIONS = {
   project: [
-    'Low margin',
-    'High competition',
-    'Supply chain issues',
-    'Market saturation',
-    'Regulatory concerns',
-    'Other'
+    { value: 'price', label: 'Price' },
+    { value: 'margin', label: 'Margin' },
+    { value: 'moq', label: 'MOQ' },
+    { value: 'lead_time', label: 'Lead Time' },
+    { value: 'risk', label: 'Risk' },
+    { value: 'other', label: 'Other' }
   ],
   quote: [
-    'Price too high',
-    'Quality concerns',
-    'Lead time too long',
-    'Payment terms',
-    'MOQ too high',
-    'Other'
+    { value: 'price', label: 'Price' },
+    { value: 'margin', label: 'Margin' },
+    { value: 'moq', label: 'MOQ' },
+    { value: 'lead_time', label: 'Lead Time' },
+    { value: 'risk', label: 'Risk' },
+    { value: 'other', label: 'Other' }
   ],
   purchase_order: [
-    'Supplier issue',
-    'Quality problem',
-    'Delay',
-    'Cost overrun',
-    'Other'
+    { value: 'price', label: 'Price' },
+    { value: 'margin', label: 'Margin' },
+    { value: 'moq', label: 'MOQ' },
+    { value: 'lead_time', label: 'Lead Time' },
+    { value: 'risk', label: 'Risk' },
+    { value: 'other', label: 'Other' }
   ]
 }
 
-export default function DecisionLog({ entityType, entityId, darkMode }) {
+export default function DecisionLog({ entityType, entityId, darkMode, requiredReason = false, allowedDecisions = null }) {
   const { t } = useTranslation()
   const [decision, setDecision] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -79,17 +80,22 @@ export default function DecisionLog({ entityType, entityId, darkMode }) {
       return
     }
 
+    if (requiredReason && !formData.reason) {
+      alert('Reason is required for this decision')
+      return
+    }
+
     setSaving(true)
     try {
       if (decision) {
-        // Update existing
+        // Update existing (1 decisión activa por entidad)
         await updateDecisionLog(decision.id, {
           decision: formData.decision,
           reason: formData.reason || null,
           notes: formData.notes || null
         })
       } else {
-        // Create new
+        // Create new (upsert: si existe, actualiza; si no, crea)
         await createDecisionLog({
           entity_type: entityType,
           entity_id: entityId,
@@ -150,7 +156,7 @@ export default function DecisionLog({ entityType, entityId, darkMode }) {
           <div style={styles.formGroup}>
             <label style={styles.label}>Decision *</label>
             <div style={styles.decisionButtons}>
-              {DECISION_OPTIONS.map(opt => {
+              {(allowedDecisions || DECISION_OPTIONS).map(opt => {
                 const Icon = opt.icon
                 return (
                   <button
@@ -175,7 +181,9 @@ export default function DecisionLog({ entityType, entityId, darkMode }) {
           </div>
 
           <div style={styles.formGroup}>
-            <label style={styles.label}>Reason</label>
+            <label style={styles.label}>
+              Reason{requiredReason ? ' *' : ''}
+            </label>
             <select
               value={formData.reason}
               onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
@@ -188,7 +196,7 @@ export default function DecisionLog({ entityType, entityId, darkMode }) {
             >
               <option value="">Select reason (optional)</option>
               {reasons.map(r => (
-                <option key={r} value={r}>{r}</option>
+                <option key={r.value} value={r.value}>{r.label}</option>
               ))}
             </select>
           </div>
@@ -230,10 +238,10 @@ export default function DecisionLog({ entityType, entityId, darkMode }) {
             </button>
             <button
               onClick={handleSave}
-              disabled={saving || !formData.decision}
+              disabled={saving || !formData.decision || (requiredReason && !formData.reason)}
               style={{
                 ...styles.saveButton,
-                opacity: (saving || !formData.decision) ? 0.6 : 1
+                opacity: (saving || !formData.decision || (requiredReason && !formData.reason)) ? 0.6 : 1
               }}
             >
               <Save size={14} />
