@@ -56,7 +56,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 // ============================================
 
 // Obtenir user_id de la sessió actual
-const getCurrentUserId = async () => {
+export const getCurrentUserId = async () => {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('No hi ha usuari autenticat')
   return user.id
