@@ -1,9 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import React, { Suspense, useState, useEffect } from 'react'
+import React, { Suspense } from 'react'
 import { AppProvider, useApp } from './context/AppContext'
 import Sidebar from './components/Sidebar'
 import ProtectedRoute from './components/ProtectedRoute'
 import PageLoader from './components/PageLoader'
+import { useBreakpoint } from './hooks/useBreakpoint'
 
 // Login (no lazy, es carrega primer)
 import Login from './pages/Login'
@@ -24,17 +25,7 @@ const Warehouses = React.lazy(() => import('./pages/Warehouses'))
 
 function AppContent() {
   const { sidebarCollapsed, darkMode } = useApp()
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
-  const [isTablet, setIsTablet] = useState(window.innerWidth >= 768 && window.innerWidth < 1024)
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768)
-      setIsTablet(window.innerWidth >= 768 && window.innerWidth < 1024)
-    }
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
+  const { isMobile, isTablet } = useBreakpoint()
 
   // Calcular margin-left segons breakpoint
   const getMarginLeft = () => {

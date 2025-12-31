@@ -9,6 +9,8 @@ export const BREAKPOINTS = {
 
 export function useBreakpoint() {
   const [breakpoint, setBreakpoint] = useState(() => {
+    // Verificar que window existe (SSR safety)
+    if (typeof window === 'undefined') return 'desktop'
     const width = window.innerWidth
     if (width < BREAKPOINTS.mobile) return 'mobile'
     if (width < BREAKPOINTS.tablet) return 'tablet'
@@ -16,6 +18,9 @@ export function useBreakpoint() {
   })
 
   useEffect(() => {
+    // Verificar que window existe
+    if (typeof window === 'undefined') return
+
     const handleResize = () => {
       const width = window.innerWidth
       if (width < BREAKPOINTS.mobile) {

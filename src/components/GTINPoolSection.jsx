@@ -21,9 +21,13 @@ import {
   releaseGtinFromProject,
   supabase
 } from '../lib/supabase'
+import { useBreakpoint } from '../hooks/useBreakpoint'
+import { getModalStyles } from '../utils/responsiveStyles'
 
 export default function GTINPoolSection({ darkMode }) {
   const navigate = useNavigate()
+  const { isMobile } = useBreakpoint()
+  const modalStyles = getModalStyles(isMobile, darkMode)
   const [gtins, setGtins] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -31,17 +35,7 @@ export default function GTINPoolSection({ darkMode }) {
   const [showImportModal, setShowImportModal] = useState(false)
   const [importing, setImporting] = useState(false)
   const [importPreview, setImportPreview] = useState(null)
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const fileInputRef = useRef(null)
-
-  // Detectar tamaño de pantalla
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
 
   useEffect(() => {
     loadGtins()
@@ -590,11 +584,11 @@ export default function GTINPoolSection({ darkMode }) {
 
       {/* Modal Import */}
       {showImportModal && (
-        <div style={{...styles.modalOverlay, ...getModalStyles(isMobile, darkMode).overlay}} onClick={() => setShowImportModal(false)}>
+        <div style={{...styles.modalOverlay, ...modalStyles.overlay}} onClick={() => setShowImportModal(false)}>
           <div
             style={{
               ...styles.modal,
-              ...getModalStyles(isMobile, darkMode).modal
+              ...modalStyles.modal
             }}
             onClick={e => e.stopPropagation()}
           >
