@@ -37,6 +37,8 @@ export default function QuotesSection({ projectId, darkMode }) {
   const [quotes, setQuotes] = useState([])
   const [suppliers, setSuppliers] = useState([])
   const [loading, setLoading] = useState(true)
+  const [poMap, setPoMap] = useState({}) // quoteId -> po
+  const [shipmentMap, setShipmentMap] = useState({}) // poId -> shipment
   const [showAddForm, setShowAddForm] = useState(false)
   const [editingQuote, setEditingQuote] = useState(null)
   const [targetQuantity, setTargetQuantity] = useState(100)
