@@ -632,6 +632,68 @@ export const getProjectsMissingGtin = async () => {
   return missingGtin
 }
 
+export const getProgrammaticallyAssignedGTIN = async () => {
+  // Retorna els GTIN assignats programàticament des del pool
+  // (aquells que tenen assigned_to_project_id a gtin_pool)
+  const userId = await getCurrentUserId()
+  
+  const { data: assignedGtins, error: poolError } = await supabase
+    .from('gtin_pool')
+    .select(`
+      id,
+      gtin_code,
+      gtin_type,
+      status,
+      assigned_to_project_id,
+      created_at,
+      updated_at,
+      projects:assigned_to_project_id (
+        id,
+        name,
+        sku,
+        project_code
+      )
+    `)
+    .eq('user_id', userId)
+    .eq('status', 'assigned')
+    .not('assigned_to_project_id', 'is', null)
+    .order('updated_at', { ascending: false })
+  
+  if (poolError) throw poolError
+  
+  // També obtenim els identifiers per obtenir informació completa
+  const projectIds = assignedGtins
+    ?.map(g => g.assigned_to_project_id)
+    .filter(Boolean) || []
+  
+  let identifiersMap = {}
+  if (projectIds.length > 0) {
+    const { data: identifiers, error: identifiersError } = await supabase
+      .from('product_identifiers')
+      .select('project_id, gtin_code, gtin_type, asin, fnsku')
+      .in('project_id', projectIds)
+      .eq('user_id', userId)
+    
+    if (identifiersError) throw identifiersError
+    
+    identifiers?.forEach(id => {
+      identifiersMap[id.project_id] = id
+    })
+  }
+  
+  // Combinem la informació del pool amb els identifiers
+  return (assignedGtins || []).map(gtin => ({
+    gtin_pool_id: gtin.id,
+    gtin_code: gtin.gtin_code,
+    gtin_type: gtin.gtin_type,
+    status: gtin.status,
+    assigned_to_project_id: gtin.assigned_to_project_id,
+    assigned_at: gtin.updated_at,
+    project: gtin.projects,
+    identifiers: identifiersMap[gtin.assigned_to_project_id] || null
+  }))
+}
+
 // ============================================
 // AMAZON READINESS (PO)
 // ============================================

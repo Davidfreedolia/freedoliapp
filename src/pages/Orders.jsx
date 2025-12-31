@@ -30,15 +30,20 @@ import {
   getSuppliers,
   getPurchaseOrder,
   getCompanySettings,
-  updatePurchaseOrder
+  updatePurchaseOrder,
+  getProductIdentifiers,
+  getProject,
+  getPoAmazonReadiness,
+  upsertPoAmazonReadiness,
+  updatePoAmazonReadinessLabels
 } from '../lib/supabase'
 import Header from '../components/Header'
 import NewPOModal from '../components/NewPOModal'
 import LogisticsFlow from '../components/LogisticsFlow'
 import AmazonReadySection from '../components/AmazonReadySection'
+import ManufacturerPackModal from '../components/ManufacturerPackModal'
 import { generatePOPdf } from '../lib/generatePOPdf'
 import { generateFnskuLabelsPdf } from '../lib/generateFnskuLabelsPdf'
-import { getProductIdentifiers, getProject, getPoAmazonReadiness, upsertPoAmazonReadiness, updatePoAmazonReadinessLabels } from '../lib/supabase'
 import { computePoAmazonReady } from '../lib/amazonReady'
 
 // Estats de la PO
@@ -88,6 +93,8 @@ export default function Orders() {
   const [amazonReadiness, setAmazonReadiness] = useState(null)
   const [amazonReadyStatus, setAmazonReadyStatus] = useState({ ready: false, missing: [] })
   const [showAmazonReadySection, setShowAmazonReadySection] = useState(false)
+  const [showManufacturerPackModal, setShowManufacturerPackModal] = useState(false)
+  const [manufacturerPackIdentifiers, setManufacturerPackIdentifiers] = useState(null)
 
   useEffect(() => {
     loadData()
@@ -246,6 +253,215 @@ export default function Orders() {
     } catch (err) {
       console.error('Error generant etiquetes:', err)
       alert('Error generant etiquetes: ' + (err.message || 'Error desconegut'))
+    }
+  }
+
+  // Generar Manufacturer Pack
+  const handleGenerateManufacturerPack = async (options) => {
+    const {
+      includePOPdf,
+      includeFnskuLabels,
+      includePackingList,
+      includeCartonLabels,
+      fnskuQuantity,
+      fnskuTemplate,
+      uploadToDrive
+    } = options
+
+    if (!selectedOrder?.id || !selectedOrder?.project_id) {
+      throw new Error('Error: La comanda no té projecte associat')
+    }
+
+    // Validar
+    const identifiers = await getProductIdentifiers(selectedOrder.project_id)
+    const validation = validateManufacturerPack({
+      readiness: amazonReadiness,
+      identifiers,
+      options: { includePackingList, includeCartonLabels, includeFnskuLabels }
+    })
+
+    if (!validation.valid) {
+      throw new Error(validation.errors.join('\n'))
+    }
+
+    try {
+      // Obtenir dades necessàries
+      const [project, supplier, companySettings] = await Promise.all([
+        getProject(selectedOrder.project_id),
+        selectedOrder.supplier_id ? getSuppliers().then(suppliers => 
+          suppliers.find(s => s.id === selectedOrder.supplier_id)
+        ) : Promise.resolve(null),
+        getCompanySettings()
+      ])
+
+      const fileNames = getManufacturerPackFileNames(selectedOrder.po_number)
+      const zip = new JSZip()
+
+      // 1. Generar PO PDF
+      if (includePOPdf) {
+        const poDoc = await generatePOPdf(selectedOrder, supplier, companySettings)
+        const poBlob = poDoc.output('blob')
+        zip.file(fileNames.po, poBlob)
+      }
+
+      // 2. Generar FNSKU Labels
+      if (includeFnskuLabels && amazonReadiness?.needs_fnsku !== false && identifiers?.fnsku) {
+        const fnskuDoc = await generateFnskuLabelsPdf({
+          fnsku: identifiers.fnsku,
+          sku: project.sku || '',
+          productName: project.name || '',
+          quantity: fnskuQuantity,
+          template: fnskuTemplate === 'A4_30UP' ? 'AVERY_5160' : fnskuTemplate,
+          includeSku: true,
+          includeName: true
+        })
+        const fnskuBlob = fnskuDoc.output('blob')
+        zip.file(fileNames.fnsku, fnskuBlob)
+
+        // Actualitzar readiness amb labels generats
+        await updatePoAmazonReadinessLabels(selectedOrder.id, {
+          quantity: fnskuQuantity,
+          template: fnskuTemplate
+        })
+      }
+
+      // 3. Generar Packing List
+      if (includePackingList && amazonReadiness) {
+        const packingListDoc = await generatePackingListPdf(
+          selectedOrder,
+          project,
+          supplier,
+          companySettings,
+          amazonReadiness
+        )
+        const packingListBlob = packingListDoc.output('blob')
+        zip.file(fileNames.packingList, packingListBlob)
+      }
+
+      // 4. Generar Carton Labels
+      if (includeCartonLabels && amazonReadiness) {
+        const cartonLabelsDoc = await generateCartonLabelsPdf({
+          poNumber: selectedOrder.po_number,
+          projectSku: project.sku || '',
+          cartonsCount: amazonReadiness.cartons_count,
+          unitsPerCarton: amazonReadiness.units_per_carton,
+          cartonWeightKg: amazonReadiness.carton_weight_kg,
+          cartonLengthCm: amazonReadiness.carton_length_cm,
+          cartonWidthCm: amazonReadiness.carton_width_cm,
+          cartonHeightCm: amazonReadiness.carton_height_cm,
+          labelsPerPage: 2
+        })
+        const cartonLabelsBlob = cartonLabelsDoc.output('blob')
+        zip.file(fileNames.cartonLabels, cartonLabelsBlob)
+      }
+
+      // Generar ZIP
+      const zipBlob = await zip.generateAsync({ type: 'blob' })
+
+      // Upload a Drive si està connectat
+      if (uploadToDrive && driveService.isAuthenticated()) {
+        try {
+          // Obtenir o crear carpeta del projecte
+          const projectFolders = await driveService.ensureProjectDriveFolders(project)
+          
+          // Obtenir o crear subcarpeta PurchaseOrders
+          const poFolder = await driveService.findOrCreateFolder(
+            '03_PurchaseOrders',
+            projectFolders.main.id
+          )
+          
+          // Obtenir o crear subcarpeta per aquesta PO
+          const poSubFolder = await driveService.findOrCreateFolder(
+            selectedOrder.po_number || `PO_${selectedOrder.id}`,
+            poFolder.id
+          )
+          
+          // Pujar ZIP
+          const zipFile = new File([zipBlob], fileNames.zip, { type: 'application/zip' })
+          await driveService.uploadFile(zipFile, poSubFolder.id)
+          
+          // Pujar PDFs individuals (opcional - per facilitar accés)
+          // Nota: pujem el ZIP, els PDFs individuals ja estan dins
+
+          // Audit log
+          try {
+            const { logSuccess } = await import('../lib/auditLog')
+            await logSuccess(
+              'manufacturer_pack',
+              'manufacturer_pack_generated',
+              selectedOrder.id,
+              'Manufacturer pack generated and uploaded to Drive',
+              {
+                po_id: selectedOrder.id,
+                po_number: selectedOrder.po_number,
+                documents: {
+                  po: includePOPdf,
+                  fnsku_labels: includeFnskuLabels,
+                  packing_list: includePackingList,
+                  carton_labels: includeCartonLabels
+                },
+                uploaded_to_drive: true,
+                drive_folder_id: poSubFolder.id
+              }
+            )
+          } catch (auditErr) {
+            console.warn('Error registrant audit log:', auditErr)
+          }
+
+          alert(`Manufacturer Pack generat i pujat a Google Drive!\n\nCarpeta: ${poSubFolder.name}`)
+        } catch (driveErr) {
+          console.error('Error pujant a Drive:', driveErr)
+          // Continuar amb download local
+          alert('S\'ha generat el pack però hi ha hagut un error pujant-lo a Drive. S\'ha descarregat localment.')
+          // Descarregar ZIP
+          const url = URL.createObjectURL(zipBlob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = fileNames.zip
+          a.click()
+          URL.revokeObjectURL(url)
+        }
+      } else {
+        // Descarregar ZIP
+        const url = URL.createObjectURL(zipBlob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = fileNames.zip
+        a.click()
+        URL.revokeObjectURL(url)
+
+        // Audit log
+        try {
+          const { logSuccess } = await import('../lib/auditLog')
+          await logSuccess(
+            'manufacturer_pack',
+            'manufacturer_pack_generated',
+            selectedOrder.id,
+            'Manufacturer pack generated and downloaded',
+            {
+              po_id: selectedOrder.id,
+              po_number: selectedOrder.po_number,
+              documents: {
+                po: includePOPdf,
+                fnsku_labels: includeFnskuLabels,
+                packing_list: includePackingList,
+                carton_labels: includeCartonLabels
+              },
+              uploaded_to_drive: false
+            }
+          )
+        } catch (auditErr) {
+          console.warn('Error registrant audit log:', auditErr)
+        }
+      }
+
+      // Recarregar readiness si s'han generat labels
+      if (includeFnskuLabels && amazonReadiness?.needs_fnsku !== false) {
+        await loadAmazonReadiness(selectedOrder.id, selectedOrder.project_id)
+      }
+    } catch (err) {
+      console.error('Error generant Manufacturer Pack:', err)
+      throw err
     }
   }
 
@@ -785,6 +1001,79 @@ export default function Orders() {
                     </div>
                   )}
 
+                  {/* Generate Manufacturer Pack */}
+                  <div style={styles.detailSection}>
+                    <h4 style={styles.detailSectionTitle}>📦 Manufacturer Pack</h4>
+                    <p style={{ 
+                      fontSize: '13px', 
+                      color: darkMode ? '#9ca3af' : '#6b7280',
+                      marginBottom: '12px'
+                    }}>
+                      Generate all documents needed to send to the manufacturer (PO, labels, packing list, carton labels)
+                    </p>
+                    <button
+                      onClick={() => setShowManufacturerPackModal(true)}
+                      style={{
+                        padding: '10px 20px',
+                        backgroundColor: '#22c55e',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}
+                    >
+                      <Package size={18} />
+                      Generate Manufacturer Pack
+                    </button>
+                  </div>
+
+                  {/* Manufacturer Pack */}
+                  <div style={styles.detailSection}>
+                    <h4 style={styles.detailSectionTitle}>📦 Manufacturer Pack</h4>
+                    <p style={{ 
+                      fontSize: '13px', 
+                      color: darkMode ? '#9ca3af' : '#6b7280',
+                      marginBottom: '12px'
+                    }}>
+                      Generate a complete pack with PO, labels, packing list and carton labels for the manufacturer
+                    </p>
+                    <button
+                      onClick={async () => {
+                        // Carregar identifiers per al pack
+                        if (selectedOrder?.project_id) {
+                          try {
+                            const ids = await getProductIdentifiers(selectedOrder.project_id)
+                            setManufacturerPackIdentifiers(ids)
+                          } catch (err) {
+                            console.error('Error carregant identifiers:', err)
+                          }
+                        }
+                        setShowManufacturerPackModal(true)
+                      }}
+                      style={{
+                        padding: '10px 20px',
+                        backgroundColor: '#8b5cf6',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}
+                    >
+                      <Package size={16} />
+                      Generate Manufacturer Pack
+                    </button>
+                  </div>
+
                   {/* Generar Etiquetes FNSKU */}
                   <div style={styles.detailSection}>
                     <h4 style={styles.detailSectionTitle}>🏷️ Etiquetes FNSKU</h4>
@@ -809,6 +1098,20 @@ export default function Orders() {
             )}
           </div>
         </div>
+      )}
+
+      {/* Modal Manufacturer Pack */}
+      {showManufacturerPackModal && selectedOrder && (
+        <ManufacturerPackModal
+          isOpen={showManufacturerPackModal}
+          onClose={() => setShowManufacturerPackModal(false)}
+          po={selectedOrder}
+          project={projects.find(p => p.id === selectedOrder.project_id)}
+          supplier={suppliers.find(s => s.id === selectedOrder.supplier_id)}
+          readiness={amazonReadiness}
+          identifiers={manufacturerPackIdentifiers}
+          darkMode={darkMode}
+        />
       )}
 
       {/* Modal Generar Etiquetes */}
@@ -1032,14 +1335,14 @@ const styles = {
   searchContainer: { flex: 1, minWidth: '200px', display: 'flex', alignItems: 'center', gap: '10px', padding: '0 16px', borderRadius: '10px', border: '1px solid var(--border-color)' },
   searchInput: { flex: 1, padding: '12px 0', border: 'none', outline: 'none', fontSize: '14px', background: 'transparent' },
   filterSelect: { padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--border-color)', fontSize: '14px', outline: 'none', cursor: 'pointer' },
-  newButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', backgroundColor: '#4f46e5', color: '#ffffff', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
+  newButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', backgroundColor: '#4f46e5', color: '#ffffff', border: '1px solid #3730a3', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
   statsRow: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px', marginBottom: '24px' },
   statCard: { display: 'flex', alignItems: 'center', gap: '16px', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-color)' },
   statValue: { display: 'block', fontSize: '20px', fontWeight: '700', color: '#4f46e5' },
   statLabel: { fontSize: '12px', color: '#6b7280' },
   loading: { padding: '64px', textAlign: 'center', color: '#6b7280' },
   empty: { padding: '64px', textAlign: 'center', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' },
-  createButton: { display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', backgroundColor: '#4f46e5', color: '#ffffff', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
+  createButton: { display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', backgroundColor: '#4f46e5', color: '#ffffff', border: '1px solid #3730a3', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
   tableContainer: { borderRadius: '16px', border: '1px solid var(--border-color)', overflow: 'hidden' },
   table: { width: '100%', borderCollapse: 'collapse' },
   th: { padding: '14px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', borderBottom: '1px solid var(--border-color)' },
@@ -1048,7 +1351,7 @@ const styles = {
   poNumber: { fontWeight: '600', color: '#4f46e5' },
   statusBadge: { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '500' },
   actionsCell: { display: 'flex', alignItems: 'center', gap: '4px' },
-  iconButton: { background: 'none', border: 'none', padding: '8px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  iconButton: { background: 'none', border: '1px solid var(--border-color, #e5e7eb)', padding: '8px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' },
   menu: { position: 'absolute', right: 0, top: '100%', minWidth: '140px', borderRadius: '10px', border: '1px solid var(--border-color)', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', zIndex: 10 },
   menuItem: { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '10px 14px', border: 'none', background: 'none', fontSize: '13px', cursor: 'pointer', color: 'inherit' },
   // Modal Detall
@@ -1059,7 +1362,7 @@ const styles = {
   detailTitle: { margin: 0, fontSize: '20px', fontWeight: '600' },
   detailHeaderRight: { display: 'flex', alignItems: 'center', gap: '12px' },
   statusSelect: { padding: '8px 12px', borderRadius: '8px', border: 'none', fontSize: '13px', fontWeight: '500', cursor: 'pointer', outline: 'none' },
-  pdfButton: { display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', backgroundColor: '#22c55e', color: '#ffffff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '500', cursor: 'pointer' },
+  pdfButton: { display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', backgroundColor: '#22c55e', color: '#ffffff', border: '1px solid #16a34a', borderRadius: '8px', fontSize: '13px', fontWeight: '500', cursor: 'pointer' },
   closeButton: { background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', padding: '4px' },
   detailBody: { padding: '24px', overflowY: 'auto', flex: 1 },
   detailGrid: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '24px', marginBottom: '24px' },

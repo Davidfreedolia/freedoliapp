@@ -95,7 +95,8 @@ const styles = {
     justifyContent: 'space-between',
     position: 'sticky',
     top: 0,
-    zIndex: 50
+    zIndex: 50,
+    borderBottom: '1px solid'
   },
   title: {
     margin: 0,
@@ -109,7 +110,7 @@ const styles = {
   iconButton: {
     width: '40px',
     height: '40px',
-    border: 'none',
+    border: '1px solid var(--border-color, #e5e7eb)',
     borderRadius: '10px',
     cursor: 'pointer',
     display: 'flex',

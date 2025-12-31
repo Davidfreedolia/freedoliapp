@@ -22,18 +22,59 @@ const SCOPES = 'https://www.googleapis.com/auth/drive.file'
  * @param {string} context - Context on ha ocorregut l'error (ex: 'uploadFile', 'createFolder')
  * @param {Error|string} error - Error object o missatge
  * @param {object} metadata - Informació addicional (opcional)
+ * @param {boolean} showStack - Si és false, no mostra stacktrace (per errors d'auth)
  */
-function logDriveError(context, error, metadata = {}) {
+function logDriveError(context, error, metadata = {}, showStack = true) {
   const errorMessage = error instanceof Error ? error.message : error
-  const errorStack = error instanceof Error ? error.stack : null
+  const errorStack = showStack && error instanceof Error ? error.stack : null
   
   console.error('[Drive Error]', {
     context,
     error: errorMessage,
-    stack: errorStack,
+    ...(errorStack && { stack: errorStack }),
     timestamp: new Date().toISOString(),
     ...metadata
   })
+}
+
+// Singleton instance (declarat abans de handleAuthError per poder-lo usar)
+let driveServiceInstance = null
+
+/**
+ * Centralitzar gestió d'errors d'autenticació (token expirat/invàlid)
+ * Neteja el token, actualitza l'estat i notifica listeners sense mostrar stacktrace
+ * @param {string} context - Context on ha ocorregut l'error
+ * @param {Error|object} error - Error object de l'API
+ */
+function handleAuthError(context, error) {
+  // No mostrar stacktrace per errors d'autenticació
+  logDriveError(context, 'Token expirat o invàlid', {
+    status: error?.status || error?.code,
+    requiresReauth: true
+  }, false)
+  
+  // Netejar token - usar la instància del servei quan estigui disponible
+  const service = driveServiceInstance || (typeof driveService !== 'undefined' ? driveService : null)
+  if (service) {
+    service.accessToken = null
+    localStorage.removeItem('gdrive_token')
+    localStorage.removeItem('gdrive_token_time')
+    if (window.gapi?.client) {
+      window.gapi.client.setToken(null)
+    }
+    
+    // Notificar canvi d'estat (desconnectat)
+    if (service.onAuthChange) {
+      service.onAuthChange(false)
+    }
+  } else {
+    // Si el servei encara no existeix, només netejar localStorage
+    localStorage.removeItem('gdrive_token')
+    localStorage.removeItem('gdrive_token_time')
+    if (window.gapi?.client) {
+      window.gapi.client.setToken(null)
+    }
+  }
 }
 
 /**
@@ -101,6 +142,9 @@ class GoogleDriveService {
     this.isInitialized = false
     this.onAuthChange = null
     this.initPromise = null
+    this.retryCount = 0
+    this.maxRetries = 0 // No retries automàtics per defecte
+    this.isRetrying = false
   }
 
   // Carregar GAPI script
@@ -390,10 +434,8 @@ class GoogleDriveService {
       const tokenAge = Date.now() - parseInt(savedTime)
       // Tokens duren ~1 hora (3600000 ms), refrescar als 55 minuts
       if (tokenAge > 3300000) {
-        logDriveError('verifyToken', 'Token expirat segons timestamp', { tokenAge })
-        this.accessToken = null
-        localStorage.removeItem('gdrive_token')
-        localStorage.removeItem('gdrive_token_time')
+        // Token expirat per timestamp
+        handleAuthError('verifyToken', { status: 401, reason: 'expired_by_timestamp', tokenAge })
         return false
       }
     }
@@ -407,22 +449,18 @@ class GoogleDriveService {
     
     try {
       await window.gapi.client.drive.about.get({ fields: 'user' })
+      // Reset retry count si tot va bé
+      this.retryCount = 0
       return true
     } catch (err) {
       // Error 401 = token expirat o invàlid
       if (err.status === 401 || err.code === 401) {
-        logDriveError('verifyToken', 'Token expirat o invàlid (401)', { error: err })
-        this.accessToken = null
-        localStorage.removeItem('gdrive_token')
-        localStorage.removeItem('gdrive_token_time')
-        if (window.gapi?.client) {
-          window.gapi.client.setToken(null)
-        }
+        handleAuthError('verifyToken', err)
         return false
       }
       
-      // Altres errors
-      logDriveError('verifyToken', err, { status: err.status, code: err.code })
+      // Altres errors (no mostrem stack per errors de xarxa menors)
+      logDriveError('verifyToken', err, { status: err.status, code: err.code }, false)
       return false
     }
   }
@@ -526,9 +564,7 @@ class GoogleDriveService {
       return createResponse.result
     } catch (err) {
       if (err.status === 401 || err.code === 401) {
-        this.accessToken = null
-        localStorage.removeItem('gdrive_token')
-        localStorage.removeItem('gdrive_token_time')
+        handleAuthError('findOrCreateFolder', err)
         throw new Error('AUTH_REQUIRED')
       }
       logDriveError('findOrCreateFolder', err, { folderName: name, parentId })
@@ -715,9 +751,7 @@ class GoogleDriveService {
       return response.result.files || []
     } catch (err) {
       if (err.status === 401 || err.code === 401) {
-        this.accessToken = null
-        localStorage.removeItem('gdrive_token')
-        localStorage.removeItem('gdrive_token_time')
+        handleAuthError('listFolderContents', err)
         throw new Error('AUTH_REQUIRED')
       }
       logDriveError('listFolderContents', err, { folderId, status: err.status })
@@ -764,10 +798,7 @@ class GoogleDriveService {
         
         // Errors comuns
         if (response.status === 401) {
-          errorMessage = 'Sessió expirada. Reconecta Google Drive.'
-          this.accessToken = null
-          localStorage.removeItem('gdrive_token')
-          localStorage.removeItem('gdrive_token_time')
+          handleAuthError('uploadFile', { status: 401 })
           throw new Error('AUTH_REQUIRED')
         } else if (response.status === 403) {
           errorMessage = 'No tens permisos per pujar fitxers a aquesta carpeta.'
@@ -816,9 +847,7 @@ class GoogleDriveService {
       return true
     } catch (err) {
       if (err.status === 401 || err.code === 401) {
-        this.accessToken = null
-        localStorage.removeItem('gdrive_token')
-        localStorage.removeItem('gdrive_token_time')
+        handleAuthError('deleteFile', err)
         throw new Error('AUTH_REQUIRED')
       }
       logDriveError('deleteFile', err, { fileId, status: err.status })
@@ -845,9 +874,7 @@ class GoogleDriveService {
       return response.result
     } catch (err) {
       if (err.status === 401 || err.code === 401) {
-        this.accessToken = null
-        localStorage.removeItem('gdrive_token')
-        localStorage.removeItem('gdrive_token_time')
+        handleAuthError('getFileInfo', err)
         throw new Error('AUTH_REQUIRED')
       }
       logDriveError('getFileInfo', err, { fileId, status: err.status, code: err.code })
@@ -880,9 +907,7 @@ class GoogleDriveService {
       return response.result.files || []
     } catch (err) {
       if (err.status === 401 || err.code === 401) {
-        this.accessToken = null
-        localStorage.removeItem('gdrive_token')
-        localStorage.removeItem('gdrive_token_time')
+        handleAuthError('searchFiles', err)
         throw new Error('AUTH_REQUIRED')
       }
       logDriveError('searchFiles', err, { query, folderId, status: err.status })
@@ -918,9 +943,7 @@ class GoogleDriveService {
       return response.result
     } catch (err) {
       if (err.status === 401 || err.code === 401) {
-        this.accessToken = null
-        localStorage.removeItem('gdrive_token')
-        localStorage.removeItem('gdrive_token_time')
+        handleAuthError('getShareableLink', err)
         throw new Error('AUTH_REQUIRED')
       }
       logDriveError('getShareableLink', err, { fileId, status: err.status })
@@ -961,9 +984,7 @@ class GoogleDriveService {
       return response.result
     } catch (err) {
       if (err.status === 401 || err.code === 401) {
-        this.accessToken = null
-        localStorage.removeItem('gdrive_token')
-        localStorage.removeItem('gdrive_token_time')
+        handleAuthError('moveFile', err)
         throw new Error('AUTH_REQUIRED')
       }
       logDriveError('moveFile', err, { fileId, newFolderId, status: err.status })
@@ -994,9 +1015,7 @@ class GoogleDriveService {
       return response.result
     } catch (err) {
       if (err.status === 401 || err.code === 401) {
-        this.accessToken = null
-        localStorage.removeItem('gdrive_token')
-        localStorage.removeItem('gdrive_token_time')
+        handleAuthError('copyFile', err)
         throw new Error('AUTH_REQUIRED')
       }
       logDriveError('copyFile', err, { fileId, newName, folderId, status: err.status })
@@ -1007,6 +1026,7 @@ class GoogleDriveService {
 
 // Singleton instance
 export const driveService = new GoogleDriveService()
+driveServiceInstance = driveService
 
 // Hook per React
 export const useDrive = () => {

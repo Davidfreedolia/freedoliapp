@@ -415,7 +415,7 @@ export default function Finances() {
           )}
           
           {activeTab === 'incomes' && (
-            <button onClick={handleNewIncome} style={{...styles.newButton, backgroundColor: '#22c55e'}}>
+            <button onClick={handleNewIncome} style={{...styles.newButton, backgroundColor: '#22c55e', border: '1px solid #16a34a'}}>
               <Plus size={18} /> Nou Ingrés
             </button>
           )}
@@ -856,7 +856,7 @@ export default function Finances() {
 
             <div style={styles.modalFooter}>
               <button onClick={() => setShowExpenseModal(false)} style={styles.cancelButton}>Cancel·lar</button>
-              <button onClick={handleSaveExpense} disabled={saving} style={{...styles.saveButton, backgroundColor: '#ef4444'}}>
+              <button onClick={handleSaveExpense} disabled={saving} style={{...styles.saveButton, backgroundColor: '#ef4444', border: '1px solid #dc2626'}}>
                 {saving ? 'Guardant...' : <><Save size={16} /> Guardar</>}
               </button>
             </div>
@@ -989,7 +989,7 @@ export default function Finances() {
 
             <div style={styles.modalFooter}>
               <button onClick={() => setShowIncomeModal(false)} style={styles.cancelButton}>Cancel·lar</button>
-              <button onClick={handleSaveIncome} disabled={saving} style={{...styles.saveButton, backgroundColor: '#22c55e'}}>
+              <button onClick={handleSaveIncome} disabled={saving} style={{...styles.saveButton, backgroundColor: '#22c55e', border: '1px solid #16a34a'}}>
                 {saving ? 'Guardant...' : <><Save size={16} /> Guardar</>}
               </button>
             </div>
@@ -1009,7 +1009,7 @@ const styles = {
   searchContainer: { flex: 1, minWidth: '200px', display: 'flex', alignItems: 'center', gap: '10px', padding: '0 16px', borderRadius: '10px', border: '1px solid var(--border-color)' },
   searchInput: { flex: 1, padding: '12px 0', border: 'none', outline: 'none', fontSize: '14px', background: 'transparent' },
   filterSelect: { padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--border-color)', fontSize: '14px', outline: 'none', cursor: 'pointer' },
-  newButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', backgroundColor: '#4f46e5', color: '#ffffff', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
+  newButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', backgroundColor: '#4f46e5', color: '#ffffff', border: '1px solid #3730a3', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
   statsRow: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '24px' },
   statCard: { display: 'flex', alignItems: 'center', gap: '16px', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-color)' },
   statValue: { display: 'block', fontSize: '18px', fontWeight: '700' },

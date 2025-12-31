@@ -53,12 +53,17 @@ export function AppProvider({ children }) {
       const isValid = await driveService.verifyToken()
       setDriveConnected(isValid)
       
-      // Escoltar canvis d'autenticació
+      // Escoltar canvis d'autenticació (token expirat, etc.)
       driveService.onAuthChange = (connected) => {
         setDriveConnected(connected)
       }
     } catch (err) {
-      console.error('Error inicialitzant Drive:', err)
+      // No mostrar stacktrace d'errors d'autenticació (són gestionats centralitzadament)
+      if (err.message !== 'AUTH_REQUIRED' && !err.message?.includes('401')) {
+        console.error('Error inicialitzant Drive:', err)
+      }
+      // Sempre marcar com desconnectat si hi ha error
+      setDriveConnected(false)
     }
   }
 

@@ -107,7 +107,7 @@ export default function AmazonReadySection({ po, readiness, readyStatus, onUpdat
       padding: '10px 20px',
       backgroundColor: '#4f46e5',
       color: '#ffffff',
-      border: 'none',
+      border: '1px solid #3730a3',
       borderRadius: '8px',
       fontSize: '14px',
       fontWeight: '500',

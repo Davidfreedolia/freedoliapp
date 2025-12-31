@@ -20,7 +20,7 @@ import {
   AlertTriangle
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { getPurchaseOrders, getDashboardPreferences, getPosNotReady } from '../lib/supabase'
+import { getPurchaseOrders, getDashboardPreferences, getPosNotReady, getProjectsMissingGtin, getUnassignedGtinCodes } from '../lib/supabase'
 import { supabase } from '../lib/supabase'
 import NewProjectModal from '../components/NewProjectModal'
 import LogisticsTrackingWidget from '../components/LogisticsTrackingWidget'
@@ -649,7 +649,8 @@ const styles = {
     justifyContent: 'space-between',
     position: 'sticky',
     top: 0,
-    zIndex: 50
+    zIndex: 50,
+    borderBottom: '1px solid'
   },
   quickActionsHeader: {
     display: 'flex',
@@ -663,7 +664,7 @@ const styles = {
   iconButton: {
     width: '40px',
     height: '40px',
-    border: 'none',
+    border: '1px solid var(--border-color, #e5e7eb)',
     borderRadius: '10px',
     cursor: 'pointer',
     display: 'flex',
@@ -677,7 +678,7 @@ const styles = {
     gap: '8px',
     padding: '10px 16px',
     borderRadius: '10px',
-    border: 'none',
+    border: '1px solid var(--border-color, #e5e7eb)',
     fontSize: '14px',
     fontWeight: '500',
     cursor: 'pointer',
@@ -746,7 +747,9 @@ const styles = {
     alignItems: 'center',
     gap: '6px',
     background: 'none',
-    border: 'none',
+    border: '1px solid var(--border-color, #e5e7eb)',
+    borderRadius: '6px',
+    padding: '6px 12px',
     color: '#4f46e5',
     fontSize: '14px',
     fontWeight: '500',

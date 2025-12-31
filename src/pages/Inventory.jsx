@@ -624,9 +624,9 @@ const styles = {
   label: { fontSize: '12px', fontWeight: '500', color: '#6b7280' },
   input: { padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '14px', outline: 'none' },
   cancelButton: { padding: '10px 20px', backgroundColor: 'transparent', color: '#6b7280', border: '1px solid var(--border-color)', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' },
-  saveButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: '#4f46e5', color: '#ffffff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
+  saveButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: '#4f46e5', color: '#ffffff', border: '1px solid #3730a3', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
   addMovementSection: { padding: '16px', borderRadius: '12px' },
-  addBtn: { display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 16px', backgroundColor: '#22c55e', color: '#ffffff', border: 'none', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' },
+  addBtn: { display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 16px', backgroundColor: '#22c55e', color: '#ffffff', border: '1px solid #16a34a', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' },
   movementsList: { display: 'flex', flexDirection: 'column', gap: '8px' },
   movementItem: { display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px' }
 }

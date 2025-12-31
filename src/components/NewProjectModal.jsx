@@ -455,17 +455,18 @@ const styles = {
     fontSize: '14px',
     fontWeight: '500',
     cursor: 'pointer',
-    border: 'none',
+    border: '1px solid var(--border-color, #e5e7eb)',
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
     transition: 'all 0.2s'
   },
   buttonSecondary: {
-    border: '1px solid var(--border-color)'
+    border: '1px solid var(--border-color, #e5e7eb)'
   },
   buttonPrimary: {
     backgroundColor: '#4f46e5',
-    color: '#ffffff'
+    color: '#ffffff',
+    border: '1px solid #3730a3'
   }
 }

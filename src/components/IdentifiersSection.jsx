@@ -377,7 +377,7 @@ const styles = {
     gap: '6px',
     padding: '8px 16px',
     borderRadius: '8px',
-    border: 'none',
+    border: '1px solid var(--border-color, #e5e7eb)',
     fontSize: '13px',
     fontWeight: '500',
     transition: 'all 0.2s'
@@ -419,7 +419,7 @@ const styles = {
     gap: '8px',
     padding: '12px 24px',
     borderRadius: '8px',
-    border: 'none',
+    border: '1px solid #3730a3',
     fontSize: '14px',
     fontWeight: '500',
     marginTop: '8px',

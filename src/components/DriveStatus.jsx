@@ -32,30 +32,34 @@ export default function DriveStatus({ compact = false }) {
     setInitFailed(false)
     
     try {
-      console.log('DriveStatus: Initializing Drive...')
       const success = await driveService.init()
       
       if (!success) {
-        console.log('DriveStatus: Init returned false')
         setIsConnected(false)
         setInitFailed(true)
         setIsLoading(false)
         return
       }
 
-      console.log('DriveStatus: Init successful, verifying token...')
       const isValid = await driveService.verifyToken()
-      console.log('DriveStatus: Token valid:', isValid)
       setIsConnected(isValid)
       
       if (isValid) {
         await getUserInfo()
+      } else {
+        // Token no vàlid - mostrar estat desconnectat
+        setIsConnected(false)
       }
     } catch (err) {
-      console.error('Error inicialitzant Drive:', err)
-      setError(err.message)
-      setIsConnected(false)
-      setInitFailed(true)
+      // No mostrar stacktrace d'errors d'autenticació
+      if (err.message === 'AUTH_REQUIRED' || err.message?.includes('401')) {
+        setError(null) // No mostrar error, només estat desconnectat
+        setIsConnected(false)
+      } else {
+        setError(err.message)
+        setIsConnected(false)
+        setInitFailed(true)
+      }
     }
     
     setIsLoading(false)
@@ -75,20 +79,19 @@ export default function DriveStatus({ compact = false }) {
     setError(null)
     
     try {
-      console.log('DriveStatus: Starting authentication...')
       await driveService.authenticate()
-      console.log('DriveStatus: Authentication successful')
       setIsConnected(true)
       await getUserInfo()
     } catch (err) {
-      console.error('Error connectant:', err)
-      
-      // Millorar missatge d'error per l'usuari
-      let errorMsg = 'Error connectant a Google Drive'
+      // Millorar missatge d'error per l'usuari (no mostrar stacktrace)
+      let errorMsg = null // Per defecte, no mostrar error si és només popup tancat
       if (err.message?.includes('popup_closed')) {
-        errorMsg = 'S\'ha tancat la finestra d\'autenticació'
+        // No mostrar error si l'usuari simplement tanca el popup
+        errorMsg = null
       } else if (err.message?.includes('access_denied')) {
         errorMsg = 'Accés denegat. Assegura\'t d\'acceptar els permisos.'
+      } else if (err.message && !err.message.includes('popup')) {
+        errorMsg = 'Error connectant a Google Drive'
       }
       
       setError(errorMsg)
@@ -187,9 +190,13 @@ export default function DriveStatus({ compact = false }) {
         <div style={styles.container}>
           <CloudOff size={18} color="#ef4444" />
           <span style={styles.statusText}>Drive desconnectat</span>
-          <button onClick={handleConnect} style={styles.buttonConnect}>
+          <button 
+            onClick={handleConnect} 
+            style={isLoading ? styles.buttonConnectDisabled : styles.buttonConnect} 
+            disabled={isLoading}
+          >
             <LogIn size={14} />
-            Connectar
+            {isLoading ? 'Connectant...' : 'Reconnectar'}
           </button>
         </div>
       )}
@@ -250,12 +257,26 @@ const styles = {
     padding: '6px 12px',
     backgroundColor: '#4f46e5',
     color: 'white',
-    border: 'none',
+    border: '1px solid #3730a3',
     borderRadius: '6px',
     fontSize: '12px',
     fontWeight: '500',
     cursor: 'pointer',
     transition: 'background-color 0.2s'
+  },
+  buttonConnectDisabled: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    padding: '6px 12px',
+    backgroundColor: '#9ca3af',
+    color: 'white',
+    border: '1px solid #78716c',
+    borderRadius: '6px',
+    fontSize: '12px',
+    fontWeight: '500',
+    cursor: 'not-allowed',
+    opacity: 0.6
   },
   buttonRetry: {
     display: 'flex',
@@ -264,7 +285,7 @@ const styles = {
     padding: '6px 12px',
     backgroundColor: '#f59e0b',
     color: 'white',
-    border: 'none',
+    border: '1px solid #d97706',
     borderRadius: '6px',
     fontSize: '12px',
     fontWeight: '500',
@@ -277,7 +298,7 @@ const styles = {
     justifyContent: 'center',
     width: '28px',
     height: '28px',
-    border: 'none',
+    border: '1px solid var(--border-color, #e5e7eb)',
     borderRadius: '6px',
     backgroundColor: 'transparent',
     color: 'var(--text-secondary, #6b7280)',

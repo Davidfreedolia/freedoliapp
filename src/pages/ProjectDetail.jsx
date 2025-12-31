@@ -409,7 +409,7 @@ export default function ProjectDetail() {
             {/* Gestionar Stock - fase 7 */}
             {project.current_phase === 7 && (
               <button 
-                style={{...styles.actionButton, backgroundColor: '#22c55e'}} 
+                style={{...styles.actionButton, backgroundColor: '#22c55e', border: '1px solid #16a34a'}} 
                 onClick={() => navigate(`/inventory?project=${id}`)}
               >
                 <Package size={18} />
@@ -605,7 +605,7 @@ const styles = {
     padding: '12px 20px',
     backgroundColor: '#4f46e5',
     color: '#ffffff',
-    border: 'none',
+    border: '1px solid #3730a3',
     borderRadius: '10px',
     fontSize: '14px',
     fontWeight: '500',
