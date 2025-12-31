@@ -23,6 +23,7 @@ import {
 } from '../lib/supabase'
 import { calculateQuickProfitability } from '../lib/profitability'
 import { useBreakpoint } from '../hooks/useBreakpoint'
+import DecisionLog from './DecisionLog'
 
 const CURRENCIES = ['USD', 'EUR', 'CNY', 'GBP']
 const INCOTERMS = ['EXW', 'FCA', 'FAS', 'FOB', 'CFR', 'CIF', 'CPT', 'CIP', 'DAP', 'DPU', 'DDP']

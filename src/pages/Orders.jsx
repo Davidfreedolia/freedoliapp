@@ -40,6 +40,7 @@ import {
 } from '../lib/supabase'
 import ShipmentTrackingSection from '../components/ShipmentTrackingSection'
 import TasksSection from '../components/TasksSection'
+import DecisionLog from '../components/DecisionLog'
 import Header from '../components/Header'
 import NewPOModal from '../components/NewPOModal'
 import LogisticsFlow from '../components/LogisticsFlow'
@@ -1233,6 +1234,17 @@ export default function Orders() {
                   {selectedOrder && (
                     <div style={styles.detailSection}>
                       <TasksSection 
+                        entityType="purchase_order" 
+                        entityId={selectedOrder.id} 
+                        darkMode={darkMode} 
+                      />
+                    </div>
+                  )}
+
+                  {/* Decision Log */}
+                  {selectedOrder && (
+                    <div style={styles.detailSection}>
+                      <DecisionLog 
                         entityType="purchase_order" 
                         entityId={selectedOrder.id} 
                         darkMode={darkMode} 

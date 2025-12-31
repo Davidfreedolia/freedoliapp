@@ -25,6 +25,7 @@ import IdentifiersSection from '../components/IdentifiersSection'
 import ProfitabilityCalculator from '../components/ProfitabilityCalculator'
 import TasksSection from '../components/TasksSection'
 import QuotesSection from '../components/QuotesSection'
+import DecisionLog from '../components/DecisionLog'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 
 const PHASES = [

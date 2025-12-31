@@ -16,7 +16,8 @@ import {
   getPosNotReady,
   getShipmentsInTransit,
   getResearchNoDecision,
-  getStaleTracking
+  getStaleTracking,
+  quickMarkPackAsSent
 } from '../lib/supabase'
 
 // Widget: Waiting Manufacturer
@@ -26,10 +27,6 @@ export function WaitingManufacturerWidget({ darkMode, limit = 10 }) {
   const { t } = useTranslation()
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    loadData()
-  }, [])
 
   const loadData = async () => {
     setLoading(true)
@@ -41,6 +38,10 @@ export function WaitingManufacturerWidget({ darkMode, limit = 10 }) {
     }
     setLoading(false)
   }
+
+  useEffect(() => {
+    loadData()
+  }, [])
 
   const getDaysSince = (date) => {
     if (!date) return 0
@@ -138,16 +139,43 @@ export function WaitingManufacturerWidget({ darkMode, limit = 10 }) {
                   {po.suppliers?.name || 'Sense proveïdor'}
                 </div>
               </div>
-              <button
-                onClick={() => navigate(`/orders`)}
-                style={{
-                  ...widgetStyles.actionButton,
-                  backgroundColor: '#4f46e5',
-                  color: '#ffffff'
-                }}
-              >
-                Open PO
-              </button>
+              <div style={widgetStyles.actionButtons}>
+                <button
+                  onClick={async (e) => {
+                    e.stopPropagation()
+                    setActionLoading(po.id)
+                    try {
+                      await quickMarkPackAsSent(po.id)
+                      await loadData()
+                    } catch (err) {
+                      console.error('Error marking pack as sent:', err)
+                      alert('Error: ' + (err.message || 'Unknown error'))
+                    } finally {
+                      setActionLoading(null)
+                    }
+                  }}
+                  disabled={actionLoading === po.id}
+                  style={{
+                    ...widgetStyles.quickActionButton,
+                    backgroundColor: '#10b981',
+                    color: '#ffffff',
+                    opacity: actionLoading === po.id ? 0.6 : 1
+                  }}
+                  title="Mark as Sent"
+                >
+                  {actionLoading === po.id ? '...' : '✓ Sent'}
+                </button>
+                <button
+                  onClick={() => navigate(`/orders?po=${po.id}`)}
+                  style={{
+                    ...widgetStyles.actionButton,
+                    backgroundColor: '#4f46e5',
+                    color: '#ffffff'
+                  }}
+                >
+                  Open PO
+                </button>
+              </div>
             </div>
           )
         })}

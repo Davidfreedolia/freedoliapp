@@ -1719,4 +1719,93 @@ export const deleteSupplierQuote = async (quoteId) => {
   if (error) throw error
 }
 
+// DECISION LOG
+export const getDecisionLog = async (entityType, entityId) => {
+  const userId = await getCurrentUserId()
+  const { data, error } = await supabase
+    .from('decision_log')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('entity_type', entityType)
+    .eq('entity_id', entityId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  
+  if (error) throw error
+  return data
+}
+
+export const createDecisionLog = async (decision) => {
+  const { user_id, ...decisionData } = decision
+  const userId = await getCurrentUserId()
+  
+  const { data, error } = await supabase
+    .from('decision_log')
+    .insert([{
+      ...decisionData,
+      user_id: userId
+    }])
+    .select()
+    .single()
+  
+  if (error) throw error
+  return data
+}
+
+export const updateDecisionLog = async (id, updates) => {
+  const userId = await getCurrentUserId()
+  const { user_id, ...updateData } = updates
+  
+  const { data, error } = await supabase
+    .from('decision_log')
+    .update(updateData)
+    .eq('id', id)
+    .eq('user_id', userId)
+    .select()
+    .single()
+  
+  if (error) throw error
+  return data
+}
+
+// Quick action: Mark Manufacturer Pack as Sent
+export const quickMarkPackAsSent = async (poId) => {
+  const userId = await getCurrentUserId()
+  const readiness = await getPoAmazonReadiness(poId)
+  
+  if (!readiness) {
+    throw new Error('PO readiness not found')
+  }
+  
+  const { data, error } = await supabase
+    .from('po_amazon_readiness')
+    .update({
+      manufacturer_pack_sent_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', readiness.id)
+    .eq('user_id', userId)
+    .select()
+    .single()
+  
+  if (error) throw error
+  
+  // Log audit
+  try {
+    const { logAudit } = await import('./auditLog')
+    await logAudit({
+      entityType: 'purchase_order',
+      entityId: poId,
+      action: 'mark_pack_sent',
+      status: 'success',
+      message: 'Manufacturer pack marked as sent'
+    })
+  } catch (err) {
+    console.warn('Error logging audit:', err)
+  }
+  
+  return data
+}
+
 export default supabase
