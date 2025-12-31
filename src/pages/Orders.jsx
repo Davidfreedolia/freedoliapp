@@ -1344,6 +1344,18 @@ export default function Orders() {
                       />
                     </div>
                   )}
+
+                  {/* Planned vs Actual */}
+                  {selectedOrder && selectedQuote && (
+                    <div style={styles.detailSection}>
+                      <PlannedVsActual
+                        quote={selectedQuote}
+                        po={selectedOrder}
+                        shipment={selectedShipment}
+                        darkMode={darkMode}
+                      />
+                    </div>
+                  )}
                 </div>
               </>
             )}

@@ -830,6 +830,16 @@ export default function QuotesSection({ projectId, darkMode }) {
                         ]}
                       />
                     </div>
+
+                    {/* Planned vs Actual */}
+                    {poMap[quote.id] && (
+                      <PlannedVsActual
+                        quote={quote}
+                        po={poMap[quote.id]}
+                        shipment={shipmentMap[poMap[quote.id].id]}
+                        darkMode={darkMode}
+                      />
+                    )}
                   </div>
                 </div>
               )
