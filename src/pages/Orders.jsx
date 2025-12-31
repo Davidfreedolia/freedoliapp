@@ -102,6 +102,8 @@ export default function Orders() {
   const [showAmazonReadySection, setShowAmazonReadySection] = useState(false)
   const [showManufacturerPackModal, setShowManufacturerPackModal] = useState(false)
   const [manufacturerPackIdentifiers, setManufacturerPackIdentifiers] = useState(null)
+  const [selectedOrders, setSelectedOrders] = useState(new Set())
+  const [bulkActionLoading, setBulkActionLoading] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -815,7 +817,23 @@ export default function Orders() {
                   const StatusIcon = status.icon
 
                   return (
-                    <tr key={order.id} style={styles.tr}>
+                    <tr 
+                      key={order.id} 
+                      style={{
+                        ...styles.tr,
+                        backgroundColor: selectedOrders.has(order.id) 
+                          ? (darkMode ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.05)')
+                          : 'transparent'
+                      }}
+                    >
+                      <td style={styles.td}>
+                        <input
+                          type="checkbox"
+                          checked={selectedOrders.has(order.id)}
+                          onChange={() => handleToggleSelect(order.id)}
+                          style={{ cursor: 'pointer', width: '18px', height: '18px' }}
+                        />
+                      </td>
                       <td style={{ ...styles.td, color: darkMode ? '#ffffff' : '#111827' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <span style={styles.poNumber}>{order.po_number}</span>

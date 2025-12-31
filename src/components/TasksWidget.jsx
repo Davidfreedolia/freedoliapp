@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { CheckCircle2, Clock, MoreVertical, Calendar, ArrowRight, AlertCircle } from 'lucide-react'
-import { getOpenTasks, markTaskDone, snoozeTask } from '../lib/supabase'
+import { getOpenTasks, markTaskDone, snoozeTask, bulkMarkTasksDone, bulkSnoozeTasks } from '../lib/supabase'
 import { showToast } from './Toast'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { formatDistanceToNow, parseISO, format } from 'date-fns'
@@ -15,6 +15,8 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(null)
+  const [selectedTasks, setSelectedTasks] = useState(new Set())
+  const [bulkActionLoading, setBulkActionLoading] = useState(false)
 
   useEffect(() => {
     loadTasks()
@@ -74,6 +76,56 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
       default:
         break
     }
+  }
+
+  const handleToggleSelect = (taskId) => {
+    const newSelected = new Set(selectedTasks)
+    if (newSelected.has(taskId)) {
+      newSelected.delete(taskId)
+    } else {
+      newSelected.add(taskId)
+    }
+    setSelectedTasks(newSelected)
+  }
+
+  const handleSelectAll = () => {
+    if (selectedTasks.size === tasks.length) {
+      setSelectedTasks(new Set())
+    } else {
+      setSelectedTasks(new Set(tasks.map(t => t.id)))
+    }
+  }
+
+  const handleBulkMarkDone = async () => {
+    if (selectedTasks.size === 0) return
+    
+    setBulkActionLoading(true)
+    try {
+      await bulkMarkTasksDone(Array.from(selectedTasks))
+      showToast(`${selectedTasks.size} task${selectedTasks.size > 1 ? 's' : ''} marked as done`, 'success')
+      setSelectedTasks(new Set())
+      await loadTasks()
+    } catch (err) {
+      console.error('Error bulk marking tasks done:', err)
+      showToast('Error: ' + (err.message || 'Unknown error'), 'error')
+    }
+    setBulkActionLoading(false)
+  }
+
+  const handleBulkSnooze = async (days) => {
+    if (selectedTasks.size === 0) return
+    
+    setBulkActionLoading(true)
+    try {
+      await bulkSnoozeTasks(Array.from(selectedTasks), days)
+      showToast(`${selectedTasks.size} task${selectedTasks.size > 1 ? 's' : ''} snoozed +${days} day${days > 1 ? 's' : ''}`, 'success')
+      setSelectedTasks(new Set())
+      await loadTasks()
+    } catch (err) {
+      console.error('Error bulk snoozing tasks:', err)
+      showToast('Error: ' + (err.message || 'Unknown error'), 'error')
+    }
+    setBulkActionLoading(false)
   }
 
   const getPriorityColor = (priority) => {
@@ -157,7 +209,113 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
         }}>
           Tasks ({tasks.length})
         </h3>
+        {tasks.length > 0 && (
+          <button
+            onClick={handleSelectAll}
+            style={{
+              marginLeft: 'auto',
+              padding: '4px 8px',
+              fontSize: '12px',
+              backgroundColor: 'transparent',
+              border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`,
+              borderRadius: '6px',
+              color: darkMode ? '#9ca3af' : '#6b7280',
+              cursor: 'pointer'
+            }}
+          >
+            {selectedTasks.size === tasks.length ? 'Deselect All' : 'Select All'}
+          </button>
+        )}
       </div>
+      
+      {/* Bulk Actions Bar */}
+      {selectedTasks.size > 0 && (
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '12px',
+          backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6',
+          borderRadius: '8px',
+          border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+          marginBottom: '12px'
+        }}>
+          <span style={{
+            fontSize: '13px',
+            fontWeight: '500',
+            color: darkMode ? '#ffffff' : '#111827'
+          }}>
+            {selectedTasks.size} selected
+          </span>
+          <div style={{ display: 'flex', gap: '6px', marginLeft: 'auto' }}>
+            <button
+              onClick={handleBulkMarkDone}
+              disabled={bulkActionLoading}
+              style={{
+                padding: '6px 12px',
+                backgroundColor: '#22c55e',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '12px',
+                fontWeight: '500',
+                cursor: bulkActionLoading ? 'not-allowed' : 'pointer',
+                opacity: bulkActionLoading ? 0.6 : 1
+              }}
+            >
+              Mark Done
+            </button>
+            <button
+              onClick={() => handleBulkSnooze(1)}
+              disabled={bulkActionLoading}
+              style={{
+                padding: '6px 12px',
+                backgroundColor: '#f59e0b',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '12px',
+                fontWeight: '500',
+                cursor: bulkActionLoading ? 'not-allowed' : 'pointer',
+                opacity: bulkActionLoading ? 0.6 : 1
+              }}
+            >
+              Snooze +1d
+            </button>
+            <button
+              onClick={() => handleBulkSnooze(3)}
+              disabled={bulkActionLoading}
+              style={{
+                padding: '6px 12px',
+                backgroundColor: '#f59e0b',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '12px',
+                fontWeight: '500',
+                cursor: bulkActionLoading ? 'not-allowed' : 'pointer',
+                opacity: bulkActionLoading ? 0.6 : 1
+              }}
+            >
+              Snooze +3d
+            </button>
+            <button
+              onClick={() => setSelectedTasks(new Set())}
+              style={{
+                padding: '6px 12px',
+                backgroundColor: 'transparent',
+                color: darkMode ? '#9ca3af' : '#6b7280',
+                border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`,
+                borderRadius: '6px',
+                fontSize: '12px',
+                cursor: 'pointer'
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
       <div style={widgetStyles.content}>
         {tasks.map(task => {
           const dueInfo = getDueDateInfo(task.due_date)
@@ -165,6 +323,18 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
           
           return (
             <div key={task.id} style={widgetStyles.taskItem}>
+              <input
+                type="checkbox"
+                checked={selectedTasks.has(task.id)}
+                onChange={() => handleToggleSelect(task.id)}
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  marginRight: '12px',
+                  cursor: 'pointer',
+                  width: '18px',
+                  height: '18px'
+                }}
+              />
               <div style={widgetStyles.taskContent}>
                 <div style={widgetStyles.taskHeader}>
                   <span style={{

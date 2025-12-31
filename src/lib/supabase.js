@@ -1580,6 +1580,138 @@ export const snoozeTask = async (id, days = 3) => {
   })
 }
 
+// Bulk actions for tasks
+export const bulkMarkTasksDone = async (taskIds) => {
+  const userId = await getCurrentUserId()
+  const { data, error } = await supabase
+    .from('tasks')
+    .update({ status: 'done', updated_at: new Date().toISOString() })
+    .in('id', taskIds)
+    .eq('user_id', userId)
+    .select()
+  
+  if (error) throw error
+  return data
+}
+
+export const bulkSnoozeTasks = async (taskIds, days = 3) => {
+  const userId = await getCurrentUserId()
+  
+  // Get current due dates
+  const { data: tasks, error: fetchError } = await supabase
+    .from('tasks')
+    .select('id, due_date')
+    .in('id', taskIds)
+    .eq('user_id', userId)
+  
+  if (fetchError) throw fetchError
+  
+  // Calculate new due dates
+  const updates = tasks.map(task => {
+    const newDueDate = task.due_date 
+      ? new Date(new Date(task.due_date).getTime() + days * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      : new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    
+    return {
+      id: task.id,
+      due_date: newDueDate,
+      status: 'open',
+      updated_at: new Date().toISOString()
+    }
+  })
+  
+  // Update in batch
+  const { data, error } = await supabase
+    .from('tasks')
+    .upsert(updates, { onConflict: 'id' })
+    .select()
+  
+  if (error) throw error
+  return data
+}
+
+// Bulk actions for purchase orders
+export const bulkMarkPacksAsSent = async (poIds) => {
+  const userId = await getCurrentUserId()
+  
+  // Get readiness records
+  const { data: readinessRecords, error: fetchError } = await supabase
+    .from('po_amazon_readiness')
+    .select('id')
+    .in('purchase_order_id', poIds)
+    .eq('user_id', userId)
+    .is('manufacturer_pack_sent_at', null)
+    .not('manufacturer_pack_generated_at', 'is', null)
+  
+  if (fetchError) throw fetchError
+  
+  if (readinessRecords.length === 0) {
+    return []
+  }
+  
+  const readinessIds = readinessRecords.map(r => r.id)
+  
+  const { data, error } = await supabase
+    .from('po_amazon_readiness')
+    .update({
+      manufacturer_pack_sent_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    })
+    .in('id', readinessIds)
+    .eq('user_id', userId)
+    .select()
+  
+  if (error) throw error
+  return data
+}
+
+export const bulkMarkShipmentsDelivered = async (poIds) => {
+  const userId = await getCurrentUserId()
+  
+  // Check if po_shipments table exists and get shipments
+  try {
+    const { data: shipments, error: fetchError } = await supabase
+      .from('po_shipments')
+      .select('id, purchase_order_id')
+      .in('purchase_order_id', poIds)
+      .eq('user_id', userId)
+      .in('status', ['picked_up', 'in_transit'])
+    
+    if (fetchError) {
+      // Table might not exist
+      if (fetchError.code === '42P01') {
+        return []
+      }
+      throw fetchError
+    }
+    
+    if (shipments.length === 0) {
+      return []
+    }
+    
+    const shipmentIds = shipments.map(s => s.id)
+    
+    const { data, error } = await supabase
+      .from('po_shipments')
+      .update({
+        status: 'delivered',
+        updated_at: new Date().toISOString()
+      })
+      .in('id', shipmentIds)
+      .eq('user_id', userId)
+      .select()
+    
+    if (error) throw error
+    return data
+  } catch (err) {
+    // If table doesn't exist, return empty array
+    if (err.code === '42P01') {
+      return []
+    }
+    throw err
+  }
+}
+
 // SUPPLIER QUOTES
 export const getSupplierQuotes = async (projectId) => {
   const userId = await getCurrentUserId()
