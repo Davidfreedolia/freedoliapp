@@ -17,18 +17,13 @@ CREATE TABLE IF NOT EXISTS project_profitability_basic (
   project_id uuid NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   
   -- Inputs
-  selling_price numeric NULL,
-  cogs numeric NULL, -- Cost of Goods Sold
-  shipping_per_unit numeric NULL,
-  referral_fee_percent numeric NULL, -- Amazon referral fee %
-  fba_fee_per_unit numeric NULL,
-  ppc_per_unit numeric NULL DEFAULT 0, -- Pay Per Click (advertising)
-  
-  -- Outputs (calculats per l'app, guardats per referència)
-  total_fees_per_unit numeric NULL,
-  net_profit_per_unit numeric NULL,
-  margin_percent numeric NULL,
-  roi_percent numeric NULL,
+  selling_price numeric NOT NULL DEFAULT 0,
+  cogs numeric NOT NULL DEFAULT 0, -- Cost of Goods Sold
+  shipping_per_unit numeric NOT NULL DEFAULT 0,
+  referral_fee_percent numeric NOT NULL DEFAULT 15, -- Amazon referral fee %
+  fba_fee_per_unit numeric NOT NULL DEFAULT 0,
+  ppc_per_unit numeric NOT NULL DEFAULT 0, -- Pay Per Click (advertising)
+  other_costs_per_unit numeric NOT NULL DEFAULT 0,
   
   UNIQUE(user_id, project_id)
 );
@@ -82,21 +77,3 @@ CREATE TRIGGER trigger_update_project_profitability_updated_at
   BEFORE UPDATE ON project_profitability_basic
   FOR EACH ROW
   EXECUTE FUNCTION update_project_profitability_updated_at();
-
--- ============================================
--- NOTES
--- ============================================
--- Aquesta taula permet calcular profitabilitat ràpida a la fase Research
--- 
--- Càlculs (fets a l'app):
--- - total_fees_per_unit = shipping_per_unit + (selling_price * referral_fee_percent / 100) + fba_fee_per_unit + ppc_per_unit
--- - net_profit_per_unit = selling_price - cogs - total_fees_per_unit
--- - margin_percent = (net_profit_per_unit / selling_price) * 100
--- - roi_percent = (net_profit_per_unit / cogs) * 100 (si cogs > 0)
---
--- Badges automàtics segons margin_percent:
--- - GO: margin >= 30%
--- - RISKY: margin >= 15% i < 30%
--- - NO-GO: margin < 15%
-
-

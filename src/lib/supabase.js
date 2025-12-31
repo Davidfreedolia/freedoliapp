@@ -1105,13 +1105,22 @@ export const upsertProjectProfitability = async (projectId, profitabilityData) =
   const { user_id, ...data } = profitabilityData
   const userId = await getCurrentUserId()
   
+  // Assegurar que tots els camps numèrics estan definits amb defaults
+  const profitabilityRecord = {
+    project_id: projectId,
+    selling_price: data.selling_price ?? 0,
+    cogs: data.cogs ?? 0,
+    shipping_per_unit: data.shipping_per_unit ?? 0,
+    referral_fee_percent: data.referral_fee_percent ?? 15,
+    fba_fee_per_unit: data.fba_fee_per_unit ?? 0,
+    ppc_per_unit: data.ppc_per_unit ?? 0,
+    other_costs_per_unit: data.other_costs_per_unit ?? 0,
+    updated_at: new Date().toISOString()
+  }
+  
   const { data: result, error } = await supabase
     .from('project_profitability_basic')
-    .upsert({
-      project_id: projectId,
-      ...data,
-      updated_at: new Date().toISOString()
-    }, {
+    .upsert(profitabilityRecord, {
       onConflict: 'user_id,project_id'
     })
     .select()
