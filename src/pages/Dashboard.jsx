@@ -57,6 +57,16 @@ export default function Dashboard() {
     loadGtinCoverage()
     loadPosNotReady()
     loadPosWaitingManufacturer()
+
+    // Prefetch rutes probables després de 2s idle (opcional)
+    // Millora UX pre-carregant pàgines que probablement s'utilitzaran
+    const idlePrefetchTimer = setTimeout(() => {
+      // Prefetch Orders i ProjectDetail (les més usades després del Dashboard)
+      import('./Orders.jsx').catch(() => {})
+      import('./ProjectDetail.jsx').catch(() => {})
+    }, 2000)
+
+    return () => clearTimeout(idlePrefetchTimer)
   }, [])
 
   const loadGtinCoverage = async () => {

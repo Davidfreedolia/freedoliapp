@@ -21,3 +21,4 @@ ADD COLUMN IF NOT EXISTS fixed_costs numeric NOT NULL DEFAULT 0;
 -- - roi_product = net_profit / (cogs + shipping + other_costs) * 100
 -- - roi_total = net_profit / (cogs + shipping + other_costs + ppc + fba_fee + referral_fee) * 100
 
+

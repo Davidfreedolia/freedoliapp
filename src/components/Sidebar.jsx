@@ -17,6 +17,48 @@ import {
 import { useApp } from '../context/AppContext'
 import DriveStatus from './DriveStatus'
 
+// Prefetch functions per rutes probables
+// Carrega el chunk abans que es necessiti per millorar UX
+// Utilitza els mateixos imports dinàmics que React.lazy() a App.jsx per garantir compatibilitat
+const prefetchRoute = (path) => {
+  switch (path) {
+    case '/orders':
+      import('../pages/Orders.jsx').catch(() => {})
+      break
+    case '/projects':
+      // Prefetch Projects i ProjectDetail - ProjectDetail normalment s'obre després de Projects
+      import('../pages/Projects.jsx').catch(() => {})
+      import('../pages/ProjectDetail.jsx').catch(() => {})
+      break
+    case '/suppliers':
+      import('../pages/Suppliers.jsx').catch(() => {})
+      break
+    case '/forwarders':
+      import('../pages/Forwarders.jsx').catch(() => {})
+      break
+    case '/warehouses':
+      import('../pages/Warehouses.jsx').catch(() => {})
+      break
+    case '/finances':
+      import('../pages/Finances.jsx').catch(() => {})
+      break
+    case '/inventory':
+      import('../pages/Inventory.jsx').catch(() => {})
+      break
+    case '/analytics':
+      import('../pages/Analytics.jsx').catch(() => {})
+      break
+    case '/settings':
+      import('../pages/Settings.jsx').catch(() => {})
+      break
+    default:
+      break
+  }
+}
+
+// Flag per evitar múltiples prefetches
+const prefetchedRoutes = new Set()
+
 const menuItems = [
   { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
   { path: '/projects', icon: FolderKanban, label: 'Projectes' },
@@ -78,6 +120,13 @@ export default function Sidebar() {
           <NavLink
             key={item.path}
             to={item.path}
+            onMouseEnter={() => {
+              // Prefetch rutes quan es fa hover (només una vegada per ruta)
+              if (!prefetchedRoutes.has(item.path) && item.path !== '/') {
+                prefetchedRoutes.add(item.path)
+                prefetchRoute(item.path)
+              }
+            }}
             style={({ isActive }) => ({
               ...styles.navItem,
               backgroundColor: isActive 
