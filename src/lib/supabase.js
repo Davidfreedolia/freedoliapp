@@ -1115,6 +1115,7 @@ export const upsertProjectProfitability = async (projectId, profitabilityData) =
     fba_fee_per_unit: data.fba_fee_per_unit ?? 0,
     ppc_per_unit: data.ppc_per_unit ?? 0,
     other_costs_per_unit: data.other_costs_per_unit ?? 0,
+    fixed_costs: data.fixed_costs ?? 0,
     updated_at: new Date().toISOString()
   }
   

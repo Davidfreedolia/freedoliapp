@@ -4,7 +4,7 @@ import { getProjectProfitability, upsertProjectProfitability } from '../lib/supa
 import { calculateQuickProfitability } from '../lib/profitability'
 
 /**
- * Calculadora de profitabilitat ràpida (Nivell 1)
+ * Calculadora de profitabilitat ràpida (Nivell 1.5)
  * Visible a la fase Research del projecte
  */
 export default function ProfitabilityCalculator({ projectId, darkMode }) {
@@ -17,7 +17,8 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
     referral_fee_percent: '15',
     fba_fee_per_unit: '0',
     ppc_per_unit: '0',
-    other_costs_per_unit: '0'
+    other_costs_per_unit: '0',
+    fixed_costs: '0'
   })
   const [results, setResults] = useState(null)
   const [badge, setBadge] = useState(null)
@@ -30,7 +31,7 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
     // Recalcular en temps real quan canvien els inputs
     if (data.selling_price || data.cogs || data.shipping_per_unit || 
         data.referral_fee_percent || data.fba_fee_per_unit || 
-        data.ppc_per_unit || data.other_costs_per_unit) {
+        data.ppc_per_unit || data.other_costs_per_unit || data.fixed_costs) {
       const calculated = calculateQuickProfitability(data)
       setResults(calculated)
       
@@ -62,7 +63,8 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
           referral_fee_percent: 15,
           fba_fee_per_unit: 0,
           ppc_per_unit: 0,
-          other_costs_per_unit: 0
+          other_costs_per_unit: 0,
+          fixed_costs: 0
         })
         // Recarregar després de crear
         profitability = await getProjectProfitability(projectId)
@@ -76,7 +78,8 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
           referral_fee_percent: (profitability.referral_fee_percent ?? 15).toString(),
           fba_fee_per_unit: (profitability.fba_fee_per_unit ?? 0).toString(),
           ppc_per_unit: (profitability.ppc_per_unit ?? 0).toString(),
-          other_costs_per_unit: (profitability.other_costs_per_unit ?? 0).toString()
+          other_costs_per_unit: (profitability.other_costs_per_unit ?? 0).toString(),
+          fixed_costs: (profitability.fixed_costs ?? 0).toString()
         })
       }
     } catch (err) {
@@ -124,7 +127,8 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
         referral_fee_percent: parseFloat(data.referral_fee_percent) || 15,
         fba_fee_per_unit: parseFloat(data.fba_fee_per_unit) || 0,
         ppc_per_unit: parseFloat(data.ppc_per_unit) || 0,
-        other_costs_per_unit: parseFloat(data.other_costs_per_unit) || 0
+        other_costs_per_unit: parseFloat(data.other_costs_per_unit) || 0,
+        fixed_costs: parseFloat(data.fixed_costs) || 0
       })
     } catch (err) {
       console.error('Error guardant profitability:', err)
@@ -340,6 +344,22 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
             />
           </div>
 
+          <div style={styles.inputGroup}>
+            <label style={styles.label}>Fixed Costs (€)</label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={data.fixed_costs}
+              onChange={e => handleInputChange('fixed_costs', e.target.value)}
+              style={styles.input}
+              placeholder="0.00"
+            />
+            <span style={{ fontSize: '11px', color: darkMode ? '#6b7280' : '#9ca3af', marginTop: '2px' }}>
+              Costos fixos totals (ex: desenvolupament, tooling, etc.)
+            </span>
+          </div>
+
           <button
             onClick={handleSave}
             disabled={saving}
@@ -381,7 +401,6 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
 
                 <div style={{
                   ...styles.resultItem,
-                  borderBottom: 'none',
                   paddingTop: '16px',
                   borderTop: `2px solid ${darkMode ? '#374151' : '#e5e7eb'}`
                 }}>
@@ -396,18 +415,38 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
                 </div>
 
                 <div style={styles.resultItem}>
-                  <span style={styles.resultLabel}>ROI:</span>
+                  <span style={styles.resultLabel}>ROI Product:</span>
                   <span style={{
                     ...styles.resultValue,
-                    color: results.roi_percent >= 50 ? '#10b981' :
-                           results.roi_percent >= 20 ? '#f59e0b' : '#ef4444'
+                    color: results.roi_product >= 50 ? '#10b981' :
+                           results.roi_product >= 20 ? '#f59e0b' : '#ef4444'
                   }}>
-                    {formatPercent(results.roi_percent)}
+                    {formatPercent(results.roi_product)}
+                  </span>
+                  <span style={{ fontSize: '11px', color: darkMode ? '#6b7280' : '#9ca3af', marginLeft: '8px' }}>
+                    (excl. fees)
                   </span>
                 </div>
 
-                {results.breakeven_units > 0 && (
-                  <div style={styles.resultItem}>
+                <div style={styles.resultItem}>
+                  <span style={styles.resultLabel}>ROI Total:</span>
+                  <span style={{
+                    ...styles.resultValue,
+                    color: results.roi_total >= 50 ? '#10b981' :
+                           results.roi_total >= 20 ? '#f59e0b' : '#ef4444'
+                  }}>
+                    {formatPercent(results.roi_total)}
+                  </span>
+                  <span style={{ fontSize: '11px', color: darkMode ? '#6b7280' : '#9ca3af', marginLeft: '8px' }}>
+                    (incl. fees)
+                  </span>
+                </div>
+
+                {results.breakeven_units !== null && results.breakeven_units > 0 && (
+                  <div style={{
+                    ...styles.resultItem,
+                    borderBottom: 'none'
+                  }}>
                     <span style={styles.resultLabel}>Breakeven Units:</span>
                     <span style={styles.resultValue}>
                       {results.breakeven_units}

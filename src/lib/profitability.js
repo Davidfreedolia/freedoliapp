@@ -12,7 +12,7 @@ export const calculateQuickProfitability = (inputs) => {
   const fbaFeePerUnit = Math.max(0, parseFloat(inputs.fba_fee_per_unit) || 0)
   const ppcPerUnit = Math.max(0, parseFloat(inputs.ppc_per_unit) || 0)
   const otherCostsPerUnit = Math.max(0, parseFloat(inputs.other_costs_per_unit) || 0)
-  const fixedCosts = Math.max(0, parseFloat(inputs.fixed_costs) || 0) // Preparat per futur
+  const fixedCosts = Math.max(0, parseFloat(inputs.fixed_costs) || 0)
 
   // Calcular referral fee
   const referralFee = sellingPrice * (referralFeePercent / 100)
@@ -26,12 +26,16 @@ export const calculateQuickProfitability = (inputs) => {
   // Calcular margin percent
   const marginPercent = sellingPrice > 0 ? (netProfit / sellingPrice) * 100 : 0
 
-  // Calcular ROI percent (base: cogs + shipping + other costs)
-  const roiDenominator = cogs + shippingPerUnit + otherCostsPerUnit
-  const roiPercent = roiDenominator > 0 ? (netProfit / roiDenominator) * 100 : 0
+  // Calcular ROI Product (base: cogs + shipping + other costs)
+  const roiProductDenominator = cogs + shippingPerUnit + otherCostsPerUnit
+  const roiProduct = roiProductDenominator > 0 ? (netProfit / roiProductDenominator) * 100 : 0
 
-  // Calcular breakeven units (preparat per futur)
-  const breakevenUnits = netProfit > 0 && fixedCosts > 0 ? Math.ceil(fixedCosts / netProfit) : 0
+  // Calcular ROI Total (base: cogs + shipping + other costs + ppc + fba_fee + referral_fee)
+  const roiTotalDenominator = cogs + shippingPerUnit + otherCostsPerUnit + ppcPerUnit + fbaFeePerUnit + referralFee
+  const roiTotal = roiTotalDenominator > 0 ? (netProfit / roiTotalDenominator) * 100 : 0
+
+  // Calcular breakeven units
+  const breakevenUnits = netProfit > 0 && fixedCosts > 0 ? Math.ceil(fixedCosts / netProfit) : null
 
   // Determinar decisió segons margin
   let decision = null
@@ -48,7 +52,8 @@ export const calculateQuickProfitability = (inputs) => {
     total_cost: totalCost,
     net_profit: netProfit,
     margin_percent: marginPercent,
-    roi_percent: roiPercent,
+    roi_product: roiProduct,
+    roi_total: roiTotal,
     breakeven_units: breakevenUnits,
     decision: decision,
     // Valors originals per referència
@@ -59,8 +64,8 @@ export const calculateQuickProfitability = (inputs) => {
       referral_fee_percent: referralFeePercent,
       fba_fee_per_unit: fbaFeePerUnit,
       ppc_per_unit: ppcPerUnit,
-      other_costs_per_unit: otherCostsPerUnit
+      other_costs_per_unit: otherCostsPerUnit,
+      fixed_costs: fixedCosts
     }
   }
 }
-

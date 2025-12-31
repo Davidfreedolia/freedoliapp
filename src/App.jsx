@@ -1,20 +1,26 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import React, { Suspense } from 'react'
 import { AppProvider, useApp } from './context/AppContext'
 import Sidebar from './components/Sidebar'
 import ProtectedRoute from './components/ProtectedRoute'
+import PageLoader from './components/PageLoader'
+
+// Login (no lazy, es carrega primer)
 import Login from './pages/Login'
-import Dashboard from './pages/Dashboard'
-import Projects from './pages/Projects'
-import ProjectDetail from './pages/ProjectDetail'
-import Suppliers from './pages/Suppliers'
-import Forwarders from './pages/Forwarders'
-import Warehouses from './pages/Warehouses'
-import Orders from './pages/Orders'
-import Briefing from './pages/Briefing'
-import Finances from './pages/Finances'
-import Inventory from './pages/Inventory'
-import Analytics from './pages/Analytics'
-import Settings from './pages/Settings'
+
+// Pàgines principals: lazy loading
+const Dashboard = React.lazy(() => import('./pages/Dashboard'))
+const Projects = React.lazy(() => import('./pages/Projects'))
+const ProjectDetail = React.lazy(() => import('./pages/ProjectDetail'))
+const Orders = React.lazy(() => import('./pages/Orders'))
+const Briefing = React.lazy(() => import('./pages/Briefing'))
+const Finances = React.lazy(() => import('./pages/Finances'))
+const Inventory = React.lazy(() => import('./pages/Inventory'))
+const Settings = React.lazy(() => import('./pages/Settings'))
+const Analytics = React.lazy(() => import('./pages/Analytics'))
+const Suppliers = React.lazy(() => import('./pages/Suppliers'))
+const Forwarders = React.lazy(() => import('./pages/Forwarders'))
+const Warehouses = React.lazy(() => import('./pages/Warehouses'))
 
 function AppContent() {
   const { sidebarCollapsed, darkMode } = useApp()
@@ -33,105 +39,107 @@ function AppContent() {
         display: 'flex',
         flexDirection: 'column'
       }}>
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/projects"
-            element={
-              <ProtectedRoute>
-                <Projects />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/projects/:id"
-            element={
-              <ProtectedRoute>
-                <ProjectDetail />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/projects/:projectId/briefing"
-            element={
-              <ProtectedRoute>
-                <Briefing />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/suppliers"
-            element={
-              <ProtectedRoute>
-                <Suppliers />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/forwarders"
-            element={
-              <ProtectedRoute>
-                <Forwarders />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/warehouses"
-            element={
-              <ProtectedRoute>
-                <Warehouses />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/orders"
-            element={
-              <ProtectedRoute>
-                <Orders />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/finances"
-            element={
-              <ProtectedRoute>
-                <Finances />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/inventory"
-            element={
-              <ProtectedRoute>
-                <Inventory />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/analytics"
-            element={
-              <ProtectedRoute>
-                <Analytics />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <ProtectedRoute>
-                <Settings />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <Suspense fallback={<PageLoader darkMode={darkMode} />}>
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/projects"
+              element={
+                <ProtectedRoute>
+                  <Projects />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/projects/:id"
+              element={
+                <ProtectedRoute>
+                  <ProjectDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/projects/:projectId/briefing"
+              element={
+                <ProtectedRoute>
+                  <Briefing />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/suppliers"
+              element={
+                <ProtectedRoute>
+                  <Suppliers />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/forwarders"
+              element={
+                <ProtectedRoute>
+                  <Forwarders />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/warehouses"
+              element={
+                <ProtectedRoute>
+                  <Warehouses />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/orders"
+              element={
+                <ProtectedRoute>
+                  <Orders />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/finances"
+              element={
+                <ProtectedRoute>
+                  <Finances />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/inventory"
+              element={
+                <ProtectedRoute>
+                  <Inventory />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/analytics"
+              element={
+                <ProtectedRoute>
+                  <Analytics />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <Settings />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
       </main>
     </div>
   )
