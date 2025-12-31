@@ -18,6 +18,12 @@ CREATE INDEX IF NOT EXISTS idx_decision_log_created ON decision_log(created_at D
 -- RLS Policies
 ALTER TABLE decision_log ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist (idempotent)
+DROP POLICY IF EXISTS "Users can view own decision logs" ON decision_log;
+DROP POLICY IF EXISTS "Users can insert own decision logs" ON decision_log;
+DROP POLICY IF EXISTS "Users can update own decision logs" ON decision_log;
+DROP POLICY IF EXISTS "Users can delete own decision logs" ON decision_log;
+
 -- Policy: Users can view own decision logs
 CREATE POLICY "Users can view own decision logs"
   ON decision_log FOR SELECT

@@ -4,6 +4,7 @@ import { AppProvider, useApp } from './context/AppContext'
 import Sidebar from './components/Sidebar'
 import ProtectedRoute from './components/ProtectedRoute'
 import PageLoader from './components/PageLoader'
+import ToastContainer from './components/Toast'
 import { useBreakpoint } from './hooks/useBreakpoint'
 import './i18n'
 
