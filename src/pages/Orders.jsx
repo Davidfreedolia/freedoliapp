@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { 
   Plus, 
   Search, 
@@ -66,6 +67,7 @@ export default function Orders() {
   const { darkMode } = useApp()
   const navigate = useNavigate()
   const { isMobile, isTablet } = useBreakpoint()
+  const { t } = useTranslation()
   const [searchParams] = useSearchParams()
   
   const [orders, setOrders] = useState([])

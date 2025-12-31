@@ -69,20 +69,20 @@ export const getCurrentUserId = async () => {
 // PROJECTES
 export const getProjects = async (includeDiscarded = false) => {
   const userId = await getCurrentUserId()
-  let query = supabase
+  const { data, error } = await supabase
     .from('projects')
     .select('*')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
   
-  // Per defecte, excloure DISCARDED
+  if (error) throw error
+  
+  // Per defecte, excloure DISCARDED (filter client-side to avoid query issues)
   if (!includeDiscarded) {
-    query = query.or('decision.is.null,decision.neq.DISCARDED')
+    return (data || []).filter(p => !p.decision || p.decision !== 'DISCARDED')
   }
   
-  const { data, error } = await query
-  if (error) throw error
-  return data
+  return data || []
 }
 
 export const getProject = async (id) => {
@@ -694,7 +694,7 @@ export const getProjectsMissingGtin = async () => {
   if (identifiersError) throw identifiersError
   
   const projectsWithIdentifiers = new Set(identifiers.map(i => i.project_id))
-  const missingGtin = projects.filter(p => 
+  const missingGtin = filteredProjects.filter(p => 
     !projectsWithIdentifiers.has(p.id) || 
     identifiers.find(i => i.project_id === p.id && !i.gtin_code && i.gtin_type !== 'GTIN_EXEMPT')
   )
@@ -1047,18 +1047,23 @@ export const getShipmentsInTransit = async (limit = 10) => {
 export const getResearchNoDecision = async (limit = 10) => {
   const userId = await getCurrentUserId()
   
-  const { data, error } = await supabase
-    .from('projects')
-    .select('id, name, sku_internal, project_code, current_phase, decision, created_at')
-    .eq('user_id', userId)
-    .eq('current_phase', 1)
-    .or('decision.is.null,decision.eq.HOLD')
-    .order('created_at', { ascending: false })
-    .limit(limit)
-  
-  if (error) throw error
-  
-  return (data || []).filter(p => !p.decision || p.decision === 'HOLD')
+  try {
+    const { data, error } = await supabase
+      .from('projects')
+      .select('id, name, sku_internal, project_code, current_phase, decision, created_at')
+      .eq('user_id', userId)
+      .eq('current_phase', 1)
+      .order('created_at', { ascending: false })
+      .limit(limit * 2) // Get more to filter after
+    
+    if (error) throw error
+    
+    // Filter client-side: no decision or HOLD
+    return (data || []).filter(p => !p.decision || p.decision === 'HOLD').slice(0, limit)
+  } catch (err) {
+    console.error('Error in getResearchNoDecision:', err)
+    return []
+  }
 }
 
 export const getStaleTracking = async (limit = 10, staleDays = 7) => {
