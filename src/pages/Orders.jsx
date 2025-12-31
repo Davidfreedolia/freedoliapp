@@ -1310,13 +1310,24 @@ export default function Orders() {
                     </div>
                   )}
 
-                  {/* Decision Log */}
+                  {/* Decision Log - Why this supplier was chosen */}
                   {selectedOrder && (
                     <div style={styles.detailSection}>
+                      <h4 style={{
+                        margin: '0 0 12px 0',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: darkMode ? '#ffffff' : '#111827'
+                      }}>
+                        Why this supplier was chosen
+                      </h4>
                       <DecisionLog 
                         entityType="purchase_order" 
                         entityId={selectedOrder.id} 
-                        darkMode={darkMode} 
+                        darkMode={darkMode}
+                        allowedDecisions={[
+                          { value: 'go', label: 'GO', icon: CheckCircle2, color: '#10b981' }
+                        ]}
                       />
                     </div>
                   )}
