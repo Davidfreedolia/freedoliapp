@@ -108,6 +108,22 @@ export default function Dashboard() {
 
     return () => clearTimeout(idlePrefetchTimer)
   }, [])
+  
+  // Calculate grid width dynamically
+  useEffect(() => {
+    if (isMobile) return
+    
+    const calculateWidth = () => {
+      const sidebarWidth = isTablet ? 72 : (sidebarCollapsed ? 72 : 260)
+      const padding = 64 // 32px each side
+      const width = Math.max(window.innerWidth - sidebarWidth - padding, 800)
+      setGridWidth(width)
+    }
+    
+    calculateWidth()
+    window.addEventListener('resize', calculateWidth)
+    return () => window.removeEventListener('resize', calculateWidth)
+  }, [isMobile, isTablet, sidebarCollapsed])
 
   const loadGtinCoverage = async () => {
     setLoadingGtinCoverage(true)
