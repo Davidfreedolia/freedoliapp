@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { 
   Barcode, 
@@ -14,7 +14,6 @@ import {
   FileSpreadsheet,
   ExternalLink
 } from 'lucide-react'
-import { useApp } from '../context/AppContext'
 import { 
   getGtinPool, 
   addGtinToPool, 
@@ -37,11 +36,7 @@ export default function GTINPoolSection({ darkMode }) {
   const [importPreview, setImportPreview] = useState(null)
   const fileInputRef = useRef(null)
 
-  useEffect(() => {
-    loadGtins()
-  }, [statusFilter])
-
-  const loadGtins = async () => {
+  const loadGtins = useCallback(async () => {
     setLoading(true)
     try {
       const data = await getGtinPool(statusFilter)
@@ -50,7 +45,11 @@ export default function GTINPoolSection({ darkMode }) {
       console.error('Error carregant GTIN pool:', err)
     }
     setLoading(false)
-  }
+  }, [statusFilter])
+
+  useEffect(() => {
+    loadGtins()
+  }, [loadGtins])
 
   // Estadístiques
   const stats = {

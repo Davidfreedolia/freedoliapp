@@ -9,3 +9,5 @@ ALTER TABLE company_settings ADD COLUMN IF NOT EXISTS demo_mode boolean DEFAULT 
 UPDATE company_settings SET demo_mode = true WHERE demo_mode IS NULL;
 
 
+
+

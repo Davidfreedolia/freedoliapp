@@ -18,7 +18,7 @@ import {
   MoreVertical
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { supabase } from '../lib/supabase'
+import { supabase, getCurrentUserId, getProjects } from '../lib/supabase'
 import Header from '../components/Header'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
@@ -45,6 +45,7 @@ export default function Inventory() {
   const [movements, setMovements] = useState([])
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterProject, setFilterProject] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
@@ -64,33 +65,39 @@ export default function Inventory() {
 
   const loadData = async () => {
     setLoading(true)
+    setError(null)
     try {
-      // Carregar projectes
-      const { data: projectsData } = await supabase
-        .from('projects')
-        .select('*')
-        .order('name')
+      const userId = await getCurrentUserId()
+      
+      // Carregar projectes (usar funció que ja filtra per user_id)
+      const projectsData = await getProjects(true) // includeDiscarded = true
       setProjects(projectsData || [])
 
       // Carregar inventari
-      const { data: inventoryData } = await supabase
+      const { data: inventoryData, error: inventoryError } = await supabase
         .from('inventory')
         .select('*, project:projects(name, project_code)')
+        .eq('user_id', userId)
         .order('created_at', { ascending: false })
+      if (inventoryError) throw inventoryError
       setInventory(inventoryData || [])
 
       // Carregar moviments recents
-      const { data: movementsData } = await supabase
+      const { data: movementsData, error: movementsError } = await supabase
         .from('inventory_movements')
         .select('*, inventory:inventory(sku, product_name)')
+        .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(50)
+      if (movementsError) throw movementsError
       setMovements(movementsData || [])
 
     } catch (err) {
       console.error('Error carregant dades:', err)
+      setError(err.message || 'Error carregant dades. Torna a intentar.')
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   // Stats
@@ -327,7 +334,17 @@ export default function Inventory() {
 
         {/* Inventory Table */}
         {loading ? (
-          <div style={styles.loading}>Carregant...</div>
+          <div style={{ padding: '64px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant inventari...</div>
+        ) : error ? (
+          <div style={{ padding: '64px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', backgroundColor: darkMode ? '#15151f' : '#ffffff', borderRadius: '16px', border: '1px solid var(--border-color)' }}>
+            <AlertTriangle size={32} color="#ef4444" />
+            <h3 style={{ color: darkMode ? '#ffffff' : '#111827', margin: 0 }}>Error carregant dades</h3>
+            <p style={{ color: '#6b7280', margin: 0 }}>{error}</p>
+            <button onClick={loadData} style={{ padding: '12px 24px', backgroundColor: '#4f46e5', color: '#ffffff', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '500' }}>
+              <RefreshCw size={16} />
+              Tornar a intentar
+            </button>
+          </div>
         ) : filteredInventory.length === 0 ? (
           <div style={{ ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
             <Package size={48} color="#d1d5db" />

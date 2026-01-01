@@ -1,24 +1,15 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
 import { AlertTriangle, X } from 'lucide-react'
 import { getAlerts, getDashboardPreferences } from '../lib/supabase'
 
 export default function AlertsBadge({ darkMode }) {
-  const { t } = useTranslation()
   const navigate = useNavigate()
   const [alerts, setAlerts] = useState([])
   const [loading, setLoading] = useState(true)
   const [showTooltip, setShowTooltip] = useState(false)
 
-  useEffect(() => {
-    loadAlerts()
-    // Refresh every 5 minutes
-    const interval = setInterval(loadAlerts, 5 * 60 * 1000)
-    return () => clearInterval(interval)
-  }, [])
-
-  const loadAlerts = async () => {
+  const loadAlerts = useCallback(async () => {
     setLoading(true)
     try {
       const preferences = await getDashboardPreferences()
@@ -32,14 +23,20 @@ export default function AlertsBadge({ darkMode }) {
       console.error('Error loading alerts:', err)
     }
     setLoading(false)
-  }
+  }, [])
+
+  useEffect(() => {
+    loadAlerts()
+    // Refresh every 5 minutes
+    const interval = setInterval(loadAlerts, 5 * 60 * 1000)
+    return () => clearInterval(interval)
+  }, [loadAlerts])
 
   if (loading || alerts.length === 0) {
     return null
   }
 
   const highSeverityCount = alerts.filter(a => a.severity === 'high').length
-  const mediumSeverityCount = alerts.filter(a => a.severity === 'medium').length
 
   const handleClick = () => {
     // Navigate to relevant section based on alert type
@@ -219,5 +216,7 @@ export default function AlertsBadge({ darkMode }) {
     </div>
   )
 }
+
+
 
 

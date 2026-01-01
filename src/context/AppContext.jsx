@@ -45,9 +45,16 @@ export function AppProvider({ children }) {
     }
   }, [])
 
-  // Auto-seed demo data on app load (if demo_mode is enabled)
+  // Auto-seed demo data on app load (only in DEV environment)
   const autoSeedDemoData = async () => {
     try {
+      // Safety check: Only seed in DEV, never in PROD
+      const env = import.meta.env.VITE_ENV || 'dev'
+      if (env === 'prod') {
+        console.log('PROD environment detected, skipping auto-seed')
+        return
+      }
+
       // Get company settings to check demo_mode
       const settings = await getCompanySettings()
       const isDemoMode = settings?.demo_mode !== false // Default to true if not set

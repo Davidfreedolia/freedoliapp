@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { 
   X, 
   Loader, 
@@ -16,7 +17,6 @@ import {
   createPurchaseOrder, 
   updatePurchaseOrder,
   generatePONumber,
-  getProjectSku,
   getWarehouses,
   getCompanySettings
 } from '../lib/supabase'
@@ -349,9 +349,6 @@ export default function NewPOModal({
   }
 
   if (!isOpen) return null
-
-  // Obtenir info del proveïdor seleccionat
-  const selectedSupplier = suppliers.find(s => s.id === formData.supplier_id)
 
   return (
     <div style={{...styles.overlay, ...modalStyles.overlay}}>

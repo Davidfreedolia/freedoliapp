@@ -1,12 +1,20 @@
 import { useEffect, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { isDemoMode } from '../demo/demoMode'
 
 export default function ProtectedRoute({ children }) {
   const [loading, setLoading] = useState(true)
   const [authenticated, setAuthenticated] = useState(false)
 
   useEffect(() => {
+    // Demo mode: always authenticated
+    if (isDemoMode()) {
+      setAuthenticated(true)
+      setLoading(false)
+      return
+    }
+
     // Verificar sessió actual
     supabase.auth.getSession().then(({ data: { session } }) => {
       setAuthenticated(!!session)
@@ -40,6 +48,8 @@ export default function ProtectedRoute({ children }) {
 
   return authenticated ? children : <Navigate to="/login" replace />
 }
+
+
 
 
 

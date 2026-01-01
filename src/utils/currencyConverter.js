@@ -39,3 +39,5 @@ export const formatEUR = (amount) => {
   }).format(amount || 0)
 }
 
+
+

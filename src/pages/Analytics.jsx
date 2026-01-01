@@ -17,8 +17,10 @@ import {
   AlertCircle
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { supabase } from '../lib/supabase'
-import { getUnassignedGtinCodes, getProjectsMissingGtin } from '../lib/supabase'
+import { supabase, getCurrentUserId } from '../lib/supabase'
+import { getUnassignedGtinCodes, getProjectsMissingGtin, getProjects } from '../lib/supabase'
+import { isDemoMode } from '../demo/demoMode'
+import { mockGetExpenses, mockGetIncomes, mockGetPurchaseOrders } from '../demo/demoMode'
 import Header from '../components/Header'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 
@@ -39,6 +41,7 @@ export default function Analytics() {
   const { isMobile } = useBreakpoint()
   
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [dateRange, setDateRange] = useState('30') // dies
   const [filterProject, setFilterProject] = useState('')
   const [projects, setProjects] = useState([])
@@ -57,60 +60,131 @@ export default function Analytics() {
 
   const loadData = async () => {
     setLoading(true)
+    setError(null)
     try {
+      const userId = await getCurrentUserId()
       const startDate = new Date()
       startDate.setDate(startDate.getDate() - parseInt(dateRange))
       const startDateStr = startDate.toISOString().split('T')[0]
 
-      // Projectes
-      const { data: projectsData } = await supabase.from('projects').select('*')
+      // Projectes (usar funció de supabase.js que ja filtra per user_id)
+      const projectsData = await getProjects(true) // includeDiscarded = true
       setProjects(projectsData || [])
 
-      // Despeses
-      let expensesQuery = supabase
-        .from('expenses')
-        .select('*')
-        .gte('expense_date', startDateStr)
-      if (filterProject) expensesQuery = expensesQuery.eq('project_id', filterProject)
-      const { data: expensesData } = await expensesQuery
+      // Despeses, Ingressos, Comandes, Inventari
+      let expensesData, incomesData, ordersData, inventoryData
+
+      if (isDemoMode()) {
+        // Demo mode: use mock data
+        const [mockExpenses, mockIncomes, mockOrders] = await Promise.all([
+          mockGetExpenses(),
+          mockGetIncomes(),
+          mockGetPurchaseOrders()
+        ])
+
+        // Filter by date range
+        expensesData = mockExpenses.filter(e => {
+          const expenseDate = new Date(e.expense_date)
+          return expenseDate >= new Date(startDateStr)
+        })
+        if (filterProject) {
+          expensesData = expensesData.filter(e => e.project_id === filterProject)
+        }
+
+        incomesData = mockIncomes.filter(i => {
+          const incomeDate = new Date(i.income_date)
+          return incomeDate >= new Date(startDateStr)
+        })
+        if (filterProject) {
+          incomesData = incomesData.filter(i => i.project_id === filterProject)
+        }
+
+        ordersData = mockOrders.filter(o => {
+          if (!o.order_date && !o.created_at) return true
+          const orderDate = new Date(o.order_date || o.created_at)
+          return orderDate >= new Date(startDateStr)
+        })
+        if (filterProject) {
+          ordersData = ordersData.filter(o => o.project_id === filterProject)
+        }
+
+        // Inventory: return empty array in demo (no inventory data yet)
+        inventoryData = []
+      } else {
+        // Production: use real Supabase queries
+        // Despeses
+        let expensesQuery = supabase
+          .from('expenses')
+          .select('*')
+          .eq('user_id', userId)
+          .gte('expense_date', startDateStr)
+        if (filterProject) expensesQuery = expensesQuery.eq('project_id', filterProject)
+        const { data: expensesRes, error: expensesError } = await expensesQuery
+        if (expensesError) throw expensesError
+        expensesData = expensesRes || []
+
+        // Ingressos
+        let incomesQuery = supabase
+          .from('incomes')
+          .select('*')
+          .eq('user_id', userId)
+          .gte('income_date', startDateStr)
+        if (filterProject) incomesQuery = incomesQuery.eq('project_id', filterProject)
+        const { data: incomesRes, error: incomesError } = await incomesQuery
+        if (incomesError) throw incomesError
+        incomesData = incomesRes || []
+
+        // Comandes
+        let ordersQuery = supabase
+          .from('purchase_orders')
+          .select('*')
+          .eq('user_id', userId)
+          .gte('order_date', startDateStr)
+        if (filterProject) ordersQuery = ordersQuery.eq('project_id', filterProject)
+        const { data: ordersRes, error: ordersError } = await ordersQuery
+        if (ordersError) throw ordersError
+        ordersData = ordersRes || []
+
+        // Inventari
+        let inventoryQuery = supabase
+          .from('inventory')
+          .select('*')
+          .eq('user_id', userId)
+        if (filterProject) inventoryQuery = inventoryQuery.eq('project_id', filterProject)
+        const { data: inventoryRes, error: inventoryError } = await inventoryQuery
+        if (inventoryError) throw inventoryError
+        inventoryData = inventoryRes || []
+      }
+
       setExpenses(expensesData || [])
-
-      // Ingressos
-      let incomesQuery = supabase
-        .from('incomes')
-        .select('*')
-        .gte('income_date', startDateStr)
-      if (filterProject) incomesQuery = incomesQuery.eq('project_id', filterProject)
-      const { data: incomesData } = await incomesQuery
       setIncomes(incomesData || [])
-
-      // Comandes
-      let ordersQuery = supabase
-        .from('purchase_orders')
-        .select('*')
-        .gte('order_date', startDateStr)
-      if (filterProject) ordersQuery = ordersQuery.eq('project_id', filterProject)
-      const { data: ordersData } = await ordersQuery
       setOrders(ordersData || [])
-
-      // Inventari
-      let inventoryQuery = supabase.from('inventory').select('*')
-      if (filterProject) inventoryQuery = inventoryQuery.eq('project_id', filterProject)
-      const { data: inventoryData } = await inventoryQuery
       setInventory(inventoryData || [])
 
       // GTIN Pool - Unassigned codes
-      const unassigned = await getUnassignedGtinCodes()
-      setUnassignedGtins(unassigned || [])
+      try {
+        const unassigned = await getUnassignedGtinCodes()
+        setUnassignedGtins(unassigned || [])
+      } catch (gtinErr) {
+        console.warn('Error carregant GTINs no assignats:', gtinErr)
+        setUnassignedGtins([])
+      }
 
       // Projects missing GTIN
-      const missing = await getProjectsMissingGtin()
-      setMissingGtinProjects(missing || [])
+      try {
+        const missing = await getProjectsMissingGtin()
+        setMissingGtinProjects(missing || [])
+      } catch (missingErr) {
+        console.warn('Error carregant projectes sense GTIN:', missingErr)
+        setMissingGtinProjects([])
+      }
 
     } catch (err) {
       console.error('Error carregant dades:', err)
+      setError(err.message || 'Error carregant dades. Torna a intentar.')
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   // Càlculs
@@ -198,6 +272,16 @@ export default function Analytics() {
 
         {loading ? (
           <div style={styles.loading}>Carregant analytics...</div>
+        ) : error ? (
+          <div style={styles.errorContainer}>
+            <AlertCircle size={24} color="#ef4444" />
+            <h3 style={{ color: darkMode ? '#ffffff' : '#111827', margin: '8px 0' }}>Error carregant dades</h3>
+            <p style={{ color: '#6b7280', marginBottom: '16px' }}>{error}</p>
+            <button onClick={loadData} style={styles.retryButton}>
+              <RefreshCw size={16} />
+              Tornar a intentar
+            </button>
+          </div>
         ) : (
           <>
             {/* KPIs principals */}
@@ -512,6 +596,8 @@ const styles = {
   filterSelect: { padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--border-color)', fontSize: '14px', outline: 'none' },
   refreshBtn: { padding: '12px', backgroundColor: 'transparent', border: '1px solid var(--border-color)', borderRadius: '10px', cursor: 'pointer', color: '#6b7280' },
   loading: { padding: '64px', textAlign: 'center', color: '#6b7280' },
+  errorContainer: { padding: '64px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' },
+  retryButton: { padding: '12px 24px', backgroundColor: '#4f46e5', color: '#ffffff', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '500' },
   // KPIs
   kpiGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '24px' },
   kpiCard: { padding: '20px', borderRadius: '16px', border: '1px solid var(--border-color)' },

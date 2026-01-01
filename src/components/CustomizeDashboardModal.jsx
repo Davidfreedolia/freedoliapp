@@ -100,7 +100,6 @@ export default function CustomizeDashboardModal({ isOpen, onClose, onSave }) {
     if (isOpen) {
       loadPreferences()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen])
 
   const handleToggle = (widgetId) => {

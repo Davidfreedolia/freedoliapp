@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { Mail, Lock, Send } from 'lucide-react'
 import { logSuccess, logError } from '../lib/auditLog'
+import { isDemoMode } from '../demo/demoMode'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -15,6 +16,12 @@ export default function Login() {
 
   // Verificar si ja està autenticat
   useEffect(() => {
+    // Demo mode: auto-redirect to dashboard
+    if (isDemoMode()) {
+      navigate('/', { replace: true })
+      return
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         navigate('/', { replace: true })

@@ -25,7 +25,7 @@ import {
   AlertTriangle,
   Save,
   X,
-  LayoutDashboard,
+  Sliders,
   Check,
   StickyNote
 } from 'lucide-react'
@@ -439,7 +439,7 @@ export default function Dashboard() {
       <div style={{
         ...styles.headerActions,
         backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-        borderColor: darkMode ? '#2a2a3a' : '#e5e7eb',
+        borderBottom: 'none',
         flexDirection: isMobile ? 'column' : 'row',
         padding: isMobile ? '12px' : '0 32px',
         gap: isMobile ? '8px' : '0'
@@ -548,7 +548,7 @@ export default function Dashboard() {
               {editLayout ? (
                 <Check size={20} color="#ffffff" />
               ) : (
-                <LayoutDashboard size={20} color={darkMode ? '#9ca3af' : '#6b7280'} />
+                <Sliders size={20} color={darkMode ? '#9ca3af' : '#6b7280'} />
               )}
             </button>
           )}
@@ -612,7 +612,7 @@ export default function Dashboard() {
             borderColor: '#4f46e5',
             color: darkMode ? '#ffffff' : '#111827'
           }}>
-            <LayoutDashboard size={14} color="#4f46e5" />
+            <Sliders size={14} color="#4f46e5" />
             <span>{t('dashboard.editMode')}</span>
           </div>
         )}
@@ -1062,6 +1062,14 @@ export default function Dashboard() {
                 
                 if (!widgetComponent) return null
                 
+                const widgetName = widgetId === WIDGET_IDS.WAITING_MANUFACTURER ? 'Waiting Manufacturer' :
+                                  widgetId === WIDGET_IDS.NOT_AMAZON_READY ? 'POs Not Amazon Ready' :
+                                  widgetId === WIDGET_IDS.SHIPMENTS_IN_TRANSIT ? 'Shipments In Transit' :
+                                  widgetId === WIDGET_IDS.RESEARCH_NO_DECISION ? 'Research No Decision' :
+                                  widgetId === WIDGET_IDS.STALE_TRACKING ? 'Stale Tracking' :
+                                  widgetId === WIDGET_IDS.TASKS ? 'Tasks' :
+                                  widgetId === WIDGET_IDS.STICKY_NOTES ? 'Sticky Notes' : 'Widget'
+
                 return (
                   <div key={item.i} style={{
                     backgroundColor: darkMode ? '#15151f' : '#ffffff',
@@ -1094,10 +1102,12 @@ export default function Dashboard() {
                         }}
                         title={t('dashboard.dragToMove')}
                       >
-                        <LayoutDashboard size={14} color="#ffffff" />
+                        <Sliders size={14} color="#ffffff" />
                       </div>
                     )}
-                    {widgetComponent}
+                    <SafeWidget widgetName={widgetName} darkMode={darkMode}>
+                      {widgetComponent}
+                    </SafeWidget>
                   </div>
                 )
               })}
@@ -1218,7 +1228,8 @@ const styles = {
     justifyContent: 'space-between',
     position: 'sticky',
     top: 0,
-    zIndex: 50
+    zIndex: 50,
+    borderBottom: 'none'
   },
   quickActionsHeader: {
     display: 'flex',

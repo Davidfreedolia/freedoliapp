@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { X, Loader, FolderPlus, Hash, Tag } from 'lucide-react'
 import { useApp } from '../context/AppContext'
@@ -33,14 +33,7 @@ export default function NewProjectModal({ isOpen, onClose }) {
     description: ''
   })
 
-  // Generar codi automàticament quan s'obre el modal
-  useEffect(() => {
-    if (isOpen) {
-      loadNextCode()
-    }
-  }, [isOpen])
-
-  const loadNextCode = async () => {
+  const loadNextCode = useCallback(async () => {
     setGeneratingCode(true)
     try {
       const codes = await generateProjectCode()
@@ -49,7 +42,14 @@ export default function NewProjectModal({ isOpen, onClose }) {
       console.error('Error generant codi:', err)
     }
     setGeneratingCode(false)
-  }
+  }, [])
+
+  // Generar codi automàticament quan s'obre el modal
+  useEffect(() => {
+    if (isOpen) {
+      loadNextCode()
+    }
+  }, [isOpen, loadNextCode])
 
   if (!isOpen) return null
 

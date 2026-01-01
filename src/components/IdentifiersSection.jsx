@@ -24,7 +24,7 @@ export default function IdentifiersSection({ projectId, darkMode }) {
   const { isMobile } = useBreakpoint()
   const { t } = useTranslation()
   const modalStyles = getModalStyles(isMobile, darkMode)
-  const [identifiers, setIdentifiers] = useState(null)
+  const [, setIdentifiers] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [availableGtins, setAvailableGtins] = useState([])
@@ -38,11 +38,7 @@ export default function IdentifiersSection({ projectId, darkMode }) {
     fnsku: ''
   })
 
-  useEffect(() => {
-    loadData()
-  }, [projectId])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true)
     try {
       const data = await getProductIdentifiers(projectId)
@@ -88,25 +84,30 @@ export default function IdentifiersSection({ projectId, darkMode }) {
       console.error('Error carregant identifiers:', err)
     }
     setLoading(false)
-  }
+  }, [projectId])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
 
   const handleSave = async () => {
     // Validacions
-    if (formData.gtin_type === 'GTIN_EXEMPT') {
-      if (!formData.exemption_reason) {
+    let dataToSave = { ...formData }
+    if (dataToSave.gtin_type === 'GTIN_EXEMPT') {
+      if (!dataToSave.exemption_reason) {
         alert('La raó d\'exempció és obligatòria per GTIN_EXEMPT')
         return
       }
       // Netejar gtin_code si és GTIN_EXEMPT
-      formData.gtin_code = null
-    } else if (formData.gtin_type && !formData.gtin_code) {
+      dataToSave.gtin_code = null
+    } else if (dataToSave.gtin_type && !dataToSave.gtin_code) {
       alert('El codi GTIN és obligatori si no és exempt')
       return
     }
 
     setSaving(true)
     try {
-      const saved = await upsertProductIdentifiers(projectId, formData)
+      const saved = await upsertProductIdentifiers(projectId, dataToSave)
       setIdentifiers(saved)
       alert('Identificadors guardats correctament')
     } catch (err) {

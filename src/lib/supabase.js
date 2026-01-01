@@ -1,4 +1,24 @@
 import { createClient } from '@supabase/supabase-js'
+import { isDemoMode } from '../demo/demoMode'
+import {
+  mockGetProjects,
+  mockGetProject,
+  mockGetPurchaseOrders,
+  mockGetPurchaseOrder,
+  mockGetPosWaitingManufacturer,
+  mockGetPosNotReady,
+  mockGetShipmentsInTransit,
+  mockGetResearchNoDecision,
+  mockGetStaleTracking,
+  mockGetTasks,
+  mockGetStickyNotes,
+  mockGetExpenses,
+  mockGetIncomes,
+  mockGetSuppliers,
+  mockGetDashboardStats,
+  mockGetProjectsMissingGtin,
+  mockGetUnassignedGtinCodes
+} from '../demo/demoMode'
 
 // Llegeix variables de Vite
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
@@ -37,19 +57,34 @@ function missingEnvError() {
   throw new Error(msg)
 }
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  missingEnvError()
+// Demo mode: create dummy client if env vars missing, otherwise use real client
+let supabaseClient
+if (isDemoMode() && (!supabaseUrl || !supabaseAnonKey)) {
+  // Create a dummy client that won't be used in demo mode
+  supabaseClient = createClient('https://demo.supabase.co', 'demo-key', {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+    },
+  })
+} else {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    missingEnvError()
+  }
+
+  // Client Supabase robust (sessions, refresh, etc.)
+  supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      storageKey: 'freedoliapp-auth',
+    },
+  })
 }
 
-// Client Supabase robust (sessions, refresh, etc.)
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-    storageKey: 'freedoliapp-auth',
-  },
-})
+export const supabase = supabaseClient
 
 // ============================================
 // HELPERS
@@ -57,6 +92,11 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 
 // Obtenir user_id de la sessió actual
 export const getCurrentUserId = async () => {
+  // Demo mode: return demo user ID
+  if (isDemoMode()) {
+    return 'demo-user-id'
+  }
+  
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('No hi ha usuari autenticat')
   return user.id
@@ -68,6 +108,11 @@ export const getCurrentUserId = async () => {
 
 // PROJECTES
 export const getProjects = async (includeDiscarded = false) => {
+  // Demo mode: return mock data
+  if (isDemoMode()) {
+    return await mockGetProjects(includeDiscarded)
+  }
+  
   const userId = await getCurrentUserId()
   const { data, error } = await supabase
     .from('projects')
@@ -86,6 +131,11 @@ export const getProjects = async (includeDiscarded = false) => {
 }
 
 export const getProject = async (id) => {
+  // Demo mode: return mock data
+  if (isDemoMode()) {
+    return await mockGetProject(id)
+  }
+  
   const { data, error } = await supabase
     .from('projects')
     .select('*')
@@ -96,6 +146,11 @@ export const getProject = async (id) => {
 }
 
 export const createProject = async (project) => {
+  // Demo mode: show message, don't actually create
+  if (isDemoMode()) {
+    throw new Error('DEMO_MODE: No es pot crear projectes en mode demo. Desactiva VITE_DEMO_MODE per usar funcionalitats reals.')
+  }
+  
   // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
   const { user_id, ...projectData } = project
   const { data, error } = await supabase
@@ -108,6 +163,11 @@ export const createProject = async (project) => {
 }
 
 export const updateProject = async (id, updates) => {
+  // Demo mode: show message, don't actually update
+  if (isDemoMode()) {
+    throw new Error('DEMO_MODE: No es pot actualitzar projectes en mode demo. Desactiva VITE_DEMO_MODE per usar funcionalitats reals.')
+  }
+  
   // Eliminar user_id si ve del client (no es pot canviar)
   const { user_id, ...updateData } = updates
   const { data, error } = await supabase
@@ -121,6 +181,11 @@ export const updateProject = async (id, updates) => {
 }
 
 export const deleteProject = async (id) => {
+  // Demo mode: show message, don't actually delete
+  if (isDemoMode()) {
+    throw new Error('DEMO_MODE: No es pot eliminar projectes en mode demo. Desactiva VITE_DEMO_MODE per usar funcionalitats reals.')
+  }
+  
   const { error } = await supabase.from('projects').delete().eq('id', id)
   if (error) throw error
   return true
@@ -128,6 +193,11 @@ export const deleteProject = async (id) => {
 
 // PROVEÏDORS
 export const getSuppliers = async () => {
+  // Demo mode: return mock data
+  if (isDemoMode()) {
+    return await mockGetSuppliers()
+  }
+  
   const { data, error } = await supabase
     .from('suppliers')
     .select('*')
@@ -195,6 +265,15 @@ export const createForwarder = async (forwarder) =>
 
 // PURCHASE ORDERS
 export const getPurchaseOrders = async (projectId = null) => {
+  // Demo mode: return mock data
+  if (isDemoMode()) {
+    const data = await mockGetPurchaseOrders()
+    if (projectId) {
+      return data.filter(po => po.project_id === projectId)
+    }
+    return data
+  }
+  
   let query = supabase
     .from('purchase_orders')
     .select(
@@ -214,6 +293,11 @@ export const getPurchaseOrders = async (projectId = null) => {
 }
 
 export const getPurchaseOrder = async (id) => {
+  // Demo mode: return mock data
+  if (isDemoMode()) {
+    return await mockGetPurchaseOrder(id)
+  }
+  
   const { data, error } = await supabase
     .from('purchase_orders')
     .select(
@@ -230,6 +314,11 @@ export const getPurchaseOrder = async (id) => {
 }
 
 export const createPurchaseOrder = async (po) => {
+  // Demo mode: show message, don't actually create
+  if (isDemoMode()) {
+    throw new Error('DEMO_MODE: No es pot crear comandes en mode demo. Desactiva VITE_DEMO_MODE per usar funcionalitats reals.')
+  }
+  
   // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
   const { user_id, ...poData } = po
   const { data, error } = await supabase
@@ -385,6 +474,11 @@ export const deletePayment = async (id) => {
 
 // ESTADÍSTIQUES DASHBOARD
 export const getDashboardStats = async () => {
+  // Demo mode: return mock data
+  if (isDemoMode()) {
+    return await mockGetDashboardStats()
+  }
+  
   // RLS maneja el filtrado por user_id automáticamente, no filtrar aquí
   const { data: projects, error } = await supabase
     .from('projects')
@@ -511,6 +605,12 @@ export const getProjectSku = async (projectId) => {
 // ============================================
 
 export const getSupplierPriceEstimates = async (projectId) => {
+  // Demo mode: return mock data
+  if (isDemoMode()) {
+    const { mockGetSupplierPriceEstimates } = await import('../demo/demoMode')
+    return await mockGetSupplierPriceEstimates(projectId)
+  }
+  
   const { data, error } = await supabase
     .from('supplier_price_estimates')
     .select('*')
@@ -565,6 +665,12 @@ export const deleteSupplierPriceEstimate = async (id) => {
 // ============================================
 
 export const getProductIdentifiers = async (projectId) => {
+  // Demo mode: return mock data
+  if (isDemoMode()) {
+    const { mockGetProductIdentifiers } = await import('../demo/demoMode')
+    return await mockGetProductIdentifiers(projectId)
+  }
+  
   const { data, error } = await supabase
     .from('product_identifiers')
     .select('*')
@@ -739,6 +845,11 @@ export const releaseGtinFromProject = async (gtinPoolId) => {
 }
 
 export const getUnassignedGtinCodes = async () => {
+  // Demo mode: return mock data
+  if (isDemoMode()) {
+    return await mockGetUnassignedGtinCodes()
+  }
+  
   const { data, error } = await supabase
     .from('gtin_pool')
     .select('*')
@@ -749,6 +860,11 @@ export const getUnassignedGtinCodes = async () => {
 }
 
 export const getProjectsMissingGtin = async () => {
+  // Demo mode: return mock data
+  if (isDemoMode()) {
+    return await mockGetProjectsMissingGtin()
+  }
+  
   // Projectes actius que no tenen GTIN assignat (ni GTIN_EXEMPT)
   // Excloure DISCARDED
   const userId = await getCurrentUserId()
@@ -954,6 +1070,11 @@ export const markManufacturerPackAsSent = async (purchaseOrderId) => {
 }
 
 export const getPosWaitingManufacturer = async (limit = 10) => {
+  // Demo mode: return mock data
+  if (isDemoMode()) {
+    return await mockGetPosWaitingManufacturer(limit)
+  }
+  
   const userId = await getCurrentUserId()
   
   const { data, error } = await supabase
@@ -995,6 +1116,11 @@ export const getPosWaitingManufacturer = async (limit = 10) => {
 }
 
 export const getPosNotReady = async (limit = 10) => {
+  // Demo mode: return mock data
+  if (isDemoMode()) {
+    return await mockGetPosNotReady(limit)
+  }
+  
   const userId = await getCurrentUserId()
   
   // Obtenir totes les POs amb readiness
@@ -1069,6 +1195,11 @@ export const getPosNotReady = async (limit = 10) => {
 
 // DAILY OPS WIDGETS
 export const getShipmentsInTransit = async (limit = 10) => {
+  // Demo mode: return mock data
+  if (isDemoMode()) {
+    return await mockGetShipmentsInTransit(limit)
+  }
+  
   const userId = await getCurrentUserId()
   
   try {
@@ -1121,6 +1252,11 @@ export const getShipmentsInTransit = async (limit = 10) => {
 }
 
 export const getResearchNoDecision = async (limit = 10) => {
+  // Demo mode: return mock data
+  if (isDemoMode()) {
+    return await mockGetResearchNoDecision(limit)
+  }
+  
   const userId = await getCurrentUserId()
   
   try {
@@ -1144,6 +1280,11 @@ export const getResearchNoDecision = async (limit = 10) => {
 }
 
 export const getStaleTracking = async (limit = 10, staleDays = 7) => {
+  // Demo mode: return mock data
+  if (isDemoMode()) {
+    return await mockGetStaleTracking(limit, staleDays)
+  }
+  
   const userId = await getCurrentUserId()
   
   const cutoffDate = new Date()
@@ -1678,6 +1819,12 @@ export const getAuditLogs = async (limit = 50, statusFilter = null) => {
 // ============================================
 
 export const getProjectProfitability = async (projectId) => {
+  // Demo mode: return mock data
+  if (isDemoMode()) {
+    const { mockGetProjectProfitability } = await import('../demo/demoMode')
+    return await mockGetProjectProfitability(projectId)
+  }
+  
   const userId = await getCurrentUserId()
   const { data, error } = await supabase
     .from('project_profitability_basic')
@@ -1721,6 +1868,23 @@ export const upsertProjectProfitability = async (projectId, profitabilityData) =
 
 // TASKS
 export const getTasks = async (filters = {}) => {
+  // Demo mode: return mock data
+  if (isDemoMode()) {
+    const tasks = await mockGetTasks(filters.entityId || filters.projectId || null)
+    // Apply filters client-side
+    let filtered = tasks
+    if (filters.status) {
+      filtered = filtered.filter(t => t.status === filters.status)
+    }
+    if (filters.entityType) {
+      filtered = filtered.filter(t => t.entity_type === filters.entityType)
+    }
+    if (filters.entityId) {
+      filtered = filtered.filter(t => t.entity_id === filters.entityId)
+    }
+    return filtered
+  }
+  
   const userId = await getCurrentUserId()
   let query = supabase
     .from('tasks')
@@ -1963,6 +2127,12 @@ export const bulkMarkShipmentsDelivered = async (poIds) => {
 // SUPPLIER QUOTES
 // Get all calendar events (tasks, shipments, manufacturer packs, quotes)
 export const getCalendarEvents = async (filters = {}) => {
+  // Demo mode: return mock data
+  if (isDemoMode()) {
+    const { mockGetCalendarEvents } = await import('../demo/demoMode')
+    return await mockGetCalendarEvents(filters)
+  }
+  
   const userId = await getCurrentUserId()
   const events = []
   
@@ -2540,6 +2710,20 @@ export const quickMarkPackAsSent = async (poId) => {
 
 // Sticky Notes functions
 export const getStickyNotes = async (filters = {}) => {
+  // Demo mode: return mock data
+  if (isDemoMode()) {
+    const notes = await mockGetStickyNotes(filters.projectId !== undefined ? filters.projectId : null)
+    // Apply filters client-side
+    let filtered = notes
+    if (filters.status) {
+      filtered = filtered.filter(n => n.status === filters.status)
+    }
+    if (filters.pinned !== undefined) {
+      filtered = filtered.filter(n => n.pinned === filters.pinned)
+    }
+    return filtered
+  }
+  
   const userId = await getCurrentUserId()
   let query = supabase
     .from('sticky_notes')

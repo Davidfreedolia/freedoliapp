@@ -3,7 +3,7 @@ import { BookOpen, ChevronRight, Search, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useApp } from '../context/AppContext'
 import Header from '../components/Header'
-import { getAllSections, getHelpContent } from '../help/helpContent'
+import { getAllSections } from '../help/helpContent'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 
 export default function Help() {
@@ -12,7 +12,6 @@ export default function Help() {
   const { isMobile } = useBreakpoint()
   const [selectedSection, setSelectedSection] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
-  const [showSearch, setShowSearch] = useState(false)
 
   const sections = getAllSections()
 

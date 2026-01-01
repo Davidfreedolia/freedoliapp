@@ -5,7 +5,8 @@ import { generateManufacturerPack } from '../lib/generateManufacturerPack'
 import { getCompanySettings, updateManufacturerPackGenerated, markManufacturerPackAsSent } from '../lib/supabase'
 import { driveService } from '../lib/googleDrive'
 import { logAudit } from '../lib/auditLog'
-import { computePoAmazonReady } from '../lib/amazonReady'
+import { useBreakpoint } from '../hooks/useBreakpoint'
+import { getModalStyles } from '../utils/responsiveStyles'
 
 /**
  * Modal per generar Manufacturer Pack (ZIP amb múltiples PDFs)
@@ -18,10 +19,11 @@ export default function ManufacturerPackModal({
   supplier,
   readiness,
   identifiers,
-  darkMode
+  darkMode,
+  onRefresh
 }) {
+  const { t } = useTranslation()
   const { isMobile } = useBreakpoint()
-  const modalStyles = getModalStyles(isMobile, darkMode)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [companySettings, setCompanySettings] = useState(null)

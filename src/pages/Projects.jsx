@@ -264,7 +264,7 @@ export default function Projects() {
                               const { showToast } = await import('../components/Toast')
                               await updateProject(project.id, { decision: 'HOLD' })
                               showToast('Project restored', 'success')
-                              await loadData()
+                              await refreshProjects()
                             } catch (err) {
                               const { showToast } = await import('../components/Toast')
                               showToast('Error: ' + (err.message || 'Unknown error'), 'error')

@@ -59,3 +59,5 @@ CREATE TRIGGER trigger_update_supplier_price_estimates_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_supplier_price_estimates_updated_at();
 
+
+

@@ -6,6 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import PageLoader from './components/PageLoader'
 import ToastContainer from './components/Toast'
 import DemoModeBanner from './components/DemoModeBanner'
+import DevBadge from './components/DevBadge'
 import ErrorBoundary from './components/ErrorBoundary'
 import { useBreakpoint } from './hooks/useBreakpoint'
 import { isDemoMode } from './demo/demoMode'
@@ -81,12 +82,12 @@ function AppContent() {
       backgroundColor: darkMode ? '#0a0a0f' : '#f8f9fc'
     }}>
       <DemoModeBanner darkMode={darkMode} />
+      <DevBadge darkMode={darkMode} />
       <Sidebar />
       <main style={{
         flex: 1,
         marginLeft: getMarginLeft(),
-        marginTop: isDemoMode() ? '48px' : '0',
-        transition: 'margin-left 0.3s ease, margin-top 0.3s ease',
+        transition: 'margin-left 0.3s ease',
         display: 'flex',
         flexDirection: 'column',
         width: isMobile ? '100%' : 'auto'

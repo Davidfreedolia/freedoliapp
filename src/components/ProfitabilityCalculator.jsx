@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Save, AlertTriangle, CheckCircle2, XCircle, ExternalLink, Link2 } from 'lucide-react'
 import { getProjectProfitability, upsertProjectProfitability, getProductIdentifiers, upsertProductIdentifiers } from '../lib/supabase'
 import { calculateQuickProfitability } from '../lib/profitability'
@@ -31,10 +31,7 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
   const [capturingAsin, setCapturingAsin] = useState(false)
   const [asinError, setAsinError] = useState(null)
 
-  useEffect(() => {
-    loadData()
-    loadAsin()
-  }, [projectId])
+  // This will be set up after loadData and loadAsin are defined
 
   // Listen for price copy events from QuickSupplierPriceEstimate
   useEffect(() => {
@@ -45,9 +42,6 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
           ...prev,
           cogs: price.toString()
         }))
-        if (onPriceCopied) {
-          onPriceCopied(price)
-        }
       }
     }
 
@@ -55,7 +49,7 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
     return () => {
       window.removeEventListener('copyPriceToCOGS', handleCopyPrice)
     }
-  }, [onPriceCopied])
+  }, [])
 
   useEffect(() => {
     // Recalcular en temps real quan canvien els inputs
@@ -78,7 +72,7 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
     }
   }, [data])
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!projectId) return
     setLoading(true)
     try {
@@ -116,7 +110,12 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
       console.error('Error carregant profitability:', err)
     }
     setLoading(false)
-  }
+  }, [projectId])
+
+  useEffect(() => {
+    loadData()
+    loadAsin()
+  }, [projectId, loadData, loadAsin])
 
   const handleInputChange = (field, value) => {
     // Validar que no sigui negatiu
@@ -142,7 +141,7 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
     return `${value.toFixed(2)}%`
   }
 
-  const loadAsin = async () => {
+  const loadAsin = useCallback(async () => {
     if (!projectId) return
     try {
       const identifiers = await getProductIdentifiers(projectId)
@@ -155,7 +154,7 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
     } catch (err) {
       console.error('Error carregant ASIN:', err)
     }
-  }
+  }, [projectId])
 
   /**
    * Extrae ASIN de una URL de Amazon o valida un ASIN directo
@@ -211,7 +210,7 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
       }
       
       return null
-    } catch (err) {
+    } catch {
       // Si no es una URL válida, intentar como ASIN directo
       if (/^[A-Z0-9]{10}$/i.test(trimmed)) {
         return trimmed.toUpperCase()
@@ -268,7 +267,7 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
             marketplace: asinMarketplace || 'es'
           })
         }
-      } catch (err) {
+      } catch {
         // Ignorar si no existeix audit_log
       }
     } catch (err) {
@@ -309,9 +308,6 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
     
     setSaving(true)
     try {
-      // Recalcular resultats abans de guardar
-      const calculated = calculateQuickProfitability(data)
-      
       await upsertProjectProfitability(projectId, {
         selling_price: parseFloat(data.selling_price) || 0,
         cogs: parseFloat(data.cogs) || 0,

@@ -44,6 +44,8 @@ import {
   getCurrentUserId,
   markRecurringExpenseAsPaid
 } from '../lib/supabase'
+import { isDemoMode } from '../demo/demoMode'
+import { mockGetExpenses, mockGetIncomes, mockGetFinanceCategories } from '../demo/demoMode'
 import Header from '../components/Header'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
@@ -109,50 +111,98 @@ export default function Finances() {
       const userId = await getCurrentUserId()
       
       // Load categories
-      const { data: categoriesData } = await supabase
-        .from('finance_categories')
-        .select('*')
-        .eq('user_id', userId)
-        .order('sort_order', { ascending: true })
+      let categoriesData
+      if (isDemoMode()) {
+        categoriesData = await mockGetFinanceCategories()
+      } else {
+        const { data } = await supabase
+          .from('finance_categories')
+          .select('*')
+          .eq('user_id', userId)
+          .order('sort_order', { ascending: true })
+        categoriesData = data || []
+      }
       
       const incomeCats = (categoriesData || []).filter(c => c.type === 'income')
       const expenseCats = (categoriesData || []).filter(c => c.type === 'expense')
       setCategories({ income: incomeCats, expense: expenseCats })
       
       // Load expenses and incomes
-      const [expensesRes, incomesRes, projectsData, suppliersData, viewsRes] = await Promise.all([
-        supabase
-          .from('expenses')
-          .select(`
-            *,
-            is_recurring,
-            recurring_expense_id,
-            recurring_status,
-            recurring_period,
-            project:projects(id, name, project_code),
-            supplier:suppliers(id, name),
-            category:finance_categories(id, name, color, icon)
-          `)
-          .eq('user_id', userId)
-          .order('expense_date', { ascending: false }),
-        supabase
-          .from('incomes')
-          .select(`
-            *,
-            project:projects(id, name, project_code),
-            category:finance_categories(id, name, color, icon)
-          `)
-          .eq('user_id', userId)
-          .order('income_date', { ascending: false }),
-        getProjects(),
-        getSuppliers(),
-        supabase
-          .from('finance_views')
-          .select('*')
-          .eq('user_id', userId)
-          .order('is_default', { ascending: false })
-          .order('created_at', { ascending: false })
-      ])
+      let expensesRes, incomesRes, projectsData, suppliersData, viewsRes
+      
+      if (isDemoMode()) {
+        // Demo mode: use mock data
+        const [mockExpenses, mockIncomes, mockProjects, mockSuppliers] = await Promise.all([
+          mockGetExpenses(),
+          mockGetIncomes(),
+          getProjects(),
+          getSuppliers()
+        ])
+        
+        // Enrich expenses and incomes with project and category data
+        expensesRes = { 
+          data: mockExpenses.map(e => {
+            const project = mockProjects.find(p => p.id === e.project_id)
+            const category = categoriesData.find(c => c.id === e.category_id)
+            const supplier = mockSuppliers.find(s => s.id === e.supplier_id)
+            return {
+              ...e,
+              project: project ? { id: project.id, name: project.name, project_code: project.project_code } : null,
+              category: category ? { id: category.id, name: category.name, color: category.color, icon: category.icon } : null,
+              supplier: supplier ? { id: supplier.id, name: supplier.name } : null
+            }
+          })
+        }
+        incomesRes = { 
+          data: mockIncomes.map(i => {
+            const project = mockProjects.find(p => p.id === i.project_id)
+            const category = categoriesData.find(c => c.id === i.category_id)
+            return {
+              ...i,
+              project: project ? { id: project.id, name: project.name, project_code: project.project_code } : null,
+              category: category ? { id: category.id, name: category.name, color: category.color, icon: category.icon } : null
+            }
+          })
+        }
+        projectsData = mockProjects
+        suppliersData = mockSuppliers
+        viewsRes = { data: [] }
+      } else {
+        // Production: use real Supabase queries
+        [expensesRes, incomesRes, projectsData, suppliersData, viewsRes] = await Promise.all([
+          supabase
+            .from('expenses')
+            .select(`
+              *,
+              is_recurring,
+              recurring_expense_id,
+              recurring_status,
+              recurring_period,
+              project:projects(id, name, project_code),
+              supplier:suppliers(id, name),
+              category:finance_categories(id, name, color, icon)
+            `)
+            .eq('user_id', userId)
+            .order('expense_date', { ascending: false }),
+          supabase
+            .from('incomes')
+            .select(`
+              *,
+              project:projects(id, name, project_code),
+              category:finance_categories(id, name, color, icon)
+            `)
+            .eq('user_id', userId)
+            .order('income_date', { ascending: false }),
+          getProjects(),
+          getSuppliers(),
+          supabase
+            .from('finance_views')
+            .select('*')
+            .eq('user_id', userId)
+            .order('is_default', { ascending: false })
+            .order('created_at', { ascending: false })
+        ])
+      }
       
       // Combine into ledger
       const expenses = (expensesRes.data || []).map(e => ({

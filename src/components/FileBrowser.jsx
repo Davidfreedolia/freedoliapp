@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { FileText, Image, File, Download, Trash2, RefreshCw, ExternalLink, FolderOpen } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { driveService } from '../lib/googleDrive'
@@ -35,13 +35,7 @@ export default function FileBrowser({ folderId, folderName = 'Carpeta', allowDel
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  useEffect(() => {
-    if (folderId) {
-      loadFiles()
-    }
-  }, [folderId])
-
-  const loadFiles = async () => {
+  const loadFiles = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
@@ -54,7 +48,13 @@ export default function FileBrowser({ folderId, folderName = 'Carpeta', allowDel
       setError('Error carregant fitxers')
     }
     setLoading(false)
-  }
+  }, [folderId])
+
+  useEffect(() => {
+    if (folderId) {
+      loadFiles()
+    }
+  }, [folderId, loadFiles])
 
   const handleDelete = async (file) => {
     if (!confirm(`Segur que vols eliminar "${file.name}"?`)) return

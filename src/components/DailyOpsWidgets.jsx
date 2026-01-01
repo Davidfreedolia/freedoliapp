@@ -10,7 +10,6 @@ import {
   ExternalLink,
   Calendar
 } from 'lucide-react'
-import { useBreakpoint } from '../hooks/useBreakpoint'
 import {
   getPosWaitingManufacturer,
   getPosNotReady,
@@ -29,7 +28,7 @@ export function WaitingManufacturerWidget({ darkMode, limit = 10 }) {
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(null)
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true)
     try {
       const pos = await getPosWaitingManufacturer(limit)
@@ -38,7 +37,7 @@ export function WaitingManufacturerWidget({ darkMode, limit = 10 }) {
       console.error('Error carregant waiting manufacturer:', err)
     }
     setLoading(false)
-  }
+  }, [limit])
 
   useEffect(() => {
     loadData()

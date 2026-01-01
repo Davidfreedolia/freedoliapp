@@ -67,7 +67,7 @@ class SafeWidget extends React.Component {
           S'ha produït un error en aquest widget
         </p>
         <button
-          onClick={handleRetry}
+          onClick={this.handleRetry}
           style={{
             display: 'flex',
             alignItems: 'center',

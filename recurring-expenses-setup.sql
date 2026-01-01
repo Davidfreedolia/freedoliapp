@@ -213,35 +213,6 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- ============================================
 -- 4. DADES DEMO
 -- ============================================
--- NOTA: Les dades demo s'han de crear des de la UI de l'aplicació
--- o executar aquests INSERTs amb un usuari autenticat.
--- 
--- Si vols crear dades demo manualment, executa aquests INSERTs
--- DESPRÉS d'autenticar-te a l'aplicació i des de la UI de Finances.
---
--- OPCIONAL: Si vols crear-les via SQL, assegura't d'estar autenticat:
--- 
--- INSERT INTO recurring_expenses (
---   user_id,
---   description,
---   amount,
---   currency,
---   day_of_month,
---   is_active,
---   notes
--- )
--- SELECT 
---   auth.uid(),
---   'ChatGPT Plus',
---   20.00,
---   'EUR',
---   1,
---   true,
---   'Subscripció mensual ChatGPT Plus'
--- WHERE auth.uid() IS NOT NULL
--- AND NOT EXISTS (
---   SELECT 1 FROM recurring_expenses 
---   WHERE description = 'ChatGPT Plus' 
---   AND user_id = auth.uid()
--- );
+-- NOTA: Les dades demo s'han de crear des de la UI de l'aplicació (Finances > Recurring Expenses > Nova Recurrent)
+-- NO s'executen INSERTs automàtics perquè requereixen un usuari autenticat.
 

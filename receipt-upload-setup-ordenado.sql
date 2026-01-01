@@ -72,3 +72,5 @@ CREATE POLICY "Users can delete own receipts" ON storage.objects
 -- 2. El bucket existeix: SELECT * FROM storage.buckets WHERE name = 'receipts';
 -- 3. Les policies existeixen: SELECT * FROM pg_policies WHERE tablename = 'objects' AND schemaname = 'storage';
 
+
+

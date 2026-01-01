@@ -15,10 +15,16 @@ Aplicació web completa per gestionar tot el cicle de vida dels productes Freedo
 
 ```bash
 npm install
-cp .env.example .env
-# Configurar credencials a .env
+# Crear .env.local amb variables (veure ENV_SETUP.md)
 npm run dev
 ```
+
+**Variables d'entorn necessàries**:
+- `VITE_ENV=dev` (o `prod`)
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+
+Veure `ENV_SETUP.md` per detalls.
 
 ## 🚀 Deploy a Vercel
 

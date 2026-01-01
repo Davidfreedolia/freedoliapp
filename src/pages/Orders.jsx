@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
 import { 
   Plus, 
   Search, 
@@ -54,6 +53,11 @@ import { generatePOPdf } from '../lib/generatePOPdf'
 import { generateFnskuLabelsPdf } from '../lib/generateFnskuLabelsPdf'
 import { computePoAmazonReady } from '../lib/amazonReady'
 import { useBreakpoint } from '../hooks/useBreakpoint'
+import { validateManufacturerPack, getManufacturerPackFileNames } from '../lib/manufacturerPack'
+import { generatePackingListPdf } from '../lib/generatePackingListPdf'
+import { generateCartonLabelsPdf } from '../lib/generateCartonLabelsPdf'
+import { driveService } from '../lib/googleDrive'
+import JSZip from 'jszip'
 
 // Estats de la PO
 const PO_STATUSES = {
@@ -70,9 +74,9 @@ const PO_STATUSES = {
 
 export default function Orders() {
   const { darkMode } = useApp()
-  const navigate = useNavigate()
+  // Removed unused navigate
   const { isMobile, isTablet } = useBreakpoint()
-  const { t } = useTranslation() // Ensure react-i18next is in bundle
+  // Removed unused t
   const [searchParams] = useSearchParams()
   
   const [orders, setOrders] = useState([])
@@ -108,8 +112,8 @@ export default function Orders() {
   const [showAmazonReadySection, setShowAmazonReadySection] = useState(false)
   const [showManufacturerPackModal, setShowManufacturerPackModal] = useState(false)
   const [manufacturerPackIdentifiers, setManufacturerPackIdentifiers] = useState(null)
-  const [selectedOrders, setSelectedOrders] = useState(new Set())
-  const [bulkActionLoading, setBulkActionLoading] = useState(false)
+  const [selectedOrders] = useState(new Set())
+  // Removed unused bulkActionLoading state
 
   useEffect(() => {
     loadData()
@@ -301,7 +305,7 @@ export default function Orders() {
     }
   }
 
-  // Generar Manufacturer Pack
+  // Generar Manufacturer Pack (used by ManufacturerPackModal)
   const handleGenerateManufacturerPack = async (options) => {
     const {
       includePOPdf,
@@ -867,11 +871,12 @@ export default function Orders() {
                       }}
                     >
                       <td style={styles.td}>
+                        {/* Bulk selection temporarily disabled */}
                         <input
                           type="checkbox"
-                          checked={selectedOrders.has(order.id)}
-                          onChange={() => handleToggleSelect(order.id)}
-                          style={{ cursor: 'pointer', width: '18px', height: '18px' }}
+                          checked={false}
+                          disabled
+                          style={{ cursor: 'not-allowed', width: '18px', height: '18px', opacity: 0.5 }}
                         />
                       </td>
                       <td style={{ ...styles.td, color: darkMode ? '#ffffff' : '#111827' }}>

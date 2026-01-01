@@ -24,11 +24,6 @@ export default function HelpIcon({ helpKey, size = 'small', style = {}, darkMode
 
   const helpContent = getHelpContent(helpKey)
 
-  if (!helpContent) {
-    console.warn(`Help content not found for key: ${helpKey}`)
-    return null
-  }
-
   // Icon size mapping
   const iconSizes = {
     small: 16,
@@ -77,6 +72,11 @@ export default function HelpIcon({ helpKey, size = 'small', style = {}, darkMode
   const handleClick = () => {
     setShowTooltip(false)
     setShowPopover(!showPopover)
+  }
+
+  if (!helpContent) {
+    console.warn(`Help content not found for key: ${helpKey}`)
+    return null
   }
 
   const title = t(helpContent.title)
@@ -146,11 +146,10 @@ export default function HelpIcon({ helpKey, size = 'small', style = {}, darkMode
               position: 'absolute',
               top: '100%',
               left: '50%',
-              transform: 'translateX(-50%)',
+              transform: 'translateX(-50%) rotate(45deg)',
               width: '8px',
               height: '8px',
               backgroundColor: darkMode ? '#1f2937' : '#111827',
-              transform: 'translateX(-50%) rotate(45deg)',
               marginTop: '-4px'
             }}
           />

@@ -16,20 +16,37 @@ export default function AmazonReadySection({ readiness, readyStatus, onUpdate, d
   })
   const [saving, setSaving] = useState(false)
 
+  // Sync formData when readiness changes
   useEffect(() => {
     if (readiness) {
-      setFormData(prev => ({
-        ...prev,
-        needs_fnsku: readiness.needs_fnsku ?? prev.needs_fnsku,
-        units_per_carton: readiness.units_per_carton || prev.units_per_carton,
-        cartons_count: readiness.cartons_count || prev.cartons_count,
-        carton_length_cm: readiness.carton_length_cm || prev.carton_length_cm,
-        carton_width_cm: readiness.carton_width_cm || prev.carton_width_cm,
-        carton_height_cm: readiness.carton_height_cm || prev.carton_height_cm,
-        carton_weight_kg: readiness.carton_weight_kg || prev.carton_weight_kg,
-        prep_type: readiness.prep_type || prev.prep_type,
-        notes: readiness.notes || prev.notes
-      }))
+      // Use functional update to avoid cascading renders
+      setFormData(prev => {
+        const hasChanges = 
+          (readiness.needs_fnsku ?? prev.needs_fnsku) !== prev.needs_fnsku ||
+          (readiness.units_per_carton || prev.units_per_carton) !== prev.units_per_carton ||
+          (readiness.cartons_count || prev.cartons_count) !== prev.cartons_count ||
+          (readiness.carton_length_cm || prev.carton_length_cm) !== prev.carton_length_cm ||
+          (readiness.carton_width_cm || prev.carton_width_cm) !== prev.carton_width_cm ||
+          (readiness.carton_height_cm || prev.carton_height_cm) !== prev.carton_height_cm ||
+          (readiness.carton_weight_kg || prev.carton_weight_kg) !== prev.carton_weight_kg ||
+          (readiness.prep_type || prev.prep_type) !== prev.prep_type ||
+          (readiness.notes || prev.notes) !== prev.notes
+        
+        if (!hasChanges) return prev
+        
+        return {
+          ...prev,
+          needs_fnsku: readiness.needs_fnsku ?? prev.needs_fnsku,
+          units_per_carton: readiness.units_per_carton || prev.units_per_carton,
+          cartons_count: readiness.cartons_count || prev.cartons_count,
+          carton_length_cm: readiness.carton_length_cm || prev.carton_length_cm,
+          carton_width_cm: readiness.carton_width_cm || prev.carton_width_cm,
+          carton_height_cm: readiness.carton_height_cm || prev.carton_height_cm,
+          carton_weight_kg: readiness.carton_weight_kg || prev.carton_weight_kg,
+          prep_type: readiness.prep_type || prev.prep_type,
+          notes: readiness.notes || prev.notes
+        }
+      })
     }
   }, [readiness])
 

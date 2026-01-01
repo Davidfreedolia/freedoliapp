@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
+import React, { useState, useEffect, useCallback } from 'react'
 import { CheckCircle2, XCircle, Clock, AlertTriangle, Save, X } from 'lucide-react'
 import { getDecisionLog, createDecisionLog, updateDecisionLog } from '../lib/supabase'
 
@@ -39,7 +38,6 @@ const REASON_OPTIONS = {
 }
 
 export default function DecisionLog({ entityType, entityId, darkMode, requiredReason = false, allowedDecisions = null }) {
-  const { t } = useTranslation()
   const [decision, setDecision] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -50,13 +48,7 @@ export default function DecisionLog({ entityType, entityId, darkMode, requiredRe
     notes: ''
   })
 
-  useEffect(() => {
-    if (entityId) {
-      loadDecision()
-    }
-  }, [entityType, entityId])
-
-  const loadDecision = async () => {
+  const loadDecision = useCallback(async () => {
     setLoading(true)
     try {
       const data = await getDecisionLog(entityType, entityId)
@@ -72,7 +64,13 @@ export default function DecisionLog({ entityType, entityId, darkMode, requiredRe
       console.error('Error loading decision:', err)
     }
     setLoading(false)
-  }
+  }, [entityType, entityId])
+
+  useEffect(() => {
+    if (entityId) {
+      loadDecision()
+    }
+  }, [entityId, loadDecision])
 
   const handleSave = async () => {
     if (!formData.decision) {

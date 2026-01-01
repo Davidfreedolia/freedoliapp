@@ -53,3 +53,5 @@ Després d'executar els scripts, verifica:
 - Cap vista buida
 
 
+
+

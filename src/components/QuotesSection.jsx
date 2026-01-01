@@ -16,12 +16,9 @@ import {
 import { 
   getSupplierQuotes, 
   createSupplierQuote, 
-  updateSupplierQuote, 
   deleteSupplierQuote,
   getSuppliers,
-  getProjectProfitability,
-  getPoForQuote,
-  getShipmentForPo
+  getProjectProfitability
 } from '../lib/supabase'
 import { calculateQuickProfitability } from '../lib/profitability'
 import { useBreakpoint } from '../hooks/useBreakpoint'
@@ -33,14 +30,10 @@ const INCOTERMS = ['EXW', 'FCA', 'FAS', 'FOB', 'CFR', 'CIF', 'CPT', 'CIP', 'DAP'
 
 export default function QuotesSection({ projectId, darkMode }) {
   const { t } = useTranslation()
-  const { isMobile } = useBreakpoint()
   const [quotes, setQuotes] = useState([])
   const [suppliers, setSuppliers] = useState([])
   const [loading, setLoading] = useState(true)
-  const [poMap, setPoMap] = useState({}) // quoteId -> po
-  const [shipmentMap, setShipmentMap] = useState({}) // poId -> shipment
   const [showAddForm, setShowAddForm] = useState(false)
-  const [editingQuote, setEditingQuote] = useState(null)
   const [targetQuantity, setTargetQuantity] = useState(100)
   const [projectShipping, setProjectShipping] = useState(0)
   const [projectProfitability, setProjectProfitability] = useState(null)
@@ -58,15 +51,8 @@ export default function QuotesSection({ projectId, darkMode }) {
   })
   
   const fileInputRef = useRef(null)
-  const [uploadingFile, setUploadingFile] = useState(false)
 
-  useEffect(() => {
-    if (projectId) {
-      loadData()
-    }
-  }, [projectId])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true)
     try {
       const [quotesData, suppliersData, profitability] = await Promise.all([
@@ -84,7 +70,13 @@ export default function QuotesSection({ projectId, darkMode }) {
       console.error('Error loading quotes:', err)
     }
     setLoading(false)
-  }
+  }, [projectId])
+
+  useEffect(() => {
+    if (projectId) {
+      loadData()
+    }
+  }, [projectId, loadData])
 
   const handleFileUpload = async (files) => {
     if (!files || files.length === 0) return

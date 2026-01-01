@@ -94,3 +94,5 @@ CREATE POLICY "Users can delete own shipments" ON po_shipments
 --   - LTL/FTL: pro_number required si status != 'planned'
 
 
+
+

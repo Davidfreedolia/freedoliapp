@@ -491,7 +491,12 @@ export default function ProjectDetail() {
         )}
 
         {/* Drive Integration */}
-        <div style={styles.driveSection}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: isMobile ? '1fr' : (isTablet ? '200px 1fr' : '280px 1fr'),
+          gap: isMobile ? '16px' : '24px',
+          marginBottom: '24px'
+        }}>
           {/* Folder selector */}
           {driveConnected && projectFolders ? (
             <div style={{
@@ -756,12 +761,7 @@ const styles = {
     alignItems: 'center',
     gap: '16px'
   },
-  driveSection: {
-    display: 'grid',
-    gridTemplateColumns: isMobile ? '1fr' : (isTablet ? '200px 1fr' : '280px 1fr'),
-    gap: isMobile ? '16px' : '24px',
-    marginBottom: '24px'
-  },
+  // driveSection moved inside component to use isMobile/isTablet
   foldersPanel: {
     padding: '20px',
     borderRadius: '16px',
