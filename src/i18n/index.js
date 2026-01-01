@@ -17,26 +17,32 @@ const detectLanguage = () => {
 }
 
 // Inicializar i18n (síncrono)
-i18n
-  .use(LanguageDetector)
-  .use(initReactI18next)
-  .init({
-    resources: {
-      ca: { translation: caTranslations },
-      en: { translation: enTranslations },
-      es: { translation: esTranslations }
-    },
-    lng: detectLanguage(),
-    fallbackLng: 'ca',
-    interpolation: {
-      escapeValue: false
-    },
-    detection: {
-      order: ['localStorage', 'navigator'],
-      caches: ['localStorage'],
-      lookupLocalStorage: 'freedolia_language'
-    }
-  })
+// Assegurar que i18n estigui inicialitzat abans de qualsevol ús
+if (!i18n.isInitialized) {
+  i18n
+    .use(LanguageDetector)
+    .use(initReactI18next)
+    .init({
+      resources: {
+        ca: { translation: caTranslations },
+        en: { translation: enTranslations },
+        es: { translation: esTranslations }
+      },
+      lng: detectLanguage(),
+      fallbackLng: 'ca',
+      interpolation: {
+        escapeValue: false
+      },
+      detection: {
+        order: ['localStorage', 'navigator'],
+        caches: ['localStorage'],
+        lookupLocalStorage: 'freedolia_language'
+      },
+      react: {
+        useSuspense: false // Evitar Suspense per evitar errors amb lazy loading
+      }
+    })
+}
 
 export default i18n
 
