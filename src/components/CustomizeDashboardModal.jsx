@@ -58,12 +58,6 @@ export default function CustomizeDashboardModal({ isOpen, onClose, onSave }) {
     researchDays: 7
   })
 
-  useEffect(() => {
-    if (isOpen) {
-      loadPreferences()
-    }
-  }, [isOpen])
-
   const loadPreferences = async () => {
     setLoading(true)
     try {
@@ -101,6 +95,13 @@ export default function CustomizeDashboardModal({ isOpen, onClose, onSave }) {
     }
     setLoading(false)
   }
+
+  useEffect(() => {
+    if (isOpen) {
+      loadPreferences()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen])
 
   const handleToggle = (widgetId) => {
     setWidgets(prev => ({

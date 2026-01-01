@@ -1,6 +1,5 @@
 import React from 'react'
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -13,7 +12,7 @@ class ErrorBoundary extends React.Component {
     }
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError() {
     return { hasError: true }
   }
 
@@ -51,7 +50,7 @@ class ErrorBoundary extends React.Component {
       const errors = JSON.parse(localStorage.getItem('app_errors') || '[]')
       errors.unshift(errorData)
       localStorage.setItem('app_errors', JSON.stringify(errors.slice(0, 5)))
-    } catch (e) {
+    } catch {
       // Ignore localStorage errors
     }
 
@@ -241,5 +240,6 @@ class ErrorBoundary extends React.Component {
 }
 
 export default ErrorBoundary
+
 
 

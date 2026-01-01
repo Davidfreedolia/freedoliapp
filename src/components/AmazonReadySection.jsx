@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { CheckCircle2, XCircle } from 'lucide-react'
 
-export default function AmazonReadySection({ po, readiness, readyStatus, onUpdate, darkMode }) {
+export default function AmazonReadySection({ readiness, readyStatus, onUpdate, darkMode }) {
   const [formData, setFormData] = useState({
     needs_fnsku: true,
     units_per_carton: null,
@@ -17,17 +17,18 @@ export default function AmazonReadySection({ po, readiness, readyStatus, onUpdat
 
   useEffect(() => {
     if (readiness) {
-      setFormData({
-        needs_fnsku: readiness.needs_fnsku ?? true,
-        units_per_carton: readiness.units_per_carton || null,
-        cartons_count: readiness.cartons_count || null,
-        carton_length_cm: readiness.carton_length_cm || null,
-        carton_width_cm: readiness.carton_width_cm || null,
-        carton_height_cm: readiness.carton_height_cm || null,
-        carton_weight_kg: readiness.carton_weight_kg || null,
-        prep_type: readiness.prep_type || 'none',
-        notes: readiness.notes || ''
-      })
+      setFormData(prev => ({
+        ...prev,
+        needs_fnsku: readiness.needs_fnsku ?? prev.needs_fnsku,
+        units_per_carton: readiness.units_per_carton || prev.units_per_carton,
+        cartons_count: readiness.cartons_count || prev.cartons_count,
+        carton_length_cm: readiness.carton_length_cm || prev.carton_length_cm,
+        carton_width_cm: readiness.carton_width_cm || prev.carton_width_cm,
+        carton_height_cm: readiness.carton_height_cm || prev.carton_height_cm,
+        carton_weight_kg: readiness.carton_weight_kg || prev.carton_weight_kg,
+        prep_type: readiness.prep_type || prev.prep_type,
+        notes: readiness.notes || prev.notes
+      }))
     }
   }, [readiness])
 

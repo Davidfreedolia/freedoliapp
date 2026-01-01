@@ -30,7 +30,7 @@ import {
   StickyNote
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { getPurchaseOrders, getDashboardPreferences, getPosNotReady, getProjectsMissingGtin, getUnassignedGtinCodes, getPosWaitingManufacturer, updateDashboardPreferences } from '../lib/supabase'
+import { getPurchaseOrders, getDashboardPreferences, getPosNotReady, getProjectsMissingGtin, getUnassignedGtinCodes, getPosWaitingManufacturer, updateDashboardPreferences, getCurrentUserId } from '../lib/supabase'
 import { supabase } from '../lib/supabase'
 import NewProjectModal from '../components/NewProjectModal'
 import LogisticsTrackingWidget from '../components/LogisticsTrackingWidget'
@@ -47,17 +47,17 @@ import AlertsBadge from '../components/AlertsBadge'
 import StickyNotesWidget from '../components/StickyNotesWidget'
 import AddStickyNoteModal from '../components/AddStickyNoteModal'
 import SafeWidget from '../components/SafeWidget'
-import { safeArray, safeNumber } from '../utils/errorLogger'
+import { safeArray } from '../utils/errorLogger'
 import { 
-  getDefaultLayout, 
   generateLayoutFromEnabled, 
   validateLayout,
   WIDGET_IDS,
   snapToAllowedSize
 } from '../utils/dashboardLayout'
+import { showToast } from '../components/Toast'
 
 export default function Dashboard() {
-  const { stats, projects, loading, darkMode, setDarkMode, sidebarCollapsed } = useApp()
+  const { stats, darkMode, setDarkMode, sidebarCollapsed } = useApp()
   const navigate = useNavigate()
   const { t } = useTranslation()
   const { isMobile, isTablet } = useBreakpoint()
@@ -304,16 +304,7 @@ export default function Dashboard() {
     }
   }, [])
   
-  const handleSaveLayout = async () => {
-    try {
-      await updateDashboardPreferences({ layout })
-      setEditLayout(false)
-      showToast(t('dashboard.layoutSaved'), 'success')
-    } catch (err) {
-      console.error('Error guardant layout:', err)
-      showToast(t('dashboard.layoutSaveError'), 'error')
-    }
-  }
+  // Removed unused handleSaveLayout - using handleToggleEditMode instead
   
   const handleResetLayout = () => {
     const enabledWidgets = {
@@ -352,9 +343,10 @@ export default function Dashboard() {
 
   const loadFinancialData = async () => {
     try {
+      const userId = await getCurrentUserId()
       const [expensesRes, incomesRes] = await Promise.all([
-        supabase.from('expenses').select('amount, expense_date').order('expense_date', { ascending: false }),
-        supabase.from('incomes').select('amount, income_date').order('income_date', { ascending: false })
+        supabase.from('expenses').select('amount, expense_date').eq('user_id', userId).order('expense_date', { ascending: false }),
+        supabase.from('incomes').select('amount, income_date').eq('user_id', userId).order('income_date', { ascending: false })
       ])
       
       const expenses = expensesRes.data || []
@@ -388,10 +380,7 @@ export default function Dashboard() {
     }
   }
 
-  // Excloure DISCARDED dels projectes recents
-  const recentProjects = projects
-    .filter(p => p.decision !== 'DISCARDED')
-    .slice(0, 5)
+  // Removed unused recentProjects
 
   const statCards = [
     {

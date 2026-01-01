@@ -24,10 +24,10 @@ import { showToast } from './Toast'
 // Widget: Waiting Manufacturer
 export function WaitingManufacturerWidget({ darkMode, limit = 10 }) {
   const navigate = useNavigate()
-  const { isMobile } = useBreakpoint()
   const { t } = useTranslation()
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
+  const [actionLoading, setActionLoading] = useState(null)
 
   const loadData = async () => {
     setLoading(true)
@@ -42,7 +42,7 @@ export function WaitingManufacturerWidget({ darkMode, limit = 10 }) {
 
   useEffect(() => {
     loadData()
-  }, [])
+  }, [loadData])
 
   const getDaysSince = (date) => {
     if (!date) return 0
@@ -189,14 +189,9 @@ export function WaitingManufacturerWidget({ darkMode, limit = 10 }) {
 // Widget: POs Not Amazon Ready
 export function PosNotAmazonReadyWidget({ darkMode, limit = 10 }) {
   const navigate = useNavigate()
-  const { isMobile } = useBreakpoint()
   const { t } = useTranslation()
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    loadData()
-  }, [])
 
   const loadData = async () => {
     setLoading(true)
@@ -208,6 +203,11 @@ export function PosNotAmazonReadyWidget({ darkMode, limit = 10 }) {
     }
     setLoading(false)
   }
+
+  useEffect(() => {
+    loadData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   if (loading) {
     return (
@@ -325,15 +325,10 @@ export function PosNotAmazonReadyWidget({ darkMode, limit = 10 }) {
 // Widget: Shipments In Transit
 export function ShipmentsInTransitWidget({ darkMode, limit = 10 }) {
   const navigate = useNavigate()
-  const { isMobile } = useBreakpoint()
   const { t } = useTranslation()
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
   const [tableExists, setTableExists] = useState(true)
-
-  useEffect(() => {
-    loadData()
-  }, [])
 
   const loadData = async () => {
     setLoading(true)
@@ -349,6 +344,11 @@ export function ShipmentsInTransitWidget({ darkMode, limit = 10 }) {
     }
     setLoading(false)
   }
+
+  useEffect(() => {
+    loadData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const getDaysToEta = (etaDate) => {
     if (!etaDate) return null
@@ -509,14 +509,9 @@ export function ShipmentsInTransitWidget({ darkMode, limit = 10 }) {
 // Widget: Research No Decision
 export function ResearchNoDecisionWidget({ darkMode, limit = 10 }) {
   const navigate = useNavigate()
-  const { isMobile } = useBreakpoint()
   const { t } = useTranslation()
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    loadData()
-  }, [])
 
   const loadData = async () => {
     setLoading(true)
@@ -631,14 +626,9 @@ export function ResearchNoDecisionWidget({ darkMode, limit = 10 }) {
 // Widget: Stale Tracking
 export function StaleTrackingWidget({ darkMode, limit = 10, staleDays = 7 }) {
   const navigate = useNavigate()
-  const { isMobile } = useBreakpoint()
   const { t } = useTranslation()
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    loadData()
-  }, [staleDays])
 
   const loadData = async () => {
     setLoading(true)
@@ -650,6 +640,11 @@ export function StaleTrackingWidget({ darkMode, limit = 10, staleDays = 7 }) {
     }
     setLoading(false)
   }
+
+  useEffect(() => {
+    loadData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [staleDays])
 
   if (loading) {
     return (
