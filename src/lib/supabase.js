@@ -417,13 +417,19 @@ export const getDashboardStats = async () => {
     p.decision === 'DISCARDED'
   ).length || 0
 
-  const { data: payments } = await supabase
+  // RLS maneja el filtrado por user_id automáticamente
+  const { data: payments, error: paymentsError } = await supabase
     .from('payments')
     .select('amount, currency, type')
     .eq('status', 'completed')
+  
+  // Si hay error en payments, continuar con 0 (no crítico para stats)
+  if (paymentsError) {
+    console.error('Error fetching payments for dashboard stats:', paymentsError)
+  }
 
   const totalInvested =
-    payments?.reduce((sum, p) => {
+    (payments || [])?.reduce((sum, p) => {
       if (p.currency === 'EUR') return sum + (p.amount || 0)
       if (p.currency === 'USD') return sum + (p.amount || 0) * 0.92
       return sum
