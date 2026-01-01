@@ -1905,6 +1905,11 @@ export const getCalendarEvents = async (filters = {}) => {
       const tasks = await getTasks(taskFilters)
       if (tasks) {
         tasks.forEach(task => {
+          // Filter out sticky-derived tasks if showStickyDerived is false
+          if (filters.showStickyDerived === false && task.source === 'sticky_note') {
+            return
+          }
+          
           if (task.due_date) {
             events.push({
               id: `task-${task.id}`,
@@ -1917,7 +1922,9 @@ export const getCalendarEvents = async (filters = {}) => {
               project_id: task.entity_type === 'project' ? task.entity_id : null,
               status: task.status,
               priority: task.priority,
-              resource: task
+              source: task.source, // Include source to identify sticky note tasks
+              resource: task,
+              taskId: task.id // Store task ID for drag & drop
             })
           }
         })
@@ -2415,7 +2422,16 @@ export const getStickyNotes = async (filters = {}) => {
   const userId = await getCurrentUserId()
   let query = supabase
     .from('sticky_notes')
-    .select('*')
+    .select(`
+      *,
+      tasks:linked_task_id (
+        id,
+        title,
+        status,
+        due_date,
+        priority
+      )
+    `)
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
   
@@ -2480,6 +2496,124 @@ export const deleteStickyNote = async (id) => {
 
 export const markStickyNoteDone = async (id) => {
   return await updateStickyNote(id, { status: 'done' })
+}
+
+// Convert sticky note to task
+export const convertStickyNoteToTask = async (stickyNoteId, options = {}) => {
+  const userId = await getCurrentUserId()
+  
+  // Get sticky note
+  const { data: stickyNote, error: stickyError } = await supabase
+    .from('sticky_notes')
+    .select('*')
+    .eq('id', stickyNoteId)
+    .eq('user_id', userId)
+    .single()
+  
+  if (stickyError) throw stickyError
+  if (!stickyNote) throw new Error('Sticky note not found')
+  
+  // D) Evitar duplicats - Check if already linked
+  if (stickyNote.linked_task_id) {
+    throw new Error('ALREADY_LINKED')
+  }
+  
+  // Create task from sticky note
+  // title = sticky.title o resum curt del content
+  const taskTitle = stickyNote.title || stickyNote.content.split('\n')[0].substring(0, 100) || 'Task from note'
+  // description/notes = sticky.content
+  const taskNotes = stickyNote.content
+  // due_date = sticky.due_date o today()
+  const taskDueDate = stickyNote.due_date || options.dueDate || new Date().toISOString().split('T')[0]
+  // priority = sticky.priority
+  const taskPriority = stickyNote.priority || 'normal'
+  
+  // Determine entity_type and entity_id
+  // si l'usuari està dins un projecte quan crea la note, linka a project
+  // sinó, entity_type='project' i entity_id null (per global tasks)
+  const entityType = options.entity_type || 'project'
+  const entityId = options.entity_id || null // Allow null for global tasks
+  
+  // Create task
+  const { data: task, error: taskError } = await supabase
+    .from('tasks')
+    .insert([{
+      user_id: userId,
+      title: taskTitle,
+      notes: taskNotes,
+      due_date: taskDueDate,
+      priority: taskPriority,
+      status: 'open',
+      source: 'sticky_note',
+      entity_type: entityType,
+      entity_id: entityId
+    }])
+    .select()
+    .single()
+  
+  if (taskError) throw taskError
+  
+  // Update sticky note with task link
+  // pinned = false (perquè deixi de molestar)
+  const { data: updatedNote, error: updateError } = await supabase
+    .from('sticky_notes')
+    .update({
+      linked_task_id: task.id,
+      converted_to_task_at: new Date().toISOString(),
+      pinned: false // Para que deje de molestar en el overlay
+    })
+    .eq('id', stickyNoteId)
+    .eq('user_id', userId)
+    .select()
+    .single()
+  
+  if (updateError) throw updateError
+  
+  return { task, stickyNote: updatedNote }
+}
+
+// Unlink task from sticky note
+export const unlinkStickyNoteTask = async (stickyNoteId) => {
+  const userId = await getCurrentUserId()
+  
+  const { data, error } = await supabase
+    .from('sticky_notes')
+    .update({
+      linked_task_id: null,
+      converted_to_task_at: null
+    })
+    .eq('id', stickyNoteId)
+    .eq('user_id', userId)
+    .select()
+    .single()
+  
+  if (error) throw error
+  return data
+}
+
+// Update getStickyNotes to include linked task info
+// (This will be done by modifying the query to join tasks table if needed)
+export const getStickyNoteWithTask = async (id) => {
+  const userId = await getCurrentUserId()
+  
+  const { data, error } = await supabase
+    .from('sticky_notes')
+    .select(`
+      *,
+      tasks:linked_task_id (
+        id,
+        title,
+        status,
+        due_date,
+        priority
+      )
+    `)
+    .eq('id', id)
+    .eq('user_id', userId)
+    .single()
+  
+  if (error) throw error
+  return data
 }
 
 export default supabase

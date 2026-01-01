@@ -6,8 +6,10 @@ import 'react-big-calendar/lib/css/react-big-calendar.css'
 import { useTranslation } from 'react-i18next'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { useApp } from '../context/AppContext'
-import { getCalendarEvents, getProjects, getDashboardPreferences, updateDashboardPreferences } from '../lib/supabase'
+import { getCalendarEvents, getProjects, getDashboardPreferences, updateDashboardPreferences, updateTask } from '../lib/supabase'
 import { Filter, X } from 'lucide-react'
+import QuickCreateTaskModal from '../components/QuickCreateTaskModal'
+import { showToast } from '../components/Toast'
 
 const localizer = momentLocalizer(moment)
 
@@ -27,9 +29,12 @@ export default function CalendarPage() {
   const [filters, setFilters] = useState({
     projectId: null,
     types: ['task', 'shipment', 'manufacturer', 'quote'],
-    showCompleted: false
+    showCompleted: false,
+    showStickyDerived: true // ON default
   })
   const [showFilters, setShowFilters] = useState(false)
+  const [showQuickCreate, setShowQuickCreate] = useState(false)
+  const [quickCreateDate, setQuickCreateDate] = useState(null)
 
   useEffect(() => {
     // Update moment locale when i18n language changes
@@ -106,6 +111,53 @@ export default function CalendarPage() {
     }
   }
 
+  // Drag & drop handler - only for tasks
+  const handleEventDrop = async ({ event, start, end }) => {
+    // Only allow drag & drop for tasks
+    if (event.type !== 'task') {
+      showToast(t('calendar.dragNotAllowed', 'Només es poden arrossegar tasques'), 'warning')
+      return
+    }
+
+    try {
+      const taskId = event.taskId || event.resource?.id
+      if (!taskId) {
+        showToast(t('calendar.taskNotFound', 'Tasca no trobada'), 'error')
+        return
+      }
+
+      // Update task due_date to the new date
+      const newDate = moment(start).format('YYYY-MM-DD')
+      await updateTask(taskId, { due_date: newDate })
+      
+      showToast(t('calendar.taskRescheduled', 'Tasca reprogramada'), 'success')
+      
+      // Reload events to reflect the change
+      loadEvents()
+    } catch (err) {
+      console.error('Error rescheduling task:', err)
+      showToast(t('calendar.rescheduleError', 'Error al reprogramar la tasca'), 'error')
+      // Reload events to revert UI
+      loadEvents()
+    }
+  }
+
+  // Quick create handler - click on empty slot
+  const handleSelectSlot = ({ start, end }) => {
+    const clickedDate = moment(start).format('YYYY-MM-DD')
+    setQuickCreateDate(clickedDate)
+    setShowQuickCreate(true)
+  }
+
+  // Only allow dragging tasks
+  const draggableAccessor = (event) => {
+    return event.type === 'task'
+  }
+
+  const handleQuickCreateSave = () => {
+    loadEvents() // Reload events to show new task
+  }
+
   const handleFilterChange = (key, value) => {
     const newFilters = { ...filters, [key]: value }
     setFilters(newFilters)
@@ -131,6 +183,10 @@ export default function CalendarPage() {
         backgroundColor = event.priority === 'high' ? '#ef4444' : 
                           event.priority === 'normal' ? '#f59e0b' : '#6b7280'
         borderColor = backgroundColor
+        // Add purple border for tasks from sticky notes
+        if (event.source === 'sticky_note') {
+          borderColor = '#a855f7'
+        }
         break
       case 'shipment':
         backgroundColor = '#3b82f6'
@@ -152,11 +208,34 @@ export default function CalendarPage() {
         borderColor,
         color: '#ffffff',
         borderRadius: '4px',
-        border: 'none',
+        border: event.type === 'task' && event.source === 'sticky_note' ? '2px solid #a855f7' : 'none',
         padding: '2px 4px',
-        fontSize: '12px'
+        fontSize: '12px',
+        position: 'relative'
       }
     }
+  }
+
+  // Custom event title component to show badge for sticky note tasks
+  const CustomEvent = ({ event }) => {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', width: '100%' }}>
+        {event.type === 'task' && event.source === 'sticky_note' && (
+          <span style={{
+            fontSize: '10px',
+            backgroundColor: '#a855f7',
+            borderRadius: '50%',
+            width: '8px',
+            height: '8px',
+            display: 'inline-block',
+            flexShrink: 0
+          }} title={t('calendar.fromNote', 'Des de nota')} />
+        )}
+        <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {event.title}
+        </span>
+      </div>
+    )
   }
 
   const styles = {
@@ -353,6 +432,19 @@ export default function CalendarPage() {
                   <span>{t('calendar.showCompleted', 'Mostrar completats')}</span>
                 </label>
               </div>
+              
+              {/* Show Sticky-Derived Tasks */}
+              <div style={styles.filterSection}>
+                <label style={styles.checkboxLabel}>
+                  <input
+                    type="checkbox"
+                    checked={filters.showStickyDerived !== false}
+                    onChange={(e) => handleFilterChange('showStickyDerived', e.target.checked)}
+                    style={styles.checkbox}
+                  />
+                  <span>{t('calendar.showStickyDerived', 'Mostrar tasques de notes')}</span>
+                </label>
+              </div>
             </div>
           )}
         </div>
@@ -373,7 +465,14 @@ export default function CalendarPage() {
             date={date}
             onNavigate={setDate}
             onSelectEvent={handleEventClick}
+            onEventDrop={handleEventDrop}
+            onSelectSlot={handleSelectSlot}
+            selectable
+            draggableAccessor={draggableAccessor}
             eventPropGetter={eventStyleGetter}
+            components={{
+              event: CustomEvent
+            }}
             messages={{
               next: t('calendar.next', 'Següent'),
               previous: t('calendar.previous', 'Anterior'),
@@ -391,6 +490,18 @@ export default function CalendarPage() {
           />
         )}
       </div>
+      
+      {/* Quick Create Task Modal */}
+      <QuickCreateTaskModal
+        isOpen={showQuickCreate}
+        onClose={() => {
+          setShowQuickCreate(false)
+          setQuickCreateDate(null)
+        }}
+        onSave={handleQuickCreateSave}
+        defaultDate={quickCreateDate}
+        projects={projects}
+      />
       
       <style>{`
         .rbc-dark {

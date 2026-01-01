@@ -21,6 +21,12 @@ CREATE INDEX IF NOT EXISTS idx_tasks_user_entity ON tasks(user_id, entity_type, 
 -- RLS Policies
 ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist (for idempotency)
+DROP POLICY IF EXISTS "Users can view own tasks" ON tasks;
+DROP POLICY IF EXISTS "Users can insert own tasks" ON tasks;
+DROP POLICY IF EXISTS "Users can update own tasks" ON tasks;
+DROP POLICY IF EXISTS "Users can delete own tasks" ON tasks;
+
 -- Policy: Users can only see their own tasks
 CREATE POLICY "Users can view own tasks"
   ON tasks FOR SELECT
@@ -50,6 +56,9 @@ BEGIN
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Drop trigger if exists (for idempotency)
+DROP TRIGGER IF EXISTS tasks_updated_at ON tasks;
 
 CREATE TRIGGER tasks_updated_at
   BEFORE UPDATE ON tasks

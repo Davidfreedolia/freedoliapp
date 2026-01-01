@@ -9,7 +9,8 @@
     "restore": "Restaurar",
     "loading": "Carregant...",
     "error": "Error",
-    "success": "Èxit"
+    "success": "Èxit",
+    "optional": "Opcional"
   },
   "sidebar": {
     "dashboard": "Dashboard",
@@ -73,7 +74,27 @@
     "date": "Data",
     "time": "Hora",
     "event": "Esdeveniment",
-    "noEvents": "No hi ha esdeveniments en aquest rang"
+    "noEvents": "No hi ha esdeveniments en aquest rang",
+    "fromNote": "Des de nota",
+    "newTask": "Nova Tasca",
+    "taskTitle": "Títol",
+    "taskTitlePlaceholder": "Títol de la tasca",
+    "dueDate": "Data de venciment",
+    "priority": "Prioritat",
+    "priorityLow": "Baixa",
+    "priorityNormal": "Normal",
+    "priorityHigh": "Alta",
+    "noProject": "Sense projecte",
+    "selectProject": "Selecciona un projecte",
+    "projectRequired": "Has de seleccionar un projecte",
+    "taskTitleRequired": "El títol és obligatori",
+    "taskCreated": "Tasca creada correctament",
+    "taskCreateError": "Error al crear la tasca",
+    "dragNotAllowed": "Només es poden arrossegar tasques",
+    "taskNotFound": "Tasca no trobada",
+    "taskRescheduled": "Tasca reprogramada",
+    "rescheduleError": "Error al reprogramar la tasca",
+    "showStickyDerived": "Mostrar tasques de notes"
   },
   "stickyNotes": {
     "title": "Notes",
@@ -85,7 +106,20 @@
     "markDone": "Marcar com fet",
     "delete": "Eliminar",
     "confirmDelete": "Vols eliminar aquesta nota?",
-    "empty": "No hi ha notes. Clica \"Afegir\" per crear-ne una."
+    "empty": "No hi ha notes. Clica \"Afegir\" per crear-ne una.",
+    "plan": "Planificar",
+    "convertToTask": "Convertir a tasca",
+    "taskLinked": "Tasca vinculada",
+    "openTask": "Obrir tasca",
+    "unlink": "Desvincular",
+    "planSaved": "Data planificada guardada",
+    "planError": "Error al guardar la data",
+    "taskCreated": "Tasca creada correctament",
+    "convertError": "Error al crear la tasca",
+    "unlinked": "Tasca desvinculada",
+    "unlinkError": "Error al desvincular",
+    "alreadyLinked": "Ja està vinculada a una tasca",
+    "projectRequired": "Has de seleccionar un projecte per crear la tasca"
   },
   "errors": {
     "driveDisconnected": "Google Drive no està connectat",

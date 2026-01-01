@@ -9,7 +9,8 @@
     "restore": "Restore",
     "loading": "Loading...",
     "error": "Error",
-    "success": "Success"
+    "success": "Success",
+    "optional": "Optional"
   },
   "sidebar": {
     "dashboard": "Dashboard",
@@ -73,7 +74,27 @@
     "date": "Date",
     "time": "Time",
     "event": "Event",
-    "noEvents": "No events in this range"
+    "noEvents": "No events in this range",
+    "fromNote": "From note",
+    "newTask": "New Task",
+    "taskTitle": "Title",
+    "taskTitlePlaceholder": "Task title",
+    "dueDate": "Due date",
+    "priority": "Priority",
+    "priorityLow": "Low",
+    "priorityNormal": "Normal",
+    "priorityHigh": "High",
+    "noProject": "No project",
+    "selectProject": "Select a project",
+    "projectRequired": "You must select a project",
+    "taskTitleRequired": "Title is required",
+    "taskCreated": "Task created successfully",
+    "taskCreateError": "Error creating task",
+    "dragNotAllowed": "Only tasks can be dragged",
+    "taskNotFound": "Task not found",
+    "taskRescheduled": "Task rescheduled",
+    "rescheduleError": "Error rescheduling task",
+    "showStickyDerived": "Show sticky-derived tasks"
   },
   "stickyNotes": {
     "title": "Notes",
@@ -85,7 +106,20 @@
     "markDone": "Mark as done",
     "delete": "Delete",
     "confirmDelete": "Do you want to delete this note?",
-    "empty": "No notes. Click \"Add\" to create one."
+    "empty": "No notes. Click \"Add\" to create one.",
+    "plan": "Plan",
+    "convertToTask": "Convert to task",
+    "taskLinked": "Task linked",
+    "openTask": "Open task",
+    "unlink": "Unlink",
+    "planSaved": "Date planned saved",
+    "planError": "Error saving date",
+    "taskCreated": "Task created successfully",
+    "convertError": "Error creating task",
+    "unlinked": "Task unlinked",
+    "unlinkError": "Error unlinking",
+    "alreadyLinked": "Already linked to a task",
+    "projectRequired": "You must select a project to create the task"
   },
   "errors": {
     "driveDisconnected": "Google Drive is not connected",

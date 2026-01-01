@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS sticky_notes (
   content text NOT NULL,
   status text NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'done')),
   pinned boolean NOT NULL DEFAULT true,
+  priority text DEFAULT 'normal' CHECK (priority IN ('low', 'normal', 'high')),
   color text DEFAULT 'yellow' CHECK (color IN ('yellow', 'blue', 'green', 'pink', 'orange', 'purple')),
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()

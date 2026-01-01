@@ -9,7 +9,8 @@
     "restore": "Restaurar",
     "loading": "Cargando...",
     "error": "Error",
-    "success": "Éxito"
+    "success": "Éxito",
+    "optional": "Opcional"
   },
   "sidebar": {
     "dashboard": "Dashboard",
@@ -73,7 +74,27 @@
     "date": "Fecha",
     "time": "Hora",
     "event": "Evento",
-    "noEvents": "No hay eventos en este rango"
+    "noEvents": "No hay eventos en este rango",
+    "fromNote": "Desde nota",
+    "newTask": "Nueva Tarea",
+    "taskTitle": "Título",
+    "taskTitlePlaceholder": "Título de la tarea",
+    "dueDate": "Fecha de vencimiento",
+    "priority": "Prioridad",
+    "priorityLow": "Baja",
+    "priorityNormal": "Normal",
+    "priorityHigh": "Alta",
+    "noProject": "Sin proyecto",
+    "selectProject": "Selecciona un proyecto",
+    "projectRequired": "Debes seleccionar un proyecto",
+    "taskTitleRequired": "El título es obligatorio",
+    "taskCreated": "Tarea creada correctamente",
+    "taskCreateError": "Error al crear la tarea",
+    "dragNotAllowed": "Solo se pueden arrastrar tareas",
+    "taskNotFound": "Tarea no encontrada",
+    "taskRescheduled": "Tarea reprogramada",
+    "rescheduleError": "Error al reprogramar la tarea",
+    "showStickyDerived": "Mostrar tareas de notas"
   },
   "stickyNotes": {
     "title": "Notas",
@@ -85,7 +106,20 @@
     "markDone": "Marcar como hecho",
     "delete": "Eliminar",
     "confirmDelete": "¿Quieres eliminar esta nota?",
-    "empty": "No hay notas. Haz clic en \"Añadir\" para crear una."
+    "empty": "No hay notas. Haz clic en \"Añadir\" para crear una.",
+    "plan": "Planificar",
+    "convertToTask": "Convertir a tarea",
+    "taskLinked": "Tarea vinculada",
+    "openTask": "Abrir tarea",
+    "unlink": "Desvincular",
+    "planSaved": "Fecha planificada guardada",
+    "planError": "Error al guardar la fecha",
+    "taskCreated": "Tarea creada correctamente",
+    "convertError": "Error al crear la tarea",
+    "unlinked": "Tarea desvinculada",
+    "unlinkError": "Error al desvincular",
+    "alreadyLinked": "Ya está vinculada a una tarea",
+    "projectRequired": "Debes seleccionar un proyecto para crear la tarea"
   },
   "errors": {
     "driveDisconnected": "Google Drive no está conectado",
