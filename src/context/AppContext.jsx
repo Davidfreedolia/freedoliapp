@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { getProjects, getDashboardStats } from '../lib/supabase'
 import { driveService } from '../lib/googleDrive'
+import { generateDemoData, checkDemoExists, checkRealDataExists } from '../lib/demoSeed'
+import { showToast } from '../components/Toast'
 
 const AppContext = createContext()
 
@@ -24,7 +26,55 @@ export function AppProvider({ children }) {
   useEffect(() => {
     loadInitialData()
     initDrive()
+    // Auto-seed demo data if enabled
+    autoSeedDemoData()
   }, [])
+
+  // Auto-seed demo data on app load (if enabled)
+  const autoSeedDemoData = async () => {
+    const isDemoMode = import.meta.env.VITE_DEMO_MODE === 'true'
+    if (!isDemoMode) return
+
+    try {
+      // Check if real data exists
+      const hasRealData = await checkRealDataExists()
+      if (hasRealData) {
+        console.log('Real data detected, demo seed skipped')
+        showToast('Real data detected, demo seed skipped', 'warning', 3000)
+        return
+      }
+
+      // Check if demo data already exists
+      const hasDemo = await checkDemoExists()
+      if (hasDemo) {
+        console.log('Demo data already exists, skipping seed')
+        return
+      }
+
+      // Generate demo data
+      console.log('Auto-generating demo data...')
+      const result = await generateDemoData()
+      
+      if (result.success) {
+        if (result.skipped) {
+          console.log('Demo data already exists')
+        } else {
+          console.log('Demo data generated successfully')
+          showToast('Demo data loaded', 'success', 3000)
+          // Refresh data after seed
+          setTimeout(() => {
+            loadInitialData()
+          }, 1000)
+        }
+      } else {
+        console.error('Failed to generate demo data:', result.message)
+        showToast('Demo failed to load', 'error', 5000)
+      }
+    } catch (err) {
+      console.error('Error in auto-seed:', err)
+      showToast('Demo failed to load', 'error', 5000)
+    }
+  }
 
   // Guardar preferència dark mode
   useEffect(() => {

@@ -128,5 +128,8 @@
     "driveDisconnected": "Google Drive no está conectado",
     "missingFields": "Faltan campos obligatorios",
     "notAllowed": "No tienes permiso para realizar esta acción"
+  },
+  "demo": {
+    "banner": "Los datos son simulados"
   }
 }

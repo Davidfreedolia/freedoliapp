@@ -1,0 +1,480 @@
+import { supabase, getCurrentUserId, upsertProjectProfitability } from './supabase'
+import { showToast } from '../components/Toast'
+
+/**
+ * Check if demo data exists
+ */
+export const checkDemoExists = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('projects')
+      .select('id')
+      .eq('is_demo', true)
+      .limit(1)
+    
+    if (error) throw error
+    return (data || []).length > 0
+  } catch (err) {
+    console.error('Error checking demo data:', err)
+    return false
+  }
+}
+
+/**
+ * Check if real (non-demo) data exists
+ */
+export const checkRealDataExists = async () => {
+  try {
+    const userId = await getCurrentUserId()
+    const { data, error } = await supabase
+      .from('projects')
+      .select('id')
+      .eq('user_id', userId)
+      .or('is_demo.is.null,is_demo.eq.false')
+      .limit(1)
+    
+    if (error) throw error
+    return (data || []).length > 0
+  } catch (err) {
+    console.error('Error checking real data:', err)
+    return false
+  }
+}
+
+/**
+ * Generate demo data (10 complete projects)
+ * Returns { success: boolean, message: string, counts?: object }
+ */
+export const generateDemoData = async (onProgress = null) => {
+  try {
+    const userId = await getCurrentUserId()
+    const hasDemo = await checkDemoExists()
+    
+    // If demo already exists, skip
+    if (hasDemo) {
+      return { success: true, message: 'Demo data already exists', skipped: true }
+    }
+
+    const newCounts = { projects: 0, suppliers: 0, gtins: 0, quotes: 0, pos: 0, tasks: 0, notes: 0, shipments: 0 }
+
+    // 1) Suppliers (8)
+    const suppliers = []
+    const supplierNames = [
+      { name: 'Demo Manufacturing Co', type: 'manufacturer', rating: 5 },
+      { name: 'Demo Producer Ltd', type: 'manufacturer', rating: 4 },
+      { name: 'Demo Factory Inc', type: 'manufacturer', rating: 3 },
+      { name: 'Demo Maker Corp', type: 'manufacturer', rating: 4 },
+      { name: 'Demo Industry LLC', type: 'manufacturer', rating: 5 },
+      { name: 'Demo Freight Solutions', type: 'freight', rating: 4 },
+      { name: 'Demo Logistics Express', type: 'freight', rating: 5 },
+      { name: 'Demo Quality Inspection', type: 'inspection', rating: 4 }
+    ]
+
+    for (const s of supplierNames) {
+      const { data: supplier, error } = await supabase
+        .from('suppliers')
+        .insert([{
+          name: s.name,
+          type: s.type,
+          rating: s.rating,
+          contact_name: `Contact ${s.name.split(' ')[1]}`,
+          email: `contact@${s.name.toLowerCase().replace(/\s+/g, '')}.com`,
+          phone: `+1-555-${Math.floor(Math.random() * 9000) + 1000}`,
+          incoterm: ['FOB', 'FCA', 'EXW'][Math.floor(Math.random() * 3)],
+          payment_terms: ['T/T 30%', 'L/C at sight', 'Net 30'][Math.floor(Math.random() * 3)],
+          is_demo: true
+        }])
+        .select()
+        .single()
+
+      if (error) throw error
+      suppliers.push(supplier)
+      newCounts.suppliers++
+      if (onProgress) onProgress({ ...newCounts })
+    }
+
+    // 2) Projects (10)
+    const projects = []
+    const projectNames = [
+      { name: 'Demo Wireless Earbuds', phase: 1, decision: null, profitability: 'GO' },
+      { name: 'Demo Phone Case Pro', phase: 2, decision: 'HOLD', profitability: null },
+      { name: 'Demo Smart Watch', phase: 3, decision: 'GO', profitability: null },
+      { name: 'Demo Laptop Stand', phase: 4, decision: 'GO', profitability: null },
+      { name: 'Demo USB Cable', phase: 2, decision: 'DISCARDED', profitability: null },
+      { name: 'Demo Power Bank', phase: 5, decision: 'GO', profitability: null },
+      { name: 'Demo Tablet Cover', phase: 3, decision: 'HOLD', profitability: null },
+      { name: 'Demo Keyboard', phase: 6, decision: 'GO', profitability: null },
+      { name: 'Demo Mouse Pad', phase: 1, decision: 'DISCARDED', profitability: 'RISKY' },
+      { name: 'Demo Webcam', phase: 7, decision: 'GO', profitability: null }
+    ]
+
+    for (let i = 0; i < projectNames.length; i++) {
+      const p = projectNames[i]
+      const projectCode = `DEMO-PR-${String(i + 1).padStart(6, '0')}`
+      const sku = `DEMO-${String(i + 1).padStart(6, '0')}`
+
+      const { data: project, error } = await supabase
+        .from('projects')
+        .insert([{
+          project_code: projectCode,
+          sku: sku,
+          sku_internal: sku,
+          name: p.name,
+          description: `Demo project: ${p.name}`,
+          current_phase: p.phase,
+          decision: p.decision,
+          status: p.decision === 'DISCARDED' ? 'inactive' : 'active',
+          is_demo: true
+        }])
+        .select()
+        .single()
+
+      if (error) throw error
+      projects.push(project)
+      newCounts.projects++
+      if (onProgress) onProgress({ ...newCounts })
+
+      // Add profitability data for phase 1 projects
+      if (p.phase === 1 && p.profitability) {
+        const profitabilityData = {
+          selling_price: p.profitability === 'GO' ? 29.99 : 19.99,
+          cogs: p.profitability === 'GO' ? 8.50 : 12.00,
+          shipping_per_unit: 2.50,
+          referral_fee_percent: 15,
+          fba_fee_per_unit: p.profitability === 'GO' ? 3.50 : 2.50,
+          ppc_per_unit: p.profitability === 'GO' ? 1.50 : 2.00,
+          other_costs_per_unit: 0.50,
+          fixed_costs: 500
+        }
+        try {
+          await upsertProjectProfitability(project.id, profitabilityData)
+        } catch (err) {
+          console.warn('Could not add profitability data:', err)
+        }
+      }
+    }
+
+    // 3) GTIN Pool (80 GTINs)
+    const gtinPool = []
+    for (let i = 0; i < 80; i++) {
+      const gtinCode = `7${String(Math.floor(Math.random() * 9000000000000) + 1000000000000)}`.substring(0, 13)
+      const gtinType = i % 3 === 0 ? 'UPC' : 'EAN'
+
+      const { data: gtin, error } = await supabase
+        .from('gtin_pool')
+        .insert([{
+          gtin_code: gtinCode,
+          gtin_type: gtinType,
+          status: i < 60 ? 'available' : 'assigned',
+          is_demo: true,
+          assigned_to_project_id: i < 60 ? null : projects[i % 6].id,
+          assigned_at: i < 60 ? null : new Date().toISOString()
+        }])
+        .select()
+        .single()
+
+      if (!error && gtin) {
+        gtinPool.push(gtin)
+        newCounts.gtins++
+        if (onProgress) onProgress({ ...newCounts })
+      }
+    }
+
+    // 4) Product Identifiers (6 projects with identifiers, 4 without)
+    for (let i = 0; i < 6; i++) {
+      const project = projects[i]
+      const assignedGtin = gtinPool.find(g => g.assigned_to_project_id === project.id)
+
+      if (assignedGtin) {
+        await supabase
+          .from('product_identifiers')
+          .insert([{
+            project_id: project.id,
+            gtin_code: assignedGtin.gtin_code,
+            gtin_type: assignedGtin.gtin_type,
+            fnsku: `X00${String(i + 1).padStart(9, '0')}`,
+            asin: `B0${String(Math.floor(Math.random() * 90000000) + 10000000)}`,
+            is_demo: true
+          }])
+      }
+    }
+
+    // 5) Supplier Quotes (3 projects with 2 quotes each)
+    const quoteProjects = projects.slice(0, 3)
+    for (const project of quoteProjects) {
+      for (let q = 0; q < 2; q++) {
+        const supplier = suppliers[q === 0 ? 0 : 1]
+        const isBetterPrice = q === 0
+        
+        const { data: quote, error: quoteError } = await supabase
+          .from('supplier_quotes')
+          .insert([{
+            project_id: project.id,
+            supplier_id: supplier.id,
+            currency: 'USD',
+            incoterm: supplier.incoterm,
+            payment_terms: supplier.payment_terms,
+            lead_time_days: isBetterPrice ? 45 : 30,
+            moq: isBetterPrice ? 2000 : 500,
+            shipping_estimate: 500,
+            notes: `Demo quote ${q + 1} for ${project.name}`,
+            is_demo: true
+          }])
+          .select()
+          .single()
+
+        if (!quoteError && quote) {
+          // Add price breaks
+          const breaks = [
+            { min_qty: 500, unit_price: isBetterPrice ? 12.50 : 14.00 },
+            { min_qty: 1000, unit_price: isBetterPrice ? 11.50 : 13.00 },
+            { min_qty: 2000, unit_price: isBetterPrice ? 10.50 : 12.00 }
+          ]
+
+          for (const br of breaks) {
+            await supabase
+              .from('supplier_quote_price_breaks')
+              .insert([{
+                quote_id: quote.id,
+                min_qty: br.min_qty,
+                unit_price: br.unit_price,
+                is_demo: true
+              }])
+          }
+
+          newCounts.quotes++
+          if (onProgress) onProgress({ ...newCounts })
+        }
+      }
+    }
+
+    // 6) Purchase Orders (6 projects with 1-2 POs)
+    const poProjects = projects.slice(0, 6)
+    const poStatuses = ['draft', 'confirmed', 'in_production', 'shipped', 'received', 'confirmed']
+    const purchaseOrders = []
+
+    for (let i = 0; i < poProjects.length; i++) {
+      const project = poProjects[i]
+      const numPOs = i < 3 ? 1 : 2
+      const supplier = suppliers[i % 5]
+
+      for (let poNum = 0; poNum < numPOs; poNum++) {
+        const poNumber = `DEMO-PO-${String(i + 1).padStart(4, '0')}-${poNum + 1}`
+        const status = poStatuses[i]
+
+        const items = [{
+          sku: project.sku,
+          description: project.name,
+          quantity: 1000 + (poNum * 500),
+          unit_price: 12.50 - (poNum * 0.50),
+          total: (1000 + (poNum * 500)) * (12.50 - (poNum * 0.50))
+        }]
+
+        const { data: po, error: poError } = await supabase
+          .from('purchase_orders')
+          .insert([{
+            po_number: poNumber,
+            project_id: project.id,
+            supplier_id: supplier.id,
+            order_date: new Date(Date.now() - (i * 30 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0],
+            status: status,
+            currency: 'USD',
+            incoterm: supplier.incoterm,
+            payment_terms: supplier.payment_terms,
+            items: JSON.stringify(items),
+            total_amount: items.reduce((sum, item) => sum + item.total, 0),
+            is_demo: true
+          }])
+          .select()
+          .single()
+
+        if (!poError && po) {
+          purchaseOrders.push(po)
+          newCounts.pos++
+          if (onProgress) onProgress({ ...newCounts })
+
+          // 7) Amazon Readiness (3 complete, 3 incomplete)
+          if (i < 3) {
+            await supabase
+              .from('po_amazon_readiness')
+              .upsert([{
+                purchase_order_id: po.id,
+                needs_fnsku: true,
+                units_per_carton: 24,
+                cartons_count: Math.ceil(items[0].quantity / 24),
+                carton_length_cm: 30,
+                carton_width_cm: 20,
+                carton_height_cm: 15,
+                carton_weight_kg: 5.5,
+                prep_type: 'none',
+                is_demo: true
+              }], { onConflict: 'purchase_order_id' })
+          } else {
+            await supabase
+              .from('po_amazon_readiness')
+              .upsert([{
+                purchase_order_id: po.id,
+                needs_fnsku: true,
+                units_per_carton: i === 3 ? null : 24,
+                cartons_count: i === 4 ? null : Math.ceil(items[0].quantity / 24),
+                carton_length_cm: null,
+                carton_width_cm: null,
+                carton_height_cm: null,
+                carton_weight_kg: i === 5 ? null : 5.5,
+                prep_type: 'none',
+                is_demo: true
+              }], { onConflict: 'purchase_order_id' })
+          }
+
+          // 8) Manufacturer Pack (4 POs with generated_at, 2 with sent_at)
+          if (i < 4) {
+            const generatedAt = new Date(Date.now() - ((4 - i) * 7 * 24 * 60 * 60 * 1000))
+            const sentAt = i < 2 ? new Date(generatedAt.getTime() + (2 * 24 * 60 * 60 * 1000)) : null
+
+            await supabase
+              .from('po_amazon_readiness')
+              .update({
+                manufacturer_pack_generated_at: generatedAt.toISOString(),
+                manufacturer_pack_sent_at: sentAt?.toISOString() || null,
+                manufacturer_pack_version: i % 2 === 0 ? 1 : 2
+              })
+              .eq('purchase_order_id', po.id)
+          }
+        }
+      }
+    }
+
+    // 9) Shipments (4 shipments)
+    const shipmentPOs = purchaseOrders.slice(0, 4)
+    const shipmentData = [
+      { type: 'SPD', status: 'planned', pickup: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), eta: null, delivered: null, stale: false },
+      { type: 'LTL', status: 'in_transit', pickup: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), eta: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), delivered: null, stale: false },
+      { type: 'FTL', status: 'in_transit', pickup: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), eta: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), delivered: null, stale: true },
+      { type: 'SPD', status: 'delivered', pickup: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000), eta: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), delivered: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), stale: false }
+    ]
+
+    for (let i = 0; i < shipmentPOs.length; i++) {
+      const po = shipmentPOs[i]
+      const ship = shipmentData[i]
+      const trackingNumber = ship.type === 'SPD' ? `1Z${Math.random().toString(36).substring(2, 18).toUpperCase()}` : null
+      const proNumber = ship.type !== 'SPD' ? `PRO${String(i + 1).padStart(8, '0')}` : null
+      const updatedAt = ship.stale ? new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString() : new Date().toISOString()
+
+      const { data: shipment, error: shipError } = await supabase
+        .from('po_shipments')
+        .insert([{
+          purchase_order_id: po.id,
+          shipment_type: ship.type,
+          carrier: ship.type === 'SPD' ? 'UPS' : 'Demo Freight Co',
+          tracking_number: trackingNumber,
+          pro_number: proNumber,
+          pickup_date: ship.pickup.toISOString().split('T')[0],
+          eta_date: ship.eta?.toISOString().split('T')[0] || null,
+          status: ship.status,
+          notes: ship.stale ? `Demo shipment ${i + 1} (stale tracking)` : `Demo shipment ${i + 1}`,
+          updated_at: updatedAt,
+          is_demo: true
+        }])
+        .select()
+        .single()
+
+      if (!shipError && shipment) {
+        if (ship.stale) {
+          await supabase
+            .from('po_shipments')
+            .update({ updated_at: updatedAt })
+            .eq('id', shipment.id)
+        }
+        newCounts.shipments++
+        if (onProgress) onProgress({ ...newCounts })
+      }
+    }
+
+    // 10) Tasks (25 tasks)
+    const taskProjects = projects.slice(0, 8)
+    const taskTypes = ['project', 'purchase_order', 'supplier', 'shipment']
+    const taskStatuses = ['open', 'done', 'snoozed']
+    const priorities = ['low', 'normal', 'high']
+
+    for (let i = 0; i < 25; i++) {
+      const entityType = taskTypes[i % 4]
+      const project = taskProjects[i % taskProjects.length]
+      let entityId = project.id
+
+      if (entityType === 'purchase_order' && purchaseOrders.length > 0) {
+        entityId = purchaseOrders[i % purchaseOrders.length].id
+      } else if (entityType === 'supplier' && suppliers.length > 0) {
+        entityId = suppliers[i % suppliers.length].id
+      } else if (entityType === 'shipment' && shipmentPOs.length > 0) {
+        entityId = shipmentPOs[i % shipmentPOs.length].id
+      }
+
+      const dueDate = new Date()
+      if (i < 8) dueDate.setDate(dueDate.getDate())
+      else if (i < 16) dueDate.setDate(dueDate.getDate() + 3)
+      else dueDate.setDate(dueDate.getDate() + 10)
+
+      await supabase
+        .from('tasks')
+        .insert([{
+          entity_type: entityType,
+          entity_id: entityId,
+          title: `Demo Task ${i + 1}: ${entityType}`,
+          notes: `Demo task for testing`,
+          due_date: dueDate.toISOString().split('T')[0],
+          status: taskStatuses[i % 3],
+          priority: priorities[i % 3],
+          source: i < 5 ? 'sticky_note' : null,
+          is_demo: true
+        }])
+
+      newCounts.tasks++
+      if (onProgress) onProgress({ ...newCounts })
+    }
+
+    // 11) Sticky Notes (12 notes: 8 open+pinned, 1 done, 3 converted)
+    const { data: allTasks } = await supabase
+      .from('tasks')
+      .select('id')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: true })
+      .limit(3)
+
+    for (let i = 0; i < 12; i++) {
+      const actualIsOpen = i < 8 || (i >= 9 && i < 12)
+      const actualIsPinned = i < 8
+      const actualIsDone = i === 8
+      const actualIsConverted = i >= 9 && i < 12
+      const taskIndex = i - 9
+
+      await supabase
+        .from('sticky_notes')
+        .insert([{
+          title: `Demo Note ${i + 1}`,
+          content: `Demo sticky note content ${i + 1}`,
+          status: actualIsDone ? 'done' : 'open',
+          pinned: actualIsPinned,
+          priority: priorities[i % 3],
+          is_demo: true,
+          linked_task_id: actualIsConverted && allTasks && allTasks[taskIndex] ? allTasks[taskIndex].id : null,
+          converted_to_task_at: actualIsConverted ? new Date().toISOString() : null
+        }])
+
+      newCounts.notes++
+      if (onProgress) onProgress({ ...newCounts })
+    }
+
+    return {
+      success: true,
+      message: `Demo data generated successfully! Created: ${newCounts.projects} projects, ${newCounts.suppliers} suppliers, ${newCounts.gtins} GTINs, ${newCounts.quotes} quotes, ${newCounts.pos} POs, ${newCounts.shipments} shipments, ${newCounts.tasks} tasks, ${newCounts.notes} notes`,
+      counts: newCounts
+    }
+  } catch (err) {
+    console.error('Error generating demo data:', err)
+    return {
+      success: false,
+      message: `Error generating demo data: ${err.message}`
+    }
+  }
+}
+

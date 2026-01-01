@@ -5,6 +5,7 @@ import Sidebar from './components/Sidebar'
 import ProtectedRoute from './components/ProtectedRoute'
 import PageLoader from './components/PageLoader'
 import ToastContainer from './components/Toast'
+import DemoModeBanner from './components/DemoModeBanner'
 import { useBreakpoint } from './hooks/useBreakpoint'
 import './i18n'
 
@@ -45,11 +46,13 @@ function AppContent() {
       minHeight: '100vh',
       backgroundColor: darkMode ? '#0a0a0f' : '#f8f9fc'
     }}>
+      <DemoModeBanner darkMode={darkMode} />
       <Sidebar />
       <main style={{
         flex: 1,
         marginLeft: getMarginLeft(),
-        transition: 'margin-left 0.3s ease',
+        marginTop: import.meta.env.VITE_DEMO_MODE === 'true' ? '48px' : '0',
+        transition: 'margin-left 0.3s ease, margin-top 0.3s ease',
         display: 'flex',
         flexDirection: 'column',
         width: isMobile ? '100%' : 'auto'
