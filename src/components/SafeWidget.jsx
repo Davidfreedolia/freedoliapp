@@ -94,3 +94,5 @@ class SafeWidget extends React.Component {
   }
 }
 
+export default SafeWidget
+
