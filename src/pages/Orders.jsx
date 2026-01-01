@@ -616,7 +616,11 @@ export default function Orders() {
   }
 
   return (
-    <div style={styles.container}>
+    <div style={{
+      ...styles.container,
+      backgroundColor: darkMode ? '#0a0a0f' : '#f8f9fc',
+      minHeight: '100vh'
+    }}>
       <Header title="Comandes (PO)" />
 
       <div style={{
