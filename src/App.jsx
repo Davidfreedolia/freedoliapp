@@ -8,6 +8,7 @@ import ToastContainer from './components/Toast'
 import DemoModeBanner from './components/DemoModeBanner'
 import ErrorBoundary from './components/ErrorBoundary'
 import { useBreakpoint } from './hooks/useBreakpoint'
+import { isDemoMode } from './demo/demoMode'
 import './i18n'
 
 // Login (no lazy, es carrega primer)
@@ -60,6 +61,7 @@ const Warehouses = lazyWithErrorBoundary(() => import('./pages/Warehouses'), 'Wa
 const Calendar = lazyWithErrorBoundary(() => import('./pages/Calendar'), 'Calendar')
 const Diagnostics = lazyWithErrorBoundary(() => import('./pages/Diagnostics'), 'Diagnostics')
 const DevSeed = lazyWithErrorBoundary(() => import('./pages/DevSeed'), 'DevSeed')
+const Help = lazyWithErrorBoundary(() => import('./pages/Help'), 'Help')
 
 function AppContent() {
   const { sidebarCollapsed, darkMode } = useApp()
@@ -83,7 +85,7 @@ function AppContent() {
       <main style={{
         flex: 1,
         marginLeft: getMarginLeft(),
-        marginTop: import.meta.env.VITE_DEMO_MODE === 'true' ? '48px' : '0',
+        marginTop: isDemoMode() ? '48px' : '0',
         transition: 'margin-left 0.3s ease, margin-top 0.3s ease',
         display: 'flex',
         flexDirection: 'column',
@@ -126,7 +128,9 @@ function AppContent() {
               path="/projects/:projectId/briefing"
               element={
                 <ProtectedRoute>
-                  <Briefing />
+                  <ErrorBoundary context="page:Briefing" darkMode={darkMode}>
+                    <Briefing />
+                  </ErrorBoundary>
                 </ProtectedRoute>
               }
             />
@@ -134,7 +138,9 @@ function AppContent() {
               path="/suppliers"
               element={
                 <ProtectedRoute>
-                  <Suppliers />
+                  <ErrorBoundary context="page:Suppliers" darkMode={darkMode}>
+                    <Suppliers />
+                  </ErrorBoundary>
                 </ProtectedRoute>
               }
             />
@@ -142,7 +148,9 @@ function AppContent() {
               path="/forwarders"
               element={
                 <ProtectedRoute>
-                  <Forwarders />
+                  <ErrorBoundary context="page:Forwarders" darkMode={darkMode}>
+                    <Forwarders />
+                  </ErrorBoundary>
                 </ProtectedRoute>
               }
             />
@@ -150,7 +158,9 @@ function AppContent() {
               path="/warehouses"
               element={
                 <ProtectedRoute>
-                  <Warehouses />
+                  <ErrorBoundary context="page:Warehouses" darkMode={darkMode}>
+                    <Warehouses />
+                  </ErrorBoundary>
                 </ProtectedRoute>
               }
             />
@@ -168,7 +178,9 @@ function AppContent() {
               path="/finances"
               element={
                 <ProtectedRoute>
-                  <Finances />
+                  <ErrorBoundary context="page:Finances" darkMode={darkMode}>
+                    <Finances />
+                  </ErrorBoundary>
                 </ProtectedRoute>
               }
             />
@@ -176,7 +188,9 @@ function AppContent() {
               path="/inventory"
               element={
                 <ProtectedRoute>
-                  <Inventory />
+                  <ErrorBoundary context="page:Inventory" darkMode={darkMode}>
+                    <Inventory />
+                  </ErrorBoundary>
                 </ProtectedRoute>
               }
             />
@@ -184,7 +198,9 @@ function AppContent() {
               path="/analytics"
               element={
                 <ProtectedRoute>
-                  <Analytics />
+                  <ErrorBoundary context="page:Analytics" darkMode={darkMode}>
+                    <Analytics />
+                  </ErrorBoundary>
                 </ProtectedRoute>
               }
             />
@@ -192,7 +208,19 @@ function AppContent() {
               path="/settings"
               element={
                 <ProtectedRoute>
-                  <Settings />
+                  <ErrorBoundary context="page:Settings" darkMode={darkMode}>
+                    <Settings />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/help"
+              element={
+                <ProtectedRoute>
+                  <ErrorBoundary context="page:Help" darkMode={darkMode}>
+                    <Help />
+                  </ErrorBoundary>
                 </ProtectedRoute>
               }
             />
@@ -200,7 +228,9 @@ function AppContent() {
               path="/calendar"
               element={
                 <ProtectedRoute>
-                  <Calendar />
+                  <ErrorBoundary context="page:Calendar" darkMode={darkMode}>
+                    <Calendar />
+                  </ErrorBoundary>
                 </ProtectedRoute>
               }
             />
@@ -208,7 +238,9 @@ function AppContent() {
               path="/diagnostics"
               element={
                 <ProtectedRoute>
-                  <Diagnostics />
+                  <ErrorBoundary context="page:Diagnostics" darkMode={darkMode}>
+                    <Diagnostics />
+                  </ErrorBoundary>
                 </ProtectedRoute>
               }
             />
@@ -216,7 +248,9 @@ function AppContent() {
               path="/dev/seed"
               element={
                 <ProtectedRoute>
-                  <DevSeed />
+                  <ErrorBoundary context="page:DevSeed" darkMode={darkMode}>
+                    <DevSeed />
+                  </ErrorBoundary>
                 </ProtectedRoute>
               }
             />

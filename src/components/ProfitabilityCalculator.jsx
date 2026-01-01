@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Save, AlertTriangle, CheckCircle2, XCircle, ExternalLink, Link2 } from 'lucide-react'
 import { getProjectProfitability, upsertProjectProfitability, getProductIdentifiers, upsertProductIdentifiers } from '../lib/supabase'
 import { calculateQuickProfitability } from '../lib/profitability'
+import HelpIcon from './HelpIcon'
 
 /**
  * Calculadora de profitabilitat ràpida (Nivell 1.5)
@@ -459,6 +460,7 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
     <div style={styles.card}>
       <h3 style={styles.cardTitle}>
         💰 Quick Profitability
+        <HelpIcon helpKey="profitability" size="medium" darkMode={darkMode} />
       </h3>
 
       {/* Amazon ASIN Capture Section */}
@@ -616,7 +618,10 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
         {/* Columna esquerra - Inputs */}
         <div style={styles.column}>
           <div style={styles.inputGroup}>
-            <label style={styles.label}>Selling Price (€)</label>
+            <label style={{ ...styles.label, display: 'flex', alignItems: 'center', gap: '4px' }}>
+              Selling Price (€)
+              <HelpIcon helpKey="profitability.selling_price" size="small" darkMode={darkMode} />
+            </label>
             <input
               type="number"
               step="0.01"
@@ -629,7 +634,10 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
           </div>
 
           <div style={styles.inputGroup}>
-            <label style={styles.label}>COGS (€)</label>
+            <label style={{ ...styles.label, display: 'flex', alignItems: 'center', gap: '4px' }}>
+              COGS (€)
+              <HelpIcon helpKey="profitability.cogs" size="small" darkMode={darkMode} />
+            </label>
             <input
               type="number"
               step="0.01"
@@ -642,7 +650,10 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
           </div>
 
           <div style={styles.inputGroup}>
-            <label style={styles.label}>Shipping per Unit (€)</label>
+            <label style={{ ...styles.label, display: 'flex', alignItems: 'center', gap: '4px' }}>
+              Shipping per Unit (€)
+              <HelpIcon helpKey="profitability.shipping_per_unit" size="small" darkMode={darkMode} />
+            </label>
             <input
               type="number"
               step="0.01"
@@ -655,7 +666,10 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
           </div>
 
           <div style={styles.inputGroup}>
-            <label style={styles.label}>Referral Fee (%)</label>
+            <label style={{ ...styles.label, display: 'flex', alignItems: 'center', gap: '4px' }}>
+              Referral Fee (%)
+              <HelpIcon helpKey="profitability.referral_fee_percent" size="small" darkMode={darkMode} />
+            </label>
             <input
               type="number"
               step="0.01"
@@ -668,7 +682,10 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
           </div>
 
           <div style={styles.inputGroup}>
-            <label style={styles.label}>FBA Fee per Unit (€)</label>
+            <label style={{ ...styles.label, display: 'flex', alignItems: 'center', gap: '4px' }}>
+              FBA Fee per Unit (€)
+              <HelpIcon helpKey="profitability.fba_fee_per_unit" size="small" darkMode={darkMode} />
+            </label>
             <input
               type="number"
               step="0.01"
@@ -681,7 +698,10 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
           </div>
 
           <div style={styles.inputGroup}>
-            <label style={styles.label}>PPC per Unit (€)</label>
+            <label style={{ ...styles.label, display: 'flex', alignItems: 'center', gap: '4px' }}>
+              PPC per Unit (€)
+              <HelpIcon helpKey="profitability.ppc_per_unit" size="small" darkMode={darkMode} />
+            </label>
             <input
               type="number"
               step="0.01"
@@ -694,7 +714,10 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
           </div>
 
           <div style={styles.inputGroup}>
-            <label style={styles.label}>Other Costs per Unit (€)</label>
+            <label style={{ ...styles.label, display: 'flex', alignItems: 'center', gap: '4px' }}>
+              Other Costs per Unit (€)
+              <HelpIcon helpKey="profitability.other_costs_per_unit" size="small" darkMode={darkMode} />
+            </label>
             <input
               type="number"
               step="0.01"
@@ -707,7 +730,10 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
           </div>
 
           <div style={styles.inputGroup}>
-            <label style={styles.label}>Fixed Costs (€)</label>
+            <label style={{ ...styles.label, display: 'flex', alignItems: 'center', gap: '4px' }}>
+              Fixed Costs (€)
+              <HelpIcon helpKey="profitability.fixed_costs" size="small" darkMode={darkMode} />
+            </label>
             <input
               type="number"
               step="0.01"
@@ -777,7 +803,10 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
                 </div>
 
                 <div style={styles.resultItem}>
-                  <span style={styles.resultLabel}>ROI Product:</span>
+                  <span style={{ ...styles.resultLabel, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    ROI Product:
+                    <HelpIcon helpKey="profitability.roi" size="small" darkMode={darkMode} />
+                  </span>
                   <span style={{
                     ...styles.resultValue,
                     color: results.roi_product >= 50 ? '#10b981' :

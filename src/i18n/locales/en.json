@@ -134,5 +134,195 @@
   },
   "demo": {
     "banner": "Data is simulated"
+  },
+  "help": {
+    "profitability": {
+      "title": "Profitability",
+      "short": "Calculate product profitability",
+      "long": "The profitability calculator helps you determine if a product is viable to sell on Amazon. Enter expected costs and revenues to get the margin and decision (GO, RISKY, NO-GO).",
+      "selling_price": {
+        "title": "Selling Price",
+        "short": "Price at which you will sell the product on Amazon",
+        "long": "The selling price is the final price that the customer will pay for the product on Amazon. This price must include all costs and your desired profit.",
+        "example": "Ex: €24.99"
+      },
+      "cogs": {
+        "title": "COGS (Cost of Goods Sold)",
+        "short": "Cost of manufactured product",
+        "long": "COGS includes the unit cost of the product at the factory, excluding shipping and other costs. It's the price you pay the supplier per unit.",
+        "example": "Ex: €3.20 per unit"
+      },
+      "shipping_per_unit": {
+        "title": "Shipping per unit",
+        "short": "Shipping cost from factory to Amazon",
+        "long": "Shipping cost per unit from the factory to Amazon's warehouse (FBA). Includes international transport, customs, and handling.",
+        "example": "Ex: €0.50 per unit"
+      },
+      "referral_fee_percent": {
+        "title": "Referral Fee",
+        "short": "Percentage Amazon charges per sale",
+        "long": "Amazon charges a referral fee on each sale. This percentage varies by product category (usually between 8% and 15%).",
+        "example": "Ex: 15% (standard category)"
+      },
+      "fba_fee_per_unit": {
+        "title": "FBA Fee per unit",
+        "short": "Amazon fulfillment and storage cost",
+        "long": "Amazon charges an FBA (Fulfillment by Amazon) fee per unit that includes storage, picking, packing, and shipping to the end customer.",
+        "example": "Ex: €2.50 per unit"
+      },
+      "ppc_per_unit": {
+        "title": "PPC per unit",
+        "short": "Advertising cost per unit sold",
+        "long": "Average advertising cost (Pay-Per-Click) per unit sold. Calculate total advertising cost divided by number of units sold.",
+        "example": "Ex: €0.80 per unit"
+      },
+      "other_costs_per_unit": {
+        "title": "Other costs per unit",
+        "short": "Other variable costs per unit",
+        "long": "Any other variable cost per unit, such as custom packaging, labels, quality inspections, etc.",
+        "example": "Ex: €0.20 per unit"
+      },
+      "fixed_costs": {
+        "title": "Fixed Costs",
+        "short": "One-time costs independent of volume",
+        "long": "Fixed costs that are only paid once, such as product photography, listing creation, brand registration, etc. They are divided among all units sold.",
+        "example": "Ex: €500 (photography + listing)"
+      },
+      "margin": {
+        "title": "Margin",
+        "short": "Profit percentage over selling price",
+        "long": "Margin is the profit percentage you get over the selling price after subtracting all costs. A margin above 25% is considered good.",
+        "example": "Ex: 32.5% margin"
+      },
+      "roi": {
+        "title": "ROI (Return on Investment)",
+        "short": "Return on investment",
+        "long": "ROI indicates how much profit per euro invested. An ROI above 2.0 means you earn more than double what you invest.",
+        "example": "Ex: ROI of 2.5 means €2.50 profit for every €1 invested"
+      }
+    },
+    "amazon_ready": {
+      "title": "Amazon Ready",
+      "short": "Configuration to send products to Amazon",
+      "long": "The Amazon Ready section contains all the information needed to send products to Amazon FBA warehouses. Make sure all fields are completed before generating the Manufacturer Pack.",
+      "fnsku": {
+        "title": "FNSKU",
+        "short": "Amazon's unique code for the product",
+        "long": "FNSKU (Fulfillment Network Stock Keeping Unit) is a unique code that Amazon assigns to your product. It's needed to generate the labels that must be stuck on each unit.",
+        "example": "Ex: X001ABC123"
+      },
+      "gtin": {
+        "title": "GTIN",
+        "short": "Global product code (EAN/UPC)",
+        "long": "GTIN (Global Trade Item Number) is a unique barcode that identifies the product globally. It can be an EAN-13 (Europe) or UPC (United States).",
+        "example": "Ex: 1234567890123"
+      },
+      "units_per_carton": {
+        "title": "Units per carton",
+        "short": "Number of units that fit in a carton",
+        "long": "Number of individual units packed in each carton. This information is needed to generate carton labels and calculate space needed on the pallet.",
+        "example": "Ex: 12 units per carton"
+      },
+      "cartons_per_pallet": {
+        "title": "Cartons per pallet",
+        "short": "Number of cartons that fit on a pallet",
+        "long": "Number of cartons that can be stacked on a standard pallet. This helps calculate space needed in the warehouse and optimize shipments.",
+        "example": "Ex: 50 cartons per pallet"
+      }
+    },
+    "purchase_orders": {
+      "title": "Purchase Orders",
+      "short": "Supplier order management",
+      "long": "Purchase orders (PO) are documents that formalize the purchase of products from suppliers. Here you can manage the entire lifecycle of orders, from creation to receipt.",
+      "po_number": {
+        "title": "PO Number",
+        "short": "Unique order identifier",
+        "long": "The PO number is a unique identifier automatically generated for each purchase order. It's used to reference the order in communications with suppliers and for tracking."
+      },
+      "status": {
+        "title": "Order Status",
+        "short": "Current order status",
+        "long": "Order status indicates which phase it's in: confirmed (confirmed), waiting_manufacturer (waiting for manufacturing), in_transit (in transit), received (received), etc."
+      },
+      "tracking_number": {
+        "title": "Tracking Number",
+        "short": "Shipment tracking code",
+        "long": "The tracking number allows you to track the shipment from the factory to the warehouse. Enter the code provided by the shipping company."
+      },
+      "eta_date": {
+        "title": "Estimated Arrival Date",
+        "short": "Expected arrival date at warehouse",
+        "long": "The estimated arrival date (ETA) is the expected date when the shipment will arrive at Amazon's warehouse or your warehouse. Helps plan receipt and product launch."
+      }
+    },
+    "research": {
+      "title": "Research Phase",
+      "short": "First phase of the project",
+      "long": "The research phase is the first stage of the project, where you evaluate product viability. Here you capture product information, analyze competition, and make the initial decision (GO, RISKY, DISCARDED).",
+      "asin": {
+        "title": "Amazon ASIN",
+        "short": "Unique product identifier on Amazon",
+        "long": "ASIN (Amazon Standard Identification Number) is a unique 10-character identifier that Amazon assigns to each product. You can get it from the product URL on Amazon or enter it directly.",
+        "example": "Ex: B08XYZ1234"
+      },
+      "supplier_quotes": {
+        "title": "Supplier Quotes",
+        "short": "Comparison of prices from different suppliers",
+        "long": "Supplier quotes allow you to compare offers from different suppliers for the same product. You can add multiple quotes and compare prices, MOQ (Minimum Order Quantity), and conditions."
+      },
+      "decision": {
+        "title": "Decision",
+        "short": "Decision on product viability",
+        "long": "The decision indicates if the product is viable: GO (viable, continue), RISKY (viable but with risk), DISCARDED (not viable, discard). This decision is based on profitability and competition analysis."
+      }
+    },
+    "finances": {
+      "title": "Finances",
+      "short": "Expense and income management",
+      "long": "The finances section allows you to record and manage all expenses and income related to your projects. You can create custom categories, view balance, and generate reports.",
+      "expenses": {
+        "title": "Expenses",
+        "short": "Record of all costs",
+        "long": "Expenses include all costs related to projects: purchase orders, samples, advertising, tools, etc. You can assign them to a specific project or leave them global."
+      },
+      "incomes": {
+        "title": "Income",
+        "short": "Record of all income",
+        "long": "Income is all the money you receive from product sales on Amazon. You can assign it to a specific project for detailed profitability tracking."
+      },
+      "categories": {
+        "title": "Categories",
+        "short": "Organization of expenses and income",
+        "long": "Categories allow you to organize your expenses and income. You can create custom categories like 'Advertising', 'Samples', 'Tools', etc., for better financial control."
+      },
+      "recurring_expenses": {
+        "title": "Recurring Expenses",
+        "short": "Expenses that repeat periodically",
+        "long": "Recurring expenses are expenses that are automatically generated each month or period (such as subscriptions, rents, etc.). The system generates them automatically according to the configuration."
+      }
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "short": "Overview of all projects and activities",
+      "long": "The dashboard is the main page where you see an overview of all your projects, orders, tasks, and activities. You can customize the widgets that are displayed to adapt it to your needs.",
+      "widgets": {
+        "title": "Widgets",
+        "short": "Customizable dashboard elements",
+        "long": "Widgets are elements displayed on the dashboard to provide quick information. You can enable or disable widgets and reorganize them according to your preferences."
+      },
+      "sticky_notes": {
+        "title": "Sticky Notes",
+        "short": "Quick notes for reminders",
+        "long": "Sticky notes allow you to create quick reminders. They can be global or associated with a specific project. You can convert them to tasks when necessary."
+      },
+      "tasks": {
+        "title": "Tasks",
+        "short": "List of pending tasks",
+        "long": "Tasks help you track pending actions. They can be associated with a specific project or be global. You can assign priority and due date."
+      }
+    }
+  },
+  "help": {
+    "searchPlaceholder": "Search manual..."
   }
 }

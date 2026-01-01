@@ -134,6 +134,194 @@
   },
   "demo": {
     "banner": "Les dades són simulades"
+  },
+  "help": {
+    "profitability": {
+      "title": "Profitabilitat",
+      "short": "Calcula la profitabilitat del producte",
+      "long": "La calculadora de profitabilitat t'ajuda a determinar si un producte és viable per vendre a Amazon. Introdueix els costos i ingressos esperats per obtenir el marge i la decisió (GO, RISKY, NO-GO).",
+      "selling_price": {
+        "title": "Preu de venda",
+        "short": "Preu al qual vendràs el producte a Amazon",
+        "long": "El preu de venda és el preu final que el client pagarà per al producte a Amazon. Aquest preu ha d'incloure tots els costos i el teu benefici desitjat.",
+        "example": "Ex: 24,99 €"
+      },
+      "cogs": {
+        "title": "COGS (Cost of Goods Sold)",
+        "short": "Cost del producte fabricat",
+        "long": "El COGS inclou el cost unitari del producte a fàbrica, sense incloure enviaments ni altres costos. És el preu que pagues al proveïdor per unitat.",
+        "example": "Ex: 3,20 € per unitat"
+      },
+      "shipping_per_unit": {
+        "title": "Enviament per unitat",
+        "short": "Cost d'enviament des de fàbrica fins a Amazon",
+        "long": "Cost d'enviament per unitat des de la fàbrica fins al magatzem d'Amazon (FBA). Inclou transport internacional, duanes i manipulació.",
+        "example": "Ex: 0,50 € per unitat"
+      },
+      "referral_fee_percent": {
+        "title": "Comissió de referència",
+        "short": "Percentatge que cobra Amazon per cada venda",
+        "long": "Amazon cobra una comissió de referència sobre cada venda. Aquest percentatge varia segons la categoria del producte (normalment entre 8% i 15%).",
+        "example": "Ex: 15% (categoria estàndard)"
+      },
+      "fba_fee_per_unit": {
+        "title": "Tarifa FBA per unitat",
+        "short": "Cost de gestió i emmagatzematge d'Amazon",
+        "long": "Amazon cobra una tarifa FBA (Fulfillment by Amazon) per unitat que inclou emmagatzematge, recollida, embalatge i enviament al client final.",
+        "example": "Ex: 2,50 € per unitat"
+      },
+      "ppc_per_unit": {
+        "title": "PPC per unitat",
+        "short": "Cost de publicitat per unitat venuda",
+        "long": "Cost mitjà de publicitat (Pay-Per-Click) per unitat venuda. Calcula el cost total de publicitat dividit pel nombre d'unitats venudes.",
+        "example": "Ex: 0,80 € per unitat"
+      },
+      "other_costs_per_unit": {
+        "title": "Altres costos per unitat",
+        "short": "Altres costos variables per unitat",
+        "long": "Qualsevol altre cost variable per unitat, com embalatge personalitzat, etiquetes, inspeccions de qualitat, etc.",
+        "example": "Ex: 0,20 € per unitat"
+      },
+      "fixed_costs": {
+        "title": "Costos fixos",
+        "short": "Costos únics independents del volum",
+        "long": "Costos fixos que només es paguen una vegada, com fotografia de producte, creació de listing, registre de marca, etc. Es divideixen entre totes les unitats venudes.",
+        "example": "Ex: 500 € (fotografia + listing)"
+      },
+      "margin": {
+        "title": "Marge",
+        "short": "Percentatge de benefici sobre el preu de venda",
+        "long": "El marge és el percentatge de benefici que obtens sobre el preu de venda després de restar tots els costos. Un marge superior al 25% es considera bo.",
+        "example": "Ex: 32,5% de marge"
+      },
+      "roi": {
+        "title": "ROI (Return on Investment)",
+        "short": "Retorn sobre la inversió",
+        "long": "El ROI indica quant beneficis per cada euro invertit. Un ROI superior a 2.0 significa que guanyes més del doble del que invertixes.",
+        "example": "Ex: ROI de 2,5 significa 2,50 € de benefici per cada 1 € invertit"
+      }
+    },
+    "amazon_ready": {
+      "title": "Amazon Ready",
+      "short": "Configuració per enviar productes a Amazon",
+      "long": "La secció Amazon Ready conté tota la informació necessària per enviar productes als magatzems d'Amazon FBA. Assegura't que tots els camps estiguin completats abans de generar el Manufacturer Pack.",
+      "fnsku": {
+        "title": "FNSKU",
+        "short": "Codi únic d'Amazon per al producte",
+        "long": "El FNSKU (Fulfillment Network Stock Keeping Unit) és un codi únic que Amazon assigna al teu producte. És necessari per generar les etiquetes que s'han d'enganxar a cada unitat.",
+        "example": "Ex: X001ABC123"
+      },
+      "gtin": {
+        "title": "GTIN",
+        "short": "Codi de producte global (EAN/UPC)",
+        "long": "El GTIN (Global Trade Item Number) és un codi de barres únic que identifica el producte a nivell global. Pot ser un EAN-13 (Europa) o UPC (Estats Units).",
+        "example": "Ex: 1234567890123"
+      },
+      "units_per_carton": {
+        "title": "Unitats per cartó",
+        "short": "Quantitat d'unitats que caben en un cartó",
+        "long": "Nombre d'unitats individuals que s'embalen en cada cartó. Aquesta informació és necessària per generar les etiquetes de cartó i calcular l'espai necessari al pallet.",
+        "example": "Ex: 12 unitats per cartó"
+      },
+      "cartons_per_pallet": {
+        "title": "Cartons per pallet",
+        "short": "Quantitat de cartons que caben en un pallet",
+        "long": "Nombre de cartons que es poden apilar en un pallet estàndard. Això ajuda a calcular l'espai necessari al magatzem i optimitzar els enviaments.",
+        "example": "Ex: 50 cartons per pallet"
+      }
+    },
+    "purchase_orders": {
+      "title": "Comandes de compra",
+      "short": "Gestió de comandes a proveïdors",
+      "long": "Les comandes de compra (PO) són documents que formalitzen la compra de productes als proveïdors. Aquí pots gestionar tot el cicle de vida de les comandes, des de la creació fins a la recepció.",
+      "po_number": {
+        "title": "Número de PO",
+        "short": "Identificador únic de la comanda",
+        "long": "El número de PO és un identificador únic generat automàticament per cada comanda de compra. S'utilitza per referenciar la comanda en comunicacions amb proveïdors i per al seguiment."
+      },
+      "status": {
+        "title": "Estat de la comanda",
+        "short": "Estat actual de la comanda",
+        "long": "L'estat de la comanda indica en quina fase es troba: confirmed (confirmada), waiting_manufacturer (esperant fabricació), in_transit (en trànsit), received (rebuta), etc."
+      },
+      "tracking_number": {
+        "title": "Número de seguiment",
+        "short": "Codi de seguiment de l'enviament",
+        "long": "El número de seguiment permet rastrejar l'enviament des de la fàbrica fins al magatzem. Introdueix el codi proporcionat per la companyia de transport."
+      },
+      "eta_date": {
+        "title": "Data estimada d'arribada",
+        "short": "Data prevista d'arribada al magatzem",
+        "long": "La data estimada d'arribada (ETA) és la data prevista en què l'enviament arribarà al magatzem d'Amazon o al teu magatzem. Ajuda a planificar la recepció i el llançament del producte."
+      }
+    },
+    "research": {
+      "title": "Fase de recerca",
+      "short": "Primera fase del projecte",
+      "long": "La fase de recerca és la primera etapa del projecte, on avalues la viabilitat del producte. Aquí captures informació del producte, analitzes la competència i prens la decisió inicial (GO, RISKY, DISCARDED).",
+      "asin": {
+        "title": "ASIN d'Amazon",
+        "short": "Identificador únic del producte a Amazon",
+        "long": "L'ASIN (Amazon Standard Identification Number) és un identificador únic de 10 caràcters que Amazon assigna a cada producte. Pots obtenir-lo des de l'URL del producte a Amazon o introduir-lo directament.",
+        "example": "Ex: B08XYZ1234"
+      },
+      "supplier_quotes": {
+        "title": "Pressupostos de proveïdors",
+        "short": "Comparació de preus de diferents proveïdors",
+        "long": "Els pressupostos de proveïdors et permeten comparar ofertes de diferents proveïdors per al mateix producte. Pots afegir múltiples pressupostos i comparar preus, MOQ (Minimum Order Quantity) i condicions."
+      },
+      "decision": {
+        "title": "Decisió",
+        "short": "Decisió sobre la viabilitat del producte",
+        "long": "La decisió indica si el producte és viable: GO (viable, continuar), RISKY (viable però amb risc), DISCARDED (no viable, descartar). Aquesta decisió es basa en l'anàlisi de profitabilitat i competència."
+      }
+    },
+    "finances": {
+      "title": "Finances",
+      "short": "Gestió de despeses i ingressos",
+      "long": "La secció de finances et permet registrar i gestionar totes les despeses i ingressos relacionats amb els teus projectes. Pots crear categories personalitzades, veure el balanç i generar informes.",
+      "expenses": {
+        "title": "Despeses",
+        "short": "Registre de tots els costos",
+        "long": "Les despeses inclouen tots els costos relacionats amb els projectes: comandes de compra, mostres, publicitat, eines, etc. Pots assignar-les a un projecte específic o deixar-les globals."
+      },
+      "incomes": {
+        "title": "Ingressos",
+        "short": "Registre de tots els ingressos",
+        "long": "Els ingressos són tots els diners que reus per vendes de productes a Amazon. Pots assignar-los a un projecte específic per fer un seguiment detallat de la rendibilitat."
+      },
+      "categories": {
+        "title": "Categories",
+        "short": "Organització de despeses i ingressos",
+        "long": "Les categories et permeten organitzar les teves despeses i ingressos. Pots crear categories personalitzades com 'Publicitat', 'Mostres', 'Eines', etc., per tenir un millor control financer."
+      },
+      "recurring_expenses": {
+        "title": "Despeses recurrents",
+        "short": "Despeses que es repeteixen periòdicament",
+        "long": "Les despeses recurrents són despeses que es generen automàticament cada mes o període (com subscripcions, lloguers, etc.). El sistema les genera automàticament segons la configuració."
+      }
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "short": "Vista general de tots els projectes i activitats",
+      "long": "El dashboard és la pàgina principal on veus una vista general de tots els teus projectes, comandes, tasques i activitats. Pots personalitzar els widgets que es mostren per adaptar-lo a les teves necessitats.",
+      "widgets": {
+        "title": "Widgets",
+        "short": "Elements personalitzables del dashboard",
+        "long": "Els widgets són elements que es mostren al dashboard per proporcionar informació ràpida. Pots activar o desactivar widgets i reorganitzar-los segons les teves preferències."
+      },
+      "sticky_notes": {
+        "title": "Notes adhesives",
+        "short": "Notes ràpides per recordatoris",
+        "long": "Les notes adhesives et permeten crear recordatoris ràpids. Poden ser globals o associades a un projecte específic. Pots convertir-les en tasques quan sigui necessari."
+      },
+      "tasks": {
+        "title": "Tasques",
+        "short": "Llista de tasques pendents",
+        "long": "Les tasques et ajuden a fer un seguiment de les accions pendents. Poden estar associades a un projecte específic o ser globals. Pots assignar prioritat i data de venciment."
+      }
+    },
+    "searchPlaceholder": "Cerca al manual..."
   }
 }
 

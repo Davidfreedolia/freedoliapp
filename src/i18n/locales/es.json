@@ -134,5 +134,195 @@
   },
   "demo": {
     "banner": "Los datos son simulados"
+  },
+  "help": {
+    "profitability": {
+      "title": "Rentabilidad",
+      "short": "Calcular la rentabilidad del producto",
+      "long": "La calculadora de rentabilidad te ayuda a determinar si un producto es viable para vender en Amazon. Introduce los costos e ingresos esperados para obtener el margen y la decisión (GO, RISKY, NO-GO).",
+      "selling_price": {
+        "title": "Precio de venta",
+        "short": "Precio al que venderás el producto en Amazon",
+        "long": "El precio de venta es el precio final que el cliente pagará por el producto en Amazon. Este precio debe incluir todos los costos y tu beneficio deseado.",
+        "example": "Ej: 24,99 €"
+      },
+      "cogs": {
+        "title": "COGS (Coste de Productos Vendidos)",
+        "short": "Coste del producto fabricado",
+        "long": "El COGS incluye el coste unitario del producto en fábrica, sin incluir envíos ni otros costos. Es el precio que pagas al proveedor por unidad.",
+        "example": "Ej: 3,20 € por unidad"
+      },
+      "shipping_per_unit": {
+        "title": "Envío por unidad",
+        "short": "Coste de envío desde fábrica hasta Amazon",
+        "long": "Coste de envío por unidad desde la fábrica hasta el almacén de Amazon (FBA). Incluye transporte internacional, aduanas y manipulación.",
+        "example": "Ej: 0,50 € por unidad"
+      },
+      "referral_fee_percent": {
+        "title": "Comisión de referencia",
+        "short": "Porcentaje que cobra Amazon por cada venta",
+        "long": "Amazon cobra una comisión de referencia sobre cada venta. Este porcentaje varía según la categoría del producto (normalmente entre 8% y 15%).",
+        "example": "Ej: 15% (categoría estándar)"
+      },
+      "fba_fee_per_unit": {
+        "title": "Tarifa FBA por unidad",
+        "short": "Coste de gestión y almacenamiento de Amazon",
+        "long": "Amazon cobra una tarifa FBA (Fulfillment by Amazon) por unidad que incluye almacenamiento, recogida, embalaje y envío al cliente final.",
+        "example": "Ej: 2,50 € por unidad"
+      },
+      "ppc_per_unit": {
+        "title": "PPC por unidad",
+        "short": "Coste de publicidad por unidad vendida",
+        "long": "Coste medio de publicidad (Pay-Per-Click) por unidad vendida. Calcula el coste total de publicidad dividido por el número de unidades vendidas.",
+        "example": "Ej: 0,80 € por unidad"
+      },
+      "other_costs_per_unit": {
+        "title": "Otros costos por unidad",
+        "short": "Otros costos variables por unidad",
+        "long": "Cualquier otro costo variable por unidad, como embalaje personalizado, etiquetas, inspecciones de calidad, etc.",
+        "example": "Ej: 0,20 € por unidad"
+      },
+      "fixed_costs": {
+        "title": "Costos fijos",
+        "short": "Costos únicos independientes del volumen",
+        "long": "Costos fijos que solo se pagan una vez, como fotografía de producto, creación de listing, registro de marca, etc. Se dividen entre todas las unidades vendidas.",
+        "example": "Ej: 500 € (fotografía + listing)"
+      },
+      "margin": {
+        "title": "Margen",
+        "short": "Porcentaje de beneficio sobre el precio de venta",
+        "long": "El margen es el porcentaje de beneficio que obtienes sobre el precio de venta después de restar todos los costos. Un margen superior al 25% se considera bueno.",
+        "example": "Ej: 32,5% de margen"
+      },
+      "roi": {
+        "title": "ROI (Retorno de Inversión)",
+        "short": "Retorno sobre la inversión",
+        "long": "El ROI indica cuánto beneficio por cada euro invertido. Un ROI superior a 2.0 significa que ganas más del doble de lo que inviertes.",
+        "example": "Ej: ROI de 2,5 significa 2,50 € de beneficio por cada 1 € invertido"
+      }
+    },
+    "amazon_ready": {
+      "title": "Amazon Ready",
+      "short": "Configuración para enviar productos a Amazon",
+      "long": "La sección Amazon Ready contiene toda la información necesaria para enviar productos a los almacenes de Amazon FBA. Asegúrate de que todos los campos estén completados antes de generar el Manufacturer Pack.",
+      "fnsku": {
+        "title": "FNSKU",
+        "short": "Código único de Amazon para el producto",
+        "long": "El FNSKU (Fulfillment Network Stock Keeping Unit) es un código único que Amazon asigna a tu producto. Es necesario para generar las etiquetas que se deben pegar en cada unidad.",
+        "example": "Ej: X001ABC123"
+      },
+      "gtin": {
+        "title": "GTIN",
+        "short": "Código de producto global (EAN/UPC)",
+        "long": "El GTIN (Global Trade Item Number) es un código de barras único que identifica el producto a nivel global. Puede ser un EAN-13 (Europa) o UPC (Estados Unidos).",
+        "example": "Ej: 1234567890123"
+      },
+      "units_per_carton": {
+        "title": "Unidades por cartón",
+        "short": "Cantidad de unidades que caben en un cartón",
+        "long": "Número de unidades individuales que se embalan en cada cartón. Esta información es necesaria para generar las etiquetas de cartón y calcular el espacio necesario en el pallet.",
+        "example": "Ej: 12 unidades por cartón"
+      },
+      "cartons_per_pallet": {
+        "title": "Cartones por pallet",
+        "short": "Cantidad de cartones que caben en un pallet",
+        "long": "Número de cartones que se pueden apilar en un pallet estándar. Esto ayuda a calcular el espacio necesario en el almacén y optimizar los envíos.",
+        "example": "Ej: 50 cartones por pallet"
+      }
+    },
+    "purchase_orders": {
+      "title": "Órdenes de compra",
+      "short": "Gestión de órdenes a proveedores",
+      "long": "Las órdenes de compra (PO) son documentos que formalizan la compra de productos a los proveedores. Aquí puedes gestionar todo el ciclo de vida de las órdenes, desde la creación hasta la recepción.",
+      "po_number": {
+        "title": "Número de PO",
+        "short": "Identificador único de la orden",
+        "long": "El número de PO es un identificador único generado automáticamente para cada orden de compra. Se utiliza para referenciar la orden en comunicaciones con proveedores y para el seguimiento."
+      },
+      "status": {
+        "title": "Estado de la orden",
+        "short": "Estado actual de la orden",
+        "long": "El estado de la orden indica en qué fase se encuentra: confirmed (confirmada), waiting_manufacturer (esperando fabricación), in_transit (en tránsito), received (recibida), etc."
+      },
+      "tracking_number": {
+        "title": "Número de seguimiento",
+        "short": "Código de seguimiento del envío",
+        "long": "El número de seguimiento permite rastrear el envío desde la fábrica hasta el almacén. Introduce el código proporcionado por la compañía de transporte."
+      },
+      "eta_date": {
+        "title": "Fecha estimada de llegada",
+        "short": "Fecha prevista de llegada al almacén",
+        "long": "La fecha estimada de llegada (ETA) es la fecha prevista en la que el envío llegará al almacén de Amazon o a tu almacén. Ayuda a planificar la recepción y el lanzamiento del producto."
+      }
+    },
+    "research": {
+      "title": "Fase de investigación",
+      "short": "Primera fase del proyecto",
+      "long": "La fase de investigación es la primera etapa del proyecto, donde evalúas la viabilidad del producto. Aquí capturas información del producto, analizas la competencia y tomas la decisión inicial (GO, RISKY, DISCARDED).",
+      "asin": {
+        "title": "ASIN de Amazon",
+        "short": "Identificador único del producto en Amazon",
+        "long": "El ASIN (Amazon Standard Identification Number) es un identificador único de 10 caracteres que Amazon asigna a cada producto. Puedes obtenerlo desde la URL del producto en Amazon o introducirlo directamente.",
+        "example": "Ej: B08XYZ1234"
+      },
+      "supplier_quotes": {
+        "title": "Presupuestos de proveedores",
+        "short": "Comparación de precios de diferentes proveedores",
+        "long": "Los presupuestos de proveedores te permiten comparar ofertas de diferentes proveedores para el mismo producto. Puedes añadir múltiples presupuestos y comparar precios, MOQ (Cantidad Mínima de Pedido) y condiciones."
+      },
+      "decision": {
+        "title": "Decisión",
+        "short": "Decisión sobre la viabilidad del producto",
+        "long": "La decisión indica si el producto es viable: GO (viable, continuar), RISKY (viable pero con riesgo), DISCARDED (no viable, descartar). Esta decisión se basa en el análisis de rentabilidad y competencia."
+      }
+    },
+    "finances": {
+      "title": "Finanzas",
+      "short": "Gestión de gastos e ingresos",
+      "long": "La sección de finanzas te permite registrar y gestionar todos los gastos e ingresos relacionados con tus proyectos. Puedes crear categorías personalizadas, ver el balance y generar informes.",
+      "expenses": {
+        "title": "Gastos",
+        "short": "Registro de todos los costos",
+        "long": "Los gastos incluyen todos los costos relacionados con los proyectos: órdenes de compra, muestras, publicidad, herramientas, etc. Puedes asignarlos a un proyecto específico o dejarlos globales."
+      },
+      "incomes": {
+        "title": "Ingresos",
+        "short": "Registro de todos los ingresos",
+        "long": "Los ingresos son todo el dinero que recibes por ventas de productos en Amazon. Puedes asignarlos a un proyecto específico para hacer un seguimiento detallado de la rentabilidad."
+      },
+      "categories": {
+        "title": "Categorías",
+        "short": "Organización de gastos e ingresos",
+        "long": "Las categorías te permiten organizar tus gastos e ingresos. Puedes crear categorías personalizadas como 'Publicidad', 'Muestras', 'Herramientas', etc., para tener un mejor control financiero."
+      },
+      "recurring_expenses": {
+        "title": "Gastos recurrentes",
+        "short": "Gastos que se repiten periódicamente",
+        "long": "Los gastos recurrentes son gastos que se generan automáticamente cada mes o período (como suscripciones, alquileres, etc.). El sistema los genera automáticamente según la configuración."
+      }
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "short": "Vista general de todos los proyectos y actividades",
+      "long": "El dashboard es la página principal donde ves una vista general de todos tus proyectos, órdenes, tareas y actividades. Puedes personalizar los widgets que se muestran para adaptarlo a tus necesidades.",
+      "widgets": {
+        "title": "Widgets",
+        "short": "Elementos personalizables del dashboard",
+        "long": "Los widgets son elementos que se muestran en el dashboard para proporcionar información rápida. Puedes activar o desactivar widgets y reorganizarlos según tus preferencias."
+      },
+      "sticky_notes": {
+        "title": "Notas adhesivas",
+        "short": "Notas rápidas para recordatorios",
+        "long": "Las notas adhesivas te permiten crear recordatorios rápidos. Pueden ser globales o asociadas a un proyecto específico. Puedes convertirlas en tareas cuando sea necesario."
+      },
+      "tasks": {
+        "title": "Tareas",
+        "short": "Lista de tareas pendientes",
+        "long": "Las tareas te ayudan a hacer un seguimiento de las acciones pendientes. Pueden estar asociadas a un proyecto específico o ser globales. Puedes asignar prioridad y fecha de vencimiento."
+      }
+    }
+  },
+  "help": {
+    "searchPlaceholder": "Buscar en el manual..."
   }
 }

@@ -19,21 +19,25 @@ import {
   Barcode,
   Globe,
   Database,
-  RefreshCw
+  RefreshCw,
+  BookOpen,
+  ExternalLink
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { getCompanySettings, updateCompanySettings, supabase, getAuditLogs, updateLanguage } from '../lib/supabase'
+import { getCompanySettings, updateCompanySettings, supabase, getAuditLogs, updateLanguage, getCurrentUserId } from '../lib/supabase'
 import { clearDemoData, generateDemoData } from '../lib/demoSeed'
 import Header from '../components/Header'
 import GTINPoolSection from '../components/GTINPoolSection'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
 import { showToast } from '../components/Toast'
+import { useNavigate } from 'react-router-dom'
 
 export default function Settings() {
   const { darkMode, refreshProjects } = useApp()
   const { t, i18n } = useTranslation()
   const { isMobile } = useBreakpoint()
+  const navigate = useNavigate()
   
   const [activeTab, setActiveTab] = useState('company')
   const [currentLanguage, setCurrentLanguage] = useState(i18n.language || 'ca')
@@ -98,9 +102,10 @@ export default function Settings() {
   const loadSettings = async () => {
     setLoading(true)
     try {
+      const userId = await getCurrentUserId()
       const [companyRes, signaturesRes] = await Promise.all([
         getCompanySettings(),
-        supabase.from('signatures').select('*').order('created_at', { ascending: true })
+        supabase.from('signatures').select('*').eq('user_id', userId).order('created_at', { ascending: true })
       ])
       
       if (companyRes) {
@@ -359,6 +364,59 @@ export default function Settings() {
                   <option value="es">Español</option>
                 </select>
               </div>
+            </div>
+
+            {/* Help Manual */}
+            <div style={{
+              ...styles.subsection,
+              marginBottom: '32px',
+              padding: '20px',
+              borderRadius: '12px',
+              border: '1px solid var(--border-color)',
+              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
+            }}>
+              <h3 style={{
+                ...styles.subsectionTitle,
+                color: darkMode ? '#ffffff' : '#111827',
+                marginBottom: '16px'
+              }}>
+                <BookOpen size={16} />
+                Manual d'ús
+              </h3>
+              <p style={{
+                color: darkMode ? '#9ca3af' : '#6b7280',
+                fontSize: '14px',
+                marginBottom: '16px'
+              }}>
+                Consulta el manual complet amb informació detallada sobre totes les funcionalitats de Freedoliapp.
+              </p>
+              <button
+                onClick={() => navigate('/help')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '10px 18px',
+                  backgroundColor: '#4f46e5',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.backgroundColor = '#4338ca'
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.backgroundColor = '#4f46e5'
+                }}
+              >
+                <BookOpen size={16} />
+                Obrir Manual d'ús
+                <ExternalLink size={14} />
+              </button>
             </div>
 
             {/* Demo Mode Section */}
@@ -727,7 +785,9 @@ export default function Settings() {
       </div>
 
       {/* Modal Signatura */}
-      {showSignatureModal && editingSignature && (
+      {showSignatureModal && editingSignature && (() => {
+        const modalStyles = getModalStyles(isMobile, darkMode)
+        return (
         <div style={{...styles.modalOverlay, ...modalStyles.overlay}} onClick={() => setShowSignatureModal(false)}>
           <div style={{...styles.modal, ...modalStyles.modal}} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeader}>
@@ -799,7 +859,8 @@ export default function Settings() {
             </div>
           </div>
         </div>
-      )}
+        )
+      })()}
     </div>
   )
 }

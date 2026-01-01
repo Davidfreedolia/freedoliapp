@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Barcode, Package, Save, Plus, AlertCircle, CheckCircle2, X } from 'lucide-react'
+import HelpIcon from './HelpIcon'
 import {
   getProductIdentifiers,
   upsertProductIdentifiers,
@@ -210,9 +211,13 @@ export default function IdentifiersSection({ projectId, darkMode }) {
         <div style={styles.formGroup}>
           <label style={{
             ...styles.label,
-            color: darkMode ? '#e5e7eb' : '#374151'
+            color: darkMode ? '#e5e7eb' : '#374151',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px'
           }}>
             Tipus GTIN
+            <HelpIcon helpKey="amazon_ready.gtin" size="small" darkMode={darkMode} />
           </label>
           <select
             value={formData.gtin_type}
@@ -283,9 +288,13 @@ export default function IdentifiersSection({ projectId, darkMode }) {
         <div style={styles.formGroup}>
           <label style={{
             ...styles.label,
-            color: darkMode ? '#e5e7eb' : '#374151'
+            color: darkMode ? '#e5e7eb' : '#374151',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px'
           }}>
             ASIN
+            <HelpIcon helpKey="research.asin" size="small" darkMode={darkMode} />
           </label>
           <input
             type="text"
@@ -305,9 +314,13 @@ export default function IdentifiersSection({ projectId, darkMode }) {
         <div style={styles.formGroup}>
           <label style={{
             ...styles.label,
-            color: darkMode ? '#e5e7eb' : '#374151'
+            color: darkMode ? '#e5e7eb' : '#374151',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px'
           }}>
             FNSKU
+            <HelpIcon helpKey="amazon_ready.fnsku" size="small" darkMode={darkMode} />
           </label>
           <input
             type="text"

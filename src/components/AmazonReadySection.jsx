@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { CheckCircle2, XCircle } from 'lucide-react'
+import HelpIcon from './HelpIcon'
 
 export default function AmazonReadySection({ readiness, readyStatus, onUpdate, darkMode }) {
   const [formData, setFormData] = useState({
@@ -165,7 +166,10 @@ export default function AmazonReadySection({ readiness, readyStatus, onUpdate, d
 
         <div style={styles.formGrid}>
           <div style={styles.formGroup}>
-            <label style={styles.label}>Units per carton</label>
+            <label style={{ ...styles.label, display: 'flex', alignItems: 'center', gap: '4px' }}>
+              Units per carton
+              <HelpIcon helpKey="amazon_ready.units_per_carton" size="small" darkMode={darkMode} />
+            </label>
             <input
               type="number"
               value={formData.units_per_carton || ''}
