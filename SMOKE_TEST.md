@@ -1,166 +1,145 @@
 # Production Smoke Test Checklist
 
-**Objetivo**: Validar rápidamente (1 minuto) que la aplicación funciona correctamente después de un deploy a producción.
+**Objetivo**: Detectar "showstoppers" rápidamente después de cada deploy a producción.
 
-**Cuándo ejecutar**: Después de cada deploy a producción, antes de anunciar la actualización.
+**Cuándo ejecutar**: Inmediatamente después de cada deploy, antes de anunciar la actualización.
 
 ---
 
-## ✅ Checklist Rápido (1 minuto)
+## 🚀 Smoke 60s (Must-Pass)
 
-### 1. Autenticación
+**Tiempo estimado**: 60-90 segundos  
+**Criterio**: Todos los checks deben pasar. Si alguno falla, considerar rollback.
+
+### 1. Consola del Navegador (F12)
+- [ ] **No hay errores rojos** en la consola
+- [ ] **No hay 404** para recursos estáticos (JS, CSS)
+- [ ] **No hay chunk-load errors** (verificar Network tab para assets)
+- [ ] **No hay errores de autenticación** (401, 403)
+
+### 2. Autenticación
 - [ ] **Login**: Acceder con credenciales válidas
-  - [ ] El formulario de login se muestra correctamente
   - [ ] Login exitoso redirige al dashboard
-  - [ ] No hay errores en consola
+  - [ ] No hay errores en consola durante login
 
 - [ ] **Logout**: Cerrar sesión
-  - [ ] Botón de logout funciona
   - [ ] Redirige a `/login`
   - [ ] No se puede acceder a rutas protegidas sin login
 
----
-
-### 2. Dashboard
+### 3. Dashboard
 - [ ] **Carga inicial**
-  - [ ] Dashboard carga sin pantalla blanca
+  - [ ] Dashboard carga sin pantalla blanca (< 3 segundos)
+  - [ ] Dashboard renderiza y al menos 1 widget no falla
   - [ ] No hay errores críticos en consola
-  - [ ] Los widgets principales se renderizan
 
-- [ ] **Widgets visibles** (al menos 3 deben estar visibles)
-  - [ ] Orders In Progress
-  - [ ] Financial Chart
-  - [ ] POs Not Ready (si hay datos)
-  - [ ] Sticky Notes (si está habilitado)
+### 4. Navegación Core
+- [ ] **Projects**: `/projects` carga correctamente (lista o "No projects")
+- [ ] **Orders**: `/orders` carga correctamente (lista o "No orders")
+- [ ] **Finances**: `/finances` carga correctamente
+- [ ] **Settings**: `/settings` carga correctamente
 
----
-
-### 3. Projects
-- [ ] **Lista de proyectos**
-  - [ ] La página `/projects` carga correctamente
-  - [ ] Se muestran proyectos (o mensaje "No projects")
-  - [ ] No hay errores en consola
-
-- [ ] **Detalle de proyecto**
-  - [ ] Click en un proyecto abre `/projects/:id`
-  - [ ] Se muestran las pestañas (Research, Production, etc.)
-  - [ ] Profitability Calculator se renderiza
-  - [ ] No hay errores al cambiar de pestaña
+### 5. Supabase Reachable
+- [ ] **Conexión a Supabase**: 
+  - [ ] Si Supabase está caído, se muestra UI de error recuperable (no pantalla blanca)
+  - [ ] Si hay error de red, se muestra mensaje claro al usuario
+  - [ ] Verificar en Network tab: requests a Supabase no fallan con 500/502/503
 
 ---
 
-### 4. Orders
-- [ ] **Lista de órdenes**
-  - [ ] La página `/orders` carga correctamente
-  - [ ] Se muestran POs (o mensaje "No orders")
-  - [ ] Filtros funcionan (status, supplier, etc.)
+## ✅ Smoke 2min (Nice-to-Have)
 
-- [ ] **Detalle de PO**
-  - [ ] Click en un PO abre el detalle
-  - [ ] Se muestran todos los campos principales
-  - [ ] Amazon Ready Section se renderiza (si aplica)
-  - [ ] No hay errores al guardar cambios
+**Tiempo estimado**: 2 minutos  
+**Criterio**: Verificaciones adicionales para mayor confianza.
 
----
-
-### 5. Finances
-- [ ] **Lista de transacciones**
-  - [ ] La página `/finances` carga correctamente
-  - [ ] Se muestran expenses e incomes (o mensajes vacíos)
-  - [ ] Filtros por categoría funcionan
-
-- [ ] **Agregar expense de prueba**
-  - [ ] Botón "Add Expense" abre modal
-  - [ ] Formulario se completa correctamente
-  - [ ] Guardar crea el expense
-  - [ ] El expense aparece en la lista
+### 1. Funcionalidad Básica
+- [ ] **Projects**: Click en un proyecto abre `/projects/:id` y se renderiza
+- [ ] **Orders**: Click en un PO muestra el detalle
+- [ ] **Finances**: Agregar expense de prueba funciona
   - [ ] **IMPORTANTE**: Eliminar el expense de prueba después
 
----
+### 2. Google Drive Integration
+- [ ] **Drive Status**: Se muestra en Settings (conectado o desconectado)
+- [ ] **Estado correcto**: Si desconectado, muestra "Disconnected" (no error)
+- [ ] **Botones funcionan**: Connect/Disconnect responden correctamente
 
-### 6. Settings
-- [ ] **Página de configuración**
-  - [ ] La página `/settings` carga correctamente
-  - [ ] Se muestran las secciones principales:
-    - [ ] Company Settings
-    - [ ] User Signature
-    - [ ] Google Drive Status
-  - [ ] No hay errores en consola
-
----
-
-### 7. Google Drive Integration
-- [ ] **Estado de Drive**
-  - [ ] Drive Status se muestra en Settings
-  - [ ] Si está desconectado: muestra "Disconnected" (no error)
-  - [ ] Si está conectado: muestra nombre de usuario
-  - [ ] Botón "Connect" funciona (si está desconectado)
-  - [ ] Botón "Disconnect" funciona (si está conectado)
-
----
-
-## 🚨 Errores Críticos a Verificar
-
-### Consola del Navegador (F12)
-- [ ] **No hay errores rojos** en la consola
-- [ ] **No hay 404** para recursos estáticos (JS, CSS, imágenes)
-- [ ] **No hay errores de autenticación** (401, 403)
-- [ ] **No hay errores de red** (500, 502, 503)
-
-### Rendimiento
+### 3. Rendimiento Básico
 - [ ] **Carga inicial** < 3 segundos
 - [ ] **Navegación entre páginas** < 1 segundo
-- [ ] **No hay memory leaks** (verificar con DevTools > Performance)
+- [ ] **No hay errores de red** (500, 502, 503) en Network tab
 
 ---
 
-## 📝 Notas Post-Deploy
+## 📊 Resultados del Smoke Test
 
 **Fecha del deploy**: _______________
 
-**Versión/Commit**: _______________
+**Commit SHA**: _______________
+
+**Deploy URL**: _______________
 
 **Ejecutado por**: _______________
 
 **Resultado**: 
-- [ ] ✅ Todo OK - Producción estable
-- [ ] ⚠️ Problemas menores (especificar abajo)
-- [ ] ❌ Problemas críticos (rollback necesario)
+- [ ] ✅ **PASS** - Producción estable
+- [ ] ❌ **FAIL** - Rollback necesario
 
-**Problemas encontrados**:
+**Si FAIL**:
+- **Link al log Vercel**: _______________
+- **Screenshot del error**: _______________
+- **Descripción del problema**: 
 ```
-[Describir cualquier problema encontrado]
+[Describir el problema encontrado]
 ```
 
 **Acciones tomadas**:
 ```
-[Describir acciones correctivas]
+[Describir acciones correctivas o rollback]
 ```
 
 ---
 
-## 🔄 Rollback Checklist (si es necesario)
+## 🔄 Rollback Checklist
 
-Si se encuentran problemas críticos:
+Si el smoke test falla:
 
-1. [ ] Identificar el commit problemático
+1. [ ] Identificar el commit problemático (SHA arriba)
 2. [ ] Revertir al commit anterior estable
 3. [ ] Ejecutar `npm run build` localmente para verificar
-4. [ ] Desplegar versión anterior
+4. [ ] Desplegar versión anterior: `vercel --prod`
 5. [ ] Ejecutar smoke test de nuevo
 6. [ ] Documentar el problema en el issue tracker
 
 ---
 
-## 💡 Tips
+## 🔬 Extended QA (Optional)
+
+**Cuándo ejecutar**: Antes de releases importantes, o cuando hay tiempo disponible.
+
+### Performance Profiling
+- [ ] **Memory leaks**: Verificar con DevTools > Performance (grabar 2-3 minutos de uso)
+- [ ] **Bundle size**: Verificar que no haya aumentado significativamente
+- [ ] **Lighthouse score**: Ejecutar Lighthouse y verificar métricas
+
+### Cross-Browser Testing
+- [ ] **Chrome**: Funcionalidad completa
+- [ ] **Firefox**: Funcionalidad completa
+- [ ] **Safari**: Funcionalidad completa (si aplica)
+- [ ] **Mobile**: Probar en dispositivo móvil (si aplica)
+
+### Monitoreo
+- [ ] **Logs de Supabase**: Revisar logs durante el test
+- [ ] **Logs de Vercel**: Revisar logs de runtime en Vercel Dashboard
+- [ ] **Error tracking**: Verificar que no hay errores en producción
+
+---
+
+## 💡 Tips Rápidos
 
 - **Usar modo incógnito** para evitar cache del navegador
-- **Limpiar localStorage** si hay problemas de autenticación
-- **Verificar en múltiples navegadores** (Chrome, Firefox, Safari)
-- **Probar en mobile** si es relevante para tu audiencia
-- **Monitorear logs de Supabase** durante el test
+- **Limpiar localStorage** si hay problemas de autenticación: `localStorage.clear()`
+- **Network tab**: Verificar que todos los chunks se cargan (no 404)
+- **Console tab**: Filtrar por "Error" para ver solo errores críticos
 
 ---
 
 **Última actualización**: 2026-01-01
-
