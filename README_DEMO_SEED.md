@@ -52,3 +52,4 @@ Després d'executar els scripts, verifica:
 - Widgets actius amb dades
 - Cap vista buida
 
+

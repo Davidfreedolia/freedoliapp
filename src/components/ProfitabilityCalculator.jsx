@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Save, AlertTriangle, CheckCircle2, XCircle } from 'lucide-react'
-import { getProjectProfitability, upsertProjectProfitability } from '../lib/supabase'
+import { Save, AlertTriangle, CheckCircle2, XCircle, ExternalLink, Link2 } from 'lucide-react'
+import { getProjectProfitability, upsertProjectProfitability, getProductIdentifiers, upsertProductIdentifiers } from '../lib/supabase'
 import { calculateQuickProfitability } from '../lib/profitability'
 
 /**
@@ -22,10 +22,39 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
   })
   const [results, setResults] = useState(null)
   const [badge, setBadge] = useState(null)
+  
+  // Amazon ASIN Capture state
+  const [asinInput, setAsinInput] = useState('')
+  const [capturedAsin, setCapturedAsin] = useState(null)
+  const [asinMarketplace, setAsinMarketplace] = useState(null)
+  const [capturingAsin, setCapturingAsin] = useState(false)
+  const [asinError, setAsinError] = useState(null)
 
   useEffect(() => {
     loadData()
+    loadAsin()
   }, [projectId])
+
+  // Listen for price copy events from QuickSupplierPriceEstimate
+  useEffect(() => {
+    const handleCopyPrice = (event) => {
+      const { price } = event.detail
+      if (price && !isNaN(price)) {
+        setData(prev => ({
+          ...prev,
+          cogs: price.toString()
+        }))
+        if (onPriceCopied) {
+          onPriceCopied(price)
+        }
+      }
+    }
+
+    window.addEventListener('copyPriceToCOGS', handleCopyPrice)
+    return () => {
+      window.removeEventListener('copyPriceToCOGS', handleCopyPrice)
+    }
+  }, [onPriceCopied])
 
   useEffect(() => {
     // Recalcular en temps real quan canvien els inputs
@@ -110,6 +139,168 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
 
   const formatPercent = (value) => {
     return `${value.toFixed(2)}%`
+  }
+
+  const loadAsin = async () => {
+    if (!projectId) return
+    try {
+      const identifiers = await getProductIdentifiers(projectId)
+      if (identifiers?.asin) {
+        setCapturedAsin(identifiers.asin)
+        // Try to extract marketplace from existing data if available
+        // For now, default to 'es' if not specified
+        setAsinMarketplace('es')
+      }
+    } catch (err) {
+      console.error('Error carregant ASIN:', err)
+    }
+  }
+
+  /**
+   * Extrae ASIN de una URL de Amazon o valida un ASIN directo
+   * Soporta:
+   * - /dp/<ASIN>
+   * - /gp/product/<ASIN>
+   * - query param asin=<ASIN>
+   * - ASIN directo (10 caracteres alfanuméricos)
+   */
+  const extractAsin = (input) => {
+    if (!input || typeof input !== 'string') return null
+    
+    const trimmed = input.trim()
+    
+    // Si es un ASIN directo (10 caracteres alfanuméricos)
+    if (/^[A-Z0-9]{10}$/i.test(trimmed)) {
+      return trimmed.toUpperCase()
+    }
+    
+    // Intentar extraer de URL
+    try {
+      const url = new URL(trimmed.startsWith('http') ? trimmed : `https://${trimmed}`)
+      
+      // Extraer marketplace del dominio
+      const domain = url.hostname
+      let marketplace = 'es' // default
+      if (domain.includes('.co.uk')) marketplace = 'uk'
+      else if (domain.includes('.de')) marketplace = 'de'
+      else if (domain.includes('.fr')) marketplace = 'fr'
+      else if (domain.includes('.it')) marketplace = 'it'
+      else if (domain.includes('.es')) marketplace = 'es'
+      else if (domain.includes('.com')) marketplace = 'com'
+      
+      // Patrón 1: /dp/<ASIN>
+      const dpMatch = url.pathname.match(/\/dp\/([A-Z0-9]{10})/i)
+      if (dpMatch) {
+        setAsinMarketplace(marketplace)
+        return dpMatch[1].toUpperCase()
+      }
+      
+      // Patrón 2: /gp/product/<ASIN>
+      const gpMatch = url.pathname.match(/\/gp\/product\/([A-Z0-9]{10})/i)
+      if (gpMatch) {
+        setAsinMarketplace(marketplace)
+        return gpMatch[1].toUpperCase()
+      }
+      
+      // Patrón 3: query param asin=<ASIN>
+      const asinParam = url.searchParams.get('asin')
+      if (asinParam && /^[A-Z0-9]{10}$/i.test(asinParam)) {
+        setAsinMarketplace(marketplace)
+        return asinParam.toUpperCase()
+      }
+      
+      return null
+    } catch (err) {
+      // Si no es una URL válida, intentar como ASIN directo
+      if (/^[A-Z0-9]{10}$/i.test(trimmed)) {
+        return trimmed.toUpperCase()
+      }
+      return null
+    }
+  }
+
+  /**
+   * Valida formato de ASIN: 10 caracteres alfanuméricos
+   */
+  const validateAsin = (asin) => {
+    if (!asin) return false
+    return /^[A-Z0-9]{10}$/.test(asin)
+  }
+
+  const handleCaptureAsin = async () => {
+    if (!projectId) return
+    
+    setCapturingAsin(true)
+    setAsinError(null)
+    
+    try {
+      const asin = extractAsin(asinInput)
+      
+      if (!asin) {
+        setAsinError('Format invàlid. Introdueix una URL d\'Amazon o un ASIN de 10 caràcters.')
+        setCapturingAsin(false)
+        return
+      }
+      
+      if (!validateAsin(asin)) {
+        setAsinError('L\'ASIN ha de tenir exactament 10 caràcters alfanumèrics.')
+        setCapturingAsin(false)
+        return
+      }
+      
+      // Guardar en product_identifiers
+      await upsertProductIdentifiers(projectId, {
+        asin: asin
+      })
+      
+      setCapturedAsin(asin)
+      setAsinInput('')
+      setAsinError(null)
+      
+      // Opcional: Log a audit_log (si existeix la función)
+      try {
+        const { logAuditEvent } = await import('../lib/supabase')
+        if (logAuditEvent) {
+          await logAuditEvent('asin_captured', {
+            project_id: projectId,
+            asin: asin,
+            marketplace: asinMarketplace || 'es'
+          })
+        }
+      } catch (err) {
+        // Ignorar si no existeix audit_log
+      }
+    } catch (err) {
+      console.error('Error capturant ASIN:', err)
+      setAsinError('Error guardant l\'ASIN: ' + (err.message || 'Error desconegut'))
+    } finally {
+      setCapturingAsin(false)
+    }
+  }
+
+  const handleReplaceAsin = () => {
+    setCapturedAsin(null)
+    setAsinInput('')
+    setAsinError(null)
+  }
+
+  const getAmazonUrl = (asin, marketplace = 'es') => {
+    const domainMap = {
+      'es': 'amazon.es',
+      'uk': 'amazon.co.uk',
+      'de': 'amazon.de',
+      'fr': 'amazon.fr',
+      'it': 'amazon.it',
+      'com': 'amazon.com'
+    }
+    const domain = domainMap[marketplace] || 'amazon.es'
+    return `https://${domain}/dp/${asin}`
+  }
+
+  const handleOpenOnAmazon = () => {
+    if (!capturedAsin) return
+    const url = getAmazonUrl(capturedAsin, asinMarketplace || 'es')
+    window.open(url, '_blank', 'noopener,noreferrer')
   }
 
   const handleSave = async () => {
@@ -231,6 +422,26 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
       gap: '8px',
       justifyContent: 'center',
       marginTop: '8px'
+    },
+    asinSection: {
+      marginBottom: '24px'
+    },
+    asinInputGroup: {
+      display: 'flex',
+      gap: '8px',
+      alignItems: 'flex-start'
+    },
+    asinCapturedGroup: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: '12px',
+      flexWrap: 'wrap'
+    },
+    captureButton: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '6px'
     }
   }
 
@@ -249,6 +460,157 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
       <h3 style={styles.cardTitle}>
         💰 Quick Profitability
       </h3>
+
+      {/* Amazon ASIN Capture Section */}
+      <div style={{
+        ...styles.asinSection,
+        backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+        border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+        borderRadius: '8px',
+        padding: '16px',
+        marginBottom: '24px'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          marginBottom: '12px'
+        }}>
+          <Link2 size={16} color={darkMode ? '#9ca3af' : '#6b7280'} />
+          <label style={{
+            ...styles.label,
+            fontSize: '14px',
+            fontWeight: '600',
+            color: darkMode ? '#ffffff' : '#111827'
+          }}>
+            Amazon ASIN Capture
+          </label>
+        </div>
+        
+        {!capturedAsin ? (
+          <div style={styles.asinInputGroup}>
+            <input
+              type="text"
+              value={asinInput}
+              onChange={(e) => {
+                setAsinInput(e.target.value)
+                setAsinError(null)
+              }}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleCaptureAsin()
+                }
+              }}
+              placeholder="Pega una URL d'Amazon o un ASIN (ex: B08XYZ1234)"
+              style={{
+                ...styles.input,
+                flex: 1,
+                marginRight: '8px'
+              }}
+            />
+            <button
+              onClick={handleCaptureAsin}
+              disabled={capturingAsin || !asinInput.trim()}
+              style={{
+                ...styles.captureButton,
+                backgroundColor: '#4f46e5',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '6px',
+                padding: '10px 16px',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: (capturingAsin || !asinInput.trim()) ? 'not-allowed' : 'pointer',
+                opacity: (capturingAsin || !asinInput.trim()) ? 0.6 : 1,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              {capturingAsin ? 'Capturant...' : 'Capture'}
+            </button>
+          </div>
+        ) : (
+          <div style={styles.asinCapturedGroup}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              flex: 1
+            }}>
+              <CheckCircle2 size={16} color="#10b981" />
+              <span style={{
+                fontSize: '14px',
+                color: darkMode ? '#ffffff' : '#111827',
+                fontWeight: '500'
+              }}>
+                ASIN capturat: <strong>{capturedAsin}</strong>
+                {asinMarketplace && (
+                  <span style={{ color: darkMode ? '#9ca3af' : '#6b7280', marginLeft: '8px' }}>
+                    ({asinMarketplace.toUpperCase()})
+                  </span>
+                )}
+              </span>
+            </div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={handleOpenOnAmazon}
+                style={{
+                  ...styles.captureButton,
+                  backgroundColor: '#f59e0b',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '8px 12px',
+                  fontSize: '13px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <ExternalLink size={14} />
+                Open on Amazon
+              </button>
+              <button
+                onClick={handleReplaceAsin}
+                style={{
+                  ...styles.captureButton,
+                  backgroundColor: 'transparent',
+                  color: darkMode ? '#9ca3af' : '#6b7280',
+                  border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`,
+                  borderRadius: '6px',
+                  padding: '8px 12px',
+                  fontSize: '13px',
+                  fontWeight: '500',
+                  cursor: 'pointer'
+                }}
+              >
+                Replace
+              </button>
+            </div>
+          </div>
+        )}
+        
+        {asinError && (
+          <div style={{
+            marginTop: '8px',
+            padding: '8px 12px',
+            backgroundColor: '#fee2e2',
+            border: '1px solid #fecaca',
+            borderRadius: '6px',
+            color: '#991b1b',
+            fontSize: '13px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}>
+            <AlertTriangle size={14} />
+            {asinError}
+          </div>
+        )}
+      </div>
 
       <div style={styles.grid}>
         {/* Columna esquerra - Inputs */}

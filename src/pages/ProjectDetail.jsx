@@ -26,6 +26,7 @@ import FileUploader from '../components/FileUploader'
 import FileBrowser from '../components/FileBrowser'
 import IdentifiersSection from '../components/IdentifiersSection'
 import ProfitabilityCalculator from '../components/ProfitabilityCalculator'
+import QuickSupplierPriceEstimate from '../components/QuickSupplierPriceEstimate'
 import TasksSection from '../components/TasksSection'
 import QuotesSection from '../components/QuotesSection'
 import DecisionLog from '../components/DecisionLog'
@@ -448,6 +449,25 @@ export default function ProjectDetail() {
                 { value: 'hold', label: 'HOLD', icon: Clock, color: '#f59e0b' },
                 { value: 'discarded', label: 'DISCARDED', icon: XCircle, color: '#ef4444' }
               ]}
+            />
+          </div>
+        )}
+
+        {/* Quick Supplier Price Estimate - Visible a fase Research (1) */}
+        {project.current_phase === 1 && (
+          <div style={{
+            marginBottom: '24px'
+          }}>
+            <QuickSupplierPriceEstimate 
+              projectId={id} 
+              darkMode={darkMode}
+              onCopyToProfitability={(priceInEUR) => {
+                // Trigger update in ProfitabilityCalculator via ref or state
+                // For now, we'll use a custom event
+                window.dispatchEvent(new CustomEvent('copyPriceToCOGS', { 
+                  detail: { price: priceInEUR } 
+                }))
+              }}
             />
           </div>
         )}

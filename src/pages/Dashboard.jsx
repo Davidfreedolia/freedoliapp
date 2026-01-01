@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useBreakpoint } from '../hooks/useBreakpoint'
@@ -197,7 +197,13 @@ export default function Dashboard() {
     }
   }
 
+  const loadingPrefsRef = useRef(false)
+  
   const loadDashboardPreferences = async () => {
+    // Prevent multiple simultaneous loads
+    if (loadingPrefsRef.current) return
+    loadingPrefsRef.current = true
+    
     setLoadingPreferences(true)
     try {
       const prefs = await getDashboardPreferences()
@@ -215,6 +221,7 @@ export default function Dashboard() {
           shipments_in_transit: prefs.enabledWidgets?.shipments_in_transit !== false,
           research_no_decision: prefs.enabledWidgets?.research_no_decision !== false,
           stale_tracking: prefs.enabledWidgets?.stale_tracking !== false,
+          tasks: prefs.widgets?.tasks !== false,
           sticky_notes: prefs.widgets?.sticky_notes !== false
         })
       }
@@ -225,31 +232,55 @@ export default function Dashboard() {
         setStaleDays(prefs.staleDays)
       }
       
-      // Load layout
+      // Load layout - only set if different to prevent re-renders
       if (prefs?.layout && validateLayout(prefs.layout)) {
-        setLayout(prefs.layout)
+        setLayout(prevLayout => {
+          // Only update if layout actually changed
+          const layoutStr = JSON.stringify(prevLayout)
+          const prefsStr = JSON.stringify(prefs.layout)
+          if (layoutStr === prefsStr) return prevLayout
+          return prefs.layout
+        })
       } else {
-        // Generate default layout
+        // Generate default layout - use prefs values, not state
         const enabledWidgets = {
           waiting_manufacturer_ops: prefs?.enabledWidgets?.waiting_manufacturer_ops !== false,
           pos_not_amazon_ready: prefs?.enabledWidgets?.pos_not_amazon_ready !== false,
           shipments_in_transit: prefs?.enabledWidgets?.shipments_in_transit !== false,
           research_no_decision: prefs?.enabledWidgets?.research_no_decision !== false,
           stale_tracking: prefs?.enabledWidgets?.stale_tracking !== false,
-          tasks: dashboardWidgets.tasks !== false,
-          sticky_notes: dashboardWidgets.sticky_notes !== false
+          tasks: prefs?.widgets?.tasks !== false,
+          sticky_notes: prefs?.widgets?.sticky_notes !== false
         }
         const defaultLayout = generateLayoutFromEnabled(enabledWidgets)
-        setLayout(defaultLayout)
+        setLayout(prevLayout => {
+          const layoutStr = JSON.stringify(prevLayout)
+          const defaultStr = JSON.stringify(defaultLayout)
+          if (layoutStr === defaultStr) return prevLayout
+          return defaultLayout
+        })
       }
     } catch (err) {
       console.error('Error carregant preferències dashboard:', err)
+    } finally {
+      setLoadingPreferences(false)
+      loadingPrefsRef.current = false
     }
-    setLoadingPreferences(false)
   }
   
+  // Debounce layout changes to prevent infinite loops
+  const layoutChangeTimeoutRef = React.useRef(null)
+  
   const handleLayoutChange = (newLayout) => {
-    if (editLayout) {
+    if (!editLayout) return
+    
+    // Clear previous timeout
+    if (layoutChangeTimeoutRef.current) {
+      clearTimeout(layoutChangeTimeoutRef.current)
+    }
+    
+    // Debounce layout updates
+    layoutChangeTimeoutRef.current = setTimeout(() => {
       // Snap to allowed sizes (1x1, 2x1, 2x2)
       const snappedLayout = newLayout.map(item => {
         // Snap width and height to allowed sizes
@@ -261,8 +292,17 @@ export default function Dashboard() {
         }
       })
       setLayout(snappedLayout)
-    }
+    }, 100) // 100ms debounce
   }
+  
+  // Cleanup timeout on unmount
+  React.useEffect(() => {
+    return () => {
+      if (layoutChangeTimeoutRef.current) {
+        clearTimeout(layoutChangeTimeoutRef.current)
+      }
+    }
+  }, [])
   
   const handleSaveLayout = async () => {
     try {

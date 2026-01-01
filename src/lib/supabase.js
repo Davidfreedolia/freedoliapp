@@ -507,6 +507,60 @@ export const getProjectSku = async (projectId) => {
 }
 
 // ============================================
+// SUPPLIER PRICE ESTIMATES
+// ============================================
+
+export const getSupplierPriceEstimates = async (projectId) => {
+  const { data, error } = await supabase
+    .from('supplier_price_estimates')
+    .select('*')
+    .eq('project_id', projectId)
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data || []
+}
+
+export const createSupplierPriceEstimate = async (projectId, estimate) => {
+  // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
+  const { user_id, ...estimateData } = estimate
+  const { data, error } = await supabase
+    .from('supplier_price_estimates')
+    .insert([{
+      project_id: projectId,
+      ...estimateData
+    }])
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+export const updateSupplierPriceEstimate = async (id, estimate) => {
+  // Eliminar user_id si ve del client
+  const { user_id, ...estimateData } = estimate
+  const { data, error } = await supabase
+    .from('supplier_price_estimates')
+    .update({
+      ...estimateData,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', id)
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+export const deleteSupplierPriceEstimate = async (id) => {
+  const { error } = await supabase
+    .from('supplier_price_estimates')
+    .delete()
+    .eq('id', id)
+  if (error) throw error
+  return true
+}
+
+// ============================================
 // PRODUCT IDENTIFIERS (GTIN, ASIN, FNSKU)
 // ============================================
 
@@ -2098,6 +2152,56 @@ export const getCalendarEvents = async (filters = {}) => {
       }
     }
     
+    // 5) Purchase Orders (PO dates)
+    if (filters.types?.includes('purchase_order') !== false) {
+      const { data: pos, error: posError } = await supabase
+        .from('purchase_orders')
+        .select(`
+          id,
+          po_number,
+          order_date,
+          expected_delivery_date,
+          projects(id, name)
+        `)
+        .eq('user_id', userId)
+      
+      if (!posError && pos) {
+        pos.forEach(po => {
+          // Order date event
+          if (po.order_date) {
+            events.push({
+              id: `po-order-${po.id}`,
+              title: `PO: ${po.po_number || 'N/A'}`,
+              start: new Date(po.order_date),
+              end: new Date(po.order_date),
+              type: 'purchase_order',
+              entity_type: 'purchase_order',
+              entity_id: po.id,
+              project_id: po.projects?.id,
+              status: 'ordered',
+              resource: po
+            })
+          }
+          
+          // Expected delivery event
+          if (po.expected_delivery_date) {
+            events.push({
+              id: `po-delivery-${po.id}`,
+              title: `Delivery: ${po.po_number || 'N/A'}`,
+              start: new Date(po.expected_delivery_date),
+              end: new Date(po.expected_delivery_date),
+              type: 'purchase_order',
+              entity_type: 'purchase_order',
+              entity_id: po.id,
+              project_id: po.projects?.id,
+              status: 'expected',
+              resource: po
+            })
+          }
+        })
+      }
+    }
+    
     // Filter by project if specified
     if (filters.projectId) {
       return events.filter(e => e.project_id === filters.projectId)
@@ -2631,6 +2735,255 @@ export const getStickyNoteWithTask = async (id) => {
   
   if (error) throw error
   return data
+}
+
+// ============================================
+// RECEIPT UPLOAD (STORAGE)
+// ============================================
+
+/**
+ * Upload receipt file to Supabase Storage bucket "receipts"
+ * @param {File} file - File to upload (PDF, JPG, PNG)
+ * @param {string} expenseId - Expense ID (for folder structure)
+ * @returns {Promise<{url: string, path: string}>} Public URL and path
+ */
+export const uploadReceipt = async (file, expenseId = null) => {
+  const userId = await getCurrentUserId()
+  if (!userId) throw new Error('User not authenticated')
+
+  // Validar tipus de fitxer
+  const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg']
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error('Tipus de fitxer no permès. Només PDF, JPG i PNG.')
+  }
+
+  // Validar mida (max 10MB)
+  const maxSize = 10 * 1024 * 1024 // 10MB
+  if (file.size > maxSize) {
+    throw new Error('El fitxer és massa gran. Màxim 10MB.')
+  }
+
+  // Generar nom únic: userId/expenseId-timestamp-filename
+  const timestamp = Date.now()
+  const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
+  const filePath = expenseId 
+    ? `${userId}/${expenseId}-${timestamp}-${sanitizedFileName}`
+    : `${userId}/${timestamp}-${sanitizedFileName}`
+
+  try {
+    // Upload a Supabase Storage
+    const { data, error } = await supabase.storage
+      .from('receipts')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      })
+
+    if (error) throw error
+
+    // Obtenir URL pública
+    const { data: urlData } = supabase.storage
+      .from('receipts')
+      .getPublicUrl(filePath)
+
+    return {
+      url: urlData.publicUrl,
+      path: filePath,
+      filename: file.name,
+      size: file.size
+    }
+  } catch (err) {
+    console.error('Error uploading receipt:', err)
+    throw new Error(`Error pujant receipt: ${err.message || 'Error desconegut'}`)
+  }
+}
+
+/**
+ * Delete receipt from Supabase Storage
+ * @param {string} filePath - Path del fitxer a eliminar
+ */
+export const deleteReceipt = async (filePath) => {
+  try {
+    const { error } = await supabase.storage
+      .from('receipts')
+      .remove([filePath])
+    
+    if (error) throw error
+    return true
+  } catch (err) {
+    console.error('Error deleting receipt:', err)
+    throw new Error(`Error eliminant receipt: ${err.message || 'Error desconegut'}`)
+  }
+}
+
+/**
+ * Get public URL for receipt
+ * @param {string} filePath - Path del fitxer
+ * @returns {string} Public URL
+ */
+export const getReceiptUrl = (filePath) => {
+  if (!filePath) return null
+  const { data } = supabase.storage
+    .from('receipts')
+    .getPublicUrl(filePath)
+  return data.publicUrl
+}
+
+// ============================================
+// RECURRING EXPENSES
+// ============================================
+
+/**
+ * Get all recurring expenses for current user
+ */
+export const getRecurringExpenses = async () => {
+  const userId = await getCurrentUserId()
+  const { data, error } = await supabase
+    .from('recurring_expenses')
+    .select(`
+      *,
+      category:finance_categories(id, name, color, icon),
+      project:projects(id, name),
+      supplier:suppliers(id, name)
+    `)
+    .eq('user_id', userId)
+    .order('day_of_month', { ascending: true })
+  if (error) throw error
+  return data || []
+}
+
+/**
+ * Create recurring expense
+ */
+export const createRecurringExpense = async (recurringExpense) => {
+  const userId = await getCurrentUserId()
+  const { user_id, ...data } = recurringExpense
+  
+  // Calcular next_generation_date
+  const today = new Date()
+  const currentMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+  const dayOfMonth = data.day_of_month || 1
+  const targetDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), dayOfMonth)
+  
+  // Si el dia ja ha passat aquest mes, generar per al mes següent
+  if (targetDate < today) {
+    targetDate.setMonth(targetDate.getMonth() + 1)
+  }
+  
+  const { data: result, error } = await supabase
+    .from('recurring_expenses')
+    .insert([{
+      ...data,
+      user_id: userId,
+      next_generation_date: targetDate.toISOString().split('T')[0]
+    }])
+    .select()
+    .single()
+  if (error) throw error
+  return result
+}
+
+/**
+ * Update recurring expense
+ */
+export const updateRecurringExpense = async (id, updates) => {
+  const { user_id, ...data } = updates
+  const { data: result, error } = await supabase
+    .from('recurring_expenses')
+    .update(data)
+    .eq('id', id)
+    .select()
+    .single()
+  if (error) throw error
+  return result
+}
+
+/**
+ * Delete recurring expense
+ */
+export const deleteRecurringExpense = async (id) => {
+  const { error } = await supabase
+    .from('recurring_expenses')
+    .delete()
+    .eq('id', id)
+  if (error) throw error
+  return true
+}
+
+/**
+ * Generate recurring expenses (call Supabase function)
+ */
+export const generateRecurringExpenses = async () => {
+  const { data, error } = await supabase.rpc('generate_recurring_expenses')
+  if (error) throw error
+  return data || 0
+}
+
+/**
+ * Mark recurring expense as paid
+ */
+export const markRecurringExpenseAsPaid = async (expenseId) => {
+  const { data, error } = await supabase
+    .from('expenses')
+    .update({
+      recurring_status: 'paid',
+      payment_status: 'paid'
+    })
+    .eq('id', expenseId)
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+/**
+ * Get recurring expenses KPIs
+ */
+export const getRecurringExpensesKPIs = async () => {
+  const userId = await getCurrentUserId()
+  const today = new Date()
+  const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`
+  const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1)
+  const nextMonthStr = `${nextMonth.getFullYear()}-${String(nextMonth.getMonth() + 1).padStart(2, '0')}`
+  
+  // Pending (expected, no pagades, mes actual o anterior)
+  const { data: pending } = await supabase
+    .from('expenses')
+    .select('amount, currency')
+    .eq('user_id', userId)
+    .eq('recurring_status', 'expected')
+    .eq('payment_status', 'pending')
+    .lte('recurring_period', currentMonth)
+  
+  // Paid (pagades)
+  const { data: paid } = await supabase
+    .from('expenses')
+    .select('amount, currency')
+    .eq('user_id', userId)
+    .eq('recurring_status', 'paid')
+  
+  // Upcoming (expected, mes següent o posterior)
+  const { data: upcoming } = await supabase
+    .from('expenses')
+    .select('amount, currency')
+    .eq('user_id', userId)
+    .eq('recurring_status', 'expected')
+    .gte('recurring_period', nextMonthStr)
+  
+  return {
+    pending: {
+      count: pending?.length || 0,
+      amount: pending?.reduce((sum, e) => sum + parseFloat(e.amount || 0), 0) || 0
+    },
+    paid: {
+      count: paid?.length || 0,
+      amount: paid?.reduce((sum, e) => sum + parseFloat(e.amount || 0), 0) || 0
+    },
+    upcoming: {
+      count: upcoming?.length || 0,
+      amount: upcoming?.reduce((sum, e) => sum + parseFloat(e.amount || 0), 0) || 0
+    }
+  }
 }
 
 export default supabase

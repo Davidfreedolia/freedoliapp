@@ -253,3 +253,4 @@ WHERE NOT EXISTS (
   WHERE type = 'expense' AND name = 'Other Expenses' AND user_id = auth.uid()
 );
 
+

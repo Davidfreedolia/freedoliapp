@@ -24,10 +24,25 @@ export function AppProvider({ children }) {
 
   // Carregar dades inicials
   useEffect(() => {
-    loadInitialData()
-    initDrive()
-    // Auto-seed demo data if enabled
-    autoSeedDemoData()
+    let mounted = true
+    
+    const initialize = async () => {
+      await loadInitialData()
+      await initDrive()
+      // Auto-seed demo data if enabled (only once)
+      if (!window._demoSeedInitialized) {
+        window._demoSeedInitialized = true
+        await autoSeedDemoData()
+      }
+    }
+    
+    if (mounted) {
+      initialize()
+    }
+    
+    return () => {
+      mounted = false
+    }
   }, [])
 
   // Auto-seed demo data on app load (if demo_mode is enabled)
@@ -74,10 +89,14 @@ export function AppProvider({ children }) {
         } else {
           console.log('Demo data generated successfully')
           showToast('Demo data loaded', 'success', 3000)
-          // Refresh data after seed
-          setTimeout(() => {
-            loadInitialData()
-          }, 1000)
+          // Refresh data after seed - use a ref to prevent multiple calls
+          if (!window._demoDataRefreshScheduled) {
+            window._demoDataRefreshScheduled = true
+            setTimeout(() => {
+              loadInitialData()
+              window._demoDataRefreshScheduled = false
+            }, 1000)
+          }
         }
       } else {
         console.error('Failed to generate demo data:', result.message)

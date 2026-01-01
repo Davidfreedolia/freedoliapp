@@ -116,3 +116,4 @@ CREATE TRIGGER supplier_quotes_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_supplier_quotes_updated_at();
 
+

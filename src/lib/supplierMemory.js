@@ -190,3 +190,4 @@ export const generateSupplierBadges = (metrics) => {
   return badges
 }
 
+

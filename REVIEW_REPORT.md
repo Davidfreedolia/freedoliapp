@@ -189,3 +189,4 @@ Hay **3 queries** que seleccionan columnas específicas que podrían no existir 
 
 **Revisión completada**: ✅ Todo en orden para producción
 
+

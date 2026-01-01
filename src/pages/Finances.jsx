@@ -33,20 +33,24 @@ import {
   ChevronUp,
   FileSpreadsheet,
   Tag,
-  BookOpen as BookIcon
+  BookOpen as BookIcon,
+  CheckCircle2
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { 
   supabase,
   getProjects,
   getSuppliers,
-  getCurrentUserId
+  getCurrentUserId,
+  markRecurringExpenseAsPaid
 } from '../lib/supabase'
 import Header from '../components/Header'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
 import { showToast } from '../components/Toast'
 import { useTranslation } from 'react-i18next'
+import ReceiptUploader from '../components/ReceiptUploader'
+import RecurringExpensesSection from '../components/RecurringExpensesSection'
 
 export default function Finances() {
   const { darkMode } = useApp()
@@ -121,6 +125,10 @@ export default function Finances() {
           .from('expenses')
           .select(`
             *,
+            is_recurring,
+            recurring_expense_id,
+            recurring_status,
+            recurring_period,
             project:projects(id, name, project_code),
             supplier:suppliers(id, name),
             category:finance_categories(id, name, color, icon)
@@ -379,7 +387,12 @@ export default function Finances() {
       marketplace: type === 'income' ? 'ES' : null,
       order_id: type === 'income' ? '' : null,
       supplier_id: type === 'expense' ? null : null,
-      notes: ''
+      notes: '',
+      // Receipt fields
+      receipt_url: null,
+      receipt_filename: null,
+      receipt_size: null,
+      receipt_drive_file_id: null
     })
     setShowTransactionModal(true)
   }
@@ -407,6 +420,10 @@ export default function Finances() {
           payment_status: editingTransaction.payment_status,
           supplier_id: editingTransaction.supplier_id || null,
           notes: editingTransaction.notes,
+          receipt_url: editingTransaction.receipt_url || null,
+          receipt_filename: editingTransaction.receipt_filename || null,
+          receipt_size: editingTransaction.receipt_size || null,
+          receipt_drive_file_id: editingTransaction.receipt_drive_file_id || null,
           user_id: userId
         }
         
@@ -689,6 +706,13 @@ export default function Finances() {
           </div>
         </div>
 
+        {/* Recurring Expenses Section */}
+        <RecurringExpensesSection 
+          darkMode={darkMode} 
+          categories={categories}
+          onExpensesGenerated={loadData}
+        />
+
         {/* Stats Cards */}
         <div style={styles.statsRow}>
           <div style={{...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff'}}>
@@ -796,12 +820,35 @@ export default function Finances() {
                         )}
                         {visibleColumns.includes('description') && (
                           <td style={{...styles.td, color: darkMode ? '#ffffff' : '#111827'}}>
-                            {item.description || '-'}
-                            {item.order_id && (
-                              <span style={{fontSize: '11px', color: '#6b7280', marginLeft: '8px'}}>
-                                Order: {item.order_id}
-                              </span>
-                            )}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                              <span>{item.description || '-'}</span>
+                              {item.order_id && (
+                                <span style={{fontSize: '11px', color: '#6b7280'}}>
+                                  Order: {item.order_id}
+                                </span>
+                              )}
+                              {item.type === 'expense' && item.receipt_url && (
+                                <button
+                                  onClick={() => window.open(item.receipt_url, '_blank', 'noopener,noreferrer')}
+                                  style={{
+                                    padding: '4px 8px',
+                                    backgroundColor: 'transparent',
+                                    border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`,
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    color: '#4f46e5',
+                                    fontSize: '12px'
+                                  }}
+                                  title={`Veure receipt${item.receipt_filename ? ': ' + item.receipt_filename : ''}`}
+                                >
+                                  <FileText size={12} />
+                                  <Eye size={12} />
+                                </button>
+                              )}
+                            </div>
                           </td>
                         )}
                         {visibleColumns.includes('project') && (
@@ -847,6 +894,24 @@ export default function Finances() {
                                 >
                                   <Edit size={14} /> Editar
                                 </button>
+                                {item.type === 'expense' && item.is_recurring && item.recurring_status === 'expected' && (
+                                  <button
+                                    onClick={async () => {
+                                      try {
+                                        await markRecurringExpenseAsPaid(item.id)
+                                        showToast('Despesa marcada com pagada', 'success')
+                                        await loadData()
+                                        setMenuOpen(null)
+                                      } catch (err) {
+                                        console.error('Error marking as paid:', err)
+                                        showToast('Error marcant com pagada', 'error')
+                                      }
+                                    }}
+                                    style={{...styles.menuItem, color: '#22c55e'}}
+                                  >
+                                    <CheckCircle2 size={14} /> Marcar com pagada
+                                  </button>
+                                )}
                                 <button
                                   onClick={() => handleDeleteTransaction(item)}
                                   style={{...styles.menuItem, color: '#ef4444'}}
@@ -1292,6 +1357,36 @@ export default function Finances() {
                     }}
                   />
                 </div>
+
+                {/* Receipt Upload - Solo para expenses */}
+                {editingTransaction.type === 'expense' && (
+                  <div style={{...styles.formGroup, gridColumn: 'span 2'}}>
+                    <ReceiptUploader
+                      expenseId={editingTransaction.id}
+                      currentReceiptUrl={editingTransaction.receipt_url}
+                      currentReceiptFilename={editingTransaction.receipt_filename}
+                      onReceiptUploaded={(receiptData) => {
+                        setEditingTransaction({
+                          ...editingTransaction,
+                          receipt_url: receiptData.url,
+                          receipt_filename: receiptData.filename,
+                          receipt_size: receiptData.size,
+                          receipt_drive_file_id: receiptData.drive_file_id || null
+                        })
+                      }}
+                      onReceiptDeleted={() => {
+                        setEditingTransaction({
+                          ...editingTransaction,
+                          receipt_url: null,
+                          receipt_filename: null,
+                          receipt_size: null,
+                          receipt_drive_file_id: null
+                        })
+                      }}
+                      darkMode={darkMode}
+                    />
+                  </div>
+                )}
               </div>
             </div>
 

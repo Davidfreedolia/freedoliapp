@@ -38,7 +38,8 @@ export default function Header({ title }) {
       ...styles.header,
       backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
       borderBottom: 'none',
-      boxShadow: 'none'
+      boxShadow: 'none',
+      borderBottomWidth: 0
     }}>
       <h1 style={{
         ...styles.title,

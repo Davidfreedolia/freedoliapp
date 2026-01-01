@@ -28,7 +28,7 @@ export default function CalendarPage() {
   const [projects, setProjects] = useState([])
   const [filters, setFilters] = useState({
     projectId: null,
-    types: ['task', 'shipment', 'manufacturer', 'quote'],
+    types: ['task', 'shipment', 'manufacturer', 'quote', 'purchase_order'],
     showCompleted: false,
     showStickyDerived: true // ON default
   })
@@ -199,6 +199,10 @@ export default function CalendarPage() {
       case 'quote':
         backgroundColor = '#8b5cf6'
         borderColor = '#8b5cf6'
+        break
+      case 'purchase_order':
+        backgroundColor = event.status === 'expected' ? '#f59e0b' : '#3b82f6'
+        borderColor = backgroundColor
         break
     }
     
@@ -401,7 +405,7 @@ export default function CalendarPage() {
                   {t('calendar.eventTypes', 'Tipus d\'esdeveniments')}
                 </label>
                 <div style={styles.checkboxGroup}>
-                  {['task', 'shipment', 'manufacturer', 'quote'].map(type => (
+                  {['task', 'shipment', 'manufacturer', 'quote', 'purchase_order'].map(type => (
                     <label key={type} style={styles.checkboxLabel}>
                       <input
                         type="checkbox"
