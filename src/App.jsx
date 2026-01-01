@@ -25,6 +25,7 @@ const Suppliers = React.lazy(() => import('./pages/Suppliers'))
 const Forwarders = React.lazy(() => import('./pages/Forwarders'))
 const Warehouses = React.lazy(() => import('./pages/Warehouses'))
 const Calendar = React.lazy(() => import('./pages/Calendar'))
+const Diagnostics = React.lazy(() => import('./pages/Diagnostics'))
 
 function AppContent() {
   const { sidebarCollapsed, darkMode } = useApp()
@@ -155,6 +156,14 @@ function AppContent() {
               element={
                 <ProtectedRoute>
                   <Calendar />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/diagnostics"
+              element={
+                <ProtectedRoute>
+                  <Diagnostics />
                 </ProtectedRoute>
               }
             />
