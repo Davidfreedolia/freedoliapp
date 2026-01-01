@@ -26,6 +26,9 @@
     "settings": "Configuració"
   },
   "dashboard": {
+    "customize": "Personalitza el dashboard",
+    "done": "Fet",
+    "editMode": "Mode d'edició",
     "waitingManufacturer": {
       "title": "Waiting Manufacturer",
       "empty": "Tots els packs enviats al fabricant. Res bloquejat."

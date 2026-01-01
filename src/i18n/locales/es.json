@@ -26,6 +26,9 @@
     "settings": "Configuración"
   },
   "dashboard": {
+    "customize": "Personalizar dashboard",
+    "done": "Hecho",
+    "editMode": "Modo de edición",
     "waitingManufacturer": {
       "title": "Esperando Fabricante",
       "empty": "Todos los packs del fabricante enviados. Nada bloqueado."

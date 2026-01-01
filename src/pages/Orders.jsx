@@ -124,7 +124,13 @@ export default function Orders() {
         getSuppliers()
       ])
       
-      // Carregar estat Amazon Ready per cada PO
+      // Establecer datos básicos primero para que la página se muestre
+      setOrders(ordersData || [])
+      setProjects(projectsData || [])
+      setSuppliers(suppliersData || [])
+      setLoading(false) // Marcar como cargado para mostrar la página
+      
+      // Carregar estat Amazon Ready per cada PO (async, després de mostrar la pàgina)
       if (ordersData && ordersData.length > 0) {
         const ordersWithReadiness = await Promise.all(
           ordersData.map(async (order) => {
@@ -167,16 +173,15 @@ export default function Orders() {
           })
         )
         setOrders(ordersWithReadiness)
-      } else {
-        setOrders(ordersData || [])
       }
-      
-      setProjects(projectsData || [])
-      setSuppliers(suppliersData || [])
     } catch (err) {
       console.error('Error carregant dades:', err)
+      // Asegurar que loading se establece en false incluso si hay error
+      setOrders([])
+      setProjects([])
+      setSuppliers([])
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   // Carregar Amazon readiness

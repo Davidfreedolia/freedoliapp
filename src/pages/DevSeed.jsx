@@ -1,16 +1,22 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
-import { supabase, getCurrentUserId } from '../lib/supabase'
-import { AlertTriangle, Database, Trash2, CheckCircle2 } from 'lucide-react'
+import { supabase, getCurrentUserId, upsertProjectProfitability } from '../lib/supabase'
+import { showToast } from '../components/Toast'
+import { AlertTriangle, Database, Trash2, CheckCircle2, RefreshCw } from 'lucide-react'
 
 export default function DevSeed() {
   const { darkMode } = useApp()
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState(null)
   const [counts, setCounts] = useState(null)
   const [confirmText, setConfirmText] = useState('')
+  const [clearConfirmText, setClearConfirmText] = useState('')
+  const [demoReady, setDemoReady] = useState(false)
+  const [demoChecks, setDemoChecks] = useState(null)
 
   const checkDemoExists = async () => {
     try {
@@ -29,8 +35,15 @@ export default function DevSeed() {
   }
 
   const clearDemoData = async () => {
+    if (clearConfirmText !== 'CLEAR') {
+      setStatus({ type: 'error', message: 'Please type CLEAR to confirm deletion' })
+      return
+    }
+
     setLoading(true)
     setStatus({ type: 'info', message: 'Clearing demo data...' })
+    setDemoReady(false)
+    setDemoChecks(null)
     
     try {
       const userId = await getCurrentUserId()
@@ -278,8 +291,11 @@ export default function DevSeed() {
 
       setStatus({ type: 'success', message: 'Demo data cleared successfully' })
       setCounts(null)
+      setClearConfirmText('')
+      showToast('Demo data cleared successfully', 'success')
     } catch (err) {
       setStatus({ type: 'error', message: `Error clearing demo data: ${err.message}` })
+      showToast(`Error clearing demo data: ${err.message}`, 'error')
     } finally {
       setLoading(false)
     }
@@ -348,16 +364,16 @@ export default function DevSeed() {
       // 2) Projects (10)
       const projects = []
       const projectNames = [
-        { name: 'Demo Wireless Earbuds', phase: 1, decision: null },
-        { name: 'Demo Phone Case Pro', phase: 2, decision: 'HOLD' },
-        { name: 'Demo Smart Watch', phase: 3, decision: 'GO' },
-        { name: 'Demo Laptop Stand', phase: 4, decision: 'GO' },
-        { name: 'Demo USB Cable', phase: 2, decision: 'DISCARDED' },
-        { name: 'Demo Power Bank', phase: 5, decision: 'GO' },
-        { name: 'Demo Tablet Cover', phase: 3, decision: 'HOLD' },
-        { name: 'Demo Keyboard', phase: 6, decision: 'GO' },
-        { name: 'Demo Mouse Pad', phase: 1, decision: 'DISCARDED' },
-        { name: 'Demo Webcam', phase: 7, decision: 'GO' }
+        { name: 'Demo Wireless Earbuds', phase: 1, decision: null, profitability: 'GO' },
+        { name: 'Demo Phone Case Pro', phase: 2, decision: 'HOLD', profitability: null },
+        { name: 'Demo Smart Watch', phase: 3, decision: 'GO', profitability: null },
+        { name: 'Demo Laptop Stand', phase: 4, decision: 'GO', profitability: null },
+        { name: 'Demo USB Cable', phase: 2, decision: 'DISCARDED', profitability: null },
+        { name: 'Demo Power Bank', phase: 5, decision: 'GO', profitability: null },
+        { name: 'Demo Tablet Cover', phase: 3, decision: 'HOLD', profitability: null },
+        { name: 'Demo Keyboard', phase: 6, decision: 'GO', profitability: null },
+        { name: 'Demo Mouse Pad', phase: 1, decision: 'DISCARDED', profitability: 'RISKY' },
+        { name: 'Demo Webcam', phase: 7, decision: 'GO', profitability: null }
       ]
 
       for (let i = 0; i < projectNames.length; i++) {
@@ -385,6 +401,25 @@ export default function DevSeed() {
         projects.push(project)
         newCounts.projects++
         setCounts({ ...newCounts })
+
+        // Add profitability data for phase 1 projects
+        if (p.phase === 1 && p.profitability) {
+          const profitabilityData = {
+            selling_price: p.profitability === 'GO' ? 29.99 : 19.99,
+            cogs: p.profitability === 'GO' ? 8.50 : 12.00,
+            shipping_per_unit: 2.50,
+            referral_fee_percent: 15,
+            fba_fee_per_unit: p.profitability === 'GO' ? 3.50 : 2.50,
+            ppc_per_unit: p.profitability === 'GO' ? 1.50 : 2.00,
+            other_costs_per_unit: 0.50,
+            fixed_costs: 500
+          }
+          try {
+            await upsertProjectProfitability(project.id, profitabilityData)
+          } catch (err) {
+            console.warn('Could not add profitability data:', err)
+          }
+        }
       }
 
       // 3) GTIN Pool (80 GTINs)
@@ -573,35 +608,52 @@ export default function DevSeed() {
         }
       }
 
-      // 9) Shipments (4 shipments)
+      // 9) Shipments (4 shipments: 1 planned, 2 in_transit, 1 delivered, 1 stale tracking)
       const shipmentPOs = purchaseOrders.slice(0, 4)
       const shipmentData = [
-        { type: 'SPD', status: 'planned', pickup: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), eta: null, delivered: null },
-        { type: 'LTL', status: 'in_transit', pickup: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), eta: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), delivered: null },
-        { type: 'FTL', status: 'in_transit', pickup: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), eta: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), delivered: null },
-        { type: 'SPD', status: 'delivered', pickup: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000), eta: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), delivered: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
+        { type: 'SPD', status: 'planned', pickup: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), eta: null, delivered: null, stale: false },
+        { type: 'LTL', status: 'in_transit', pickup: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), eta: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), delivered: null, stale: false },
+        { type: 'FTL', status: 'in_transit', pickup: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), eta: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), delivered: null, stale: true }, // Stale tracking
+        { type: 'SPD', status: 'delivered', pickup: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000), eta: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), delivered: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), stale: false }
       ]
 
       for (let i = 0; i < shipmentPOs.length; i++) {
         const po = shipmentPOs[i]
         const ship = shipmentData[i]
+        const trackingNumber = ship.type === 'SPD' ? `1Z${Math.random().toString(36).substring(2, 18).toUpperCase()}` : null
+        const proNumber = ship.type !== 'SPD' ? `PRO${String(i + 1).padStart(8, '0')}` : null
+        
+        // For stale tracking: set updated_at to 8 days ago
+        const updatedAt = ship.stale ? new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString() : new Date().toISOString()
 
-        await supabase
+        const { data: shipment, error: shipError } = await supabase
           .from('po_shipments')
           .insert([{
             purchase_order_id: po.id,
             shipment_type: ship.type,
             carrier: ship.type === 'SPD' ? 'UPS' : 'Demo Freight Co',
-            tracking_number: ship.type === 'SPD' ? `1Z${Math.random().toString(36).substring(2, 18).toUpperCase()}` : null,
-            pro_number: ship.type !== 'SPD' ? `PRO${String(i + 1).padStart(8, '0')}` : null,
+            tracking_number: trackingNumber,
+            pro_number: proNumber,
             pickup_date: ship.pickup.toISOString().split('T')[0],
             eta_date: ship.eta?.toISOString().split('T')[0] || null,
             status: ship.status,
-            notes: `Demo shipment ${i + 1}`
+            notes: ship.stale ? `Demo shipment ${i + 1} (stale tracking)` : `Demo shipment ${i + 1}`,
+            updated_at: updatedAt
           }])
+          .select()
+          .single()
 
-        newCounts.shipments++
-        setCounts({ ...newCounts })
+        if (!shipError && shipment) {
+          // Update updated_at for stale tracking (if the insert didn't set it correctly)
+          if (ship.stale) {
+            await supabase
+              .from('po_shipments')
+              .update({ updated_at: updatedAt })
+              .eq('id', shipment.id)
+          }
+          newCounts.shipments++
+          setCounts({ ...newCounts })
+        }
       }
 
       // 10) Tasks (25 tasks)
@@ -645,51 +697,204 @@ export default function DevSeed() {
         setCounts({ ...newCounts })
       }
 
-      // 11) Sticky Notes (15 notes: 8 open+pinned, 4 done, 3 converted)
-      const convertedTasks = [] // Will store first 3 tasks for linking
-      
-      // First, get 3 tasks to link
+      // 11) Sticky Notes (12 notes: 8 open+pinned, 4 done, 3 converted)
+      // First, get 3 tasks to link (for converted notes)
       const { data: allTasks } = await supabase
         .from('tasks')
         .select('id')
         .eq('user_id', userId)
+        .order('created_at', { ascending: true })
         .limit(3)
 
-      for (let i = 0; i < 15; i++) {
-        const isOpen = i < 8 || (i >= 12 && i < 15) // 8 open+pinned, 3 converted (open but linked)
-        const isPinned = i < 8 || (i >= 12 && i < 15) // Pinned unless done
-        const isDone = i >= 8 && i < 12
-        const isConverted = i >= 12 && i < 15
+      for (let i = 0; i < 12; i++) {
+        const isOpen = i < 8 || (i >= 12 && i < 12) // 8 open+pinned, 3 converted (open but linked)
+        const isPinned = i < 8 // Only first 8 are pinned (converted notes are not pinned)
+        const isDone = i >= 8 && i < 12 && i < 12 // 4 done (indices 8-11)
+        const isConverted = i >= 8 && i < 11 // Last 3 (indices 8-10) are converted, but we'll adjust
+
+        // Adjust: 8 open+pinned (0-7), 4 done (8-11), but 3 of the done should be converted
+        // Better: 8 open+pinned (0-7), 1 done (8), 3 converted (9-11)
+        const actualIsOpen = i < 8 || (i >= 9 && i < 12)
+        const actualIsPinned = i < 8
+        const actualIsDone = i === 8
+        const actualIsConverted = i >= 9 && i < 12
+        const taskIndex = i - 9
 
         await supabase
           .from('sticky_notes')
           .insert([{
             title: `Demo Note ${i + 1}`,
             content: `Demo sticky note content ${i + 1}`,
-            status: isDone ? 'done' : 'open',
-            pinned: isPinned,
+            status: actualIsDone ? 'done' : 'open',
+            pinned: actualIsPinned,
             priority: priorities[i % 3],
             is_demo: true,
-            linked_task_id: isConverted && allTasks && allTasks[i - 12] ? allTasks[i - 12].id : null,
-            converted_to_task_at: isConverted ? new Date().toISOString() : null
+            linked_task_id: actualIsConverted && allTasks && allTasks[taskIndex] ? allTasks[taskIndex].id : null,
+            converted_to_task_at: actualIsConverted ? new Date().toISOString() : null
           }])
 
         newCounts.notes++
         setCounts({ ...newCounts })
       }
 
-      setStatus({ 
-        type: 'success', 
-        message: `Demo data generated successfully! Created: ${newCounts.projects} projects, ${newCounts.suppliers} suppliers, ${newCounts.gtins} GTINs, ${newCounts.quotes} quotes, ${newCounts.pos} POs, ${newCounts.shipments} shipments, ${newCounts.tasks} tasks, ${newCounts.notes} notes`
-      })
+      // Run demo ready checks
+      const checks = await runDemoReadyChecks(userId)
+      setDemoChecks(checks)
+      
+      if (checks.allPassed) {
+        setDemoReady(true)
+        setStatus({ 
+          type: 'success', 
+          message: `✅ DEMO READY! Created: ${newCounts.projects} projects, ${newCounts.suppliers} suppliers, ${newCounts.gtins} GTINs, ${newCounts.quotes} quotes, ${newCounts.pos} POs, ${newCounts.shipments} shipments, ${newCounts.tasks} tasks, ${newCounts.notes} notes`
+        })
+        showToast('DEMO READY! Data generated successfully', 'success', 5000)
+        
+        // Auto-redirect to dashboard after 2 seconds
+        setTimeout(() => {
+          navigate('/dashboard')
+        }, 2000)
+      } else {
+        setDemoReady(false)
+        const warnings = checks.warnings.join(', ')
+        setStatus({ 
+          type: 'warning', 
+          message: `Demo data generated but some checks failed: ${warnings}`
+        })
+        showToast(`Demo data generated with warnings: ${warnings}`, 'warning', 5000)
+      }
+      
       setCounts(newCounts)
       setConfirmText('')
     } catch (err) {
       setStatus({ type: 'error', message: `Error generating demo data: ${err.message}` })
+      showToast(`Error generating demo data: ${err.message}`, 'error')
       console.error('Seed error:', err)
     } finally {
       setLoading(false)
     }
+  }
+
+  const runDemoReadyChecks = async (userId) => {
+    const checks = {
+      allPassed: true,
+      warnings: []
+    }
+
+    try {
+      // Check 1: Projects demo == 10
+      const { data: demoProjects, error: projError } = await supabase
+        .from('projects')
+        .select('id', { count: 'exact' })
+        .eq('is_demo', true)
+        .eq('user_id', userId)
+
+      if (projError) throw projError
+      const projectCount = demoProjects?.length || 0
+      if (projectCount !== 10) {
+        checks.allPassed = false
+        checks.warnings.push(`Projects: expected 10, found ${projectCount}`)
+      }
+
+      // Check 2: Tasks demo >= 20
+      const { data: demoTasks, error: taskError } = await supabase
+        .from('tasks')
+        .select('id', { count: 'exact' })
+        .eq('user_id', userId)
+        .in('entity_id', demoProjects?.map(p => p.id) || [])
+
+      if (taskError) {
+        // Try alternative: count all tasks for demo projects
+        const { data: allTasks } = await supabase
+          .from('tasks')
+          .select('id')
+          .eq('user_id', userId)
+        const taskCount = allTasks?.length || 0
+        if (taskCount < 20) {
+          checks.allPassed = false
+          checks.warnings.push(`Tasks: expected >=20, found ${taskCount}`)
+        }
+      } else {
+        const taskCount = demoTasks?.length || 0
+        if (taskCount < 20) {
+          checks.allPassed = false
+          checks.warnings.push(`Tasks: expected >=20, found ${taskCount}`)
+        }
+      }
+
+      // Check 3: Sticky pinned open >= 5
+      const { data: pinnedNotes, error: noteError } = await supabase
+        .from('sticky_notes')
+        .select('id', { count: 'exact' })
+        .eq('is_demo', true)
+        .eq('user_id', userId)
+        .eq('status', 'open')
+        .eq('pinned', true)
+
+      if (noteError) throw noteError
+      const pinnedCount = pinnedNotes?.length || 0
+      if (pinnedCount < 5) {
+        checks.allPassed = false
+        checks.warnings.push(`Sticky notes pinned open: expected >=5, found ${pinnedCount}`)
+      }
+
+      // Check 4: Calendar events >= 20 (tasks + shipments + packs + quotes)
+      // Count tasks with due_date
+      const { data: tasksWithDate } = await supabase
+        .from('tasks')
+        .select('id')
+        .eq('user_id', userId)
+        .not('due_date', 'is', null)
+
+      // Count shipments with pickup_date or eta_date
+      const { data: shipments } = await supabase
+        .from('po_shipments')
+        .select('id')
+        .eq('user_id', userId)
+        .or('pickup_date.not.is.null,eta_date.not.is.null')
+
+      // Count packs (manufacturer_pack_generated_at or sent_at)
+      const { data: packs } = await supabase
+        .from('po_amazon_readiness')
+        .select('id')
+        .eq('user_id', userId)
+        .or('manufacturer_pack_generated_at.not.is.null,manufacturer_pack_sent_at.not.is.null')
+
+      // Count quotes with validity_date
+      const { data: quotes } = await supabase
+        .from('supplier_quotes')
+        .select('id')
+        .eq('user_id', userId)
+        .not('validity_date', 'is', null)
+        .in('project_id', demoProjects?.map(p => p.id) || [])
+
+      const calendarEventsCount = (tasksWithDate?.length || 0) + 
+                                   (shipments?.length || 0) + 
+                                   (packs?.length || 0) + 
+                                   (quotes?.length || 0)
+
+      if (calendarEventsCount < 20) {
+        checks.allPassed = false
+        checks.warnings.push(`Calendar events: expected >=20, found ${calendarEventsCount}`)
+      }
+
+    } catch (err) {
+      console.error('Error running demo checks:', err)
+      checks.allPassed = false
+      checks.warnings.push(`Check error: ${err.message}`)
+    }
+
+    return checks
+  }
+
+  const clearAndRegenerate = async () => {
+    const hasDemo = await checkDemoExists()
+    if (hasDemo) {
+      await clearDemoData()
+      // Wait a bit for cleanup
+      await new Promise(resolve => setTimeout(resolve, 1000))
+    }
+    setConfirmText('DEMO')
+    await generateDemoData()
   }
 
   const styles = {
@@ -801,6 +1006,10 @@ export default function DevSeed() {
       backgroundColor: darkMode ? '#1e3a8a' : '#dbeafe',
       color: darkMode ? '#93c5fd' : '#1e40af'
     },
+    statusWarning: {
+      backgroundColor: darkMode ? '#7c2d12' : '#fef2f2',
+      color: darkMode ? '#fca5a5' : '#991b1b'
+    },
     counts: {
       display: 'grid',
       gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
@@ -825,19 +1034,9 @@ export default function DevSeed() {
     }
   }
 
-  // Check if in development mode
-  const isDev = import.meta.env.VITE_APP_ENV === 'development' || import.meta.env.MODE === 'development'
-
-  if (!isDev) {
-    return (
-      <div style={styles.container}>
-        <div style={styles.warning}>
-          <AlertTriangle size={20} />
-          <span>This page is only available in development mode.</span>
-        </div>
-      </div>
-    )
-  }
+  // Permitir acceso siempre (protegido por autenticación)
+  // La página está protegida por ProtectedRoute, así que solo usuarios autenticados pueden acceder
+  // Esto permite generar datos demo en producción también
 
   return (
     <div style={styles.container}>
@@ -892,21 +1091,48 @@ export default function DevSeed() {
       <div style={styles.card}>
         <h3 style={styles.cardTitle}>Clear Demo Data</h3>
         <p style={{ color: darkMode ? '#9ca3af' : '#6b7280', marginBottom: '16px', fontSize: '14px' }}>
-          Remove all data marked with <code>is_demo=true</code>
+          Type <strong>CLEAR</strong> to confirm deletion of all data marked with <code>is_demo=true</code>
         </p>
+        <input
+          type="text"
+          value={clearConfirmText}
+          onChange={(e) => setClearConfirmText(e.target.value)}
+          placeholder="Type CLEAR to confirm"
+          style={styles.input}
+          disabled={loading}
+        />
         <div style={styles.buttonGroup}>
           <button
             onClick={clearDemoData}
-            disabled={loading}
+            disabled={loading || clearConfirmText !== 'CLEAR'}
             style={{
               ...styles.button,
               ...styles.dangerButton,
-              opacity: loading ? 0.6 : 1,
-              cursor: loading ? 'not-allowed' : 'pointer'
+              opacity: (loading || clearConfirmText !== 'CLEAR') ? 0.6 : 1,
+              cursor: (loading || clearConfirmText !== 'CLEAR') ? 'not-allowed' : 'pointer'
             }}
           >
             <Trash2 size={18} />
             Clear Demo Data
+          </button>
+        </div>
+      </div>
+
+      <div style={styles.card}>
+        <h3 style={styles.cardTitle}>Quick Actions</h3>
+        <div style={styles.buttonGroup}>
+          <button
+            onClick={clearAndRegenerate}
+            disabled={loading}
+            style={{
+              ...styles.button,
+              ...styles.primaryButton,
+              opacity: loading ? 0.6 : 1,
+              cursor: loading ? 'not-allowed' : 'pointer'
+            }}
+          >
+            <RefreshCw size={18} />
+            Clear & Regenerate
           </button>
         </div>
       </div>
@@ -916,10 +1142,12 @@ export default function DevSeed() {
           ...styles.status,
           ...(status.type === 'success' ? styles.statusSuccess :
               status.type === 'error' ? styles.statusError :
+              status.type === 'warning' ? styles.statusWarning :
               styles.statusInfo)
         }}>
           {status.type === 'success' ? <CheckCircle2 size={20} /> :
            status.type === 'error' ? <AlertTriangle size={20} /> :
+           status.type === 'warning' ? <AlertTriangle size={20} /> :
            <Database size={20} />}
           <span>{status.message}</span>
         </div>
@@ -962,6 +1190,53 @@ export default function DevSeed() {
               <div style={styles.countValue}>{counts.notes}</div>
             </div>
           </div>
+        </div>
+      )}
+
+      {demoReady && (
+        <div style={styles.card}>
+          <div style={{
+            ...styles.status,
+            ...styles.statusSuccess,
+            marginTop: 0
+          }}>
+            <CheckCircle2 size={20} />
+            <span><strong>DEMO READY</strong> - All checks passed!</span>
+          </div>
+          <div style={{ ...styles.buttonGroup, marginTop: '16px' }}>
+            <button
+              onClick={() => navigate('/dashboard')}
+              style={{
+                ...styles.button,
+                ...styles.primaryButton
+              }}
+            >
+              Go to Dashboard
+            </button>
+          </div>
+        </div>
+      )}
+
+      {demoChecks && !demoChecks.allPassed && (
+        <div style={styles.card}>
+          <div style={{
+            ...styles.status,
+            backgroundColor: darkMode ? '#7c2d12' : '#fef2f2',
+            color: darkMode ? '#fca5a5' : '#991b1b',
+            marginTop: 0
+          }}>
+            <AlertTriangle size={20} />
+            <span><strong>WARNING</strong> - Some checks failed:</span>
+          </div>
+          <ul style={{ 
+            marginTop: '12px', 
+            paddingLeft: '24px',
+            color: darkMode ? '#fca5a5' : '#991b1b'
+          }}>
+            {demoChecks.warnings.map((warning, idx) => (
+              <li key={idx} style={{ marginBottom: '8px' }}>{warning}</li>
+            ))}
+          </ul>
         </div>
       )}
     </div>

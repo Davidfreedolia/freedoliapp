@@ -698,15 +698,16 @@ export const getProjectsMissingGtin = async () => {
   // Projectes actius que no tenen GTIN assignat (ni GTIN_EXEMPT)
   // Excloure DISCARDED
   const userId = await getCurrentUserId()
+  // Use select('*') to avoid issues if decision column doesn't exist
   const { data: projects, error: projectsError } = await supabase
     .from('projects')
-    .select('id, name, project_code, sku, status, decision')
+    .select('*')
     .eq('status', 'active')
     .eq('user_id', userId)
   
   if (projectsError) throw projectsError
   
-  // Filter DISCARDED client-side to avoid query issues
+  // Filter DISCARDED client-side to avoid query issues (handle if decision column doesn't exist)
   const filteredProjects = (projects || []).filter(p => !p.decision || p.decision !== 'DISCARDED')
   
   const { data: identifiers, error: identifiersError } = await supabase
@@ -1069,9 +1070,10 @@ export const getResearchNoDecision = async (limit = 10) => {
   const userId = await getCurrentUserId()
   
   try {
+    // Use select('*') to avoid issues if decision column doesn't exist
     const { data, error } = await supabase
       .from('projects')
-      .select('id, name, sku_internal, project_code, current_phase, decision, created_at')
+      .select('*')
       .eq('user_id', userId)
       .eq('current_phase', 1)
       .order('created_at', { ascending: false })
@@ -1079,7 +1081,7 @@ export const getResearchNoDecision = async (limit = 10) => {
     
     if (error) throw error
     
-    // Filter client-side: no decision or HOLD
+    // Filter client-side: no decision or HOLD (handle if decision column doesn't exist)
     return (data || []).filter(p => !p.decision || p.decision === 'HOLD').slice(0, limit)
   } catch (err) {
     console.error('Error in getResearchNoDecision:', err)
@@ -1205,14 +1207,11 @@ export const setShipmentStatus = async (poId, status) => {
 
 // MAGATZEMS
 export const getWarehouses = async () => {
+  // Avoid relationship ambiguity - fetch warehouses without embedded supplier
+  // If supplier info is needed, it can be fetched separately using supplier_id
   const { data, error } = await supabase
     .from('warehouses')
-    .select(
-      `
-      *,
-      supplier:suppliers(name, type)
-    `
-    )
+    .select('*')
     .order('name', { ascending: true })
   if (error) throw error
   return data

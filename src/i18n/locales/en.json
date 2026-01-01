@@ -26,6 +26,9 @@
     "settings": "Settings"
   },
   "dashboard": {
+    "customize": "Customize dashboard",
+    "done": "Done",
+    "editMode": "Edit mode",
     "waitingManufacturer": {
       "title": "Waiting Manufacturer",
       "empty": "All manufacturer packs sent. Nothing blocked."

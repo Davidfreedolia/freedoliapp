@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import GridLayout from 'react-grid-layout'
 import 'react-grid-layout/css/styles.css'
@@ -23,7 +24,9 @@ import {
   Barcode,
   AlertTriangle,
   Save,
-  X
+  X,
+  LayoutDashboard,
+  Check
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { getPurchaseOrders, getDashboardPreferences, getPosNotReady, getProjectsMissingGtin, getUnassignedGtinCodes, getPosWaitingManufacturer, updateDashboardPreferences } from '../lib/supabase'
@@ -51,6 +54,7 @@ import {
 export default function Dashboard() {
   const { stats, projects, loading, darkMode, setDarkMode, sidebarCollapsed } = useApp()
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const { isMobile, isTablet } = useBreakpoint()
   const [showNewProjectModal, setShowNewProjectModal] = useState(false)
   const [showCustomizeModal, setShowCustomizeModal] = useState(false)
@@ -264,6 +268,16 @@ export default function Dashboard() {
     setLayout(defaultLayout)
   }
 
+  const handleToggleEditMode = async () => {
+    if (editLayout) {
+      // Si está en edit mode, guardar y salir
+      await handleSaveLayout()
+    } else {
+      // Si no está en edit mode, entrar
+      setEditLayout(true)
+    }
+  }
+
   const handlePreferencesSave = (newWidgets) => {
     setDashboardWidgets(newWidgets)
   }
@@ -446,47 +460,38 @@ export default function Dashboard() {
           justifyContent: isMobile ? 'space-between' : 'flex-end',
           gap: '8px'
         }}>
-          {/* Toggle Edit Layout */}
+          {/* Toggle Edit Layout / Done */}
           {!isMobile && (
             <button 
-              onClick={() => setEditLayout(!editLayout)}
+              onClick={handleToggleEditMode}
               style={{
                 ...styles.iconButton,
                 backgroundColor: editLayout ? '#4f46e5' : (darkMode ? '#1f1f2e' : '#f3f4f6'),
                 color: editLayout ? '#ffffff' : 'inherit'
               }}
-              title={editLayout ? "Desactivar edició de layout" : "Editar layout"}
+              title={editLayout ? t('dashboard.done') : t('dashboard.customize')}
             >
-              <Settings size={20} color={editLayout ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280')} />
+              {editLayout ? (
+                <Check size={20} color="#ffffff" />
+              ) : (
+                <LayoutDashboard size={20} color={darkMode ? '#9ca3af' : '#6b7280'} />
+              )}
             </button>
           )}
           
-          {/* Save Layout */}
+          {/* Reset Layout (solo en edit mode) */}
           {editLayout && !isMobile && (
-            <>
-              <button 
-                onClick={handleSaveLayout}
-                style={{
-                  ...styles.iconButton,
-                  backgroundColor: '#22c55e',
-                  color: '#ffffff'
-                }}
-                title="Guardar layout"
-              >
-                <Save size={20} color="#ffffff" />
-              </button>
-              <button 
-                onClick={handleResetLayout}
-                style={{
-                  ...styles.iconButton,
-                  backgroundColor: '#f59e0b',
-                  color: '#ffffff'
-                }}
-                title="Restaurar layout per defecte"
-              >
-                <X size={20} color="#ffffff" />
-              </button>
-            </>
+            <button 
+              onClick={handleResetLayout}
+              style={{
+                ...styles.iconButton,
+                backgroundColor: '#f59e0b',
+                color: '#ffffff'
+              }}
+              title="Restaurar layout per defecte"
+            >
+              <X size={20} color="#ffffff" />
+            </button>
           )}
           
           {/* Personalitzar Dashboard */}
@@ -525,6 +530,19 @@ export default function Dashboard() {
         ...styles.content,
         padding: isMobile ? '16px' : '32px'
       }}>
+        {/* Edit Mode Badge */}
+        {editLayout && !isMobile && (
+          <div style={{
+            ...styles.editModeBadge,
+            backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6',
+            borderColor: '#4f46e5',
+            color: darkMode ? '#ffffff' : '#111827'
+          }}>
+            <LayoutDashboard size={14} color="#4f46e5" />
+            <span>{t('dashboard.editMode')}</span>
+          </div>
+        )}
+        
         {/* Stats Grid */}
         <div style={{
           ...styles.statsGrid,
@@ -1155,6 +1173,18 @@ const styles = {
   statLabel: {
     fontSize: '14px',
     color: '#6b7280'
+  },
+  editModeBadge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '8px 16px',
+    borderRadius: '8px',
+    border: '1px solid',
+    fontSize: '13px',
+    fontWeight: '500',
+    marginBottom: '20px',
+    transition: 'all 0.2s ease'
   },
   discardedCounter: {
     display: 'flex',

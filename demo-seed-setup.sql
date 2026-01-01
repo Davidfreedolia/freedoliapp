@@ -16,7 +16,27 @@ ALTER TABLE gtin_pool ADD COLUMN IF NOT EXISTS is_demo boolean DEFAULT false NOT
 -- Sticky Notes
 ALTER TABLE sticky_notes ADD COLUMN IF NOT EXISTS is_demo boolean DEFAULT false NOT NULL;
 
--- Note: Other tables (tasks, purchase_orders, supplier_quotes, etc.) don't need is_demo
--- because they are linked to projects via foreign keys, so they can be deleted
--- by cascading from projects or by filtering by project_id IN (SELECT id FROM projects WHERE is_demo = true)
+-- Product Identifiers (optional, for direct marking)
+-- Note: Can also be deleted via project_id, but adding for clarity
+ALTER TABLE product_identifiers ADD COLUMN IF NOT EXISTS is_demo boolean DEFAULT false NOT NULL;
+
+-- Supplier Quotes (optional, for direct marking)
+-- Note: Can also be deleted via project_id, but adding for clarity
+ALTER TABLE supplier_quotes ADD COLUMN IF NOT EXISTS is_demo boolean DEFAULT false NOT NULL;
+
+-- Purchase Orders (optional, for direct marking)
+-- Note: Can also be deleted via project_id, but adding for clarity
+ALTER TABLE purchase_orders ADD COLUMN IF NOT EXISTS is_demo boolean DEFAULT false NOT NULL;
+
+-- Tasks (optional, for direct marking)
+-- Note: Can also be deleted via entity_id, but adding for clarity
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS is_demo boolean DEFAULT false NOT NULL;
+
+-- PO Shipments (optional, for direct marking)
+-- Note: Can also be deleted via purchase_order_id, but adding for clarity
+ALTER TABLE po_shipments ADD COLUMN IF NOT EXISTS is_demo boolean DEFAULT false NOT NULL;
+
+-- PO Amazon Readiness (optional, for direct marking)
+-- Note: Can also be deleted via purchase_order_id, but adding for clarity
+ALTER TABLE po_amazon_readiness ADD COLUMN IF NOT EXISTS is_demo boolean DEFAULT false NOT NULL;
 
