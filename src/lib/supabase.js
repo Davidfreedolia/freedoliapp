@@ -386,20 +386,22 @@ export const deletePayment = async (id) => {
 // ESTADÍSTIQUES DASHBOARD
 export const getDashboardStats = async () => {
   const userId = await getCurrentUserId()
-  const { data: projects } = await supabase
+  const { data: projects, error } = await supabase
     .from('projects')
-    .select('id, status, current_phase, decision')
+    .select('*')
     .eq('user_id', userId)
+  
+  if (error) throw error
 
-  // Excloure DISCARDED dels stats
+  // Excloure DISCARDED dels stats (if decision column exists)
   const activeProjects = projects?.filter((p) => 
-    p.status === 'active' && p.decision !== 'DISCARDED'
+    p.status === 'active' && (!p.decision || p.decision !== 'DISCARDED')
   ).length || 0
   const completedProjects = projects?.filter((p) => 
-    p.status === 'completed' && p.decision !== 'DISCARDED'
+    p.status === 'completed' && (!p.decision || p.decision !== 'DISCARDED')
   ).length || 0
   const totalProjects = projects?.filter((p) => 
-    p.decision !== 'DISCARDED'
+    !p.decision || p.decision !== 'DISCARDED'
   ).length || 0
   const discardedProjects = projects?.filter((p) => 
     p.decision === 'DISCARDED'
