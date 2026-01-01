@@ -49,7 +49,7 @@ import {
 } from '../utils/dashboardLayout'
 
 export default function Dashboard() {
-  const { stats, projects, loading, darkMode, setDarkMode } = useApp()
+  const { stats, projects, loading, darkMode, setDarkMode, sidebarCollapsed } = useApp()
   const navigate = useNavigate()
   const { isMobile, isTablet } = useBreakpoint()
   const [showNewProjectModal, setShowNewProjectModal] = useState(false)
