@@ -391,7 +391,17 @@ export const getDashboardStats = async () => {
     .select('*')
     .eq('user_id', userId)
   
-  if (error) throw error
+  if (error) {
+    console.error('Error fetching projects for dashboard stats:', error);
+    // Fallback to empty data or re-throw if critical
+    return {
+      totalProjects: 0,
+      activeProjects: 0,
+      completedProjects: 0,
+      discardedProjects: 0,
+      totalInvested: 0,
+    };
+  }
 
   // Excloure DISCARDED dels stats (if decision column exists)
   const activeProjects = projects?.filter((p) => 
@@ -401,7 +411,7 @@ export const getDashboardStats = async () => {
     p.status === 'completed' && (!p.decision || p.decision !== 'DISCARDED')
   ).length || 0
   const totalProjects = projects?.filter((p) => 
-    !p.decision || p.decision !== 'DISCARDED'
+    (!p.decision || p.decision !== 'DISCARDED')
   ).length || 0
   const discardedProjects = projects?.filter((p) => 
     p.decision === 'DISCARDED'
