@@ -38,6 +38,29 @@ export const WIDGET_MIN_SIZES = {
   [WIDGET_IDS.STICKY_NOTES]: { w: 2, h: 2 }
 }
 
+// Allowed widget sizes (1x1, 2x1, 2x2)
+export const ALLOWED_SIZES = [
+  { w: 2, h: 2 }, // 1x1 (2 cols x 2 rows)
+  { w: 4, h: 2 }, // 2x1 (4 cols x 2 rows)
+  { w: 4, h: 4 }  // 2x2 (4 cols x 4 rows)
+]
+
+// Snap to nearest allowed size
+export const snapToAllowedSize = (w, h) => {
+  let minDistance = Infinity
+  let snapped = { w, h }
+  
+  ALLOWED_SIZES.forEach(size => {
+    const distance = Math.abs(size.w - w) + Math.abs(size.h - h)
+    if (distance < minDistance) {
+      minDistance = distance
+      snapped = { ...size }
+    }
+  })
+  
+  return snapped
+}
+
 // Generate layout from enabled widgets
 export const generateLayoutFromEnabled = (enabledWidgets, savedLayout = null) => {
   if (savedLayout && Array.isArray(savedLayout) && savedLayout.length > 0) {

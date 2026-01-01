@@ -29,6 +29,9 @@
     "customize": "Customize dashboard",
     "done": "Done",
     "editMode": "Edit mode",
+    "layoutSaved": "Layout saved successfully",
+    "layoutSaveError": "Error saving layout",
+    "dragToMove": "Drag to move",
     "waitingManufacturer": {
       "title": "Waiting Manufacturer",
       "empty": "All manufacturer packs sent. Nothing blocked."

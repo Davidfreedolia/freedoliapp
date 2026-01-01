@@ -17,17 +17,21 @@ import {
   AlertCircle,
   CheckCircle2,
   Barcode,
-  Globe
+  Globe,
+  Database,
+  RefreshCw
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { getCompanySettings, updateCompanySettings, supabase, getAuditLogs, updateLanguage } from '../lib/supabase'
+import { clearDemoData, generateDemoData } from '../lib/demoSeed'
 import Header from '../components/Header'
 import GTINPoolSection from '../components/GTINPoolSection'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
+import { showToast } from '../components/Toast'
 
 export default function Settings() {
-  const { darkMode } = useApp()
+  const { darkMode, refreshProjects } = useApp()
   const { t, i18n } = useTranslation()
   const { isMobile } = useBreakpoint()
   
@@ -36,6 +40,8 @@ export default function Settings() {
   const [auditLogs, setAuditLogs] = useState([])
   const [statusFilter, setStatusFilter] = useState(null)
   const [loadingLogs, setLoadingLogs] = useState(false)
+  const [demoMode, setDemoMode] = useState(false)
+  const [resettingDemo, setResettingDemo] = useState(false)
   
   const [companyData, setCompanyData] = useState({
     company_name: 'Freedolia',
@@ -97,7 +103,10 @@ export default function Settings() {
         supabase.from('signatures').select('*').order('created_at', { ascending: true })
       ])
       
-      if (companyRes) setCompanyData(companyRes)
+      if (companyRes) {
+        setCompanyData(companyRes)
+        setDemoMode(companyRes.demo_mode || false)
+      }
       setSignatures(signaturesRes.data || [])
     } catch (err) {
       console.error('Error carregant configuració:', err)
@@ -349,6 +358,101 @@ export default function Settings() {
                   <option value="en">English</option>
                   <option value="es">Español</option>
                 </select>
+              </div>
+            </div>
+
+            {/* Demo Mode Section */}
+            <div style={{
+              ...styles.subsection,
+              marginBottom: '32px',
+              padding: '20px',
+              borderRadius: '12px',
+              border: '1px solid var(--border-color)',
+              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
+            }}>
+              <h3 style={{
+                ...styles.subsectionTitle,
+                color: darkMode ? '#ffffff' : '#111827',
+                marginBottom: '16px'
+              }}>
+                <Database size={16} />
+                Dades Demo
+              </h3>
+              <p style={{
+                color: darkMode ? '#9ca3af' : '#6b7280',
+                fontSize: '14px',
+                marginBottom: '16px'
+              }}>
+                Les dades demo permeten veure l'aplicació funcionant sense crear res manualment.
+              </p>
+              <div style={styles.formGroup}>
+                <label style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  cursor: 'pointer',
+                  color: darkMode ? '#e5e7eb' : '#374151'
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={demoMode}
+                    onChange={async (e) => {
+                      const newValue = e.target.checked
+                      setDemoMode(newValue)
+                      await updateCompanySettings({ demo_mode: newValue })
+                      showToast('Demo mode ' + (newValue ? 'activat' : 'desactivat'), 'success')
+                    }}
+                    style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                  />
+                  <span>Activar mode demo</span>
+                </label>
+              </div>
+              <div style={{ marginTop: '16px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <button
+                  onClick={async () => {
+                    if (!confirm('Vols regenerar les dades demo? Això eliminarà les dades demo existents i crearà noves.')) return
+                    setResettingDemo(true)
+                    try {
+                      // Clear existing demo data
+                      const clearResult = await clearDemoData()
+                      if (!clearResult.success) {
+                        showToast('Error netejant dades demo: ' + clearResult.message, 'error')
+                        return
+                      }
+                      // Generate new demo data
+                      const genResult = await generateDemoData()
+                      if (genResult.success) {
+                        showToast('Dades demo regenerades correctament', 'success')
+                        await refreshProjects()
+                      } else {
+                        showToast('Error generant dades demo: ' + genResult.message, 'error')
+                      }
+                    } catch (err) {
+                      console.error('Error resetting demo:', err)
+                      showToast('Error al regenerar dades demo', 'error')
+                    } finally {
+                      setResettingDemo(false)
+                    }
+                  }}
+                  disabled={resettingDemo}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '10px 18px',
+                    backgroundColor: '#4f46e5',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    cursor: resettingDemo ? 'not-allowed' : 'pointer',
+                    opacity: resettingDemo ? 0.6 : 1
+                  }}
+                >
+                  <RefreshCw size={16} style={{ animation: resettingDemo ? 'spin 1s linear infinite' : 'none' }} />
+                  {resettingDemo ? 'Regenerant...' : 'Regenerar Dades Demo'}
+                </button>
               </div>
             </div>
 

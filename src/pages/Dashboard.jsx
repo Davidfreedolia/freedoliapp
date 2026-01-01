@@ -26,7 +26,8 @@ import {
   Save,
   X,
   LayoutDashboard,
-  Check
+  Check,
+  StickyNote
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { getPurchaseOrders, getDashboardPreferences, getPosNotReady, getProjectsMissingGtin, getUnassignedGtinCodes, getPosWaitingManufacturer, updateDashboardPreferences } from '../lib/supabase'
@@ -45,11 +46,14 @@ import TasksWidget from '../components/TasksWidget'
 import AlertsBadge from '../components/AlertsBadge'
 import StickyNotesWidget from '../components/StickyNotesWidget'
 import AddStickyNoteModal from '../components/AddStickyNoteModal'
+import SafeWidget from '../components/SafeWidget'
+import { safeArray, safeNumber } from '../utils/errorLogger'
 import { 
   getDefaultLayout, 
   generateLayoutFromEnabled, 
   validateLayout,
-  WIDGET_IDS 
+  WIDGET_IDS,
+  snapToAllowedSize
 } from '../utils/dashboardLayout'
 
 export default function Dashboard() {
@@ -153,38 +157,44 @@ export default function Dashboard() {
   const loadOrdersInProgress = async () => {
     setLoadingOrders(true)
     try {
-      const orders = await getPurchaseOrders()
+      const orders = await getPurchaseOrders().catch(() => [])
       // Filtrar comandes que estan en curs (no cancel·lades ni completades)
-      const inProgress = (orders || []).filter(order => 
-        !['cancelled', 'received'].includes(order.status)
+      const inProgress = safeArray(orders).filter(order => 
+        order?.status && !['cancelled', 'received'].includes(order.status)
       )
       setOrdersInProgress(inProgress.slice(0, 5)) // Mostrar les 5 primeres
     } catch (err) {
       console.error('Error carregant comandes:', err)
+      setOrdersInProgress([])
+    } finally {
+      setLoadingOrders(false)
     }
-    setLoadingOrders(false)
   }
 
   const loadPosNotReady = async () => {
     setLoadingPosNotReady(true)
     try {
-      const notReady = await getPosNotReady(5)
-      setPosNotReady(notReady || [])
+      const notReady = await getPosNotReady(5).catch(() => [])
+      setPosNotReady(safeArray(notReady))
     } catch (err) {
       console.error('Error carregant POs not ready:', err)
+      setPosNotReady([])
+    } finally {
+      setLoadingPosNotReady(false)
     }
-    setLoadingPosNotReady(false)
   }
 
   const loadPosWaitingManufacturer = async () => {
     setLoadingWaitingManufacturer(true)
     try {
-      const waiting = await getPosWaitingManufacturer(5)
-      setPosWaitingManufacturer(waiting || [])
+      const waiting = await getPosWaitingManufacturer(5).catch(() => [])
+      setPosWaitingManufacturer(safeArray(waiting))
     } catch (err) {
       console.error('Error carregant POs waiting manufacturer:', err)
+      setPosWaitingManufacturer([])
+    } finally {
+      setLoadingWaitingManufacturer(false)
     }
-    setLoadingWaitingManufacturer(false)
   }
 
   const loadDashboardPreferences = async () => {
@@ -240,7 +250,17 @@ export default function Dashboard() {
   
   const handleLayoutChange = (newLayout) => {
     if (editLayout) {
-      setLayout(newLayout)
+      // Snap to allowed sizes (1x1, 2x1, 2x2)
+      const snappedLayout = newLayout.map(item => {
+        // Snap width and height to allowed sizes
+        const snapped = snapToAllowedSize(item.w, item.h)
+        return {
+          ...item,
+          w: snapped.w,
+          h: snapped.h
+        }
+      })
+      setLayout(snappedLayout)
     }
   }
   
@@ -248,11 +268,10 @@ export default function Dashboard() {
     try {
       await updateDashboardPreferences({ layout })
       setEditLayout(false)
-      // Show success message
-      alert('Layout guardat correctament')
+      showToast(t('dashboard.layoutSaved'), 'success')
     } catch (err) {
       console.error('Error guardant layout:', err)
-      alert('Error guardant el layout')
+      showToast(t('dashboard.layoutSaveError'), 'error')
     }
   }
   
@@ -272,8 +291,15 @@ export default function Dashboard() {
 
   const handleToggleEditMode = async () => {
     if (editLayout) {
-      // Si está en edit mode, guardar y salir
-      await handleSaveLayout()
+      // Si está en edit mode, guardar automáticamente y salir
+      try {
+        await updateDashboardPreferences({ layout })
+        setEditLayout(false)
+        showToast(t('dashboard.layoutSaved'), 'success')
+      } catch (err) {
+        console.error('Error guardant layout:', err)
+        showToast(t('dashboard.layoutSaveError'), 'error')
+      }
     } else {
       // Si no está en edit mode, entrar
       setEditLayout(true)
@@ -416,8 +442,15 @@ export default function Dashboard() {
               backgroundColor: '#FFE066',
               color: '#5F4B00',
               width: isMobile ? '100%' : 'auto',
-              justifyContent: isMobile ? 'center' : 'flex-start'
+              justifyContent: isMobile ? 'center' : 'flex-start',
+              border: '2px solid #FBBF24',
+              fontWeight: '600',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              transform: 'rotate(-1deg)',
+              transition: 'transform 0.2s ease'
             }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'rotate(0deg) scale(1.05)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'rotate(-1deg) scale(1)'}
             title="Add sticky note"
           >
             <StickyNote size={18} color="#5F4B00" />
@@ -925,6 +958,8 @@ export default function Dashboard() {
               onLayoutChange={handleLayoutChange}
               compactType={null}
               preventCollision={false}
+              resizeHandles={['se']}
+              draggableHandle=".widget-drag-handle"
               style={{
                 backgroundColor: 'transparent'
               }}
@@ -1007,8 +1042,32 @@ export default function Dashboard() {
                     borderColor: editLayout ? '#4f46e5' : (darkMode ? '#374151' : '#e5e7eb'),
                     height: '100%',
                     overflow: 'auto',
-                    boxSizing: 'border-box'
+                    boxSizing: 'border-box',
+                    position: 'relative',
+                    cursor: editLayout ? 'move' : 'default'
                   }}>
+                    {editLayout && (
+                      <div 
+                        className="widget-drag-handle"
+                        style={{
+                          position: 'absolute',
+                          top: '8px',
+                          right: '8px',
+                          width: '24px',
+                          height: '24px',
+                          backgroundColor: '#4f46e5',
+                          borderRadius: '4px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'move',
+                          zIndex: 10
+                        }}
+                        title={t('dashboard.dragToMove')}
+                      >
+                        <LayoutDashboard size={14} color="#ffffff" />
+                      </div>
+                    )}
                     {widgetComponent}
                   </div>
                 )
@@ -1039,46 +1098,54 @@ export default function Dashboard() {
                   )
                 case 'pos_not_amazon_ready':
                   return (
-                    <PosNotAmazonReadyWidget
-                      key={widgetId}
-                      darkMode={darkMode}
-                      limit={10}
-                    />
+                    <SafeWidget key={widgetId} widgetName="POs Not Amazon Ready" darkMode={darkMode}>
+                      <PosNotAmazonReadyWidget
+                        darkMode={darkMode}
+                        limit={10}
+                      />
+                    </SafeWidget>
                   )
                 case 'shipments_in_transit':
                   return (
-                    <ShipmentsInTransitWidget
-                      key={widgetId}
-                      darkMode={darkMode}
-                      limit={10}
-                    />
+                    <SafeWidget key={widgetId} widgetName="Shipments In Transit" darkMode={darkMode}>
+                      <ShipmentsInTransitWidget
+                        darkMode={darkMode}
+                        limit={10}
+                      />
+                    </SafeWidget>
                   )
                 case 'research_no_decision':
                   return (
-                    <ResearchNoDecisionWidget
-                      key={widgetId}
-                      darkMode={darkMode}
-                      limit={10}
-                    />
+                    <SafeWidget key={widgetId} widgetName="Research No Decision" darkMode={darkMode}>
+                      <ResearchNoDecisionWidget
+                        darkMode={darkMode}
+                        limit={10}
+                      />
+                    </SafeWidget>
                   )
                 case 'stale_tracking':
                   return (
-                    <StaleTrackingWidget
-                      key={widgetId}
-                      darkMode={darkMode}
-                      limit={10}
-                      staleDays={staleDays}
-                    />
+                    <SafeWidget key={widgetId} widgetName="Stale Tracking" darkMode={darkMode}>
+                      <StaleTrackingWidget
+                        darkMode={darkMode}
+                        limit={10}
+                        staleDays={staleDays}
+                      />
+                    </SafeWidget>
                   )
                 default:
                   return null
               }
             })}
             {dashboardWidgets.tasks && (
-              <TasksWidget darkMode={darkMode} limit={10} />
+              <SafeWidget widgetName="Tasks" darkMode={darkMode}>
+                <TasksWidget darkMode={darkMode} limit={10} />
+              </SafeWidget>
             )}
             {dashboardWidgets.sticky_notes && (
-              <StickyNotesWidget darkMode={darkMode} showOverlay={false} />
+              <SafeWidget widgetName="Sticky Notes" darkMode={darkMode}>
+                <StickyNotesWidget darkMode={darkMode} showOverlay={false} />
+              </SafeWidget>
             )}
           </div>
         )}

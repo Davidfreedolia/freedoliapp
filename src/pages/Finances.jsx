@@ -24,289 +24,486 @@ import {
   BarChart3,
   PieChart,
   Building2,
-  FolderKanban
+  FolderKanban,
+  FileText,
+  Settings,
+  Eye,
+  EyeOff,
+  ChevronDown,
+  ChevronUp,
+  FileSpreadsheet,
+  Tag,
+  BookOpen as BookIcon
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { 
   supabase,
   getProjects,
-  getSuppliers
+  getSuppliers,
+  getCurrentUserId
 } from '../lib/supabase'
 import Header from '../components/Header'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
-
-// Categories de despeses
-const EXPENSE_CATEGORIES = {
-  project: [
-    { id: 'project_purchase', name: 'Compra (PO)', icon: ShoppingCart, color: '#4f46e5' },
-    { id: 'project_sample', name: 'Mostres', icon: Package, color: '#8b5cf6' },
-    { id: 'project_shipping', name: 'Enviament', icon: Truck, color: '#06b6d4' },
-    { id: 'project_inspection', name: 'Inspecció', icon: Search, color: '#f59e0b' },
-    { id: 'project_other', name: 'Altres', icon: Receipt, color: '#6b7280' }
-  ],
-  global: [
-    { id: 'global_software', name: 'Software', icon: Monitor, color: '#3b82f6' },
-    { id: 'global_tools', name: 'Eines', icon: Package, color: '#10b981' },
-    { id: 'global_training', name: 'Formació', icon: BookOpen, color: '#8b5cf6' },
-    { id: 'global_accounting', name: 'Comptabilitat', icon: Calculator, color: '#f59e0b' },
-    { id: 'global_marketing', name: 'Marketing', icon: Megaphone, color: '#ec4899' },
-    { id: 'global_other', name: 'Altres', icon: Receipt, color: '#6b7280' }
-  ]
-}
-
-// Categories d'ingressos
-const INCOME_CATEGORIES = [
-  { id: 'sale', name: 'Venda', color: '#22c55e' },
-  { id: 'refund', name: 'Reemborsament', color: '#f59e0b' },
-  { id: 'reimbursement', name: 'Compensació Amazon', color: '#3b82f6' },
-  { id: 'other', name: 'Altres', color: '#6b7280' }
-]
-
-const PAYMENT_STATUS = {
-  pending: { name: 'Pendent', color: '#f59e0b' },
-  paid: { name: 'Pagat', color: '#22c55e' },
-  partial: { name: 'Parcial', color: '#3b82f6' }
-}
+import { showToast } from '../components/Toast'
+import { useTranslation } from 'react-i18next'
 
 export default function Finances() {
   const { darkMode } = useApp()
   const { isMobile, isTablet } = useBreakpoint()
+  const { t } = useTranslation()
   const modalStyles = getModalStyles(isMobile, darkMode)
   
-  const [activeTab, setActiveTab] = useState('overview')
-  const [expenses, setExpenses] = useState([])
-  const [incomes, setIncomes] = useState([])
+  // Data
+  const [ledger, setLedger] = useState([]) // Combined incomes + expenses
+  const [categories, setCategories] = useState({ income: [], expense: [] })
   const [projects, setProjects] = useState([])
   const [suppliers, setSuppliers] = useState([])
   const [loading, setLoading] = useState(true)
   
-  // Filtres
-  const [filterProject, setFilterProject] = useState(null)
-  const [filterPeriod, setFilterPeriod] = useState('all')
-  const [searchTerm, setSearchTerm] = useState('')
+  // Views
+  const [savedViews, setSavedViews] = useState([])
+  const [activeView, setActiveView] = useState(null)
+  const [showViewModal, setShowViewModal] = useState(false)
+  const [editingView, setEditingView] = useState(null)
   
-  // Modals
-  const [showExpenseModal, setShowExpenseModal] = useState(false)
-  const [showIncomeModal, setShowIncomeModal] = useState(false)
-  const [editingExpense, setEditingExpense] = useState(null)
-  const [editingIncome, setEditingIncome] = useState(null)
-  const [saving, setSaving] = useState(false)
+  // Filters
+  const [filters, setFilters] = useState({
+    project_id: null,
+    category_id: null,
+    date_from: null,
+    date_to: null,
+    search: '',
+    type: 'all' // 'all', 'income', 'expense'
+  })
+  
+  // UI State
+  const [showCategoryModal, setShowCategoryModal] = useState(false)
+  const [editingCategory, setEditingCategory] = useState(null)
+  const [showTransactionModal, setShowTransactionModal] = useState(false)
+  const [editingTransaction, setEditingTransaction] = useState(null)
   const [menuOpen, setMenuOpen] = useState(null)
+  const [saving, setSaving] = useState(false)
+  const [visibleColumns, setVisibleColumns] = useState([
+    'date', 'type', 'category', 'description', 'project', 'amount', 'balance'
+  ])
 
   useEffect(() => {
     loadData()
   }, [])
 
+  useEffect(() => {
+    if (activeView) {
+      setFilters(activeView.filters || {})
+      setVisibleColumns(activeView.columns || visibleColumns)
+    }
+  }, [activeView])
+
   const loadData = async () => {
     setLoading(true)
     try {
-      const [expensesRes, incomesRes, projectsData, suppliersData] = await Promise.all([
-        supabase.from('expenses').select('*, project:projects(name), supplier:suppliers(name)').order('expense_date', { ascending: false }),
-        supabase.from('incomes').select('*, project:projects(name)').order('income_date', { ascending: false }),
+      const userId = await getCurrentUserId()
+      
+      // Load categories
+      const { data: categoriesData } = await supabase
+        .from('finance_categories')
+        .select('*')
+        .eq('user_id', userId)
+        .order('sort_order', { ascending: true })
+      
+      const incomeCats = (categoriesData || []).filter(c => c.type === 'income')
+      const expenseCats = (categoriesData || []).filter(c => c.type === 'expense')
+      setCategories({ income: incomeCats, expense: expenseCats })
+      
+      // Load expenses and incomes
+      const [expensesRes, incomesRes, projectsData, suppliersData, viewsRes] = await Promise.all([
+        supabase
+          .from('expenses')
+          .select(`
+            *,
+            project:projects(id, name, project_code),
+            supplier:suppliers(id, name),
+            category:finance_categories(id, name, color, icon)
+          `)
+          .eq('user_id', userId)
+          .order('expense_date', { ascending: false }),
+        supabase
+          .from('incomes')
+          .select(`
+            *,
+            project:projects(id, name, project_code),
+            category:finance_categories(id, name, color, icon)
+          `)
+          .eq('user_id', userId)
+          .order('income_date', { ascending: false }),
         getProjects(),
-        getSuppliers()
+        getSuppliers(),
+        supabase
+          .from('finance_views')
+          .select('*')
+          .eq('user_id', userId)
+          .order('is_default', { ascending: false })
+          .order('created_at', { ascending: false })
       ])
       
-      setExpenses(expensesRes.data || [])
-      setIncomes(incomesRes.data || [])
+      // Combine into ledger
+      const expenses = (expensesRes.data || []).map(e => ({
+        ...e,
+        type: 'expense',
+        date: e.expense_date,
+        amount: -Math.abs(parseFloat(e.amount || 0)),
+        currency: e.currency || 'EUR'
+      }))
+      
+      const incomes = (incomesRes.data || []).map(i => ({
+        ...i,
+        type: 'income',
+        date: i.income_date,
+        amount: Math.abs(parseFloat(i.amount || 0)),
+        currency: i.currency || 'EUR'
+      }))
+      
+      // Combine and sort by date
+      const combined = [...expenses, ...incomes].sort((a, b) => 
+        new Date(b.date) - new Date(a.date)
+      )
+      
+      // Calculate running balance
+      let balance = 0
+      const ledgerWithBalance = combined.map(item => {
+        balance += item.amount
+        return { ...item, balance }
+      })
+      
+      setLedger(ledgerWithBalance)
       setProjects(projectsData || [])
       setSuppliers(suppliersData || [])
+      setSavedViews(viewsRes.data || [])
+      
+      // Set default view if exists
+      const defaultView = viewsRes.data?.find(v => v.is_default)
+      if (defaultView) {
+        setActiveView(defaultView)
+      }
     } catch (err) {
       console.error('Error carregant finances:', err)
+      showToast('Error carregant les finances', 'error')
     }
     setLoading(false)
   }
 
-  // Calcular estadístiques
-  const calculateStats = () => {
-    const filteredExpenses = filterData(expenses, 'expense_date')
-    const filteredIncomes = filterData(incomes, 'income_date')
-    
-    const totalExpenses = filteredExpenses.reduce((sum, e) => sum + parseFloat(e.amount || 0), 0)
-    const totalIncomes = filteredIncomes.reduce((sum, i) => sum + parseFloat(i.amount || 0), 0)
-    const projectExpenses = filteredExpenses.filter(e => !e.is_global).reduce((sum, e) => sum + parseFloat(e.amount || 0), 0)
-    const globalExpenses = filteredExpenses.filter(e => e.is_global).reduce((sum, e) => sum + parseFloat(e.amount || 0), 0)
-    
-    return {
-      totalExpenses,
-      totalIncomes,
-      profit: totalIncomes - totalExpenses,
-      projectExpenses,
-      globalExpenses,
-      expenseCount: filteredExpenses.length,
-      incomeCount: filteredIncomes.length
-    }
-  }
-
-  // Filtrar dades per període
-  const filterData = (data, dateField) => {
-    let filtered = [...data]
-    
-    if (filterProject) {
-      filtered = filtered.filter(d => d.project_id === filterProject)
-    }
-    
-    if (filterPeriod !== 'all') {
-      const now = new Date()
-      let startDate
-      
-      switch (filterPeriod) {
-        case 'month':
-          startDate = new Date(now.getFullYear(), now.getMonth(), 1)
-          break
-        case 'quarter':
-          startDate = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1)
-          break
-        case 'year':
-          startDate = new Date(now.getFullYear(), 0, 1)
-          break
-      }
-      
-      filtered = filtered.filter(d => new Date(d[dateField]) >= startDate)
-    }
-    
-    if (searchTerm) {
-      filtered = filtered.filter(d => 
-        d.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        d.reference_number?.toLowerCase().includes(searchTerm.toLowerCase())
+  // Filter ledger
+  const filteredLedger = ledger.filter(item => {
+    if (filters.type !== 'all' && item.type !== filters.type) return false
+    if (filters.project_id && item.project_id !== filters.project_id) return false
+    if (filters.category_id && item.category_id !== filters.category_id) return false
+    if (filters.date_from && new Date(item.date) < new Date(filters.date_from)) return false
+    if (filters.date_to && new Date(item.date) > new Date(filters.date_to)) return false
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase()
+      return (
+        item.description?.toLowerCase().includes(searchLower) ||
+        item.reference_number?.toLowerCase().includes(searchLower) ||
+        item.project?.name?.toLowerCase().includes(searchLower) ||
+        item.order_id?.toLowerCase().includes(searchLower)
       )
     }
-    
-    return filtered
+    return true
+  })
+
+  // Calculate stats
+  const stats = {
+    totalIncome: filteredLedger.filter(i => i.type === 'income').reduce((sum, i) => sum + i.amount, 0),
+    totalExpense: Math.abs(filteredLedger.filter(i => i.type === 'expense').reduce((sum, i) => sum + i.amount, 0)),
+    profit: filteredLedger.reduce((sum, i) => sum + i.amount, 0),
+    balance: filteredLedger.length > 0 ? filteredLedger[filteredLedger.length - 1]?.balance || 0 : 0
   }
 
-  const stats = calculateStats()
-
-  // CRUD Despeses
-  const handleNewExpense = (isGlobal = false) => {
-    setEditingExpense({
-      project_id: isGlobal ? null : '',
-      is_global: isGlobal,
-      category: isGlobal ? 'global_software' : 'project_purchase',
-      subcategory: '',
-      description: '',
-      amount: '',
-      currency: 'EUR',
-      expense_date: new Date().toISOString().split('T')[0],
-      supplier_id: '',
-      supplier_name: '',
-      reference_number: '',
-      payment_status: 'pending',
-      payment_method: '',
-      notes: ''
+  // Category CRUD
+  const handleNewCategory = (type) => {
+    setEditingCategory({
+      name: '',
+      type: type,
+      color: '#6b7280',
+      icon: 'Receipt',
+      parent_id: null,
+      is_system: false
     })
-    setShowExpenseModal(true)
+    setShowCategoryModal(true)
   }
 
-  const handleSaveExpense = async () => {
-    if (!editingExpense.amount || !editingExpense.category) {
-      alert('Import i categoria són obligatoris')
+  const handleSaveCategory = async () => {
+    if (!editingCategory.name) {
+      showToast('El nom és obligatori', 'error')
       return
     }
     
     setSaving(true)
     try {
+      const userId = await getCurrentUserId()
       const data = {
-        ...editingExpense,
-        amount: parseFloat(editingExpense.amount),
-        project_id: editingExpense.is_global ? null : editingExpense.project_id || null,
-        supplier_id: editingExpense.supplier_id || null
+        ...editingCategory,
+        user_id: userId
       }
       
-      // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
-      const { user_id, ...dataToSave } = data
-
-      if (editingExpense.id) {
-        const { error } = await supabase.from('expenses').update(dataToSave).eq('id', editingExpense.id)
+      if (editingCategory.id) {
+        const { error } = await supabase
+          .from('finance_categories')
+          .update(data)
+          .eq('id', editingCategory.id)
         if (error) throw error
+        showToast('Categoria actualitzada', 'success')
       } else {
-        const { error } = await supabase.from('expenses').insert(dataToSave)
+        const { error } = await supabase
+          .from('finance_categories')
+          .insert(data)
         if (error) throw error
+        showToast('Categoria creada', 'success')
       }
       
       await loadData()
-      setShowExpenseModal(false)
-      setEditingExpense(null)
+      setShowCategoryModal(false)
+      setEditingCategory(null)
     } catch (err) {
-      console.error('Error guardant despesa:', err)
-      alert('Error guardant la despesa')
+      console.error('Error guardant categoria:', err)
+      showToast('Error guardant la categoria', 'error')
     }
     setSaving(false)
   }
 
-  const handleDeleteExpense = async (expense) => {
-    if (!confirm('Segur que vols eliminar aquesta despesa?')) return
+  const handleDeleteCategory = async (category) => {
+    if (category.is_system) {
+      showToast('No es pot eliminar una categoria del sistema', 'error')
+      return
+    }
+    
+    if (!confirm(`Segur que vols eliminar la categoria "${category.name}"?`)) return
+    
     try {
-      await supabase.from('expenses').delete().eq('id', expense.id)
+      const { error } = await supabase
+        .from('finance_categories')
+        .delete()
+        .eq('id', category.id)
+      if (error) throw error
+      showToast('Categoria eliminada', 'success')
       await loadData()
-      setMenuOpen(null)
     } catch (err) {
-      console.error('Error eliminant:', err)
+      console.error('Error eliminant categoria:', err)
+      showToast('Error eliminant la categoria', 'error')
     }
   }
 
-  // CRUD Ingressos
-  const handleNewIncome = () => {
-    setEditingIncome({
-      project_id: '',
-      category: 'sale',
-      description: '',
-      amount: '',
-      currency: 'EUR',
-      platform: 'amazon',
-      marketplace: 'ES',
-      income_date: new Date().toISOString().split('T')[0],
-      reference_number: '',
-      order_id: '',
-      notes: ''
-    })
-    setShowIncomeModal(true)
-  }
-
-  const handleSaveIncome = async () => {
-    if (!editingIncome.amount || !editingIncome.project_id) {
-      alert('Import i projecte són obligatoris')
+  // View CRUD
+  const handleSaveView = async () => {
+    if (!editingView.name) {
+      showToast('El nom és obligatori', 'error')
       return
     }
     
     setSaving(true)
     try {
+      const userId = await getCurrentUserId()
       const data = {
-        ...editingIncome,
-        amount: parseFloat(editingIncome.amount)
+        name: editingView.name,
+        filters: filters,
+        columns: visibleColumns,
+        sort_by: 'date',
+        sort_order: 'desc',
+        is_default: editingView.is_default || false,
+        user_id: userId
       }
       
-      // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
-      const { user_id, ...dataToSave } = data
-
-      if (editingIncome.id) {
-        const { error } = await supabase.from('incomes').update(dataToSave).eq('id', editingIncome.id)
+      if (editingView.id) {
+        const { error } = await supabase
+          .from('finance_views')
+          .update(data)
+          .eq('id', editingView.id)
         if (error) throw error
+        showToast('Vista guardada', 'success')
       } else {
-        const { error } = await supabase.from('incomes').insert(dataToSave)
+        const { error } = await supabase
+          .from('finance_views')
+          .insert(data)
         if (error) throw error
+        showToast('Vista creada', 'success')
       }
       
       await loadData()
-      setShowIncomeModal(false)
-      setEditingIncome(null)
+      setShowViewModal(false)
+      setEditingView(null)
     } catch (err) {
-      console.error('Error guardant ingrés:', err)
-      alert('Error guardant l\'ingrés')
+      console.error('Error guardant vista:', err)
+      showToast('Error guardant la vista', 'error')
     }
     setSaving(false)
   }
 
-  const handleDeleteIncome = async (income) => {
-    if (!confirm('Segur que vols eliminar aquest ingrés?')) return
+  const handleDeleteView = async (view) => {
+    if (!confirm(`Segur que vols eliminar la vista "${view.name}"?`)) return
+    
     try {
-      await supabase.from('incomes').delete().eq('id', income.id)
+      const { error } = await supabase
+        .from('finance_views')
+        .delete()
+        .eq('id', view.id)
+      if (error) throw error
+      showToast('Vista eliminada', 'success')
+      if (activeView?.id === view.id) {
+        setActiveView(null)
+      }
+      await loadData()
+    } catch (err) {
+      console.error('Error eliminant vista:', err)
+      showToast('Error eliminant la vista', 'error')
+    }
+  }
+
+  // Transaction CRUD
+  const handleNewTransaction = (type) => {
+    const defaultCategory = type === 'income' 
+      ? categories.income[0] 
+      : categories.expense[0]
+    
+    setEditingTransaction({
+      type: type,
+      project_id: null,
+      category_id: defaultCategory?.id || null,
+      description: '',
+      amount: '',
+      currency: 'EUR',
+      date: new Date().toISOString().split('T')[0],
+      reference_number: '',
+      payment_status: type === 'expense' ? 'pending' : null,
+      // Amazon-specific fields
+      platform: type === 'income' ? 'amazon' : null,
+      marketplace: type === 'income' ? 'ES' : null,
+      order_id: type === 'income' ? '' : null,
+      supplier_id: type === 'expense' ? null : null,
+      notes: ''
+    })
+    setShowTransactionModal(true)
+  }
+
+  const handleSaveTransaction = async () => {
+    if (!editingTransaction.amount || !editingTransaction.category_id) {
+      showToast('Import i categoria són obligatoris', 'error')
+      return
+    }
+    
+    setSaving(true)
+    try {
+      const userId = await getCurrentUserId()
+      const amount = Math.abs(parseFloat(editingTransaction.amount))
+      
+      if (editingTransaction.type === 'expense') {
+        const data = {
+          project_id: editingTransaction.project_id || null,
+          category_id: editingTransaction.category_id,
+          description: editingTransaction.description,
+          amount: amount,
+          currency: editingTransaction.currency,
+          expense_date: editingTransaction.date,
+          reference_number: editingTransaction.reference_number,
+          payment_status: editingTransaction.payment_status,
+          supplier_id: editingTransaction.supplier_id || null,
+          notes: editingTransaction.notes,
+          user_id: userId
+        }
+        
+        if (editingTransaction.id) {
+          const { error } = await supabase
+            .from('expenses')
+            .update(data)
+            .eq('id', editingTransaction.id)
+          if (error) throw error
+        } else {
+          const { error } = await supabase
+            .from('expenses')
+            .insert(data)
+          if (error) throw error
+        }
+      } else {
+        const data = {
+          project_id: editingTransaction.project_id,
+          category_id: editingTransaction.category_id,
+          description: editingTransaction.description,
+          amount: amount,
+          currency: editingTransaction.currency,
+          income_date: editingTransaction.date,
+          reference_number: editingTransaction.reference_number,
+          platform: editingTransaction.platform,
+          marketplace: editingTransaction.marketplace,
+          order_id: editingTransaction.order_id,
+          notes: editingTransaction.notes,
+          user_id: userId
+        }
+        
+        if (editingTransaction.id) {
+          const { error } = await supabase
+            .from('incomes')
+            .update(data)
+            .eq('id', editingTransaction.id)
+          if (error) throw error
+        } else {
+          const { error } = await supabase
+            .from('incomes')
+            .insert(data)
+          if (error) throw error
+        }
+      }
+      
+      showToast('Transacció guardada', 'success')
+      await loadData()
+      setShowTransactionModal(false)
+      setEditingTransaction(null)
+    } catch (err) {
+      console.error('Error guardant transacció:', err)
+      showToast('Error guardant la transacció', 'error')
+    }
+    setSaving(false)
+  }
+
+  const handleDeleteTransaction = async (transaction) => {
+    if (!confirm('Segur que vols eliminar aquesta transacció?')) return
+    
+    try {
+      const table = transaction.type === 'expense' ? 'expenses' : 'incomes'
+      const { error } = await supabase
+        .from(table)
+        .delete()
+        .eq('id', transaction.id)
+      if (error) throw error
+      showToast('Transacció eliminada', 'success')
       await loadData()
       setMenuOpen(null)
     } catch (err) {
-      console.error('Error eliminant:', err)
+      console.error('Error eliminant transacció:', err)
+      showToast('Error eliminant la transacció', 'error')
     }
+  }
+
+  // Export to CSV
+  const handleExportCSV = () => {
+    const headers = ['Data', 'Tipus', 'Categoria', 'Descripció', 'Projecte', 'Import', 'Moneda', 'Saldo', 'Referència']
+    const rows = filteredLedger.map(item => [
+      formatDate(item.date),
+      item.type === 'income' ? 'Ingrés' : 'Despesa',
+      item.category?.name || '-',
+      item.description || '-',
+      item.project?.name || '-',
+      item.amount.toFixed(2),
+      item.currency,
+      item.balance.toFixed(2),
+      item.reference_number || item.order_id || '-'
+    ])
+    
+    const csv = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = `ledger_${new Date().toISOString().split('T')[0]}.csv`
+    link.click()
+    showToast('Exportat a CSV', 'success')
   }
 
   const formatCurrency = (amount, currency = 'EUR') => {
@@ -321,9 +518,9 @@ export default function Finances() {
     return new Date(dateString).toLocaleDateString('ca-ES')
   }
 
-  const getCategoryInfo = (categoryId) => {
-    const allCategories = [...EXPENSE_CATEGORIES.project, ...EXPENSE_CATEGORIES.global]
-    return allCategories.find(c => c.id === categoryId) || { name: categoryId, icon: Receipt, color: '#6b7280' }
+  const getCategoryInfo = (categoryId, type) => {
+    const catList = type === 'income' ? categories.income : categories.expense
+    return catList.find(c => c.id === categoryId) || { name: 'Sense categoria', color: '#6b7280', icon: 'Receipt' }
   }
 
   return (
@@ -331,121 +528,184 @@ export default function Finances() {
       <Header title="Finances" />
 
       <div style={styles.content}>
-        {/* Tabs */}
-        <div style={styles.tabs}>
-          <button
-            onClick={() => setActiveTab('overview')}
-            style={{
-              ...styles.tab,
-              backgroundColor: activeTab === 'overview' ? '#4f46e5' : 'transparent',
-              color: activeTab === 'overview' ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280')
-            }}
-          >
-            <BarChart3 size={18} /> Resum
-          </button>
-          <button
-            onClick={() => setActiveTab('expenses')}
-            style={{
-              ...styles.tab,
-              backgroundColor: activeTab === 'expenses' ? '#ef4444' : 'transparent',
-              color: activeTab === 'expenses' ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280')
-            }}
-          >
-            <TrendingDown size={18} /> Despeses
-          </button>
-          <button
-            onClick={() => setActiveTab('incomes')}
-            style={{
-              ...styles.tab,
-              backgroundColor: activeTab === 'incomes' ? '#22c55e' : 'transparent',
-              color: activeTab === 'incomes' ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280')
-            }}
-          >
-            <TrendingUp size={18} /> Ingressos
-          </button>
-        </div>
-
-        {/* Filtres */}
+        {/* Toolbar */}
         <div style={styles.toolbar}>
-          <div style={{
-            ...styles.searchContainer,
-            backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
-          }}>
-            <Search size={18} color="#9ca3af" />
-            <input
-              type="text"
-              placeholder="Buscar..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              style={{ ...styles.searchInput, color: darkMode ? '#ffffff' : '#111827' }}
-            />
+          {/* Saved Views */}
+          <div style={styles.viewsSection}>
+            <select
+              value={activeView?.id || ''}
+              onChange={(e) => {
+                const view = savedViews.find(v => v.id === e.target.value)
+                setActiveView(view || null)
+              }}
+              style={{
+                ...styles.viewSelect,
+                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                color: darkMode ? '#ffffff' : '#111827'
+              }}
+            >
+              <option value="">Vista actual</option>
+              {savedViews.map(view => (
+                <option key={view.id} value={view.id}>{view.name}</option>
+              ))}
+            </select>
+            <button
+              onClick={() => {
+                setEditingView({ name: '', filters: filters, columns: visibleColumns, is_default: false })
+                setShowViewModal(true)
+              }}
+              style={styles.iconButton}
+              title="Guardar vista"
+            >
+              <Save size={18} />
+            </button>
+            {activeView && (
+              <button
+                onClick={() => {
+                  setEditingView(activeView)
+                  setShowViewModal(true)
+                }}
+                style={styles.iconButton}
+                title="Editar vista"
+              >
+                <Edit size={18} />
+              </button>
+            )}
           </div>
 
-          <select
-            value={filterProject || ''}
-            onChange={e => setFilterProject(e.target.value || null)}
-            style={{
-              ...styles.filterSelect,
-              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-              color: darkMode ? '#ffffff' : '#111827'
-            }}
-          >
-            <option value="">Tots els projectes</option>
-            {projects.map(p => (
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
-          </select>
+          {/* Filters */}
+          <div style={styles.filtersSection}>
+            <select
+              value={filters.type}
+              onChange={e => setFilters({...filters, type: e.target.value})}
+              style={{
+                ...styles.filterSelect,
+                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                color: darkMode ? '#ffffff' : '#111827'
+              }}
+            >
+              <option value="all">Tots</option>
+              <option value="income">Ingressos</option>
+              <option value="expense">Despeses</option>
+            </select>
 
-          <select
-            value={filterPeriod}
-            onChange={e => setFilterPeriod(e.target.value)}
-            style={{
-              ...styles.filterSelect,
-              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-              color: darkMode ? '#ffffff' : '#111827'
-            }}
-          >
-            <option value="all">Tot el temps</option>
-            <option value="month">Aquest mes</option>
-            <option value="quarter">Aquest trimestre</option>
-            <option value="year">Aquest any</option>
-          </select>
+            <select
+              value={filters.project_id || ''}
+              onChange={e => setFilters({...filters, project_id: e.target.value || null})}
+              style={{
+                ...styles.filterSelect,
+                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                color: darkMode ? '#ffffff' : '#111827'
+              }}
+            >
+              <option value="">Tots els projectes</option>
+              {projects.map(p => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
 
-          {activeTab === 'expenses' && (
-            <>
-              <button onClick={() => handleNewExpense(false)} style={styles.newButton}>
-                <Plus size={18} /> Despesa Projecte
-              </button>
-              <button onClick={() => handleNewExpense(true)} style={{...styles.newButton, backgroundColor: '#6b7280'}}>
-                <Plus size={18} /> Despesa Global
-              </button>
-            </>
-          )}
-          
-          {activeTab === 'incomes' && (
-            <button onClick={handleNewIncome} style={{...styles.newButton, backgroundColor: '#22c55e', border: '1px solid #16a34a'}}>
-              <Plus size={18} /> Nou Ingrés
+            <select
+              value={filters.category_id || ''}
+              onChange={e => setFilters({...filters, category_id: e.target.value || null})}
+              style={{
+                ...styles.filterSelect,
+                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                color: darkMode ? '#ffffff' : '#111827'
+              }}
+            >
+              <option value="">Totes les categories</option>
+              {[...categories.income, ...categories.expense].map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+
+            <input
+              type="date"
+              value={filters.date_from || ''}
+              onChange={e => setFilters({...filters, date_from: e.target.value || null})}
+              placeholder="Des de"
+              style={{
+                ...styles.filterInput,
+                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                color: darkMode ? '#ffffff' : '#111827'
+              }}
+            />
+
+            <input
+              type="date"
+              value={filters.date_to || ''}
+              onChange={e => setFilters({...filters, date_to: e.target.value || null})}
+              placeholder="Fins a"
+              style={{
+                ...styles.filterInput,
+                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                color: darkMode ? '#ffffff' : '#111827'
+              }}
+            />
+
+            <div style={{
+              ...styles.searchContainer,
+              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
+            }}>
+              <Search size={18} color="#9ca3af" />
+              <input
+                type="text"
+                placeholder="Buscar..."
+                value={filters.search}
+                onChange={e => setFilters({...filters, search: e.target.value})}
+                style={{...styles.searchInput, color: darkMode ? '#ffffff' : '#111827'}}
+              />
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div style={styles.actionsSection}>
+            <button
+              onClick={() => setShowCategoryModal(true)}
+              style={styles.iconButton}
+              title="Gestionar categories"
+            >
+              <Tag size={18} />
             </button>
-          )}
+            <button
+              onClick={handleExportCSV}
+              style={styles.iconButton}
+              title="Exportar a CSV"
+            >
+              <FileSpreadsheet size={18} />
+            </button>
+            <button
+              onClick={() => handleNewTransaction('income')}
+              style={{...styles.newButton, backgroundColor: '#22c55e', border: '1px solid #16a34a'}}
+            >
+              <Plus size={18} /> Ingrés
+            </button>
+            <button
+              onClick={() => handleNewTransaction('expense')}
+              style={{...styles.newButton, backgroundColor: '#ef4444', border: '1px solid #dc2626'}}
+            >
+              <Plus size={18} /> Despesa
+            </button>
+          </div>
         </div>
 
         {/* Stats Cards */}
         <div style={styles.statsRow}>
-          <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
+          <div style={{...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff'}}>
             <TrendingUp size={28} color="#22c55e" />
             <div>
-              <span style={{...styles.statValue, color: '#22c55e'}}>{formatCurrency(stats.totalIncomes)}</span>
+              <span style={{...styles.statValue, color: '#22c55e'}}>{formatCurrency(stats.totalIncome)}</span>
               <span style={styles.statLabel}>Ingressos</span>
             </div>
           </div>
-          <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
+          <div style={{...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff'}}>
             <TrendingDown size={28} color="#ef4444" />
             <div>
-              <span style={{...styles.statValue, color: '#ef4444'}}>{formatCurrency(stats.totalExpenses)}</span>
+              <span style={{...styles.statValue, color: '#ef4444'}}>{formatCurrency(stats.totalExpense)}</span>
               <span style={styles.statLabel}>Despeses</span>
             </div>
           </div>
-          <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
+          <div style={{...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff'}}>
             <DollarSign size={28} color={stats.profit >= 0 ? '#22c55e' : '#ef4444'} />
             <div>
               <span style={{...styles.statValue, color: stats.profit >= 0 ? '#22c55e' : '#ef4444'}}>
@@ -454,258 +714,397 @@ export default function Finances() {
               <span style={styles.statLabel}>Benefici</span>
             </div>
           </div>
-          <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <FolderKanban size={28} color="#4f46e5" />
+          <div style={{...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff'}}>
+            <BookIcon size={28} color="#4f46e5" />
             <div>
-              <span style={{...styles.statValue, color: '#4f46e5'}}>{formatCurrency(stats.projectExpenses)}</span>
-              <span style={styles.statLabel}>Desp. Projectes</span>
-            </div>
-          </div>
-          <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <Building2 size={28} color="#6b7280" />
-            <div>
-              <span style={{...styles.statValue, color: '#6b7280'}}>{formatCurrency(stats.globalExpenses)}</span>
-              <span style={styles.statLabel}>Desp. Globals</span>
+              <span style={{...styles.statValue, color: '#4f46e5'}}>{formatCurrency(stats.balance)}</span>
+              <span style={styles.statLabel}>Saldo</span>
             </div>
           </div>
         </div>
 
-        {/* Content based on tab */}
+        {/* Ledger Table */}
         {loading ? (
           <div style={styles.loading}>Carregant...</div>
         ) : (
-          <>
-            {/* OVERVIEW TAB */}
-            {activeTab === 'overview' && (
-              <div style={styles.overviewGrid}>
-                {/* Últimes despeses */}
-                <div style={{...styles.card, backgroundColor: darkMode ? '#15151f' : '#ffffff'}}>
-                  <h3 style={{...styles.cardTitle, color: darkMode ? '#ffffff' : '#111827'}}>
-                    <TrendingDown size={18} color="#ef4444" /> Últimes Despeses
-                  </h3>
-                  {expenses.slice(0, 5).map(expense => {
-                    const catInfo = getCategoryInfo(expense.category)
-                    const CatIcon = catInfo.icon
+          <div style={{...styles.tableContainer, backgroundColor: darkMode ? '#15151f' : '#ffffff'}}>
+            <table style={styles.table}>
+              <thead>
+                <tr>
+                  {visibleColumns.includes('date') && (
+                    <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Data</th>
+                  )}
+                  {visibleColumns.includes('type') && (
+                    <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Tipus</th>
+                  )}
+                  {visibleColumns.includes('category') && (
+                    <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Categoria</th>
+                  )}
+                  {visibleColumns.includes('description') && (
+                    <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Descripció</th>
+                  )}
+                  {visibleColumns.includes('project') && (
+                    <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Projecte</th>
+                  )}
+                  {visibleColumns.includes('amount') && (
+                    <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Import</th>
+                  )}
+                  {visibleColumns.includes('balance') && (
+                    <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Saldo</th>
+                  )}
+                  <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Accions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredLedger.length === 0 ? (
+                  <tr>
+                    <td colSpan={visibleColumns.length + 1} style={{...styles.td, textAlign: 'center', padding: '48px', color: '#6b7280'}}>
+                      No hi ha transaccions
+                    </td>
+                  </tr>
+                ) : (
+                  filteredLedger.map((item, index) => {
+                    const catInfo = getCategoryInfo(item.category_id, item.type)
                     return (
-                      <div key={expense.id} style={styles.listItem}>
-                        <div style={{...styles.listIcon, backgroundColor: `${catInfo.color}15`}}>
-                          <CatIcon size={16} color={catInfo.color} />
-                        </div>
-                        <div style={styles.listContent}>
-                          <span style={{color: darkMode ? '#ffffff' : '#111827', fontWeight: '500'}}>
-                            {expense.description || catInfo.name}
-                          </span>
-                          <span style={{color: '#6b7280', fontSize: '12px'}}>
-                            {expense.project?.name || 'Global'} • {formatDate(expense.expense_date)}
-                          </span>
-                        </div>
-                        <span style={{color: '#ef4444', fontWeight: '600'}}>-{formatCurrency(expense.amount, expense.currency)}</span>
-                      </div>
-                    )
-                  })}
-                </div>
-
-                {/* Últims ingressos */}
-                <div style={{...styles.card, backgroundColor: darkMode ? '#15151f' : '#ffffff'}}>
-                  <h3 style={{...styles.cardTitle, color: darkMode ? '#ffffff' : '#111827'}}>
-                    <TrendingUp size={18} color="#22c55e" /> Últims Ingressos
-                  </h3>
-                  {incomes.slice(0, 5).map(income => (
-                    <div key={income.id} style={styles.listItem}>
-                      <div style={{...styles.listIcon, backgroundColor: '#22c55e15'}}>
-                        <DollarSign size={16} color="#22c55e" />
-                      </div>
-                      <div style={styles.listContent}>
-                        <span style={{color: darkMode ? '#ffffff' : '#111827', fontWeight: '500'}}>
-                          {income.description || 'Venda'}
-                        </span>
-                        <span style={{color: '#6b7280', fontSize: '12px'}}>
-                          {income.project?.name} • {formatDate(income.income_date)}
-                        </span>
-                      </div>
-                      <span style={{color: '#22c55e', fontWeight: '600'}}>+{formatCurrency(income.amount, income.currency)}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* EXPENSES TAB */}
-            {activeTab === 'expenses' && (
-              <div style={{...styles.tableContainer, backgroundColor: darkMode ? '#15151f' : '#ffffff'}}>
-                <table style={styles.table}>
-                  <thead>
-                    <tr>
-                      <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Data</th>
-                      <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Categoria</th>
-                      <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Descripció</th>
-                      <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Projecte</th>
-                      <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Import</th>
-                      <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Estat</th>
-                      <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Accions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filterData(expenses, 'expense_date').map(expense => {
-                      const catInfo = getCategoryInfo(expense.category)
-                      const CatIcon = catInfo.icon
-                      const statusInfo = PAYMENT_STATUS[expense.payment_status] || PAYMENT_STATUS.pending
-                      
-                      return (
-                        <tr key={expense.id} style={styles.tr}>
+                      <tr key={`${item.type}-${item.id}`} style={styles.tr}>
+                        {visibleColumns.includes('date') && (
                           <td style={{...styles.td, color: darkMode ? '#9ca3af' : '#6b7280'}}>
-                            {formatDate(expense.expense_date)}
+                            {formatDate(item.date)}
                           </td>
+                        )}
+                        {visibleColumns.includes('type') && (
                           <td style={styles.td}>
-                            <span style={{...styles.categoryBadge, backgroundColor: `${catInfo.color}15`, color: catInfo.color}}>
-                              <CatIcon size={14} /> {catInfo.name}
+                            <span style={{
+                              ...styles.typeBadge,
+                              backgroundColor: item.type === 'income' ? '#22c55e15' : '#ef444415',
+                              color: item.type === 'income' ? '#22c55e' : '#ef4444'
+                            }}>
+                              {item.type === 'income' ? 'Ingrés' : 'Despesa'}
                             </span>
                           </td>
-                          <td style={{...styles.td, color: darkMode ? '#ffffff' : '#111827'}}>
-                            {expense.description || '-'}
-                          </td>
-                          <td style={{...styles.td, color: darkMode ? '#9ca3af' : '#6b7280'}}>
-                            {expense.is_global ? (
-                              <span style={styles.globalBadge}>🌐 Global</span>
-                            ) : expense.project?.name || '-'}
-                          </td>
-                          <td style={{...styles.td, color: '#ef4444', fontWeight: '600'}}>
-                            {formatCurrency(expense.amount, expense.currency)}
-                          </td>
+                        )}
+                        {visibleColumns.includes('category') && (
                           <td style={styles.td}>
-                            <span style={{...styles.statusBadge, backgroundColor: `${statusInfo.color}15`, color: statusInfo.color}}>
-                              {statusInfo.name}
-                            </span>
-                          </td>
-                          <td style={styles.td}>
-                            <div style={{position: 'relative'}}>
-                              <button onClick={() => setMenuOpen(menuOpen === expense.id ? null : expense.id)} style={styles.menuButton}>
-                                <MoreVertical size={18} />
-                              </button>
-                              {menuOpen === expense.id && (
-                                <div style={{...styles.menu, backgroundColor: darkMode ? '#1f1f2e' : '#ffffff'}}>
-                                  <button onClick={() => { setEditingExpense(expense); setShowExpenseModal(true); setMenuOpen(null) }} style={styles.menuItem}>
-                                    <Edit size={14} /> Editar
-                                  </button>
-                                  <button onClick={() => handleDeleteExpense(expense)} style={{...styles.menuItem, color: '#ef4444'}}>
-                                    <Trash2 size={14} /> Eliminar
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            {/* INCOMES TAB */}
-            {activeTab === 'incomes' && (
-              <div style={{...styles.tableContainer, backgroundColor: darkMode ? '#15151f' : '#ffffff'}}>
-                <table style={styles.table}>
-                  <thead>
-                    <tr>
-                      <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Data</th>
-                      <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Categoria</th>
-                      <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Descripció</th>
-                      <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Projecte</th>
-                      <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Plataforma</th>
-                      <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Import</th>
-                      <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Accions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filterData(incomes, 'income_date').map(income => {
-                      const catInfo = INCOME_CATEGORIES.find(c => c.id === income.category) || INCOME_CATEGORIES[0]
-                      
-                      return (
-                        <tr key={income.id} style={styles.tr}>
-                          <td style={{...styles.td, color: darkMode ? '#9ca3af' : '#6b7280'}}>
-                            {formatDate(income.income_date)}
-                          </td>
-                          <td style={styles.td}>
-                            <span style={{...styles.categoryBadge, backgroundColor: `${catInfo.color}15`, color: catInfo.color}}>
+                            <span style={{
+                              ...styles.categoryBadge,
+                              backgroundColor: `${catInfo.color}15`,
+                              color: catInfo.color
+                            }}>
                               {catInfo.name}
                             </span>
                           </td>
+                        )}
+                        {visibleColumns.includes('description') && (
                           <td style={{...styles.td, color: darkMode ? '#ffffff' : '#111827'}}>
-                            {income.description || '-'}
+                            {item.description || '-'}
+                            {item.order_id && (
+                              <span style={{fontSize: '11px', color: '#6b7280', marginLeft: '8px'}}>
+                                Order: {item.order_id}
+                              </span>
+                            )}
                           </td>
+                        )}
+                        {visibleColumns.includes('project') && (
                           <td style={{...styles.td, color: darkMode ? '#9ca3af' : '#6b7280'}}>
-                            {income.project?.name || '-'}
+                            {item.project?.name || '-'}
                           </td>
-                          <td style={{...styles.td, color: darkMode ? '#9ca3af' : '#6b7280'}}>
-                            {income.platform} {income.marketplace && `(${income.marketplace})`}
+                        )}
+                        {visibleColumns.includes('amount') && (
+                          <td style={{
+                            ...styles.td,
+                            color: item.amount >= 0 ? '#22c55e' : '#ef4444',
+                            fontWeight: '600'
+                          }}>
+                            {item.amount >= 0 ? '+' : ''}{formatCurrency(item.amount, item.currency)}
                           </td>
-                          <td style={{...styles.td, color: '#22c55e', fontWeight: '600'}}>
-                            {formatCurrency(income.amount, income.currency)}
+                        )}
+                        {visibleColumns.includes('balance') && (
+                          <td style={{
+                            ...styles.td,
+                            color: item.balance >= 0 ? '#22c55e' : '#ef4444',
+                            fontWeight: '600'
+                          }}>
+                            {formatCurrency(item.balance, item.currency)}
                           </td>
-                          <td style={styles.td}>
-                            <div style={{position: 'relative'}}>
-                              <button onClick={() => setMenuOpen(menuOpen === `i-${income.id}` ? null : `i-${income.id}`)} style={styles.menuButton}>
-                                <MoreVertical size={18} />
-                              </button>
-                              {menuOpen === `i-${income.id}` && (
-                                <div style={{...styles.menu, backgroundColor: darkMode ? '#1f1f2e' : '#ffffff'}}>
-                                  <button onClick={() => { setEditingIncome(income); setShowIncomeModal(true); setMenuOpen(null) }} style={styles.menuItem}>
-                                    <Edit size={14} /> Editar
-                                  </button>
-                                  <button onClick={() => handleDeleteIncome(income)} style={{...styles.menuItem, color: '#ef4444'}}>
-                                    <Trash2 size={14} /> Eliminar
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </>
+                        )}
+                        <td style={styles.td}>
+                          <div style={{position: 'relative'}}>
+                            <button
+                              onClick={() => setMenuOpen(menuOpen === item.id ? null : item.id)}
+                              style={styles.menuButton}
+                            >
+                              <MoreVertical size={18} />
+                            </button>
+                            {menuOpen === item.id && (
+                              <div style={{...styles.menu, backgroundColor: darkMode ? '#1f1f2e' : '#ffffff'}}>
+                                <button
+                                  onClick={() => {
+                                    setEditingTransaction(item)
+                                    setShowTransactionModal(true)
+                                    setMenuOpen(null)
+                                  }}
+                                  style={styles.menuItem}
+                                >
+                                  <Edit size={14} /> Editar
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteTransaction(item)}
+                                  style={{...styles.menuItem, color: '#ef4444'}}
+                                >
+                                  <Trash2 size={14} /> Eliminar
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
-      {/* Modal Despesa */}
-      {showExpenseModal && editingExpense && (
-        <div style={{...styles.modalOverlay, ...modalStyles.overlay}} onClick={() => setShowExpenseModal(false)}>
+      {/* Category Modal */}
+      {showCategoryModal && (
+        <div style={{...styles.modalOverlay, ...modalStyles.overlay}} onClick={() => setShowCategoryModal(false)}>
           <div style={{...styles.modal, ...modalStyles.modal}} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeader}>
               <h3 style={{...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827'}}>
-                {editingExpense.id ? 'Editar Despesa' : (editingExpense.is_global ? 'Nova Despesa Global' : 'Nova Despesa de Projecte')}
+                Gestionar Categories
               </h3>
-              <button onClick={() => setShowExpenseModal(false)} style={styles.closeButton}><X size={20} /></button>
+              <button onClick={() => setShowCategoryModal(false)} style={styles.closeButton}>
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div style={styles.modalBody}>
+              <div style={styles.categoryTabs}>
+                <button
+                  onClick={() => setEditingCategory({...editingCategory, type: 'income'})}
+                  style={{
+                    ...styles.categoryTab,
+                    backgroundColor: editingCategory?.type === 'income' ? '#22c55e' : 'transparent',
+                    color: editingCategory?.type === 'income' ? '#ffffff' : 'inherit'
+                  }}
+                >
+                  Ingressos
+                </button>
+                <button
+                  onClick={() => setEditingCategory({...editingCategory, type: 'expense'})}
+                  style={{
+                    ...styles.categoryTab,
+                    backgroundColor: editingCategory?.type === 'expense' ? '#ef4444' : 'transparent',
+                    color: editingCategory?.type === 'expense' ? '#ffffff' : 'inherit'
+                  }}
+                >
+                  Despeses
+                </button>
+              </div>
+
+              <div style={styles.categoriesList}>
+                {(editingCategory?.type === 'income' ? categories.income : categories.expense).map(cat => (
+                  <div key={cat.id} style={styles.categoryItem}>
+                    <span style={{
+                      ...styles.categoryBadge,
+                      backgroundColor: `${cat.color}15`,
+                      color: cat.color
+                    }}>
+                      {cat.name}
+                    </span>
+                    {!cat.is_system && (
+                      <div style={styles.categoryActions}>
+                        <button
+                          onClick={() => {
+                            setEditingCategory(cat)
+                            setShowCategoryModal(true)
+                          }}
+                          style={styles.smallButton}
+                        >
+                          <Edit size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteCategory(cat)}
+                          style={{...styles.smallButton, color: '#ef4444'}}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {editingCategory && (
+                <div style={styles.categoryForm}>
+                  <input
+                    type="text"
+                    placeholder="Nom de la categoria"
+                    value={editingCategory.name || ''}
+                    onChange={e => setEditingCategory({...editingCategory, name: e.target.value})}
+                    style={{
+                      ...styles.input,
+                      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                      color: darkMode ? '#ffffff' : '#111827'
+                    }}
+                  />
+                  <input
+                    type="color"
+                    value={editingCategory.color || '#6b7280'}
+                    onChange={e => setEditingCategory({...editingCategory, color: e.target.value})}
+                    style={styles.colorInput}
+                  />
+                  <div style={styles.formActions}>
+                    <button
+                      onClick={handleSaveCategory}
+                      disabled={saving}
+                      style={styles.saveButton}
+                    >
+                      {saving ? 'Guardant...' : <><Save size={16} /> Guardar</>}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditingCategory(null)
+                        setShowCategoryModal(false)
+                      }}
+                      style={styles.cancelButton}
+                    >
+                      Cancel·lar
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {!editingCategory && (
+                <button
+                  onClick={() => handleNewCategory(editingCategory?.type || 'expense')}
+                  style={styles.newCategoryButton}
+                >
+                  <Plus size={16} /> Nova Categoria
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Modal */}
+      {showViewModal && editingView && (
+        <div style={{...styles.modalOverlay, ...modalStyles.overlay}} onClick={() => setShowViewModal(false)}>
+          <div style={{...styles.modal, ...modalStyles.modal}} onClick={e => e.stopPropagation()}>
+            <div style={styles.modalHeader}>
+              <h3 style={{...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827'}}>
+                {editingView.id ? 'Editar Vista' : 'Nova Vista'}
+              </h3>
+              <button onClick={() => setShowViewModal(false)} style={styles.closeButton}>
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div style={styles.modalBody}>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Nom de la vista</label>
+                <input
+                  type="text"
+                  value={editingView.name}
+                  onChange={e => setEditingView({...editingView, name: e.target.value})}
+                  placeholder="Ex: Q1 2024, Amazon Sales, etc."
+                  style={{
+                    ...styles.input,
+                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                    color: darkMode ? '#ffffff' : '#111827'
+                  }}
+                />
+              </div>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>
+                  <input
+                    type="checkbox"
+                    checked={editingView.is_default || false}
+                    onChange={e => setEditingView({...editingView, is_default: e.target.checked})}
+                    style={{marginRight: '8px'}}
+                  />
+                  Vista per defecte
+                </label>
+              </div>
+              <div style={styles.formActions}>
+                <button
+                  onClick={handleSaveView}
+                  disabled={saving}
+                  style={styles.saveButton}
+                >
+                  {saving ? 'Guardant...' : <><Save size={16} /> Guardar</>}
+                </button>
+                {editingView.id && (
+                  <button
+                    onClick={() => handleDeleteView(editingView)}
+                    style={{...styles.cancelButton, color: '#ef4444'}}
+                  >
+                    <Trash2 size={16} /> Eliminar
+                  </button>
+                )}
+                <button
+                  onClick={() => setShowViewModal(false)}
+                  style={styles.cancelButton}
+                >
+                  Cancel·lar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Transaction Modal */}
+      {showTransactionModal && editingTransaction && (
+        <div style={{...styles.modalOverlay, ...modalStyles.overlay}} onClick={() => setShowTransactionModal(false)}>
+          <div style={{...styles.modal, ...modalStyles.modal, maxWidth: '700px'}} onClick={e => e.stopPropagation()}>
+            <div style={styles.modalHeader}>
+              <h3 style={{...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827'}}>
+                {editingTransaction.id 
+                  ? `Editar ${editingTransaction.type === 'income' ? 'Ingrés' : 'Despesa'}` 
+                  : `Nova ${editingTransaction.type === 'income' ? 'Ingrés' : 'Despesa'}`}
+              </h3>
+              <button onClick={() => setShowTransactionModal(false)} style={styles.closeButton}>
+                <X size={20} />
+              </button>
             </div>
             
             <div style={styles.modalBody}>
               <div style={styles.formGrid}>
-                {!editingExpense.is_global && (
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Projecte *</label>
-                    <select
-                      value={editingExpense.project_id}
-                      onChange={e => setEditingExpense({...editingExpense, project_id: e.target.value})}
-                      style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
-                    >
-                      <option value="">Selecciona...</option>
-                      {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                    </select>
-                  </div>
-                )}
-                
-                <div style={{...styles.formGroup, ...(editingExpense.is_global && { gridColumn: 'span 1' })}}>
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>Projecte {editingTransaction.type === 'income' && '*'}</label>
+                  <select
+                    value={editingTransaction.project_id || ''}
+                    onChange={e => setEditingTransaction({...editingTransaction, project_id: e.target.value || null})}
+                    style={{
+                      ...styles.input,
+                      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                      color: darkMode ? '#ffffff' : '#111827'
+                    }}
+                  >
+                    <option value="">Selecciona...</option>
+                    {projects.map(p => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div style={styles.formGroup}>
                   <label style={styles.label}>Categoria *</label>
                   <select
-                    value={editingExpense.category}
-                    onChange={e => setEditingExpense({...editingExpense, category: e.target.value})}
-                    style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                    value={editingTransaction.category_id || ''}
+                    onChange={e => setEditingTransaction({...editingTransaction, category_id: e.target.value || null})}
+                    style={{
+                      ...styles.input,
+                      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                      color: darkMode ? '#ffffff' : '#111827'
+                    }}
                   >
-                    {(editingExpense.is_global ? EXPENSE_CATEGORIES.global : EXPENSE_CATEGORIES.project).map(c => (
+                    <option value="">Selecciona...</option>
+                    {(editingTransaction.type === 'income' ? categories.income : categories.expense).map(c => (
                       <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
                   </select>
@@ -716,18 +1115,26 @@ export default function Finances() {
                   <input
                     type="number"
                     step="0.01"
-                    value={editingExpense.amount}
-                    onChange={e => setEditingExpense({...editingExpense, amount: e.target.value})}
-                    style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                    value={editingTransaction.amount}
+                    onChange={e => setEditingTransaction({...editingTransaction, amount: e.target.value})}
+                    style={{
+                      ...styles.input,
+                      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                      color: darkMode ? '#ffffff' : '#111827'
+                    }}
                   />
                 </div>
 
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Moneda</label>
                   <select
-                    value={editingExpense.currency}
-                    onChange={e => setEditingExpense({...editingExpense, currency: e.target.value})}
-                    style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                    value={editingTransaction.currency}
+                    onChange={e => setEditingTransaction({...editingTransaction, currency: e.target.value})}
+                    style={{
+                      ...styles.input,
+                      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                      color: darkMode ? '#ffffff' : '#111827'
+                    }}
                   >
                     <option value="EUR">EUR</option>
                     <option value="USD">USD</option>
@@ -739,33 +1146,120 @@ export default function Finances() {
                   <label style={styles.label}>Data *</label>
                   <input
                     type="date"
-                    value={editingExpense.expense_date}
-                    onChange={e => setEditingExpense({...editingExpense, expense_date: e.target.value})}
-                    style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                    value={editingTransaction.date}
+                    onChange={e => setEditingTransaction({...editingTransaction, date: e.target.value})}
+                    style={{
+                      ...styles.input,
+                      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                      color: darkMode ? '#ffffff' : '#111827'
+                    }}
                   />
                 </div>
 
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Estat pagament</label>
-                  <select
-                    value={editingExpense.payment_status}
-                    onChange={e => setEditingExpense({...editingExpense, payment_status: e.target.value})}
-                    style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
-                  >
-                    <option value="pending">Pendent</option>
-                    <option value="paid">Pagat</option>
-                    <option value="partial">Parcial</option>
-                  </select>
-                </div>
+                {editingTransaction.type === 'expense' && (
+                  <div style={styles.formGroup}>
+                    <label style={styles.label}>Estat pagament</label>
+                    <select
+                      value={editingTransaction.payment_status}
+                      onChange={e => setEditingTransaction({...editingTransaction, payment_status: e.target.value})}
+                      style={{
+                        ...styles.input,
+                        backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                        color: darkMode ? '#ffffff' : '#111827'
+                      }}
+                    >
+                      <option value="pending">Pendent</option>
+                      <option value="paid">Pagat</option>
+                      <option value="partial">Parcial</option>
+                    </select>
+                  </div>
+                )}
+
+                {editingTransaction.type === 'income' && (
+                  <>
+                    <div style={styles.formGroup}>
+                      <label style={styles.label}>Plataforma</label>
+                      <select
+                        value={editingTransaction.platform}
+                        onChange={e => setEditingTransaction({...editingTransaction, platform: e.target.value})}
+                        style={{
+                          ...styles.input,
+                          backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                          color: darkMode ? '#ffffff' : '#111827'
+                        }}
+                      >
+                        <option value="amazon">Amazon</option>
+                        <option value="other">Altre</option>
+                      </select>
+                    </div>
+                    <div style={styles.formGroup}>
+                      <label style={styles.label}>Marketplace</label>
+                      <select
+                        value={editingTransaction.marketplace}
+                        onChange={e => setEditingTransaction({...editingTransaction, marketplace: e.target.value})}
+                        style={{
+                          ...styles.input,
+                          backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                          color: darkMode ? '#ffffff' : '#111827'
+                        }}
+                      >
+                        <option value="ES">Espanya</option>
+                        <option value="DE">Alemanya</option>
+                        <option value="FR">França</option>
+                        <option value="IT">Itàlia</option>
+                        <option value="UK">UK</option>
+                        <option value="US">USA</option>
+                      </select>
+                    </div>
+                    <div style={styles.formGroup}>
+                      <label style={styles.label}>Order ID (Amazon)</label>
+                      <input
+                        type="text"
+                        value={editingTransaction.order_id || ''}
+                        onChange={e => setEditingTransaction({...editingTransaction, order_id: e.target.value})}
+                        placeholder="ID comanda Amazon..."
+                        style={{
+                          ...styles.input,
+                          backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                          color: darkMode ? '#ffffff' : '#111827'
+                        }}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {editingTransaction.type === 'expense' && (
+                  <div style={styles.formGroup}>
+                    <label style={styles.label}>Proveïdor</label>
+                    <select
+                      value={editingTransaction.supplier_id || ''}
+                      onChange={e => setEditingTransaction({...editingTransaction, supplier_id: e.target.value || null})}
+                      style={{
+                        ...styles.input,
+                        backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                        color: darkMode ? '#ffffff' : '#111827'
+                      }}
+                    >
+                      <option value="">Selecciona...</option>
+                      {suppliers.map(s => (
+                        <option key={s.id} value={s.id}>{s.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
 
                 <div style={{...styles.formGroup, gridColumn: 'span 2'}}>
                   <label style={styles.label}>Descripció</label>
                   <input
                     type="text"
-                    value={editingExpense.description}
-                    onChange={e => setEditingExpense({...editingExpense, description: e.target.value})}
-                    placeholder="Descripció de la despesa..."
-                    style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                    value={editingTransaction.description || ''}
+                    onChange={e => setEditingTransaction({...editingTransaction, description: e.target.value})}
+                    placeholder="Descripció de la transacció..."
+                    style={{
+                      ...styles.input,
+                      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                      color: darkMode ? '#ffffff' : '#111827'
+                    }}
                   />
                 </div>
 
@@ -773,231 +1267,47 @@ export default function Finances() {
                   <label style={styles.label}>Referència</label>
                   <input
                     type="text"
-                    value={editingExpense.reference_number}
-                    onChange={e => setEditingExpense({...editingExpense, reference_number: e.target.value})}
+                    value={editingTransaction.reference_number || ''}
+                    onChange={e => setEditingTransaction({...editingTransaction, reference_number: e.target.value})}
                     placeholder="Nº factura, PO..."
-                    style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                    style={{
+                      ...styles.input,
+                      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                      color: darkMode ? '#ffffff' : '#111827'
+                    }}
                   />
                 </div>
-
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Proveïdor</label>
-                  <select
-                    value={editingExpense.supplier_id || ''}
-                    onChange={e => {
-                      if (e.target.value === '__other__') {
-                        setEditingExpense({...editingExpense, supplier_id: '', supplier_name: ''})
-                      } else {
-                        setEditingExpense({...editingExpense, supplier_id: e.target.value, supplier_name: ''})
-                      }
-                    }}
-                    style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
-                  >
-                    <option value="">Selecciona...</option>
-                    {suppliers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                    <option value="__other__">➕ Altre (escriure nom)</option>
-                  </select>
-                </div>
-
-                {(!editingExpense.supplier_id || editingExpense.supplier_id === '') && (
-                  <div style={{...styles.formGroup, gridColumn: 'span 2'}}>
-                    <label style={styles.label}>Nom Proveïdor</label>
-                    <input
-                      type="text"
-                      value={editingExpense.supplier_name || ''}
-                      onChange={e => setEditingExpense({...editingExpense, supplier_name: e.target.value})}
-                      placeholder="Nom del proveïdor..."
-                      style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
-                    />
-                  </div>
-                )}
 
                 <div style={{...styles.formGroup, gridColumn: 'span 2'}}>
                   <label style={styles.label}>Notes</label>
                   <textarea
-                    value={editingExpense.notes}
-                    onChange={e => setEditingExpense({...editingExpense, notes: e.target.value})}
-                    rows={2}
-                    style={{...styles.input, ...styles.textarea, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                    value={editingTransaction.notes || ''}
+                    onChange={e => setEditingTransaction({...editingTransaction, notes: e.target.value})}
+                    rows={3}
+                    style={{
+                      ...styles.input,
+                      ...styles.textarea,
+                      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                      color: darkMode ? '#ffffff' : '#111827'
+                    }}
                   />
-                </div>
-
-                {/* Upload factura */}
-                <div style={{...styles.formGroup, gridColumn: 'span 2'}}>
-                  <label style={styles.label}>Factura / Document</label>
-                  <div style={{
-                    ...styles.uploadArea,
-                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                    borderColor: editingExpense.receipt_url ? '#22c55e' : '#d1d5db'
-                  }}>
-                    {editingExpense.receipt_url ? (
-                      <div style={styles.uploadedFile}>
-                        <span style={{ color: '#22c55e' }}>✓ Document adjuntat</span>
-                        <a href={editingExpense.receipt_url} target="_blank" rel="noopener noreferrer" style={{ color: '#4f46e5', fontSize: '12px' }}>
-                          Veure document
-                        </a>
-                        <button 
-                          onClick={() => setEditingExpense({...editingExpense, receipt_url: '', receipt_drive_id: ''})}
-                          style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '12px' }}
-                        >
-                          Eliminar
-                        </button>
-                      </div>
-                    ) : (
-                      <div style={styles.uploadPlaceholder}>
-                        <span style={{ color: '#6b7280', fontSize: '13px' }}>
-                          📄 Puja factura des del projecte o enganxa URL
-                        </span>
-                        <input
-                          type="url"
-                          placeholder="URL del document (Google Drive, etc.)"
-                          value={editingExpense.receipt_url || ''}
-                          onChange={e => setEditingExpense({...editingExpense, receipt_url: e.target.value})}
-                          style={{...styles.input, marginTop: '8px', backgroundColor: darkMode ? '#15151f' : '#ffffff', color: darkMode ? '#ffffff' : '#111827'}}
-                        />
-                      </div>
-                    )}
-                  </div>
                 </div>
               </div>
             </div>
 
             <div style={styles.modalFooter}>
-              <button onClick={() => setShowExpenseModal(false)} style={styles.cancelButton}>Cancel·lar</button>
-              <button onClick={handleSaveExpense} disabled={saving} style={{...styles.saveButton, backgroundColor: '#ef4444', border: '1px solid #dc2626'}}>
-                {saving ? 'Guardant...' : <><Save size={16} /> Guardar</>}
+              <button onClick={() => setShowTransactionModal(false)} style={styles.cancelButton}>
+                Cancel·lar
               </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Ingrés */}
-      {showIncomeModal && editingIncome && (
-        <div style={{...styles.modalOverlay, ...modalStyles.overlay}} onClick={() => setShowIncomeModal(false)}>
-          <div style={{...styles.modal, ...modalStyles.modal}} onClick={e => e.stopPropagation()}>
-            <div style={styles.modalHeader}>
-              <h3 style={{...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827'}}>
-                {editingIncome.id ? 'Editar Ingrés' : 'Nou Ingrés'}
-              </h3>
-              <button onClick={() => setShowIncomeModal(false)} style={styles.closeButton}><X size={20} /></button>
-            </div>
-            
-            <div style={styles.modalBody}>
-              <div style={styles.formGrid}>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Projecte *</label>
-                  <select
-                    value={editingIncome.project_id}
-                    onChange={e => setEditingIncome({...editingIncome, project_id: e.target.value})}
-                    style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
-                  >
-                    <option value="">Selecciona...</option>
-                    {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                  </select>
-                </div>
-                
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Categoria</label>
-                  <select
-                    value={editingIncome.category}
-                    onChange={e => setEditingIncome({...editingIncome, category: e.target.value})}
-                    style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
-                  >
-                    {INCOME_CATEGORIES.map(c => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Import *</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={editingIncome.amount}
-                    onChange={e => setEditingIncome({...editingIncome, amount: e.target.value})}
-                    style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
-                  />
-                </div>
-
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Moneda</label>
-                  <select
-                    value={editingIncome.currency}
-                    onChange={e => setEditingIncome({...editingIncome, currency: e.target.value})}
-                    style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
-                  >
-                    <option value="EUR">EUR</option>
-                    <option value="USD">USD</option>
-                  </select>
-                </div>
-
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Data *</label>
-                  <input
-                    type="date"
-                    value={editingIncome.income_date}
-                    onChange={e => setEditingIncome({...editingIncome, income_date: e.target.value})}
-                    style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
-                  />
-                </div>
-
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Plataforma</label>
-                  <select
-                    value={editingIncome.platform}
-                    onChange={e => setEditingIncome({...editingIncome, platform: e.target.value})}
-                    style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
-                  >
-                    <option value="amazon">Amazon</option>
-                    <option value="other">Altre</option>
-                  </select>
-                </div>
-
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Marketplace</label>
-                  <select
-                    value={editingIncome.marketplace}
-                    onChange={e => setEditingIncome({...editingIncome, marketplace: e.target.value})}
-                    style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
-                  >
-                    <option value="ES">Espanya</option>
-                    <option value="DE">Alemanya</option>
-                    <option value="FR">França</option>
-                    <option value="IT">Itàlia</option>
-                    <option value="UK">UK</option>
-                    <option value="US">USA</option>
-                  </select>
-                </div>
-
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Order ID</label>
-                  <input
-                    type="text"
-                    value={editingIncome.order_id}
-                    onChange={e => setEditingIncome({...editingIncome, order_id: e.target.value})}
-                    placeholder="ID comanda Amazon..."
-                    style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
-                  />
-                </div>
-
-                <div style={{...styles.formGroup, gridColumn: 'span 2'}}>
-                  <label style={styles.label}>Descripció</label>
-                  <input
-                    type="text"
-                    value={editingIncome.description}
-                    onChange={e => setEditingIncome({...editingIncome, description: e.target.value})}
-                    placeholder="Descripció..."
-                    style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div style={styles.modalFooter}>
-              <button onClick={() => setShowIncomeModal(false)} style={styles.cancelButton}>Cancel·lar</button>
-              <button onClick={handleSaveIncome} disabled={saving} style={{...styles.saveButton, backgroundColor: '#22c55e', border: '1px solid #16a34a'}}>
+              <button
+                onClick={handleSaveTransaction}
+                disabled={saving}
+                style={{
+                  ...styles.saveButton,
+                  backgroundColor: editingTransaction.type === 'income' ? '#22c55e' : '#ef4444',
+                  border: editingTransaction.type === 'income' ? '1px solid #16a34a' : '1px solid #dc2626'
+                }}
+              >
                 {saving ? 'Guardant...' : <><Save size={16} /> Guardar</>}
               </button>
             </div>
@@ -1011,51 +1321,371 @@ export default function Finances() {
 const styles = {
   container: { flex: 1, display: 'flex', flexDirection: 'column' },
   content: { padding: '16px', overflowY: 'auto' },
-  tabs: { display: 'flex', gap: '8px', marginBottom: '24px' },
-  tab: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer', transition: 'all 0.2s' },
-  toolbar: { display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' },
-  searchContainer: { flex: 1, minWidth: '200px', display: 'flex', alignItems: 'center', gap: '10px', padding: '0 16px', borderRadius: '10px', border: '1px solid var(--border-color)' },
-  searchInput: { flex: 1, padding: '12px 0', border: 'none', outline: 'none', fontSize: '14px', background: 'transparent' },
-  filterSelect: { padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--border-color)', fontSize: '14px', outline: 'none', cursor: 'pointer' },
-  newButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', backgroundColor: '#4f46e5', color: '#ffffff', border: '1px solid #3730a3', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
-  statsRow: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '24px' },
-  statCard: { display: 'flex', alignItems: 'center', gap: '16px', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-color)' },
-  statValue: { display: 'block', fontSize: '18px', fontWeight: '700' },
-  statLabel: { fontSize: '12px', color: '#6b7280' },
-  loading: { padding: '64px', textAlign: 'center', color: '#6b7280' },
-  overviewGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px' },
-  card: { padding: '20px', borderRadius: '16px', border: '1px solid var(--border-color)' },
-  cardTitle: { margin: '0 0 16px', fontSize: '16px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' },
-  listItem: { display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', borderBottom: '1px solid var(--border-color)' },
-  listIcon: { width: '36px', height: '36px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  listContent: { flex: 1, display: 'flex', flexDirection: 'column', gap: '2px' },
-  tableContainer: { borderRadius: '16px', border: '1px solid var(--border-color)', overflow: 'hidden' },
-  table: { width: '100%', borderCollapse: 'collapse' },
-  th: { padding: '14px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', borderBottom: '1px solid var(--border-color)' },
-  tr: { borderBottom: '1px solid var(--border-color)' },
-  td: { padding: '14px 16px', fontSize: '14px' },
-  categoryBadge: { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '500' },
-  statusBadge: { display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '500' },
-  globalBadge: { padding: '4px 10px', borderRadius: '6px', fontSize: '12px', backgroundColor: '#6b728015', color: '#6b7280' },
-  menuButton: { background: 'none', border: 'none', cursor: 'pointer', padding: '8px', color: '#9ca3af' },
-  menu: { position: 'absolute', right: 0, top: '100%', minWidth: '140px', borderRadius: '10px', border: '1px solid var(--border-color)', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', zIndex: 10 },
-  menuItem: { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '10px 14px', border: 'none', background: 'none', fontSize: '13px', cursor: 'pointer', color: 'inherit' },
+  toolbar: {
+    display: 'flex',
+    gap: '12px',
+    marginBottom: '24px',
+    flexWrap: 'wrap',
+    alignItems: 'center'
+  },
+  viewsSection: {
+    display: 'flex',
+    gap: '8px',
+    alignItems: 'center'
+  },
+  viewSelect: {
+    padding: '10px 16px',
+    borderRadius: '10px',
+    border: '1px solid var(--border-color)',
+    fontSize: '14px',
+    outline: 'none',
+    cursor: 'pointer',
+    minWidth: '150px'
+  },
+  filtersSection: {
+    display: 'flex',
+    gap: '8px',
+    flex: 1,
+    flexWrap: 'wrap'
+  },
+  filterSelect: {
+    padding: '10px 16px',
+    borderRadius: '10px',
+    border: '1px solid var(--border-color)',
+    fontSize: '14px',
+    outline: 'none',
+    cursor: 'pointer'
+  },
+  filterInput: {
+    padding: '10px 16px',
+    borderRadius: '10px',
+    border: '1px solid var(--border-color)',
+    fontSize: '14px',
+    outline: 'none'
+  },
+  searchContainer: {
+    flex: 1,
+    minWidth: '200px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    padding: '0 16px',
+    borderRadius: '10px',
+    border: '1px solid var(--border-color)'
+  },
+  searchInput: {
+    flex: 1,
+    padding: '10px 0',
+    border: 'none',
+    outline: 'none',
+    fontSize: '14px',
+    background: 'transparent'
+  },
+  actionsSection: {
+    display: 'flex',
+    gap: '8px',
+    alignItems: 'center'
+  },
+  iconButton: {
+    width: '40px',
+    height: '40px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'var(--bg-secondary)',
+    border: '1px solid var(--border-color)',
+    borderRadius: '10px',
+    cursor: 'pointer',
+    color: 'inherit'
+  },
+  newButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '10px 20px',
+    color: '#ffffff',
+    border: 'none',
+    borderRadius: '10px',
+    fontSize: '14px',
+    fontWeight: '500',
+    cursor: 'pointer'
+  },
+  statsRow: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gap: '16px',
+    marginBottom: '24px'
+  },
+  statCard: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px',
+    padding: '20px',
+    borderRadius: '12px',
+    border: '1px solid var(--border-color)'
+  },
+  statValue: {
+    display: 'block',
+    fontSize: '18px',
+    fontWeight: '700'
+  },
+  statLabel: {
+    fontSize: '12px',
+    color: '#6b7280'
+  },
+  loading: {
+    padding: '64px',
+    textAlign: 'center',
+    color: '#6b7280'
+  },
+  tableContainer: {
+    borderRadius: '16px',
+    border: '1px solid var(--border-color)',
+    overflow: 'hidden',
+    overflowX: 'auto'
+  },
+  table: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    minWidth: '800px'
+  },
+  th: {
+    padding: '14px 16px',
+    textAlign: 'left',
+    fontSize: '12px',
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    borderBottom: '1px solid var(--border-color)',
+    whiteSpace: 'nowrap'
+  },
+  tr: {
+    borderBottom: '1px solid var(--border-color)'
+  },
+  td: {
+    padding: '14px 16px',
+    fontSize: '14px',
+    whiteSpace: 'nowrap'
+  },
+  typeBadge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    padding: '4px 10px',
+    borderRadius: '6px',
+    fontSize: '12px',
+    fontWeight: '500'
+  },
+  categoryBadge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    padding: '4px 10px',
+    borderRadius: '6px',
+    fontSize: '12px',
+    fontWeight: '500'
+  },
+  menuButton: {
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    padding: '8px',
+    color: '#9ca3af'
+  },
+  menu: {
+    position: 'absolute',
+    right: 0,
+    top: '100%',
+    minWidth: '140px',
+    borderRadius: '10px',
+    border: '1px solid var(--border-color)',
+    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+    zIndex: 10,
+    padding: '4px'
+  },
+  menuItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    width: '100%',
+    padding: '10px 14px',
+    border: 'none',
+    background: 'none',
+    fontSize: '13px',
+    cursor: 'pointer',
+    color: 'inherit'
+  },
   // Modal
-  modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
-  modal: { width: '100%', maxWidth: '600px', maxHeight: '90vh', borderRadius: '16px', border: '1px solid var(--border-color)', overflow: 'hidden' },
-  modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid var(--border-color)' },
-  modalTitle: { margin: 0, fontSize: '18px', fontWeight: '600' },
-  closeButton: { background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280' },
-  modalBody: { padding: '24px', overflowY: 'auto', maxHeight: '60vh' },
-  modalFooter: { display: 'flex', justifyContent: 'flex-end', gap: '12px', padding: '20px 24px', borderTop: '1px solid var(--border-color)' },
-  formGrid: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' },
-  formGroup: { display: 'flex', flexDirection: 'column', gap: '6px' },
-  label: { fontSize: '12px', fontWeight: '500', color: '#6b7280' },
-  input: { padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '14px', outline: 'none' },
-  textarea: { resize: 'vertical', minHeight: '60px' },
-  cancelButton: { padding: '10px 20px', backgroundColor: 'transparent', color: '#6b7280', border: '1px solid var(--border-color)', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' },
-  saveButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', color: '#ffffff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
-  uploadArea: { padding: '16px', borderRadius: '8px', border: '2px dashed', textAlign: 'center' },
-  uploadedFile: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px' },
-  uploadPlaceholder: { display: 'flex', flexDirection: 'column', alignItems: 'center' }
+  modalOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000
+  },
+  modal: {
+    width: '100%',
+    maxWidth: '600px',
+    maxHeight: '90vh',
+    borderRadius: '16px',
+    border: '1px solid var(--border-color)',
+    overflow: 'hidden',
+    backgroundColor: 'var(--bg-primary)'
+  },
+  modalHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '20px 24px',
+    borderBottom: '1px solid var(--border-color)'
+  },
+  modalTitle: {
+    margin: 0,
+    fontSize: '18px',
+    fontWeight: '600'
+  },
+  closeButton: {
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    color: '#6b7280',
+    padding: '4px'
+  },
+  modalBody: {
+    padding: '24px',
+    overflowY: 'auto',
+    maxHeight: '60vh'
+  },
+  modalFooter: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '12px',
+    padding: '20px 24px',
+    borderTop: '1px solid var(--border-color)'
+  },
+  formGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gap: '16px'
+  },
+  formGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px'
+  },
+  label: {
+    fontSize: '12px',
+    fontWeight: '500',
+    color: '#6b7280'
+  },
+  input: {
+    padding: '10px 12px',
+    borderRadius: '8px',
+    border: '1px solid var(--border-color)',
+    fontSize: '14px',
+    outline: 'none'
+  },
+  textarea: {
+    resize: 'vertical',
+    minHeight: '80px',
+    fontFamily: 'inherit'
+  },
+  cancelButton: {
+    padding: '10px 20px',
+    backgroundColor: 'transparent',
+    color: '#6b7280',
+    border: '1px solid var(--border-color)',
+    borderRadius: '8px',
+    fontSize: '14px',
+    cursor: 'pointer'
+  },
+  saveButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '10px 20px',
+    color: '#ffffff',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '14px',
+    fontWeight: '500',
+    cursor: 'pointer'
+  },
+  // Category modal specific
+  categoryTabs: {
+    display: 'flex',
+    gap: '8px',
+    marginBottom: '20px'
+  },
+  categoryTab: {
+    padding: '8px 16px',
+    borderRadius: '8px',
+    border: '1px solid var(--border-color)',
+    cursor: 'pointer',
+    fontSize: '14px'
+  },
+  categoriesList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+    marginBottom: '20px',
+    maxHeight: '300px',
+    overflowY: 'auto'
+  },
+  categoryItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '12px',
+    borderRadius: '8px',
+    border: '1px solid var(--border-color)'
+  },
+  categoryActions: {
+    display: 'flex',
+    gap: '4px'
+  },
+  smallButton: {
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    padding: '4px',
+    color: '#6b7280'
+  },
+  categoryForm: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+    padding: '16px',
+    borderRadius: '8px',
+    border: '1px solid var(--border-color)',
+    marginTop: '20px'
+  },
+  colorInput: {
+    width: '60px',
+    height: '40px',
+    border: '1px solid var(--border-color)',
+    borderRadius: '8px',
+    cursor: 'pointer'
+  },
+  formActions: {
+    display: 'flex',
+    gap: '8px',
+    justifyContent: 'flex-end'
+  },
+  newCategoryButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '10px 20px',
+    backgroundColor: '#4f46e5',
+    color: '#ffffff',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '14px',
+    cursor: 'pointer',
+    width: '100%',
+    justifyContent: 'center'
+  }
 }

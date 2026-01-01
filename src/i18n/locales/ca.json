@@ -29,6 +29,9 @@
     "customize": "Personalitza el dashboard",
     "done": "Fet",
     "editMode": "Mode d'edició",
+    "layoutSaved": "Layout guardat correctament",
+    "layoutSaveError": "Error guardant el layout",
+    "dragToMove": "Arrossega per moure",
     "waitingManufacturer": {
       "title": "Waiting Manufacturer",
       "empty": "Tots els packs enviats al fabricant. Res bloquejat."

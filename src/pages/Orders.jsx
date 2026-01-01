@@ -119,15 +119,15 @@ export default function Orders() {
     setLoading(true)
     try {
       const [ordersData, projectsData, suppliersData] = await Promise.all([
-        getPurchaseOrders(),
-        getProjects(),
-        getSuppliers()
+        getPurchaseOrders().catch(() => []),
+        getProjects().catch(() => []),
+        getSuppliers().catch(() => [])
       ])
       
       // Establecer datos básicos primero para que la página se muestre
-      setOrders(ordersData || [])
-      setProjects(projectsData || [])
-      setSuppliers(suppliersData || [])
+      setOrders(Array.isArray(ordersData) ? ordersData : [])
+      setProjects(Array.isArray(projectsData) ? projectsData : [])
+      setSuppliers(Array.isArray(suppliersData) ? suppliersData : [])
       setLoading(false) // Marcar como cargado para mostrar la página
       
       // Carregar estat Amazon Ready per cada PO (async, després de mostrar la pàgina)
@@ -541,23 +541,34 @@ export default function Orders() {
     }
   }
 
-  // Filtrar comandes
-  const filteredOrders = orders.filter(order => {
-    const matchesSearch = order.po_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.project?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.supplier?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = filterStatus ? order.status === filterStatus : true
-    const matchesProject = filterProject ? order.project_id === filterProject : true
-    return matchesSearch && matchesStatus && matchesProject
+  // Filtrar comandes (con manejo de errores)
+  const filteredOrders = (orders || []).filter(order => {
+    try {
+      const matchesSearch = order?.po_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order?.project?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order?.supplier?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesStatus = filterStatus ? order?.status === filterStatus : true
+      const matchesProject = filterProject ? order?.project_id === filterProject : true
+      return matchesSearch && matchesStatus && matchesProject
+    } catch (err) {
+      console.error('Error filtering order:', err, order)
+      return false
+    }
   })
 
-  // Estadístiques
+  // Estadístiques (con manejo de errores)
   const stats = {
-    total: orders.length,
-    pending: orders.filter(o => ['draft', 'sent'].includes(o.status)).length,
-    inProgress: orders.filter(o => ['confirmed', 'partial_paid', 'paid', 'in_production'].includes(o.status)).length,
-    completed: orders.filter(o => ['shipped', 'received'].includes(o.status)).length,
-    totalValue: orders.reduce((sum, o) => sum + (parseFloat(o.total_amount) || 0), 0)
+    total: (orders || []).length,
+    pending: (orders || []).filter(o => o?.status && ['draft', 'sent'].includes(o.status)).length,
+    inProgress: (orders || []).filter(o => o?.status && ['confirmed', 'partial_paid', 'paid', 'in_production'].includes(o.status)).length,
+    completed: (orders || []).filter(o => o?.status && ['shipped', 'received'].includes(o.status)).length,
+    totalValue: (orders || []).reduce((sum, o) => {
+      try {
+        return sum + (parseFloat(o?.total_amount) || 0)
+      } catch (err) {
+        return sum
+      }
+    }, 0)
   }
 
   const handleDeleteOrder = async (order) => {
@@ -579,15 +590,25 @@ export default function Orders() {
   }
 
   const formatDate = (dateString) => {
-    if (!dateString) return '-'
-    return new Date(dateString).toLocaleDateString('ca-ES')
+    try {
+      if (!dateString) return '-'
+      return new Date(dateString).toLocaleDateString('ca-ES')
+    } catch (err) {
+      console.error('Error formatting date:', err)
+      return '-'
+    }
   }
 
   const formatCurrency = (amount, currency = 'USD') => {
-    return new Intl.NumberFormat('ca-ES', {
-      style: 'currency',
-      currency: currency
-    }).format(amount || 0)
+    try {
+      return new Intl.NumberFormat('ca-ES', {
+        style: 'currency',
+        currency: currency || 'USD'
+      }).format(amount || 0)
+    } catch (err) {
+      console.error('Error formatting currency:', err)
+      return `${amount || 0} ${currency || 'USD'}`
+    }
   }
 
   return (

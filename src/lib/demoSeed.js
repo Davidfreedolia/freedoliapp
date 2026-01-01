@@ -478,3 +478,194 @@ export const generateDemoData = async (onProgress = null) => {
   }
 }
 
+/**
+ * Clear all demo data
+ * Returns { success: boolean, message: string }
+ */
+export const clearDemoData = async () => {
+  try {
+    const userId = await getCurrentUserId()
+    
+    // Get demo suppliers first (needed for tasks deletion)
+    const { data: suppliers } = await supabase
+      .from('suppliers')
+      .select('id')
+      .eq('is_demo', true)
+      .eq('user_id', userId)
+    
+    // Delete in order of foreign keys (reverse dependency order)
+    const tables = [
+      'decision_log',
+      'tasks',
+      'sticky_notes',
+      'po_shipments',
+      'po_amazon_readiness',
+      'purchase_orders',
+      'supplier_quote_price_breaks',
+      'supplier_quotes',
+      'product_identifiers',
+      'gtin_pool',
+      'projects',
+      'suppliers'
+    ]
+
+    for (const table of tables) {
+      try {
+        // For tables with direct project_id reference
+        if (['supplier_quotes', 'product_identifiers', 'purchase_orders'].includes(table)) {
+          // Delete items linked to demo projects
+          const { data: demoProjects } = await supabase
+            .from('projects')
+            .select('id')
+            .eq('is_demo', true)
+            .eq('user_id', userId)
+
+          if (demoProjects && demoProjects.length > 0) {
+            const projectIds = demoProjects.map(p => p.id)
+            
+            // Special handling for po_amazon_readiness and po_shipments which link to purchase_orders
+            if (table === 'purchase_orders') {
+              const { data: demoPOs } = await supabase
+                .from('purchase_orders')
+                .select('id')
+                .eq('user_id', userId)
+                .in('project_id', projectIds)
+
+              if (demoPOs && demoPOs.length > 0) {
+                const poIds = demoPOs.map(po => po.id)
+                await supabase
+                  .from('po_amazon_readiness')
+                  .delete()
+                  .eq('user_id', userId)
+                  .in('purchase_order_id', poIds)
+
+                await supabase
+                  .from('po_shipments')
+                  .delete()
+                  .eq('user_id', userId)
+                  .in('purchase_order_id', poIds)
+              }
+            }
+            
+            await supabase
+              .from(table)
+              .delete()
+              .eq('user_id', userId)
+              .in('project_id', projectIds)
+          }
+        } else if (table === 'supplier_quote_price_breaks') {
+          // Delete price breaks linked to demo quotes
+          const { data: demoProjects } = await supabase
+            .from('projects')
+            .select('id')
+            .eq('is_demo', true)
+            .eq('user_id', userId)
+
+          if (demoProjects && demoProjects.length > 0) {
+            const projectIds = demoProjects.map(p => p.id)
+            const { data: demoQuotes } = await supabase
+              .from('supplier_quotes')
+              .select('id')
+              .eq('user_id', userId)
+              .in('project_id', projectIds)
+
+            if (demoQuotes && demoQuotes.length > 0) {
+              const quoteIds = demoQuotes.map(q => q.id)
+              await supabase
+                .from('supplier_quote_price_breaks')
+                .delete()
+                .in('quote_id', quoteIds)
+            }
+          }
+        } else if (table === 'gtin_pool') {
+          // Delete demo GTINs (marked with is_demo or assigned to demo projects)
+          const { data: demoProjects } = await supabase
+            .from('projects')
+            .select('id')
+            .eq('is_demo', true)
+            .eq('user_id', userId)
+
+          if (demoProjects && demoProjects.length > 0) {
+            const projectIds = demoProjects.map(p => p.id)
+            // Release GTINs assigned to demo projects
+            await supabase
+              .from('gtin_pool')
+              .update({
+                assigned_to_project_id: null,
+                assigned_at: null,
+                status: 'available'
+              })
+              .eq('user_id', userId)
+              .in('assigned_to_project_id', projectIds)
+          }
+
+          // Delete GTINs marked as demo
+          await supabase
+            .from('gtin_pool')
+            .delete()
+            .eq('user_id', userId)
+            .eq('is_demo', true)
+        } else if (table === 'sticky_notes') {
+          // Delete demo sticky notes
+          await supabase
+            .from('sticky_notes')
+            .delete()
+            .eq('user_id', userId)
+            .eq('is_demo', true)
+        } else if (table === 'tasks') {
+          // Delete demo tasks
+          await supabase
+            .from('tasks')
+            .delete()
+            .eq('user_id', userId)
+            .eq('is_demo', true)
+        } else if (table === 'decision_log') {
+          // Delete decision_log entries for demo projects (entity_type='project')
+          const { data: demoProjects } = await supabase
+            .from('projects')
+            .select('id')
+            .eq('is_demo', true)
+            .eq('user_id', userId)
+
+          if (demoProjects && demoProjects.length > 0) {
+            const projectIds = demoProjects.map(p => p.id)
+            await supabase
+              .from('decision_log')
+              .delete()
+              .eq('user_id', userId)
+              .in('entity_id', projectIds)
+          }
+        } else if (table === 'projects') {
+          // Delete demo projects (last, after all FKs cleared)
+          await supabase
+            .from('projects')
+            .delete()
+            .eq('user_id', userId)
+            .eq('is_demo', true)
+        } else if (table === 'suppliers') {
+          // Delete demo suppliers (only if not used by non-demo projects)
+          await supabase
+            .from('suppliers')
+            .delete()
+            .eq('user_id', userId)
+            .eq('is_demo', true)
+        }
+      } catch (err) {
+        console.error(`Error deleting from ${table}:`, err)
+        // Continue with other tables
+      }
+    }
+    
+    return {
+      success: true,
+      message: 'Demo data cleared successfully'
+    }
+  } catch (err) {
+    console.error('Error clearing demo data:', err)
+    return {
+      success: false,
+      message: `Error clearing demo data: ${err.message}`
+    }
+  }
+}
+

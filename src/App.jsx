@@ -6,28 +6,60 @@ import ProtectedRoute from './components/ProtectedRoute'
 import PageLoader from './components/PageLoader'
 import ToastContainer from './components/Toast'
 import DemoModeBanner from './components/DemoModeBanner'
+import ErrorBoundary from './components/ErrorBoundary'
 import { useBreakpoint } from './hooks/useBreakpoint'
 import './i18n'
 
 // Login (no lazy, es carrega primer)
 import Login from './pages/Login'
 
-// Pàgines principals: lazy loading
-const Dashboard = React.lazy(() => import('./pages/Dashboard'))
-const Projects = React.lazy(() => import('./pages/Projects'))
-const ProjectDetail = React.lazy(() => import('./pages/ProjectDetail'))
-const Orders = React.lazy(() => import('./pages/Orders'))
-const Briefing = React.lazy(() => import('./pages/Briefing'))
-const Finances = React.lazy(() => import('./pages/Finances'))
-const Inventory = React.lazy(() => import('./pages/Inventory'))
-const Settings = React.lazy(() => import('./pages/Settings'))
-const Analytics = React.lazy(() => import('./pages/Analytics'))
-const Suppliers = React.lazy(() => import('./pages/Suppliers'))
-const Forwarders = React.lazy(() => import('./pages/Forwarders'))
-const Warehouses = React.lazy(() => import('./pages/Warehouses'))
-const Calendar = React.lazy(() => import('./pages/Calendar'))
-const Diagnostics = React.lazy(() => import('./pages/Diagnostics'))
-const DevSeed = React.lazy(() => import('./pages/DevSeed'))
+// Lazy loading wrapper with error handling
+const lazyWithErrorBoundary = (importFn, pageName) => {
+  return React.lazy(() => 
+    importFn().catch(error => {
+      console.error(`Error loading ${pageName}:`, error)
+      // Return a fallback component
+      return {
+        default: () => (
+          <ErrorBoundary context={`lazy:${pageName}`} darkMode={false}>
+            <div style={{
+              minHeight: '100vh',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '24px'
+            }}>
+              <div style={{ textAlign: 'center' }}>
+                <h2>Error carregant la pàgina</h2>
+                <p>No s'ha pogut carregar {pageName}</p>
+                <button onClick={() => window.location.reload()}>
+                  Recarregar
+                </button>
+              </div>
+            </div>
+          </ErrorBoundary>
+        )
+      }
+    })
+  )
+}
+
+// Pàgines principals: lazy loading amb error handling
+const Dashboard = lazyWithErrorBoundary(() => import('./pages/Dashboard'), 'Dashboard')
+const Projects = lazyWithErrorBoundary(() => import('./pages/Projects'), 'Projects')
+const ProjectDetail = lazyWithErrorBoundary(() => import('./pages/ProjectDetail'), 'ProjectDetail')
+const Orders = lazyWithErrorBoundary(() => import('./pages/Orders'), 'Orders')
+const Briefing = lazyWithErrorBoundary(() => import('./pages/Briefing'), 'Briefing')
+const Finances = lazyWithErrorBoundary(() => import('./pages/Finances'), 'Finances')
+const Inventory = lazyWithErrorBoundary(() => import('./pages/Inventory'), 'Inventory')
+const Settings = lazyWithErrorBoundary(() => import('./pages/Settings'), 'Settings')
+const Analytics = lazyWithErrorBoundary(() => import('./pages/Analytics'), 'Analytics')
+const Suppliers = lazyWithErrorBoundary(() => import('./pages/Suppliers'), 'Suppliers')
+const Forwarders = lazyWithErrorBoundary(() => import('./pages/Forwarders'), 'Forwarders')
+const Warehouses = lazyWithErrorBoundary(() => import('./pages/Warehouses'), 'Warehouses')
+const Calendar = lazyWithErrorBoundary(() => import('./pages/Calendar'), 'Calendar')
+const Diagnostics = lazyWithErrorBoundary(() => import('./pages/Diagnostics'), 'Diagnostics')
+const DevSeed = lazyWithErrorBoundary(() => import('./pages/DevSeed'), 'DevSeed')
 
 function AppContent() {
   const { sidebarCollapsed, darkMode } = useApp()
@@ -57,32 +89,39 @@ function AppContent() {
         flexDirection: 'column',
         width: isMobile ? '100%' : 'auto'
       }}>
-        <Suspense fallback={<PageLoader darkMode={darkMode} />}>
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/projects"
-              element={
-                <ProtectedRoute>
-                  <Projects />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/projects/:id"
-              element={
-                <ProtectedRoute>
-                  <ProjectDetail />
-                </ProtectedRoute>
-              }
-            />
+        <ErrorBoundary context="app:main" darkMode={darkMode}>
+          <Suspense fallback={<PageLoader darkMode={darkMode} />}>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <ErrorBoundary context="page:Dashboard" darkMode={darkMode}>
+                      <Dashboard />
+                    </ErrorBoundary>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/projects"
+                element={
+                  <ProtectedRoute>
+                    <ErrorBoundary context="page:Projects" darkMode={darkMode}>
+                      <Projects />
+                    </ErrorBoundary>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/projects/:id"
+                element={
+                  <ProtectedRoute>
+                    <ErrorBoundary context="page:ProjectDetail" darkMode={darkMode}>
+                      <ProjectDetail />
+                    </ErrorBoundary>
+                  </ProtectedRoute>
+                }
+              />
             <Route
               path="/projects/:projectId/briefing"
               element={
@@ -119,7 +158,9 @@ function AppContent() {
               path="/orders"
               element={
                 <ProtectedRoute>
-                  <Orders />
+                  <ErrorBoundary context="page:Orders" darkMode={darkMode}>
+                    <Orders />
+                  </ErrorBoundary>
                 </ProtectedRoute>
               }
             />
@@ -182,6 +223,7 @@ function AppContent() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>
+        </ErrorBoundary>
       </main>
       <ToastContainer darkMode={darkMode} />
     </div>

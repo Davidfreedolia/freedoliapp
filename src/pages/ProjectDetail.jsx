@@ -79,47 +79,59 @@ export default function ProjectDetail() {
     setLoading(true)
     try {
       const data = await getProject(id)
+      if (!data) {
+        navigate('/projects')
+        return
+      }
       setProject(data)
       const docs = await getDocuments(id)
-      setDocuments(docs || [])
+      setDocuments(Array.isArray(docs) ? docs : [])
     } catch (err) {
       console.error('Error carregant projecte:', err)
-      navigate('/projects')
+      // Don't navigate immediately, show error state instead
+      setProject(null)
+      setDocuments([])
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   const loadDriveFolders = async () => {
+    if (!project) return
+    
     try {
       // Usar ensureProjectDriveFolders per garantir idempotència
       const folders = await driveService.ensureProjectDriveFolders({
         id: project.id,
-        project_code: project.project_code,
-        sku: project.sku,
-        name: project.name,
-        drive_folder_id: project.drive_folder_id
+        project_code: project?.project_code || '',
+        sku: project?.sku || '',
+        name: project?.name || '',
+        drive_folder_id: project?.drive_folder_id || null
       })
       
-      setProjectFolders(folders)
-      
-      // Si no tenia drive_folder_id, guardar-lo ara
-      if (!project.drive_folder_id && folders.main.id) {
-        await updateProject(id, { drive_folder_id: folders.main.id })
-        setProject({ ...project, drive_folder_id: folders.main.id })
-      }
-      
-      // Seleccionar carpeta segons fase actual
-      const folderName = PHASE_FOLDER_MAP[project.current_phase]
-      if (folders.subfolders && folders.subfolders[folderName]) {
-        setSelectedFolder(folders.subfolders[folderName])
+      if (folders) {
+        setProjectFolders(folders)
+        
+        // Si no tenia drive_folder_id, guardar-lo ara
+        if (!project.drive_folder_id && folders?.main?.id) {
+          try {
+            await updateProject(id, { drive_folder_id: folders.main.id })
+            setProject({ ...project, drive_folder_id: folders.main.id })
+          } catch (e) {
+            console.warn('Error guardant drive_folder_id:', e)
+          }
+        }
+        
+        // Seleccionar carpeta segons fase actual
+        const folderName = PHASE_FOLDER_MAP[project?.current_phase]
+        if (folders?.subfolders && folderName && folders.subfolders[folderName]) {
+          setSelectedFolder(folders.subfolders[folderName])
+        }
       }
     } catch (err) {
       console.error('Error amb carpetes Drive:', err)
-      if (err.message === 'AUTH_REQUIRED') {
-        alert('Reconnecta Google Drive. La sessió ha expirat.')
-      } else {
-        alert('Error gestionant carpetes de Drive: ' + (err.message || 'Error desconegut'))
-      }
+      // Don't show alert, just log - Drive is optional
+      setProjectFolders(null)
     }
   }
 
@@ -169,7 +181,7 @@ export default function ProjectDetail() {
           name: file.name,
           file_url: file.webViewLink || file.driveUrl,
           drive_file_id: file.id,
-          category: getCategoryForPhase(project.current_phase),
+          category: getCategoryForPhase(project?.current_phase || 1),
           file_size: file.size
         })
         savedCount++
@@ -229,7 +241,53 @@ export default function ProjectDetail() {
     )
   }
 
-  if (!project) return null
+  if (!project) {
+    return (
+      <div style={styles.container}>
+        <Header title="Projecte no trobat" />
+        <div style={{
+          padding: '48px',
+          textAlign: 'center',
+          backgroundColor: darkMode ? '#15151f' : '#ffffff',
+          borderRadius: '16px',
+          border: `1px solid ${darkMode ? '#2a2a3a' : '#e5e7eb'}`,
+          margin: '24px'
+        }}>
+          <AlertCircle size={48} color="#ef4444" style={{ margin: '0 auto 16px' }} />
+          <h2 style={{
+            margin: '0 0 8px',
+            fontSize: '20px',
+            fontWeight: '600',
+            color: darkMode ? '#ffffff' : '#111827'
+          }}>
+            Projecte no trobat
+          </h2>
+          <p style={{
+            margin: '0 0 24px',
+            fontSize: '14px',
+            color: '#6b7280'
+          }}>
+            El projecte que busques no existeix o no tens accés.
+          </p>
+          <button
+            onClick={() => navigate('/projects')}
+            style={{
+              padding: '12px 24px',
+              backgroundColor: '#4f46e5',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}
+          >
+            Tornar a Projectes
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   const currentPhase = PHASES.find(p => p.id === project.current_phase) || PHASES[0]
 

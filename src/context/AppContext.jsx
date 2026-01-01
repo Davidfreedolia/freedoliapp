@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import { getProjects, getDashboardStats } from '../lib/supabase'
+import { getProjects, getDashboardStats, getCompanySettings, updateCompanySettings } from '../lib/supabase'
 import { driveService } from '../lib/googleDrive'
 import { generateDemoData, checkDemoExists, checkRealDataExists } from '../lib/demoSeed'
 import { showToast } from '../components/Toast'
@@ -30,12 +30,25 @@ export function AppProvider({ children }) {
     autoSeedDemoData()
   }, [])
 
-  // Auto-seed demo data on app load (if enabled)
+  // Auto-seed demo data on app load (if demo_mode is enabled)
   const autoSeedDemoData = async () => {
-    const isDemoMode = import.meta.env.VITE_DEMO_MODE === 'true'
-    if (!isDemoMode) return
-
     try {
+      // Get company settings to check demo_mode
+      const settings = await getCompanySettings()
+      const isDemoMode = settings?.demo_mode !== false // Default to true if not set
+      
+      // If demo_mode is false, skip
+      if (isDemoMode === false) {
+        console.log('Demo mode is disabled')
+        return
+      }
+
+      // If demo_mode is not set, set it to true by default
+      if (settings?.demo_mode === undefined || settings?.demo_mode === null) {
+        await updateCompanySettings({ demo_mode: true })
+        console.log('Demo mode enabled by default')
+      }
+
       // Check if real data exists
       const hasRealData = await checkRealDataExists()
       if (hasRealData) {
