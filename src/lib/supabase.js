@@ -385,11 +385,11 @@ export const deletePayment = async (id) => {
 
 // ESTADÍSTIQUES DASHBOARD
 export const getDashboardStats = async () => {
-  const userId = await getCurrentUserId()
+  // RLS maneja el filtrado por user_id automáticamente, no filtrar aquí
   const { data: projects, error } = await supabase
     .from('projects')
     .select('*')
-    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
   
   if (error) {
     console.error('Error fetching projects for dashboard stats:', error);
