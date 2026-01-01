@@ -84,7 +84,7 @@
     "priorityLow": "Baja",
     "priorityNormal": "Normal",
     "priorityHigh": "Alta",
-    "noProject": "Sin proyecto",
+    "noProject": "Sin proyecto (tarea global)",
     "selectProject": "Selecciona un proyecto",
     "projectRequired": "Debes seleccionar un proyecto",
     "taskTitleRequired": "El título es obligatorio",

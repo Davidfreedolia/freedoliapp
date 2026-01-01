@@ -33,19 +33,14 @@ export default function QuickCreateTaskModal({ isOpen, onClose, onSave, defaultD
     setLoading(true)
     try {
       // Create task
-      // Note: entity_id is NOT NULL in tasks table, so we require a project
-      if (!formData.project_id) {
-        showToast(t('calendar.projectRequired', 'Has de seleccionar un projecte'), 'error')
-        return
-      }
-
+      // Note: entity_id can be NULL for global tasks (after SQL update)
       const taskData = {
         title: formData.title.trim(),
         due_date: formData.due_date,
         priority: formData.priority,
         status: 'open',
         entity_type: 'project',
-        entity_id: formData.project_id
+        entity_id: formData.project_id || null // Allow null for global tasks
       }
 
       const task = await createTask(taskData)
@@ -215,14 +210,14 @@ export default function QuickCreateTaskModal({ isOpen, onClose, onSave, defaultD
 
           <div style={styles.field}>
             <label style={styles.label}>
-              {t('calendar.project', 'Projecte')} *
+              {t('calendar.project', 'Projecte')} {t('common.optional', '(opcional)')}
             </label>
             <select
               value={formData.project_id || ''}
               onChange={(e) => setFormData({ ...formData, project_id: e.target.value || null })}
               style={styles.select}
             >
-              <option value="">{t('calendar.selectProject', 'Selecciona un projecte')}</option>
+              <option value="">{t('calendar.noProject', 'Sense projecte (tasca global)')}</option>
               {projects.map(project => (
                 <option key={project.id} value={project.id}>
                   {project.name} {project.sku_internal ? `(${project.sku_internal})` : ''}
@@ -243,7 +238,7 @@ export default function QuickCreateTaskModal({ isOpen, onClose, onSave, defaultD
             <button
               type="submit"
               style={{ ...styles.button, ...styles.saveButton }}
-              disabled={loading || !formData.title.trim() || !formData.project_id}
+              disabled={loading || !formData.title.trim()}
             >
               {loading ? t('common.loading', 'Carregant...') : t('common.save', 'Guardar')}
             </button>

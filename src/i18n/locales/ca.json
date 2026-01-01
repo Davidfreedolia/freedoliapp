@@ -84,7 +84,7 @@
     "priorityLow": "Baixa",
     "priorityNormal": "Normal",
     "priorityHigh": "Alta",
-    "noProject": "Sense projecte",
+    "noProject": "Sense projecte (tasca global)",
     "selectProject": "Selecciona un projecte",
     "projectRequired": "Has de seleccionar un projecte",
     "taskTitleRequired": "El títol és obligatori",
