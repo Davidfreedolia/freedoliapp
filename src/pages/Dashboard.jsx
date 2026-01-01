@@ -1122,8 +1122,7 @@ const styles = {
     justifyContent: 'space-between',
     position: 'sticky',
     top: 0,
-    zIndex: 50,
-    borderBottom: '1px solid'
+    zIndex: 50
   },
   quickActionsHeader: {
     display: 'flex',
