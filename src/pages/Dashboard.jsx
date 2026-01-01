@@ -44,6 +44,7 @@ import {
 import TasksWidget from '../components/TasksWidget'
 import AlertsBadge from '../components/AlertsBadge'
 import StickyNotesWidget from '../components/StickyNotesWidget'
+import AddStickyNoteModal from '../components/AddStickyNoteModal'
 import { 
   getDefaultLayout, 
   generateLayoutFromEnabled, 
@@ -58,6 +59,7 @@ export default function Dashboard() {
   const { isMobile, isTablet } = useBreakpoint()
   const [showNewProjectModal, setShowNewProjectModal] = useState(false)
   const [showCustomizeModal, setShowCustomizeModal] = useState(false)
+  const [showAddNoteModal, setShowAddNoteModal] = useState(false)
   const [ordersInProgress, setOrdersInProgress] = useState([])
   const [loadingOrders, setLoadingOrders] = useState(true)
   const [financialData, setFinancialData] = useState([])
@@ -377,11 +379,7 @@ export default function Dashboard() {
     : 1
 
   return (
-    <>
-      {/* Sticky Notes Overlay (pinned notes) */}
-      <StickyNotesWidget darkMode={darkMode} showOverlay={true} />
-      
-      <div style={styles.container}>
+    <div style={styles.container}>
       {/* Botons d'accions ràpides en lloc del Header */}
       <div style={{
         ...styles.headerActions,
@@ -410,6 +408,20 @@ export default function Dashboard() {
             <Plus size={16} />
             <FolderKanban size={18} color="#4f46e5" />
             Nou Projecte
+          </button>
+          <button
+            onClick={() => setShowAddNoteModal(true)}
+            style={{
+              ...styles.actionButton,
+              backgroundColor: '#FFE066',
+              color: '#5F4B00',
+              width: isMobile ? '100%' : 'auto',
+              justifyContent: isMobile ? 'center' : 'flex-start'
+            }}
+            title="Add sticky note"
+          >
+            <StickyNote size={18} color="#5F4B00" />
+            Add note
           </button>
           {!isMobile && (
             <>
@@ -1082,8 +1094,17 @@ export default function Dashboard() {
         onClose={() => setShowCustomizeModal(false)}
         onSave={handlePreferencesSave}
       />
+
+      <AddStickyNoteModal
+        isOpen={showAddNoteModal}
+        onClose={() => setShowAddNoteModal(false)}
+        onSuccess={() => {
+          // Refresh sticky notes widget if needed
+          window.dispatchEvent(new Event('stickyNotesRefresh'))
+        }}
+        darkMode={darkMode}
+      />
     </div>
-    </>
   )
 }
 
