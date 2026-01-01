@@ -20,7 +20,6 @@ import {
 } from '../lib/supabase'
 import { CheckCircle2, XCircle, AlertTriangle, Play, RefreshCw, ExternalLink } from 'lucide-react'
 import { driveService } from '../lib/googleDrive'
-import { useApp } from '../context/AppContext'
 
 const CHECK_STATUS = {
   PENDING: 'pending',
