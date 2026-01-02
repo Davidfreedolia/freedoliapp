@@ -199,26 +199,109 @@ END $$;
 -- ============================================
 -- PART B: UPDATE NULL is_demo VALUES TO false
 -- ============================================
-UPDATE projects SET is_demo = false WHERE is_demo IS NULL;
-UPDATE purchase_orders SET is_demo = false WHERE is_demo IS NULL;
-UPDATE suppliers SET is_demo = false WHERE is_demo IS NULL;
-UPDATE expenses SET is_demo = false WHERE is_demo IS NULL;
-UPDATE incomes SET is_demo = false WHERE is_demo IS NULL;
-UPDATE tasks SET is_demo = false WHERE is_demo IS NULL;
-UPDATE sticky_notes SET is_demo = false WHERE is_demo IS NULL;
-UPDATE recurring_expenses SET is_demo = false WHERE is_demo IS NULL;
-UPDATE payments SET is_demo = false WHERE is_demo IS NULL;
-UPDATE warehouses SET is_demo = false WHERE is_demo IS NULL;
-UPDATE supplier_quotes SET is_demo = false WHERE is_demo IS NULL;
-UPDATE supplier_price_estimates SET is_demo = false WHERE is_demo IS NULL;
-UPDATE product_identifiers SET is_demo = false WHERE is_demo IS NULL;
-UPDATE gtin_pool SET is_demo = false WHERE is_demo IS NULL;
-UPDATE documents SET is_demo = false WHERE is_demo IS NULL;
-UPDATE audit_log SET is_demo = false WHERE is_demo IS NULL;
-UPDATE dashboard_preferences SET is_demo = false WHERE is_demo IS NULL;
-UPDATE po_amazon_readiness SET is_demo = false WHERE is_demo IS NULL;
-UPDATE po_shipments SET is_demo = false WHERE is_demo IS NULL;
-UPDATE logistics_flow SET is_demo = false WHERE is_demo IS NULL;
+-- Only update if table exists and column exists
+DO $$ 
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='projects') 
+     AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='projects' AND column_name='is_demo') THEN
+    UPDATE projects SET is_demo = false WHERE is_demo IS NULL;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='purchase_orders') 
+     AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='purchase_orders' AND column_name='is_demo') THEN
+    UPDATE purchase_orders SET is_demo = false WHERE is_demo IS NULL;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='suppliers') 
+     AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='suppliers' AND column_name='is_demo') THEN
+    UPDATE suppliers SET is_demo = false WHERE is_demo IS NULL;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='expenses') 
+     AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='expenses' AND column_name='is_demo') THEN
+    UPDATE expenses SET is_demo = false WHERE is_demo IS NULL;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='incomes') 
+     AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='incomes' AND column_name='is_demo') THEN
+    UPDATE incomes SET is_demo = false WHERE is_demo IS NULL;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='tasks') 
+     AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='tasks' AND column_name='is_demo') THEN
+    UPDATE tasks SET is_demo = false WHERE is_demo IS NULL;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='sticky_notes') 
+     AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='sticky_notes' AND column_name='is_demo') THEN
+    UPDATE sticky_notes SET is_demo = false WHERE is_demo IS NULL;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='recurring_expenses') 
+     AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='recurring_expenses' AND column_name='is_demo') THEN
+    UPDATE recurring_expenses SET is_demo = false WHERE is_demo IS NULL;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='payments') 
+     AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='payments' AND column_name='is_demo') THEN
+    UPDATE payments SET is_demo = false WHERE is_demo IS NULL;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='warehouses') 
+     AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='warehouses' AND column_name='is_demo') THEN
+    UPDATE warehouses SET is_demo = false WHERE is_demo IS NULL;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='supplier_quotes') 
+     AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='supplier_quotes' AND column_name='is_demo') THEN
+    UPDATE supplier_quotes SET is_demo = false WHERE is_demo IS NULL;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='supplier_price_estimates') 
+     AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='supplier_price_estimates' AND column_name='is_demo') THEN
+    UPDATE supplier_price_estimates SET is_demo = false WHERE is_demo IS NULL;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='product_identifiers') 
+     AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='product_identifiers' AND column_name='is_demo') THEN
+    UPDATE product_identifiers SET is_demo = false WHERE is_demo IS NULL;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='gtin_pool') 
+     AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='gtin_pool' AND column_name='is_demo') THEN
+    UPDATE gtin_pool SET is_demo = false WHERE is_demo IS NULL;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='documents') 
+     AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='documents' AND column_name='is_demo') THEN
+    UPDATE documents SET is_demo = false WHERE is_demo IS NULL;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='audit_log') 
+     AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='audit_log' AND column_name='is_demo') THEN
+    UPDATE audit_log SET is_demo = false WHERE is_demo IS NULL;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='dashboard_preferences') 
+     AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='dashboard_preferences' AND column_name='is_demo') THEN
+    UPDATE dashboard_preferences SET is_demo = false WHERE is_demo IS NULL;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='po_amazon_readiness') 
+     AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='po_amazon_readiness' AND column_name='is_demo') THEN
+    UPDATE po_amazon_readiness SET is_demo = false WHERE is_demo IS NULL;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='po_shipments') 
+     AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='po_shipments' AND column_name='is_demo') THEN
+    UPDATE po_shipments SET is_demo = false WHERE is_demo IS NULL;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='logistics_flow') 
+     AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='logistics_flow' AND column_name='is_demo') THEN
+    UPDATE logistics_flow SET is_demo = false WHERE is_demo IS NULL;
+  END IF;
+END $$;
 
 -- ============================================
 -- PART C: ENSURE is_demo IS NOT NULL
@@ -406,14 +489,18 @@ END $$;
 -- Create scoped uniqueness constraint: (user_id, is_demo, sku)
 DO $$ 
 BEGIN
+  -- Check if index exists (indexes are in pg_class, not pg_constraint)
   IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint 
-    WHERE conname = 'idx_projects_sku_scoped'
-    AND conrelid = 'projects'::regclass
+    SELECT 1 FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE c.relname = 'idx_projects_sku_scoped'
+    AND n.nspname = 'public'
   ) THEN
     CREATE UNIQUE INDEX idx_projects_sku_scoped ON projects(user_id, is_demo, sku) 
     WHERE sku IS NOT NULL;
     RAISE NOTICE 'Created scoped SKU uniqueness constraint';
+  ELSE
+    RAISE NOTICE 'Index idx_projects_sku_scoped already exists, skipping';
   END IF;
 END $$;
 
