@@ -164,15 +164,52 @@ export const createProject = async (project) => {
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
   
+  const userId = await getCurrentUserId()
+  
   // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
   const { user_id, ...projectData } = project
-  const { data, error } = await supabase
-    .from('projects')
-    .insert([{ ...projectData, is_demo: demoMode }]) // Mark with current demo mode
-    .select()
-    .single()
-  if (error) throw error
-  return data
+  
+  // Retry up to 5 times on duplicate SKU error
+  let attempts = 0
+  const maxAttempts = 5
+  
+  while (attempts < maxAttempts) {
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .insert([{ 
+          ...projectData, 
+          user_id: userId, // Always set user_id explicitly
+          is_demo: demoMode // Mark with current demo mode
+        }])
+        .select()
+        .single()
+      
+      if (error) {
+        // Check if it's a duplicate SKU error (23505 = unique_violation)
+        if (error.code === '23505' && (error.message.includes('sku') || error.message.includes('idx_projects_sku'))) {
+          attempts++
+          if (attempts >= maxAttempts) {
+            throw new Error('SKU duplicat: el codi SKU ja existeix. Torna a intentar crear el projecte.')
+          }
+          // Regenerate codes and retry
+          const newCodes = await generateProjectCode()
+          projectData.project_code = newCodes.projectCode
+          projectData.sku = newCodes.sku
+          continue
+        }
+        throw error
+      }
+      return data
+    } catch (err) {
+      if (attempts >= maxAttempts - 1) {
+        throw err
+      }
+      attempts++
+    }
+  }
+  
+  throw new Error('Error creant projecte després de múltiples intents')
 }
 
 export const updateProject = async (id, updates) => {
@@ -602,28 +639,79 @@ export const getDashboardStats = async () => {
 // GENERADORS DE CODIS
 // ============================================
 
+/**
+ * Apply demo mode filter to a Supabase query
+ * @param {object} query - Supabase query builder
+ * @param {boolean} demoMode - Current demo mode state
+ * @returns {object} Query with is_demo filter applied
+ */
+export const applyDemoFilter = async (query, demoMode = null) => {
+  if (demoMode === null || demoMode === undefined) {
+    // Get demo mode if not provided
+    const { getDemoMode } = await import('./demoModeFilter')
+    demoMode = await getDemoMode()
+  }
+  return query.eq('is_demo', demoMode)
+}
+
 export const generateProjectCode = async () => {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
+  const userId = await getCurrentUserId()
   const year = new Date().getFullYear().toString().slice(-2)
   const prefix = `PR-FRDL${year}`
 
-  const { data } = await supabase
-    .from('projects')
-    .select('project_code')
-    .like('project_code', `${prefix}%`)
-    .order('project_code', { ascending: false })
-    .limit(1)
+  // Retry up to 5 times if duplicate SKU error occurs
+  let attempts = 0
+  const maxAttempts = 5
+  
+  while (attempts < maxAttempts) {
+    const { data } = await supabase
+      .from('projects')
+      .select('project_code, sku')
+      .eq('user_id', userId)
+      .eq('is_demo', demoMode) // Filter by demo mode
+      .like('project_code', `${prefix}%`)
+      .order('project_code', { ascending: false })
+      .limit(1)
 
-  let nextNum = 1
-  if (data && data.length > 0 && data[0].project_code) {
-    const lastCode = data[0].project_code
-    const numPart = lastCode.replace(`PR-FRDL${year}`, '')
-    const lastNum = parseInt(numPart) || 0
-    nextNum = lastNum + 1
+    let nextNum = 1
+    if (data && data.length > 0 && data[0].project_code) {
+      const lastCode = data[0].project_code
+      const numPart = lastCode.replace(`PR-FRDL${year}`, '')
+      const lastNum = parseInt(numPart) || 0
+      nextNum = lastNum + 1
+    }
+
+    const projectCode = `PR-FRDL${year}${nextNum.toString().padStart(4, '0')}`
+    const sku = `FRDL${year}${nextNum.toString().padStart(4, '0')}`
+
+    // Check if SKU already exists (scoped by user_id and is_demo)
+    const { data: existingSku } = await supabase
+      .from('projects')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('is_demo', demoMode)
+      .eq('sku', sku)
+      .maybeSingle()
+
+    if (!existingSku) {
+      // SKU is available, return it
+      return { projectCode, sku }
+    }
+
+    // SKU exists, try next number
+    attempts++
+    if (attempts >= maxAttempts) {
+      throw new Error('No s\'ha pogut generar un SKU únic després de múltiples intents')
+    }
   }
 
-  const projectCode = `PR-FRDL${year}${nextNum.toString().padStart(4, '0')}`
-  const sku = `FRDL${year}${nextNum.toString().padStart(4, '0')}`
-
+  // Fallback (should not reach here)
+  const projectCode = `PR-FRDL${year}${Date.now().toString().slice(-4)}`
+  const sku = `FRDL${year}${Date.now().toString().slice(-4)}`
   return { projectCode, sku }
 }
 
@@ -3314,9 +3402,9 @@ export const getRecurringExpensesKPIs = async () => {
   // Paid (pagades)
   const { data: paid } = await supabase
     .from('expenses')
-    .eq('is_demo', demoMode) // Filter by demo mode
     .select('amount, currency')
     .eq('user_id', userId)
+    .eq('is_demo', demoMode) // Filter by demo mode
     .eq('recurring_status', 'paid')
   
   // Upcoming (expected, mes següent o posterior)
