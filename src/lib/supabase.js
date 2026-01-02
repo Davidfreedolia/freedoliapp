@@ -200,6 +200,27 @@ export const createProject = async (project) => {
         }
         throw error
       }
+      
+      // Audit log: project created with is_demo value
+      try {
+        const { logAudit } = await import('./auditLog')
+        await logAudit({
+          entityType: 'project',
+          entityId: data.id,
+          action: 'create',
+          status: 'success',
+          message: `Project created with is_demo=${demoMode}`,
+          meta: {
+            project_code: data.project_code,
+            sku: data.sku,
+            is_demo: demoMode
+          }
+        })
+      } catch (auditErr) {
+        // Don't fail project creation if audit log fails
+        console.warn('Failed to log project creation:', auditErr)
+      }
+      
       return data
     } catch (err) {
       if (attempts >= maxAttempts - 1) {

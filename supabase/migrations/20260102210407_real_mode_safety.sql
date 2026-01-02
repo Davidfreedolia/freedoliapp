@@ -176,6 +176,24 @@ BEGIN
     END IF;
   END IF;
 
+  -- PO Shipments
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='po_shipments') THEN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name='po_shipments' AND column_name='is_demo') THEN
+      ALTER TABLE po_shipments ADD COLUMN is_demo boolean DEFAULT false NOT NULL;
+      RAISE NOTICE 'Columna is_demo afegida a po_shipments';
+    END IF;
+  END IF;
+
+  -- Logistics Flow
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='logistics_flow') THEN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name='logistics_flow' AND column_name='is_demo') THEN
+      ALTER TABLE logistics_flow ADD COLUMN is_demo boolean DEFAULT false NOT NULL;
+      RAISE NOTICE 'Columna is_demo afegida a logistics_flow';
+    END IF;
+  END IF;
+
 END $$;
 
 -- ============================================
@@ -199,6 +217,8 @@ UPDATE documents SET is_demo = false WHERE is_demo IS NULL;
 UPDATE audit_log SET is_demo = false WHERE is_demo IS NULL;
 UPDATE dashboard_preferences SET is_demo = false WHERE is_demo IS NULL;
 UPDATE po_amazon_readiness SET is_demo = false WHERE is_demo IS NULL;
+UPDATE po_shipments SET is_demo = false WHERE is_demo IS NULL;
+UPDATE logistics_flow SET is_demo = false WHERE is_demo IS NULL;
 
 -- ============================================
 -- PART C: ENSURE is_demo IS NOT NULL
@@ -414,21 +434,43 @@ CREATE INDEX IF NOT EXISTS idx_gtin_pool_user_demo ON gtin_pool(user_id, is_demo
 CREATE INDEX IF NOT EXISTS idx_gtin_pool_user_demo_code ON gtin_pool(user_id, is_demo, gtin_code);
 CREATE INDEX IF NOT EXISTS idx_product_identifiers_user_demo ON product_identifiers(user_id, is_demo);
 CREATE INDEX IF NOT EXISTS idx_documents_user_demo ON documents(user_id, is_demo);
+CREATE INDEX IF NOT EXISTS idx_po_shipments_user_demo ON po_shipments(user_id, is_demo);
+CREATE INDEX IF NOT EXISTS idx_logistics_flow_user_demo ON logistics_flow(user_id, is_demo);
 
 -- ============================================
--- PART F: FIX RLS POLICIES FOR gtin_pool
+-- PART F: FIX RLS POLICIES
 -- ============================================
--- Ensure gtin_pool has proper INSERT policy
+-- Ensure proper INSERT policies for all tables
+
 DO $$ 
 BEGIN
-  -- Drop existing insert policy if it exists
+  -- gtin_pool INSERT policy
   DROP POLICY IF EXISTS "Users can insert own gtin pool" ON gtin_pool;
-  
-  -- Create insert policy that sets user_id automatically
   CREATE POLICY "Users can insert own gtin pool" ON gtin_pool
     FOR INSERT
     WITH CHECK (auth.uid() = user_id);
-  
   RAISE NOTICE 'Fixed gtin_pool INSERT policy';
+
+  -- sticky_notes INSERT policy
+  DROP POLICY IF EXISTS "Users can insert own sticky notes" ON sticky_notes;
+  CREATE POLICY "Users can insert own sticky notes" ON sticky_notes
+    FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
+  RAISE NOTICE 'Fixed sticky_notes INSERT policy';
+
+  -- recurring_expenses SELECT policy (ensure it allows filtering by is_demo)
+  DROP POLICY IF EXISTS "Users can view own recurring expenses" ON recurring_expenses;
+  CREATE POLICY "Users can view own recurring expenses" ON recurring_expenses
+    FOR SELECT
+    USING (auth.uid() = user_id);
+  RAISE NOTICE 'Fixed recurring_expenses SELECT policy';
+
+  -- recurring_expenses INSERT policy
+  DROP POLICY IF EXISTS "Users can insert own recurring expenses" ON recurring_expenses;
+  CREATE POLICY "Users can insert own recurring expenses" ON recurring_expenses
+    FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
+  RAISE NOTICE 'Fixed recurring_expenses INSERT policy';
+
 END $$;
 
