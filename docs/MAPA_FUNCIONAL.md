@@ -429,3 +429,4 @@ Freedoliapp
 **Conclusió**: L'app està **molt completa** i funcional. El focus hauria de ser en **simplificar i netejar** més que en afegir funcionalitat nova. Les parts crítiques (Projects, Orders, Finances) ja funcionen bé.
 
 
+

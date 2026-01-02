@@ -255,3 +255,4 @@ Abans de considerar el setup complet:
 **Última actualització**: Gener 2025
 
 
+

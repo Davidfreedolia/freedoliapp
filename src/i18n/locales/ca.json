@@ -67,6 +67,7 @@
       "empty": "Tots els trackings actualitzats"
     },
     "tasks": {
+      "title": "Tasques",
       "empty": "Totes les tasques completades. Tot al dia."
     },
     "noProject": "Sense projecte",
@@ -349,6 +350,28 @@
     "lightMode": "Mode clar",
     "logout": "Tancar sessió",
     "settings": "Configuració"
+  },
+  "tasks": {
+    "title": "Tasques",
+    "selectAll": "Seleccionar tot",
+    "deselectAll": "Deseleccionar tot",
+    "selected": "seleccionades",
+    "markDone": "Marcar fet",
+    "snooze1d": "Ajornar +1d",
+    "snooze3d": "Ajornar +3d",
+    "markedDone": "Tasca marcada com feta",
+    "snoozed": "Tasca ajornada +{{days}} dia",
+    "snoozed_plural": "Tasca ajornada +{{days}} dies",
+    "bulkMarkedDone": "{{count}} tasca marcada com feta",
+    "bulkMarkedDone_plural": "{{count}} tasques marcades com fetes",
+    "bulkSnoozed": "{{count}} tasca ajornada +{{days}} dia",
+    "bulkSnoozed_plural": "{{count}} tasques ajornades +{{days}} dies",
+    "noDueDate": "Sense data de venciment",
+    "overdue": "Vençut fa {{days}} dies",
+    "overdue_plural": "Vençut fa {{days}} dies",
+    "dueToday": "Venç avui",
+    "dueTomorrow": "Venç demà",
+    "dueInDays": "Venç en {{days}} dies"
   },
   "settings": {
     "title": "Configuració",

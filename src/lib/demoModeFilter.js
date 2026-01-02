@@ -57,3 +57,4 @@ export function addDemoModeFilter(query, demoMode) {
   return query.eq('is_demo', demoMode)
 }
 
+

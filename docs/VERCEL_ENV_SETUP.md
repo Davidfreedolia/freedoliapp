@@ -203,3 +203,4 @@ Si necessites canviar una variable:
 **Última actualització**: Gener 2025
 
 
+

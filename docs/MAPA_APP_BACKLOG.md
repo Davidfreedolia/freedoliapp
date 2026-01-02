@@ -1066,3 +1066,4 @@ graph TB
 **Quick wins disponibles**: 5 tasques <1h que milloren mantenibilitat sense risc.
 
 
+

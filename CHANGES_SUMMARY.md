@@ -65,3 +65,4 @@
 3. Commit: `Fix i18n, help modal, global notes button, dark mode buttons`
 4. Push a main per deploy automàtic a Vercel
 
+

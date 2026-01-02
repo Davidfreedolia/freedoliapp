@@ -132,3 +132,4 @@
 2. Commit i push
 3. Deploy a Vercel
 
+

@@ -3,7 +3,9 @@
  * Ensures proper contrast and opacity in dark mode
  */
 
-export const getButtonStyles = ({ variant = 'primary', darkMode = false, disabled = false }) => {
+import { useState } from 'react'
+
+export const getButtonStyles = ({ variant = 'primary', darkMode = false, disabled = false, isHovered = false, isActive = false }) => {
   const baseStyles = {
     padding: '12px 24px',
     borderRadius: '10px',
@@ -11,49 +13,54 @@ export const getButtonStyles = ({ variant = 'primary', darkMode = false, disable
     fontWeight: '500',
     cursor: disabled ? 'not-allowed' : 'pointer',
     border: 'none',
-    transition: 'all 0.2s ease',
+    transition: 'all 0.15s ease',
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
     gap: '8px',
-    opacity: disabled ? 0.5 : 1
+    opacity: disabled ? 0.5 : 1,
+    transform: isActive ? 'scale(0.99)' : 'scale(1)',
+    outline: 'none'
   }
 
   const variants = {
     primary: {
-      backgroundColor: darkMode ? '#4f46e5' : '#4f46e5',
+      backgroundColor: isHovered 
+        ? (darkMode ? '#4338ca' : '#4338ca')
+        : (darkMode ? '#4f46e5' : '#4f46e5'),
       color: '#ffffff',
-      boxShadow: darkMode ? '0 2px 8px rgba(79, 70, 229, 0.3)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
-      ':hover': {
-        backgroundColor: darkMode ? '#4338ca' : '#4338ca',
-        boxShadow: darkMode ? '0 4px 12px rgba(79, 70, 229, 0.4)' : '0 4px 8px rgba(0, 0, 0, 0.15)'
-      }
+      boxShadow: isHovered
+        ? (darkMode ? '0 4px 12px rgba(79, 70, 229, 0.4)' : '0 4px 8px rgba(0, 0, 0, 0.15)')
+        : (darkMode ? '0 2px 8px rgba(79, 70, 229, 0.3)' : '0 2px 4px rgba(0, 0, 0, 0.1)'),
+      filter: isHovered ? 'brightness(1.05)' : 'brightness(1)'
     },
     secondary: {
-      backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6',
+      backgroundColor: isHovered
+        ? (darkMode ? '#2a2a3a' : '#e5e7eb')
+        : (darkMode ? '#1f1f2e' : '#f3f4f6'),
       color: darkMode ? '#e5e7eb' : '#374151',
       border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`,
-      ':hover': {
-        backgroundColor: darkMode ? '#2a2a3a' : '#e5e7eb'
-      }
+      filter: isHovered ? 'brightness(1.1)' : 'brightness(1)'
     },
     danger: {
-      backgroundColor: darkMode ? '#dc2626' : '#ef4444',
+      backgroundColor: isHovered
+        ? (darkMode ? '#b91c1c' : '#dc2626')
+        : (darkMode ? '#dc2626' : '#ef4444'),
       color: '#ffffff',
-      boxShadow: darkMode ? '0 2px 8px rgba(220, 38, 38, 0.3)' : '0 2px 4px rgba(239, 68, 68, 0.2)',
-      ':hover': {
-        backgroundColor: darkMode ? '#b91c1c' : '#dc2626',
-        boxShadow: darkMode ? '0 4px 12px rgba(220, 38, 38, 0.4)' : '0 4px 8px rgba(239, 68, 68, 0.3)'
-      }
+      boxShadow: isHovered
+        ? (darkMode ? '0 4px 12px rgba(220, 38, 38, 0.4)' : '0 4px 8px rgba(239, 68, 68, 0.3)')
+        : (darkMode ? '0 2px 8px rgba(220, 38, 38, 0.3)' : '0 2px 4px rgba(239, 68, 68, 0.2)'),
+      filter: isHovered ? 'brightness(1.05)' : 'brightness(1)'
     },
     success: {
-      backgroundColor: darkMode ? '#16a34a' : '#22c55e',
+      backgroundColor: isHovered
+        ? (darkMode ? '#15803d' : '#16a34a')
+        : (darkMode ? '#16a34a' : '#22c55e'),
       color: '#ffffff',
-      boxShadow: darkMode ? '0 2px 8px rgba(22, 163, 74, 0.3)' : '0 2px 4px rgba(34, 197, 94, 0.2)',
-      ':hover': {
-        backgroundColor: darkMode ? '#15803d' : '#16a34a',
-        boxShadow: darkMode ? '0 4px 12px rgba(22, 163, 74, 0.4)' : '0 4px 8px rgba(34, 197, 94, 0.3)'
-      }
+      boxShadow: isHovered
+        ? (darkMode ? '0 4px 12px rgba(22, 163, 74, 0.4)' : '0 4px 8px rgba(34, 197, 94, 0.3)')
+        : (darkMode ? '0 2px 8px rgba(22, 163, 74, 0.3)' : '0 2px 4px rgba(34, 197, 94, 0.2)'),
+      filter: isHovered ? 'brightness(1.05)' : 'brightness(1)'
     }
   }
 
@@ -61,9 +68,29 @@ export const getButtonStyles = ({ variant = 'primary', darkMode = false, disable
 
   return {
     ...baseStyles,
-    ...variantStyle,
-    // Remove :hover from object (React doesn't support it in inline styles)
-    // Hover will be handled via onMouseEnter/onMouseLeave if needed
+    ...variantStyle
+  }
+}
+
+/**
+ * Hook to manage button hover/active states
+ */
+export const useButtonState = () => {
+  const [isHovered, setIsHovered] = useState(false)
+  const [isActive, setIsActive] = useState(false)
+  
+  return {
+    isHovered,
+    isActive,
+    onMouseEnter: () => setIsHovered(true),
+    onMouseLeave: () => {
+      setIsHovered(false)
+      setIsActive(false)
+    },
+    onMouseDown: () => setIsActive(true),
+    onMouseUp: () => setIsActive(false),
+    onTouchStart: () => setIsActive(true),
+    onTouchEnd: () => setIsActive(false)
   }
 }
 

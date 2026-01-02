@@ -2022,11 +2022,16 @@ export const getTasks = async (filters = {}) => {
 }
 
 export const getOpenTasks = async (limit = 10) => {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
   const userId = await getCurrentUserId()
   const { data, error } = await supabase
     .from('tasks')
     .select('*')
     .eq('user_id', userId)
+    .eq('is_demo', demoMode) // Filter by demo mode
     .eq('status', 'open')
     .order('due_date', { ascending: true, nullsLast: true })
     .order('priority', { ascending: false })

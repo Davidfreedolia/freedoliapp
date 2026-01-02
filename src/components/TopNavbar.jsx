@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { StickyNote, HelpCircle, Sun, Moon, Bell, LogOut, Settings } from 'lucide-react'
+import { StickyNote, HelpCircle, Sun, Moon, LogOut, Settings } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useApp } from '../context/AppContext'
@@ -20,41 +20,22 @@ export default function TopNavbar() {
   const { addNote, refresh } = useNotes()
   const [showNoteModal, setShowNoteModal] = useState(false)
   const [showHelpModal, setShowHelpModal] = useState(false)
-  const [demoMode, setDemoMode] = useState(false)
+  const { demoMode, toggleDemoMode } = useApp()
   const [loadingDemoMode, setLoadingDemoMode] = useState(false)
-
-  // Load demo mode on mount
-  React.useEffect(() => {
-    loadDemoMode()
-  }, [])
-
-  const loadDemoMode = async () => {
-    try {
-      const settings = await getCompanySettings()
-      setDemoMode(settings?.demo_mode || false)
-    } catch (err) {
-      console.error('Error loading demo mode:', err)
-    }
-  }
 
   const handleToggleDemoMode = async (newValue) => {
     setLoadingDemoMode(true)
     try {
-      await updateCompanySettings({ demo_mode: newValue })
-      setDemoMode(newValue)
+      await toggleDemoMode(newValue)
       showToast(
         newValue 
           ? t('settings.demoModeEnabled', 'Demo mode enabled') 
           : t('settings.demoModeDisabled', 'Demo mode disabled'),
         'success'
       )
-      // Refresh data to apply filter
-      if (refreshProjects) refreshProjects()
-      window.location.reload() // Force reload to apply is_demo filters
     } catch (err) {
       console.error('Error toggling demo mode:', err)
       showToast(t('settings.demoModeError', 'Error toggling demo mode'), 'error')
-    } finally {
       setLoadingDemoMode(false)
     }
   }
@@ -165,17 +146,7 @@ export default function TopNavbar() {
             <Settings size={20} color={darkMode ? '#9ca3af' : '#6b7280'} />
           </button>
 
-          {/* Notifications */}
-          <button 
-            style={{
-              ...styles.iconButton,
-              backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6'
-            }}
-            title={t('navbar.notifications')}
-            aria-label={t('navbar.notifications')}
-          >
-            <Bell size={20} color={darkMode ? '#9ca3af' : '#6b7280'} />
-          </button>
+          {/* Notifications - Hidden until implemented */}
 
           {/* Toggle Dark Mode */}
           <button 

@@ -134,3 +134,4 @@ Fix i18n, help modal, global notes button, dark mode buttons
 ### Confirmació final:
 (Es completarà després del deploy)
 
+

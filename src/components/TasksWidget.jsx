@@ -37,7 +37,7 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
     setActionLoading(taskId)
     try {
       await markTaskDone(taskId)
-      showToast('Task marked as done', 'success')
+      showToast(t('tasks.markedDone'), 'success')
       await loadTasks()
     } catch (err) {
       console.error('Error marking task done:', err)
@@ -50,7 +50,7 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
     setActionLoading(taskId)
     try {
       await snoozeTask(taskId, days)
-      showToast(`Task snoozed +${days} day${days > 1 ? 's' : ''}`, 'success')
+      showToast(t('tasks.snoozed', { days }), 'success')
       await loadTasks()
     } catch (err) {
       console.error('Error snoozing task:', err)
@@ -102,7 +102,7 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
     setBulkActionLoading(true)
     try {
       await bulkMarkTasksDone(Array.from(selectedTasks))
-      showToast(`${selectedTasks.size} task${selectedTasks.size > 1 ? 's' : ''} marked as done`, 'success')
+      showToast(t('tasks.bulkMarkedDone', { count: selectedTasks.size }), 'success')
       setSelectedTasks(new Set())
       await loadTasks()
     } catch (err) {
@@ -118,7 +118,7 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
     setBulkActionLoading(true)
     try {
       await bulkSnoozeTasks(Array.from(selectedTasks), days)
-      showToast(`${selectedTasks.size} task${selectedTasks.size > 1 ? 's' : ''} snoozed +${days} day${days > 1 ? 's' : ''}`, 'success')
+      showToast(t('tasks.bulkSnoozed', { count: selectedTasks.size, days }), 'success')
       setSelectedTasks(new Set())
       await loadTasks()
     } catch (err) {
@@ -142,20 +142,21 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
   }
 
   const getDueDateInfo = (dueDate) => {
-    if (!dueDate) return { text: 'No due date', color: '#6b7280' }
+    if (!dueDate) return { text: t('tasks.noDueDate'), color: '#6b7280' }
     
     const due = parseISO(dueDate)
     const now = new Date()
     const diffDays = Math.ceil((due - now) / (1000 * 60 * 60 * 24))
     
     if (diffDays < 0) {
-      return { text: `Overdue ${Math.abs(diffDays)} days`, color: '#ef4444' }
+      const days = Math.abs(diffDays)
+      return { text: t('tasks.overdue', { days, count: days }), color: '#ef4444' }
     } else if (diffDays === 0) {
-      return { text: 'Due today', color: '#f59e0b' }
+      return { text: t('tasks.dueToday'), color: '#f59e0b' }
     } else if (diffDays === 1) {
-      return { text: 'Due tomorrow', color: '#f59e0b' }
+      return { text: t('tasks.dueTomorrow'), color: '#f59e0b' }
     } else if (diffDays <= 7) {
-      return { text: `Due in ${diffDays} days`, color: '#f59e0b' }
+      return { text: t('tasks.dueInDays', { days: diffDays }), color: '#f59e0b' }
     } else {
       return { text: format(due, 'MMM d', { locale: es }) || format(due, 'MMM d'), color: '#6b7280' }
     }
@@ -207,7 +208,7 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
           ...widgetStyles.title,
           color: darkMode ? '#ffffff' : '#111827'
         }}>
-          Tasks ({tasks.length})
+            {t('dashboard.tasks.title')} ({tasks.length})
         </h3>
         {tasks.length > 0 && (
           <button
@@ -223,7 +224,7 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
               cursor: 'pointer'
             }}
           >
-            {selectedTasks.size === tasks.length ? 'Deselect All' : 'Select All'}
+            {selectedTasks.size === tasks.length ? t('tasks.deselectAll') : t('tasks.selectAll')}
           </button>
         )}
       </div>
@@ -245,7 +246,7 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
             fontWeight: '500',
             color: darkMode ? '#ffffff' : '#111827'
           }}>
-            {selectedTasks.size} selected
+            {selectedTasks.size} {t('tasks.selected')}
           </span>
           <div style={{ display: 'flex', gap: '6px', marginLeft: 'auto' }}>
             <button
@@ -263,7 +264,7 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
                 opacity: bulkActionLoading ? 0.6 : 1
               }}
             >
-              Mark Done
+              {t('tasks.markDone')}
             </button>
             <button
               onClick={() => handleBulkSnooze(1)}
@@ -280,7 +281,7 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
                 opacity: bulkActionLoading ? 0.6 : 1
               }}
             >
-              Snooze +1d
+              {t('tasks.snooze1d')}
             </button>
             <button
               onClick={() => handleBulkSnooze(3)}
@@ -297,7 +298,7 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
                 opacity: bulkActionLoading ? 0.6 : 1
               }}
             >
-              Snooze +3d
+              {t('tasks.snooze3d')}
             </button>
             <button
               onClick={() => setSelectedTasks(new Set())}
@@ -311,7 +312,7 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
                 cursor: 'pointer'
               }}
             >
-              Cancel
+              {t('common.cancel')}
             </button>
           </div>
         </div>

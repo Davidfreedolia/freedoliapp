@@ -54,6 +54,7 @@
       "empty": "All tracking updated"
     },
     "tasks": {
+      "title": "Tasks",
       "empty": "All tasks completed. Everything up to date."
     }
   },
@@ -336,6 +337,28 @@
     "lightMode": "Light mode",
     "logout": "Logout",
     "settings": "Settings"
+  },
+  "tasks": {
+    "title": "Tasks",
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "selected": "selected",
+    "markDone": "Mark Done",
+    "snooze1d": "Snooze +1d",
+    "snooze3d": "Snooze +3d",
+    "markedDone": "Task marked as done",
+    "snoozed": "Task snoozed +{{days}} day",
+    "snoozed_plural": "Task snoozed +{{days}} days",
+    "bulkMarkedDone": "{{count}} task marked as done",
+    "bulkMarkedDone_plural": "{{count}} tasks marked as done",
+    "bulkSnoozed": "{{count}} task snoozed +{{days}} day",
+    "bulkSnoozed_plural": "{{count}} tasks snoozed +{{days}} days",
+    "noDueDate": "No due date",
+    "overdue": "Overdue {{days}} day",
+    "overdue_plural": "Overdue {{days}} days",
+    "dueToday": "Due today",
+    "dueTomorrow": "Due tomorrow",
+    "dueInDays": "Due in {{days}} days"
   },
   "settings": {
     "title": "Settings",

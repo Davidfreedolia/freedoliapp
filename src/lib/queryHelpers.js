@@ -38,3 +38,4 @@ export async function getBaseQuery(table, supabase, demoMode = null) {
     .eq('is_demo', demoMode)
 }
 
+

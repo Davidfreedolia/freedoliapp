@@ -67,6 +67,7 @@
       "empty": "Todos los trackings actualizados"
     },
     "tasks": {
+      "title": "Tareas",
       "empty": "Todas las tareas completadas. Todo al día."
     },
     "noProject": "Sin proyecto",
@@ -351,6 +352,28 @@
     "lightMode": "Modo claro",
     "logout": "Cerrar sesión",
     "settings": "Configuración"
+  },
+  "tasks": {
+    "title": "Tareas",
+    "selectAll": "Seleccionar todo",
+    "deselectAll": "Deseleccionar todo",
+    "selected": "seleccionadas",
+    "markDone": "Marcar hecho",
+    "snooze1d": "Aplazar +1d",
+    "snooze3d": "Aplazar +3d",
+    "markedDone": "Tarea marcada como hecha",
+    "snoozed": "Tarea aplazada +{{days}} día",
+    "snoozed_plural": "Tarea aplazada +{{days}} días",
+    "bulkMarkedDone": "{{count}} tarea marcada como hecha",
+    "bulkMarkedDone_plural": "{{count}} tareas marcadas como hechas",
+    "bulkSnoozed": "{{count}} tarea aplazada +{{days}} día",
+    "bulkSnoozed_plural": "{{count}} tareas aplazadas +{{days}} días",
+    "noDueDate": "Sin fecha de vencimiento",
+    "overdue": "Vencido hace {{days}} día",
+    "overdue_plural": "Vencido hace {{days}} días",
+    "dueToday": "Vence hoy",
+    "dueTomorrow": "Vence mañana",
+    "dueInDays": "Vence en {{days}} días"
   },
   "settings": {
     "title": "Configuración",

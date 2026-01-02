@@ -34,7 +34,7 @@ import { showToast } from '../components/Toast'
 import { useNavigate } from 'react-router-dom'
 
 export default function Settings() {
-  const { darkMode, refreshProjects } = useApp()
+  const { darkMode, refreshProjects, demoMode, toggleDemoMode } = useApp()
   const { t, i18n } = useTranslation()
   const { isMobile } = useBreakpoint()
   const navigate = useNavigate()
@@ -44,7 +44,6 @@ export default function Settings() {
   const [auditLogs, setAuditLogs] = useState([])
   const [statusFilter, setStatusFilter] = useState(null)
   const [loadingLogs, setLoadingLogs] = useState(false)
-  const [demoMode, setDemoMode] = useState(false)
   const [resettingDemo, setResettingDemo] = useState(false)
   
   const [companyData, setCompanyData] = useState({
@@ -110,7 +109,7 @@ export default function Settings() {
       
       if (companyRes) {
         setCompanyData(companyRes)
-        setDemoMode(companyRes.demo_mode || false)
+        // Demo mode is now managed by AppContext
       }
       setSignatures(signaturesRes.data || [])
     } catch (err) {
@@ -456,9 +455,13 @@ export default function Settings() {
                     checked={demoMode}
                     onChange={async (e) => {
                       const newValue = e.target.checked
-                      setDemoMode(newValue)
-                      await updateCompanySettings({ demo_mode: newValue })
-                      showToast(newValue ? t('settings.demoModeEnabled') : t('settings.demoModeDisabled'), 'success')
+                      try {
+                        await toggleDemoMode(newValue)
+                        showToast(newValue ? t('settings.demoModeEnabled') : t('settings.demoModeDisabled'), 'success')
+                      } catch (err) {
+                        console.error('Error toggling demo mode:', err)
+                        showToast(t('settings.demoModeError'), 'error')
+                      }
                     }}
                     style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                   />

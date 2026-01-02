@@ -22,6 +22,7 @@ export function AppProvider({ children }) {
   })
   const [loading, setLoading] = useState(true)
   const [driveConnected, setDriveConnected] = useState(false)
+  const [demoMode, setDemoMode] = useState(false)
 
   // Carregar dades inicials
   useEffect(() => {
@@ -125,6 +126,15 @@ export function AppProvider({ children }) {
   const loadInitialData = async () => {
     setLoading(true)
     try {
+      // Load demo mode first and clear cache
+      const settings = await getCompanySettings()
+      const currentDemoMode = settings?.demo_mode || false
+      setDemoMode(currentDemoMode)
+      
+      // Clear demo mode cache to ensure fresh data
+      const { clearDemoModeCache } = await import('../lib/demoModeFilter')
+      clearDemoModeCache()
+      
       const [projectsData, statsData] = await Promise.all([
         getProjects(),
         getDashboardStats()
@@ -135,6 +145,26 @@ export function AppProvider({ children }) {
       console.error('Error carregant dades:', err)
     }
     setLoading(false)
+  }
+  
+  const toggleDemoMode = async (newValue) => {
+    try {
+      await updateCompanySettings({ demo_mode: newValue })
+      setDemoMode(newValue)
+      
+      // Clear cache and reload data
+      const { clearDemoModeCache } = await import('../lib/demoModeFilter')
+      clearDemoModeCache()
+      
+      // Reload all data
+      await loadInitialData()
+      
+      // Force page reload to ensure all components refresh
+      window.location.reload()
+    } catch (err) {
+      console.error('Error toggling demo mode:', err)
+      throw err
+    }
   }
 
   const initDrive = async () => {
@@ -175,7 +205,9 @@ export function AppProvider({ children }) {
     loading,
     refreshProjects,
     driveConnected,
-    setDriveConnected
+    setDriveConnected,
+    demoMode,
+    toggleDemoMode
   }
 
   return (

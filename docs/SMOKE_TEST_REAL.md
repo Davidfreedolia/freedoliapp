@@ -164,3 +164,4 @@ Verificar que l'aplicació funciona correctament amb dades reals (demo mode OFF)
 - Verificar consola del navegador per errors
 - Verificar que no hi ha warnings crítics
 
+
