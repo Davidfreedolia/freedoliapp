@@ -108,17 +108,24 @@ export const getCurrentUserId = async () => {
 
 // PROJECTES
 export const getProjects = async (includeDiscarded = false) => {
-  // Demo mode: return mock data
-  if (isDemoMode()) {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
+  // Legacy demo mode check (for backward compatibility)
+  if (isDemoMode() && !demoMode) {
     return await mockGetProjects(includeDiscarded)
   }
   
   const userId = await getCurrentUserId()
-  const { data, error } = await supabase
+  let query = supabase
     .from('projects')
     .select('*')
     .eq('user_id', userId)
+    .eq('is_demo', demoMode) // Filter by demo mode
     .order('created_at', { ascending: false })
+  
+  const { data, error } = await query
   
   if (error) throw error
   
@@ -131,31 +138,37 @@ export const getProjects = async (includeDiscarded = false) => {
 }
 
 export const getProject = async (id) => {
-  // Demo mode: return mock data
-  if (isDemoMode()) {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
+  // Legacy demo mode check (for backward compatibility)
+  if (isDemoMode() && !demoMode) {
     return await mockGetProject(id)
   }
   
+  const userId = await getCurrentUserId()
   const { data, error } = await supabase
     .from('projects')
     .select('*')
     .eq('id', id)
+    .eq('user_id', userId)
+    .eq('is_demo', demoMode) // Filter by demo mode
     .single()
   if (error) throw error
   return data
 }
 
 export const createProject = async (project) => {
-  // Demo mode: show message, don't actually create
-  if (isDemoMode()) {
-    throw new Error('DEMO_MODE: No es pot crear projectes en mode demo. Desactiva VITE_DEMO_MODE per usar funcionalitats reals.')
-  }
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
   
   // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
   const { user_id, ...projectData } = project
   const { data, error } = await supabase
     .from('projects')
-    .insert([projectData])
+    .insert([{ ...projectData, is_demo: demoMode }]) // Mark with current demo mode
     .select()
     .single()
   if (error) throw error
@@ -193,14 +206,21 @@ export const deleteProject = async (id) => {
 
 // PROVEÏDORS
 export const getSuppliers = async () => {
-  // Demo mode: return mock data
-  if (isDemoMode()) {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
+  // Legacy demo mode check (for backward compatibility)
+  if (isDemoMode() && !demoMode) {
     return await mockGetSuppliers()
   }
   
+  const userId = await getCurrentUserId()
   const { data, error } = await supabase
     .from('suppliers')
     .select('*')
+    .eq('user_id', userId)
+    .eq('is_demo', demoMode) // Filter by demo mode
     .order('name', { ascending: true })
   if (error) throw error
   return data
@@ -265,8 +285,12 @@ export const createForwarder = async (forwarder) =>
 
 // PURCHASE ORDERS
 export const getPurchaseOrders = async (projectId = null) => {
-  // Demo mode: return mock data
-  if (isDemoMode()) {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
+  // Legacy demo mode check (for backward compatibility)
+  if (isDemoMode() && !demoMode) {
     const data = await mockGetPurchaseOrders()
     if (projectId) {
       return data.filter(po => po.project_id === projectId)
@@ -274,6 +298,7 @@ export const getPurchaseOrders = async (projectId = null) => {
     return data
   }
   
+  const userId = await getCurrentUserId()
   let query = supabase
     .from('purchase_orders')
     .select(
@@ -283,6 +308,8 @@ export const getPurchaseOrders = async (projectId = null) => {
       project:projects(name, project_code, sku)
     `
     )
+    .eq('user_id', userId)
+    .eq('is_demo', demoMode) // Filter by demo mode
     .order('created_at', { ascending: false })
 
   if (projectId) query = query.eq('project_id', projectId)
@@ -314,16 +341,15 @@ export const getPurchaseOrder = async (id) => {
 }
 
 export const createPurchaseOrder = async (po) => {
-  // Demo mode: show message, don't actually create
-  if (isDemoMode()) {
-    throw new Error('DEMO_MODE: No es pot crear comandes en mode demo. Desactiva VITE_DEMO_MODE per usar funcionalitats reals.')
-  }
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
   
   // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
   const { user_id, ...poData } = po
   const { data, error } = await supabase
     .from('purchase_orders')
-    .insert([poData])
+    .insert([{ ...poData, is_demo: demoMode }]) // Mark with current demo mode
     .select()
     .single()
   if (error) throw error
@@ -1868,6 +1894,9 @@ export const upsertProjectProfitability = async (projectId, profitabilityData) =
 
 // TASKS
 export const getTasks = async (filters = {}) => {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
   // Demo mode: return mock data
   if (isDemoMode()) {
     const tasks = await mockGetTasks(filters.entityId || filters.projectId || null)
@@ -1890,6 +1919,7 @@ export const getTasks = async (filters = {}) => {
     .from('tasks')
     .select('*')
     .eq('user_id', userId)
+    .eq('is_demo', demoMode) // Filter by demo mode
     .order('due_date', { ascending: true, nullsLast: true })
     .order('created_at', { ascending: false })
   
@@ -1924,6 +1954,10 @@ export const getOpenTasks = async (limit = 10) => {
 }
 
 export const createTask = async (task) => {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
   const { user_id, ...taskData } = task
   const userId = await getCurrentUserId()
   
@@ -1931,7 +1965,8 @@ export const createTask = async (task) => {
     .from('tasks')
     .insert([{
       ...taskData,
-      user_id: userId
+      user_id: userId,
+      is_demo: demoMode // Mark with current demo mode
     }])
     .select()
     .single()
@@ -2710,8 +2745,12 @@ export const quickMarkPackAsSent = async (poId) => {
 
 // Sticky Notes functions
 export const getStickyNotes = async (filters = {}) => {
-  // Demo mode: return mock data
-  if (isDemoMode()) {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
+  // Legacy demo mode check (for backward compatibility)
+  if (isDemoMode() && !demoMode) {
     const notes = await mockGetStickyNotes(filters.projectId !== undefined ? filters.projectId : null)
     // Apply filters client-side
     let filtered = notes
@@ -2727,6 +2766,7 @@ export const getStickyNotes = async (filters = {}) => {
   const userId = await getCurrentUserId()
   let query = supabase
     .from('sticky_notes')
+    .eq('is_demo', demoMode) // Filter by demo mode
     .select(`
       *,
       tasks:linked_task_id (
@@ -2753,6 +2793,10 @@ export const getStickyNotes = async (filters = {}) => {
 }
 
 export const createStickyNote = async (note) => {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
   const { user_id, ...noteData } = note
   const userId = await getCurrentUserId()
   
@@ -2760,7 +2804,8 @@ export const createStickyNote = async (note) => {
     .from('sticky_notes')
     .insert([{
       ...noteData,
-      user_id: userId
+      user_id: userId,
+      is_demo: demoMode // Mark with current demo mode
     }])
     .select()
     .single()

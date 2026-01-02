@@ -458,27 +458,6 @@ export default function Dashboard() {
             <FolderKanban size={18} color="#4f46e5" />
             Nou Projecte
           </button>
-          <button
-            onClick={() => setShowAddNoteModal(true)}
-            style={{
-              ...styles.actionButton,
-              backgroundColor: '#FFE066',
-              color: '#5F4B00',
-              width: isMobile ? '100%' : 'auto',
-              justifyContent: isMobile ? 'center' : 'flex-start',
-              border: '2px solid #FBBF24',
-              fontWeight: '600',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-              transform: 'rotate(-1deg)',
-              transition: 'transform 0.2s ease'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = 'rotate(0deg) scale(1.05)'}
-            onMouseLeave={(e) => e.currentTarget.style.transform = 'rotate(-1deg) scale(1)'}
-            title="Add sticky note"
-          >
-            <StickyNote size={18} color="#5F4B00" />
-            Add note
-          </button>
           {!isMobile && (
             <>
               <button

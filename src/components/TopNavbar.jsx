@@ -1,17 +1,18 @@
-import { useState } from 'react'
-import { StickyNote, HelpCircle, Sun, Moon, Bell, LogOut } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { StickyNote, HelpCircle, Sun, Moon, Bell, LogOut, Settings } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useApp } from '../context/AppContext'
-import { supabase } from '../lib/supabase'
+import { supabase, getCompanySettings, updateCompanySettings } from '../lib/supabase'
 import { logSuccess } from '../lib/auditLog'
 import { useNotes } from '../hooks/useNotes'
 import AddStickyNoteModal from './AddStickyNoteModal'
 import HelpModal from './HelpModal'
 import { useBreakpoint } from '../hooks/useBreakpoint'
+import { showToast } from './Toast'
 
 export default function TopNavbar() {
-  const { darkMode, setDarkMode } = useApp()
+  const { darkMode, setDarkMode, refreshProjects } = useApp()
   const navigate = useNavigate()
   const location = useLocation()
   const { t } = useTranslation()
@@ -19,6 +20,44 @@ export default function TopNavbar() {
   const { addNote, refresh } = useNotes()
   const [showNoteModal, setShowNoteModal] = useState(false)
   const [showHelpModal, setShowHelpModal] = useState(false)
+  const [demoMode, setDemoMode] = useState(false)
+  const [loadingDemoMode, setLoadingDemoMode] = useState(false)
+
+  // Load demo mode on mount
+  React.useEffect(() => {
+    loadDemoMode()
+  }, [])
+
+  const loadDemoMode = async () => {
+    try {
+      const settings = await getCompanySettings()
+      setDemoMode(settings?.demo_mode || false)
+    } catch (err) {
+      console.error('Error loading demo mode:', err)
+    }
+  }
+
+  const handleToggleDemoMode = async (newValue) => {
+    setLoadingDemoMode(true)
+    try {
+      await updateCompanySettings({ demo_mode: newValue })
+      setDemoMode(newValue)
+      showToast(
+        newValue 
+          ? t('settings.demoModeEnabled', 'Demo mode enabled') 
+          : t('settings.demoModeDisabled', 'Demo mode disabled'),
+        'success'
+      )
+      // Refresh data to apply filter
+      if (refreshProjects) refreshProjects()
+      window.location.reload() // Force reload to apply is_demo filters
+    } catch (err) {
+      console.error('Error toggling demo mode:', err)
+      showToast(t('settings.demoModeError', 'Error toggling demo mode'), 'error')
+    } finally {
+      setLoadingDemoMode(false)
+    }
+  }
 
   // No mostrar navbar a login
   if (location.pathname === '/login') return null
@@ -88,6 +127,44 @@ export default function TopNavbar() {
         </div>
 
         <div style={styles.rightSection}>
+          {/* Demo Mode Toggle */}
+          {!isMobile && (
+            <label style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 12px',
+              borderRadius: '8px',
+              backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6',
+              cursor: 'pointer',
+              fontSize: '13px',
+              color: darkMode ? '#e5e7eb' : '#374151',
+              border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`
+            }}>
+              <input
+                type="checkbox"
+                checked={demoMode}
+                onChange={(e) => handleToggleDemoMode(e.target.checked)}
+                disabled={loadingDemoMode}
+                style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+              />
+              <span>Demo</span>
+            </label>
+          )}
+
+          {/* Settings */}
+          <button 
+            onClick={() => navigate('/settings')}
+            style={{
+              ...styles.iconButton,
+              backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6'
+            }}
+            title={t('navbar.settings')}
+            aria-label={t('navbar.settings')}
+          >
+            <Settings size={20} color={darkMode ? '#9ca3af' : '#6b7280'} />
+          </button>
+
           {/* Notifications */}
           <button 
             style={{

@@ -334,7 +334,13 @@
     "notifications": "Notifications",
     "darkMode": "Dark mode",
     "lightMode": "Light mode",
-    "logout": "Logout"
+    "logout": "Logout",
+    "settings": "Settings"
+  },
+  "settings": {
+    "demoModeEnabled": "Demo mode enabled",
+    "demoModeDisabled": "Demo mode disabled",
+    "demoModeError": "Error toggling demo mode"
   },
   "common": {
     "close": "Close"

@@ -334,7 +334,13 @@
     "notifications": "Notificaciones",
     "darkMode": "Modo oscuro",
     "lightMode": "Modo claro",
-    "logout": "Cerrar sesión"
+    "logout": "Cerrar sesión",
+    "settings": "Configuración"
+  },
+  "settings": {
+    "demoModeEnabled": "Modo demo activado",
+    "demoModeDisabled": "Modo demo desactivado",
+    "demoModeError": "Error al cambiar modo demo"
   },
   "common": {
     "close": "Cerrar"

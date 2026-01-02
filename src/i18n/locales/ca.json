@@ -332,7 +332,13 @@
     "notifications": "Notificacions",
     "darkMode": "Mode fosc",
     "lightMode": "Mode clar",
-    "logout": "Tancar sessió"
+    "logout": "Tancar sessió",
+    "settings": "Configuració"
+  },
+  "settings": {
+    "demoModeEnabled": "Mode demo activat",
+    "demoModeDisabled": "Mode demo desactivat",
+    "demoModeError": "Error al canviar mode demo"
   },
   "common": {
     "close": "Tancar"
