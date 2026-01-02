@@ -21,6 +21,7 @@ import {
   releaseGtinFromProject,
   supabase
 } from '../lib/supabase'
+import { showToast } from './Toast'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
 
@@ -168,25 +169,25 @@ export default function GTINPoolSection({ darkMode }) {
       await loadGtins()
       setShowImportModal(false)
       setImportPreview(null)
-      alert(`${toInsert.length} codis GTIN importats correctament`)
+      showToast(t('settings.gtinPool.importedSuccess', { count: toInsert.length }), 'success')
     } catch (err) {
       console.error('Error important GTINs:', err)
-      alert('Error important GTINs: ' + err.message)
+      showToast(t('settings.gtinPool.importError') + ': ' + err.message, 'error')
     }
     setImporting(false)
   }
 
   // Alliberar GTIN
   const handleReleaseGtin = async (gtinId) => {
-    if (!confirm('Estàs segur que vols alliberar aquest GTIN? Es podrà assignar a un altre projecte.')) return
+    if (!confirm(t('settings.gtinPool.confirmRelease'))) return
 
     try {
       await releaseGtinFromProject(gtinId)
       await loadGtins()
-      alert('GTIN alliberat correctament')
+      showToast(t('settings.gtinPool.releasedSuccess'), 'success')
     } catch (err) {
       console.error('Error alliberant GTIN:', err)
-      alert('Error alliberant GTIN: ' + err.message)
+      showToast(t('settings.gtinPool.releaseError') + ': ' + err.message, 'error')
     }
   }
 
@@ -424,8 +425,8 @@ export default function GTINPoolSection({ darkMode }) {
                       color: gtin.status === 'available' ? '#22c55e' : 
                             gtin.status === 'assigned' ? '#f59e0b' : '#6b7280'
                     }}>
-                      {gtin.status === 'available' ? 'Disponible' : 
-                       gtin.status === 'assigned' ? 'Assignat' : 'Arxivat'}
+                      {gtin.status === 'available' ? t('settings.gtinPool.statusAvailable') : 
+                       gtin.status === 'assigned' ? t('settings.gtinPool.statusAssigned') : t('settings.gtinPool.statusArchived')}
                     </span>
                   </div>
                 </div>
@@ -433,7 +434,7 @@ export default function GTINPoolSection({ darkMode }) {
               
               {gtin.projects && (
                 <div style={styles.cardRow}>
-                  <span style={styles.cardLabel}>Projecte:</span>
+                  <span style={styles.cardLabel}>{t('settings.gtinPool.project')}:</span>
                   <a
                     href={`/projects/${gtin.assigned_to_project_id}`}
                     onClick={(e) => {
@@ -454,7 +455,7 @@ export default function GTINPoolSection({ darkMode }) {
               
               {gtin.notes && (
                 <div style={styles.cardRow}>
-                  <span style={styles.cardLabel}>Notes:</span>
+                  <span style={styles.cardLabel}>{t('settings.gtinPool.notes')}:</span>
                   <span style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>{gtin.notes}</span>
                 </div>
               )}
@@ -466,7 +467,7 @@ export default function GTINPoolSection({ darkMode }) {
                     style={styles.actionButton}
                   >
                     <X size={14} />
-                    Alliberar
+                    {t('settings.gtinPool.release')}
                   </button>
                 )}
                 {gtin.status !== 'archived' && (
@@ -490,12 +491,12 @@ export default function GTINPoolSection({ darkMode }) {
           <table style={styles.table}>
             <thead>
               <tr style={{ backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb' }}>
-                <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Codi GTIN</th>
-                <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Tipus</th>
-                <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Estat</th>
-                <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Projecte Assignat</th>
-                <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Notes</th>
-                <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Accions</th>
+                <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>{t('settings.gtinPool.code')}</th>
+                <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>{t('settings.gtinPool.type')}</th>
+                <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>{t('settings.gtinPool.status')}</th>
+                <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>{t('settings.gtinPool.assignedProject')}</th>
+                <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>{t('settings.gtinPool.notes')}</th>
+                <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -526,8 +527,8 @@ export default function GTINPoolSection({ darkMode }) {
                       color: gtin.status === 'available' ? '#22c55e' : 
                             gtin.status === 'assigned' ? '#f59e0b' : '#6b7280'
                     }}>
-                      {gtin.status === 'available' ? 'Disponible' : 
-                       gtin.status === 'assigned' ? 'Assignat' : 'Arxivat'}
+                      {gtin.status === 'available' ? t('settings.gtinPool.statusAvailable') : 
+                       gtin.status === 'assigned' ? t('settings.gtinPool.statusAssigned') : t('settings.gtinPool.statusArchived')}
                     </span>
                   </td>
                   <td style={styles.td}>
@@ -560,7 +561,7 @@ export default function GTINPoolSection({ darkMode }) {
                         <button
                           onClick={() => handleReleaseGtin(gtin.id)}
                           style={styles.actionButton}
-                          title="Alliberar GTIN"
+                          title={t('settings.gtinPool.release')}
                         >
                           <X size={14} />
                         </button>
@@ -569,9 +570,9 @@ export default function GTINPoolSection({ darkMode }) {
                         <button
                           onClick={() => handleArchiveGtin(gtin.id)}
                           style={{...styles.actionButton, color: '#6b7280'}}
-                          title="Arxivar"
+                          title={t('settings.gtinPool.archive')}
                         >
-                          Arxivar
+                          {t('settings.gtinPool.archive')}
                         </button>
                       )}
                     </div>
@@ -599,7 +600,7 @@ export default function GTINPoolSection({ darkMode }) {
                 color: darkMode ? '#ffffff' : '#111827'
               }}>
                 <FileSpreadsheet size={20} />
-                Import GTINs des de Excel/CSV
+                {t('settings.gtinPool.importFromExcel')}
               </h3>
               <button
                 onClick={() => {
@@ -619,7 +620,7 @@ export default function GTINPoolSection({ darkMode }) {
                     ...styles.helpText,
                     color: darkMode ? '#9ca3af' : '#6b7280'
                   }}>
-                    Format esperat (CSV):<br />
+                    {t('settings.gtinPool.expectedFormat')}:<br />
                     <code style={styles.code}>
                       gtin_code,gtin_type,notes<br />
                       8437012345678,EAN,Lot GS1 març<br />
@@ -636,7 +637,7 @@ export default function GTINPoolSection({ darkMode }) {
                   >
                     <Upload size={32} color="#9ca3af" />
                     <p style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
-                      Clica per seleccionar fitxer CSV
+                      {t('settings.gtinPool.clickToSelectFile')}
                     </p>
                     <input
                       ref={fileInputRef}
@@ -652,22 +653,22 @@ export default function GTINPoolSection({ darkMode }) {
                   <div style={styles.previewStats}>
                     <div style={styles.previewStat}>
                       <CheckCircle2 size={20} color="#22c55e" />
-                      <span>{importPreview.valid} vàlids</span>
+                      <span>{importPreview.valid} {t('settings.gtinPool.valid')}</span>
                     </div>
                     <div style={styles.previewStat}>
                       <AlertTriangle size={20} color="#ef4444" />
-                      <span>{importPreview.invalid} invàlids</span>
+                      <span>{importPreview.invalid} {t('settings.gtinPool.invalid')}</span>
                     </div>
                     {importPreview.duplicates.length > 0 && (
                       <div style={styles.previewStat}>
                         <AlertTriangle size={20} color="#f59e0b" />
-                        <span>{importPreview.duplicates.length} duplicats al fitxer</span>
+                        <span>{importPreview.duplicates.length} {t('settings.gtinPool.duplicatesInFile')}</span>
                       </div>
                     )}
                     {importPreview.conflicts.length > 0 && (
                       <div style={styles.previewStat}>
                         <AlertTriangle size={20} color="#ef4444" />
-                        <span>{importPreview.conflicts.length} ja existeixen</span>
+                        <span>{importPreview.conflicts.length} {t('settings.gtinPool.alreadyExist')}</span>
                       </div>
                     )}
                   </div>
@@ -676,10 +677,10 @@ export default function GTINPoolSection({ darkMode }) {
                     <table style={styles.table}>
                       <thead>
                         <tr>
-                          <th style={styles.th}>Fila</th>
-                          <th style={styles.th}>Codi</th>
-                          <th style={styles.th}>Tipus</th>
-                          <th style={styles.th}>Estat</th>
+                          <th style={styles.th}>{t('settings.gtinPool.row')}</th>
+                          <th style={styles.th}>{t('settings.gtinPool.code')}</th>
+                          <th style={styles.th}>{t('settings.gtinPool.type')}</th>
+                          <th style={styles.th}>{t('settings.gtinPool.status')}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -689,12 +690,12 @@ export default function GTINPoolSection({ darkMode }) {
                             <td style={styles.td}>{row.gtin_code}</td>
                             <td style={styles.td}>{row.gtin_type}</td>
                             <td style={styles.td}>
-                              {!row.valid && <span style={{ color: '#ef4444' }}>Invàlid</span>}
+                              {!row.valid && <span style={{ color: '#ef4444' }}>{t('settings.gtinPool.invalid')}</span>}
                               {importPreview.conflicts.includes(row.gtin_code) && (
-                                <span style={{ color: '#f59e0b' }}>Ja existeix</span>
+                                <span style={{ color: '#f59e0b' }}>{t('settings.gtinPool.alreadyExist')}</span>
                               )}
                               {row.valid && !importPreview.conflicts.includes(row.gtin_code) && (
-                                <span style={{ color: '#22c55e' }}>✓ Vàlid</span>
+                                <span style={{ color: '#22c55e' }}>✓ {t('settings.gtinPool.valid')}</span>
                               )}
                             </td>
                           </tr>
@@ -703,7 +704,7 @@ export default function GTINPoolSection({ darkMode }) {
                     </table>
                     {importPreview.rows.length > 20 && (
                       <p style={{ color: '#6b7280', fontSize: '12px', marginTop: '8px' }}>
-                        ... i {importPreview.rows.length - 20} més
+                        ... {t('common.and')} {importPreview.rows.length - 20} {t('common.more')}
                       </p>
                     )}
                   </div>
@@ -719,7 +720,7 @@ export default function GTINPoolSection({ darkMode }) {
                 }}
                 style={styles.cancelButton}
               >
-                Cancel·lar
+                {t('common.cancel')}
               </button>
               {importPreview && (
                 <button
@@ -730,7 +731,7 @@ export default function GTINPoolSection({ darkMode }) {
                     opacity: (importing || importPreview.valid === 0) ? 0.6 : 1
                   }}
                 >
-                  {importing ? 'Important...' : `Importar ${importPreview.rows.filter(r => r.valid && !importPreview.conflicts.includes(r.gtin_code)).length} codis`}
+                  {importing ? t('settings.gtinPool.importing') : t('settings.gtinPool.importCodes', { count: importPreview.rows.filter(r => r.valid && !importPreview.conflicts.includes(r.gtin_code)).length })}
                 </button>
               )}
             </div>

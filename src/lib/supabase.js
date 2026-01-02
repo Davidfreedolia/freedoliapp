@@ -1089,6 +1089,7 @@ export const upsertPoAmazonReadiness = async (purchaseOrderId, projectId, readin
     .upsert({
       purchase_order_id: purchaseOrderId,
       project_id: projectId,
+      user_id: userId, // Always set user_id explicitly
       ...data,
       updated_at: new Date().toISOString()
     }, {
@@ -1127,10 +1128,16 @@ export const updateManufacturerPackGenerated = async (purchaseOrderId, version) 
   
   if (!existing) {
     // Necessitem project_id per crear el registre
+    // Get demo mode setting
+    const { getDemoMode } = await import('./demoModeFilter')
+    const demoMode = await getDemoMode()
+    
     const { data: poData } = await supabase
       .from('purchase_orders')
       .select('project_id')
       .eq('id', purchaseOrderId)
+      .eq('user_id', userId)
+      .eq('is_demo', demoMode) // Filter by demo mode
       .single()
     if (poData) projectId = poData.project_id
   } else {
@@ -1146,6 +1153,7 @@ export const updateManufacturerPackGenerated = async (purchaseOrderId, version) 
     .upsert({
       purchase_order_id: purchaseOrderId,
       project_id: projectId,
+      user_id: userId, // Always set user_id explicitly
       manufacturer_pack_version: version,
       manufacturer_pack_generated_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
@@ -1153,7 +1161,6 @@ export const updateManufacturerPackGenerated = async (purchaseOrderId, version) 
       onConflict: 'user_id,purchase_order_id',
       ignoreDuplicates: false
     })
-    .eq('user_id', userId)
     .select()
     .single()
   if (error) throw error
