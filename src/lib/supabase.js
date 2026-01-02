@@ -462,9 +462,16 @@ export const deleteDocument = async (id) => {
 
 // PAGAMENTS
 export const getPayments = async (projectId = null) => {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
+  const userId = await getCurrentUserId()
   let query = supabase
     .from('payments')
     .select('*')
+    .eq('user_id', userId)
+    .eq('is_demo', demoMode) // Filter by demo mode
     .order('payment_date', { ascending: false })
 
   if (projectId) query = query.eq('project_id', projectId)
@@ -475,11 +482,15 @@ export const getPayments = async (projectId = null) => {
 }
 
 export const createPayment = async (payment) => {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
   // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
   const { user_id, ...paymentData } = payment
   const { data, error } = await supabase
     .from('payments')
-    .insert([paymentData])
+    .insert([{ ...paymentData, is_demo: demoMode }]) // Mark with current demo mode
     .select()
     .single()
   if (error) throw error
@@ -507,15 +518,22 @@ export const deletePayment = async (id) => {
 
 // ESTADÍSTIQUES DASHBOARD
 export const getDashboardStats = async () => {
-  // Demo mode: return mock data
-  if (isDemoMode()) {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
+  // Legacy demo mode check (for backward compatibility)
+  if (isDemoMode() && !demoMode) {
     return await mockGetDashboardStats()
   }
   
-  // RLS maneja el filtrado por user_id automáticamente, no filtrar aquí
+  const userId = await getCurrentUserId()
+  // RLS maneja el filtrado por user_id automáticamente, pero afegim is_demo filter
   const { data: projects, error } = await supabase
     .from('projects')
     .select('*')
+    .eq('user_id', userId)
+    .eq('is_demo', demoMode) // Filter by demo mode
     .order('created_at', { ascending: false })
   
   if (error) {
@@ -544,9 +562,11 @@ export const getDashboardStats = async () => {
     p.decision === 'DISCARDED'
   ).length || 0
 
-  // RLS maneja el filtrado por user_id automáticamente
+  // RLS maneja el filtrado por user_id automáticamente, pero afegim is_demo filter
   const { data: payments, error: paymentsError } = await supabase
     .from('payments')
+    .eq('user_id', userId)
+    .eq('is_demo', demoMode) // Filter by demo mode
     .select('amount, currency, type')
     .eq('status', 'completed')
   

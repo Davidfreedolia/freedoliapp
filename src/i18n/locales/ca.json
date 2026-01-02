@@ -32,6 +32,19 @@
     "layoutSaved": "Layout guardat correctament",
     "layoutSaveError": "Error guardant el layout",
     "dragToMove": "Arrossega per moure",
+    "ordersInProgress": {
+      "title": "Comandes en curs",
+      "viewAll": "Veure totes",
+      "loading": "Carregant...",
+      "empty": "No hi ha comandes en curs"
+    },
+    "posNotReady": {
+      "title": "POs no llestes per Amazon",
+      "viewAll": "Veure totes",
+      "loading": "Carregant...",
+      "empty": "Totes les POs estan llestes per Amazon! 🎉",
+      "missing": "Falten"
+    },
     "waitingManufacturer": {
       "title": "Waiting Manufacturer",
       "empty": "Tots els packs enviats al fabricant. Res bloquejat."
@@ -55,7 +68,9 @@
     },
     "tasks": {
       "empty": "Totes les tasques completades. Tot al dia."
-    }
+    },
+    "noProject": "Sense projecte",
+    "partialPaid": "Pagat parcial"
   },
   "calendar": {
     "title": "Calendari",

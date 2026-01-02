@@ -32,6 +32,19 @@
     "layoutSaved": "Layout guardado correctamente",
     "layoutSaveError": "Error guardando el layout",
     "dragToMove": "Arrastra para mover",
+    "ordersInProgress": {
+      "title": "Pedidos en curso",
+      "viewAll": "Ver todos",
+      "loading": "Cargando...",
+      "empty": "No hay pedidos en curso"
+    },
+    "posNotReady": {
+      "title": "POs no listas para Amazon",
+      "viewAll": "Ver todos",
+      "loading": "Cargando...",
+      "empty": "¡Todas las POs están listas para Amazon! 🎉",
+      "missing": "Faltan"
+    },
     "waitingManufacturer": {
       "title": "Esperando Fabricante",
       "empty": "Todos los packs del fabricante enviados. Nada bloqueado."
@@ -55,7 +68,9 @@
     },
     "tasks": {
       "empty": "Todas las tareas completadas. Todo al día."
-    }
+    },
+    "noProject": "Sin proyecto",
+    "partialPaid": "Pagado parcialmente"
   },
   "calendar": {
     "title": "Calendario",

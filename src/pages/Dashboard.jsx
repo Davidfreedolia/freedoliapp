@@ -411,7 +411,7 @@ export default function Dashboard() {
       draft: { name: 'Esborrany', color: '#6b7280' },
       sent: { name: 'Enviat', color: '#3b82f6' },
       confirmed: { name: 'Confirmat', color: '#8b5cf6' },
-      partial_paid: { name: 'Pagat parcial', color: '#f59e0b' },
+      partial_paid: { name: t('dashboard.partialPaid'), color: '#f59e0b' },
       paid: { name: 'Pagat', color: '#22c55e' },
       in_production: { name: 'En producció', color: '#ec4899' },
       shipped: { name: 'Enviat', color: '#06b6d4' },
@@ -668,21 +668,21 @@ export default function Dashboard() {
               color: darkMode ? '#ffffff' : '#111827'
             }}>
               <Package size={20} />
-              Comandes en curs
+              {t('dashboard.ordersInProgress.title')}
             </h2>
             <button 
               onClick={() => navigate('/orders')}
               style={styles.viewAllButton}
             >
-              Veure totes <ArrowRight size={16} />
+              {t('dashboard.ordersInProgress.viewAll')} <ArrowRight size={16} />
             </button>
           </div>
 
           {loadingOrders ? (
-            <div style={styles.loading}>Carregant...</div>
+            <div style={styles.loading}>{t('dashboard.ordersInProgress.loading')}</div>
           ) : ordersInProgress.length === 0 ? (
             <div style={styles.empty}>
-              <p>No hi ha comandes en curs</p>
+              <p>{t('dashboard.ordersInProgress.empty')}</p>
             </div>
           ) : (
             <div style={styles.ordersList}>
@@ -705,7 +705,7 @@ export default function Dashboard() {
                         ...styles.orderProject,
                         color: darkMode ? '#6b7280' : '#9ca3af'
                       }}>
-                        {order.project?.name || 'Sense projecte'}
+                        {order.project?.name || t('dashboard.noProject')}
                       </span>
                     </div>
                     <div style={{
@@ -737,21 +737,21 @@ export default function Dashboard() {
               color: darkMode ? '#ffffff' : '#111827'
             }}>
               <AlertTriangle size={20} />
-              POs no llestes per Amazon
+              {t('dashboard.posNotReady.title')}
             </h2>
             <button 
               onClick={() => navigate('/orders')}
               style={styles.viewAllButton}
             >
-              Veure totes <ArrowRight size={16} />
+              {t('dashboard.posNotReady.viewAll')} <ArrowRight size={16} />
             </button>
           </div>
 
           {loadingPosNotReady ? (
-            <div style={styles.loading}>Carregant...</div>
+            <div style={styles.loading}>{t('dashboard.posNotReady.loading')}</div>
           ) : posNotReady.length === 0 ? (
             <div style={styles.empty}>
-              <p>Totes les POs estan llestes per Amazon! 🎉</p>
+              <p>{t('dashboard.posNotReady.empty')}</p>
             </div>
           ) : (
             <div style={styles.ordersList}>
@@ -772,7 +772,7 @@ export default function Dashboard() {
                       ...styles.orderProject,
                       color: darkMode ? '#6b7280' : '#9ca3af'
                     }}>
-                      {po.projects?.name || 'Sense projecte'}
+                      {po.projects?.name || t('dashboard.noProject')}
                     </span>
                   </div>
                   <div style={{
@@ -780,7 +780,7 @@ export default function Dashboard() {
                     backgroundColor: '#f59e0b15',
                     color: '#f59e0b'
                   }}>
-                    Missing {po.missingCount}
+                    {t('dashboard.posNotReady.missing')} {po.missingCount}
                   </div>
                   <ArrowRight size={18} color="#9ca3af" />
                 </div>
