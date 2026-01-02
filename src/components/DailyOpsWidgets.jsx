@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { 
@@ -90,12 +90,12 @@ export function WaitingManufacturerWidget({ darkMode, limit = 10 }) {
     }}>
       <div style={widgetStyles.header}>
         <Package size={20} color="#f59e0b" />
-        <h3 style={{
-          ...widgetStyles.title,
-          color: darkMode ? '#ffffff' : '#111827'
-        }}>
-          Waiting Manufacturer ({data.length})
-        </h3>
+          <h3 style={{
+            ...widgetStyles.title,
+            color: darkMode ? '#ffffff' : '#111827'
+          }}>
+            {t('dashboard.waitingManufacturer.title')} ({data.length})
+          </h3>
       </div>
       <div style={widgetStyles.list}>
         {data.map(po => {
@@ -254,7 +254,7 @@ export function PosNotAmazonReadyWidget({ darkMode, limit = 10 }) {
           ...widgetStyles.title,
           color: darkMode ? '#ffffff' : '#111827'
         }}>
-          POs Not Amazon Ready ({data.length})
+          {t('dashboard.posNotAmazonReady.title')} ({data.length})
         </h3>
       </div>
       <div style={widgetStyles.list}>
@@ -425,7 +425,7 @@ export function ShipmentsInTransitWidget({ darkMode, limit = 10 }) {
           ...widgetStyles.title,
           color: darkMode ? '#ffffff' : '#111827'
         }}>
-          Shipments In Transit ({data.length})
+          {t('dashboard.shipmentsInTransit.title')} ({data.length})
         </h3>
       </div>
       <div style={widgetStyles.list}>
@@ -569,7 +569,7 @@ export function ResearchNoDecisionWidget({ darkMode, limit = 10 }) {
           ...widgetStyles.title,
           color: darkMode ? '#ffffff' : '#111827'
         }}>
-          Research No Decision ({data.length})
+          {t('dashboard.researchNoDecision.title')} ({data.length})
         </h3>
       </div>
       <div style={widgetStyles.list}>
@@ -691,7 +691,7 @@ export function StaleTrackingWidget({ darkMode, limit = 10, staleDays = 7 }) {
           ...widgetStyles.title,
           color: darkMode ? '#ffffff' : '#111827'
         }}>
-          Stale Tracking ({data.length})
+          {t('dashboard.staleTracking.title')} ({data.length})
         </h3>
       </div>
       <div style={widgetStyles.list}>

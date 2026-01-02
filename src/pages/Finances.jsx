@@ -141,10 +141,10 @@ export default function Finances() {
         const [mockExpenses, mockIncomes, mockProjects, mockSuppliers] = await Promise.all([
           mockGetExpenses(),
           mockGetIncomes(),
-          getProjects(),
-          getSuppliers()
-        ])
-        
+        getProjects(),
+        getSuppliers()
+      ])
+      
         // Enrich expenses and incomes with project and category data
         expensesRes = { 
           data: mockExpenses.map(e => {
@@ -175,7 +175,11 @@ export default function Finances() {
         viewsRes = { data: [] }
       } else {
         // Production: use real Supabase queries
-        [expensesRes, incomesRes, projectsData, suppliersData, viewsRes] = await Promise.all([
+        // Get demo mode setting
+        const { getDemoMode } = await import('../lib/demoModeFilter')
+        const demoMode = await getDemoMode()
+        
+        const results = await Promise.all([
           supabase
             .from('expenses')
             .select(`
@@ -189,6 +193,7 @@ export default function Finances() {
               category:finance_categories(id, name, color, icon)
             `)
             .eq('user_id', userId)
+            .eq('is_demo', demoMode) // Filter by demo mode
             .order('expense_date', { ascending: false }),
           supabase
             .from('incomes')
@@ -198,6 +203,7 @@ export default function Finances() {
               category:finance_categories(id, name, color, icon)
             `)
             .eq('user_id', userId)
+            .eq('is_demo', demoMode) // Filter by demo mode
             .order('income_date', { ascending: false }),
           getProjects(),
           getSuppliers(),
@@ -208,6 +214,11 @@ export default function Finances() {
             .order('is_default', { ascending: false })
             .order('created_at', { ascending: false })
         ])
+        expensesRes = results[0]
+        incomesRes = results[1]
+        projectsData = results[2]
+        suppliersData = results[3]
+        viewsRes = results[4]
       }
       
       // Combine into ledger
@@ -466,7 +477,7 @@ export default function Finances() {
       const amount = Math.abs(parseFloat(editingTransaction.amount))
       
       if (editingTransaction.type === 'expense') {
-        const data = {
+      const data = {
           project_id: editingTransaction.project_id || null,
           category_id: editingTransaction.category_id,
           description: editingTransaction.description,
@@ -518,7 +529,7 @@ export default function Finances() {
             .update(data)
             .eq('id', editingTransaction.id)
           if (error) throw error
-        } else {
+      } else {
           const { error } = await supabase
             .from('incomes')
             .insert(data)
@@ -610,7 +621,7 @@ export default function Finances() {
                 const view = savedViews.find(v => v.id === e.target.value)
                 setActiveView(view || null)
               }}
-              style={{
+            style={{
                 ...styles.viewSelect,
                 backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
                 color: darkMode ? '#ffffff' : '#111827'
@@ -621,7 +632,7 @@ export default function Finances() {
                 <option key={view.id} value={view.id}>{view.name}</option>
               ))}
             </select>
-            <button
+          <button
               onClick={() => {
                 setEditingView({ name: '', filters: filters, columns: visibleColumns, is_default: false })
                 setShowViewModal(true)
@@ -630,9 +641,9 @@ export default function Finances() {
               title="Guardar vista"
             >
               <Save size={18} />
-            </button>
+          </button>
             {activeView && (
-              <button
+          <button
                 onClick={() => {
                   setEditingView(activeView)
                   setShowViewModal(true)
@@ -641,9 +652,9 @@ export default function Finances() {
                 title="Editar vista"
               >
                 <Edit size={18} />
-              </button>
+          </button>
             )}
-          </div>
+        </div>
 
           {/* Filters */}
           <div style={styles.filtersSection}>
@@ -661,35 +672,35 @@ export default function Finances() {
               <option value="expense">Despeses</option>
             </select>
 
-            <select
+          <select
               value={filters.project_id || ''}
               onChange={e => setFilters({...filters, project_id: e.target.value || null})}
-              style={{
-                ...styles.filterSelect,
-                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                color: darkMode ? '#ffffff' : '#111827'
-              }}
-            >
-              <option value="">Tots els projectes</option>
-              {projects.map(p => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
+            style={{
+              ...styles.filterSelect,
+              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+              color: darkMode ? '#ffffff' : '#111827'
+            }}
+          >
+            <option value="">Tots els projectes</option>
+            {projects.map(p => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
+          </select>
 
-            <select
+          <select
               value={filters.category_id || ''}
               onChange={e => setFilters({...filters, category_id: e.target.value || null})}
-              style={{
-                ...styles.filterSelect,
-                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                color: darkMode ? '#ffffff' : '#111827'
-              }}
-            >
+            style={{
+              ...styles.filterSelect,
+              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+              color: darkMode ? '#ffffff' : '#111827'
+            }}
+          >
               <option value="">Totes les categories</option>
               {[...categories.income, ...categories.expense].map(c => (
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}
-            </select>
+          </select>
 
             <input
               type="date"
@@ -738,14 +749,14 @@ export default function Finances() {
               title="Gestionar categories"
             >
               <Tag size={18} />
-            </button>
+              </button>
             <button
               onClick={handleExportCSV}
               style={styles.iconButton}
               title="Exportar a CSV"
             >
               <FileSpreadsheet size={18} />
-            </button>
+              </button>
             <button
               onClick={() => handleNewTransaction('income')}
               style={{...styles.newButton, backgroundColor: '#22c55e', border: '1px solid #16a34a'}}
@@ -822,7 +833,7 @@ export default function Finances() {
               color: darkMode ? '#ffffff' : '#111827'
             }}>
               Error carregant les finances
-            </h3>
+                  </h3>
             <p style={{
               margin: '0 0 24px',
               fontSize: '14px',
@@ -846,37 +857,37 @@ export default function Finances() {
               <RefreshCw size={16} style={{ marginRight: '8px', display: 'inline' }} />
               Reintentar
             </button>
-          </div>
+                        </div>
         ) : (
-          <div style={{...styles.tableContainer, backgroundColor: darkMode ? '#15151f' : '#ffffff'}}>
-            <table style={styles.table}>
-              <thead>
-                <tr>
+              <div style={{...styles.tableContainer, backgroundColor: darkMode ? '#15151f' : '#ffffff'}}>
+                <table style={styles.table}>
+                  <thead>
+                    <tr>
                   {visibleColumns.includes('date') && (
-                    <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Data</th>
+                      <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Data</th>
                   )}
                   {visibleColumns.includes('type') && (
                     <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Tipus</th>
                   )}
                   {visibleColumns.includes('category') && (
-                    <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Categoria</th>
+                      <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Categoria</th>
                   )}
                   {visibleColumns.includes('description') && (
-                    <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Descripció</th>
+                      <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Descripció</th>
                   )}
                   {visibleColumns.includes('project') && (
-                    <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Projecte</th>
+                      <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Projecte</th>
                   )}
                   {visibleColumns.includes('amount') && (
-                    <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Import</th>
+                      <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Import</th>
                   )}
                   {visibleColumns.includes('balance') && (
                     <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Saldo</th>
                   )}
-                  <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Accions</th>
-                </tr>
-              </thead>
-              <tbody>
+                      <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Accions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
                 {filteredLedger.length === 0 ? (
                   <tr>
                     <td colSpan={visibleColumns.length + 1} style={{...styles.td, textAlign: 'center', padding: '48px', color: '#6b7280'}}>
@@ -886,7 +897,7 @@ export default function Finances() {
                 ) : (
                   filteredLedger.map((item, index) => {
                     const catInfo = getCategoryInfo(item.category_id, item.type)
-                    return (
+                      return (
                       <tr key={`${item.type}-${item.id}`} style={styles.tr}>
                         {visibleColumns.includes('date') && (
                           <td style={{...styles.td, color: darkMode ? '#9ca3af' : '#6b7280'}}>
@@ -943,7 +954,7 @@ export default function Finances() {
                                 >
                                   <FileText size={12} />
                                   <Eye size={12} />
-                                </button>
+                              </button>
                               )}
                             </div>
                           </td>
@@ -971,16 +982,16 @@ export default function Finances() {
                             {formatCurrency(item.balance, item.currency)}
                           </td>
                         )}
-                        <td style={styles.td}>
-                          <div style={{position: 'relative'}}>
+                          <td style={styles.td}>
+                            <div style={{position: 'relative'}}>
                             <button
                               onClick={() => setMenuOpen(menuOpen === item.id ? null : item.id)}
                               style={styles.menuButton}
                             >
-                              <MoreVertical size={18} />
-                            </button>
+                                <MoreVertical size={18} />
+                              </button>
                             {menuOpen === item.id && (
-                              <div style={{...styles.menu, backgroundColor: darkMode ? '#1f1f2e' : '#ffffff'}}>
+                                <div style={{...styles.menu, backgroundColor: darkMode ? '#1f1f2e' : '#ffffff'}}>
                                 <button
                                   onClick={() => {
                                     setEditingTransaction(item)
@@ -989,8 +1000,8 @@ export default function Finances() {
                                   }}
                                   style={styles.menuItem}
                                 >
-                                  <Edit size={14} /> Editar
-                                </button>
+                                    <Edit size={14} /> Editar
+                                  </button>
                                 {item.type === 'expense' && item.is_recurring && item.recurring_status === 'expected' && (
                                   <button
                                     onClick={async () => {
@@ -1012,19 +1023,19 @@ export default function Finances() {
                                   onClick={() => handleDeleteTransaction(item)}
                                   style={{...styles.menuItem, color: '#ef4444'}}
                                 >
-                                  <Trash2 size={14} /> Eliminar
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    )
+                                    <Trash2 size={14} /> Eliminar
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )
                   })
                 )}
-              </tbody>
-            </table>
-          </div>
+                  </tbody>
+                </table>
+              </div>
         )}
       </div>
 
@@ -1063,7 +1074,7 @@ export default function Finances() {
                 >
                   Despeses
                 </button>
-              </div>
+                  </div>
 
               <div style={styles.categoriesList}>
                 {(editingCategory?.type === 'income' ? categories.income : categories.expense).map(cat => (
@@ -1096,7 +1107,7 @@ export default function Finances() {
                     )}
                   </div>
                 ))}
-              </div>
+                </div>
 
               {editingCategory && (
                 <div style={styles.categoryForm}>
@@ -1134,7 +1145,7 @@ export default function Finances() {
                     >
                       Cancel·lar
                     </button>
-                  </div>
+                </div>
                 </div>
               )}
 
@@ -1146,7 +1157,7 @@ export default function Finances() {
                   <Plus size={16} /> Nova Categoria
                 </button>
               )}
-            </div>
+                </div>
           </div>
         </div>
       )}
@@ -1162,13 +1173,13 @@ export default function Finances() {
               <button onClick={() => setShowViewModal(false)} style={styles.closeButton}>
                 <X size={20} />
               </button>
-            </div>
-            
+                </div>
+
             <div style={styles.modalBody}>
-              <div style={styles.formGroup}>
+                <div style={styles.formGroup}>
                 <label style={styles.label}>Nom de la vista</label>
-                <input
-                  type="text"
+                  <input
+                    type="text"
                   value={editingView.name}
                   onChange={e => setEditingView({...editingView, name: e.target.value})}
                   placeholder="Ex: Q1 2024, Amazon Sales, etc."
@@ -1177,11 +1188,11 @@ export default function Finances() {
                     backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
                     color: darkMode ? '#ffffff' : '#111827'
                   }}
-                />
-              </div>
-              <div style={styles.formGroup}>
+                  />
+                </div>
+                <div style={styles.formGroup}>
                 <label style={styles.label}>
-                  <input
+                    <input
                     type="checkbox"
                     checked={editingView.is_default || false}
                     onChange={e => setEditingView({...editingView, is_default: e.target.checked})}
@@ -1189,15 +1200,15 @@ export default function Finances() {
                   />
                   Vista per defecte
                 </label>
-              </div>
+                  </div>
               <div style={styles.formActions}>
-                <button
+                        <button 
                   onClick={handleSaveView}
                   disabled={saving}
                   style={styles.saveButton}
-                >
+                        >
                   {saving ? 'Guardant...' : <><Save size={16} /> Guardar</>}
-                </button>
+                        </button>
                 {editingView.id && (
                   <button
                     onClick={() => handleDeleteView(editingView)}
@@ -1211,7 +1222,7 @@ export default function Finances() {
                   style={styles.cancelButton}
                 >
                   Cancel·lar
-                </button>
+              </button>
               </div>
             </div>
           </div>
@@ -1252,7 +1263,7 @@ export default function Finances() {
                     ))}
                   </select>
                 </div>
-
+                
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Categoria *</label>
                   <select
@@ -1338,9 +1349,9 @@ export default function Finances() {
 
                 {editingTransaction.type === 'income' && (
                   <>
-                    <div style={styles.formGroup}>
-                      <label style={styles.label}>Plataforma</label>
-                      <select
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>Plataforma</label>
+                  <select
                         value={editingTransaction.platform}
                         onChange={e => setEditingTransaction({...editingTransaction, platform: e.target.value})}
                         style={{
@@ -1348,14 +1359,14 @@ export default function Finances() {
                           backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
                           color: darkMode ? '#ffffff' : '#111827'
                         }}
-                      >
-                        <option value="amazon">Amazon</option>
-                        <option value="other">Altre</option>
-                      </select>
-                    </div>
-                    <div style={styles.formGroup}>
-                      <label style={styles.label}>Marketplace</label>
-                      <select
+                  >
+                    <option value="amazon">Amazon</option>
+                    <option value="other">Altre</option>
+                  </select>
+                </div>
+                <div style={styles.formGroup}>
+                  <label style={styles.label}>Marketplace</label>
+                  <select
                         value={editingTransaction.marketplace}
                         onChange={e => setEditingTransaction({...editingTransaction, marketplace: e.target.value})}
                         style={{
@@ -1363,29 +1374,29 @@ export default function Finances() {
                           backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
                           color: darkMode ? '#ffffff' : '#111827'
                         }}
-                      >
-                        <option value="ES">Espanya</option>
-                        <option value="DE">Alemanya</option>
-                        <option value="FR">França</option>
-                        <option value="IT">Itàlia</option>
-                        <option value="UK">UK</option>
-                        <option value="US">USA</option>
-                      </select>
-                    </div>
-                    <div style={styles.formGroup}>
+                  >
+                    <option value="ES">Espanya</option>
+                    <option value="DE">Alemanya</option>
+                    <option value="FR">França</option>
+                    <option value="IT">Itàlia</option>
+                    <option value="UK">UK</option>
+                    <option value="US">USA</option>
+                  </select>
+                </div>
+                <div style={styles.formGroup}>
                       <label style={styles.label}>Order ID (Amazon)</label>
-                      <input
-                        type="text"
+                  <input
+                    type="text"
                         value={editingTransaction.order_id || ''}
                         onChange={e => setEditingTransaction({...editingTransaction, order_id: e.target.value})}
-                        placeholder="ID comanda Amazon..."
+                    placeholder="ID comanda Amazon..."
                         style={{
                           ...styles.input,
                           backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
                           color: darkMode ? '#ffffff' : '#111827'
                         }}
-                      />
-                    </div>
+                  />
+                </div>
                   </>
                 )}
 

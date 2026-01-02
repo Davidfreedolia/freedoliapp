@@ -1297,8 +1297,12 @@ export const getPosNotReady = async (limit = 10) => {
 
 // DAILY OPS WIDGETS
 export const getShipmentsInTransit = async (limit = 10) => {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
   // Demo mode: return mock data
-  if (isDemoMode()) {
+  if (demoMode) {
     return await mockGetShipmentsInTransit(limit)
   }
   
@@ -1316,9 +1320,10 @@ export const getShipmentsInTransit = async (limit = 10) => {
         tracking_number,
         pro_number,
         updated_at,
-        purchase_orders (
+        purchase_orders!inner (
           id,
           po_number,
+          is_demo,
           projects (
             id,
             name,
@@ -1327,6 +1332,7 @@ export const getShipmentsInTransit = async (limit = 10) => {
         )
       `)
       .eq('user_id', userId)
+      .eq('purchase_orders.is_demo', false) // Filter by demo mode
       .in('status', ['picked_up', 'in_transit'])
       .order('eta_date', { ascending: true })
       .limit(limit)
@@ -3154,6 +3160,10 @@ export const getReceiptUrl = (filePath) => {
  * Get all recurring expenses for current user
  */
 export const getRecurringExpenses = async () => {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
   const userId = await getCurrentUserId()
   const { data, error } = await supabase
     .from('recurring_expenses')
@@ -3164,6 +3174,7 @@ export const getRecurringExpenses = async () => {
       supplier:suppliers(id, name)
     `)
     .eq('user_id', userId)
+    .eq('is_demo', demoMode) // Filter by demo mode
     .order('day_of_month', { ascending: true })
   if (error) throw error
   return data || []
@@ -3262,6 +3273,10 @@ export const markRecurringExpenseAsPaid = async (expenseId) => {
  * Get recurring expenses KPIs
  */
 export const getRecurringExpensesKPIs = async () => {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
   const userId = await getCurrentUserId()
   const today = new Date()
   const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`
@@ -3273,6 +3288,7 @@ export const getRecurringExpensesKPIs = async () => {
     .from('expenses')
     .select('amount, currency')
     .eq('user_id', userId)
+    .eq('is_demo', demoMode) // Filter by demo mode
     .eq('recurring_status', 'expected')
     .eq('payment_status', 'pending')
     .lte('recurring_period', currentMonth)
@@ -3280,6 +3296,7 @@ export const getRecurringExpensesKPIs = async () => {
   // Paid (pagades)
   const { data: paid } = await supabase
     .from('expenses')
+    .eq('is_demo', demoMode) // Filter by demo mode
     .select('amount, currency')
     .eq('user_id', userId)
     .eq('recurring_status', 'paid')
@@ -3289,6 +3306,7 @@ export const getRecurringExpensesKPIs = async () => {
     .from('expenses')
     .select('amount, currency')
     .eq('user_id', userId)
+    .eq('is_demo', demoMode) // Filter by demo mode
     .eq('recurring_status', 'expected')
     .gte('recurring_period', nextMonthStr)
   
