@@ -351,9 +351,25 @@
     "settings": "Configuració"
   },
   "settings": {
+    "title": "Configuració",
+    "loading": "Carregant...",
+    "saving": "Guardant...",
+    "saved": "Guardat!",
+    "save": "Guardar",
+    "errorSaving": "Error guardant les dades",
+    "errorSavingSignature": "Error guardant la signatura",
+    "selectImage": "Selecciona una imatge",
+    "nameAndImageRequired": "Nom i imatge de signatura són obligatoris",
+    "openManual": "Obrir Manual d'ús",
     "demoModeEnabled": "Mode demo activat",
     "demoModeDisabled": "Mode demo desactivat",
-    "demoModeError": "Error al canviar mode demo"
+    "demoModeError": "Error al canviar mode demo",
+    "demoDataCleared": "Dades demo netejades correctament",
+    "demoDataGenerated": "Dades demo generades correctament!",
+    "demoDataRegenerated": "Dades demo regenerades correctament",
+    "errorClearingDemo": "Error netejant dades demo",
+    "errorGeneratingDemo": "Error generant dades demo",
+    "errorRegeneratingDemo": "Error al regenerar dades demo"
   },
   "common": {
     "close": "Tancar"

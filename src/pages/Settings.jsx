@@ -139,7 +139,7 @@ export default function Settings() {
       setTimeout(() => setSaved(false), 3000)
     } catch (err) {
       console.error('Error guardant:', err)
-      showToast('Error guardant les dades', 'error')
+      showToast(t('settings.errorSaving'), 'error')
     }
     setSaving(false)
   }
@@ -182,7 +182,7 @@ export default function Settings() {
 
   const processFile = (file) => {
     if (!file.type.startsWith('image/')) {
-      showToast('Selecciona una imatge', 'error')
+      showToast(t('settings.selectImage'), 'error')
       return
     }
     
@@ -195,7 +195,7 @@ export default function Settings() {
 
   const handleSaveSignature = async () => {
     if (!editingSignature.name || !editingSignature.signature_image) {
-      showToast('Nom i imatge de signatura són obligatoris', 'error')
+      showToast(t('settings.nameAndImageRequired'), 'error')
       return
     }
 
@@ -221,7 +221,7 @@ export default function Settings() {
       setEditingSignature(null)
     } catch (err) {
       console.error('Error guardant signatura:', err)
-      showToast('Error guardant la signatura', 'error')
+      showToast(t('settings.errorSavingSignature'), 'error')
     }
     setSaving(false)
   }
@@ -250,7 +250,7 @@ export default function Settings() {
     return (
       <div style={styles.container}>
         <Header title="Configuració" />
-        <div style={styles.loading}>Carregant...</div>
+        <div style={styles.loading}>{t('settings.loading')}</div>
       </div>
     )
   }
@@ -315,7 +315,7 @@ export default function Settings() {
                 <Building2 size={20} /> Dades de l'Empresa
               </h2>
               <button onClick={handleSave} disabled={saving} style={{...styles.saveButton, backgroundColor: saved ? '#22c55e' : '#4f46e5'}}>
-                {saved ? <><Check size={16} /> Guardat!</> : saving ? 'Guardant...' : <><Save size={16} /> Guardar</>}
+                {saved ? <><Check size={16} /> {t('settings.saved')}</> : saving ? t('settings.saving') : <><Save size={16} /> {t('settings.save')}</>}
               </button>
             </div>
 
@@ -414,7 +414,7 @@ export default function Settings() {
                 }}
               >
                 <BookOpen size={16} />
-                Obrir Manual d'ús
+                {t('settings.openManual')}
                 <ExternalLink size={14} />
               </button>
             </div>
@@ -458,7 +458,7 @@ export default function Settings() {
                       const newValue = e.target.checked
                       setDemoMode(newValue)
                       await updateCompanySettings({ demo_mode: newValue })
-                      showToast('Demo mode ' + (newValue ? 'activat' : 'desactivat'), 'success')
+                      showToast(newValue ? t('settings.demoModeEnabled') : t('settings.demoModeDisabled'), 'success')
                     }}
                     style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                   />
@@ -484,7 +484,7 @@ export default function Settings() {
                         }
                         const clearResult = await clearDemoData()
                         if (!clearResult.success) {
-                          showToast('Error netejant dades demo: ' + clearResult.message, 'error')
+                          showToast(t('settings.errorClearingDemo') + ': ' + clearResult.message, 'error')
                           setResettingDemo(false)
                           return
                         }
@@ -493,18 +493,18 @@ export default function Settings() {
                       // Generate new demo data
                       const genResult = await generateDemoData()
                       if (genResult.success) {
-                        showToast('Dades demo generades correctament!', 'success', 5000)
+                        showToast(t('settings.demoDataGenerated'), 'success', 5000)
                         await refreshProjects()
                         // Redirect to dashboard after 2 seconds
                         setTimeout(() => {
                           navigate('/')
                         }, 2000)
                       } else {
-                        showToast('Error generant dades demo: ' + genResult.message, 'error')
+                        showToast(t('settings.errorGeneratingDemo') + ': ' + genResult.message, 'error')
                       }
                     } catch (err) {
                       console.error('Error generating demo:', err)
-                      showToast('Error al generar dades demo', 'error')
+                      showToast(t('settings.errorGeneratingDemo'), 'error')
                     } finally {
                       setResettingDemo(false)
                     }
@@ -542,14 +542,14 @@ export default function Settings() {
                       // Generate new demo data
                       const genResult = await generateDemoData()
                       if (genResult.success) {
-                        showToast('Dades demo regenerades correctament', 'success')
+                        showToast(t('settings.demoDataRegenerated'), 'success')
                         await refreshProjects()
                       } else {
-                        showToast('Error generant dades demo: ' + genResult.message, 'error')
+                        showToast(t('settings.errorGeneratingDemo') + ': ' + genResult.message, 'error')
                       }
                     } catch (err) {
                       console.error('Error resetting demo:', err)
-                      showToast('Error al regenerar dades demo', 'error')
+                      showToast(t('settings.errorRegeneratingDemo'), 'error')
                     } finally {
                       setResettingDemo(false)
                     }

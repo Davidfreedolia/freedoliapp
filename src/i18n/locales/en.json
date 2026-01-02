@@ -338,9 +338,25 @@
     "settings": "Settings"
   },
   "settings": {
+    "title": "Settings",
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "saved": "Saved!",
+    "save": "Save",
+    "errorSaving": "Error saving data",
+    "errorSavingSignature": "Error saving signature",
+    "selectImage": "Select an image",
+    "nameAndImageRequired": "Name and signature image are required",
+    "openManual": "Open User Manual",
     "demoModeEnabled": "Demo mode enabled",
     "demoModeDisabled": "Demo mode disabled",
-    "demoModeError": "Error toggling demo mode"
+    "demoModeError": "Error toggling demo mode",
+    "demoDataCleared": "Demo data cleared successfully",
+    "demoDataGenerated": "Demo data generated successfully!",
+    "demoDataRegenerated": "Demo data regenerated successfully",
+    "errorClearingDemo": "Error clearing demo data",
+    "errorGeneratingDemo": "Error generating demo data",
+    "errorRegeneratingDemo": "Error regenerating demo data"
   },
   "common": {
     "close": "Close"

@@ -391,9 +391,16 @@ export const deletePurchaseOrder = async (id) => {
 
 // DOCUMENTS
 export const getDocuments = async (projectId) => {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
+  const userId = await getCurrentUserId()
   const { data, error } = await supabase
     .from('documents')
     .select('*')
+    .eq('user_id', userId)
+    .eq('is_demo', demoMode) // Filter by demo mode
     .eq('project_id', projectId)
     .order('created_at', { ascending: false })
   if (error) throw error
@@ -734,6 +741,10 @@ export const getProductIdentifiers = async (projectId) => {
 }
 
 export const upsertProductIdentifiers = async (projectId, identifiers) => {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
   // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
   const { user_id, ...identifiersData } = identifiers
   const { data, error } = await supabase
@@ -741,6 +752,7 @@ export const upsertProductIdentifiers = async (projectId, identifiers) => {
     .upsert({
       project_id: projectId,
       ...identifiersData,
+      is_demo: demoMode, // Mark with current demo mode
       updated_at: new Date().toISOString()
     }, {
       onConflict: 'user_id,project_id'
@@ -756,6 +768,10 @@ export const upsertProductIdentifiers = async (projectId, identifiers) => {
 // ============================================
 
 export const getGtinPool = async (status = null) => {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
   const userId = await getCurrentUserId()
   let query = supabase
     .from('gtin_pool')
@@ -769,6 +785,7 @@ export const getGtinPool = async (status = null) => {
       )
     `)
     .eq('user_id', userId)
+    .eq('is_demo', demoMode) // Filter by demo mode
     .order('created_at', { ascending: false })
   
   if (status) {
@@ -781,9 +798,16 @@ export const getGtinPool = async (status = null) => {
 }
 
 export const getAvailableGtinCodes = async () => {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
+  const userId = await getCurrentUserId()
   const { data, error } = await supabase
     .from('gtin_pool')
     .select('*')
+    .eq('user_id', userId)
+    .eq('is_demo', demoMode) // Filter by demo mode
     .eq('status', 'available')
     .order('created_at', { ascending: false })
   if (error) throw error
@@ -898,14 +922,21 @@ export const releaseGtinFromProject = async (gtinPoolId) => {
 }
 
 export const getUnassignedGtinCodes = async () => {
-  // Demo mode: return mock data
-  if (isDemoMode()) {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
+  // Legacy demo mode check (for backward compatibility)
+  if (isDemoMode() && !demoMode) {
     return await mockGetUnassignedGtinCodes()
   }
   
+  const userId = await getCurrentUserId()
   const { data, error } = await supabase
     .from('gtin_pool')
     .select('*')
+    .eq('user_id', userId)
+    .eq('is_demo', demoMode) // Filter by demo mode
     .eq('status', 'available')
     .order('created_at', { ascending: false })
   if (error) throw error
@@ -913,8 +944,12 @@ export const getUnassignedGtinCodes = async () => {
 }
 
 export const getProjectsMissingGtin = async () => {
-  // Demo mode: return mock data
-  if (isDemoMode()) {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
+  // Legacy demo mode check (for backward compatibility)
+  if (isDemoMode() && !demoMode) {
     return await mockGetProjectsMissingGtin()
   }
   
@@ -927,6 +962,7 @@ export const getProjectsMissingGtin = async () => {
     .select('*')
     .eq('status', 'active')
     .eq('user_id', userId)
+    .eq('is_demo', demoMode) // Filter by demo mode
   
   if (projectsError) throw projectsError
   
@@ -936,6 +972,8 @@ export const getProjectsMissingGtin = async () => {
   const { data: identifiers, error: identifiersError } = await supabase
     .from('product_identifiers')
     .select('project_id, gtin_type, gtin_code')
+    .eq('user_id', userId)
+    .eq('is_demo', demoMode) // Filter by demo mode
   if (identifiersError) throw identifiersError
   
   const projectsWithIdentifiers = new Set(identifiers.map(i => i.project_id))
@@ -948,6 +986,10 @@ export const getProjectsMissingGtin = async () => {
 }
 
 export const getProgrammaticallyAssignedGTIN = async () => {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
   // Retorna els GTIN assignats programàticament des del pool
   // (aquells que tenen assigned_to_project_id a gtin_pool)
   const userId = await getCurrentUserId()
@@ -970,6 +1012,7 @@ export const getProgrammaticallyAssignedGTIN = async () => {
       )
     `)
     .eq('user_id', userId)
+    .eq('is_demo', demoMode) // Filter by demo mode
     .eq('status', 'assigned')
     .not('assigned_to_project_id', 'is', null)
     .order('updated_at', { ascending: false })
@@ -1123,8 +1166,12 @@ export const markManufacturerPackAsSent = async (purchaseOrderId) => {
 }
 
 export const getPosWaitingManufacturer = async (limit = 10) => {
-  // Demo mode: return mock data
-  if (isDemoMode()) {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
+  // Legacy demo mode check (for backward compatibility)
+  if (isDemoMode() && !demoMode) {
     return await mockGetPosWaitingManufacturer(limit)
   }
   
@@ -1134,12 +1181,13 @@ export const getPosWaitingManufacturer = async (limit = 10) => {
     .from('po_amazon_readiness')
     .select(`
       *,
-      purchase_orders (
+      purchase_orders!inner (
         id,
         po_number,
         status,
         order_date,
         project_id,
+        is_demo,
         projects (
           id,
           name,
@@ -1153,6 +1201,7 @@ export const getPosWaitingManufacturer = async (limit = 10) => {
       )
     `)
     .eq('user_id', userId)
+    .eq('purchase_orders.is_demo', demoMode) // Filter by demo mode on joined table
     .not('manufacturer_pack_generated_at', 'is', null)
     .is('manufacturer_pack_sent_at', null)
     .order('manufacturer_pack_generated_at', { ascending: true })
@@ -3119,6 +3168,10 @@ export const getRecurringExpenses = async () => {
  * Create recurring expense
  */
 export const createRecurringExpense = async (recurringExpense) => {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
   const userId = await getCurrentUserId()
   const { user_id, ...data } = recurringExpense
   
@@ -3138,6 +3191,7 @@ export const createRecurringExpense = async (recurringExpense) => {
     .insert([{
       ...data,
       user_id: userId,
+      is_demo: demoMode, // Mark with current demo mode
       next_generation_date: targetDate.toISOString().split('T')[0]
     }])
     .select()

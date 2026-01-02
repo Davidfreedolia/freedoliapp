@@ -353,9 +353,25 @@
     "settings": "Configuración"
   },
   "settings": {
+    "title": "Configuración",
+    "loading": "Cargando...",
+    "saving": "Guardando...",
+    "saved": "¡Guardado!",
+    "save": "Guardar",
+    "errorSaving": "Error guardando los datos",
+    "errorSavingSignature": "Error guardando la firma",
+    "selectImage": "Selecciona una imagen",
+    "nameAndImageRequired": "Nombre e imagen de firma son obligatorios",
+    "openManual": "Abrir Manual de uso",
     "demoModeEnabled": "Modo demo activado",
     "demoModeDisabled": "Modo demo desactivado",
-    "demoModeError": "Error al cambiar modo demo"
+    "demoModeError": "Error al cambiar modo demo",
+    "demoDataCleared": "Datos demo limpiados correctamente",
+    "demoDataGenerated": "¡Datos demo generados correctamente!",
+    "demoDataRegenerated": "Datos demo regenerados correctamente",
+    "errorClearingDemo": "Error limpiando datos demo",
+    "errorGeneratingDemo": "Error generando datos demo",
+    "errorRegeneratingDemo": "Error al regenerar datos demo"
   },
   "common": {
     "close": "Cerrar"
