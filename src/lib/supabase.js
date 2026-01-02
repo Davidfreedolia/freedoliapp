@@ -2092,8 +2092,9 @@ export const getTasks = async (filters = {}) => {
   // Get demo mode setting
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
-  // Demo mode: return mock data
-  if (isDemoMode()) {
+  
+  // Legacy demo mode check (for backward compatibility)
+  if (isDemoMode() && !demoMode) {
     const tasks = await mockGetTasks(filters.entityId || filters.projectId || null)
     // Apply filters client-side
     let filtered = tasks
@@ -2362,8 +2363,12 @@ export const bulkMarkShipmentsDelivered = async (poIds) => {
 // SUPPLIER QUOTES
 // Get all calendar events (tasks, shipments, manufacturer packs, quotes)
 export const getCalendarEvents = async (filters = {}) => {
-  // Demo mode: return mock data
-  if (isDemoMode()) {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
+  // Legacy demo mode check (for backward compatibility)
+  if (isDemoMode() && !demoMode) {
     const { mockGetCalendarEvents } = await import('../demo/demoMode')
     return await mockGetCalendarEvents(filters)
   }
@@ -2416,10 +2421,12 @@ export const getCalendarEvents = async (filters = {}) => {
           purchase_orders!inner(
             id,
             po_number,
+            is_demo,
             projects(id, name)
           )
         `)
         .eq('user_id', userId)
+        .eq('purchase_orders.is_demo', demoMode) // Filter by demo mode on purchase_orders
       
       if (!shipmentsError && shipments) {
         shipments.forEach(shipment => {
@@ -2475,6 +2482,7 @@ export const getCalendarEvents = async (filters = {}) => {
           projects(id, name)
         `)
         .eq('user_id', userId)
+        .eq('is_demo', demoMode) // Filter by demo mode
         .not('manufacturer_pack_generated_at', 'is', null)
       
       if (!posError && pos) {
@@ -2525,6 +2533,7 @@ export const getCalendarEvents = async (filters = {}) => {
             suppliers(id, name)
           `)
           .eq('user_id', userId)
+          .eq('is_demo', demoMode) // Filter by demo mode
         
         if (quotesError) {
           // If column doesn't exist, skip quotes
@@ -2569,6 +2578,7 @@ export const getCalendarEvents = async (filters = {}) => {
           projects(id, name)
         `)
         .eq('user_id', userId)
+        .eq('is_demo', demoMode) // Filter by demo mode
       
       if (!posError && pos) {
         pos.forEach(po => {
