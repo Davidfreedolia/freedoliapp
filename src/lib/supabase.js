@@ -269,8 +269,15 @@ export const deleteSupplier = async (id) => {
 
 // Obtenir proveïdors per tipus
 export const getSuppliersByType = async (type) => {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
+  const userId = await getCurrentUserId()
   const { data, error } = await supabase
     .from('suppliers')
+    .eq('user_id', userId)
+    .eq('is_demo', demoMode) // Filter by demo mode
     .select('*')
     .eq('type', type)
     .order('name', { ascending: true })
@@ -1428,11 +1435,18 @@ export const setShipmentStatus = async (poId, status) => {
 
 // MAGATZEMS
 export const getWarehouses = async () => {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
   // Avoid relationship ambiguity - fetch warehouses without embedded supplier
   // If supplier info is needed, it can be fetched separately using supplier_id
+  const userId = await getCurrentUserId()
   const { data, error } = await supabase
     .from('warehouses')
     .select('*')
+    .eq('user_id', userId)
+    .eq('is_demo', demoMode) // Filter by demo mode
     .order('name', { ascending: true })
   if (error) throw error
   return data

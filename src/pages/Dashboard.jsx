@@ -429,104 +429,29 @@ export default function Dashboard() {
 
   return (
     <div style={styles.container}>
-      {/* Botons d'accions ràpides en lloc del Header */}
-      <div style={{
-        ...styles.headerActions,
-        backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-        borderBottom: 'none',
-        flexDirection: isMobile ? 'column' : 'row',
-        padding: isMobile ? '12px' : '0 32px',
-        gap: isMobile ? '8px' : '0'
-      }}>
+      {/* Edit Layout Controls - Only visible when editing, no duplicate topbar */}
+      {editLayout && !isMobile && (
         <div style={{
-          ...styles.quickActionsHeader,
-          flexDirection: isMobile ? 'column' : 'row',
-          width: isMobile ? '100%' : 'auto',
-          gap: isMobile ? '8px' : '12px'
+          display: 'flex',
+          justifyContent: 'flex-end',
+          padding: '16px 32px',
+          gap: '12px',
+          backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
+          borderBottom: `1px solid ${darkMode ? '#1f1f2e' : '#e5e7eb'}`
         }}>
-          <button
-            onClick={() => setShowNewProjectModal(true)}
+          <button 
+            onClick={handleToggleEditMode}
             style={{
-              ...styles.actionButton,
-              backgroundColor: darkMode ? '#15151f' : '#f3f4f6',
-              color: darkMode ? '#ffffff' : '#111827',
-              width: isMobile ? '100%' : 'auto',
-              justifyContent: isMobile ? 'center' : 'flex-start'
+              ...styles.iconButton,
+              backgroundColor: '#4f46e5',
+              color: '#ffffff'
             }}
+            title={t('dashboard.done')}
           >
-            <Plus size={16} />
-            <FolderKanban size={18} color="#4f46e5" />
-            Nou Projecte
+            <Check size={20} />
           </button>
-          {!isMobile && (
-            <>
-              <button
-                onClick={() => navigate('/suppliers')}
-                style={{
-                  ...styles.actionButton,
-                  backgroundColor: darkMode ? '#15151f' : '#f3f4f6',
-                  color: darkMode ? '#ffffff' : '#111827'
-                }}
-              >
-                <Plus size={16} />
-                <Users size={18} color="#22c55e" />
-                Nou Proveïdor
-              </button>
-              <button
-                onClick={() => navigate('/forwarders')}
-                style={{
-                  ...styles.actionButton,
-                  backgroundColor: darkMode ? '#15151f' : '#f3f4f6',
-                  color: darkMode ? '#ffffff' : '#111827'
-                }}
-              >
-                <Plus size={16} />
-                <Truck size={18} color="#f59e0b" />
-                Nou Transitari
-              </button>
-              <button
-                onClick={() => navigate('/warehouses')}
-                style={{
-                  ...styles.actionButton,
-                  backgroundColor: darkMode ? '#15151f' : '#f3f4f6',
-                  color: darkMode ? '#ffffff' : '#111827'
-                }}
-              >
-                <Plus size={16} />
-                <Warehouse size={18} color="#3b82f6" />
-                Nou Magatzem
-              </button>
-            </>
-          )}
-        </div>
-        
-        <div style={{
-          ...styles.headerActionsRight,
-          flexDirection: isMobile ? 'row' : 'row',
-          width: isMobile ? '100%' : 'auto',
-          justifyContent: isMobile ? 'space-between' : 'flex-end',
-          gap: '8px'
-        }}>
-          {/* Toggle Edit Layout / Done */}
-          {!isMobile && (
-            <button 
-              onClick={handleToggleEditMode}
-              style={{
-                ...styles.iconButton,
-                backgroundColor: editLayout ? '#4f46e5' : (darkMode ? '#1f1f2e' : '#f3f4f6'),
-                color: editLayout ? '#ffffff' : 'inherit'
-              }}
-              title={editLayout ? t('dashboard.done') : t('dashboard.customize')}
-            >
-              {editLayout ? (
-                <Check size={20} color="#ffffff" />
-              ) : (
-                <Sliders size={20} color={darkMode ? '#9ca3af' : '#6b7280'} />
-              )}
-            </button>
-          )}
           
-          {/* Reset Layout (solo en edit mode) */}
+          {/* Reset Layout */}
           {editLayout && !isMobile && (
             <button 
               onClick={handleResetLayout}
@@ -541,7 +466,7 @@ export default function Dashboard() {
             </button>
           )}
           
-          {/* Personalitzar Dashboard */}
+          {/* Personalitzar Dashboard - Using Sliders icon to avoid duplicate Settings */}
           <button 
             onClick={() => setShowCustomizeModal(true)}
             style={{
@@ -550,28 +475,10 @@ export default function Dashboard() {
             }}
             title="Personalitzar Dashboard"
           >
-            <Settings size={20} color={darkMode ? '#9ca3af' : '#6b7280'} />
-          </button>
-
-          {/* Alerts Badge */}
-          <AlertsBadge darkMode={darkMode} />
-
-          {/* Toggle Dark Mode */}
-          <button 
-            onClick={() => setDarkMode(!darkMode)}
-            style={{
-              ...styles.iconButton,
-              backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6'
-            }}
-          >
-            {darkMode ? (
-              <Sun size={20} color="#fbbf24" />
-            ) : (
-              <Moon size={20} color="#6b7280" />
-            )}
+            <Sliders size={20} color={darkMode ? '#9ca3af' : '#6b7280'} />
           </button>
         </div>
-      </div>
+      )}
 
       <div style={{
         ...styles.content,
@@ -1177,26 +1084,6 @@ const styles = {
     display: 'flex',
     flexDirection: 'column'
   },
-  headerActions: {
-    height: '70px',
-    padding: '0 32px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    position: 'sticky',
-    top: 0,
-    zIndex: 50,
-    borderBottom: 'none'
-  },
-  quickActionsHeader: {
-    display: 'flex',
-    gap: '12px',
-    flex: 1
-  },
-  headerActionsRight: {
-    display: 'flex',
-    gap: '12px'
-  },
   iconButton: {
     width: '40px',
     height: '40px',
@@ -1208,18 +1095,7 @@ const styles = {
     justifyContent: 'center',
     transition: 'all 0.2s ease'
   },
-  actionButton: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '10px 16px',
-    borderRadius: '10px',
-    border: '1px solid var(--border-color, #e5e7eb)',
-    fontSize: '14px',
-    fontWeight: '500',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease'
-  },
+  // Removed actionButton - duplicate actions removed
   content: {
     padding: '32px',
     overflowY: 'auto'
