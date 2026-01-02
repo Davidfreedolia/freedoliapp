@@ -487,29 +487,38 @@ BEGIN
 END $$;
 
 -- Create scoped uniqueness constraint: (user_id, is_demo, sku)
--- Use DROP IF EXISTS first, then CREATE to ensure clean state
+-- Check if index exists first, then drop and recreate if needed
 DO $$ 
+DECLARE
+  index_exists boolean;
 BEGIN
-  -- Drop index if it exists (to handle any previous partial creation)
-  DROP INDEX IF EXISTS idx_projects_sku_scoped;
-  RAISE NOTICE 'Dropped existing idx_projects_sku_scoped if it existed';
+  -- Check if index exists
+  SELECT EXISTS (
+    SELECT 1 
+    FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE c.relname = 'idx_projects_sku_scoped'
+    AND n.nspname = 'public'
+  ) INTO index_exists;
   
-  -- Create the index (will fail silently if already exists due to DROP above)
-  BEGIN
-    CREATE UNIQUE INDEX idx_projects_sku_scoped ON projects(user_id, is_demo, sku) 
-    WHERE sku IS NOT NULL;
-    RAISE NOTICE 'Created scoped SKU uniqueness constraint';
-  EXCEPTION
-    WHEN duplicate_table THEN
-      RAISE NOTICE 'Index idx_projects_sku_scoped already exists (unexpected), skipping';
-    WHEN OTHERS THEN
-      -- If error code is 42P07 (duplicate relation), it's OK
-      IF SQLSTATE = '42P07' THEN
-        RAISE NOTICE 'Index idx_projects_sku_scoped already exists, skipping';
-      ELSE
-        RAISE NOTICE 'Error creating index idx_projects_sku_scoped: %', SQLERRM;
-      END IF;
-  END;
+  -- Drop index if it exists
+  IF index_exists THEN
+    DROP INDEX idx_projects_sku_scoped;
+    RAISE NOTICE 'Dropped existing idx_projects_sku_scoped';
+  END IF;
+  
+  -- Create the index
+  CREATE UNIQUE INDEX idx_projects_sku_scoped ON projects(user_id, is_demo, sku) 
+  WHERE sku IS NOT NULL;
+  RAISE NOTICE 'Created scoped SKU uniqueness constraint';
+EXCEPTION
+  WHEN OTHERS THEN
+    -- If error code is 42P07 (duplicate relation), it's OK - index already exists
+    IF SQLSTATE = '42P07' THEN
+      RAISE NOTICE 'Index idx_projects_sku_scoped already exists, skipping';
+    ELSE
+      RAISE WARNING 'Error creating index idx_projects_sku_scoped: % (SQLSTATE: %)', SQLERRM, SQLSTATE;
+    END IF;
 END $$;
 
 -- ============================================
