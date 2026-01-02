@@ -876,11 +876,22 @@ export const assignGtinFromPool = async (gtinPoolId, projectId) => {
 }
 
 export const addGtinToPool = async (gtinData) => {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
+  const userId = await getCurrentUserId()
+  
   // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
   const { user_id, ...poolData } = gtinData
+  
   const { data, error } = await supabase
     .from('gtin_pool')
-    .insert([poolData])
+    .insert([{
+      ...poolData,
+      user_id: userId, // Always set user_id explicitly
+      is_demo: demoMode // Mark with current demo mode
+    }])
     .select()
     .single()
   if (error) throw error

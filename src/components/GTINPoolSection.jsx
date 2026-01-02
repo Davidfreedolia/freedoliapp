@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { 
   Barcode, 
   Plus, 
@@ -25,6 +26,7 @@ import { getModalStyles } from '../utils/responsiveStyles'
 
 export default function GTINPoolSection({ darkMode }) {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const { isMobile } = useBreakpoint()
   const modalStyles = getModalStyles(isMobile, darkMode)
   const [gtins, setGtins] = useState([])
@@ -225,7 +227,7 @@ export default function GTINPoolSection({ darkMode }) {
             ...styles.subtitle,
             color: darkMode ? '#9ca3af' : '#6b7280'
           }}>
-            Gestiona els codis EAN/UPC disponibles per assignar a projectes
+            {t('settings.gtinPool.description')}
           </p>
         </div>
         <button
@@ -250,7 +252,7 @@ export default function GTINPoolSection({ darkMode }) {
           <Package size={20} color="#4f46e5" />
           <div>
             <span style={{...styles.statValue, color: '#4f46e5'}}>{stats.total}</span>
-            <span style={styles.statLabel}>Total</span>
+            <span style={styles.statLabel}>{t('common.total')}</span>
           </div>
         </div>
         <div style={{
@@ -261,7 +263,7 @@ export default function GTINPoolSection({ darkMode }) {
           <CheckCircle2 size={20} color="#22c55e" />
           <div>
             <span style={{...styles.statValue, color: '#22c55e'}}>{stats.available}</span>
-            <span style={styles.statLabel}>Disponibles</span>
+            <span style={styles.statLabel}>{t('settings.gtinPool.available')}</span>
           </div>
         </div>
         <div style={{
@@ -272,7 +274,7 @@ export default function GTINPoolSection({ darkMode }) {
           <Package size={20} color="#f59e0b" />
           <div>
             <span style={{...styles.statValue, color: '#f59e0b'}}>{stats.assigned}</span>
-            <span style={styles.statLabel}>Assignats</span>
+            <span style={styles.statLabel}>{t('settings.gtinPool.assigned')}</span>
           </div>
         </div>
         {stats.available < 5 && stats.available > 0 && (
@@ -306,7 +308,7 @@ export default function GTINPoolSection({ darkMode }) {
           <Search size={18} color="#9ca3af" />
           <input
             type="text"
-            placeholder="Buscar per codi GTIN..."
+            placeholder={t('settings.gtinPool.searchPlaceholder')}
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             style={{
@@ -347,7 +349,7 @@ export default function GTINPoolSection({ darkMode }) {
                 flex: isMobile ? 1 : 'none'
               }}
             >
-              Available
+              {t('settings.gtinPool.available')}
             </button>
             <button
               onClick={() => setStatusFilter('assigned')}
@@ -359,7 +361,7 @@ export default function GTINPoolSection({ darkMode }) {
                 flex: isMobile ? 1 : 'none'
               }}
             >
-              Assigned
+              {t('settings.gtinPool.assigned')}
             </button>
           </div>
           <button onClick={loadGtins} style={{

@@ -337,10 +337,14 @@ export default function Dashboard() {
 
   const loadFinancialData = async () => {
     try {
+      // Get demo mode setting
+      const { getDemoMode } = await import('../lib/demoModeFilter')
+      const demoMode = await getDemoMode()
+      
       const userId = await getCurrentUserId()
       const [expensesRes, incomesRes] = await Promise.all([
-        supabase.from('expenses').select('amount, expense_date').eq('user_id', userId).order('expense_date', { ascending: false }),
-        supabase.from('incomes').select('amount, income_date').eq('user_id', userId).order('income_date', { ascending: false })
+        supabase.from('expenses').select('amount, expense_date').eq('user_id', userId).eq('is_demo', demoMode).order('expense_date', { ascending: false }),
+        supabase.from('incomes').select('amount, income_date').eq('user_id', userId).eq('is_demo', demoMode).order('income_date', { ascending: false })
       ])
       
       const expenses = expensesRes.data || []
