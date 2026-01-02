@@ -487,21 +487,29 @@ BEGIN
 END $$;
 
 -- Create scoped uniqueness constraint: (user_id, is_demo, sku)
+-- Use DROP IF EXISTS first, then CREATE to ensure clean state
 DO $$ 
 BEGIN
-  -- Check if index exists (indexes are in pg_class, not pg_constraint)
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_class c
-    JOIN pg_namespace n ON n.oid = c.relnamespace
-    WHERE c.relname = 'idx_projects_sku_scoped'
-    AND n.nspname = 'public'
-  ) THEN
+  -- Drop index if it exists (to handle any previous partial creation)
+  DROP INDEX IF EXISTS idx_projects_sku_scoped;
+  RAISE NOTICE 'Dropped existing idx_projects_sku_scoped if it existed';
+  
+  -- Create the index (will fail silently if already exists due to DROP above)
+  BEGIN
     CREATE UNIQUE INDEX idx_projects_sku_scoped ON projects(user_id, is_demo, sku) 
     WHERE sku IS NOT NULL;
     RAISE NOTICE 'Created scoped SKU uniqueness constraint';
-  ELSE
-    RAISE NOTICE 'Index idx_projects_sku_scoped already exists, skipping';
-  END IF;
+  EXCEPTION
+    WHEN duplicate_table THEN
+      RAISE NOTICE 'Index idx_projects_sku_scoped already exists (unexpected), skipping';
+    WHEN OTHERS THEN
+      -- If error code is 42P07 (duplicate relation), it's OK
+      IF SQLSTATE = '42P07' THEN
+        RAISE NOTICE 'Index idx_projects_sku_scoped already exists, skipping';
+      ELSE
+        RAISE NOTICE 'Error creating index idx_projects_sku_scoped: %', SQLERRM;
+      END IF;
+  END;
 END $$;
 
 -- ============================================
