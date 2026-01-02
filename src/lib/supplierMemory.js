@@ -193,3 +193,4 @@ export const generateSupplierBadges = (metrics) => {
 
 
 
+

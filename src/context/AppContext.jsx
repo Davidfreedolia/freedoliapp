@@ -3,13 +3,14 @@ import { getProjects, getDashboardStats, getCompanySettings, updateCompanySettin
 import { driveService } from '../lib/googleDrive'
 import { generateDemoData, checkDemoExists, checkRealDataExists } from '../lib/demoSeed'
 import { showToast } from '../components/Toast'
+import { safeJsonParse } from '../lib/safeJson'
 
 const AppContext = createContext()
 
 export function AppProvider({ children }) {
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('darkMode')
-    return saved ? JSON.parse(saved) : false
+    return safeJsonParse(saved, false)
   })
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [projects, setProjects] = useState([])

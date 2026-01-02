@@ -26,6 +26,7 @@ import {
 import Header from '../components/Header'
 import { generateBriefingPdf } from '../lib/generateBriefingPdf'
 import { useBreakpoint } from '../hooks/useBreakpoint'
+import { safeJsonArray } from '../lib/safeJson'
 
 export default function Briefing() {
   const { projectId } = useParams()
@@ -130,10 +131,11 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
         .single()
       
       if (existingBriefing) {
+        const images = safeJsonArray(existingBriefing.images)
         setBriefing(prev => ({
           ...prev,
           ...existingBriefing,
-          images: existingBriefing.images ? JSON.parse(existingBriefing.images) : []
+          images
         }))
       }
       

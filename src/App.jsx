@@ -8,6 +8,8 @@ import ToastContainer from './components/Toast'
 import DemoModeBanner from './components/DemoModeBanner'
 import DevBadge from './components/DevBadge'
 import ErrorBoundary from './components/ErrorBoundary'
+import FloatingNotesLayer from './components/FloatingNotesLayer'
+import TopNavbar from './components/TopNavbar'
 import { useBreakpoint } from './hooks/useBreakpoint'
 import { isDemoMode } from './demo/demoMode'
 import './i18n'
@@ -92,6 +94,7 @@ function AppContent() {
         flexDirection: 'column',
         width: isMobile ? '100%' : 'auto'
       }}>
+        <TopNavbar />
         <ErrorBoundary context="app:main" darkMode={darkMode}>
           <Suspense fallback={<PageLoader darkMode={darkMode} />}>
             <Routes>
@@ -261,6 +264,7 @@ function AppContent() {
         </ErrorBoundary>
       </main>
       <ToastContainer darkMode={darkMode} />
+      <FloatingNotesLayer />
     </div>
   )
 }

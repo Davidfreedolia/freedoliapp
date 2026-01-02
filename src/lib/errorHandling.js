@@ -1,6 +1,8 @@
 // Error Handling Service per Freedoliapp
 // Unifica gestió d'errors per evitar errors silenciosos
 
+import { showToast } from '../components/Toast'
+
 /**
  * Formata un error per mostrar un missatge usable a l'usuari
  * 
@@ -59,28 +61,34 @@ export function formatError(err) {
 }
 
 /**
- * Mostra un error a l'usuari de forma consistent
- * Per ara utilitza alert(), però es pot migrar a un sistema de toast/notificacions
+ * Mostra un error a l'usuari de forma consistent amb toast
  * 
  * @param {Error|string} error - Error object o missatge
  * @param {object} options - Opcions
- * @param {boolean} options.critical - Si és crític, mostra alert. Si no, només console.warn
- * @param {string} options.title - Títol del missatge (opcional)
+ * @param {boolean} options.critical - Si és crític, mostra toast error. Si no, només console.warn
+ * @param {string} options.context - Context de l'error (opcional, per logging)
  */
 export function notifyError(error, options = {}) {
-  const { critical = true, title = null } = options
+  const { critical = true, context = null } = options
   const message = formatError(error)
 
-  if (critical) {
-    // Per ara utilitzem alert, però es pot canviar a un sistema de toast
-    if (title) {
-      alert(`${title}: ${message}`)
+  // Log a consola només en dev
+  if (import.meta.env.DEV) {
+    if (context) {
+      console.error(`[${context}]`, error)
     } else {
-      alert(message)
+      console.error('[Error]', error)
     }
+  }
+
+  // Mostrar toast sempre que sigui crític
+  if (critical) {
+    showToast(message, 'error')
   } else {
-    // Només loguejar errors no crítics
-    console.warn('[Error]', message)
+    // Errors no crítics només a consola (dev)
+    if (import.meta.env.DEV) {
+      console.warn('[Error]', message)
+    }
   }
 }
 
@@ -116,7 +124,7 @@ export async function handleError(entityType, action, error, options = {}) {
 
   // Notificar a l'usuari
   if (notify) {
-    notifyError(error, { critical })
+    notifyError(error, { critical, context: `${entityType}:${action}` })
   }
 
   return message

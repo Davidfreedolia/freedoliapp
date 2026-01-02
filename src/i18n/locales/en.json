@@ -323,6 +323,20 @@
     }
   },
   "help": {
-    "searchPlaceholder": "Search manual..."
+    "searchPlaceholder": "Search manual...",
+    "title": "Help & Documentation",
+    "noResults": "No results found"
+  },
+  "navbar": {
+    "addNote": "Add note",
+    "notes": "Notes",
+    "help": "Help",
+    "notifications": "Notifications",
+    "darkMode": "Dark mode",
+    "lightMode": "Light mode",
+    "logout": "Logout"
+  },
+  "common": {
+    "close": "Close"
   }
 }

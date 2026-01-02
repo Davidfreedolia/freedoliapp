@@ -31,6 +31,8 @@ import TasksSection from '../components/TasksSection'
 import QuotesSection from '../components/QuotesSection'
 import DecisionLog from '../components/DecisionLog'
 import { useBreakpoint } from '../hooks/useBreakpoint'
+import { showToast } from '../components/Toast'
+import { formatError, notifyError } from '../lib/errorHandling'
 
 const PHASES = [
   { id: 1, name: 'Recerca', icon: '🔍', color: '#6366f1', description: 'Investigació de producte i mercat' },
@@ -78,6 +80,7 @@ export default function ProjectDetail() {
 
   const loadProject = async () => {
     setLoading(true)
+    setError(null)
     try {
       const data = await getProject(id)
       if (!data) {
@@ -88,10 +91,10 @@ export default function ProjectDetail() {
       const docs = await getDocuments(id)
       setDocuments(Array.isArray(docs) ? docs : [])
     } catch (err) {
-      console.error('Error carregant projecte:', err)
-      // Don't navigate immediately, show error state instead
+      setError(formatError(err))
       setProject(null)
       setDocuments([])
+      notifyError(err, { context: 'ProjectDetail:loadProject' })
     } finally {
       setLoading(false)
     }
@@ -119,7 +122,9 @@ export default function ProjectDetail() {
             await updateProject(id, { drive_folder_id: folders.main.id })
             setProject({ ...project, drive_folder_id: folders.main.id })
           } catch (e) {
-            console.warn('Error guardant drive_folder_id:', e)
+            if (import.meta.env.DEV) {
+              console.warn('Error guardant drive_folder_id:', e)
+            }
           }
         }
         
@@ -130,7 +135,7 @@ export default function ProjectDetail() {
         }
       }
     } catch (err) {
-      console.error('Error amb carpetes Drive:', err)
+      notifyError(err, { context: 'ProjectDetail:loadDriveFolders' })
       // Don't show alert, just log - Drive is optional
       setProjectFolders(null)
     }
@@ -139,7 +144,7 @@ export default function ProjectDetail() {
   const handlePhaseChange = async (newPhase) => {
     // Bloquejar canvi de fase si està DISCARDED
     if (project.decision === 'DISCARDED') {
-      alert('No es pot canviar la fase d\'un projecte descartat. Restaura el projecte primer.')
+      showToast('No es pot canviar la fase d\'un projecte descartat. Restaura el projecte primer.', 'warning')
       return
     }
     
@@ -151,7 +156,7 @@ export default function ProjectDetail() {
       // Redirigir al Dashboard després d'editar el projecte
       navigate('/')
     } catch (err) {
-      console.error('Error actualitzant fase:', err)
+      notifyError(err, { context: 'ProjectDetail:handlePhaseChange' })
     }
   }
 
@@ -162,10 +167,9 @@ export default function ProjectDetail() {
       await updateProject(id, { decision: 'HOLD' })
       setProject({ ...project, decision: 'HOLD' })
       await refreshProjects()
-      alert('Projecte restaurat correctament')
+      showToast('Projecte restaurat correctament', 'success')
     } catch (err) {
-      console.error('Error restaurant projecte:', err)
-      alert('Error restaurant projecte: ' + err.message)
+      notifyError(err, { context: 'ProjectDetail:handleRestore' })
     }
   }
 
@@ -194,7 +198,9 @@ export default function ProjectDetail() {
           drive_file_id: file.id
         })
       } catch (err) {
-        console.error('Error guardant document:', err)
+        if (import.meta.env.DEV) {
+          console.error('Error guardant document:', err)
+        }
         errorCount++
         // Audit log: error pujant document
         await logError('document', 'upload', err, {
@@ -211,12 +217,14 @@ export default function ProjectDetail() {
       const docs = await getDocuments(id)
       setDocuments(docs || [])
     } catch (err) {
-      console.error('Error recarregant documents:', err)
+      if (import.meta.env.DEV) {
+        console.error('Error recarregant documents:', err)
+      }
     }
     
     // Mostrar feedback si hi ha errors
     if (errorCount > 0) {
-      alert(`${errorCount} document(s) no s'han pogut guardar correctament.`)
+      showToast(`${errorCount} document(s) no s'han pogut guardar correctament.`, 'warning')
     }
   }
 
@@ -238,6 +246,71 @@ export default function ProjectDetail() {
       <div style={styles.container}>
         <Header title="Carregant..." />
         <div style={styles.loading}>Carregant projecte...</div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div style={styles.container}>
+        <Header title="Error" />
+        <div style={{
+          padding: '48px',
+          textAlign: 'center',
+          backgroundColor: darkMode ? '#15151f' : '#ffffff',
+          borderRadius: '16px',
+          border: `1px solid ${darkMode ? '#2a2a3a' : '#e5e7eb'}`,
+          margin: '24px'
+        }}>
+          <AlertCircle size={48} color="#ef4444" style={{ margin: '0 auto 16px' }} />
+          <h2 style={{
+            margin: '0 0 8px',
+            fontSize: '20px',
+            fontWeight: '600',
+            color: darkMode ? '#ffffff' : '#111827'
+          }}>
+            Error carregant el projecte
+          </h2>
+          <p style={{
+            margin: '0 0 24px',
+            fontSize: '14px',
+            color: '#6b7280'
+          }}>
+            {error}
+          </p>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+            <button
+              onClick={loadProject}
+              style={{
+                padding: '12px 24px',
+                backgroundColor: '#4f46e5',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}
+            >
+              Reintentar
+            </button>
+            <button
+              onClick={() => navigate('/projects')}
+              style={{
+                padding: '12px 24px',
+                backgroundColor: 'transparent',
+                color: darkMode ? '#9ca3af' : '#6b7280',
+                border: `1px solid ${darkMode ? '#2a2a3a' : '#e5e7eb'}`,
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}
+            >
+              Tornar a Projectes
+            </button>
+          </div>
+        </div>
       </div>
     )
   }

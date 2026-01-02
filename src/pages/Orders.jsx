@@ -21,7 +21,8 @@ import {
   Send,
   Loader,
   X,
-  Ship
+  Ship,
+  RefreshCw
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { 
@@ -58,6 +59,9 @@ import { generatePackingListPdf } from '../lib/generatePackingListPdf'
 import { generateCartonLabelsPdf } from '../lib/generateCartonLabelsPdf'
 import { driveService } from '../lib/googleDrive'
 import JSZip from 'jszip'
+import { safeJsonArray } from '../lib/safeJson'
+import { safeArray } from '../lib/safeArray'
+import { formatError, notifyError } from '../lib/errorHandling'
 
 // Estats de la PO
 const PO_STATUSES = {
@@ -83,6 +87,7 @@ export default function Orders() {
   const [projects, setProjects] = useState([])
   const [suppliers, setSuppliers] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState(null)
   const [filterProject, setFilterProject] = useState(searchParams.get('project') || null)
@@ -121,6 +126,7 @@ export default function Orders() {
 
   const loadData = async () => {
     setLoading(true)
+    setError(null)
     try {
       const [ordersData, projectsData, suppliersData] = await Promise.all([
         getPurchaseOrders().catch(() => []),
@@ -171,7 +177,9 @@ export default function Orders() {
                 manufacturerPackSentAt: readiness?.manufacturer_pack_sent_at || null
               }
             } catch (err) {
-              console.error(`Error carregant Amazon readiness per PO ${order.id}:`, err)
+              if (import.meta.env.DEV) {
+                console.error(`Error carregant Amazon readiness per PO ${order.id}:`, err)
+              }
               return { ...order, amazonReadyStatus: null }
             }
           })
@@ -179,11 +187,12 @@ export default function Orders() {
         setOrders(ordersWithReadiness)
       }
     } catch (err) {
-      console.error('Error carregant dades:', err)
-      // Asegurar que loading se establece en false incluso si hay error
+      setError(formatError(err))
       setOrders([])
       setProjects([])
       setSuppliers([])
+      notifyError(err, { context: 'Orders:loadData' })
+    } finally {
       setLoading(false)
     }
   }
@@ -215,7 +224,9 @@ export default function Orders() {
         setAmazonReadyStatus(status)
       }
     } catch (err) {
-      console.error('Error carregant Amazon readiness:', err)
+      if (import.meta.env.DEV) {
+        console.error('Error carregant Amazon readiness:', err)
+      }
     }
   }
 
@@ -241,8 +252,7 @@ export default function Orders() {
       setSelectedQuote(quote)
       setSelectedShipment(shipment)
     } catch (err) {
-      console.error('Error carregant detall:', err)
-      alert('Error carregant el detall de la comanda')
+      notifyError(err, { context: 'Orders:handleViewOrder' })
       setShowDetailModal(false)
     }
     setLoadingDetail(false)
@@ -251,7 +261,7 @@ export default function Orders() {
   // Generar etiquetes FNSKU
   const handleGenerateLabels = async () => {
     if (!selectedOrder?.project_id) {
-      alert('Error: La comanda no té projecte associat')
+      showToast('Error: La comanda no té projecte associat', 'error')
       return
     }
 
@@ -259,7 +269,7 @@ export default function Orders() {
       // Obtenir identificadors del projecte
       const identifiers = await getProductIdentifiers(selectedOrder.project_id)
       if (!identifiers || !identifiers.fnsku) {
-        alert('Error: El projecte no té FNSKU informat. Afegeix-lo a la secció d\'Identificadors del projecte.')
+        showToast('Error: El projecte no té FNSKU informat. Afegeix-lo a la secció d\'Identificadors del projecte.', 'error')
         return
       }
 
@@ -293,15 +303,14 @@ export default function Orders() {
         if (selectedOrder?.project_id) {
           await loadAmazonReadiness(selectedOrder.id, selectedOrder.project_id)
         }
-      } catch (err) {
-        console.error('Error actualitzant Amazon readiness:', err)
+        } catch (err) {
+          notifyError(err, { context: 'Orders:handleUpdateAmazonReadiness' })
         // No bloquejar si falla aquesta actualització
       }
       
       setShowLabelsModal(false)
     } catch (err) {
-      console.error('Error generant etiquetes:', err)
-      alert('Error generant etiquetes: ' + (err.message || 'Error desconegut'))
+      notifyError(err, { context: 'Orders:handleGenerateLabels' })
     }
   }
 
@@ -454,14 +463,15 @@ export default function Orders() {
               }
             )
           } catch (auditErr) {
-            console.warn('Error registrant audit log:', auditErr)
+            if (import.meta.env.DEV) {
+              console.warn('Error registrant audit log:', auditErr)
+            }
           }
 
-          alert(`Manufacturer Pack generat i pujat a Google Drive!\n\nCarpeta: ${poSubFolder.name}`)
+          showToast(`Manufacturer Pack generat i pujat a Google Drive! Carpeta: ${poSubFolder.name}`, 'success')
         } catch (driveErr) {
-          console.error('Error pujant a Drive:', driveErr)
-          // Continuar amb download local
-          alert('S\'ha generat el pack però hi ha hagut un error pujant-lo a Drive. S\'ha descarregat localment.')
+          showToast('S\'ha generat el pack però hi ha hagut un error pujant-lo a Drive. S\'ha descarregat localment.', 'warning')
+          notifyError(driveErr, { context: 'Orders:handleGenerateManufacturerPack:drive', critical: false })
           // Descarregar ZIP
           const url = URL.createObjectURL(zipBlob)
           const a = document.createElement('a')
@@ -509,7 +519,7 @@ export default function Orders() {
         await loadAmazonReadiness(selectedOrder.id, selectedOrder.project_id)
       }
     } catch (err) {
-      console.error('Error generant Manufacturer Pack:', err)
+      notifyError(err, { context: 'Orders:handleGenerateManufacturerPack' })
       throw err
     }
   }
@@ -526,8 +536,7 @@ export default function Orders() {
       const supplier = suppliers.find(s => s.id === order.supplier_id) || fullOrder.supplier
       await generatePOPdf(fullOrder, supplier, companySettings)
     } catch (err) {
-      console.error('Error generant PDF:', err)
-      alert('Error generant el PDF: ' + err.message)
+      notifyError(err, { context: 'Orders:handleDownloadPdf' })
     }
     setDownloadingPdf(null)
   }
@@ -541,32 +550,37 @@ export default function Orders() {
         setSelectedOrder({ ...selectedOrder, status: newStatus })
       }
     } catch (err) {
-      console.error('Error actualitzant estat:', err)
+      notifyError(err, { context: 'Orders:handleUpdateStatus' })
     }
   }
 
   // Filtrar comandes (con manejo de errores)
-  const filteredOrders = (orders || []).filter(order => {
+  const filteredOrders = safeArray(orders).filter(order => {
     try {
-      const matchesSearch = order?.po_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      if (!order) return false
+      const matchesSearch = !searchTerm || 
+        order?.po_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order?.project?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order?.supplier?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-      const matchesStatus = filterStatus ? order?.status === filterStatus : true
-      const matchesProject = filterProject ? order?.project_id === filterProject : true
+      const matchesStatus = !filterStatus || order?.status === filterStatus
+      const matchesProject = !filterProject || order?.project_id === filterProject
       return matchesSearch && matchesStatus && matchesProject
     } catch (err) {
-      console.error('Error filtering order:', err, order)
+      if (import.meta.env.DEV) {
+        console.error('Error filtering order:', err, order)
+      }
       return false
     }
   })
 
   // Estadístiques (con manejo de errores)
+  const ordersArray = safeArray(orders)
   const stats = {
-    total: (orders || []).length,
-    pending: (orders || []).filter(o => o?.status && ['draft', 'sent'].includes(o.status)).length,
-    inProgress: (orders || []).filter(o => o?.status && ['confirmed', 'partial_paid', 'paid', 'in_production'].includes(o.status)).length,
-    completed: (orders || []).filter(o => o?.status && ['shipped', 'received'].includes(o.status)).length,
-    totalValue: (orders || []).reduce((sum, o) => {
+    total: ordersArray.length,
+    pending: safeArray(ordersArray).filter(o => o?.status && ['draft', 'sent'].includes(o.status)).length,
+    inProgress: safeArray(ordersArray).filter(o => o?.status && ['confirmed', 'partial_paid', 'paid', 'in_production'].includes(o.status)).length,
+    completed: safeArray(ordersArray).filter(o => o?.status && ['shipped', 'received'].includes(o.status)).length,
+    totalValue: safeArray(ordersArray).reduce((sum, o) => {
       try {
         return sum + (parseFloat(o?.total_amount) || 0)
       } catch (err) {
@@ -582,8 +596,7 @@ export default function Orders() {
       await loadData()
       setMenuOpen(null)
     } catch (err) {
-      console.error('Error eliminant:', err)
-      alert('Error eliminant la comanda')
+      notifyError(err, { context: 'Orders:handleDelete' })
     }
   }
 
@@ -598,7 +611,9 @@ export default function Orders() {
       if (!dateString) return '-'
       return new Date(dateString).toLocaleDateString('ca-ES')
     } catch (err) {
-      console.error('Error formatting date:', err)
+      if (import.meta.env.DEV) {
+        console.error('Error formatting date:', err)
+      }
       return '-'
     }
   }
@@ -725,6 +740,30 @@ export default function Orders() {
         {/* Orders Table */}
         {loading ? (
           <div style={styles.loading}>Carregant...</div>
+        ) : error ? (
+          <div style={{ ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
+            <AlertCircle size={48} color="#ef4444" />
+            <h3 style={{ color: darkMode ? '#ffffff' : '#111827', margin: '0 0 8px', fontSize: '18px', fontWeight: '600' }}>
+              Error carregant les comandes
+            </h3>
+            <p style={{ color: darkMode ? '#9ca3af' : '#6b7280', margin: '0 0 24px' }}>
+              {error}
+            </p>
+            <button 
+              onClick={loadData}
+              style={{
+                ...styles.createButton,
+                backgroundColor: '#4f46e5',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              <RefreshCw size={18} />
+              Reintentar
+            </button>
+          </div>
         ) : filteredOrders.length === 0 ? (
           <div style={{ ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
             <FileText size={48} color="#d1d5db" />
@@ -1137,17 +1176,31 @@ export default function Orders() {
                         </tr>
                       </thead>
                       <tbody>
-                        {(typeof selectedOrder.items === 'string' ? JSON.parse(selectedOrder.items) : selectedOrder.items || []).map((item, i) => (
-                          <tr key={i}>
-                            <td style={styles.itemsTd}>{item.ref}</td>
-                            <td style={{ ...styles.itemsTd, color: darkMode ? '#ffffff' : '#111827' }}>{item.description}</td>
-                            <td style={styles.itemsTd}>{item.qty} {item.unit}</td>
-                            <td style={styles.itemsTd}>{formatCurrency(item.unit_price, selectedOrder.currency)}</td>
-                            <td style={{ ...styles.itemsTd, fontWeight: '600', color: darkMode ? '#ffffff' : '#111827' }}>
-                              {formatCurrency((parseFloat(item.qty) || 0) * (parseFloat(item.unit_price) || 0), selectedOrder.currency)}
-                            </td>
-                          </tr>
-                        ))}
+                        {(() => {
+                          const items = safeJsonArray(selectedOrder?.items)
+                          
+                          if (items.length === 0) {
+                            return (
+                              <tr>
+                                <td colSpan={5} style={{ ...styles.itemsTd, textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>
+                                  No hi ha items
+                                </td>
+                              </tr>
+                            )
+                          }
+                          
+                          return items.map((item, i) => (
+                              <tr key={i}>
+                                <td style={styles.itemsTd}>{item?.ref || '-'}</td>
+                                <td style={{ ...styles.itemsTd, color: darkMode ? '#ffffff' : '#111827' }}>{item?.description || '-'}</td>
+                                <td style={styles.itemsTd}>{item?.qty || 0} {item?.unit || ''}</td>
+                                <td style={styles.itemsTd}>{formatCurrency(item?.unit_price || 0, selectedOrder?.currency || 'EUR')}</td>
+                                <td style={{ ...styles.itemsTd, fontWeight: '600', color: darkMode ? '#ffffff' : '#111827' }}>
+                                  {formatCurrency((parseFloat(item?.qty) || 0) * (parseFloat(item?.unit_price) || 0), selectedOrder?.currency || 'EUR')}
+                                </td>
+                              </tr>
+                            ))
+                        })()}
                       </tbody>
                       <tfoot>
                         <tr>

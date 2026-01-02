@@ -55,7 +55,7 @@ export const generateDemoData = async (onProgress = null) => {
       return { success: true, message: 'Demo data already exists', skipped: true }
     }
 
-    const newCounts = { projects: 0, suppliers: 0, gtins: 0, quotes: 0, pos: 0, tasks: 0, notes: 0, shipments: 0 }
+    const newCounts = { projects: 0, suppliers: 0, gtins: 0, quotes: 0, pos: 0, tasks: 0, notes: 0, shipments: 0, expenses: 0, incomes: 0, recurring: 0, floatingNotes: 0 }
 
     // 1) Suppliers (8)
     const suppliers = []
@@ -464,9 +464,155 @@ export const generateDemoData = async (onProgress = null) => {
       if (onProgress) onProgress({ ...newCounts })
     }
 
+    // 12) Expenses (10 expenses variats)
+    const expenseProjects = projects.slice(0, 5)
+    const expenseCategories = ['Marketing', 'Shipping', 'Packaging', 'Tools', 'Software']
+    const expenseDates = []
+    for (let i = 0; i < 10; i++) {
+      const date = new Date()
+      date.setDate(date.getDate() - (i * 7)) // Últims 70 dies
+      expenseDates.push(date.toISOString().split('T')[0])
+    }
+
+    for (let i = 0; i < 10; i++) {
+      const project = expenseProjects[i % expenseProjects.length]
+      const amount = [50, 120, 200, 350, 500, 75, 150, 280, 400, 600][i]
+      const category = expenseCategories[i % expenseCategories.length]
+
+      await supabase
+        .from('expenses')
+        .insert([{
+          project_id: i < 7 ? project.id : null, // 7 amb projecte, 3 sense
+          amount: amount,
+          currency: 'EUR',
+          description: `Demo expense ${i + 1}: ${category}`,
+          expense_date: expenseDates[i],
+          notes: `Demo expense for testing`,
+          is_demo: true
+        }])
+
+      newCounts.expenses = (newCounts.expenses || 0) + 1
+      if (onProgress) onProgress({ ...newCounts })
+    }
+
+    // 13) Incomes (5 incomes)
+    const incomeProjects = projects.slice(0, 3)
+    const incomeDates = []
+    for (let i = 0; i < 5; i++) {
+      const date = new Date()
+      date.setDate(date.getDate() - (i * 14)) // Últims 70 dies
+      incomeDates.push(date.toISOString().split('T')[0])
+    }
+
+    for (let i = 0; i < 5; i++) {
+      const project = incomeProjects[i % incomeProjects.length]
+      const amount = [500, 1200, 800, 1500, 2000][i]
+
+      await supabase
+        .from('incomes')
+        .insert([{
+          project_id: project.id,
+          amount: amount,
+          currency: 'EUR',
+          description: `Demo income ${i + 1}: Amazon sales`,
+          income_date: incomeDates[i],
+          platform: 'amazon',
+          marketplace: 'ES',
+          notes: `Demo income for testing`,
+          is_demo: true
+        }])
+
+      newCounts.incomes = (newCounts.incomes || 0) + 1
+      if (onProgress) onProgress({ ...newCounts })
+    }
+
+    // 14) Recurring Expenses (2)
+    const today = new Date()
+    const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1)
+    
+    // Recurring 1: Monthly subscription
+    await supabase
+      .from('recurring_expenses')
+      .insert([{
+        amount: 99.00,
+        currency: 'EUR',
+        frequency: 'monthly',
+        start_date: new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0],
+        day_of_month: 1,
+        description: 'Demo SaaS Subscription',
+        is_active: true,
+        is_demo: true
+      }])
+
+    // Recurring 2: Quarterly service
+    await supabase
+      .from('recurring_expenses')
+      .insert([{
+        amount: 500.00,
+        currency: 'EUR',
+        frequency: 'quarterly',
+        start_date: new Date(today.getFullYear(), today.getMonth() - 1, 15).toISOString().split('T')[0],
+        day_of_month: 15,
+        description: 'Demo Quarterly Service Fee',
+        is_active: true,
+        is_demo: true
+      }])
+
+    newCounts.recurring = 2
+    if (onProgress) onProgress({ ...newCounts })
+
+    // 15) Sticky Notes Flotants (3 notes amb posicions)
+    const floatingNotes = [
+      { 
+        title: 'Recordatori important', 
+        content: 'Revisar quotes abans de final de setmana',
+        color: 'yellow',
+        position_x: 150,
+        position_y: 200,
+        z_index: Date.now()
+      },
+      { 
+        title: 'Tasca urgent', 
+        content: 'Enviar manufacturer pack per PO-001',
+        color: 'pink',
+        position_x: 400,
+        position_y: 150,
+        z_index: Date.now() + 1
+      },
+      { 
+        title: 'Nota general', 
+        content: 'Recordar actualitzar tracking numbers',
+        color: 'blue',
+        position_x: 650,
+        position_y: 300,
+        z_index: Date.now() + 2
+      }
+    ]
+
+    for (const note of floatingNotes) {
+      await supabase
+        .from('sticky_notes')
+        .insert([{
+          title: note.title,
+          content: note.content,
+          status: 'open',
+          pinned: true,
+          color: note.color,
+          position_x: note.position_x,
+          position_y: note.position_y,
+          z_index: note.z_index,
+          context: 'global',
+          minimized: false,
+          is_demo: true
+        }])
+
+      newCounts.floatingNotes = (newCounts.floatingNotes || 0) + 1
+      if (onProgress) onProgress({ ...newCounts })
+    }
+
     return {
       success: true,
-      message: `Demo data generated successfully! Created: ${newCounts.projects} projects, ${newCounts.suppliers} suppliers, ${newCounts.gtins} GTINs, ${newCounts.quotes} quotes, ${newCounts.pos} POs, ${newCounts.shipments} shipments, ${newCounts.tasks} tasks, ${newCounts.notes} notes`,
+      message: `Demo data generated successfully! Created: ${newCounts.projects} projects, ${newCounts.suppliers} suppliers, ${newCounts.gtins} GTINs, ${newCounts.quotes} quotes, ${newCounts.pos} POs, ${newCounts.shipments} shipments, ${newCounts.tasks} tasks, ${newCounts.notes} notes, ${newCounts.expenses || 0} expenses, ${newCounts.incomes || 0} incomes, ${newCounts.recurring || 0} recurring, ${newCounts.floatingNotes || 0} floating notes`,
       counts: newCounts
     }
   } catch (err) {
@@ -498,6 +644,9 @@ export const clearDemoData = async () => {
       'decision_log',
       'tasks',
       'sticky_notes',
+      'expenses',
+      'incomes',
+      'recurring_expenses',
       'po_shipments',
       'po_amazon_readiness',
       'purchase_orders',
@@ -609,6 +758,27 @@ export const clearDemoData = async () => {
           // Delete demo sticky notes
           await supabase
             .from('sticky_notes')
+            .delete()
+            .eq('user_id', userId)
+            .eq('is_demo', true)
+        } else if (table === 'expenses') {
+          // Delete demo expenses
+          await supabase
+            .from('expenses')
+            .delete()
+            .eq('user_id', userId)
+            .eq('is_demo', true)
+        } else if (table === 'incomes') {
+          // Delete demo incomes
+          await supabase
+            .from('incomes')
+            .delete()
+            .eq('user_id', userId)
+            .eq('is_demo', true)
+        } else if (table === 'recurring_expenses') {
+          // Delete demo recurring expenses
+          await supabase
+            .from('recurring_expenses')
             .delete()
             .eq('user_id', userId)
             .eq('is_demo', true)

@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf'
 import 'jspdf-autotable'
+import { safeJsonArray } from './safeJson'
 
 /**
  * Genera un PDF professional de Purchase Order
@@ -288,12 +289,7 @@ export const generatePOPdf = async (poData, supplier, companySettings) => {
   y += 10
   
   // Parse items
-  let items = []
-  try {
-    items = typeof poData.items === 'string' ? JSON.parse(poData.items) : (poData.items || [])
-  } catch (e) {
-    items = []
-  }
+  const items = safeJsonArray(poData.items)
   
   // Preparar dades per la taula
   const tableData = items.map((item, index) => {

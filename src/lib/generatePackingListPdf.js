@@ -80,16 +80,7 @@ export const generatePackingListPdf = async (poData, supplier, project, companyS
   // TAULA D'ITEMS
   // ============================================
   
-  let items = []
-  if (poData.items && typeof poData.items === 'string') {
-    try {
-      items = JSON.parse(poData.items)
-    } catch (e) {
-      items = []
-    }
-  } else if (Array.isArray(poData.items)) {
-    items = poData.items
-  }
+  const items = safeJsonArray(poData.items)
 
   if (items.length > 0) {
     doc.setFontSize(11)

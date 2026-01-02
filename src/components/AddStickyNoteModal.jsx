@@ -36,7 +36,13 @@ export default function AddStickyNoteModal({ isOpen, onClose, onSuccess, darkMod
         title: newNote.title || null,
         color: newNote.color,
         pinned: true,
-        status: 'open'
+        status: 'open',
+        context: 'global',
+        context_id: null,
+        position_x: Math.random() * (window.innerWidth - 300) + 50,
+        position_y: Math.random() * (window.innerHeight - 300) + 50,
+        minimized: false,
+        z_index: Date.now()
       })
       showToast('Nota creada correctament', 'success')
       setNewNote({ content: '', title: '', color: 'yellow' })

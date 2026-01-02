@@ -309,11 +309,16 @@ export default function DevSeed() {
 
     setLoading(true)
     setStatus({ type: 'info', message: 'Generating demo data...' })
-    setCounts({ projects: 0, suppliers: 0, gtins: 0, quotes: 0, pos: 0, tasks: 0, notes: 0 })
+    setCounts({ projects: 0, suppliers: 0, gtins: 0, quotes: 0, pos: 0, tasks: 0, notes: 0, expenses: 0, incomes: 0, recurring: 0, floatingNotes: 0 })
 
     try {
       const userId = await getCurrentUserId()
       const hasDemo = await checkDemoExists()
+      
+      // Activar demo_mode
+      await supabase
+        .from('company_settings')
+        .upsert({ demo_mode: true }, { onConflict: 'user_id' })
       
       if (hasDemo) {
         if (!confirm('Demo data already exists. Clear and regenerate?')) {
@@ -737,6 +742,123 @@ export default function DevSeed() {
         setCounts({ ...newCounts })
       }
 
+      // 12) Expenses (10 expenses variats)
+      const expenseProjects = projects.slice(0, 5)
+      const expenseDates = []
+      for (let i = 0; i < 10; i++) {
+        const date = new Date()
+        date.setDate(date.getDate() - (i * 7))
+        expenseDates.push(date.toISOString().split('T')[0])
+      }
+
+      for (let i = 0; i < 10; i++) {
+        const project = expenseProjects[i % expenseProjects.length]
+        const amount = [50, 120, 200, 350, 500, 75, 150, 280, 400, 600][i]
+
+        await supabase
+          .from('expenses')
+          .insert([{
+            project_id: i < 7 ? project.id : null,
+            amount: amount,
+            currency: 'EUR',
+            description: `Demo expense ${i + 1}`,
+            expense_date: expenseDates[i],
+            is_demo: true
+          }])
+
+        newCounts.expenses = (newCounts.expenses || 0) + 1
+        setCounts({ ...newCounts })
+      }
+
+      // 13) Incomes (5 incomes)
+      const incomeProjects = projects.slice(0, 3)
+      const incomeDates = []
+      for (let i = 0; i < 5; i++) {
+        const date = new Date()
+        date.setDate(date.getDate() - (i * 14))
+        incomeDates.push(date.toISOString().split('T')[0])
+      }
+
+      for (let i = 0; i < 5; i++) {
+        const project = incomeProjects[i % incomeProjects.length]
+        const amount = [500, 1200, 800, 1500, 2000][i]
+
+        await supabase
+          .from('incomes')
+          .insert([{
+            project_id: project.id,
+            amount: amount,
+            currency: 'EUR',
+            description: `Demo income ${i + 1}: Amazon sales`,
+            income_date: incomeDates[i],
+            platform: 'amazon',
+            marketplace: 'ES',
+            is_demo: true
+          }])
+
+        newCounts.incomes = (newCounts.incomes || 0) + 1
+        setCounts({ ...newCounts })
+      }
+
+      // 14) Recurring Expenses (2)
+      const today = new Date()
+      await supabase
+        .from('recurring_expenses')
+        .insert([{
+          amount: 99.00,
+          currency: 'EUR',
+          frequency: 'monthly',
+          start_date: new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0],
+          day_of_month: 1,
+          description: 'Demo SaaS Subscription',
+          is_active: true,
+          is_demo: true
+        }])
+
+      await supabase
+        .from('recurring_expenses')
+        .insert([{
+          amount: 500.00,
+          currency: 'EUR',
+          frequency: 'quarterly',
+          start_date: new Date(today.getFullYear(), today.getMonth() - 1, 15).toISOString().split('T')[0],
+          day_of_month: 15,
+          description: 'Demo Quarterly Service Fee',
+          is_active: true,
+          is_demo: true
+        }])
+
+      newCounts.recurring = 2
+      setCounts({ ...newCounts })
+
+      // 15) Sticky Notes Flotants (3 notes amb posicions)
+      const floatingNotes = [
+        { title: 'Recordatori important', content: 'Revisar quotes abans de final de setmana', color: 'yellow', position_x: 150, position_y: 200 },
+        { title: 'Tasca urgent', content: 'Enviar manufacturer pack per PO-001', color: 'pink', position_x: 400, position_y: 150 },
+        { title: 'Nota general', content: 'Recordar actualitzar tracking numbers', color: 'blue', position_x: 650, position_y: 300 }
+      ]
+
+      for (const note of floatingNotes) {
+        await supabase
+          .from('sticky_notes')
+          .insert([{
+            title: note.title,
+            content: note.content,
+            status: 'open',
+            pinned: true,
+            color: note.color,
+            position_x: note.position_x,
+            position_y: note.position_y,
+            z_index: Date.now(),
+            context: 'global',
+            minimized: false,
+            is_demo: true
+          }])
+
+        newCounts.floatingNotes = (newCounts.floatingNotes || 0) + 1
+        setCounts({ ...newCounts })
+      }
+
       // Run demo ready checks
       const checks = await runDemoReadyChecks(userId)
       setDemoChecks(checks)
@@ -745,7 +867,7 @@ export default function DevSeed() {
         setDemoReady(true)
         setStatus({ 
           type: 'success', 
-          message: `✅ DEMO READY! Created: ${newCounts.projects} projects, ${newCounts.suppliers} suppliers, ${newCounts.gtins} GTINs, ${newCounts.quotes} quotes, ${newCounts.pos} POs, ${newCounts.shipments} shipments, ${newCounts.tasks} tasks, ${newCounts.notes} notes`
+          message: `✅ DEMO READY! Created: ${newCounts.projects} projects, ${newCounts.suppliers} suppliers, ${newCounts.gtins} GTINs, ${newCounts.quotes} quotes, ${newCounts.pos} POs, ${newCounts.shipments} shipments, ${newCounts.tasks} tasks, ${newCounts.notes} notes, ${newCounts.expenses || 0} expenses, ${newCounts.incomes || 0} incomes, ${newCounts.recurring || 0} recurring, ${newCounts.floatingNotes || 0} floating notes`
         })
         showToast('DEMO READY! Data generated successfully', 'success', 5000)
         
@@ -1189,6 +1311,30 @@ export default function DevSeed() {
               <div style={styles.countLabel}>Sticky Notes</div>
               <div style={styles.countValue}>{counts.notes}</div>
             </div>
+            {counts.expenses !== undefined && (
+              <div style={styles.countItem}>
+                <div style={styles.countLabel}>Expenses</div>
+                <div style={styles.countValue}>{counts.expenses}</div>
+              </div>
+            )}
+            {counts.incomes !== undefined && (
+              <div style={styles.countItem}>
+                <div style={styles.countLabel}>Incomes</div>
+                <div style={styles.countValue}>{counts.incomes}</div>
+              </div>
+            )}
+            {counts.recurring !== undefined && (
+              <div style={styles.countItem}>
+                <div style={styles.countLabel}>Recurring</div>
+                <div style={styles.countValue}>{counts.recurring}</div>
+              </div>
+            )}
+            {counts.floatingNotes !== undefined && (
+              <div style={styles.countItem}>
+                <div style={styles.countLabel}>Floating Notes</div>
+                <div style={styles.countValue}>{counts.floatingNotes}</div>
+              </div>
+            )}
           </div>
         </div>
       )}

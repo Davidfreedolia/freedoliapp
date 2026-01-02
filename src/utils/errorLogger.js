@@ -2,6 +2,7 @@
  * Centralized error logging utility
  * Differentiates between error types and provides appropriate handling
  */
+import { safeJsonArray } from '../lib/safeJson'
 
 export const ERROR_TYPES = {
   AUTH: 'auth',
@@ -35,7 +36,7 @@ export const logError = (error, context = {}, errorType = ERROR_TYPES.UNKNOWN) =
 
   // Store in localStorage for debugging (last 10 errors)
   try {
-    const errors = JSON.parse(localStorage.getItem('app_errors') || '[]')
+    const errors = safeJsonArray(localStorage.getItem('app_errors'))
     errors.unshift(errorData)
     localStorage.setItem('app_errors', JSON.stringify(errors.slice(0, 10)))
   } catch (e) {

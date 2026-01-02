@@ -108,6 +108,18 @@ const styles = {
     display: 'flex',
     gap: '12px'
   },
+  notesButton: {
+    height: '40px',
+    padding: '0 14px',
+    borderRadius: '10px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.2s ease',
+    gap: '6px',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+  },
   iconButton: {
     width: '40px',
     height: '40px',

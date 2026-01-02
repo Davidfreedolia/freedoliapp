@@ -323,6 +323,20 @@
     }
   },
   "help": {
-    "searchPlaceholder": "Buscar en el manual..."
+    "searchPlaceholder": "Buscar en el manual...",
+    "title": "Ayuda y Documentación",
+    "noResults": "No se encontraron resultados"
+  },
+  "navbar": {
+    "addNote": "Añadir nota",
+    "notes": "Notas",
+    "help": "Ayuda",
+    "notifications": "Notificaciones",
+    "darkMode": "Modo oscuro",
+    "lightMode": "Modo claro",
+    "logout": "Cerrar sesión"
+  },
+  "common": {
+    "close": "Cerrar"
   }
 }

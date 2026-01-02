@@ -44,10 +44,8 @@ import {
 } from '../components/DailyOpsWidgets'
 import TasksWidget from '../components/TasksWidget'
 import AlertsBadge from '../components/AlertsBadge'
-import StickyNotesWidget from '../components/StickyNotesWidget'
-import AddStickyNoteModal from '../components/AddStickyNoteModal'
 import SafeWidget from '../components/SafeWidget'
-import { safeArray } from '../utils/errorLogger'
+import { safeArray } from '../lib/safeArray'
 import { 
   generateLayoutFromEnabled, 
   validateLayout,
@@ -63,7 +61,6 @@ export default function Dashboard() {
   const { isMobile, isTablet } = useBreakpoint()
   const [showNewProjectModal, setShowNewProjectModal] = useState(false)
   const [showCustomizeModal, setShowCustomizeModal] = useState(false)
-  const [showAddNoteModal, setShowAddNoteModal] = useState(false)
   const [ordersInProgress, setOrdersInProgress] = useState([])
   const [loadingOrders, setLoadingOrders] = useState(true)
   const [financialData, setFinancialData] = useState([])
@@ -77,7 +74,6 @@ export default function Dashboard() {
     waiting_manufacturer: true,
     activity_feed: false,
     tasks: true,
-    sticky_notes: true,
     // Daily Ops widgets
     waiting_manufacturer_ops: true,
     pos_not_amazon_ready: true,
@@ -222,7 +218,6 @@ export default function Dashboard() {
           research_no_decision: prefs.enabledWidgets?.research_no_decision !== false,
           stale_tracking: prefs.enabledWidgets?.stale_tracking !== false,
           tasks: prefs.widgets?.tasks !== false,
-          sticky_notes: prefs.widgets?.sticky_notes !== false
         })
       }
       if (prefs?.widgetOrder) {
@@ -314,7 +309,6 @@ export default function Dashboard() {
       research_no_decision: dashboardWidgets.research_no_decision !== false,
       stale_tracking: dashboardWidgets.stale_tracking !== false,
       tasks: dashboardWidgets.tasks !== false,
-      sticky_notes: dashboardWidgets.sticky_notes !== false
     }
     const defaultLayout = generateLayoutFromEnabled(enabledWidgets)
     setLayout(defaultLayout)
@@ -770,11 +764,14 @@ export default function Dashboard() {
 
         {/* Tracking Logístic Widget */}
         {dashboardWidgets.logistics_tracking && !loadingPreferences && (
-          <LogisticsTrackingWidget darkMode={darkMode} />
+          <SafeWidget widgetName="Logistics Tracking" darkMode={darkMode}>
+            <LogisticsTrackingWidget darkMode={darkMode} />
+          </SafeWidget>
         )}
 
         {/* Comandes en curs */}
         {dashboardWidgets.orders_in_progress && (
+        <SafeWidget widgetName="Orders In Progress" darkMode={darkMode}>
         <div style={{
           ...styles.section,
           backgroundColor: darkMode ? '#15151f' : '#ffffff'
@@ -839,6 +836,7 @@ export default function Dashboard() {
             </div>
           )}
         </div>
+        </SafeWidget>
         )}
 
         {/* POs not ready */}
@@ -908,6 +906,7 @@ export default function Dashboard() {
 
         {/* Gràfica de finances */}
         {dashboardWidgets.finance_chart && financialData.length > 0 && (
+          <SafeWidget widgetName="Finance Chart" darkMode={darkMode}>
           <div style={{
             ...styles.section,
             backgroundColor: darkMode ? '#15151f' : '#ffffff'
@@ -971,6 +970,7 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+          </SafeWidget>
         )}
 
         {/* Daily Ops Widgets with Grid Layout (Desktop/Tablet) */}
@@ -1048,14 +1048,6 @@ export default function Dashboard() {
                       />
                     )
                     break
-                  case WIDGET_IDS.STICKY_NOTES:
-                    widgetComponent = (
-                      <StickyNotesWidget
-                        darkMode={darkMode}
-                        showOverlay={false}
-                      />
-                    )
-                    break
                   default:
                     return null
                 }
@@ -1067,8 +1059,7 @@ export default function Dashboard() {
                                   widgetId === WIDGET_IDS.SHIPMENTS_IN_TRANSIT ? 'Shipments In Transit' :
                                   widgetId === WIDGET_IDS.RESEARCH_NO_DECISION ? 'Research No Decision' :
                                   widgetId === WIDGET_IDS.STALE_TRACKING ? 'Stale Tracking' :
-                                  widgetId === WIDGET_IDS.TASKS ? 'Tasks' :
-                                  widgetId === WIDGET_IDS.STICKY_NOTES ? 'Sticky Notes' : 'Widget'
+                                  widgetId === WIDGET_IDS.TASKS ? 'Tasks' : 'Widget'
 
                 return (
                   <div key={item.i} style={{
@@ -1129,11 +1120,12 @@ export default function Dashboard() {
               switch (widgetId) {
                 case 'waiting_manufacturer_ops':
                   return (
-                    <WaitingManufacturerWidget
-                      key={widgetId}
-                      darkMode={darkMode}
-                      limit={10}
-                    />
+                    <SafeWidget key={widgetId} widgetName="Waiting Manufacturer" darkMode={darkMode}>
+                      <WaitingManufacturerWidget
+                        darkMode={darkMode}
+                        limit={10}
+                      />
+                    </SafeWidget>
                   )
                 case 'pos_not_amazon_ready':
                   return (
@@ -1181,11 +1173,6 @@ export default function Dashboard() {
                 <TasksWidget darkMode={darkMode} limit={10} />
               </SafeWidget>
             )}
-            {dashboardWidgets.sticky_notes && (
-              <SafeWidget widgetName="Sticky Notes" darkMode={darkMode}>
-                <StickyNotesWidget darkMode={darkMode} showOverlay={false} />
-              </SafeWidget>
-            )}
           </div>
         )}
       </div>
@@ -1201,15 +1188,6 @@ export default function Dashboard() {
         onSave={handlePreferencesSave}
       />
 
-      <AddStickyNoteModal
-        isOpen={showAddNoteModal}
-        onClose={() => setShowAddNoteModal(false)}
-        onSuccess={() => {
-          // Refresh sticky notes widget if needed
-          window.dispatchEvent(new Event('stickyNotesRefresh'))
-        }}
-        darkMode={darkMode}
-      />
     </div>
   )
 }

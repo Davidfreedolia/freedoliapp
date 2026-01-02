@@ -34,7 +34,9 @@ import {
   FileSpreadsheet,
   Tag,
   BookOpen as BookIcon,
-  CheckCircle2
+  CheckCircle2,
+  AlertCircle,
+  RefreshCw
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { 
@@ -44,6 +46,7 @@ import {
   getCurrentUserId,
   markRecurringExpenseAsPaid
 } from '../lib/supabase'
+import { safeArray } from '../lib/safeArray'
 import { isDemoMode } from '../demo/demoMode'
 import { mockGetExpenses, mockGetIncomes, mockGetFinanceCategories } from '../demo/demoMode'
 import Header from '../components/Header'
@@ -52,6 +55,7 @@ import { getModalStyles } from '../utils/responsiveStyles'
 import { showToast } from '../components/Toast'
 import { useTranslation } from 'react-i18next'
 import ReceiptUploader from '../components/ReceiptUploader'
+import { formatError, notifyError } from '../lib/errorHandling'
 import RecurringExpensesSection from '../components/RecurringExpensesSection'
 
 export default function Finances() {
@@ -66,6 +70,7 @@ export default function Finances() {
   const [projects, setProjects] = useState([])
   const [suppliers, setSuppliers] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   
   // Views
   const [savedViews, setSavedViews] = useState([])
@@ -107,6 +112,7 @@ export default function Finances() {
 
   const loadData = async () => {
     setLoading(true)
+    setError(null)
     try {
       const userId = await getCurrentUserId()
       
@@ -244,14 +250,19 @@ export default function Finances() {
         setActiveView(defaultView)
       }
     } catch (err) {
-      console.error('Error carregant finances:', err)
-      showToast('Error carregant les finances', 'error')
+      setError(formatError(err))
+      setLedger([])
+      setCategories({ income: [], expense: [] })
+      setProjects([])
+      setSuppliers([])
+      notifyError(err, { context: 'Finances:loadData' })
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
-  // Filter ledger
-  const filteredLedger = ledger.filter(item => {
+  // Filter ledger (safe array check)
+  const filteredLedger = safeArray(ledger).filter(item => {
     if (filters.type !== 'all' && item.type !== filters.type) return false
     if (filters.project_id && item.project_id !== filters.project_id) return false
     if (filters.category_id && item.category_id !== filters.category_id) return false
@@ -260,21 +271,21 @@ export default function Finances() {
     if (filters.search) {
       const searchLower = filters.search.toLowerCase()
       return (
-        item.description?.toLowerCase().includes(searchLower) ||
-        item.reference_number?.toLowerCase().includes(searchLower) ||
-        item.project?.name?.toLowerCase().includes(searchLower) ||
-        item.order_id?.toLowerCase().includes(searchLower)
+        item?.description?.toLowerCase().includes(searchLower) ||
+        item?.reference_number?.toLowerCase().includes(searchLower) ||
+        item?.project?.name?.toLowerCase().includes(searchLower) ||
+        item?.order_id?.toLowerCase().includes(searchLower)
       )
     }
     return true
   })
 
-  // Calculate stats
+  // Calculate stats (safe array operations)
   const stats = {
-    totalIncome: filteredLedger.filter(i => i.type === 'income').reduce((sum, i) => sum + i.amount, 0),
-    totalExpense: Math.abs(filteredLedger.filter(i => i.type === 'expense').reduce((sum, i) => sum + i.amount, 0)),
-    profit: filteredLedger.reduce((sum, i) => sum + i.amount, 0),
-    balance: filteredLedger.length > 0 ? filteredLedger[filteredLedger.length - 1]?.balance || 0 : 0
+    totalIncome: safeArray(filteredLedger).filter(i => i?.type === 'income').reduce((sum, i) => sum + (parseFloat(i?.amount) || 0), 0),
+    totalExpense: Math.abs(safeArray(filteredLedger).filter(i => i?.type === 'expense').reduce((sum, i) => sum + (parseFloat(i?.amount) || 0), 0)),
+    profit: safeArray(filteredLedger).reduce((sum, i) => sum + (parseFloat(i?.amount) || 0), 0),
+    balance: safeArray(filteredLedger).length > 0 ? (parseFloat(safeArray(filteredLedger)[safeArray(filteredLedger).length - 1]?.balance) || 0) : 0
   }
 
   // Category CRUD
@@ -323,8 +334,7 @@ export default function Finances() {
       setShowCategoryModal(false)
       setEditingCategory(null)
     } catch (err) {
-      console.error('Error guardant categoria:', err)
-      showToast('Error guardant la categoria', 'error')
+      notifyError(err, { context: 'Finances:handleSaveCategory' })
     }
     setSaving(false)
   }
@@ -346,8 +356,7 @@ export default function Finances() {
       showToast('Categoria eliminada', 'success')
       await loadData()
     } catch (err) {
-      console.error('Error eliminant categoria:', err)
-      showToast('Error eliminant la categoria', 'error')
+      notifyError(err, { context: 'Finances:handleDeleteCategory' })
     }
   }
 
@@ -390,8 +399,7 @@ export default function Finances() {
       setShowViewModal(false)
       setEditingView(null)
     } catch (err) {
-      console.error('Error guardant vista:', err)
-      showToast('Error guardant la vista', 'error')
+      notifyError(err, { context: 'Finances:handleSaveView' })
     }
     setSaving(false)
   }
@@ -411,8 +419,7 @@ export default function Finances() {
       }
       await loadData()
     } catch (err) {
-      console.error('Error eliminant vista:', err)
-      showToast('Error eliminant la vista', 'error')
+      notifyError(err, { context: 'Finances:handleDeleteView' })
     }
   }
 
@@ -524,8 +531,7 @@ export default function Finances() {
       setShowTransactionModal(false)
       setEditingTransaction(null)
     } catch (err) {
-      console.error('Error guardant transacció:', err)
-      showToast('Error guardant la transacció', 'error')
+      notifyError(err, { context: 'Finances:handleSaveTransaction' })
     }
     setSaving(false)
   }
@@ -544,8 +550,7 @@ export default function Finances() {
       await loadData()
       setMenuOpen(null)
     } catch (err) {
-      console.error('Error eliminant transacció:', err)
-      showToast('Error eliminant la transacció', 'error')
+      notifyError(err, { context: 'Finances:handleDeleteTransaction' })
     }
   }
 
@@ -800,6 +805,48 @@ export default function Finances() {
         {/* Ledger Table */}
         {loading ? (
           <div style={styles.loading}>Carregant...</div>
+        ) : error ? (
+          <div style={{
+            padding: '48px',
+            textAlign: 'center',
+            backgroundColor: darkMode ? '#15151f' : '#ffffff',
+            borderRadius: '16px',
+            border: `1px solid ${darkMode ? '#2a2a3a' : '#e5e7eb'}`,
+            margin: '24px 0'
+          }}>
+            <AlertCircle size={48} color="#ef4444" style={{ margin: '0 auto 16px' }} />
+            <h3 style={{
+              margin: '0 0 8px',
+              fontSize: '18px',
+              fontWeight: '600',
+              color: darkMode ? '#ffffff' : '#111827'
+            }}>
+              Error carregant les finances
+            </h3>
+            <p style={{
+              margin: '0 0 24px',
+              fontSize: '14px',
+              color: '#6b7280'
+            }}>
+              {error}
+            </p>
+            <button
+              onClick={loadData}
+              style={{
+                padding: '12px 24px',
+                backgroundColor: '#4f46e5',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer'
+              }}
+            >
+              <RefreshCw size={16} style={{ marginRight: '8px', display: 'inline' }} />
+              Reintentar
+            </button>
+          </div>
         ) : (
           <div style={{...styles.tableContainer, backgroundColor: darkMode ? '#15151f' : '#ffffff'}}>
             <table style={styles.table}>
@@ -953,8 +1000,7 @@ export default function Finances() {
                                         await loadData()
                                         setMenuOpen(null)
                                       } catch (err) {
-                                        console.error('Error marking as paid:', err)
-                                        showToast('Error marcant com pagada', 'error')
+                                        notifyError(err, { context: 'Finances:markAsPaid' })
                                       }
                                     }}
                                     style={{...styles.menuItem, color: '#22c55e'}}

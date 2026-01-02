@@ -1,6 +1,7 @@
 /**
  * Planned vs Actual Comparison Utilities
  */
+import { safeJsonArray } from './safeJson'
 
 /**
  * Get unit price from quote for a given quantity
@@ -30,7 +31,7 @@ export const getPoUnitPrice = (po) => {
   if (!po.items) return null
   
   try {
-    const items = typeof po.items === 'string' ? JSON.parse(po.items) : po.items
+    const items = safeJsonArray(po.items)
     if (!Array.isArray(items) || items.length === 0) return null
     
     // Get first item's unit_price (assuming all items have same price)
@@ -47,14 +48,8 @@ export const getPoUnitPrice = (po) => {
 export const getPoQuantity = (po) => {
   if (!po.items) return null
   
-  try {
-    const items = typeof po.items === 'string' ? JSON.parse(po.items) : po.items
-    if (!Array.isArray(items)) return null
-    
-    return items.reduce((sum, item) => sum + (parseFloat(item.qty) || 0), 0)
-  } catch (err) {
-    return null
-  }
+  const items = safeJsonArray(po.items)
+  return items.reduce((sum, item) => sum + (parseFloat(item?.qty) || 0), 0)
 }
 
 /**

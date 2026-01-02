@@ -25,7 +25,7 @@ import {
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { getCompanySettings, updateCompanySettings, supabase, getAuditLogs, updateLanguage, getCurrentUserId } from '../lib/supabase'
-import { clearDemoData, generateDemoData } from '../lib/demoSeed'
+import { clearDemoData, generateDemoData, checkDemoExists } from '../lib/demoSeed'
 import Header from '../components/Header'
 import GTINPoolSection from '../components/GTINPoolSection'
 import { useBreakpoint } from '../hooks/useBreakpoint'
@@ -139,7 +139,7 @@ export default function Settings() {
       setTimeout(() => setSaved(false), 3000)
     } catch (err) {
       console.error('Error guardant:', err)
-      alert('Error guardant les dades')
+      showToast('Error guardant les dades', 'error')
     }
     setSaving(false)
   }
@@ -182,7 +182,7 @@ export default function Settings() {
 
   const processFile = (file) => {
     if (!file.type.startsWith('image/')) {
-      alert('Selecciona una imatge')
+      showToast('Selecciona una imatge', 'error')
       return
     }
     
@@ -195,7 +195,7 @@ export default function Settings() {
 
   const handleSaveSignature = async () => {
     if (!editingSignature.name || !editingSignature.signature_image) {
-      alert('Nom i imatge de signatura són obligatoris')
+      showToast('Nom i imatge de signatura són obligatoris', 'error')
       return
     }
 
@@ -221,7 +221,7 @@ export default function Settings() {
       setEditingSignature(null)
     } catch (err) {
       console.error('Error guardant signatura:', err)
-      alert('Error guardant la signatura')
+      showToast('Error guardant la signatura', 'error')
     }
     setSaving(false)
   }
@@ -466,6 +466,68 @@ export default function Settings() {
                 </label>
               </div>
               <div style={{ marginTop: '16px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <button
+                  onClick={async () => {
+                    if (!confirm('Vols generar dades demo? Això crearà 10 projectes, POs, quotes, GTINs, finances, tasks i notes.')) return
+                    setResettingDemo(true)
+                    try {
+                      // Activar demo_mode
+                      await updateCompanySettings({ demo_mode: true })
+                      setDemoMode(true)
+                      
+                      // Check if demo data already exists
+                      const hasDemo = await checkDemoExists()
+                      if (hasDemo) {
+                        if (!confirm('Ja existeixen dades demo. Vols eliminar-les i crear noves?')) {
+                          setResettingDemo(false)
+                          return
+                        }
+                        const clearResult = await clearDemoData()
+                        if (!clearResult.success) {
+                          showToast('Error netejant dades demo: ' + clearResult.message, 'error')
+                          setResettingDemo(false)
+                          return
+                        }
+                      }
+                      
+                      // Generate new demo data
+                      const genResult = await generateDemoData()
+                      if (genResult.success) {
+                        showToast('Dades demo generades correctament!', 'success', 5000)
+                        await refreshProjects()
+                        // Redirect to dashboard after 2 seconds
+                        setTimeout(() => {
+                          navigate('/')
+                        }, 2000)
+                      } else {
+                        showToast('Error generant dades demo: ' + genResult.message, 'error')
+                      }
+                    } catch (err) {
+                      console.error('Error generating demo:', err)
+                      showToast('Error al generar dades demo', 'error')
+                    } finally {
+                      setResettingDemo(false)
+                    }
+                  }}
+                  disabled={resettingDemo}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '10px 18px',
+                    backgroundColor: '#10b981',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    cursor: resettingDemo ? 'not-allowed' : 'pointer',
+                    opacity: resettingDemo ? 0.6 : 1
+                  }}
+                >
+                  <Database size={16} style={{ animation: resettingDemo ? 'spin 1s linear infinite' : 'none' }} />
+                  {resettingDemo ? 'Generant...' : 'Generar Dades Demo'}
+                </button>
                 <button
                   onClick={async () => {
                     if (!confirm('Vols regenerar les dades demo? Això eliminarà les dades demo existents i crearà noves.')) return

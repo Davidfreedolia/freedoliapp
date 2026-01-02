@@ -1,5 +1,6 @@
 import React from 'react'
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
+import { safeJsonArray } from '../lib/safeJson'
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -47,7 +48,7 @@ class ErrorBoundary extends React.Component {
 
     // Store in localStorage for debugging (last 5 errors)
     try {
-      const errors = JSON.parse(localStorage.getItem('app_errors') || '[]')
+      const errors = safeJsonArray(localStorage.getItem('app_errors'))
       errors.unshift(errorData)
       localStorage.setItem('app_errors', JSON.stringify(errors.slice(0, 5)))
     } catch {

@@ -321,7 +321,21 @@
         "long": "Les tasques et ajuden a fer un seguiment de les accions pendents. Poden estar associades a un projecte específic o ser globals. Pots assignar prioritat i data de venciment."
       }
     },
-    "searchPlaceholder": "Cerca al manual..."
+    "searchPlaceholder": "Cerca al manual...",
+    "title": "Ajuda i Documentació",
+    "noResults": "No s'han trobat resultats"
+  },
+  "navbar": {
+    "addNote": "Afegir nota",
+    "notes": "Notes",
+    "help": "Ajuda",
+    "notifications": "Notificacions",
+    "darkMode": "Mode fosc",
+    "lightMode": "Mode clar",
+    "logout": "Tancar sessió"
+  },
+  "common": {
+    "close": "Tancar"
   }
 }
 

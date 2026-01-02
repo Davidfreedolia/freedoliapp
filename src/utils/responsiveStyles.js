@@ -58,6 +58,29 @@ export const getModalStyles = (isMobile, darkMode) => {
       flexDirection: 'column',
       backgroundColor: darkMode ? '#15151f' : '#ffffff',
       boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
+    },
+    header: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '20px 24px',
+      borderBottom: `1px solid ${darkMode ? '#2a2a3a' : '#e5e7eb'}`
+    },
+    body: {
+      padding: '24px',
+      overflowY: 'auto'
+    },
+    closeButton: {
+      background: 'none',
+      border: 'none',
+      cursor: 'pointer',
+      color: darkMode ? '#9ca3af' : '#6b7280',
+      padding: '4px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: '4px',
+      transition: 'background-color 0.2s'
     }
   }
 }
@@ -95,6 +118,7 @@ export const getTableStyles = (isMobile, isTablet) => {
     hideColumns: []
   }
 }
+
 
 
 

@@ -75,17 +75,33 @@ function handleAuthError(context, error) {
       window.gapi.client.setToken(null)
     }
   }
+  
+  // Mostrar toast a l'usuari (només una vegada)
+  if (!window._driveAuthErrorShown) {
+    window._driveAuthErrorShown = true
+    // Import dinàmic per evitar circular dependencies
+    import('../components/Toast').then(({ showToast }) => {
+      showToast('Google Drive session expired. Reconnect in Settings.', 'error')
+      // Reset flag després de 5 segons per permetre mostrar-ho de nou si cal
+      setTimeout(() => {
+        window._driveAuthErrorShown = false
+      }, 5000)
+    }).catch(() => {
+      // Si falla l'import, no fa res (no volem trencar l'app)
+    })
+  }
 }
 
 /**
  * Helper per mostrar errors a l'usuari
- * Per ara utilitza alert(), però es pot canviar a toast/notification system
+ * Utilitza showToast per notificacions
  * @param {string} message - Missatge per mostrar
  * @param {boolean} critical - Si és crític, mostra alert. Si no, només log.
  */
-function showDriveError(message, critical = true) {
+async function showDriveError(message, critical = true) {
   if (critical) {
-    alert(`Google Drive: ${message}`)
+    const { showToast } = await import('../components/Toast')
+    showToast(`Google Drive: ${message}`, 'error')
   } else {
     console.warn('[Drive Warning]', message)
   }

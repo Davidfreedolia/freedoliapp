@@ -8,6 +8,7 @@ import { logSuccess, logError } from '../lib/auditLog'
 import { handleError } from '../lib/errorHandling'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
+import { showToast } from './Toast'
 
 const PHASES = [
   { id: 1, name: 'Recerca', icon: '🔍' },
@@ -57,7 +58,7 @@ export default function NewProjectModal({ isOpen, onClose }) {
     e.preventDefault()
     if (!formData.name.trim()) return
     if (!projectCodes.projectCode) {
-      alert('Error: No s\'ha pogut generar el codi de projecte')
+      showToast('Error: No s\'ha pogut generar el codi de projecte', 'error')
       return
     }
 
