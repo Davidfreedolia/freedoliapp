@@ -630,9 +630,9 @@ export const getDashboardStats = async () => {
   // RLS maneja el filtrado por user_id automáticamente, pero afegim is_demo filter
   const { data: payments, error: paymentsError } = await supabase
     .from('payments')
+    .select('amount, currency, type')
     .eq('user_id', userId)
     .eq('is_demo', demoMode) // Filter by demo mode
-    .select('amount, currency, type')
     .eq('status', 'completed')
   
   // Si hay error en payments, continuar con 0 (no crítico para stats)
