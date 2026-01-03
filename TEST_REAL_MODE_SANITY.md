@@ -120,3 +120,4 @@
   3. Are there any console errors that indicate the issue?
   4. Check Supabase logs for RLS violations
 
+

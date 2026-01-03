@@ -94,3 +94,4 @@ SELECT 'sticky_notes', COUNT(*) FROM sticky_notes WHERE is_demo IS NULL
 UNION ALL
 SELECT 'recurring_expenses', COUNT(*) FROM recurring_expenses WHERE is_demo IS NULL;
 
+
