@@ -3,7 +3,7 @@ import { StickyNote, HelpCircle, Sun, Moon, LogOut, Settings } from 'lucide-reac
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useApp } from '../context/AppContext'
-import { supabase, getCompanySettings, updateCompanySettings } from '../lib/supabase'
+import { supabase } from '../lib/supabase'
 import { logSuccess } from '../lib/auditLog'
 import { useNotes } from '../hooks/useNotes'
 import AddStickyNoteModal from './AddStickyNoteModal'
@@ -12,33 +12,14 @@ import { useBreakpoint } from '../hooks/useBreakpoint'
 import { showToast } from './Toast'
 
 export default function TopNavbar() {
-  const { darkMode, setDarkMode, refreshProjects } = useApp()
+  const { darkMode, setDarkMode } = useApp()
   const navigate = useNavigate()
   const location = useLocation()
   const { t } = useTranslation()
   const { isMobile } = useBreakpoint()
-  const { addNote, refresh } = useNotes()
+  const { refresh } = useNotes()
   const [showNoteModal, setShowNoteModal] = useState(false)
   const [showHelpModal, setShowHelpModal] = useState(false)
-  const { demoMode, toggleDemoMode } = useApp()
-  const [loadingDemoMode, setLoadingDemoMode] = useState(false)
-
-  const handleToggleDemoMode = async (newValue) => {
-    setLoadingDemoMode(true)
-    try {
-      await toggleDemoMode(newValue)
-      showToast(
-        newValue 
-          ? t('settings.demoModeEnabled', 'Demo mode enabled') 
-          : t('settings.demoModeDisabled', 'Demo mode disabled'),
-        'success'
-      )
-    } catch (err) {
-      console.error('Error toggling demo mode:', err)
-      showToast(t('settings.demoModeError', 'Error toggling demo mode'), 'error')
-      setLoadingDemoMode(false)
-    }
-  }
 
   // No mostrar navbar a login
   if (location.pathname === '/login') return null
@@ -108,31 +89,6 @@ export default function TopNavbar() {
         </div>
 
         <div style={styles.rightSection}>
-          {/* Demo Mode Toggle */}
-          {!isMobile && (
-            <label style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '8px 12px',
-              borderRadius: '8px',
-              backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6',
-              cursor: 'pointer',
-              fontSize: '13px',
-              color: darkMode ? '#e5e7eb' : '#374151',
-              border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`
-            }}>
-              <input
-                type="checkbox"
-                checked={demoMode}
-                onChange={(e) => handleToggleDemoMode(e.target.checked)}
-                disabled={loadingDemoMode}
-                style={{ width: '16px', height: '16px', cursor: 'pointer' }}
-              />
-              <span>Demo</span>
-            </label>
-          )}
-
           {/* Settings */}
           <button 
             onClick={() => navigate('/settings')}
