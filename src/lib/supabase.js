@@ -3003,7 +3003,6 @@ export const getStickyNotes = async (filters = {}) => {
   const userId = await getCurrentUserId()
   let query = supabase
     .from('sticky_notes')
-    .eq('is_demo', demoMode) // Filter by demo mode
     .select(`
       *,
       tasks:linked_task_id (
@@ -3015,6 +3014,7 @@ export const getStickyNotes = async (filters = {}) => {
       )
     `)
     .eq('user_id', userId)
+    .eq('is_demo', demoMode) // Filter by demo mode
     .order('created_at', { ascending: false })
   
   if (filters.status) {
