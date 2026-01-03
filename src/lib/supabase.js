@@ -689,7 +689,7 @@ export const generateProjectCode = async () => {
   const maxAttempts = 5
   
   while (attempts < maxAttempts) {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('projects')
       .select('project_code, sku')
       .eq('user_id', userId)
@@ -697,6 +697,8 @@ export const generateProjectCode = async () => {
       .like('project_code', `${prefix}%`)
       .order('project_code', { ascending: false })
       .limit(1)
+
+    if (error) throw error
 
     let nextNum = 1
     if (data && data.length > 0 && data[0].project_code) {
