@@ -2447,6 +2447,7 @@ export const getCalendarEvents = async (filters = {}) => {
           )
         `)
         .eq('user_id', userId)
+        .eq('is_demo', demoMode) // Filter by demo mode on po_shipments
         .eq('purchase_orders.is_demo', demoMode) // Filter by demo mode on purchase_orders
       
       if (!shipmentsError && shipments) {
