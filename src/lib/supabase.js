@@ -2388,12 +2388,15 @@ export const getCalendarEvents = async (filters = {}) => {
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
   
-  // Legacy demo mode check (for backward compatibility)
-  if (isDemoMode() && !demoMode) {
+  // STRICT: Only return demo events if demoMode is explicitly true
+  // No fallback, no mock data when demoMode is false
+  if (demoMode === true) {
+    // Only use mock events if demoMode is explicitly true
     const { mockGetCalendarEvents } = await import('../demo/demoMode')
     return await mockGetCalendarEvents(filters)
   }
   
+  // When demoMode is false, only return real events from database
   const userId = await getCurrentUserId()
   const events = []
   
