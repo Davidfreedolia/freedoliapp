@@ -26,7 +26,7 @@ const PHASES = {
 }
 
 export default function Projects() {
-  const { projects, refreshProjects, darkMode } = useApp()
+  const { projects, refreshProjects, darkMode, driveConnected } = useApp()
   const navigate = useNavigate()
   const { isMobile, isTablet } = useBreakpoint()
   const [showModal, setShowModal] = useState(false)
@@ -136,13 +136,29 @@ export default function Projects() {
             )}
           </div>
 
-          <button onClick={() => setShowModal(true)} style={{
-            ...styles.newButton,
-            width: isMobile ? '100%' : 'auto'
-          }}>
+          <button 
+            onClick={() => {
+              if (!driveConnected) return
+              setShowModal(true)
+            }} 
+            disabled={!driveConnected}
+            title={!driveConnected ? "Connecta Google Drive per crear" : ""}
+            style={{
+              ...styles.newButton,
+              width: isMobile ? '100%' : 'auto',
+              opacity: !driveConnected ? 0.5 : 1,
+              cursor: !driveConnected ? 'not-allowed' : 'pointer'
+            }}>
             <Plus size={18} />
             Nou Projecte
           </button>
+          {!driveConnected && (
+            <div style={{ marginTop: '8px', fontSize: '13px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
+              <a href="/settings" style={{ color: '#4f46e5', textDecoration: 'underline' }}>
+                Connecta Google Drive per crear
+              </a>
+            </div>
+          )}
         </div>
 
         {/* Projects Grid */}
@@ -157,10 +173,30 @@ export default function Projects() {
                 : 'No hi ha projectes. Crea el primer!'}
             </p>
             {!searchTerm && !filterPhase && (
-              <button onClick={() => setShowModal(true)} style={styles.createButton}>
-                <Plus size={18} />
-                Crear Projecte
-              </button>
+              <>
+                <button 
+                  onClick={() => {
+                    if (!driveConnected) return
+                    setShowModal(true)
+                  }} 
+                  disabled={!driveConnected}
+                  title={!driveConnected ? "Connecta Google Drive per crear" : ""}
+                  style={{
+                    ...styles.createButton,
+                    opacity: !driveConnected ? 0.5 : 1,
+                    cursor: !driveConnected ? 'not-allowed' : 'pointer'
+                  }}>
+                  <Plus size={18} />
+                  Crear Projecte
+                </button>
+                {!driveConnected && (
+                  <div style={{ marginTop: '8px', fontSize: '13px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
+                    <a href="/settings" style={{ color: '#4f46e5', textDecoration: 'underline' }}>
+                      Connecta Google Drive per crear
+                    </a>
+                  </div>
+                )}
+              </>
             )}
           </div>
         ) : (

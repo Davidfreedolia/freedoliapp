@@ -72,7 +72,7 @@ const COUNTRIES_CITIES = {
 }
 
 export default function Suppliers() {
-  const { darkMode } = useApp()
+  const { darkMode, driveConnected } = useApp()
   const { isMobile, isTablet } = useBreakpoint()
   const modalStyles = getModalStyles(isMobile, darkMode)
   
@@ -157,6 +157,7 @@ export default function Suppliers() {
   }
 
   const handleNewSupplier = () => {
+    if (!driveConnected) return
     setEditingSupplier({
       name: '',
       type: 'manufacturer',
@@ -294,9 +295,24 @@ export default function Suppliers() {
             ))}
           </select>
 
-          <button onClick={handleNewSupplier} style={styles.newButton}>
+          <button 
+            onClick={handleNewSupplier} 
+            disabled={!driveConnected}
+            title={!driveConnected ? "Connecta Google Drive per crear" : ""}
+            style={{
+              ...styles.newButton,
+              opacity: !driveConnected ? 0.5 : 1,
+              cursor: !driveConnected ? 'not-allowed' : 'pointer'
+            }}>
             <Plus size={18} /> Nou Proveïdor
           </button>
+          {!driveConnected && (
+            <div style={{ marginTop: '8px', fontSize: '13px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
+              <a href="/settings" style={{ color: '#4f46e5', textDecoration: 'underline' }}>
+                Connecta Google Drive per crear
+              </a>
+            </div>
+          )}
         </div>
 
         {/* Stats */}

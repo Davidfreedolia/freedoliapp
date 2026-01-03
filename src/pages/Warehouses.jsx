@@ -63,7 +63,7 @@ const WAREHOUSE_TYPES = [
 ]
 
 export default function Warehouses() {
-  const { darkMode } = useApp()
+  const { darkMode, driveConnected } = useApp()
   const { isMobile, isTablet } = useBreakpoint()
   const modalStyles = getModalStyles(isMobile, darkMode)
   
@@ -112,6 +112,7 @@ export default function Warehouses() {
 
   // CRUD
   const handleNewWarehouse = () => {
+    if (!driveConnected) return
     setEditingWarehouse({
       name: '',
       type: 'custom',
@@ -275,10 +276,25 @@ export default function Warehouses() {
             Afegir Amazon FBA
           </button>
 
-          <button onClick={handleNewWarehouse} style={styles.newButton}>
+          <button 
+            onClick={handleNewWarehouse} 
+            disabled={!driveConnected}
+            title={!driveConnected ? "Connecta Google Drive per crear" : ""}
+            style={{
+              ...styles.newButton,
+              opacity: !driveConnected ? 0.5 : 1,
+              cursor: !driveConnected ? 'not-allowed' : 'pointer'
+            }}>
             <Plus size={18} />
             Nou Magatzem
           </button>
+          {!driveConnected && (
+            <div style={{ marginTop: '8px', fontSize: '13px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
+              <a href="/settings" style={{ color: '#4f46e5', textDecoration: 'underline' }}>
+                Connecta Google Drive per crear
+              </a>
+            </div>
+          )}
         </div>
 
         {/* Stats */}
@@ -313,10 +329,25 @@ export default function Warehouses() {
                 <Package size={18} />
                 Afegir Amazon FBA
               </button>
-              <button onClick={handleNewWarehouse} style={styles.createButton}>
+              <button 
+                onClick={handleNewWarehouse} 
+                disabled={!driveConnected}
+                title={!driveConnected ? "Connecta Google Drive per crear" : ""}
+                style={{
+                  ...styles.createButton,
+                  opacity: !driveConnected ? 0.5 : 1,
+                  cursor: !driveConnected ? 'not-allowed' : 'pointer'
+                }}>
                 <Plus size={18} />
                 Crear Magatzem
               </button>
+              {!driveConnected && (
+                <div style={{ marginTop: '8px', fontSize: '13px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
+                  <a href="/settings" style={{ color: '#4f46e5', textDecoration: 'underline' }}>
+                    Connecta Google Drive per crear
+                  </a>
+                </div>
+              )}
             </div>
           </div>
         ) : (

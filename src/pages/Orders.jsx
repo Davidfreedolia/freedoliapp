@@ -77,7 +77,7 @@ const PO_STATUSES = {
 }
 
 export default function Orders() {
-  const { darkMode } = useApp()
+  const { darkMode, driveConnected } = useApp()
   // Removed unused navigate
   const { isMobile, isTablet } = useBreakpoint()
   // Removed unused t
@@ -692,10 +692,29 @@ export default function Orders() {
             ))}
           </select>
 
-          <button onClick={() => { setEditingOrder(null); setShowModal(true) }} style={styles.newButton}>
+          <button 
+            onClick={() => {
+              if (!driveConnected) return
+              setEditingOrder(null)
+              setShowModal(true)
+            }} 
+            disabled={!driveConnected}
+            title={!driveConnected ? "Connecta Google Drive per crear" : ""}
+            style={{
+              ...styles.newButton,
+              opacity: !driveConnected ? 0.5 : 1,
+              cursor: !driveConnected ? 'not-allowed' : 'pointer'
+            }}>
             <Plus size={18} />
             Nova Comanda
           </button>
+          {!driveConnected && (
+            <div style={{ marginTop: '8px', fontSize: '13px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
+              <a href="/settings" style={{ color: '#4f46e5', textDecoration: 'underline' }}>
+                Connecta Google Drive per crear
+              </a>
+            </div>
+          )}
         </div>
 
         {/* Stats */}
@@ -770,10 +789,28 @@ export default function Orders() {
             <p style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
               {searchTerm || filterStatus || filterProject ? 'No s\'han trobat comandes' : 'No hi ha comandes. Crea la primera!'}
             </p>
-            <button onClick={() => setShowModal(true)} style={styles.createButton}>
+            <button 
+              onClick={() => {
+                if (!driveConnected) return
+                setShowModal(true)
+              }} 
+              disabled={!driveConnected}
+              title={!driveConnected ? "Connecta Google Drive per crear" : ""}
+              style={{
+                ...styles.createButton,
+                opacity: !driveConnected ? 0.5 : 1,
+                cursor: !driveConnected ? 'not-allowed' : 'pointer'
+              }}>
               <Plus size={18} />
               Nova Comanda
             </button>
+            {!driveConnected && (
+              <div style={{ marginTop: '8px', fontSize: '13px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
+                <a href="/settings" style={{ color: '#4f46e5', textDecoration: 'underline' }}>
+                  Connecta Google Drive per crear
+                </a>
+              </div>
+            )}
           </div>
         ) : isMobile ? (
           // Mobile: Cards

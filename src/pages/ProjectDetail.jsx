@@ -678,8 +678,18 @@ export default function ProjectDetail() {
             {/* Nova Comanda - disponible des de fase 3 */}
             {project.current_phase >= 3 && (
               <button 
-                style={{...styles.actionButton, backgroundColor: '#4f46e5'}} 
-                onClick={() => navigate(`/orders?project=${id}`)}
+                style={{
+                  ...styles.actionButton, 
+                  backgroundColor: '#4f46e5',
+                  opacity: !driveConnected ? 0.5 : 1,
+                  cursor: !driveConnected ? 'not-allowed' : 'pointer'
+                }} 
+                disabled={!driveConnected}
+                title={!driveConnected ? "Connecta Google Drive per crear" : ""}
+                onClick={() => {
+                  if (!driveConnected) return
+                  navigate(`/orders?project=${id}`)
+                }}
               >
                 <ShoppingCart size={18} />
                 Crear Comanda (PO)
