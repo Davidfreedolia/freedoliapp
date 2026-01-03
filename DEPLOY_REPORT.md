@@ -101,3 +101,4 @@ Aquest fix evita el bundling perquè el filter ja no depèn de hooks de React, l
 - Fix de bundling a HelpModal (filter simplificat)
 
 
+

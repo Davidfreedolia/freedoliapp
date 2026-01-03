@@ -39,7 +39,15 @@ export async function logAudit({ entityType, entityId = null, action, status, me
       return
     }
 
-    // Insert a audit_log (user_id s'assigna automàticament per RLS)
+    // Get demo mode setting
+    const { getDemoMode } = await import('./demoModeFilter')
+    const demoMode = await getDemoMode()
+    
+    // Get user_id
+    const { getCurrentUserId } = await import('./supabase')
+    const userId = await getCurrentUserId()
+    
+    // Insert a audit_log (user_id and is_demo set explicitly)
     const { error } = await supabase
       .from('audit_log')
       .insert([
@@ -49,7 +57,9 @@ export async function logAudit({ entityType, entityId = null, action, status, me
           action: action,
           status: status,
           message: message,
-          meta: meta
+          meta: meta,
+          user_id: userId,
+          is_demo: demoMode
         }
       ])
 

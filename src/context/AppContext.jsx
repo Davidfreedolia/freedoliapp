@@ -149,6 +149,11 @@ export function AppProvider({ children }) {
   
   const toggleDemoMode = async (newValue) => {
     try {
+      // Dev-only log for debugging
+      if (import.meta.env.DEV) {
+        console.info('[demoMode] Toggling to:', newValue)
+      }
+      
       await updateCompanySettings({ demo_mode: newValue })
       setDemoMode(newValue)
       
@@ -160,6 +165,7 @@ export function AppProvider({ children }) {
       await loadInitialData()
       
       // Force page reload to ensure all components refresh
+      // CRITICAL: This ensures no stale cache and all queries refetch with new demoMode
       window.location.reload()
     } catch (err) {
       console.error('Error toggling demo mode:', err)

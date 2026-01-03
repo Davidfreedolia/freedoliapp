@@ -82,7 +82,8 @@ export const generateDemoData = async (onProgress = null) => {
           phone: `+1-555-${Math.floor(Math.random() * 9000) + 1000}`,
           incoterm: ['FOB', 'FCA', 'EXW'][Math.floor(Math.random() * 3)],
           payment_terms: ['T/T 30%', 'L/C at sight', 'Net 30'][Math.floor(Math.random() * 3)],
-          is_demo: true
+          user_id: userId, // Always set user_id explicitly
+          is_demo: true // Always true for demo data
         }])
         .select()
         .single()
@@ -166,7 +167,8 @@ export const generateDemoData = async (onProgress = null) => {
           gtin_code: gtinCode,
           gtin_type: gtinType,
           status: i < 60 ? 'available' : 'assigned',
-          is_demo: true,
+          user_id: userId, // Always set user_id explicitly
+          is_demo: true, // Always true for demo data
           assigned_to_project_id: i < 60 ? null : projects[i % 6].id,
           assigned_at: i < 60 ? null : new Date().toISOString()
         }])
@@ -194,7 +196,8 @@ export const generateDemoData = async (onProgress = null) => {
             gtin_type: assignedGtin.gtin_type,
             fnsku: `X00${String(i + 1).padStart(9, '0')}`,
             asin: `B0${String(Math.floor(Math.random() * 90000000) + 10000000)}`,
-            is_demo: true
+            user_id: userId, // Always set user_id explicitly
+            is_demo: true // Always true for demo data
           }])
       }
     }
@@ -218,7 +221,8 @@ export const generateDemoData = async (onProgress = null) => {
             moq: isBetterPrice ? 2000 : 500,
             shipping_estimate: 500,
             notes: `Demo quote ${q + 1} for ${project.name}`,
-            is_demo: true
+            user_id: userId, // Always set user_id explicitly
+            is_demo: true // Always true for demo data
           }])
           .select()
           .single()
@@ -238,7 +242,8 @@ export const generateDemoData = async (onProgress = null) => {
                 quote_id: quote.id,
                 min_qty: br.min_qty,
                 unit_price: br.unit_price,
-                is_demo: true
+                user_id: userId, // Always set user_id explicitly
+                is_demo: true // Always true for demo data
               }])
           }
 
@@ -283,7 +288,8 @@ export const generateDemoData = async (onProgress = null) => {
             payment_terms: supplier.payment_terms,
             items: JSON.stringify(items),
             total_amount: items.reduce((sum, item) => sum + item.total, 0),
-            is_demo: true
+            user_id: userId, // Always set user_id explicitly
+            is_demo: true // Always true for demo data
           }])
           .select()
           .single()
@@ -322,8 +328,9 @@ export const generateDemoData = async (onProgress = null) => {
                 carton_height_cm: null,
                 carton_weight_kg: i === 5 ? null : 5.5,
                 prep_type: 'none',
-                is_demo: true
-              }], { onConflict: 'purchase_order_id' })
+                user_id: userId, // Always set user_id explicitly
+                is_demo: true // Always true for demo data
+              }], { onConflict: 'user_id,purchase_order_id' })
           }
 
           // 8) Manufacturer Pack (4 POs with generated_at, 2 with sent_at)
@@ -373,7 +380,8 @@ export const generateDemoData = async (onProgress = null) => {
           status: ship.status,
           notes: ship.stale ? `Demo shipment ${i + 1} (stale tracking)` : `Demo shipment ${i + 1}`,
           updated_at: updatedAt,
-          is_demo: true
+          user_id: userId, // Always set user_id explicitly
+          is_demo: true // Always true for demo data
         }])
         .select()
         .single()
@@ -425,7 +433,8 @@ export const generateDemoData = async (onProgress = null) => {
           status: taskStatuses[i % 3],
           priority: priorities[i % 3],
           source: i < 5 ? 'sticky_note' : null,
-          is_demo: true
+          user_id: userId, // Always set user_id explicitly
+          is_demo: true // Always true for demo data
         }])
 
       newCounts.tasks++
@@ -455,7 +464,8 @@ export const generateDemoData = async (onProgress = null) => {
           status: actualIsDone ? 'done' : 'open',
           pinned: actualIsPinned,
           priority: priorities[i % 3],
-          is_demo: true,
+          user_id: userId, // Always set user_id explicitly
+          is_demo: true, // Always true for demo data
           linked_task_id: actualIsConverted && allTasks && allTasks[taskIndex] ? allTasks[taskIndex].id : null,
           converted_to_task_at: actualIsConverted ? new Date().toISOString() : null
         }])
@@ -488,7 +498,8 @@ export const generateDemoData = async (onProgress = null) => {
           description: `Demo expense ${i + 1}: ${category}`,
           expense_date: expenseDates[i],
           notes: `Demo expense for testing`,
-          is_demo: true
+          user_id: userId, // Always set user_id explicitly
+          is_demo: true // Always true for demo data
         }])
 
       newCounts.expenses = (newCounts.expenses || 0) + 1
@@ -519,7 +530,8 @@ export const generateDemoData = async (onProgress = null) => {
           platform: 'amazon',
           marketplace: 'ES',
           notes: `Demo income for testing`,
-          is_demo: true
+          user_id: userId, // Always set user_id explicitly
+          is_demo: true // Always true for demo data
         }])
 
       newCounts.incomes = (newCounts.incomes || 0) + 1
@@ -541,7 +553,8 @@ export const generateDemoData = async (onProgress = null) => {
         day_of_month: 1,
         description: 'Demo SaaS Subscription',
         is_active: true,
-        is_demo: true
+        user_id: userId, // Always set user_id explicitly
+        is_demo: true // Always true for demo data
       }])
 
     // Recurring 2: Quarterly service
@@ -555,7 +568,8 @@ export const generateDemoData = async (onProgress = null) => {
         day_of_month: 15,
         description: 'Demo Quarterly Service Fee',
         is_active: true,
-        is_demo: true
+        user_id: userId, // Always set user_id explicitly
+        is_demo: true // Always true for demo data
       }])
 
     newCounts.recurring = 2
@@ -603,7 +617,8 @@ export const generateDemoData = async (onProgress = null) => {
           z_index: note.z_index,
           context: 'global',
           minimized: false,
-          is_demo: true
+          user_id: userId, // Always set user_id explicitly
+          is_demo: true // Always true for demo data
         }])
 
       newCounts.floatingNotes = (newCounts.floatingNotes || 0) + 1

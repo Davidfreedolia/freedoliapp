@@ -165,3 +165,4 @@ Verificar que l'aplicació funciona correctament amb dades reals (demo mode OFF)
 - Verificar que no hi ha warnings crítics
 
 
+

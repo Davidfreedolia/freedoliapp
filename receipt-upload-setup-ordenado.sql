@@ -76,3 +76,4 @@ CREATE POLICY "Users can delete own receipts" ON storage.objects
 
 
 
+
