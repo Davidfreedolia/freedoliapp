@@ -11,7 +11,7 @@ import {
 import { getProjects, getSuppliers } from '../lib/supabase'
 import { showToast } from './Toast'
 
-export default function RecurringExpensesSection({ darkMode, categories, onExpensesGenerated }) {
+export default function RecurringExpensesSection({ darkMode, categories, demoMode, onExpensesGenerated }) {
   const [recurringExpenses, setRecurringExpenses] = useState([])
   const [projects, setProjects] = useState([])
   const [suppliers, setSuppliers] = useState([])
@@ -26,7 +26,7 @@ export default function RecurringExpensesSection({ darkMode, categories, onExpen
   useEffect(() => {
     loadData()
     loadKPIs()
-  }, [])
+  }, [demoMode]) // Reload when demoMode changes
 
   const loadData = async () => {
     setLoading(true)
@@ -79,6 +79,12 @@ export default function RecurringExpensesSection({ darkMode, categories, onExpen
   const handleSave = async () => {
     if (!editingRecurring.description || !editingRecurring.amount || !editingRecurring.day_of_month) {
       showToast('Descripció, import i dia del mes són obligatoris', 'error')
+      return
+    }
+
+    // Require category for recurring expenses (needed for expense generation)
+    if (!editingRecurring.category_id) {
+      showToast('Selecciona una categoria', 'error')
       return
     }
 

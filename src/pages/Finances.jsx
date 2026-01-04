@@ -888,6 +888,7 @@ export default function Finances() {
         <RecurringExpensesSection 
           darkMode={darkMode} 
           categories={categories}
+          demoMode={demoMode}
           onExpensesGenerated={loadData}
         />
 

@@ -8,7 +8,8 @@
 CREATE OR REPLACE FUNCTION generate_recurring_expenses()
 RETURNS integer AS $$
 DECLARE
-  v_recurring recurring_expenses%ROWTYPE;
+  v_recurring RECORD;
+  v_category_name text;
   v_current_date date := CURRENT_DATE;
   v_current_day integer := EXTRACT(DAY FROM v_current_date);
   v_target_month date;
@@ -17,13 +18,20 @@ DECLARE
   v_generated_count integer := 0;
   v_existing_count integer;
 BEGIN
-  -- Per cada recurring expense actiu
+  -- Per cada recurring expense actiu amb categoria
   FOR v_recurring IN 
-    SELECT * FROM recurring_expenses 
-    WHERE is_active = true 
-    AND user_id = auth.uid()
-    AND is_demo = false  -- Only generate for real expenses (demo handled separately)
+    SELECT re.*, fc.name as category_name
+    FROM recurring_expenses re
+    LEFT JOIN finance_categories fc ON fc.id = re.category_id
+    WHERE re.is_active = true 
+    AND re.user_id = auth.uid()
+    AND re.is_demo = false  -- Only generate for real expenses (demo handled separately)
   LOOP
+    -- Skip if category is missing (required for expenses.category NOT NULL)
+    IF v_recurring.category_id IS NULL OR v_recurring.category_name IS NULL THEN
+      CONTINUE;  -- Skip this recurring expense if no category
+    END IF;
+    
     -- Skip if day_of_month is in the future this month
     IF v_recurring.day_of_month > v_current_day THEN
       CONTINUE;
@@ -54,6 +62,7 @@ BEGIN
         user_id,
         project_id,
         category_id,
+        category,
         supplier_id,
         description,
         amount,
@@ -70,6 +79,7 @@ BEGIN
         v_recurring.user_id,
         v_recurring.project_id,
         v_recurring.category_id,
+        v_recurring.category_name,  -- REQUIRED: category string NOT NULL
         v_recurring.supplier_id,
         v_recurring.description,
         v_recurring.amount,
