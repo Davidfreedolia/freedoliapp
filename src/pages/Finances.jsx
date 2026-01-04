@@ -535,11 +535,13 @@ export default function Finances() {
             .from('expenses')
             .update(data)
             .eq('id', editingTransaction.id)
+            .select()
           if (error) throw error
         } else {
           const { error } = await supabase
             .from('expenses')
             .insert(data)
+            .select()
           if (error) throw error
         }
       } else {
@@ -573,11 +575,13 @@ export default function Finances() {
             .from('incomes')
             .update(data)
             .eq('id', editingTransaction.id)
+            .select()
           if (error) throw error
       } else {
           const { error } = await supabase
             .from('incomes')
             .insert(data)
+            .select()
           if (error) throw error
         }
       }
