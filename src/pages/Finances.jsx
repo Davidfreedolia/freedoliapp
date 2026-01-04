@@ -78,14 +78,22 @@ export default function Finances() {
   const [showViewModal, setShowViewModal] = useState(false)
   const [editingView, setEditingView] = useState(null)
   
-  // Filters
-  const [filters, setFilters] = useState({
+  // Filters: draft (UI) vs applied (actual filtering)
+  const [draftFilters, setDraftFilters] = useState({
     project_id: null,
     category_id: null,
     date_from: null,
     date_to: null,
     search: '',
     type: 'all' // 'all', 'income', 'expense'
+  })
+  const [appliedFilters, setAppliedFilters] = useState({
+    project_id: null,
+    category_id: null,
+    date_from: null,
+    date_to: null,
+    search: '',
+    type: 'all'
   })
   
   // UI State
@@ -105,7 +113,16 @@ export default function Finances() {
 
   useEffect(() => {
     if (activeView) {
-      setFilters(activeView.filters || {})
+      const viewFilters = activeView.filters || {
+        project_id: null,
+        category_id: null,
+        date_from: null,
+        date_to: null,
+        search: '',
+        type: 'all'
+      }
+      setDraftFilters(viewFilters)
+      setAppliedFilters(viewFilters)
       setVisibleColumns(activeView.columns || visibleColumns)
     }
   }, [activeView])
@@ -272,15 +289,15 @@ export default function Finances() {
     }
   }
 
-  // Filter ledger (safe array check)
+  // Filter ledger using appliedFilters (not draftFilters)
   const filteredLedger = safeArray(ledger).filter(item => {
-    if (filters.type !== 'all' && item.type !== filters.type) return false
-    if (filters.project_id && item.project_id !== filters.project_id) return false
-    if (filters.category_id && item.category_id !== filters.category_id) return false
-    if (filters.date_from && new Date(item.date) < new Date(filters.date_from)) return false
-    if (filters.date_to && new Date(item.date) > new Date(filters.date_to)) return false
-    if (filters.search) {
-      const searchLower = filters.search.toLowerCase()
+    if (appliedFilters.type !== 'all' && item.type !== appliedFilters.type) return false
+    if (appliedFilters.project_id && item.project_id !== appliedFilters.project_id) return false
+    if (appliedFilters.category_id && item.category_id !== appliedFilters.category_id) return false
+    if (appliedFilters.date_from && new Date(item.date) < new Date(appliedFilters.date_from)) return false
+    if (appliedFilters.date_to && new Date(item.date) > new Date(appliedFilters.date_to)) return false
+    if (appliedFilters.search) {
+      const searchLower = appliedFilters.search.toLowerCase()
       return (
         item?.description?.toLowerCase().includes(searchLower) ||
         item?.reference_number?.toLowerCase().includes(searchLower) ||
@@ -290,6 +307,14 @@ export default function Finances() {
     }
     return true
   })
+
+  // Check if draft filters differ from applied filters
+  const hasPendingFilters = JSON.stringify(draftFilters) !== JSON.stringify(appliedFilters)
+
+  // Apply filters handler
+  const handleApplyFilters = () => {
+    setAppliedFilters({ ...draftFilters })
+  }
 
   // Calculate stats (safe array operations)
   const stats = {
@@ -383,7 +408,7 @@ export default function Finances() {
       const userId = await getCurrentUserId()
       const data = {
         name: editingView.name,
-        filters: filters,
+        filters: appliedFilters,
         columns: visibleColumns,
         sort_by: 'date',
         sort_order: 'desc',
@@ -634,7 +659,7 @@ export default function Finances() {
             </select>
           <button
               onClick={() => {
-                setEditingView({ name: '', filters: filters, columns: visibleColumns, is_default: false })
+                setEditingView({ name: '', filters: appliedFilters, columns: visibleColumns, is_default: false })
                 setShowViewModal(true)
               }}
               style={styles.iconButton}
@@ -659,8 +684,8 @@ export default function Finances() {
           {/* Filters */}
           <div style={styles.filtersSection}>
             <select
-              value={filters.type}
-              onChange={e => setFilters({...filters, type: e.target.value})}
+              value={draftFilters.type}
+              onChange={e => setDraftFilters({...draftFilters, type: e.target.value})}
               style={{
                 ...styles.filterSelect,
                 backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
@@ -673,8 +698,8 @@ export default function Finances() {
             </select>
 
           <select
-              value={filters.project_id || ''}
-              onChange={e => setFilters({...filters, project_id: e.target.value || null})}
+              value={draftFilters.project_id || ''}
+              onChange={e => setDraftFilters({...draftFilters, project_id: e.target.value || null})}
             style={{
               ...styles.filterSelect,
               backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
@@ -688,8 +713,8 @@ export default function Finances() {
           </select>
 
           <select
-              value={filters.category_id || ''}
-              onChange={e => setFilters({...filters, category_id: e.target.value || null})}
+              value={draftFilters.category_id || ''}
+              onChange={e => setDraftFilters({...draftFilters, category_id: e.target.value || null})}
             style={{
               ...styles.filterSelect,
               backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
@@ -704,8 +729,8 @@ export default function Finances() {
 
             <input
               type="date"
-              value={filters.date_from || ''}
-              onChange={e => setFilters({...filters, date_from: e.target.value || null})}
+              value={draftFilters.date_from || ''}
+              onChange={e => setDraftFilters({...draftFilters, date_from: e.target.value || null})}
               placeholder="Des de"
               style={{
                 ...styles.filterInput,
@@ -716,8 +741,8 @@ export default function Finances() {
 
             <input
               type="date"
-              value={filters.date_to || ''}
-              onChange={e => setFilters({...filters, date_to: e.target.value || null})}
+              value={draftFilters.date_to || ''}
+              onChange={e => setDraftFilters({...draftFilters, date_to: e.target.value || null})}
               placeholder="Fins a"
               style={{
                 ...styles.filterInput,
@@ -734,11 +759,43 @@ export default function Finances() {
               <input
                 type="text"
                 placeholder="Buscar..."
-                value={filters.search}
-                onChange={e => setFilters({...filters, search: e.target.value})}
+                value={draftFilters.search}
+                onChange={e => setDraftFilters({...draftFilters, search: e.target.value})}
                 style={{...styles.searchInput, color: darkMode ? '#ffffff' : '#111827'}}
               />
             </div>
+
+            {/* Apply Filters Button */}
+            <button
+              onClick={handleApplyFilters}
+              disabled={!hasPendingFilters}
+              style={{
+                ...styles.applyButton,
+                backgroundColor: hasPendingFilters ? '#4f46e5' : (darkMode ? '#1f1f2e' : '#f9fafb'),
+                color: hasPendingFilters ? '#ffffff' : (darkMode ? '#6b7280' : '#9ca3af'),
+                cursor: hasPendingFilters ? 'pointer' : 'not-allowed',
+                opacity: hasPendingFilters ? 1 : 0.6,
+                border: `1px solid ${hasPendingFilters ? '#4f46e5' : 'var(--border-color)'}`
+              }}
+              title={hasPendingFilters ? 'Aplicar filtres' : 'No hi ha canvis pendents'}
+            >
+              <Filter size={16} style={{ marginRight: '6px' }} />
+              Aplicar filtres
+              {hasPendingFilters && (
+                <span style={{
+                  marginLeft: '6px',
+                  fontSize: '10px',
+                  backgroundColor: '#ef4444',
+                  color: '#ffffff',
+                  borderRadius: '50%',
+                  width: '16px',
+                  height: '16px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>!</span>
+              )}
+            </button>
           </div>
 
           {/* Actions */}
@@ -1889,5 +1946,17 @@ const styles = {
     cursor: 'pointer',
     width: '100%',
     justifyContent: 'center'
+  },
+  applyButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    padding: '10px 16px',
+    borderRadius: '10px',
+    fontSize: '14px',
+    fontWeight: '500',
+    border: '1px solid var(--border-color)',
+    outline: 'none',
+    transition: 'all 0.2s'
   }
 }
