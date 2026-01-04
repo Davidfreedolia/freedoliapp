@@ -14,3 +14,4 @@ UPDATE company_settings SET demo_mode = true WHERE demo_mode IS NULL;
 
 
 
+

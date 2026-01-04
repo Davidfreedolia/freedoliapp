@@ -257,3 +257,4 @@ Abans de considerar el setup complet:
 
 
 
+

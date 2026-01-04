@@ -195,3 +195,4 @@ Hay **3 queries** que seleccionan columnas específicas que podrían no existir 
 
 
 
+

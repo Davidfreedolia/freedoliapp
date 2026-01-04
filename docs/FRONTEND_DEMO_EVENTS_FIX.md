@@ -172,3 +172,4 @@ El fix està implementat i el build passa. Cal executar tests manuals a producci
 **Generat:** 2025-01-02  
 **Per:** Frontend Demo Events Fix
 
+

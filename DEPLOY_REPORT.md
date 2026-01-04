@@ -102,3 +102,4 @@ Aquest fix evita el bundling perquè el filter ja no depèn de hooks de React, l
 
 
 
+

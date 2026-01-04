@@ -95,3 +95,4 @@ UNION ALL
 SELECT 'recurring_expenses', COUNT(*) FROM recurring_expenses WHERE is_demo IS NULL;
 
 
+

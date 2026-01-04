@@ -131,3 +131,4 @@ Abans, si un shipment tenia `is_demo` diferent al seu PO, podia aparèixer al Ca
 **Generat:** 2025-01-02  
 **Per:** Calendar Demo/Real Isolation Fix Validation
 
+

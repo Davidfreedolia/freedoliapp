@@ -166,3 +166,4 @@ Verificar que l'aplicació funciona correctament amb dades reals (demo mode OFF)
 
 
 
+

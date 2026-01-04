@@ -193,3 +193,4 @@ Deshabilitar tots els punts d'entrada de creació quan `driveConnected === false
 **Generat:** 2025-01-02  
 **Per:** Drive Connection Gating Implementation
 
+

@@ -171,3 +171,4 @@ WHERE (p.name ILIKE 'DEMO-%' OR p.sku ILIKE 'DEMO-%')
 -- All remaining_contaminated should be 0
 -- If any is > 0, investigate that table
 
+

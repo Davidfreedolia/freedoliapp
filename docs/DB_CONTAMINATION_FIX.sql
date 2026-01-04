@@ -159,3 +159,4 @@ WHERE (p.name ILIKE 'DEMO-%' OR p.sku ILIKE 'DEMO-%')
 
 -- All counts should be 0
 
+
