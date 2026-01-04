@@ -708,13 +708,6 @@ export default function Orders() {
             <Plus size={18} />
             Nova Comanda
           </button>
-          {!driveConnected && (
-            <div style={{ marginTop: '8px', fontSize: '13px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
-              <a href="/settings" style={{ color: '#4f46e5', textDecoration: 'underline' }}>
-                Connecta Google Drive per crear
-              </a>
-            </div>
-          )}
         </div>
 
         {/* Stats */}
@@ -804,13 +797,6 @@ export default function Orders() {
               <Plus size={18} />
               Nova Comanda
             </button>
-            {!driveConnected && (
-              <div style={{ marginTop: '8px', fontSize: '13px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
-                <a href="/settings" style={{ color: '#4f46e5', textDecoration: 'underline' }}>
-                  Connecta Google Drive per crear
-                </a>
-              </div>
-            )}
           </div>
         ) : isMobile ? (
           // Mobile: Cards
