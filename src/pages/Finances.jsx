@@ -1140,13 +1140,22 @@ export default function Finances() {
               <div style={styles.categoriesList}>
                 {(editingCategory?.type === 'income' ? categories.income : categories.expense).map(cat => (
                   <div key={cat.id} style={styles.categoryItem}>
-                    <span style={{
-                      ...styles.categoryBadge,
-                      backgroundColor: `${cat.color}15`,
-                      color: cat.color
-                    }}>
-                      {cat.name}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{
+                        width: '12px',
+                        height: '12px',
+                        borderRadius: '3px',
+                        backgroundColor: cat.color || '#6b7280',
+                        flexShrink: 0
+                      }} />
+                      <span style={{
+                        ...styles.categoryBadge,
+                        backgroundColor: `${cat.color || '#6b7280'}15`,
+                        color: cat.color || '#6b7280'
+                      }}>
+                        {cat.name}
+                      </span>
+                    </div>
                     {!cat.is_system && (
                       <div style={styles.categoryActions}>
                         <button
@@ -1193,7 +1202,12 @@ export default function Finances() {
                     <button
                       onClick={handleSaveCategory}
                       disabled={saving}
-                      style={styles.saveButton}
+                      style={{
+                        ...styles.saveButton,
+                        backgroundColor: saving ? '#9ca3af' : '#4f46e5',
+                        opacity: saving ? 0.6 : 1,
+                        cursor: saving ? 'not-allowed' : 'pointer'
+                      }}
                     >
                       {saving ? 'Guardant...' : <><Save size={16} /> Guardar</>}
                     </button>
