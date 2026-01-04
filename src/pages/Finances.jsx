@@ -765,19 +765,23 @@ export default function Finances() {
               />
             </div>
 
-            {/* Apply Filters Button */}
+            {/* Apply Filters Button - ALWAYS VISIBLE */}
             <button
               onClick={handleApplyFilters}
               disabled={!hasPendingFilters}
+              data-testid="apply-filters"
+              aria-label="Aplicar filtres"
+              title="Aplicar filtres"
               style={{
                 ...styles.applyButton,
                 backgroundColor: hasPendingFilters ? '#4f46e5' : (darkMode ? '#1f1f2e' : '#f9fafb'),
                 color: hasPendingFilters ? '#ffffff' : (darkMode ? '#6b7280' : '#9ca3af'),
                 cursor: hasPendingFilters ? 'pointer' : 'not-allowed',
                 opacity: hasPendingFilters ? 1 : 0.6,
-                border: `1px solid ${hasPendingFilters ? '#4f46e5' : 'var(--border-color)'}`
+                border: `1px solid ${hasPendingFilters ? '#4f46e5' : 'var(--border-color)'}`,
+                flexShrink: 0,
+                whiteSpace: 'nowrap'
               }}
-              title={hasPendingFilters ? 'Aplicar filtres' : 'No hi ha canvis pendents'}
             >
               <Filter size={16} style={{ marginRight: '6px' }} />
               Aplicar filtres
@@ -1957,6 +1961,9 @@ const styles = {
     fontWeight: '500',
     border: '1px solid var(--border-color)',
     outline: 'none',
-    transition: 'all 0.2s'
+    transition: 'all 0.2s',
+    flexShrink: 0,
+    minWidth: '140px',
+    whiteSpace: 'nowrap'
   }
 }
