@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react'
-import { Plus, Edit, Trash2, X, Save, RefreshCw, CheckCircle2, Clock, TrendingUp, DollarSign } from 'lucide-react'
+import { Plus, Edit, Trash2, X, Save, CheckCircle2, Clock, TrendingUp, DollarSign } from 'lucide-react'
 import { 
   getRecurringExpenses, 
   createRecurringExpense, 
   updateRecurringExpense, 
   deleteRecurringExpense,
-  generateRecurringExpenses,
   getRecurringExpensesKPIs,
   markRecurringExpenseAsPaid
 } from '../lib/supabase'
@@ -17,7 +16,6 @@ export default function RecurringExpensesSection({ darkMode, categories, onExpen
   const [projects, setProjects] = useState([])
   const [suppliers, setSuppliers] = useState([])
   const [loading, setLoading] = useState(true)
-  const [generating, setGenerating] = useState(false)
   const [kpis, setKpis] = useState({ pending: { count: 0, amount: 0 }, paid: { count: 0, amount: 0 }, upcoming: { count: 0, amount: 0 } })
   
   // Modal state
@@ -55,23 +53,6 @@ export default function RecurringExpensesSection({ darkMode, categories, onExpen
       setKpis(kpisData)
     } catch (err) {
       console.error('Error loading KPIs:', err)
-    }
-  }
-
-  const handleGenerate = async () => {
-    setGenerating(true)
-    try {
-      const count = await generateRecurringExpenses()
-      showToast(`${count} despeses generades`, 'success')
-      await loadKPIs()
-      if (onExpensesGenerated) {
-        onExpensesGenerated()
-      }
-    } catch (err) {
-      console.error('Error generating expenses:', err)
-      showToast('Error generant despeses', 'error')
-    } finally {
-      setGenerating(false)
     }
   }
 
@@ -298,18 +279,6 @@ export default function RecurringExpensesSection({ darkMode, categories, onExpen
       <div style={styles.header}>
         <h2 style={styles.title}>Despeses Recurrents Mensuals</h2>
         <div style={styles.actions}>
-          <button
-            onClick={handleGenerate}
-            disabled={generating}
-            style={{
-              ...styles.button,
-              backgroundColor: '#4f46e5',
-              color: '#ffffff'
-            }}
-          >
-            <RefreshCw size={16} style={{ animation: generating ? 'spin 1s linear infinite' : 'none' }} />
-            {generating ? 'Generant...' : 'Generar Expenses'}
-          </button>
           <button
             onClick={handleNew}
             style={{
