@@ -502,9 +502,19 @@ export default function Finances() {
       const amount = Math.abs(parseFloat(editingTransaction.amount))
       
       if (editingTransaction.type === 'expense') {
-      const data = {
+        // Get category name from category_id (REQUIRED for DB NOT NULL constraint)
+        const catList = categories.expense
+        const selectedCategory = catList.find(c => c.id === editingTransaction.category_id)
+        if (!selectedCategory) {
+          showToast('Categoria no vàlida', 'error')
+          setSaving(false)
+          return
+        }
+        
+        const data = {
           project_id: editingTransaction.project_id || null,
           category_id: editingTransaction.category_id,
+          category: selectedCategory.name, // REQUIRED: category (string) NOT NULL in DB
           description: editingTransaction.description,
           amount: amount,
           currency: editingTransaction.currency,
