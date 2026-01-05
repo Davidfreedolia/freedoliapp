@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Barcode, Package, Save, Plus, AlertCircle, CheckCircle2, X } from 'lucide-react'
 import HelpIcon from './HelpIcon'
@@ -13,6 +13,7 @@ import {
 } from '../lib/supabase'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
+import { showToast } from '../components/Toast'
 
 const GTIN_TYPES = [
   { value: 'EAN', label: 'EAN' },
@@ -29,6 +30,9 @@ export default function IdentifiersSection({ projectId, darkMode }) {
   const [saving, setSaving] = useState(false)
   const [availableGtins, setAvailableGtins] = useState([])
   const [showAssignModal, setShowAssignModal] = useState(false)
+  const [selectedGtinForAssign, setSelectedGtinForAssign] = useState(null)
+  const [assignFormData, setAssignFormData] = useState({ sku: '', fnsku: '' })
+  const [assigning, setAssigning] = useState(false)
   const [assignedGtinFromPool, setAssignedGtinFromPool] = useState(null)
   const [formData, setFormData] = useState({
     gtin_type: '',
@@ -118,15 +122,81 @@ export default function IdentifiersSection({ projectId, darkMode }) {
   }
 
   const handleAssignFromPool = async (gtinPoolId) => {
+    // Obrir formulari d'assignació amb SKU/FNSKU
+    const gtin = availableGtins.find(g => g.id === gtinPoolId)
+    if (gtin) {
+      setSelectedGtinForAssign(gtin)
+      setAssignFormData({ sku: '', fnsku: '' })
+    }
+  }
+
+  const handleConfirmAssign = async () => {
+    if (!selectedGtinForAssign) return
+    if (!assignFormData.sku || !assignFormData.sku.trim()) {
+      showToast('SKU és obligatori', 'error')
+      return
+    }
+
+    setAssigning(true)
     try {
-      await assignGtinFromPool(gtinPoolId, projectId)
-      await loadData() // Recarregar dades
+      const userId = await getCurrentUserId()
+      
+      // Insertar en product_identifiers PRIMER
+      const { error: insertError } = await supabase
+        .from('product_identifiers')
+        .insert([{
+          user_id: userId,
+          project_id: projectId,
+          gtin_code: selectedGtinForAssign.gtin_code,
+          gtin_type: selectedGtinForAssign.gtin_type,
+          sku: assignFormData.sku.trim(),
+          fnsku: assignFormData.fnsku?.trim() || null,
+          is_demo: false
+        }])
+
+      if (insertError) {
+        // Si és error de unique constraint (23505)
+        if (insertError.code === '23505') {
+          // Detectar si és SKU o FNSKU duplicat
+          if (insertError.message?.includes('sku') || insertError.message?.includes('SKU')) {
+            showToast('SKU ja utilitzat per un altre producte', 'error')
+          } else if (insertError.message?.includes('fnsku') || insertError.message?.includes('FNSKU')) {
+            showToast('FNSKU ja utilitzat per un altre producte', 'error')
+          } else {
+            showToast('Aquest SKU o FNSKU ja està en ús', 'error')
+          }
+          setAssigning(false)
+          return // NO actualitzar gtin_pool
+        }
+        throw insertError
+      }
+
+      // Si l'insert ha tingut èxit, actualitzar gtin_pool
+      const { error: updateError } = await supabase
+        .from('gtin_pool')
+        .update({
+          status: 'assigned',
+          assigned_to_project_id: projectId
+        })
+        .eq('id', selectedGtinForAssign.id)
+
+      if (updateError) {
+        // Si falla l'update, intentar eliminar el product_identifiers creat
+        console.error('Error actualitzant gtin_pool:', updateError)
+        // No fem rollback automàtic, només loguegem
+      }
+
+      // Recarregar dades
+      await loadData()
       setShowAssignModal(false)
-      alert('GTIN assignat correctament des del pool')
+      setSelectedGtinForAssign(null)
+      setAssignFormData({ sku: '', fnsku: '' })
+      showToast('GTIN assignat correctament', 'success')
     } catch (err) {
       console.error('Error assignant GTIN:', err)
-      alert('Error assignant GTIN: ' + (err.message || 'Error desconegut'))
+      showToast('Error assignant GTIN: ' + (err.message || 'Error desconegut'), 'error')
     }
+    setAssigning(false)
   }
 
   const handleReleaseGtin = async () => {
@@ -356,7 +426,11 @@ export default function IdentifiersSection({ projectId, darkMode }) {
 
       {/* Modal Assign from Pool */}
       {showAssignModal && (
-        <div style={{...styles.modalOverlay, ...modalStyles.overlay}} onClick={() => setShowAssignModal(false)}>
+        <div style={{...styles.modalOverlay, ...modalStyles.overlay}} onClick={() => {
+          setShowAssignModal(false)
+          setSelectedGtinForAssign(null)
+          setAssignFormData({ sku: '', fnsku: '' })
+        }}>
           <div
             style={{
               ...styles.modal,
@@ -370,17 +444,114 @@ export default function IdentifiersSection({ projectId, darkMode }) {
                 ...styles.modalTitle,
                 color: darkMode ? '#ffffff' : '#111827'
               }}>
-                Assignar GTIN del Pool
+                {selectedGtinForAssign ? 'Assignar GTIN amb SKU/FNSKU' : 'Assignar GTIN del Pool'}
               </h3>
               <button
-                onClick={() => setShowAssignModal(false)}
+                onClick={() => {
+                  setShowAssignModal(false)
+                  setSelectedGtinForAssign(null)
+                  setAssignFormData({ sku: '', fnsku: '' })
+                }}
                 style={styles.modalClose}
               >
                 ×
               </button>
             </div>
             <div style={styles.modalBody}>
-              {availableGtins.length === 0 ? (
+              {selectedGtinForAssign ? (
+                // Formulari d'assignació amb SKU/FNSKU
+                <div style={styles.assignForm}>
+                  <div style={styles.gtinPreview}>
+                    <div style={{
+                      ...styles.gtinCode,
+                      color: darkMode ? '#ffffff' : '#111827',
+                      fontSize: '18px',
+                      marginBottom: '4px'
+                    }}>
+                      {selectedGtinForAssign.gtin_code || 'GTIN_EXEMPT'}
+                    </div>
+                    <div style={{
+                      ...styles.gtinType,
+                      color: darkMode ? '#9ca3af' : '#6b7280'
+                    }}>
+                      {selectedGtinForAssign.gtin_type}
+                    </div>
+                  </div>
+                  
+                  <div style={styles.formGroup}>
+                    <label style={{
+                      ...styles.label,
+                      color: darkMode ? '#e5e7eb' : '#374151'
+                    }}>
+                      SKU *
+                    </label>
+                    <input
+                      type="text"
+                      value={assignFormData.sku}
+                      onChange={e => setAssignFormData({ ...assignFormData, sku: e.target.value })}
+                      placeholder="Ex: SKU-001"
+                      style={{
+                        ...styles.input,
+                        backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                        color: darkMode ? '#ffffff' : '#111827',
+                        borderColor: darkMode ? '#374151' : '#d1d5db'
+                      }}
+                    />
+                  </div>
+
+                  <div style={styles.formGroup}>
+                    <label style={{
+                      ...styles.label,
+                      color: darkMode ? '#e5e7eb' : '#374151'
+                    }}>
+                      FNSKU (opcional)
+                    </label>
+                    <input
+                      type="text"
+                      value={assignFormData.fnsku}
+                      onChange={e => setAssignFormData({ ...assignFormData, fnsku: e.target.value })}
+                      placeholder="Ex: X001ABCD1234"
+                      style={{
+                        ...styles.input,
+                        backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                        color: darkMode ? '#ffffff' : '#111827',
+                        borderColor: darkMode ? '#374151' : '#d1d5db'
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+                    <button
+                      onClick={() => {
+                        setSelectedGtinForAssign(null)
+                        setAssignFormData({ sku: '', fnsku: '' })
+                      }}
+                      style={{
+                        ...styles.assignGtinButton,
+                        backgroundColor: darkMode ? '#374151' : '#e5e7eb',
+                        color: darkMode ? '#ffffff' : '#111827',
+                        flex: 1
+                      }}
+                    >
+                      Cancel·lar
+                    </button>
+                    <button
+                      onClick={handleConfirmAssign}
+                      disabled={assigning || !assignFormData.sku?.trim()}
+                      style={{
+                        ...styles.assignGtinButton,
+                        backgroundColor: '#4f46e5',
+                        color: '#ffffff',
+                        flex: 1,
+                        opacity: (assigning || !assignFormData.sku?.trim()) ? 0.6 : 1,
+                        cursor: (assigning || !assignFormData.sku?.trim()) ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      {assigning ? 'Assignant...' : 'Assignar'}
+                    </button>
+                  </div>
+                </div>
+              ) : availableGtins.length === 0 ? (
                 <div style={styles.emptyMessage}>
                   <AlertCircle size={24} />
                   <p>No hi ha codis GTIN disponibles al pool</p>
@@ -612,6 +783,19 @@ const styles = {
     fontWeight: '500',
     cursor: 'pointer',
     transition: 'all 0.2s'
+  },
+  assignForm: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px'
+  },
+  gtinPreview: {
+    padding: '16px',
+    borderRadius: '8px',
+    backgroundColor: 'var(--bg-secondary, #f9fafb)',
+    border: '1px solid var(--border-color, #e5e7eb)',
+    textAlign: 'center',
+    marginBottom: '8px'
   }
 }
 
