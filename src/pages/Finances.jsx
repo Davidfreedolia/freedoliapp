@@ -159,41 +159,29 @@ export default function Finances() {
   const loadData = async () => {
     setLoading(true)
     setError(null)
-    try {
-      const userId = await getCurrentUserId()
-      
-      // Load categories (filter by demoMode from AppContext)
-      let categoriesData
-      if (demoMode === true) {
-        categoriesData = await mockGetFinanceCategories()
-      } else {
-        const { data } = await supabase
-          .from('finance_categories')
-          .select('*')
-          .eq('user_id', userId)
-          .eq('is_demo', false) // Real mode: only non-demo categories
-          .order('sort_order', { ascending: true })
-        categoriesData = data || []
-      }
-      
-      const incomeCats = (categoriesData || []).filter(c => c.type === 'income')
-      const expenseCats = (categoriesData || []).filter(c => c.type === 'expense')
-      setCategories({ income: incomeCats, expense: expenseCats })
-      
-      // Load expenses and incomes
-      let expensesRes, incomesRes, projectsData, suppliersData, viewsRes
-      
-      if (demoMode === true) {
-        // Demo mode: use mock data (ALL mock, no DB queries)
-        const [mockExpenses, mockIncomes, mockProjects, mockSuppliers] = await Promise.all([
+    
+    // HARD GATE: If demoMode === true, use ONLY mock data, NO Supabase calls
+    if (demoMode === true) {
+      try {
+        // Import mock functions
+        const { mockGetFinanceCategories, mockGetExpenses, mockGetIncomes, mockGetProjects, mockGetSuppliers } = await import('../demo/demoMode')
+        
+        // Load ALL mock data (NO Supabase, NO getCurrentUserId)
+        const [categoriesData, mockExpenses, mockIncomes, mockProjects, mockSuppliers] = await Promise.all([
+          mockGetFinanceCategories(),
           mockGetExpenses(),
           mockGetIncomes(),
           mockGetProjects(),
           mockGetSuppliers()
-      ])
-      
+        ])
+        
+        // Set categories
+        const incomeCats = (categoriesData || []).filter(c => c.type === 'income')
+        const expenseCats = (categoriesData || []).filter(c => c.type === 'expense')
+        setCategories({ income: incomeCats, expense: expenseCats })
+        
         // Enrich expenses and incomes with project and category data
-        expensesRes = { 
+        const expensesRes = { 
           data: mockExpenses.map(e => {
             const project = mockProjects.find(p => p.id === e.project_id)
             const category = categoriesData.find(c => c.id === e.category_id)
@@ -206,7 +194,8 @@ export default function Finances() {
             }
           })
         }
-        incomesRes = { 
+        
+        const incomesRes = { 
           data: mockIncomes.map(i => {
             const project = mockProjects.find(p => p.id === i.project_id)
             const category = categoriesData.find(c => c.id === i.category_id)
@@ -217,53 +206,115 @@ export default function Finances() {
             }
           })
         }
-        projectsData = mockProjects
-        suppliersData = mockSuppliers
-        viewsRes = { data: [] }
-      } else {
-        // Production: use real Supabase queries (demoMode from AppContext)
-        const results = await Promise.all([
-          supabase
-            .from('expenses')
-            .select(`
-              *,
-              is_recurring,
-              recurring_expense_id,
-              recurring_status,
-              recurring_period,
-              project:projects(id, name, project_code),
-              supplier:suppliers(id, name),
-              category:finance_categories(id, name, color, icon)
-            `)
-            .eq('user_id', userId)
-            .eq('is_demo', false) // Real mode: only non-demo expenses
-            .order('expense_date', { ascending: false }),
-          supabase
-            .from('incomes')
-            .select(`
-              *,
-              project:projects(id, name, project_code),
-              category:finance_categories(id, name, color, icon)
-            `)
-            .eq('user_id', userId)
-            .eq('is_demo', false) // Real mode: only non-demo incomes
-            .order('income_date', { ascending: false }),
-          getProjects(),
-          getSuppliers(),
-          supabase
-            .from('finance_views')
-            .select('*')
-            .eq('user_id', userId)
-            .eq('is_demo', false) // Real mode: only non-demo views
-            .order('is_default', { ascending: false })
-            .order('created_at', { ascending: false })
-        ])
-        expensesRes = results[0]
-        incomesRes = results[1]
-        projectsData = results[2]
-        suppliersData = results[3]
-        viewsRes = results[4]
+        
+        // Combine into ledger
+        const expenses = (expensesRes.data || []).map(e => ({
+          ...e,
+          type: 'expense',
+          date: e.expense_date,
+          amount: -Math.abs(parseFloat(e.amount || 0)),
+          currency: e.currency || 'EUR'
+        }))
+        
+        const incomes = (incomesRes.data || []).map(i => ({
+          ...i,
+          type: 'income',
+          date: i.income_date,
+          amount: Math.abs(parseFloat(i.amount || 0)),
+          currency: i.currency || 'EUR'
+        }))
+        
+        // Combine and sort by date
+        const combined = [...expenses, ...incomes].sort((a, b) => 
+          new Date(b.date) - new Date(a.date)
+        )
+        
+        // Calculate running balance
+        let balance = 0
+        const ledgerWithBalance = combined.map(item => {
+          balance += item.amount
+          return { ...item, balance }
+        })
+        
+        // Set all state (NO real data)
+        setLedger(ledgerWithBalance)
+        setProjects(mockProjects || [])
+        setSuppliers(mockSuppliers || [])
+        setSavedViews([]) // No views in demo mode
+        setActiveView(null)
+      } catch (err) {
+        console.error('Error loading demo data:', err)
+        setError(err.message || 'Error carregant dades demo')
+        setLedger([])
+        setCategories({ income: [], expense: [] })
+        setProjects([])
+        setSuppliers([])
+        setSavedViews([])
+      } finally {
+        setLoading(false)
       }
+      return // EARLY RETURN: No Supabase calls
+    }
+    
+    // REAL MODE: demoMode === false
+    try {
+      const userId = await getCurrentUserId()
+      
+      // Load categories (real mode only)
+      const { data: categoriesData } = await supabase
+        .from('finance_categories')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('is_demo', false) // Real mode: only non-demo categories
+        .order('sort_order', { ascending: true })
+      
+      const incomeCats = ((categoriesData || []).filter(c => c.type === 'income'))
+      const expenseCats = ((categoriesData || []).filter(c => c.type === 'expense'))
+      setCategories({ income: incomeCats, expense: expenseCats })
+      
+      // Load expenses, incomes, projects, suppliers, views (ALL with is_demo = false)
+      const results = await Promise.all([
+        supabase
+          .from('expenses')
+          .select(`
+            *,
+            is_recurring,
+            recurring_expense_id,
+            recurring_status,
+            recurring_period,
+            project:projects(id, name, project_code),
+            supplier:suppliers(id, name),
+            category:finance_categories(id, name, color, icon)
+          `)
+          .eq('user_id', userId)
+          .eq('is_demo', false) // Real mode: only non-demo expenses
+          .order('expense_date', { ascending: false }),
+        supabase
+          .from('incomes')
+          .select(`
+            *,
+            project:projects(id, name, project_code),
+            category:finance_categories(id, name, color, icon)
+          `)
+          .eq('user_id', userId)
+          .eq('is_demo', false) // Real mode: only non-demo incomes
+          .order('income_date', { ascending: false }),
+        getProjects(),
+        getSuppliers(),
+        supabase
+          .from('finance_views')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('is_demo', false) // Real mode: only non-demo views
+          .order('is_default', { ascending: false })
+          .order('created_at', { ascending: false })
+      ])
+      
+      const expensesRes = results[0]
+      const incomesRes = results[1]
+      const projectsData = results[2]
+      const suppliersData = results[3]
+      const viewsRes = results[4]
       
       // Combine into ledger
       const expenses = (expensesRes.data || []).map(e => ({
