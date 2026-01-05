@@ -263,28 +263,14 @@ export default function Finances() {
       // Load categories (real mode only)
       // Include both user categories AND system categories (is_system=true)
       // Filter: is_demo = false OR is_demo IS NULL (handle legacy data)
-      // Use separate queries and combine, or filter client-side for is_demo
       const { data: categoriesData, error: categoriesError } = await supabase
         .from('finance_categories')
         .select('*')
         .or(`user_id.eq.${userId},is_system.eq.true`)
         .order('sort_order', { ascending: true })
       
-      // Debug logging (remove after validation)
       if (categoriesError) {
-        console.error('[Finances] Error loading categories:', categoriesError)
-      } else {
-        console.log('[Finances] Loaded categories (raw):', categoriesData?.length || 0, 'rows')
-        if (categoriesData && categoriesData.length > 0) {
-          console.log('[Finances] Sample categories:', categoriesData.slice(0, 5).map(c => ({
-            id: c.id,
-            name: c.name,
-            type: c.type,
-            is_demo: c.is_demo,
-            is_system: c.is_system,
-            user_id: c.user_id
-          })))
-        }
+        console.error('Error loading categories:', categoriesError)
       }
       
       // Filter client-side: is_demo = false OR is_demo IS NULL (real mode)
@@ -307,8 +293,6 @@ export default function Finances() {
       
       const incomeCats = realCategories.filter(c => normalizeType(c.type) === 'income')
       const expenseCats = realCategories.filter(c => normalizeType(c.type) === 'expense')
-      
-      console.log('[Finances] Mapped categories - income:', incomeCats.length, 'expense:', expenseCats.length)
       
       setCategories({ income: incomeCats, expense: expenseCats })
       
