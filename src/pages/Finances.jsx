@@ -49,7 +49,7 @@ import {
 } from '../lib/supabase'
 import { safeArray } from '../lib/safeArray'
 import { isDemoMode } from '../demo/demoMode'
-import { mockGetExpenses, mockGetIncomes, mockGetFinanceCategories } from '../demo/demoMode'
+import { mockGetExpenses, mockGetIncomes, mockGetFinanceCategories, mockGetProjects, mockGetSuppliers } from '../demo/demoMode'
 import Header from '../components/Header'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
@@ -184,12 +184,12 @@ export default function Finances() {
       let expensesRes, incomesRes, projectsData, suppliersData, viewsRes
       
       if (demoMode === true) {
-        // Demo mode: use mock data
+        // Demo mode: use mock data (ALL mock, no DB queries)
         const [mockExpenses, mockIncomes, mockProjects, mockSuppliers] = await Promise.all([
           mockGetExpenses(),
           mockGetIncomes(),
-        getProjects(),
-        getSuppliers()
+          mockGetProjects(),
+          mockGetSuppliers()
       ])
       
         // Enrich expenses and incomes with project and category data
