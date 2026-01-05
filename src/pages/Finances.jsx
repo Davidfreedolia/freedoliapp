@@ -261,15 +261,55 @@ export default function Finances() {
       const userId = await getCurrentUserId()
       
       // Load categories (real mode only)
-      const { data: categoriesData } = await supabase
+      // Include both user categories AND system categories (is_system=true)
+      // Filter: is_demo = false OR is_demo IS NULL (handle legacy data)
+      // Use separate queries and combine, or filter client-side for is_demo
+      const { data: categoriesData, error: categoriesError } = await supabase
         .from('finance_categories')
         .select('*')
-        .eq('user_id', userId)
-        .eq('is_demo', false) // Real mode: only non-demo categories
+        .or(`user_id.eq.${userId},is_system.eq.true`)
         .order('sort_order', { ascending: true })
       
-      const incomeCats = ((categoriesData || []).filter(c => c.type === 'income'))
-      const expenseCats = ((categoriesData || []).filter(c => c.type === 'expense'))
+      // Debug logging (remove after validation)
+      if (categoriesError) {
+        console.error('[Finances] Error loading categories:', categoriesError)
+      } else {
+        console.log('[Finances] Loaded categories (raw):', categoriesData?.length || 0, 'rows')
+        if (categoriesData && categoriesData.length > 0) {
+          console.log('[Finances] Sample categories:', categoriesData.slice(0, 5).map(c => ({
+            id: c.id,
+            name: c.name,
+            type: c.type,
+            is_demo: c.is_demo,
+            is_system: c.is_system,
+            user_id: c.user_id
+          })))
+        }
+      }
+      
+      // Filter client-side: is_demo = false OR is_demo IS NULL (real mode)
+      const realCategories = (categoriesData || []).filter(c => 
+        c.is_demo === false || c.is_demo === null || c.is_demo === undefined
+      )
+      
+      // Robust type mapping: handle case-insensitive and variations
+      const normalizeType = (type) => {
+        if (!type) return null
+        const lower = String(type).toLowerCase().trim()
+        if (['expense', 'expenses', 'gasto', 'gastos', 'despesa', 'despeses'].includes(lower)) {
+          return 'expense'
+        }
+        if (['income', 'incomes', 'ingreso', 'ingresos', 'ingrés', 'ingressos'].includes(lower)) {
+          return 'income'
+        }
+        return null
+      }
+      
+      const incomeCats = realCategories.filter(c => normalizeType(c.type) === 'income')
+      const expenseCats = realCategories.filter(c => normalizeType(c.type) === 'expense')
+      
+      console.log('[Finances] Mapped categories - income:', incomeCats.length, 'expense:', expenseCats.length)
+      
       setCategories({ income: incomeCats, expense: expenseCats })
       
       // Load expenses, incomes, projects, suppliers, views (ALL with is_demo = false)
@@ -424,9 +464,16 @@ export default function Finances() {
     setSaving(true)
     try {
       const userId = await getCurrentUserId()
+      
+      // Normalize type to canonical values (expense/income)
+      const normalizedType = editingCategory.type === 'expense' ? 'expense' : 'income'
+      
       const data = {
         ...editingCategory,
-        user_id: userId
+        type: normalizedType, // Ensure canonical type value
+        user_id: userId,
+        is_demo: demoMode, // Set is_demo based on current mode
+        is_system: false // User-created categories are never system
       }
       
       if (editingCategory.id) {
