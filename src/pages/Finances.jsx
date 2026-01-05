@@ -940,6 +940,7 @@ export default function Finances() {
           darkMode={darkMode} 
           categories={categories}
           demoMode={demoMode}
+          expenseCategories={categories?.expense || []}
           onExpensesGenerated={loadData}
         />
 

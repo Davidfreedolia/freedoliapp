@@ -11,7 +11,7 @@ import {
 import { getProjects, getSuppliers } from '../lib/supabase'
 import { showToast } from './Toast'
 
-export default function RecurringExpensesSection({ darkMode, categories, demoMode, onExpensesGenerated }) {
+export default function RecurringExpensesSection({ darkMode, categories, demoMode, expenseCategories = [], onExpensesGenerated }) {
   const [recurringExpenses, setRecurringExpenses] = useState([])
   const [projects, setProjects] = useState([])
   const [suppliers, setSuppliers] = useState([])
@@ -61,7 +61,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
       description: '',
       amount: '',
       currency: 'EUR',
-      category_id: categories.expense[0]?.id || null,
+      category_id: expenseCategories[0]?.id || null,
       project_id: null,
       supplier_id: null,
       day_of_month: 1,
