@@ -88,6 +88,39 @@ export default function GTINPoolSection({ darkMode }) {
     return null
   }
 
+  // Normalitzar gtin_type per complir constraint DB: 'EAN', 'UPC', 'GTIN_EXEMPT'
+  const normalizeGtinType = (type) => {
+    if (!type) return null
+    const normalized = type.toString().trim().toUpperCase()
+    
+    // Mapeig de sinònims comuns
+    const typeMap = {
+      'EAN': 'EAN',
+      'EAN13': 'EAN',
+      'EAN-13': 'EAN',
+      'UPC': 'UPC',
+      'UPC-A': 'UPC',
+      'UPC12': 'UPC',
+      'UPC-12': 'UPC',
+      'GTIN_EXEMPT': 'GTIN_EXEMPT',
+      'EXEMPT': 'GTIN_EXEMPT',
+      'GTIN-EXEMPT': 'GTIN_EXEMPT'
+    }
+    
+    // Si coincideix exactament amb un valor vàlid, retornar-lo
+    if (['EAN', 'UPC', 'GTIN_EXEMPT'].includes(normalized)) {
+      return normalized
+    }
+    
+    // Si està al map, retornar el valor mapejat
+    if (typeMap[normalized]) {
+      return typeMap[normalized]
+    }
+    
+    // Si no coincideix, retornar null (s'haurà de detectar automàticament)
+    return null
+  }
+
   // Processar Excel/CSV
   const handleFileSelect = async (e) => {
     const file = e.target.files?.[0]
@@ -111,11 +144,12 @@ export default function GTINPoolSection({ darkMode }) {
       // Validar i detectar tipus
       const validated = rows.map((row, index) => {
         const code = row.gtin_code
-        const type = row.gtin_type || detectGtinType(code)
+        const normalizedType = normalizeGtinType(row.gtin_type)
+        const type = normalizedType || detectGtinType(code) || 'EAN'
         
         return {
           ...row,
-          gtin_type: type || 'EAN',
+          gtin_type: type,
           valid: validateGtin(code),
           row: index + 1
         }
@@ -149,27 +183,56 @@ export default function GTINPoolSection({ darkMode }) {
     try {
       const validRows = importPreview.rows.filter(r => r.valid && !importPreview.conflicts.includes(r.gtin_code))
       
-      const toInsert = validRows.map(row => ({
-        gtin_code: row.gtin_code.trim().replace(/\D/g, ''),
-        gtin_type: row.gtin_type || detectGtinType(row.gtin_code) || 'EAN',
-        notes: row.notes || null,
-        status: 'available'
-      }))
+      const toInsert = validRows.map(row => {
+        const code = row.gtin_code.trim().replace(/\D/g, '')
+        const normalizedType = normalizeGtinType(row.gtin_type)
+        const type = normalizedType || detectGtinType(code) || 'EAN'
+        
+        // Validar que el tipus final sigui vàlid abans d'inserir
+        if (!['EAN', 'UPC', 'GTIN_EXEMPT'].includes(type)) {
+          throw new Error(`Fila ${row.row}: Tipus GTIN invàlid: "${row.gtin_type}". Valors vàlids: EAN, UPC, GTIN_EXEMPT`)
+        }
+        
+        return {
+          gtin_code: code,
+          gtin_type: type,
+          notes: row.notes || null,
+          status: 'available'
+        }
+      })
 
-      // Inserir en batch
+      // Inserir en batch amb tracking d'errors
+      const inserted = []
+      const errors = []
       for (const gtin of toInsert) {
         try {
           await addGtinToPool(gtin)
+          inserted.push(gtin.gtin_code)
         } catch (err) {
           // Si ja existeix, continuar
-          if (err.code !== '23505') throw err
+          if (err.code === '23505') {
+            continue
+          }
+          // Si és error de constraint, afegir a errors
+          if (err.code === '23514') {
+            errors.push(`${gtin.gtin_code}: Tipus invàlid "${gtin.gtin_type}"`)
+            continue
+          }
+          // Altres errors, llançar
+          throw err
         }
+      }
+
+      // Mostrar feedback detallat
+      if (errors.length > 0) {
+        showToast(`${inserted.length} GTINs importats. ${errors.length} errors: ${errors.join('; ')}`, 'warning')
+      } else if (inserted.length > 0) {
+        showToast(t('settings.gtinPool.importedSuccess', { count: inserted.length }), 'success')
       }
 
       await loadGtins()
       setShowImportModal(false)
       setImportPreview(null)
-      showToast(t('settings.gtinPool.importedSuccess', { count: toInsert.length }), 'success')
     } catch (err) {
       console.error('Error important GTINs:', err)
       showToast(t('settings.gtinPool.importError') + ': ' + err.message, 'error')
