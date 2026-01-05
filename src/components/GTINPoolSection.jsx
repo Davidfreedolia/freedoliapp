@@ -19,8 +19,6 @@ import {
   getGtinPool, 
   addGtinToPool, 
   releaseGtinFromProject,
-  getProjects,
-  getCurrentUserId,
   supabase
 } from '../lib/supabase'
 import { showToast } from './Toast'
@@ -39,8 +37,6 @@ export default function GTINPoolSection({ darkMode }) {
   const [showImportModal, setShowImportModal] = useState(false)
   const [importing, setImporting] = useState(false)
   const [importPreview, setImportPreview] = useState(null)
-  const [selectedProjectId, setSelectedProjectId] = useState('')
-  const [projects, setProjects] = useState([])
   const fileInputRef = useRef(null)
 
   const loadGtins = useCallback(async () => {
@@ -57,21 +53,6 @@ export default function GTINPoolSection({ darkMode }) {
   useEffect(() => {
     loadGtins()
   }, [loadGtins])
-
-  // Carregar projectes quan s'obre el modal
-  useEffect(() => {
-    if (showImportModal) {
-      const loadProjects = async () => {
-        try {
-          const projectsData = await getProjects(false) // No incloure discarded
-          setProjects(projectsData || [])
-        } catch (err) {
-          console.error('Error carregant projectes:', err)
-        }
-      }
-      loadProjects()
-    }
-  }, [showImportModal])
 
   // Estadístiques
   const stats = {
@@ -158,28 +139,21 @@ export default function GTINPoolSection({ darkMode }) {
 
       // Detectar format: llegir primera línia com a header
       const headerLine = lines[0].toLowerCase()
-      const isNewFormat = headerLine.includes('upc') || headerLine.includes('ean') || 
-                          (headerLine.includes('sku') && headerLine.includes('fnsku'))
+      const isNewFormat = (headerLine.includes('upc') || headerLine.includes('ean')) && !headerLine.includes('gtin_code')
       const isOldFormat = headerLine.includes('gtin_code') || headerLine.includes('gtin_type')
 
       let rows = []
-      let csvFormat = 'old' // 'old' o 'new'
 
       if (isNewFormat && !isOldFormat) {
-        // Nou format: UPC,EAN,SKU,FNSKU
-        csvFormat = 'new'
+        // Format UPC,EAN,SKU,FNSKU (ignorar SKU/FNSKU, només extreure UPC/EAN)
         const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, '').toUpperCase())
         const upcIdx = headers.indexOf('UPC')
         const eanIdx = headers.indexOf('EAN')
-        const skuIdx = headers.indexOf('SKU')
-        const fnskuIdx = headers.indexOf('FNSKU')
 
         rows = lines.slice(1).map((line, index) => {
           const parts = line.split(',').map(p => p.trim().replace(/^"|"$/g, ''))
           const upc = upcIdx >= 0 ? (parts[upcIdx] || '').replace(/\D/g, '') : ''
           const ean = eanIdx >= 0 ? (parts[eanIdx] || '').replace(/\D/g, '') : ''
-          const sku = skuIdx >= 0 ? (parts[skuIdx] || '').trim() : ''
-          const fnsku = fnskuIdx >= 0 ? (parts[fnskuIdx] || '').trim() : ''
           
           // EAN té prioritat sobre UPC
           const gtin_code = ean || upc
@@ -188,15 +162,12 @@ export default function GTINPoolSection({ darkMode }) {
           return {
             gtin_code,
             gtin_type,
-            sku: sku || null,
-            fnsku: fnsku || null,
             notes: null,
             row: index + 2 // +2 perquè comença després del header i és 1-based
           }
         })
       } else {
         // Format antic: gtin_code,gtin_type,notes (o sense header)
-        csvFormat = 'old'
         const startIdx = isOldFormat ? 1 : 0 // Saltar header si existeix
         rows = lines.slice(startIdx).map((line, index) => {
           const parts = line.split(',').map(p => p.trim().replace(/^"|"$/g, ''))
@@ -204,8 +175,6 @@ export default function GTINPoolSection({ darkMode }) {
             gtin_code: parts[0] || '',
             gtin_type: parts[1] || '',
             notes: parts[2] || '',
-            sku: null,
-            fnsku: null,
             row: startIdx + index + 1
           }
         })
@@ -235,9 +204,7 @@ export default function GTINPoolSection({ darkMode }) {
         duplicates: [...new Set(duplicates)],
         conflicts: conflicts.map(c => c.gtin_code),
         valid: validated.filter(v => v.valid).length,
-        invalid: validated.filter(v => !v.valid).length,
-        csvFormat,
-        hasIdentifiers: validated.some(r => r.sku || r.fnsku)
+        invalid: validated.filter(v => !v.valid).length
       })
     } catch (err) {
       console.error('Error processant fitxer:', err)
@@ -249,12 +216,6 @@ export default function GTINPoolSection({ darkMode }) {
   // Confirmar importació
   const handleConfirmImport = async () => {
     if (!importPreview) return
-
-    // Validar projecte si hi ha SKU/FNSKU
-    if (importPreview.hasIdentifiers && !selectedProjectId) {
-      showToast('Projecte requerit per registrar SKU/FNSKU', 'warning')
-      return
-    }
 
     setImporting(true)
     try {
@@ -274,27 +235,22 @@ export default function GTINPoolSection({ darkMode }) {
           gtin_code: code,
           gtin_type: type,
           notes: row.notes || null,
-          status: 'available',
-          sku: row.sku || null,
-          fnsku: row.fnsku || null
+          status: 'available'
         }
       })
 
       // Inserir GTINs al pool
       const inserted = []
+      const alreadyExisted = []
       const errors = []
       for (const gtin of toInsert) {
         try {
-          await addGtinToPool({
-            gtin_code: gtin.gtin_code,
-            gtin_type: gtin.gtin_type,
-            notes: gtin.notes,
-            status: gtin.status
-          })
+          await addGtinToPool(gtin)
           inserted.push(gtin.gtin_code)
         } catch (err) {
-          // Si ja existeix, continuar
+          // Si ja existeix, comptar com "already existed"
           if (err.code === '23505') {
+            alreadyExisted.push(gtin.gtin_code)
             continue
           }
           // Si és error de constraint, afegir a errors
@@ -307,73 +263,28 @@ export default function GTINPoolSection({ darkMode }) {
         }
       }
 
-      // Inserir product_identifiers si hi ha SKU/FNSKU i projecte seleccionat
-      let identifiersInserted = 0
-      let identifiersDuplicates = 0
-      const userId = await getCurrentUserId()
-      
-      if (importPreview.hasIdentifiers && selectedProjectId) {
-        const rowsWithIdentifiers = toInsert.filter(r => r.sku || r.fnsku)
-        
-        for (const row of rowsWithIdentifiers) {
-          try {
-            const { error: insertError } = await supabase
-              .from('product_identifiers')
-              .insert([{
-                user_id: userId,
-                project_id: selectedProjectId,
-                gtin_code: row.gtin_code,
-                gtin_type: row.gtin_type,
-                sku: row.sku,
-                fnsku: row.fnsku,
-                is_demo: false
-              }])
-            
-            if (insertError) {
-              // Si és violació de unique (project_id ja té product_identifiers o SKU/FNSKU duplicat)
-              if (insertError.code === '23505') {
-                identifiersDuplicates++
-                continue
-              }
-              throw insertError
-            }
-            identifiersInserted++
-          } catch (err) {
-            // Si és error de unique constraint, continuar
-            if (err.code === '23505') {
-              identifiersDuplicates++
-              continue
-            }
-            console.error('Error inserint product_identifiers:', err)
-            // No llançar error, només loguejar
-          }
-        }
-      }
-
-      // Mostrar feedback detallat
+      // Mostrar feedback: "X imported, Y already existed, Z invalid"
+      const invalidCount = importPreview.invalid
       const parts = []
       if (inserted.length > 0) {
-        parts.push(`${inserted.length} GTIN${inserted.length !== 1 ? 's' : ''} importat${inserted.length !== 1 ? 's' : ''}`)
+        parts.push(`${inserted.length} importat${inserted.length !== 1 ? 's' : ''}`)
       }
-      if (identifiersInserted > 0) {
-        parts.push(`${identifiersInserted} identificador${identifiersInserted !== 1 ? 's' : ''} registrat${identifiersInserted !== 1 ? 's' : ''}`)
+      if (alreadyExisted.length > 0) {
+        parts.push(`${alreadyExisted.length} ja existien`)
       }
-      if (identifiersDuplicates > 0) {
-        parts.push(`${identifiersDuplicates} duplicat${identifiersDuplicates !== 1 ? 's' : ''} omès${identifiersDuplicates !== 1 ? 's' : ''}`)
+      if (invalidCount > 0) {
+        parts.push(`${invalidCount} invàlid${invalidCount !== 1 ? 's' : ''}`)
       }
       
       if (errors.length > 0) {
         showToast(`${parts.join(', ')}. ${errors.length} error${errors.length !== 1 ? 's' : ''}: ${errors.join('; ')}`, 'warning')
       } else if (parts.length > 0) {
-        showToast(parts.join(', '), 'success')
-      } else if (importPreview.hasIdentifiers && !selectedProjectId) {
-        showToast('GTINs importats. Projecte requerit per registrar SKU/FNSKU', 'warning')
+        showToast(parts.join(', '), inserted.length > 0 ? 'success' : 'warning')
       }
 
       await loadGtins()
       setShowImportModal(false)
       setImportPreview(null)
-      setSelectedProjectId('')
     } catch (err) {
       console.error('Error important GTINs:', err)
       showToast(t('settings.gtinPool.importError') + ': ' + err.message, 'error')
@@ -810,7 +721,6 @@ export default function GTINPoolSection({ darkMode }) {
                 onClick={() => {
                   setShowImportModal(false)
                   setImportPreview(null)
-                  setSelectedProjectId('')
                 }}
                 style={styles.modalClose}
               >
@@ -840,42 +750,9 @@ export default function GTINPoolSection({ darkMode }) {
                       ,8437012345679,SKU-002,
                     </code>
                     <small style={{ display: 'block', marginTop: '8px', color: darkMode ? '#6b7280' : '#9ca3af' }}>
-                      EAN i UPC poden estar a la mateixa fila. Si hi ha SKU/FNSKU, selecciona un projecte abans d'importar.
+                      EAN i UPC poden estar a la mateixa fila. Les columnes SKU/FNSKU s'ignoren (només s'importen els GTINs al pool).
                     </small>
                   </p>
-                  {projects.length > 0 && (
-                    <div style={{ marginBottom: '16px' }}>
-                      <label style={{
-                        display: 'block',
-                        marginBottom: '8px',
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        color: darkMode ? '#ffffff' : '#111827'
-                      }}>
-                        Projecte (opcional, requerit per SKU/FNSKU):
-                      </label>
-                      <select
-                        value={selectedProjectId}
-                        onChange={(e) => setSelectedProjectId(e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '10px',
-                          borderRadius: '8px',
-                          border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`,
-                          backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
-                          color: darkMode ? '#ffffff' : '#111827',
-                          fontSize: '14px'
-                        }}
-                      >
-                        <option value="">-- Selecciona projecte (opcional) --</option>
-                        {projects.map(project => (
-                          <option key={project.id} value={project.id}>
-                            {project.sku || project.project_code} - {project.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
                   <div
                     onClick={() => fileInputRef.current?.click()}
                     style={{
@@ -899,65 +776,6 @@ export default function GTINPoolSection({ darkMode }) {
                 </div>
               ) : (
                 <div>
-                  {importPreview.hasIdentifiers && !selectedProjectId && (
-                    <div style={{
-                      padding: '12px',
-                      marginBottom: '16px',
-                      borderRadius: '8px',
-                      backgroundColor: '#fef3c7',
-                      border: '1px solid #fbbf24',
-                      color: '#92400e'
-                    }}>
-                      <AlertTriangle size={16} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle' }} />
-                      <strong>Projecte requerit:</strong> El CSV conté SKU/FNSKU. Selecciona un projecte per registrar-los.
-                    </div>
-                  )}
-                  {importPreview.hasIdentifiers && selectedProjectId && (
-                    <div style={{
-                      padding: '12px',
-                      marginBottom: '16px',
-                      borderRadius: '8px',
-                      backgroundColor: '#d1fae5',
-                      border: '1px solid #10b981',
-                      color: '#065f46'
-                    }}>
-                      <CheckCircle2 size={16} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle' }} />
-                      <strong>Projecte seleccionat:</strong> {projects.find(p => p.id === selectedProjectId)?.name || selectedProjectId}
-                    </div>
-                  )}
-                  {projects.length > 0 && importPreview.hasIdentifiers && (
-                    <div style={{ marginBottom: '16px' }}>
-                      <label style={{
-                        display: 'block',
-                        marginBottom: '8px',
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        color: darkMode ? '#ffffff' : '#111827'
-                      }}>
-                        Projecte (requerit per SKU/FNSKU):
-                      </label>
-                      <select
-                        value={selectedProjectId}
-                        onChange={(e) => setSelectedProjectId(e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '10px',
-                          borderRadius: '8px',
-                          border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`,
-                          backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
-                          color: darkMode ? '#ffffff' : '#111827',
-                          fontSize: '14px'
-                        }}
-                      >
-                        <option value="">-- Selecciona projecte --</option>
-                        {projects.map(project => (
-                          <option key={project.id} value={project.id}>
-                            {project.sku || project.project_code} - {project.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
                   <div style={styles.previewStats}>
                     <div style={styles.previewStat}>
                       <CheckCircle2 size={20} color="#22c55e" />
@@ -988,12 +806,6 @@ export default function GTINPoolSection({ darkMode }) {
                           <th style={styles.th}>{t('settings.gtinPool.row')}</th>
                           <th style={styles.th}>{t('settings.gtinPool.code')}</th>
                           <th style={styles.th}>{t('settings.gtinPool.type')}</th>
-                          {importPreview.hasIdentifiers && (
-                            <>
-                              <th style={styles.th}>SKU</th>
-                              <th style={styles.th}>FNSKU</th>
-                            </>
-                          )}
                           <th style={styles.th}>{t('settings.gtinPool.status')}</th>
                         </tr>
                       </thead>
@@ -1003,12 +815,6 @@ export default function GTINPoolSection({ darkMode }) {
                             <td style={styles.td}>{row.row}</td>
                             <td style={styles.td}>{row.gtin_code}</td>
                             <td style={styles.td}>{row.gtin_type}</td>
-                            {importPreview.hasIdentifiers && (
-                              <>
-                                <td style={styles.td}>{row.sku || '-'}</td>
-                                <td style={styles.td}>{row.fnsku || '-'}</td>
-                              </>
-                            )}
                             <td style={styles.td}>
                               {!row.valid && <span style={{ color: '#ef4444' }}>{t('settings.gtinPool.invalid')}</span>}
                               {importPreview.conflicts.includes(row.gtin_code) && (
@@ -1037,7 +843,6 @@ export default function GTINPoolSection({ darkMode }) {
                 onClick={() => {
                   setShowImportModal(false)
                   setImportPreview(null)
-                  setSelectedProjectId('')
                 }}
                 style={styles.cancelButton}
               >
@@ -1046,10 +851,10 @@ export default function GTINPoolSection({ darkMode }) {
               {importPreview && (
                 <button
                   onClick={handleConfirmImport}
-                  disabled={importing || importPreview.valid === 0 || (importPreview.hasIdentifiers && !selectedProjectId)}
+                  disabled={importing || importPreview.valid === 0}
                   style={{
                     ...styles.confirmButton,
-                    opacity: (importing || importPreview.valid === 0 || (importPreview.hasIdentifiers && !selectedProjectId)) ? 0.6 : 1
+                    opacity: (importing || importPreview.valid === 0) ? 0.6 : 1
                   }}
                 >
                   {importing ? t('settings.gtinPool.importing') : t('settings.gtinPool.importCodes', { count: importPreview.rows.filter(r => r.valid && !importPreview.conflicts.includes(r.gtin_code)).length })}
