@@ -28,13 +28,25 @@ function logDriveError(context, error, metadata = {}, showStack = true) {
   const errorMessage = error instanceof Error ? error.message : error
   const errorStack = showStack && error instanceof Error ? error.stack : null
   
-  console.error('[Drive Error]', {
+  // Detectar si és informació (èxit) basant-nos en el missatge i metadata
+  // Si showStack === false I el missatge no conté "Error" I hi ha folderId, és informació
+  const isInfo = showStack === false && 
+                 !errorMessage.toLowerCase().includes('error') && 
+                 (metadata.folderId || metadata.folder_id)
+  
+  const logData = {
     context,
-    error: errorMessage,
+    ...(isInfo ? { message: errorMessage } : { error: errorMessage }),
     ...(errorStack && { stack: errorStack }),
     timestamp: new Date().toISOString(),
     ...metadata
-  })
+  }
+  
+  if (isInfo) {
+    console.log('[Drive Info]', logData)
+  } else {
+    console.error('[Drive Error]', logData)
+  }
 }
 
 // Singleton instance (declarat abans de handleAuthError per poder-lo usar)
