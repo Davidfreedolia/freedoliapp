@@ -64,12 +64,18 @@ export default function ProjectDetail() {
   
   const [project, setProject] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [projectFolders, setProjectFolders] = useState(null)
   const [selectedFolder, setSelectedFolder] = useState(null)
   const [documents, setDocuments] = useState([])
 
   useEffect(() => {
-    loadProject()
+    if (id) {
+      loadProject()
+    } else {
+      setLoading(false)
+      setError('ID de projecte no vàlid')
+    }
   }, [id])
 
   useEffect(() => {
@@ -79,12 +85,20 @@ export default function ProjectDetail() {
   }, [project, driveConnected])
 
   const loadProject = async () => {
+    if (!id) {
+      setError('ID de projecte no vàlid')
+      setLoading(false)
+      return
+    }
+
     setLoading(true)
     setError(null)
     try {
       const data = await getProject(id)
       if (!data) {
-        navigate('/projects')
+        setError('Projecte no trobat')
+        setProject(null)
+        setDocuments([])
         return
       }
       setProject(data)
