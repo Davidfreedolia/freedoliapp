@@ -19,7 +19,6 @@ import {
   XCircle
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { getProject, updateProject, getDocuments, createDocument } from '../lib/supabase'
 import Header from '../components/Header'
 import FileUploader from '../components/FileUploader'
 import FileBrowser from '../components/FileBrowser'
@@ -82,6 +81,9 @@ export default function ProjectDetail() {
     setLoading(true)
     setError(null)
     try {
+      // Import dinàmic de supabase per evitar cicles d'imports
+      const { getProject, getDocuments } = await import('../lib/supabase')
+      
       const data = await getProject(id)
       if (!data) {
         setError('Projecte no trobat')
@@ -148,6 +150,7 @@ export default function ProjectDetail() {
         // Si no tenia drive_folder_id, guardar-lo ara
         if (!project.drive_folder_id && folders?.main?.id) {
           try {
+            const { updateProject } = await import('../lib/supabase')
             await updateProject(id, { drive_folder_id: folders.main.id })
             setProject({ ...project, drive_folder_id: folders.main.id })
           } catch (e) {
@@ -178,6 +181,7 @@ export default function ProjectDetail() {
     }
     
     try {
+      const { updateProject } = await import('../lib/supabase')
       await updateProject(id, { current_phase: newPhase })
       setProject({ ...project, current_phase: newPhase })
       await refreshProjects()
@@ -193,6 +197,7 @@ export default function ProjectDetail() {
     if (!confirm('Estàs segur que vols restaurar aquest projecte? Tornarà a l\'estat HOLD.')) return
     
     try {
+      const { updateProject } = await import('../lib/supabase')
       await updateProject(id, { decision: 'HOLD' })
       setProject({ ...project, decision: 'HOLD' })
       await refreshProjects()
@@ -207,6 +212,9 @@ export default function ProjectDetail() {
     let savedCount = 0
     let errorCount = 0
     const { logSuccess, logError } = await import('../lib/auditLog')
+    
+    // Import dinàmic de createDocument per evitar cicles d'imports
+    const { createDocument } = await import('../lib/supabase')
     
     for (const file of files) {
       try {
