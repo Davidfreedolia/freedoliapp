@@ -1,9 +1,10 @@
 /**
  * Demo Mode Filter Helper
  * Ensures complete separation between demo and real data
+ * 
+ * IMPORTANT: This module must NOT import supabase.js at module scope to avoid circular dependencies.
+ * All supabase imports are done dynamically inside functions.
  */
-
-import { getCompanySettings } from './supabase'
 
 let _cachedDemoMode = null
 let _cacheTimestamp = null
@@ -22,6 +23,8 @@ export async function getDemoMode() {
   }
 
   try {
+    // Dynamic import to avoid circular dependency with supabase.js
+    const { getCompanySettings } = await import('./supabase')
     const settings = await getCompanySettings()
     _cachedDemoMode = settings?.demo_mode || false
     _cacheTimestamp = now

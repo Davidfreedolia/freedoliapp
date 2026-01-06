@@ -1,7 +1,8 @@
 // Audit Log Service per Freedoliapp
 // Registra events crítics a Supabase per observabilitat
-
-import { supabase } from './supabase'
+//
+// IMPORTANT: This module must NOT import supabase.js at module scope to avoid circular dependencies.
+// All supabase imports are done dynamically inside functions.
 
 /**
  * Registra un event a l'audit log
@@ -39,12 +40,11 @@ export async function logAudit({ entityType, entityId = null, action, status, me
       return
     }
 
-    // Get demo mode setting
+    // Dynamic imports to avoid circular dependencies
     const { getDemoMode } = await import('./demoModeFilter')
     const demoMode = await getDemoMode()
     
-    // Get user_id
-    const { getCurrentUserId } = await import('./supabase')
+    const { getCurrentUserId, supabase } = await import('./supabase')
     const userId = await getCurrentUserId()
     
     // Insert a audit_log (user_id and is_demo set explicitly)
