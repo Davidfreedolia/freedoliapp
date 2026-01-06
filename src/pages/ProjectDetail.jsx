@@ -82,7 +82,18 @@ export default function ProjectDetail() {
     setError(null)
     try {
       // Import dinàmic de supabase per evitar cicles d'imports
-      const { getProject, getDocuments } = await import('../lib/supabase')
+      let getProject, getDocuments
+      try {
+        const supabaseModule = await import('../lib/supabase')
+        getProject = supabaseModule.getProject
+        getDocuments = supabaseModule.getDocuments
+      } catch (importErr) {
+        setError('Error carregant mòduls')
+        setProject(null)
+        setDocuments([])
+        setLoading(false)
+        return
+      }
       
       const data = await getProject(id)
       if (!data) {
@@ -133,7 +144,15 @@ export default function ProjectDetail() {
     
     try {
       // Import dinàmic de driveService per evitar cicles d'imports
-      const { driveService } = await import('../lib/googleDrive')
+      let driveService
+      try {
+        const googleDriveModule = await import('../lib/googleDrive')
+        driveService = googleDriveModule.driveService
+      } catch (importErr) {
+        // Drive is optional, don't crash the route
+        setProjectFolders(null)
+        return
+      }
       
       // Usar ensureProjectDriveFolders per garantir idempotència
       const folders = await driveService.ensureProjectDriveFolders({
@@ -150,7 +169,14 @@ export default function ProjectDetail() {
         // Si no tenia drive_folder_id, guardar-lo ara
         if (!project.drive_folder_id && folders?.main?.id) {
           try {
-            const { updateProject } = await import('../lib/supabase')
+            let updateProject
+            try {
+              const supabaseModule = await import('../lib/supabase')
+              updateProject = supabaseModule.updateProject
+            } catch (importErr) {
+              // Silent fail - drive_folder_id update is not critical
+              return
+            }
             await updateProject(id, { drive_folder_id: folders.main.id })
             setProject({ ...project, drive_folder_id: folders.main.id })
           } catch (e) {
@@ -181,7 +207,15 @@ export default function ProjectDetail() {
     }
     
     try {
-      const { updateProject } = await import('../lib/supabase')
+      let updateProject
+      try {
+        const supabaseModule = await import('../lib/supabase')
+        updateProject = supabaseModule.updateProject
+      } catch (importErr) {
+        setError('Error carregant mòduls')
+        return
+      }
+      
       await updateProject(id, { current_phase: newPhase })
       setProject({ ...project, current_phase: newPhase })
       await refreshProjects()
@@ -189,6 +223,7 @@ export default function ProjectDetail() {
       // Redirigir al Dashboard després d'editar el projecte
       navigate('/')
     } catch (err) {
+      setError(formatError(err))
       notifyError(err, { context: 'ProjectDetail:handlePhaseChange' })
     }
   }
@@ -197,12 +232,21 @@ export default function ProjectDetail() {
     if (!confirm('Estàs segur que vols restaurar aquest projecte? Tornarà a l\'estat HOLD.')) return
     
     try {
-      const { updateProject } = await import('../lib/supabase')
+      let updateProject
+      try {
+        const supabaseModule = await import('../lib/supabase')
+        updateProject = supabaseModule.updateProject
+      } catch (importErr) {
+        setError('Error carregant mòduls')
+        return
+      }
+      
       await updateProject(id, { decision: 'HOLD' })
       setProject({ ...project, decision: 'HOLD' })
       await refreshProjects()
       showToast('Projecte restaurat correctament', 'success')
     } catch (err) {
+      setError(formatError(err))
       notifyError(err, { context: 'ProjectDetail:handleRestore' })
     }
   }
@@ -211,10 +255,27 @@ export default function ProjectDetail() {
     // Guardar referències a Supabase (evita duplicats automàticament)
     let savedCount = 0
     let errorCount = 0
-    const { logSuccess, logError } = await import('../lib/auditLog')
     
-    // Import dinàmic de createDocument per evitar cicles d'imports
-    const { createDocument } = await import('../lib/supabase')
+    // Import dinàmic de mòduls per evitar cicles d'imports
+    let createDocument, getDocuments, logSuccess, logError
+    try {
+      const supabaseModule = await import('../lib/supabase')
+      createDocument = supabaseModule.createDocument
+      getDocuments = supabaseModule.getDocuments
+    } catch (importErr) {
+      setError('Error carregant mòduls')
+      return
+    }
+    
+    try {
+      const auditLogModule = await import('../lib/auditLog')
+      logSuccess = auditLogModule.logSuccess
+      logError = auditLogModule.logError
+    } catch (importErr) {
+      // Audit log is optional, continue without it
+      logSuccess = async () => {}
+      logError = async () => {}
+    }
     
     for (const file of files) {
       try {
@@ -228,24 +289,32 @@ export default function ProjectDetail() {
         })
         savedCount++
         // Audit log: document pujat correctament
-        await logSuccess('document', 'upload', doc.id, 'Document uploaded to Drive', {
-          project_id: id,
-          file_name: file.name,
-          file_size: file.size,
-          drive_file_id: file.id
-        })
+        try {
+          await logSuccess('document', 'upload', doc.id, 'Document uploaded to Drive', {
+            project_id: id,
+            file_name: file.name,
+            file_size: file.size,
+            drive_file_id: file.id
+          })
+        } catch (auditErr) {
+          // Silent fail for audit log
+        }
       } catch (err) {
         if (import.meta.env.DEV) {
           console.error('Error guardant document:', err)
         }
         errorCount++
         // Audit log: error pujant document
-        await logError('document', 'upload', err, {
-          project_id: id,
-          file_name: file.name,
-          file_size: file.size,
-          drive_file_id: file.id
-        })
+        try {
+          await logError('document', 'upload', err, {
+            project_id: id,
+            file_name: file.name,
+            file_size: file.size,
+            drive_file_id: file.id
+          })
+        } catch (auditErr) {
+          // Silent fail for audit log
+        }
       }
     }
     
