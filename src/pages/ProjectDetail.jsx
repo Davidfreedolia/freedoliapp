@@ -20,8 +20,6 @@ import {
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { getProject, updateProject, getDocuments, createDocument } from '../lib/supabase'
-import { PROJECT_SUBFOLDERS } from '../lib/googleDrive'
-import { driveService } from '../lib/googleDrive'
 import Header from '../components/Header'
 import FileUploader from '../components/FileUploader'
 import FileBrowser from '../components/FileBrowser'
@@ -72,6 +70,7 @@ export default function ProjectDetail() {
   const [projectFolders, setProjectFolders] = useState(null)
   const [selectedFolder, setSelectedFolder] = useState(null)
   const [documents, setDocuments] = useState([])
+  const [projectSubfolders, setProjectSubfolders] = useState([])
 
   const loadProject = async () => {
     if (!id) {
@@ -103,6 +102,15 @@ export default function ProjectDetail() {
     }
   }
 
+  // Carregar PROJECT_SUBFOLDERS dinàmicament per evitar cicles d'imports
+  useEffect(() => {
+    import('../constants/projectDrive').then((mod) => {
+      setProjectSubfolders(mod.PROJECT_SUBFOLDERS || [])
+    }).catch(() => {
+      setProjectSubfolders([])
+    })
+  }, [])
+
   useEffect(() => {
     if (id) {
       loadProject()
@@ -122,6 +130,9 @@ export default function ProjectDetail() {
     if (!project) return
     
     try {
+      // Import dinàmic de driveService per evitar cicles d'imports
+      const { driveService } = await import('../lib/googleDrive')
+      
       // Usar ensureProjectDriveFolders per garantir idempotència
       const folders = await driveService.ensureProjectDriveFolders({
         id: project.id,
@@ -603,7 +614,7 @@ export default function ProjectDetail() {
               </h3>
               
               <div style={styles.foldersList}>
-                {(PROJECT_SUBFOLDERS || []).map(folderName => {
+                {(projectSubfolders || []).map(folderName => {
                   const folder = projectFolders.subfolders?.[folderName]
                   const isSelected = selectedFolder?.name === folderName
                   
