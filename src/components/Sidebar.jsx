@@ -31,9 +31,9 @@ const prefetchRoute = (path) => {
       import('../pages/Orders.jsx').catch(() => {})
       break
     case '/projects':
-      // Prefetch Projects i ProjectDetail - ProjectDetail normalment s'obre després de Projects
+      // Prefetch Projects i ProjectDetailRoute - ProjectDetailRoute normalment s'obre després de Projects
       import('../pages/Projects.jsx').catch(() => {})
-      import('../pages/ProjectDetail.jsx').catch(() => {})
+      import('../pages/ProjectDetailRoute.jsx').catch(() => {})
       break
     case '/suppliers':
       import('../pages/Suppliers.jsx').catch(() => {})

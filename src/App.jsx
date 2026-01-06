@@ -51,7 +51,7 @@ const lazyWithErrorBoundary = (importFn, pageName) => {
 // Pàgines principals: lazy loading amb error handling
 const Dashboard = lazyWithErrorBoundary(() => import('./pages/Dashboard'), 'Dashboard')
 const Projects = lazyWithErrorBoundary(() => import('./pages/Projects'), 'Projects')
-const ProjectDetail = lazyWithErrorBoundary(() => import('./pages/ProjectDetail'), 'ProjectDetail')
+const ProjectDetailRoute = lazyWithErrorBoundary(() => import('./pages/ProjectDetailRoute'), 'ProjectDetailRoute')
 const Orders = lazyWithErrorBoundary(() => import('./pages/Orders'), 'Orders')
 const Briefing = lazyWithErrorBoundary(() => import('./pages/Briefing'), 'Briefing')
 const Finances = lazyWithErrorBoundary(() => import('./pages/Finances'), 'Finances')
@@ -123,7 +123,7 @@ function AppContent() {
                 element={
                   <ProtectedRoute>
                     <ErrorBoundary context="page:ProjectDetail" darkMode={darkMode}>
-                      <ProjectDetail />
+                      <ProjectDetailRoute />
                     </ErrorBoundary>
                   </ProtectedRoute>
                 }
