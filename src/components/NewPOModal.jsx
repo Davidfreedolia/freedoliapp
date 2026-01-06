@@ -962,7 +962,20 @@ export default function NewPOModal({
 
         {/* Footer */}
         <div style={styles.footer}>
-          <button onClick={onClose} style={styles.cancelButton}>
+          <button 
+            onClick={onClose} 
+            style={styles.cancelButton}
+            onMouseEnter={(e) => {
+              if (!e.currentTarget.disabled) {
+                e.currentTarget.style.backgroundColor = '#dc2626'
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!e.currentTarget.disabled) {
+                e.currentTarget.style.backgroundColor = '#ef4444'
+              }
+            }}
+          >
             {t('common.cancel', 'Cancel·lar')}
           </button>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
@@ -974,6 +987,16 @@ export default function NewPOModal({
                 ...styles.saveButton,
                 opacity: (loading || !formData.po_number) ? 0.7 : 1,
                 cursor: (loading || !formData.po_number) ? 'not-allowed' : 'pointer'
+              }}
+              onMouseEnter={(e) => {
+                if (!e.currentTarget.disabled) {
+                  e.currentTarget.style.backgroundColor = '#4338ca'
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!e.currentTarget.disabled) {
+                  e.currentTarget.style.backgroundColor = '#4f46e5'
+                }
               }}
             >
               {loading ? (
@@ -1186,18 +1209,29 @@ const styles = {
     borderTop: '1px solid var(--border-color)'
   },
   cancelButton: {
-    padding: '12px 20px',
-    backgroundColor: 'transparent',
-    color: '#6b7280',
-    border: '1px solid var(--border-color)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    height: '40px',
+    minWidth: '140px',
+    padding: '12px 24px',
+    backgroundColor: '#ef4444',
+    color: '#ffffff',
+    border: '1px solid #dc2626',
     borderRadius: '10px',
     fontSize: '14px',
-    cursor: 'pointer'
+    fontWeight: '500',
+    cursor: 'pointer',
+    transition: 'all 0.2s'
   },
   saveButton: {
     display: 'flex',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: '8px',
+    height: '40px',
+    minWidth: '140px',
     padding: '12px 24px',
     backgroundColor: '#4f46e5',
     color: '#ffffff',
@@ -1205,6 +1239,7 @@ const styles = {
     borderRadius: '10px',
     fontSize: '14px',
     fontWeight: '500',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    transition: 'all 0.2s'
   }
 }
