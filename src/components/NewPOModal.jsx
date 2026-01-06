@@ -963,28 +963,41 @@ export default function NewPOModal({
         {/* Footer */}
         <div style={styles.footer}>
           <button onClick={onClose} style={styles.cancelButton}>
-            {t('common.cancel')}
+            {t('common.cancel', 'Cancel·lar')}
           </button>
-          <button 
-            onClick={handleSave} 
-            disabled={loading || !formData.po_number}
-            style={{
-              ...styles.saveButton,
-              opacity: (loading || !formData.po_number) ? 0.7 : 1
-            }}
-          >
-            {loading ? (
-              <>
-                <Loader size={18} style={{ animation: 'spin 1s linear infinite' }} />
-                Guardant...
-              </>
-            ) : (
-              <>
-                <Save size={18} />
-                {editingOrder ? 'Actualitzar' : 'Crear PO'}
-              </>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+            <button 
+              onClick={handleSave} 
+              disabled={loading || !formData.po_number}
+              title={!formData.po_number ? 'Selecciona un projecte per generar el número de PO' : ''}
+              style={{
+                ...styles.saveButton,
+                opacity: (loading || !formData.po_number) ? 0.7 : 1,
+                cursor: (loading || !formData.po_number) ? 'not-allowed' : 'pointer'
+              }}
+            >
+              {loading ? (
+                <>
+                  <Loader size={18} style={{ animation: 'spin 1s linear infinite' }} />
+                  Guardant...
+                </>
+              ) : (
+                <>
+                  <Save size={18} />
+                  {editingOrder ? 'Actualitzar' : 'Crear PO'}
+                </>
+              )}
+            </button>
+            {!formData.po_number && !loading && (
+              <span style={{
+                fontSize: '11px',
+                color: '#6b7280',
+                fontStyle: 'italic'
+              }}>
+                Selecciona un projecte per continuar
+              </span>
             )}
-          </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1074,7 +1087,7 @@ const styles = {
   },
   formGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
     gap: '16px'
   },
   formGroup: {
@@ -1085,7 +1098,10 @@ const styles = {
   label: {
     fontSize: '12px',
     fontWeight: '500',
-    color: '#6b7280'
+    color: '#6b7280',
+    whiteSpace: 'nowrap',
+    overflow: 'visible',
+    textOverflow: 'clip'
   },
   input: {
     padding: '10px 12px',
