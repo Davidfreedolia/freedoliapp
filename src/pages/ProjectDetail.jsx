@@ -20,7 +20,8 @@ import {
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { getProject, updateProject, getDocuments, createDocument } from '../lib/supabase'
-import { driveService, PROJECT_SUBFOLDERS } from '../lib/googleDrive'
+import { PROJECT_SUBFOLDERS } from '../lib/googleDrive'
+import { driveService } from '../lib/googleDrive'
 import Header from '../components/Header'
 import FileUploader from '../components/FileUploader'
 import FileBrowser from '../components/FileBrowser'
@@ -56,11 +57,14 @@ const PHASE_FOLDER_MAP = {
 }
 
 export default function ProjectDetail() {
-  const { id } = useParams()
+  const { id: rawId } = useParams()
   const navigate = useNavigate()
   const { darkMode, driveConnected, refreshProjects } = useApp()
   const { isMobile, isTablet } = useBreakpoint()
   const { t } = useTranslation()
+  
+  // Extreure UUID net del paràmetre de ruta (eliminar qualsevol sufix com "Fes:")
+  const id = rawId?.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i)?.[0] || null
   
   const [project, setProject] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -68,21 +72,6 @@ export default function ProjectDetail() {
   const [projectFolders, setProjectFolders] = useState(null)
   const [selectedFolder, setSelectedFolder] = useState(null)
   const [documents, setDocuments] = useState([])
-
-  useEffect(() => {
-    if (id) {
-      loadProject()
-    } else {
-      setLoading(false)
-      setError('ID de projecte no vàlid')
-    }
-  }, [id])
-
-  useEffect(() => {
-    if (project && driveConnected) {
-      loadDriveFolders()
-    }
-  }, [project, driveConnected])
 
   const loadProject = async () => {
     if (!id) {
@@ -113,6 +102,21 @@ export default function ProjectDetail() {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (id) {
+      loadProject()
+    } else {
+      setLoading(false)
+      setError('ID de projecte no vàlid')
+    }
+  }, [id])
+
+  useEffect(() => {
+    if (project && driveConnected) {
+      loadDriveFolders()
+    }
+  }, [project, driveConnected])
 
   const loadDriveFolders = async () => {
     if (!project) return
@@ -599,7 +603,7 @@ export default function ProjectDetail() {
               </h3>
               
               <div style={styles.foldersList}>
-                {PROJECT_SUBFOLDERS.map(folderName => {
+                {(PROJECT_SUBFOLDERS || []).map(folderName => {
                   const folder = projectFolders.subfolders?.[folderName]
                   const isSelected = selectedFolder?.name === folderName
                   
