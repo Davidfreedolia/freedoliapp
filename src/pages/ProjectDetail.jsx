@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense, lazy } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { 
@@ -22,14 +22,14 @@ import { useApp } from '../context/AppContext'
 import Header from '../components/Header'
 import FileUploader from '../components/FileUploader'
 import FileBrowser from '../components/FileBrowser'
-import IdentifiersSection from '../components/IdentifiersSection'
-import ProfitabilityCalculator from '../components/ProfitabilityCalculator'
-import QuickSupplierPriceEstimate from '../components/QuickSupplierPriceEstimate'
-import TasksSection from '../components/TasksSection'
-import QuotesSection from '../components/QuotesSection'
-import DecisionLog from '../components/DecisionLog'
 import { useBreakpoint } from '../hooks/useBreakpoint'
-// Dynamic imports for errorHandling and Toast to avoid circular dependencies during module initialization
+// Dynamic imports for components that import supabase statically to avoid circular dependencies during module initialization
+const IdentifiersSection = lazy(() => import('../components/IdentifiersSection'))
+const ProfitabilityCalculator = lazy(() => import('../components/ProfitabilityCalculator'))
+const QuickSupplierPriceEstimate = lazy(() => import('../components/QuickSupplierPriceEstimate'))
+const TasksSection = lazy(() => import('../components/TasksSection'))
+const QuotesSection = lazy(() => import('../components/QuotesSection'))
+const DecisionLog = lazy(() => import('../components/DecisionLog'))
 
 const PHASES = [
   { id: 1, name: 'Recerca', icon: '🔍', color: '#6366f1', description: 'Investigació de producte i mercat' },
@@ -628,14 +628,18 @@ export default function ProjectDetail() {
         </div>
 
         {/* Identifiers Section */}
-        <IdentifiersSection projectId={id} darkMode={darkMode} />
+        <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
+          <IdentifiersSection projectId={id} darkMode={darkMode} />
+        </Suspense>
 
         {/* Tasks Section */}
-        <TasksSection 
-          entityType="project" 
-          entityId={id} 
-          darkMode={darkMode} 
-        />
+        <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
+          <TasksSection 
+            entityType="project" 
+            entityId={id} 
+            darkMode={darkMode} 
+          />
+        </Suspense>
 
         {/* Decision Block - Visible a fase Research (1) */}
         {project.current_phase === 1 && (
@@ -654,16 +658,18 @@ export default function ProjectDetail() {
             }}>
               Decision
             </h3>
-            <DecisionLog 
-              entityType="project" 
-              entityId={id} 
-              darkMode={darkMode}
-              allowedDecisions={[
-                { value: 'go', label: 'GO', icon: CheckCircle2, color: '#10b981' },
-                { value: 'hold', label: 'HOLD', icon: Clock, color: '#f59e0b' },
-                { value: 'discarded', label: 'DISCARDED', icon: XCircle, color: '#ef4444' }
-              ]}
-            />
+            <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
+              <DecisionLog 
+                entityType="project" 
+                entityId={id} 
+                darkMode={darkMode}
+                allowedDecisions={[
+                  { value: 'go', label: 'GO', icon: CheckCircle2, color: '#10b981' },
+                  { value: 'hold', label: 'HOLD', icon: Clock, color: '#f59e0b' },
+                  { value: 'discarded', label: 'DISCARDED', icon: XCircle, color: '#ef4444' }
+                ]}
+              />
+            </Suspense>
           </div>
         )}
 
@@ -672,17 +678,19 @@ export default function ProjectDetail() {
           <div style={{
             marginBottom: '24px'
           }}>
-            <QuickSupplierPriceEstimate 
-              projectId={id} 
-              darkMode={darkMode}
-              onCopyToProfitability={(priceInEUR) => {
-                // Trigger update in ProfitabilityCalculator via ref or state
-                // For now, we'll use a custom event
-                window.dispatchEvent(new CustomEvent('copyPriceToCOGS', { 
-                  detail: { price: priceInEUR } 
-                }))
-              }}
-            />
+            <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
+              <QuickSupplierPriceEstimate 
+                projectId={id} 
+                darkMode={darkMode}
+                onCopyToProfitability={(priceInEUR) => {
+                  // Trigger update in ProfitabilityCalculator via ref or state
+                  // For now, we'll use a custom event
+                  window.dispatchEvent(new CustomEvent('copyPriceToCOGS', { 
+                    detail: { price: priceInEUR } 
+                  }))
+                }}
+              />
+            </Suspense>
           </div>
         )}
 
@@ -691,7 +699,9 @@ export default function ProjectDetail() {
           <div style={{
             marginBottom: '24px'
           }}>
-            <ProfitabilityCalculator projectId={id} darkMode={darkMode} />
+            <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
+              <ProfitabilityCalculator projectId={id} darkMode={darkMode} />
+            </Suspense>
           </div>
         )}
 
@@ -700,7 +710,9 @@ export default function ProjectDetail() {
           <div style={{
             marginBottom: '24px'
           }}>
-            <QuotesSection projectId={id} darkMode={darkMode} />
+            <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
+              <QuotesSection projectId={id} darkMode={darkMode} />
+            </Suspense>
           </div>
         )}
 

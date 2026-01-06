@@ -1,6 +1,9 @@
 // Google Drive Integration for Freedoliapp
 // OAuth2 per accedir al Drive del usuari
 
+// Importar PROJECT_SUBFOLDERS des d'un fitxer separat per evitar cicles d'imports
+import { PROJECT_SUBFOLDERS } from '../constants/projectDrive'
+
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || ''
 
 // Import dinàmic per evitar cicles de dependències
@@ -129,20 +132,6 @@ export const DRIVE_FOLDERS = {
   legal: '188C4MK1qAdqliXzLWSl0lbKmiZj7N49N',
   reports: '1HxdzuMoQ6eJ_jNlkX_L9d5foKne53V2A'
 }
-
-// Estructura de subcarpetes per projecte
-export const PROJECT_SUBFOLDERS = [
-  '01_Research',
-  '02_Quotations',
-  '03_PurchaseOrders',
-  '04_Briefings',
-  '05_Invoices',
-  '06_Shipping',
-  '07_Certificates',
-  '08_Samples',
-  '09_Listings',
-  '10_Images'
-]
 
 // Helper per esperar que un objecte estigui disponible
 const waitFor = (check, timeout = 10000, interval = 100) => {

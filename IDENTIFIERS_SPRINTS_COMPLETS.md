@@ -191,3 +191,6 @@ INSERT INTO gtin_pool (gtin_code, gtin_type, status) VALUES
 
 
 
+
+
+
