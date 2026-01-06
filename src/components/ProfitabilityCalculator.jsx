@@ -112,11 +112,6 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
     setLoading(false)
   }, [projectId])
 
-  useEffect(() => {
-    loadData()
-    loadAsin()
-  }, [projectId, loadData, loadAsin])
-
   const handleInputChange = (field, value) => {
     // Validar que no sigui negatiu
     const numValue = parseFloat(value)
@@ -155,6 +150,12 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
       console.error('Error carregant ASIN:', err)
     }
   }, [projectId])
+
+  // Load data and ASIN when projectId changes - must be after both functions are defined
+  useEffect(() => {
+    loadData()
+    loadAsin()
+  }, [projectId, loadData, loadAsin])
 
   /**
    * Extrae ASIN de una URL de Amazon o valida un ASIN directo
