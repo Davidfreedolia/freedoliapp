@@ -29,8 +29,7 @@ import TasksSection from '../components/TasksSection'
 import QuotesSection from '../components/QuotesSection'
 import DecisionLog from '../components/DecisionLog'
 import { useBreakpoint } from '../hooks/useBreakpoint'
-import { showToast } from '../components/Toast'
-import { formatError, notifyError } from '../lib/errorHandling'
+// Dynamic imports for errorHandling and Toast to avoid circular dependencies during module initialization
 
 const PHASES = [
   { id: 1, name: 'Recerca', icon: '🔍', color: '#6366f1', description: 'Investigació de producte i mercat' },
@@ -106,10 +105,15 @@ export default function ProjectDetail() {
       const docs = await getDocuments(id)
       setDocuments(Array.isArray(docs) ? docs : [])
     } catch (err) {
-      setError(formatError(err))
+      try {
+        const { formatError, notifyError } = await import('../lib/errorHandling')
+        setError(formatError(err))
+        notifyError(err, { context: 'ProjectDetail:loadProject' })
+      } catch (importErr) {
+        setError('Error carregant mòduls')
+      }
       setProject(null)
       setDocuments([])
-      notifyError(err, { context: 'ProjectDetail:loadProject' })
     } finally {
       setLoading(false)
     }
@@ -193,7 +197,12 @@ export default function ProjectDetail() {
         }
       }
     } catch (err) {
-      notifyError(err, { context: 'ProjectDetail:loadDriveFolders' })
+      try {
+        const { notifyError } = await import('../lib/errorHandling')
+        notifyError(err, { context: 'ProjectDetail:loadDriveFolders' })
+      } catch (importErr) {
+        // Silent fail - Drive is optional
+      }
       // Don't show alert, just log - Drive is optional
       setProjectFolders(null)
     }
@@ -202,7 +211,12 @@ export default function ProjectDetail() {
   const handlePhaseChange = async (newPhase) => {
     // Bloquejar canvi de fase si està DISCARDED
     if (project.decision === 'DISCARDED') {
-      showToast('No es pot canviar la fase d\'un projecte descartat. Restaura el projecte primer.', 'warning')
+      try {
+        const { showToast } = await import('../components/Toast')
+        showToast('No es pot canviar la fase d\'un projecte descartat. Restaura el projecte primer.', 'warning')
+      } catch (importErr) {
+        // Silent fail for toast
+      }
       return
     }
     
@@ -223,8 +237,13 @@ export default function ProjectDetail() {
       // Redirigir al Dashboard després d'editar el projecte
       navigate('/')
     } catch (err) {
-      setError(formatError(err))
-      notifyError(err, { context: 'ProjectDetail:handlePhaseChange' })
+      try {
+        const { formatError, notifyError } = await import('../lib/errorHandling')
+        setError(formatError(err))
+        notifyError(err, { context: 'ProjectDetail:handlePhaseChange' })
+      } catch (importErr) {
+        setError('Error carregant mòduls')
+      }
     }
   }
 
@@ -244,10 +263,21 @@ export default function ProjectDetail() {
       await updateProject(id, { decision: 'HOLD' })
       setProject({ ...project, decision: 'HOLD' })
       await refreshProjects()
-      showToast('Projecte restaurat correctament', 'success')
+      
+      try {
+        const { showToast } = await import('../components/Toast')
+        showToast('Projecte restaurat correctament', 'success')
+      } catch (importErr) {
+        // Silent fail for toast
+      }
     } catch (err) {
-      setError(formatError(err))
-      notifyError(err, { context: 'ProjectDetail:handleRestore' })
+      try {
+        const { formatError, notifyError } = await import('../lib/errorHandling')
+        setError(formatError(err))
+        notifyError(err, { context: 'ProjectDetail:handleRestore' })
+      } catch (importErr) {
+        setError('Error carregant mòduls')
+      }
     }
   }
 
@@ -330,7 +360,12 @@ export default function ProjectDetail() {
     
     // Mostrar feedback si hi ha errors
     if (errorCount > 0) {
-      showToast(`${errorCount} document(s) no s'han pogut guardar correctament.`, 'warning')
+      try {
+        const { showToast } = await import('../components/Toast')
+        showToast(`${errorCount} document(s) no s'han pogut guardar correctament.`, 'warning')
+      } catch (importErr) {
+        // Silent fail for toast
+      }
     }
   }
 
