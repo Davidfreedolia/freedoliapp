@@ -1,33 +1,16 @@
 import { createClient } from '@supabase/supabase-js'
-import { isDemoMode } from '../demo/demoMode'
-import {
-  mockGetProjects,
-  mockGetProject,
-  mockGetPurchaseOrders,
-  mockGetPurchaseOrder,
-  mockGetPosWaitingManufacturer,
-  mockGetPosNotReady,
-  mockGetShipmentsInTransit,
-  mockGetResearchNoDecision,
-  mockGetStaleTracking,
-  mockGetTasks,
-  mockGetStickyNotes,
-  mockGetExpenses,
-  mockGetIncomes,
-  mockGetSuppliers,
-  mockGetDashboardStats,
-  mockGetProjectsMissingGtin,
-  mockGetUnassignedGtinCodes
-} from '../demo/demoMode'
+
+// IMPORTANT: No static imports of demoMode, auditLog, or demoModeFilter to avoid circular dependencies.
+// All imports from these modules must be dynamic (inside functions).
 
 // Llegeix variables de Vite
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-// Error claríssim (en lloc de “supabaseUrl is required”)
+// Error claríssim (en lloc de "supabaseUrl is required")
 function missingEnvError() {
   const msg =
-    'FALTA CONFIGURACIÓ: No s’han carregat les variables de Supabase.\n\n' +
+    'FALTA CONFIGURACIÓ: No s\'han carregat les variables de Supabase.\n\n' +
     'Solució ràpida:\n' +
     '1) Comprova que el fitxer .env està a la mateixa carpeta que package.json\n' +
     '2) Assegura que tens:\n' +
@@ -43,7 +26,7 @@ function missingEnvError() {
     VITE_SUPABASE_ANON_KEY_present: Boolean(supabaseAnonKey),
   })
 
-  // També ho pintem a la pantalla (perquè no “quedi en blanc”)
+  // També ho pintem a la pantalla (perquè no "quedi en blanc")
   if (typeof document !== 'undefined') {
     document.body.innerHTML = `
       <div style="font-family:system-ui;padding:24px;max-width:900px;margin:0 auto;">
@@ -57,34 +40,58 @@ function missingEnvError() {
   throw new Error(msg)
 }
 
-// Demo mode: create dummy client if env vars missing, otherwise use real client
-let supabaseClient
-if (isDemoMode() && (!supabaseUrl || !supabaseAnonKey)) {
-  // Create a dummy client that won't be used in demo mode
-  supabaseClient = createClient('https://demo.supabase.co', 'demo-key', {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-      detectSessionInUrl: false,
-    },
-  })
-} else {
-  if (!supabaseUrl || !supabaseAnonKey) {
-    missingEnvError()
+// Lazy initialization of Supabase client to avoid calling isDemoMode() at module scope
+let supabaseClient = null
+
+function getSupabaseClient() {
+  if (supabaseClient) {
+    return supabaseClient
   }
 
-  // Client Supabase robust (sessions, refresh, etc.)
-  supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-      storageKey: 'freedoliapp-auth',
-    },
-  })
+  // Dynamic import to avoid circular dependency
+  // Check demo mode and env vars dynamically
+  const isDemo = import.meta.env.VITE_DEMO_MODE === 'true' || 
+                 (typeof localStorage !== 'undefined' && localStorage.getItem('demo_mode_toggle') === 'true')
+  
+  if (isDemo && (!supabaseUrl || !supabaseAnonKey)) {
+    // Create a dummy client that won't be used in demo mode
+    supabaseClient = createClient('https://demo.supabase.co', 'demo-key', {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+      },
+    })
+  } else {
+    if (!supabaseUrl || !supabaseAnonKey) {
+      missingEnvError()
+    }
+
+    // Client Supabase robust (sessions, refresh, etc.)
+    supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        storageKey: 'freedoliapp-auth',
+      },
+    })
+  }
+
+  return supabaseClient
 }
 
-export const supabase = supabaseClient
+// Export a getter that initializes the client lazily
+export const supabase = new Proxy({}, {
+  get(target, prop) {
+    const client = getSupabaseClient()
+    const value = client[prop]
+    if (typeof value === 'function') {
+      return value.bind(client)
+    }
+    return value
+  }
+})
 
 // ============================================
 // HELPERS
@@ -92,6 +99,9 @@ export const supabase = supabaseClient
 
 // Obtenir user_id de la sessió actual
 export const getCurrentUserId = async () => {
+  // Dynamic import to avoid circular dependency
+  const { isDemoMode } = await import('../demo/demoMode')
+  
   // Demo mode: return demo user ID
   if (isDemoMode()) {
     return 'demo-user-id'
@@ -108,7 +118,8 @@ export const getCurrentUserId = async () => {
 
 // PROJECTES
 export const getProjects = async (includeDiscarded = false) => {
-  // Get demo mode setting
+  // Dynamic imports to avoid circular dependencies
+  const { isDemoMode, mockGetProjects } = await import('../demo/demoMode')
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
   
@@ -138,7 +149,8 @@ export const getProjects = async (includeDiscarded = false) => {
 }
 
 export const getProject = async (id) => {
-  // Get demo mode setting
+  // Dynamic imports to avoid circular dependencies
+  const { isDemoMode, mockGetProject } = await import('../demo/demoMode')
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
   
@@ -234,6 +246,9 @@ export const createProject = async (project) => {
 }
 
 export const updateProject = async (id, updates) => {
+  // Dynamic import to avoid circular dependency
+  const { isDemoMode } = await import('../demo/demoMode')
+  
   // Demo mode: show message, don't actually update
   if (isDemoMode()) {
     throw new Error('DEMO_MODE: No es pot actualitzar projectes en mode demo. Desactiva VITE_DEMO_MODE per usar funcionalitats reals.')
@@ -252,6 +267,9 @@ export const updateProject = async (id, updates) => {
 }
 
 export const deleteProject = async (id) => {
+  // Dynamic import to avoid circular dependency
+  const { isDemoMode } = await import('../demo/demoMode')
+  
   // Demo mode: show message, don't actually delete
   if (isDemoMode()) {
     throw new Error('DEMO_MODE: No es pot eliminar projectes en mode demo. Desactiva VITE_DEMO_MODE per usar funcionalitats reals.')
@@ -264,7 +282,8 @@ export const deleteProject = async (id) => {
 
 // PROVEÏDORS
 export const getSuppliers = async () => {
-  // Get demo mode setting
+  // Dynamic imports to avoid circular dependencies
+  const { isDemoMode, mockGetSuppliers } = await import('../demo/demoMode')
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
   
@@ -350,7 +369,8 @@ export const createForwarder = async (forwarder) =>
 
 // PURCHASE ORDERS
 export const getPurchaseOrders = async (projectId = null) => {
-  // Get demo mode setting
+  // Dynamic imports to avoid circular dependencies
+  const { isDemoMode, mockGetPurchaseOrders } = await import('../demo/demoMode')
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
   
@@ -385,6 +405,9 @@ export const getPurchaseOrders = async (projectId = null) => {
 }
 
 export const getPurchaseOrder = async (id) => {
+  // Dynamic import to avoid circular dependency
+  const { isDemoMode, mockGetPurchaseOrder } = await import('../demo/demoMode')
+  
   // Demo mode: return mock data
   if (isDemoMode()) {
     return await mockGetPurchaseOrder(id)
@@ -583,7 +606,8 @@ export const deletePayment = async (id) => {
 
 // ESTADÍSTIQUES DASHBOARD
 export const getDashboardStats = async () => {
-  // Get demo mode setting
+  // Dynamic imports to avoid circular dependencies
+  const { isDemoMode, mockGetDashboardStats } = await import('../demo/demoMode')
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
   
@@ -776,6 +800,9 @@ export const getProjectSku = async (projectId) => {
 // ============================================
 
 export const getSupplierPriceEstimates = async (projectId) => {
+  // Dynamic import to avoid circular dependency
+  const { isDemoMode } = await import('../demo/demoMode')
+  
   // Demo mode: return mock data
   if (isDemoMode()) {
     const { mockGetSupplierPriceEstimates } = await import('../demo/demoMode')
@@ -836,6 +863,9 @@ export const deleteSupplierPriceEstimate = async (id) => {
 // ============================================
 
 export const getProductIdentifiers = async (projectId) => {
+  // Dynamic import to avoid circular dependency
+  const { isDemoMode } = await import('../demo/demoMode')
+  
   // Demo mode: return mock data
   if (isDemoMode()) {
     const { mockGetProductIdentifiers } = await import('../demo/demoMode')
@@ -1044,7 +1074,8 @@ export const releaseGtinFromProject = async (gtinPoolId) => {
 }
 
 export const getUnassignedGtinCodes = async () => {
-  // Get demo mode setting
+  // Dynamic imports to avoid circular dependencies
+  const { isDemoMode, mockGetUnassignedGtinCodes } = await import('../demo/demoMode')
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
   
@@ -1066,7 +1097,8 @@ export const getUnassignedGtinCodes = async () => {
 }
 
 export const getProjectsMissingGtin = async () => {
-  // Get demo mode setting
+  // Dynamic imports to avoid circular dependencies
+  const { isDemoMode, mockGetProjectsMissingGtin } = await import('../demo/demoMode')
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
   
@@ -1295,7 +1327,8 @@ export const markManufacturerPackAsSent = async (purchaseOrderId) => {
 }
 
 export const getPosWaitingManufacturer = async (limit = 10) => {
-  // Get demo mode setting
+  // Dynamic imports to avoid circular dependencies
+  const { isDemoMode, mockGetPosWaitingManufacturer } = await import('../demo/demoMode')
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
   
@@ -1347,6 +1380,9 @@ export const getPosWaitingManufacturer = async (limit = 10) => {
 }
 
 export const getPosNotReady = async (limit = 10) => {
+  // Dynamic import to avoid circular dependency
+  const { isDemoMode, mockGetPosNotReady } = await import('../demo/demoMode')
+  
   // Demo mode: return mock data
   if (isDemoMode()) {
     return await mockGetPosNotReady(limit)
@@ -1426,7 +1462,8 @@ export const getPosNotReady = async (limit = 10) => {
 
 // DAILY OPS WIDGETS
 export const getShipmentsInTransit = async (limit = 10) => {
-  // Get demo mode setting
+  // Dynamic imports to avoid circular dependencies
+  const { mockGetShipmentsInTransit } = await import('../demo/demoMode')
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
   
@@ -1489,6 +1526,9 @@ export const getShipmentsInTransit = async (limit = 10) => {
 }
 
 export const getResearchNoDecision = async (limit = 10) => {
+  // Dynamic import to avoid circular dependency
+  const { isDemoMode, mockGetResearchNoDecision } = await import('../demo/demoMode')
+  
   // Demo mode: return mock data
   if (isDemoMode()) {
     return await mockGetResearchNoDecision(limit)
@@ -1517,6 +1557,9 @@ export const getResearchNoDecision = async (limit = 10) => {
 }
 
 export const getStaleTracking = async (limit = 10, staleDays = 7) => {
+  // Dynamic import to avoid circular dependency
+  const { isDemoMode, mockGetStaleTracking } = await import('../demo/demoMode')
+  
   // Demo mode: return mock data
   if (isDemoMode()) {
     return await mockGetStaleTracking(limit, staleDays)
@@ -2063,6 +2106,9 @@ export const getAuditLogs = async (limit = 50, statusFilter = null) => {
 // ============================================
 
 export const getProjectProfitability = async (projectId) => {
+  // Dynamic import to avoid circular dependency
+  const { isDemoMode } = await import('../demo/demoMode')
+  
   // Demo mode: return mock data
   if (isDemoMode()) {
     const { mockGetProjectProfitability } = await import('../demo/demoMode')
@@ -2112,7 +2158,8 @@ export const upsertProjectProfitability = async (projectId, profitabilityData) =
 
 // TASKS
 export const getTasks = async (filters = {}) => {
-  // Get demo mode setting
+  // Dynamic imports to avoid circular dependencies
+  const { isDemoMode, mockGetTasks } = await import('../demo/demoMode')
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
   
@@ -2394,6 +2441,7 @@ export const getCalendarEvents = async (filters = {}) => {
   // No fallback, no mock data when demoMode is false
   if (demoMode === true) {
     // Only use mock events if demoMode is explicitly true
+    // Dynamic import to avoid circular dependency
     const { mockGetCalendarEvents } = await import('../demo/demoMode')
     return await mockGetCalendarEvents(filters)
   }
@@ -2982,7 +3030,8 @@ export const quickMarkPackAsSent = async (poId) => {
 
 // Sticky Notes functions
 export const getStickyNotes = async (filters = {}) => {
-  // Get demo mode setting
+  // Dynamic imports to avoid circular dependencies
+  const { isDemoMode, mockGetStickyNotes } = await import('../demo/demoMode')
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
   
