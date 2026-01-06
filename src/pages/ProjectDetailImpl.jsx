@@ -18,7 +18,6 @@ import {
   Clock,
   XCircle
 } from 'lucide-react'
-import { useApp } from '../context/AppContext'
 import Header from '../components/Header'
 import FileUploader from '../components/FileUploader'
 import FileBrowser from '../components/FileBrowser'
@@ -52,7 +51,70 @@ const PHASE_FOLDER_MAP = {
   7: '09_Listings'
 }
 
+// Lazy import AppContext to avoid initializing supabase during module init
+// Lazy load AppContext to avoid initializing supabase during module init
+// We'll use a wrapper pattern where the outer component loads AppContext dynamically
+// and the inner component uses the hook unconditionally
+let AppContextModule = null
+const loadAppContext = async () => {
+  if (AppContextModule) return AppContextModule
+  try {
+    AppContextModule = await import('../context/AppContext')
+    return AppContextModule
+  } catch (err) {
+    console.error('Error loading AppContext:', err)
+    return null
+  }
+}
+
 export default function ProjectDetail() {
+  const [appContextModule, setAppContextModule] = useState(null)
+  const [loading, setLoading] = useState(true)
+  
+  useEffect(() => {
+    loadAppContext().then((module) => {
+      setAppContextModule(module)
+      setLoading(false)
+    })
+  }, [])
+  
+  if (loading || !appContextModule) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#f8f9fc'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: '48px',
+            height: '48px',
+            border: '4px solid #e5e7eb',
+            borderTop: '4px solid #4f46e5',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 16px'
+          }} />
+          <p style={{ margin: 0, fontSize: '14px', color: '#6b7280' }}>
+            Carregant...
+          </p>
+          <style>{`
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `}</style>
+        </div>
+      </div>
+    )
+  }
+  
+  return <ProjectDetailInner useApp={appContextModule.useApp} />
+}
+
+function ProjectDetailInner({ useApp }) {
   const { id: rawId } = useParams()
   const navigate = useNavigate()
   const { darkMode, driveConnected, refreshProjects } = useApp()
