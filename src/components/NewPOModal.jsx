@@ -705,106 +705,119 @@ export default function NewPOModal({
               </button>
             </div>
             
-            <div style={styles.itemsTable}>
-              <div style={styles.itemsHeader}>
-                <span style={{width: '40px'}}>Ref</span>
-                <span style={{flex: 2}}>Descripció</span>
-                <span style={{width: '80px'}}>Qty</span>
-                <span style={{width: '80px'}}>Unitat</span>
-                <span style={{width: '100px'}}>Preu ({formData.currency})</span>
-                <span style={{width: '100px'}}>Total</span>
-                <span style={{width: '40px'}}></span>
-              </div>
-              
-              {formData.items.map((item, index) => (
-                <div key={index} style={styles.itemRow}>
-                  <span style={{width: '40px', color: '#6b7280'}}>{item.ref}</span>
-                  <input
-                    type="text"
-                    value={item.description}
-                    onChange={e => updateItem(index, 'description', e.target.value)}
-                    placeholder="Descripció del producte..."
-                    style={{
-                      ...styles.itemInput,
-                      flex: 2,
-                      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                      color: darkMode ? '#ffffff' : '#111827'
-                    }}
-                  />
-                  <input
-                    type="number"
-                    value={item.qty}
-                    onChange={e => updateItem(index, 'qty', e.target.value)}
-                    placeholder="0"
-                    style={{
-                      ...styles.itemInput,
-                      width: '80px',
-                      textAlign: 'right',
-                      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                      color: darkMode ? '#ffffff' : '#111827'
-                    }}
-                  />
-                  <select
-                    value={item.unit}
-                    onChange={e => updateItem(index, 'unit', e.target.value)}
-                    style={{
-                      ...styles.itemInput,
-                      width: '80px',
-                      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                      color: darkMode ? '#ffffff' : '#111827'
-                    }}
-                  >
-                    {UNITS.map(u => (
-                      <option key={u} value={u}>{u}</option>
-                    ))}
-                  </select>
-                  <input
-                    type="number"
-                    step="0.001"
-                    value={item.unit_price}
-                    onChange={e => updateItem(index, 'unit_price', e.target.value)}
-                    placeholder="0.00"
-                    style={{
-                      ...styles.itemInput,
+            <div style={styles.itemsTableWrapper}>
+              <div style={styles.itemsTable}>
+                <div style={styles.itemsHeader}>
+                  <span style={{width: '40px', minWidth: '40px', flexShrink: 0}}>Ref</span>
+                  <span style={{flex: '2 1 0', minWidth: 0}}>Descripció</span>
+                  <span style={{width: '80px', minWidth: '80px', flexShrink: 0}}>Qty</span>
+                  <span style={{width: '80px', minWidth: '80px', flexShrink: 0}}>Unitat</span>
+                  <span style={{width: '100px', minWidth: '100px', flexShrink: 0}}>Preu ({formData.currency})</span>
+                  <span style={{width: '100px', minWidth: '100px', flexShrink: 0}}>Total</span>
+                  <span style={{width: '40px', minWidth: '40px', flexShrink: 0}}></span>
+                </div>
+                
+                {formData.items.map((item, index) => (
+                  <div key={index} style={styles.itemRow}>
+                    <span style={{width: '40px', minWidth: '40px', flexShrink: 0, color: '#6b7280'}}>{item.ref}</span>
+                    <input
+                      type="text"
+                      value={item.description}
+                      onChange={e => updateItem(index, 'description', e.target.value)}
+                      placeholder="Descripció del producte..."
+                      style={{
+                        ...styles.itemInput,
+                        flex: '2 1 0',
+                        minWidth: 0,
+                        backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                        color: darkMode ? '#ffffff' : '#111827'
+                      }}
+                    />
+                    <input
+                      type="number"
+                      value={item.qty}
+                      onChange={e => updateItem(index, 'qty', e.target.value)}
+                      placeholder="0"
+                      style={{
+                        ...styles.itemInput,
+                        width: '80px',
+                        minWidth: '80px',
+                        flexShrink: 0,
+                        textAlign: 'right',
+                        backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                        color: darkMode ? '#ffffff' : '#111827'
+                      }}
+                    />
+                    <select
+                      value={item.unit}
+                      onChange={e => updateItem(index, 'unit', e.target.value)}
+                      style={{
+                        ...styles.itemInput,
+                        width: '80px',
+                        minWidth: '80px',
+                        flexShrink: 0,
+                        backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                        color: darkMode ? '#ffffff' : '#111827'
+                      }}
+                    >
+                      {UNITS.map(u => (
+                        <option key={u} value={u}>{u}</option>
+                      ))}
+                    </select>
+                    <input
+                      type="number"
+                      step="0.001"
+                      value={item.unit_price}
+                      onChange={e => updateItem(index, 'unit_price', e.target.value)}
+                      placeholder="0.00"
+                      style={{
+                        ...styles.itemInput,
+                        width: '100px',
+                        minWidth: '100px',
+                        flexShrink: 0,
+                        textAlign: 'right',
+                        backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                        color: darkMode ? '#ffffff' : '#111827'
+                      }}
+                    />
+                    <span style={{
                       width: '100px',
+                      minWidth: '100px',
+                      flexShrink: 0,
                       textAlign: 'right',
-                      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                      fontWeight: '600',
                       color: darkMode ? '#ffffff' : '#111827'
-                    }}
-                  />
+                    }}>
+                      {calculateLineTotal(item).toFixed(2)}
+                    </span>
+                    <button 
+                      onClick={() => removeItem(index)}
+                      style={styles.removeItemButton}
+                      disabled={formData.items.length === 1}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))}
+                
+                {/* Total */}
+                <div style={styles.totalRow}>
+                  <span style={{flex: '1 1 0', minWidth: 0, textAlign: 'right', fontWeight: '600'}}>
+                    TOTAL ({formData.currency}):
+                  </span>
                   <span style={{
                     width: '100px',
+                    minWidth: '100px',
+                    flexShrink: 0,
                     textAlign: 'right',
-                    fontWeight: '600',
-                    color: darkMode ? '#ffffff' : '#111827'
+                    fontWeight: '700',
+                    fontSize: '18px',
+                    color: '#4f46e5'
                   }}>
-                    {calculateLineTotal(item).toFixed(2)}
+                    {calculateTotal().toFixed(2)}
                   </span>
-                  <button 
-                    onClick={() => removeItem(index)}
-                    style={styles.removeItemButton}
-                    disabled={formData.items.length === 1}
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                  <span style={{width: '40px', minWidth: '40px', flexShrink: 0}}></span>
                 </div>
-              ))}
-              
-              {/* Total */}
-              <div style={styles.totalRow}>
-                <span style={{flex: 1, textAlign: 'right', fontWeight: '600'}}>
-                  TOTAL ({formData.currency}):
-                </span>
-                <span style={{
-                  width: '100px',
-                  textAlign: 'right',
-                  fontWeight: '700',
-                  fontSize: '18px',
-                  color: '#4f46e5'
-                }}>
-                  {calculateTotal().toFixed(2)}
-                </span>
-                <span style={{width: '40px'}}></span>
               </div>
             </div>
           </div>
@@ -1083,16 +1096,20 @@ const styles = {
   },
   body: {
     padding: '24px',
+    overflowX: 'hidden',
     overflowY: 'auto',
     display: 'flex',
     flexDirection: 'column',
-    gap: '24px'
+    gap: '24px',
+    boxSizing: 'border-box'
   },
   section: {
     padding: '20px',
     borderRadius: '12px',
     border: '1px solid var(--border-color)',
-    backgroundColor: 'var(--bg-secondary)'
+    backgroundColor: 'var(--bg-secondary)',
+    boxSizing: 'border-box',
+    width: '100%'
   },
   sectionHeader: {
     display: 'flex',
@@ -1131,7 +1148,9 @@ const styles = {
     borderRadius: '8px',
     border: '1px solid var(--border-color)',
     fontSize: '14px',
-    outline: 'none'
+    outline: 'none',
+    boxSizing: 'border-box',
+    width: '100%'
   },
   textarea: {
     resize: 'vertical',
@@ -1154,10 +1173,18 @@ const styles = {
     fontWeight: '500',
     cursor: 'pointer'
   },
+  itemsTableWrapper: {
+    width: '100%',
+    overflowX: 'auto',
+    overflowY: 'visible',
+    boxSizing: 'border-box'
+  },
   itemsTable: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '8px'
+    gap: '8px',
+    minWidth: '100%',
+    boxSizing: 'border-box'
   },
   itemsHeader: {
     display: 'flex',
@@ -1167,23 +1194,31 @@ const styles = {
     fontSize: '11px',
     fontWeight: '600',
     textTransform: 'uppercase',
-    color: '#6b7280'
+    color: '#6b7280',
+    minWidth: 0,
+    boxSizing: 'border-box'
   },
   itemRow: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px'
+    gap: '8px',
+    minWidth: 0,
+    boxSizing: 'border-box'
   },
   itemInput: {
     padding: '8px 10px',
     borderRadius: '6px',
     border: '1px solid var(--border-color)',
     fontSize: '13px',
-    outline: 'none'
+    outline: 'none',
+    boxSizing: 'border-box',
+    width: '100%'
   },
   removeItemButton: {
     width: '32px',
+    minWidth: '32px',
     height: '32px',
+    flexShrink: 0,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -1191,7 +1226,8 @@ const styles = {
     border: 'none',
     color: '#ef4444',
     cursor: 'pointer',
-    borderRadius: '6px'
+    borderRadius: '6px',
+    boxSizing: 'border-box'
   },
   totalRow: {
     display: 'flex',
@@ -1199,7 +1235,9 @@ const styles = {
     gap: '8px',
     padding: '16px 8px',
     borderTop: '2px solid var(--border-color)',
-    marginTop: '8px'
+    marginTop: '8px',
+    minWidth: 0,
+    boxSizing: 'border-box'
   },
   footer: {
     display: 'flex',
