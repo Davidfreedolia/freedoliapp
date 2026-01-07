@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useImperativeHandle, forwardRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Barcode, Package, Save, Plus, AlertCircle, CheckCircle2, X } from 'lucide-react'
 import HelpIcon from './HelpIcon'
@@ -22,7 +22,7 @@ const GTIN_TYPES = [
   { value: 'GTIN_EXEMPT', label: 'GTIN Exempt (Amazon)' }
 ]
 
-export default function IdentifiersSection({ projectId, darkMode }) {
+const IdentifiersSection = forwardRef(function IdentifiersSection({ projectId, darkMode }, ref) {
   const { isMobile } = useBreakpoint()
   const { t } = useTranslation()
   const modalStyles = getModalStyles(isMobile, darkMode)
@@ -52,9 +52,12 @@ export default function IdentifiersSection({ projectId, darkMode }) {
       const data = await getProductIdentifiers(projectId)
       setIdentifiers(data)
       if (data) {
+        // Si GTIN_EXEMPT está seleccionado, asegurar que gtin_code está vacío/null
+        const gtinCode = (data.gtin_type === 'GTIN_EXEMPT') ? '' : (data.gtin_code || '')
+        
         setFormData({
           gtin_type: data.gtin_type || '',
-          gtin_code: data.gtin_code || '',
+          gtin_code: gtinCode,
           exemption_reason: data.exemption_reason || '',
           asin: data.asin || '',
           fnsku: data.fnsku || ''
@@ -102,11 +105,11 @@ export default function IdentifiersSection({ projectId, darkMode }) {
     // Validacions
     let dataToSave = { ...formData }
     if (dataToSave.gtin_type === 'GTIN_EXEMPT') {
-      if (!dataToSave.exemption_reason) {
+      if (!dataToSave.exemption_reason || !dataToSave.exemption_reason.trim()) {
         alert('La raó d\'exempció és obligatòria per GTIN_EXEMPT')
         return
       }
-      // Netejar gtin_code si és GTIN_EXEMPT
+      // Netejar gtin_code si és GTIN_EXEMPT (asegurar null en DB)
       dataToSave.gtin_code = null
     } else if (dataToSave.gtin_type && !dataToSave.gtin_code) {
       alert('El codi GTIN és obligatori si no és exempt')
@@ -226,6 +229,21 @@ export default function IdentifiersSection({ projectId, darkMode }) {
       exemption_reason: gtinType === 'GTIN_EXEMPT' ? formData.exemption_reason : ''
     })
   }
+
+  // Exponer función para establecer GTIN_EXEMPT programáticamente vía ref
+  useImperativeHandle(ref, () => ({
+    markAsExempt: () => {
+      handleGtinTypeChange('GTIN_EXEMPT')
+      const section = document.getElementById('identifiers-section')
+      if (section) {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        setTimeout(() => {
+          const select = section.querySelector('select')
+          if (select) select.focus()
+        }, 300)
+      }
+    }
+  }), [])
 
   if (loading) {
     return (
@@ -629,7 +647,7 @@ export default function IdentifiersSection({ projectId, darkMode }) {
       )}
     </div>
   )
-}
+})
 
 const styles = {
   section: {

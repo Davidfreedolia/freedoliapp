@@ -694,7 +694,6 @@ function ProjectDetailInner({ useApp }) {
         <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
           <AmazonReadinessBadge
             projectId={id}
-            projectSku={project.sku}
             darkMode={darkMode}
             onAssignGtin={() => {
               // Scroll to IdentifiersSection
@@ -708,23 +707,9 @@ function ProjectDetailInner({ useApp }) {
               navigate(`/orders?project=${id}&action=create`)
             }}
             onMarkExempt={() => {
-              // Scroll to IdentifiersSection and trigger GTIN Exempt selection
-              const identifiersSection = document.getElementById('identifiers-section')
-              if (identifiersSection) {
-                identifiersSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                // Small delay to ensure section is visible before triggering
-                setTimeout(() => {
-                  // Find the GTIN type select dropdown
-                  const gtinTypeSelect = identifiersSection.querySelector('select')
-                  if (gtinTypeSelect) {
-                    // Set value and trigger change event
-                    gtinTypeSelect.value = 'GTIN_EXEMPT'
-                    const changeEvent = new Event('change', { bubbles: true, cancelable: true })
-                    gtinTypeSelect.dispatchEvent(changeEvent)
-                    // Focus the select for better UX
-                    gtinTypeSelect.focus()
-                  }
-                }, 300)
+              // Use ref to call markAsExempt method (React-controlled, no DOM manipulation)
+              if (identifiersSectionRef.current) {
+                identifiersSectionRef.current.markAsExempt()
               }
             }}
           />
@@ -733,7 +718,7 @@ function ProjectDetailInner({ useApp }) {
         {/* Identifiers Section */}
         <div id="identifiers-section">
           <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
-            <IdentifiersSection projectId={id} darkMode={darkMode} />
+            <IdentifiersSection ref={identifiersSectionRef} projectId={id} darkMode={darkMode} />
           </Suspense>
         </div>
 

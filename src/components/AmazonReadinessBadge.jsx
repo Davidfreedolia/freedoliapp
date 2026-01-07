@@ -3,7 +3,7 @@ import { CheckCircle2, AlertCircle, XCircle, Plus, Barcode, Shield } from 'lucid
 import { getProductIdentifiers, getPurchaseOrders } from '../lib/supabase'
 import { getButtonStyles, useButtonState } from '../utils/buttonStyles'
 
-export default function AmazonReadinessBadge({ projectId, projectSku, darkMode, onAssignGtin, onCreatePO, onMarkExempt }) {
+export default function AmazonReadinessBadge({ projectId, darkMode, onAssignGtin, onCreatePO, onMarkExempt }) {
   const [readiness, setReadiness] = useState(null) // null = loading, { status, message, action }
   const [loading, setLoading] = useState(true)
   const assignButtonState = useButtonState()
@@ -12,7 +12,7 @@ export default function AmazonReadinessBadge({ projectId, projectSku, darkMode, 
 
   useEffect(() => {
     loadReadiness()
-  }, [projectId, projectSku])
+  }, [projectId])
 
   const loadReadiness = async () => {
     setLoading(true)
@@ -22,16 +22,17 @@ export default function AmazonReadinessBadge({ projectId, projectSku, darkMode, 
       const hasGtin = !!(identifiers?.gtin_code)
       const hasGtinExempt = identifiers?.gtin_type === 'GTIN_EXEMPT'
       const hasGtinOrExempt = hasGtin || hasGtinExempt
-      const hasSku = !!projectSku
+      // Usar SKU Amazon de identifiers (no project.sku que es interno)
+      const hasAmazonSku = !!(identifiers?.sku)
 
       // Obtener POs del proyecto
       const pos = await getPurchaseOrders(projectId)
       const hasPO = pos && pos.length > 0
 
       // Calcular estado según requisitos:
-      // Ready: (GTIN OR GTIN Exempt) + SKU Amazon + PO
-      // Parcial: (GTIN OR GTIN Exempt) + NO PO
-      // No preparat: NO GTIN AND NO GTIN Exempt
+      // Ready: (GTIN OR GTIN Exempt) AND SKU Amazon AND PO
+      // Parcial: (GTIN OR GTIN Exempt) AND SKU Amazon AND !PO
+      // Not ready: !(GTIN OR GTIN Exempt) OR !SKU Amazon
       let status, message, action
       
       if (!hasGtinOrExempt) {
@@ -43,21 +44,25 @@ export default function AmazonReadinessBadge({ projectId, projectSku, darkMode, 
           secondaryLabel: 'Marcar com a Exempt',
           hasSecondary: true
         }
+      } else if (!hasAmazonSku) {
+        status = 'not_ready'
+        message = "Falta el SKU Amazon. Assigna un SKU Amazon a la secció d'identificadors."
+        action = { type: 'assign_gtin', label: 'Assignar SKU Amazon' }
       } else if (!hasPO) {
         status = 'partial'
         message = hasGtinExempt 
-          ? "El producte ja té exempció de GTIN però falta una comanda (PO)."
-          : "El producte ja té GTIN però falta una comanda (PO)."
+          ? "El producte ja té exempció de GTIN i SKU Amazon però falta una comanda (PO)."
+          : "El producte ja té GTIN i SKU Amazon però falta una comanda (PO)."
         action = { type: 'create_po', label: 'Crear PO' }
-      } else if (hasGtinOrExempt && hasSku && hasPO) {
+      } else if (hasGtinOrExempt && hasAmazonSku && hasPO) {
         status = 'ready'
         message = "Aquest producte compleix els requisits bàsics per Amazon."
         action = null
       } else {
-        // Fallback: si tiene GTIN/Exempt y PO pero no SKU, aún se considera ready
-        status = 'ready'
-        message = "Aquest producte compleix els requisits bàsics per Amazon."
-        action = null
+        // Fallback: no debería llegar aquí, pero por seguridad
+        status = 'not_ready'
+        message = "Falten requisits per Amazon. Revisa GTIN, SKU Amazon i comandes."
+        action = { type: 'assign_gtin', label: 'Revisar identificadors' }
       }
 
       setReadiness({ status, message, action })
