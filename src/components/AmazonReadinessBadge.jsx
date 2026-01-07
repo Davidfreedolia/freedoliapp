@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react'
-import { CheckCircle2, AlertCircle, XCircle, Plus, Barcode } from 'lucide-react'
+import { CheckCircle2, AlertCircle, XCircle, Plus, Barcode, Shield } from 'lucide-react'
 import { getProductIdentifiers, getPurchaseOrders } from '../lib/supabase'
 import { getButtonStyles, useButtonState } from '../utils/buttonStyles'
 
-export default function AmazonReadinessBadge({ projectId, projectSku, darkMode, onAssignGtin, onCreatePO }) {
+export default function AmazonReadinessBadge({ projectId, projectSku, darkMode, onAssignGtin, onCreatePO, onMarkExempt }) {
   const [readiness, setReadiness] = useState(null) // null = loading, { status, message, action }
   const [loading, setLoading] = useState(true)
   const assignButtonState = useButtonState()
   const createPOButtonState = useButtonState()
+  const exemptButtonState = useButtonState()
 
   useEffect(() => {
     loadReadiness()
@@ -16,9 +17,11 @@ export default function AmazonReadinessBadge({ projectId, projectSku, darkMode, 
   const loadReadiness = async () => {
     setLoading(true)
     try {
-      // Obtener GTIN
+      // Obtener GTIN y estado de exempción
       const identifiers = await getProductIdentifiers(projectId)
       const hasGtin = !!(identifiers?.gtin_code)
+      const hasGtinExempt = identifiers?.gtin_type === 'GTIN_EXEMPT'
+      const hasGtinOrExempt = hasGtin || hasGtinExempt
       const hasSku = !!projectSku
 
       // Obtener POs del proyecto
@@ -26,26 +29,32 @@ export default function AmazonReadinessBadge({ projectId, projectSku, darkMode, 
       const hasPO = pos && pos.length > 0
 
       // Calcular estado según requisitos:
-      // Ready: GTIN + SKU + PO
-      // Parcial: GTIN + NO PO
-      // No preparat: NO GTIN
+      // Ready: (GTIN OR GTIN Exempt) + SKU Amazon + PO
+      // Parcial: (GTIN OR GTIN Exempt) + NO PO
+      // No preparat: NO GTIN AND NO GTIN Exempt
       let status, message, action
       
-      if (!hasGtin) {
+      if (!hasGtinOrExempt) {
         status = 'not_ready'
-        message = "Falta assignar un GTIN. Amazon requereix un identificador per llistar el producte."
-        action = { type: 'assign_gtin', label: 'Assignar GTIN' }
+        message = "Falta GTIN o exempció de GTIN. Pots assignar un EAN/UPC o marcar el producte com a exempt segons aprovació d'Amazon."
+        action = { 
+          type: 'no_gtin', 
+          label: 'Assignar GTIN',
+          secondaryLabel: 'Marcar com a Exempt',
+          hasSecondary: true
+        }
       } else if (!hasPO) {
         status = 'partial'
-        message = "El producte ja té GTIN però falta una comanda (PO)."
+        message = hasGtinExempt 
+          ? "El producte ja té exempció de GTIN però falta una comanda (PO)."
+          : "El producte ja té GTIN però falta una comanda (PO)."
         action = { type: 'create_po', label: 'Crear PO' }
-      } else if (hasGtin && hasSku && hasPO) {
+      } else if (hasGtinOrExempt && hasSku && hasPO) {
         status = 'ready'
         message = "Aquest producte compleix els requisits bàsics per Amazon."
         action = null
       } else {
-        // Fallback: si tiene GTIN y PO pero no SKU, aún se considera ready
-        // (SKU es opcional según la lógica, pero preferible tenerlo)
+        // Fallback: si tiene GTIN/Exempt y PO pero no SKU, aún se considera ready
         status = 'ready'
         message = "Aquest producte compleix els requisits bàsics per Amazon."
         action = null
@@ -139,33 +148,82 @@ export default function AmazonReadinessBadge({ projectId, projectSku, darkMode, 
         {message}
       </p>
 
-      {/* Action Button */}
+      {/* Action Buttons */}
       {action && (
-        <button
-          onClick={() => {
-            if (action.type === 'assign_gtin' && onAssignGtin) {
-              onAssignGtin()
-            } else if (action.type === 'create_po' && onCreatePO) {
-              onCreatePO()
-            }
-          }}
-          {...(action.type === 'assign_gtin' ? assignButtonState : createPOButtonState)}
-          style={{
-            ...getButtonStyles({
-              variant: action.type === 'assign_gtin' ? 'primary' : 'primary',
-              darkMode,
-              disabled: false,
-              isHovered: (action.type === 'assign_gtin' ? assignButtonState : createPOButtonState).isHovered,
-              isActive: (action.type === 'assign_gtin' ? assignButtonState : createPOButtonState).isActive
-            }),
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}
-        >
-          {action.type === 'assign_gtin' ? <Barcode size={16} /> : <Plus size={16} />}
-          {action.label}
-        </button>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          {action.type === 'no_gtin' && action.hasSecondary ? (
+            <>
+              <button
+                onClick={() => {
+                  if (onAssignGtin) onAssignGtin()
+                }}
+                {...assignButtonState}
+                style={{
+                  ...getButtonStyles({
+                    variant: 'primary',
+                    darkMode,
+                    disabled: false,
+                    isHovered: assignButtonState.isHovered,
+                    isActive: assignButtonState.isActive
+                  }),
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+              >
+                <Barcode size={16} />
+                {action.label}
+              </button>
+              <button
+                onClick={() => {
+                  if (onMarkExempt) onMarkExempt()
+                }}
+                {...exemptButtonState}
+                style={{
+                  ...getButtonStyles({
+                    variant: 'secondary',
+                    darkMode,
+                    disabled: false,
+                    isHovered: exemptButtonState.isHovered,
+                    isActive: exemptButtonState.isActive
+                  }),
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+              >
+                <Shield size={16} />
+                {action.secondaryLabel}
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => {
+                if (action.type === 'assign_gtin' && onAssignGtin) {
+                  onAssignGtin()
+                } else if (action.type === 'create_po' && onCreatePO) {
+                  onCreatePO()
+                }
+              }}
+              {...(action.type === 'assign_gtin' ? assignButtonState : createPOButtonState)}
+              style={{
+                ...getButtonStyles({
+                  variant: 'primary',
+                  darkMode,
+                  disabled: false,
+                  isHovered: (action.type === 'assign_gtin' ? assignButtonState : createPOButtonState).isHovered,
+                  isActive: (action.type === 'assign_gtin' ? assignButtonState : createPOButtonState).isActive
+                }),
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              {action.type === 'assign_gtin' ? <Barcode size={16} /> : <Plus size={16} />}
+              {action.label}
+            </button>
+          )}
+        </div>
       )}
     </div>
   )

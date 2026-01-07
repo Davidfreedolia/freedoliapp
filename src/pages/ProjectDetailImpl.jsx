@@ -707,6 +707,26 @@ function ProjectDetailInner({ useApp }) {
               // Navigate to Orders page with project filter - modal will open automatically if action=create
               navigate(`/orders?project=${id}&action=create`)
             }}
+            onMarkExempt={() => {
+              // Scroll to IdentifiersSection and trigger GTIN Exempt selection
+              const identifiersSection = document.getElementById('identifiers-section')
+              if (identifiersSection) {
+                identifiersSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                // Small delay to ensure section is visible before triggering
+                setTimeout(() => {
+                  // Find the GTIN type select dropdown
+                  const gtinTypeSelect = identifiersSection.querySelector('select')
+                  if (gtinTypeSelect) {
+                    // Set value and trigger change event
+                    gtinTypeSelect.value = 'GTIN_EXEMPT'
+                    const changeEvent = new Event('change', { bubbles: true, cancelable: true })
+                    gtinTypeSelect.dispatchEvent(changeEvent)
+                    // Focus the select for better UX
+                    gtinTypeSelect.focus()
+                  }
+                }, 300)
+              }
+            }}
           />
         </Suspense>
 

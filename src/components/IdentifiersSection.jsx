@@ -19,7 +19,7 @@ import { showToast } from '../components/Toast'
 const GTIN_TYPES = [
   { value: 'EAN', label: 'EAN' },
   { value: 'UPC', label: 'UPC' },
-  { value: 'GTIN_EXEMPT', label: 'GTIN Exempt' }
+  { value: 'GTIN_EXEMPT', label: 'GTIN Exempt (Amazon)' }
 ]
 
 export default function IdentifiersSection({ projectId, darkMode }) {
@@ -337,26 +337,44 @@ export default function IdentifiersSection({ projectId, darkMode }) {
 
         {/* Exemption Reason (si és EXEMPT) */}
         {formData.gtin_type === 'GTIN_EXEMPT' && (
-          <div style={styles.formGroup}>
-            <label style={{
-              ...styles.label,
-              color: darkMode ? '#e5e7eb' : '#374151'
+          <>
+            <div style={{
+              padding: '12px',
+              backgroundColor: darkMode ? '#1a3a2a' : '#f0fdf4',
+              border: `1px solid ${darkMode ? '#22c55e' : '#22c55e'}`,
+              borderRadius: '8px',
+              marginBottom: '16px'
             }}>
-              Raó d'Exempció *
-            </label>
-            <textarea
-              value={formData.exemption_reason}
-              onChange={e => setFormData({ ...formData, exemption_reason: e.target.value })}
-              placeholder="Explica per què aquest producte està exempt de GTIN"
-              rows={3}
-              style={{
-                ...styles.textarea,
-                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                color: darkMode ? '#ffffff' : '#111827',
-                borderColor: darkMode ? '#374151' : '#d1d5db'
-              }}
-            />
-          </div>
+              <p style={{
+                margin: 0,
+                fontSize: '13px',
+                color: darkMode ? '#86efac' : '#166534',
+                lineHeight: '1.5'
+              }}>
+                Aquest producte té exempció de GTIN aprovada per Amazon. No cal introduir EAN o UPC.
+              </p>
+            </div>
+            <div style={styles.formGroup}>
+              <label style={{
+                ...styles.label,
+                color: darkMode ? '#e5e7eb' : '#374151'
+              }}>
+                Raó d'Exempció *
+              </label>
+              <textarea
+                value={formData.exemption_reason}
+                onChange={e => setFormData({ ...formData, exemption_reason: e.target.value })}
+                placeholder="Explica per què aquest producte està exempt de GTIN"
+                rows={3}
+                style={{
+                  ...styles.textarea,
+                  backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                  color: darkMode ? '#ffffff' : '#111827',
+                  borderColor: darkMode ? '#374151' : '#d1d5db'
+                }}
+              />
+            </div>
+          </>
         )}
 
         {/* ASIN */}
