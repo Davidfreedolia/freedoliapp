@@ -10,6 +10,7 @@ import { handleError } from '../lib/errorHandling'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
 import { showToast } from './Toast'
+import { getButtonStyles, useButtonState } from '../utils/buttonStyles'
 
 const PHASES = [
   { id: 1, name: 'Recerca', icon: '🔍' },
@@ -27,6 +28,8 @@ export default function NewProjectModal({ isOpen, onClose }) {
   const { t } = useTranslation()
   const { isMobile } = useBreakpoint()
   const modalStyles = getModalStyles(isMobile, darkMode)
+  const cancelButtonState = useButtonState()
+  const saveButtonState = useButtonState()
   const [loading, setLoading] = useState(false)
   const [creatingFolders, setCreatingFolders] = useState(false)
   const [generatingCode, setGeneratingCode] = useState(false)
@@ -293,23 +296,28 @@ export default function NewProjectModal({ isOpen, onClose }) {
             <button 
               type="button" 
               onClick={handleClose}
-              style={{
-                ...styles.button,
-                ...styles.buttonSecondary,
-                backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6',
-                color: darkMode ? '#9ca3af' : '#6b7280'
-              }}
+              {...cancelButtonState}
+              style={getButtonStyles({ 
+                variant: 'danger', 
+                darkMode, 
+                disabled: false,
+                isHovered: cancelButtonState.isHovered,
+                isActive: cancelButtonState.isActive
+              })}
             >
               {t('common.cancel')}
             </button>
             <button 
               type="submit"
               disabled={loading || generatingCode || !projectCodes.projectCode}
-              style={{
-                ...styles.button,
-                ...styles.buttonPrimary,
-                opacity: (loading || generatingCode || !projectCodes.projectCode) ? 0.7 : 1
-              }}
+              {...saveButtonState}
+              style={getButtonStyles({ 
+                variant: 'primary', 
+                darkMode, 
+                disabled: loading || generatingCode || !projectCodes.projectCode,
+                isHovered: saveButtonState.isHovered,
+                isActive: saveButtonState.isActive
+              })}
             >
               {loading ? (
                 <>

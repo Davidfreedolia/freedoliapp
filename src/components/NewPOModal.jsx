@@ -22,6 +22,7 @@ import {
 } from '../lib/supabase'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
+import { getButtonStyles, useButtonState } from '../utils/buttonStyles'
 
 // Incoterms comuns
 const INCOTERMS = [
@@ -46,6 +47,8 @@ export default function NewPOModal({
   const { isMobile } = useBreakpoint()
   const { t } = useTranslation()
   const modalStyles = getModalStyles(isMobile, darkMode)
+  const cancelButtonState = useButtonState()
+  const saveButtonState = useButtonState()
   const [loading, setLoading] = useState(false)
   const [generatingPO, setGeneratingPO] = useState(false)
   const [warehouses, setWarehouses] = useState([])
@@ -976,18 +979,15 @@ export default function NewPOModal({
         {/* Footer */}
         <div style={styles.footer}>
           <button 
-            onClick={onClose} 
-            style={styles.cancelButton}
-            onMouseEnter={(e) => {
-              if (!e.currentTarget.disabled) {
-                e.currentTarget.style.backgroundColor = '#dc2626'
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!e.currentTarget.disabled) {
-                e.currentTarget.style.backgroundColor = '#ef4444'
-              }
-            }}
+            onClick={onClose}
+            {...cancelButtonState}
+            style={getButtonStyles({ 
+              variant: 'danger', 
+              darkMode, 
+              disabled: false,
+              isHovered: cancelButtonState.isHovered,
+              isActive: cancelButtonState.isActive
+            })}
           >
             {t('common.cancel', 'Cancel·lar')}
           </button>
@@ -996,21 +996,14 @@ export default function NewPOModal({
               onClick={handleSave} 
               disabled={loading || !formData.po_number}
               title={!formData.po_number ? 'Selecciona un projecte per generar el número de PO' : ''}
-              style={{
-                ...styles.saveButton,
-                opacity: (loading || !formData.po_number) ? 0.7 : 1,
-                cursor: (loading || !formData.po_number) ? 'not-allowed' : 'pointer'
-              }}
-              onMouseEnter={(e) => {
-                if (!e.currentTarget.disabled) {
-                  e.currentTarget.style.backgroundColor = '#4338ca'
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!e.currentTarget.disabled) {
-                  e.currentTarget.style.backgroundColor = '#4f46e5'
-                }
-              }}
+              {...saveButtonState}
+              style={getButtonStyles({ 
+                variant: 'primary', 
+                darkMode, 
+                disabled: loading || !formData.po_number,
+                isHovered: saveButtonState.isHovered,
+                isActive: saveButtonState.isActive
+              })}
             >
               {loading ? (
                 <>
@@ -1246,38 +1239,4 @@ const styles = {
     padding: '20px 24px',
     borderTop: '1px solid var(--border-color)'
   },
-  cancelButton: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '8px',
-    height: '40px',
-    minWidth: '140px',
-    padding: '12px 24px',
-    backgroundColor: '#ef4444',
-    color: '#ffffff',
-    border: '1px solid #dc2626',
-    borderRadius: '10px',
-    fontSize: '14px',
-    fontWeight: '500',
-    cursor: 'pointer',
-    transition: 'all 0.2s'
-  },
-  saveButton: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '8px',
-    height: '40px',
-    minWidth: '140px',
-    padding: '12px 24px',
-    backgroundColor: '#4f46e5',
-    color: '#ffffff',
-    border: '1px solid #3730a3',
-    borderRadius: '10px',
-    fontSize: '14px',
-    fontWeight: '500',
-    cursor: 'pointer',
-    transition: 'all 0.2s'
-  }
 }

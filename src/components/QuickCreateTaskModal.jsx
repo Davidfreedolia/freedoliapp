@@ -6,12 +6,15 @@ import { getModalStyles } from '../utils/responsiveStyles'
 import { createTask } from '../lib/supabase'
 import { showToast } from './Toast'
 import { useTranslation } from 'react-i18next'
+import { getButtonStyles, useButtonState } from '../utils/buttonStyles'
 
 export default function QuickCreateTaskModal({ isOpen, onClose, onSave, defaultDate, projects = [] }) {
   const { darkMode } = useApp()
   const { isMobile } = useBreakpoint()
   const { t } = useTranslation()
   const modalStyles = getModalStyles(isMobile, darkMode)
+  const cancelButtonState = useButtonState()
+  const saveButtonState = useButtonState()
   
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
@@ -230,15 +233,29 @@ export default function QuickCreateTaskModal({ isOpen, onClose, onSave, defaultD
             <button
               type="button"
               onClick={onClose}
-              style={{ ...styles.button, ...styles.cancelButton }}
               disabled={loading}
+              {...cancelButtonState}
+              style={getButtonStyles({ 
+                variant: 'danger', 
+                darkMode, 
+                disabled: loading,
+                isHovered: cancelButtonState.isHovered,
+                isActive: cancelButtonState.isActive
+              })}
             >
               {t('common.cancel', 'Cancel·lar')}
             </button>
             <button
               type="submit"
-              style={{ ...styles.button, ...styles.saveButton }}
               disabled={loading || !formData.title.trim()}
+              {...saveButtonState}
+              style={getButtonStyles({ 
+                variant: 'primary', 
+                darkMode, 
+                disabled: loading || !formData.title.trim(),
+                isHovered: saveButtonState.isHovered,
+                isActive: saveButtonState.isActive
+              })}
             >
               {loading ? t('common.loading', 'Carregant...') : t('common.save', 'Guardar')}
             </button>

@@ -5,6 +5,7 @@ import { useApp } from '../context/AppContext'
 import { getDashboardPreferences, updateDashboardPreferences } from '../lib/supabase'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
+import { getButtonStyles, useButtonState } from '../utils/buttonStyles'
 
 const AVAILABLE_WIDGETS = [
   { id: 'logistics_tracking', name: 'Tracking Logístic', description: 'Mostra l\'estat de les comandes per projecte' },
@@ -28,6 +29,8 @@ export default function CustomizeDashboardModal({ isOpen, onClose, onSave }) {
   const { isMobile } = useBreakpoint()
   const { t } = useTranslation()
   const modalStyles = getModalStyles(isMobile, darkMode)
+  const cancelButtonState = useButtonState()
+  const saveButtonState = useButtonState()
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [widgets, setWidgets] = useState({

@@ -1,3 +1,7 @@
+
+
+
+
 // Estructura de subcarpetes per projecte
 // Aquest fitxer conté només constants sense dependències per evitar cicles d'imports
 
@@ -13,4 +17,5 @@ export const PROJECT_SUBFOLDERS = [
   '09_Listings',
   '10_Images'
 ]
+
 

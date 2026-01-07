@@ -5,22 +5,47 @@
 
 import { useState } from 'react'
 
-export const getButtonStyles = ({ variant = 'primary', darkMode = false, disabled = false, isHovered = false, isActive = false }) => {
+export const getButtonStyles = ({ variant = 'primary', darkMode = false, disabled = false, isHovered = false, isActive = false, size = 'md' }) => {
+  const sizeStyles = {
+    md: {
+      height: '40px',
+      minWidth: '140px',
+      padding: '12px 24px',
+      fontSize: '14px',
+      fontWeight: '500'
+    },
+    sm: {
+      height: '32px',
+      minWidth: '100px',
+      padding: '8px 16px',
+      fontSize: '13px',
+      fontWeight: '500'
+    },
+    lg: {
+      height: '48px',
+      minWidth: '160px',
+      padding: '14px 28px',
+      fontSize: '15px',
+      fontWeight: '600'
+    }
+  }
+
+  const sizeStyle = sizeStyles[size] || sizeStyles.md
+
   const baseStyles = {
-    padding: '12px 24px',
+    ...sizeStyle,
     borderRadius: '10px',
-    fontSize: '14px',
-    fontWeight: '500',
     cursor: disabled ? 'not-allowed' : 'pointer',
     border: 'none',
-    transition: 'all 0.15s ease',
-    display: 'inline-flex',
+    transition: 'all 0.2s ease',
+    display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     gap: '8px',
-    opacity: disabled ? 0.5 : 1,
+    opacity: disabled ? 0.6 : 1,
     transform: isActive ? 'scale(0.99)' : 'scale(1)',
-    outline: 'none'
+    outline: 'none',
+    boxSizing: 'border-box'
   }
 
   const variants = {
@@ -29,6 +54,7 @@ export const getButtonStyles = ({ variant = 'primary', darkMode = false, disable
         ? (darkMode ? '#4338ca' : '#4338ca')
         : (darkMode ? '#4f46e5' : '#4f46e5'),
       color: '#ffffff',
+      border: '1px solid #3730a3',
       boxShadow: isHovered
         ? (darkMode ? '0 4px 12px rgba(79, 70, 229, 0.4)' : '0 4px 8px rgba(0, 0, 0, 0.15)')
         : (darkMode ? '0 2px 8px rgba(79, 70, 229, 0.3)' : '0 2px 4px rgba(0, 0, 0, 0.1)'),
@@ -44,12 +70,13 @@ export const getButtonStyles = ({ variant = 'primary', darkMode = false, disable
     },
     danger: {
       backgroundColor: isHovered
-        ? (darkMode ? '#b91c1c' : '#dc2626')
-        : (darkMode ? '#dc2626' : '#ef4444'),
+        ? (darkMode ? '#dc2626' : '#dc2626')
+        : (darkMode ? '#ef4444' : '#ef4444'),
       color: '#ffffff',
+      border: '1px solid #dc2626',
       boxShadow: isHovered
-        ? (darkMode ? '0 4px 12px rgba(220, 38, 38, 0.4)' : '0 4px 8px rgba(239, 68, 68, 0.3)')
-        : (darkMode ? '0 2px 8px rgba(220, 38, 38, 0.3)' : '0 2px 4px rgba(239, 68, 68, 0.2)'),
+        ? (darkMode ? '0 4px 12px rgba(239, 68, 68, 0.4)' : '0 4px 8px rgba(239, 68, 68, 0.3)')
+        : (darkMode ? '0 2px 8px rgba(239, 68, 68, 0.3)' : '0 2px 4px rgba(239, 68, 68, 0.2)'),
       filter: isHovered ? 'brightness(1.05)' : 'brightness(1)'
     },
     success: {

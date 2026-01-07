@@ -13,6 +13,7 @@ import {
 } from '../lib/supabase'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
+import { getButtonStyles, useButtonState } from '../utils/buttonStyles'
 import { showToast } from '../components/Toast'
 
 const GTIN_TYPES = [
@@ -25,6 +26,9 @@ export default function IdentifiersSection({ projectId, darkMode }) {
   const { isMobile } = useBreakpoint()
   const { t } = useTranslation()
   const modalStyles = getModalStyles(isMobile, darkMode)
+  const saveButtonState = useButtonState()
+  const cancelAssignButtonState = useButtonState()
+  const confirmAssignButtonState = useButtonState()
   const [, setIdentifiers] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -411,13 +415,14 @@ export default function IdentifiersSection({ projectId, darkMode }) {
         <button
           onClick={handleSave}
           disabled={saving}
-          style={{
-            ...styles.saveButton,
-            backgroundColor: '#4f46e5',
-            color: '#ffffff',
-            opacity: saving ? 0.6 : 1,
-            cursor: saving ? 'not-allowed' : 'pointer'
-          }}
+          {...saveButtonState}
+          style={getButtonStyles({ 
+            variant: 'primary', 
+            darkMode, 
+            disabled: saving,
+            isHovered: saveButtonState.isHovered,
+            isActive: saveButtonState.isActive
+          })}
         >
           <Save size={16} />
           {saving ? t('common.loading') : t('common.save')}
@@ -526,10 +531,15 @@ export default function IdentifiersSection({ projectId, darkMode }) {
                         setSelectedGtinForAssign(null)
                         setAssignFormData({ sku: '', fnsku: '' })
                       }}
+                      {...cancelAssignButtonState}
                       style={{
-                        ...styles.assignGtinButton,
-                        backgroundColor: darkMode ? '#374151' : '#e5e7eb',
-                        color: darkMode ? '#ffffff' : '#111827',
+                        ...getButtonStyles({ 
+                          variant: 'danger', 
+                          darkMode, 
+                          disabled: false,
+                          isHovered: cancelAssignButtonState.isHovered,
+                          isActive: cancelAssignButtonState.isActive
+                        }),
                         flex: 1
                       }}
                     >
@@ -538,13 +548,16 @@ export default function IdentifiersSection({ projectId, darkMode }) {
                     <button
                       onClick={handleConfirmAssign}
                       disabled={assigning || !assignFormData.sku?.trim()}
+                      {...confirmAssignButtonState}
                       style={{
-                        ...styles.assignGtinButton,
-                        backgroundColor: '#4f46e5',
-                        color: '#ffffff',
-                        flex: 1,
-                        opacity: (assigning || !assignFormData.sku?.trim()) ? 0.6 : 1,
-                        cursor: (assigning || !assignFormData.sku?.trim()) ? 'not-allowed' : 'pointer'
+                        ...getButtonStyles({ 
+                          variant: 'primary', 
+                          darkMode, 
+                          disabled: assigning || !assignFormData.sku?.trim(),
+                          isHovered: confirmAssignButtonState.isHovered,
+                          isActive: confirmAssignButtonState.isActive
+                        }),
+                        flex: 1
                       }}
                     >
                       {assigning ? 'Assignant...' : 'Assignar'}

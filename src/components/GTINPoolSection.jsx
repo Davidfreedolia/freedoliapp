@@ -24,12 +24,15 @@ import {
 import { showToast } from './Toast'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
+import { getButtonStyles, useButtonState } from '../utils/buttonStyles'
 
 export default function GTINPoolSection({ darkMode }) {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const { isMobile } = useBreakpoint()
   const modalStyles = getModalStyles(isMobile, darkMode)
+  const cancelButtonState = useButtonState()
+  const confirmButtonState = useButtonState()
   const [gtins, setGtins] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -846,7 +849,14 @@ export default function GTINPoolSection({ darkMode }) {
                   setShowImportModal(false)
                   setImportPreview(null)
                 }}
-                style={styles.cancelButton}
+                {...cancelButtonState}
+                style={getButtonStyles({ 
+                  variant: 'danger', 
+                  darkMode, 
+                  disabled: false,
+                  isHovered: cancelButtonState.isHovered,
+                  isActive: cancelButtonState.isActive
+                })}
               >
                 {t('common.cancel')}
               </button>
@@ -854,10 +864,14 @@ export default function GTINPoolSection({ darkMode }) {
                 <button
                   onClick={handleConfirmImport}
                   disabled={importing || importPreview.valid === 0}
-                  style={{
-                    ...styles.confirmButton,
-                    opacity: (importing || importPreview.valid === 0) ? 0.6 : 1
-                  }}
+                  {...confirmButtonState}
+                  style={getButtonStyles({ 
+                    variant: 'primary', 
+                    darkMode, 
+                    disabled: importing || importPreview.valid === 0,
+                    isHovered: confirmButtonState.isHovered,
+                    isActive: confirmButtonState.isActive
+                  })}
                 >
                   {importing ? t('settings.gtinPool.importing') : t('settings.gtinPool.importCodes', { count: importPreview.rows.filter(r => r.valid && !importPreview.conflicts.includes(r.gtin_code)).length })}
                 </button>
