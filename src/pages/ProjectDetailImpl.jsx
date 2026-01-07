@@ -29,6 +29,7 @@ const QuickSupplierPriceEstimate = lazy(() => import('../components/QuickSupplie
 const TasksSection = lazy(() => import('../components/TasksSection'))
 const QuotesSection = lazy(() => import('../components/QuotesSection'))
 const DecisionLog = lazy(() => import('../components/DecisionLog'))
+const AmazonReadinessBadge = lazy(() => import('../components/AmazonReadinessBadge'))
 
 const PHASES = [
   { id: 1, name: 'Recerca', icon: '🔍', color: '#6366f1', description: 'Investigació de producte i mercat' },
@@ -615,7 +616,7 @@ function ProjectDetailInner({ useApp }) {
           <div style={styles.projectMeta}>
             <span style={styles.projectCode}>{project.project_code}</span>
             {project.sku && (
-              <span style={styles.sku}>SKU: {project.sku}</span>
+              <span style={styles.sku}>Codi intern del projecte: {project.sku}</span>
             )}
           </div>
         </div>
@@ -689,10 +690,32 @@ function ProjectDetailInner({ useApp }) {
           </div>
         </div>
 
-        {/* Identifiers Section */}
+        {/* Amazon Readiness Badge */}
         <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
-          <IdentifiersSection projectId={id} darkMode={darkMode} />
+          <AmazonReadinessBadge
+            projectId={id}
+            projectSku={project.sku}
+            darkMode={darkMode}
+            onAssignGtin={() => {
+              // Scroll to IdentifiersSection
+              const identifiersSection = document.getElementById('identifiers-section')
+              if (identifiersSection) {
+                identifiersSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }
+            }}
+            onCreatePO={() => {
+              // Navigate to Orders page with project filter - modal will open automatically if action=create
+              navigate(`/orders?project=${id}&action=create`)
+            }}
+          />
         </Suspense>
+
+        {/* Identifiers Section */}
+        <div id="identifiers-section">
+          <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
+            <IdentifiersSection projectId={id} darkMode={darkMode} />
+          </Suspense>
+        </div>
 
         {/* Tasks Section */}
         <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>

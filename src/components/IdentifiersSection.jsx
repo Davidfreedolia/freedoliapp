@@ -394,7 +394,7 @@ export default function IdentifiersSection({ projectId, darkMode }) {
             alignItems: 'center',
             gap: '4px'
           }}>
-            FNSKU
+            FNSKU Amazon
             <HelpIcon helpKey="amazon_ready.fnsku" size="small" darkMode={darkMode} />
           </label>
           <input
@@ -488,7 +488,7 @@ export default function IdentifiersSection({ projectId, darkMode }) {
                       ...styles.label,
                       color: darkMode ? '#e5e7eb' : '#374151'
                     }}>
-                      SKU *
+                      SKU Amazon *
                     </label>
                     <input
                       type="text"
@@ -509,7 +509,7 @@ export default function IdentifiersSection({ projectId, darkMode }) {
                       ...styles.label,
                       color: darkMode ? '#e5e7eb' : '#374151'
                     }}>
-                      FNSKU (opcional)
+                      FNSKU Amazon (opcional)
                     </label>
                     <input
                       type="text"

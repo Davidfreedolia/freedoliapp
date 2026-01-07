@@ -124,6 +124,22 @@ export default function Orders() {
     loadData()
   }, [])
 
+  // Abrir modal automáticamente si action=create en URL
+  useEffect(() => {
+    const action = searchParams.get('action')
+    const projectId = searchParams.get('project')
+    if (action === 'create' && projectId && projects.length > 0) {
+      // Esperar a que projects esté carregat
+      const project = projects.find(p => p.id === projectId)
+      if (project) {
+        setEditingOrder({ project_id: projectId })
+        setShowModal(true)
+        // Netejar URL per evitar reobrir el modal en refresh
+        window.history.replaceState({}, '', '/orders?project=' + projectId)
+      }
+    }
+  }, [searchParams, projects])
+
   const loadData = async () => {
     setLoading(true)
     setError(null)
