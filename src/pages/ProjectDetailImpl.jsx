@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense, lazy } from 'react'
+import { useState, useEffect, Suspense, lazy, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { 
@@ -121,6 +121,7 @@ function ProjectDetailInner({ useApp }) {
   const { darkMode, driveConnected, refreshProjects } = useApp()
   const { isMobile, isTablet } = useBreakpoint()
   const { t } = useTranslation()
+  const identifiersSectionRef = useRef(null)
   
   // Extreure UUID net del paràmetre de ruta (eliminar qualsevol sufix com "Fes:")
   const id = rawId?.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i)?.[0] || null
