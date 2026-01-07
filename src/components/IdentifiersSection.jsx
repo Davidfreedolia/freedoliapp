@@ -649,6 +649,8 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({ projectId, d
   )
 })
 
+export default IdentifiersSection
+
 const styles = {
   section: {
     padding: '24px',
