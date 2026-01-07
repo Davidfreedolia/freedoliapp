@@ -24,6 +24,8 @@ import {
 import Header from '../components/Header'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
+import { getButtonStyles, useButtonState } from '../utils/buttonStyles'
+import { useTranslation } from 'react-i18next'
 
 // Magatzems Amazon FBA pre-definits
 const AMAZON_FBA_WAREHOUSES = [
@@ -64,8 +66,13 @@ const WAREHOUSE_TYPES = [
 
 export default function Warehouses() {
   const { darkMode, driveConnected } = useApp()
+  const { t } = useTranslation()
   const { isMobile, isTablet } = useBreakpoint()
   const modalStyles = getModalStyles(isMobile, darkMode)
+  const cancelButtonState = useButtonState()
+  const saveButtonState = useButtonState()
+  const amazonCancelButtonState = useButtonState()
+  const amazonSaveButtonState = useButtonState()
   
   const [warehouses, setWarehouses] = useState([])
   const [loading, setLoading] = useState(true)
@@ -460,8 +467,31 @@ export default function Warehouses() {
             </div>
 
             <div style={styles.modalFooter}>
-              <button onClick={() => setShowModal(false)} style={styles.cancelButton}>Cancel·lar</button>
-              <button onClick={handleSaveWarehouse} disabled={saving} style={styles.saveButton}>
+              <button 
+                onClick={() => setShowModal(false)}
+                {...cancelButtonState}
+                style={getButtonStyles({ 
+                  variant: 'danger', 
+                  darkMode, 
+                  disabled: false,
+                  isHovered: cancelButtonState.isHovered,
+                  isActive: cancelButtonState.isActive
+                })}
+              >
+                {t('common.cancel', 'Cancel·lar')}
+              </button>
+              <button 
+                onClick={handleSaveWarehouse} 
+                disabled={saving}
+                {...saveButtonState}
+                style={getButtonStyles({ 
+                  variant: 'primary', 
+                  darkMode, 
+                  disabled: saving,
+                  isHovered: saveButtonState.isHovered,
+                  isActive: saveButtonState.isActive
+                })}
+              >
                 {saving ? 'Guardant...' : <><Save size={16} /> {editingWarehouse.id ? 'Actualitzar' : 'Crear'}</>}
               </button>
             </div>
@@ -515,8 +545,35 @@ export default function Warehouses() {
                 {selectedAmazonWarehouses.length} seleccionats
               </span>
               <div style={{ display: 'flex', gap: '12px' }}>
-                <button onClick={() => setShowAmazonModal(false)} style={styles.cancelButton}>Cancel·lar</button>
-                <button onClick={handleSaveAmazonWarehouses} disabled={saving} style={styles.amazonSaveButton}>
+                <button 
+                  onClick={() => setShowAmazonModal(false)}
+                  {...amazonCancelButtonState}
+                  style={getButtonStyles({ 
+                    variant: 'danger', 
+                    darkMode, 
+                    disabled: false,
+                    isHovered: amazonCancelButtonState.isHovered,
+                    isActive: amazonCancelButtonState.isActive
+                  })}
+                >
+                  {t('common.cancel', 'Cancel·lar')}
+                </button>
+                <button 
+                  onClick={handleSaveAmazonWarehouses} 
+                  disabled={saving}
+                  {...amazonSaveButtonState}
+                  style={{
+                    ...getButtonStyles({ 
+                      variant: 'primary', 
+                      darkMode, 
+                      disabled: saving,
+                      isHovered: amazonSaveButtonState.isHovered,
+                      isActive: amazonSaveButtonState.isActive
+                    }),
+                    backgroundColor: '#ff9900',
+                    border: '1px solid #e68900'
+                  }}
+                >
                   {saving ? 'Guardant...' : <><Save size={16} /> Afegir seleccionats</>}
                 </button>
               </div>

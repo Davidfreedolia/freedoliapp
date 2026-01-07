@@ -858,7 +858,7 @@ export default function GTINPoolSection({ darkMode }) {
                   isActive: cancelButtonState.isActive
                 })}
               >
-                {t('common.cancel')}
+                {t('common.cancel', 'Cancel·lar')}
               </button>
               {importPreview && (
                 <button

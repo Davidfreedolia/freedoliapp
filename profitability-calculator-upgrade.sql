@@ -35,3 +35,4 @@ ADD COLUMN IF NOT EXISTS fixed_costs numeric NOT NULL DEFAULT 0;
 
 
 
+
