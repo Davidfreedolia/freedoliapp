@@ -336,12 +336,20 @@ export const createSupplier = async (supplier) => {
 }
 
 export const updateSupplier = async (id, updates) => {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
   // Eliminar user_id si ve del client (no es pot canviar)
   const { user_id, ...updateData } = updates
+  const userId = await getCurrentUserId()
+  
   const { data, error } = await supabase
     .from('suppliers')
     .update({ ...updateData, updated_at: new Date().toISOString() })
     .eq('id', id)
+    .eq('user_id', userId) // Ensure user can only update their own suppliers
+    .eq('is_demo', demoMode) // Ensure demo/real mode consistency
     .select()
     .single()
   if (error) throw error
@@ -349,7 +357,17 @@ export const updateSupplier = async (id, updates) => {
 }
 
 export const deleteSupplier = async (id) => {
-  const { error } = await supabase.from('suppliers').delete().eq('id', id)
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
+  const userId = await getCurrentUserId()
+  const { error } = await supabase
+    .from('suppliers')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', userId) // Ensure user can only delete their own suppliers
+    .eq('is_demo', demoMode) // Ensure demo/real mode consistency
   if (error) throw error
   return true
 }
