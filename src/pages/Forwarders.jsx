@@ -35,6 +35,7 @@ import {
 import Header from '../components/Header'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
+import { showToast } from '../components/Toast'
 
 // Països i ciutats
 const COUNTRIES_CITIES = {
@@ -221,22 +222,25 @@ export default function Forwarders() {
 
   const handleSaveForwarder = async () => {
     if (!editingForwarder.name) {
-      alert('El nom és obligatori')
+      showToast('El nom és obligatori', 'error')
       return
     }
     setSaving(true)
     try {
       if (editingForwarder.id) {
         await updateSupplier(editingForwarder.id, editingForwarder)
+        showToast('Transitari actualitzat correctament', 'success')
       } else {
-        await createSupplier(editingForwarder)
+        await createSupplier({ ...editingForwarder, type: 'freight' })
+        showToast('Transitari creat correctament', 'success')
       }
       await loadData()
       setShowForwarderModal(false)
       setEditingForwarder(null)
     } catch (err) {
       console.error('Error:', err)
-      alert('Error guardant transitari: ' + err.message)
+      showToast('Error guardant transitari: ' + (err.message || 'Error desconegut'), 'error')
+      // NO tancar modal si hi ha error
     }
     setSaving(false)
   }

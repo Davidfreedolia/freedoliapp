@@ -314,11 +314,21 @@ export const getSupplier = async (id) => {
 }
 
 export const createSupplier = async (supplier) => {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
   // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
   const { user_id, ...supplierData } = supplier
+  const userId = await getCurrentUserId()
+  
   const { data, error } = await supabase
     .from('suppliers')
-    .insert([supplierData])
+    .insert([{
+      ...supplierData,
+      user_id: userId, // Always set user_id explicitly
+      is_demo: demoMode // Set is_demo based on current mode
+    }])
     .select()
     .single()
   if (error) throw error
@@ -353,9 +363,9 @@ export const getSuppliersByType = async (type) => {
   const userId = await getCurrentUserId()
   const { data, error } = await supabase
     .from('suppliers')
+    .select('*')
     .eq('user_id', userId)
     .eq('is_demo', demoMode) // Filter by demo mode
-    .select('*')
     .eq('type', type)
     .order('name', { ascending: true })
   if (error) throw error
@@ -908,7 +918,7 @@ export const upsertProductIdentifiers = async (projectId, identifiers) => {
 // GTIN POOL
 // ============================================
 
-export const getGtinPool = async (status = null) => {
+export const getGtinPool = async (statusFilter = null) => {
   // Get demo mode setting
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
@@ -927,15 +937,29 @@ export const getGtinPool = async (status = null) => {
     `)
     .eq('user_id', userId)
     .eq('is_demo', demoMode) // Filter by demo mode
-    .order('created_at', { ascending: false })
+    .is('deleted_at', null) // Exclude soft-deleted rows
   
-  if (status) {
-    query = query.eq('status', status)
+  // Status is derived from assigned_to_project_id, not from status field
+  // Filter by assigned_to_project_id if needed
+  if (statusFilter === 'available') {
+    // Disponibles: assigned_to_project_id is null
+    query = query.is('assigned_to_project_id', null)
+  } else if (statusFilter === 'assigned') {
+    // Assignats: assigned_to_project_id is not null
+    query = query.not('assigned_to_project_id', 'is', null)
   }
+  // If statusFilter is null (All), don't filter by assigned_to_project_id
+  
+  query = query.order('created_at', { ascending: false })
   
   const { data, error } = await query
   if (error) throw error
-  return data
+  
+  // Derive status from assigned_to_project_id for each record
+  return data.map(record => ({
+    ...record,
+    status: record.assigned_to_project_id ? 'assigned' : 'available'
+  }))
 }
 
 export const getAvailableGtinCodes = async () => {
@@ -949,7 +973,8 @@ export const getAvailableGtinCodes = async () => {
     .select('*')
     .eq('user_id', userId)
     .eq('is_demo', demoMode) // Filter by demo mode
-    .eq('status', 'available')
+    .is('assigned_to_project_id', null) // Available: not assigned
+    .is('deleted_at', null) // Exclude soft-deleted rows
     .order('created_at', { ascending: false })
   if (error) throw error
   return data
@@ -964,15 +989,14 @@ export const assignGtinFromPool = async (gtinPoolId, projectId) => {
     .single()
   if (gtinError) throw gtinError
   
-  if (gtinData.status !== 'available') {
-    throw new Error('Aquest GTIN ja està assignat o arxivat')
+  if (gtinData.assigned_to_project_id) {
+    throw new Error('Aquest GTIN ja està assignat')
   }
   
-  // Actualitzar el pool a "assigned"
+  // Actualitzar el pool: assignar a projecte
   const { error: updateError } = await supabase
     .from('gtin_pool')
     .update({
-      status: 'assigned',
       assigned_to_project_id: projectId,
       assigned_at: new Date().toISOString()
     })
@@ -1021,22 +1045,45 @@ export const addGtinToPool = async (gtinData) => {
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
   
-  const userId = await getCurrentUserId()
-  
   // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
   const { user_id, ...poolData } = gtinData
   
-  const { data, error } = await supabase
-    .from('gtin_pool')
-    .insert([{
-      ...poolData,
-      user_id: userId, // Always set user_id explicitly
-      is_demo: demoMode // Mark with current demo mode
-    }])
-    .select()
-    .single()
+  // Usar RPC import_gtins per evitar errors 409
+  // La funció RPC gestiona inserts, restauracions i skips automàticament
+  const { data, error } = await supabase.rpc('import_gtins', {
+    p_codes: [poolData.gtin_code],
+    p_gtin_type: poolData.gtin_type || 'EAN',
+    p_notes: poolData.notes || null,
+    p_is_demo: demoMode
+  })
+  
   if (error) throw error
-  return data
+  
+  // Retornar el GTIN inserit/restaurat
+  // Si s'ha inserit o restaurat, buscar-lo per retornar-lo
+  if (data && data.length > 0 && (data[0].inserted_count > 0 || data[0].restored_count > 0)) {
+    const { data: gtin, error: fetchError } = await supabase
+      .from('gtin_pool')
+      .select('*')
+      .eq('gtin_code', poolData.gtin_code)
+      .eq('is_demo', demoMode)
+      .is('deleted_at', null)
+      .single()
+    
+    if (fetchError) throw fetchError
+    return gtin
+  }
+  
+  // Si s'ha saltat (ja existia), buscar-lo igualment
+  const { data: existing, error: fetchError } = await supabase
+    .from('gtin_pool')
+    .select('*')
+    .eq('gtin_code', poolData.gtin_code)
+    .eq('is_demo', demoMode)
+    .single()
+  
+  if (fetchError) throw fetchError
+  return existing
 }
 
 export const releaseGtinFromProject = async (gtinPoolId) => {
@@ -1059,7 +1106,6 @@ export const releaseGtinFromProject = async (gtinPoolId) => {
   const { error: updateError } = await supabase
     .from('gtin_pool')
     .update({
-      status: 'available',
       assigned_to_project_id: null,
       assigned_at: null
     })
@@ -1090,7 +1136,8 @@ export const getUnassignedGtinCodes = async () => {
     .select('*')
     .eq('user_id', userId)
     .eq('is_demo', demoMode) // Filter by demo mode
-    .eq('status', 'available')
+    .is('assigned_to_project_id', null) // Available: not assigned
+    .is('deleted_at', null) // Exclude soft-deleted rows
     .order('created_at', { ascending: false })
   if (error) throw error
   return data
@@ -1167,8 +1214,8 @@ export const getProgrammaticallyAssignedGTIN = async () => {
     `)
     .eq('user_id', userId)
     .eq('is_demo', demoMode) // Filter by demo mode
-    .eq('status', 'assigned')
-    .not('assigned_to_project_id', 'is', null)
+    .not('assigned_to_project_id', 'is', null) // Assigned: has assigned_to_project_id
+    .is('deleted_at', null) // Exclude soft-deleted rows
     .order('updated_at', { ascending: false })
   
   if (poolError) throw poolError
