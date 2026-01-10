@@ -96,6 +96,22 @@ export default function Warehouses() {
     loadData()
   }, [])
 
+  // Close actions menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuOpen && !event.target.closest('[data-menu-container]')) {
+        setMenuOpen(null)
+      }
+    }
+    
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside)
+      }
+    }
+  }, [menuOpen])
+
   const loadData = async () => {
     setLoading(true)
     try {
@@ -146,24 +162,28 @@ export default function Warehouses() {
   }
 
   const handleSaveWarehouse = async () => {
-    if (!editingWarehouse.name) {
-      alert('El nom és obligatori')
+    if (!editingWarehouse.name || !editingWarehouse.name.trim()) {
+      showToast('El nom és obligatori', 'error')
       return
     }
     setSaving(true)
     try {
       if (editingWarehouse.id) {
         await updateWarehouse(editingWarehouse.id, editingWarehouse)
+        showToast('Magatzem actualitzat correctament', 'success')
       } else {
         await createWarehouse(editingWarehouse)
+        showToast('Magatzem creat correctament', 'success')
       }
       await loadData()
       setShowModal(false)
+      setEditingWarehouse(null)
     } catch (err) {
-      console.error('Error:', err)
-      alert('Error guardant magatzem')
+      console.error('Error guardant magatzem:', err)
+      showToast(`Error guardant magatzem: ${err.message || 'Error desconegut'}`, 'error')
+    } finally {
+      setSaving(false)
     }
-    setSaving(false)
   }
 
   const handleDeleteWarehouse = async (warehouse) => {
@@ -250,11 +270,17 @@ export default function Warehouses() {
 
       await loadData()
       setShowAmazonModal(false)
+      if (newCodes.length > 0) {
+        showToast(`${newCodes.length} magatzem(s) Amazon afegit(s) correctament`, 'success')
+      } else {
+        showToast('Tots els magatzems Amazon seleccionats ja existeixen', 'info')
+      }
     } catch (err) {
-      console.error('Error:', err)
-      alert('Error afegint magatzems Amazon')
+      console.error('Error afegint magatzems Amazon:', err)
+      showToast(`Error afegint magatzems Amazon: ${err.message || 'Error desconegut'}`, 'error')
+    } finally {
+      setSaving(false)
     }
-    setSaving(false)
   }
 
   // Agrupar Amazon per país
@@ -394,16 +420,45 @@ export default function Warehouses() {
                     }}>
                       {typeInfo.icon} {typeInfo.name}
                     </span>
-                    <div style={{ position: 'relative' }}>
-                      <button onClick={() => setMenuOpen(menuOpen === warehouse.id ? null : warehouse.id)} style={styles.menuButton}>
+                    <div 
+                      style={{ position: 'relative' }} 
+                      data-menu-container
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setMenuOpen(menuOpen === warehouse.id ? null : warehouse.id)
+                        }} 
+                        style={styles.menuButton}
+                      >
                         <MoreVertical size={18} color="#9ca3af" />
                       </button>
                       {menuOpen === warehouse.id && (
-                        <div style={{ ...styles.menu, backgroundColor: darkMode ? '#1f1f2e' : '#ffffff' }}>
-                          <button onClick={() => handleEditWarehouse(warehouse)} style={styles.menuItem}>
+                        <div 
+                          style={{ 
+                            ...styles.menu, 
+                            backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
+                            zIndex: 1000
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleEditWarehouse(warehouse)
+                            }} 
+                            style={styles.menuItem}
+                          >
                             <Edit size={14} /> Editar
                           </button>
-                          <button onClick={() => handleDeleteWarehouse(warehouse)} style={{ ...styles.menuItem, color: '#ef4444' }}>
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleDeleteWarehouse(warehouse)
+                            }} 
+                            style={{ ...styles.menuItem, color: '#ef4444' }}
+                          >
                             <Trash2 size={14} /> Eliminar
                           </button>
                         </div>

@@ -101,6 +101,22 @@ export default function Suppliers() {
     loadCustomCities()
   }, [])
 
+  // Close actions menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuOpen && !event.target.closest('[data-menu-container]')) {
+        setMenuOpen(null)
+      }
+    }
+    
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside)
+      }
+    }
+  }, [menuOpen])
+
   const loadData = async () => {
     setLoading(true)
     try {
@@ -186,8 +202,8 @@ export default function Suppliers() {
   }
 
   const handleSave = async () => {
-    if (!editingSupplier.name) {
-      alert('El nom és obligatori')
+    if (!editingSupplier.name || !editingSupplier.name.trim()) {
+      showToast('El nom és obligatori', 'error')
       return
     }
 
@@ -195,17 +211,20 @@ export default function Suppliers() {
     try {
       if (editingSupplier.id) {
         await updateSupplier(editingSupplier.id, editingSupplier)
+        showToast('Proveïdor actualitzat correctament', 'success')
       } else {
         await createSupplier(editingSupplier)
+        showToast('Proveïdor creat correctament', 'success')
       }
       await loadData()
       setShowModal(false)
       setEditingSupplier(null)
     } catch (err) {
-      console.error('Error guardant:', err)
-      alert('Error guardant el proveïdor')
+      console.error('Error guardant proveïdor:', err)
+      showToast(`Error guardant el proveïdor: ${err.message || 'Error desconegut'}`, 'error')
+    } finally {
+      setSaving(false)
     }
-    setSaving(false)
   }
 
   const handleDelete = async (supplier) => {
@@ -410,16 +429,47 @@ export default function Suppliers() {
                         {typeInfo.name}
                       </span>
                     </div>
-                    <div style={{ position: 'relative' }}>
-                      <button onClick={() => setMenuOpen(menuOpen === supplier.id ? null : supplier.id)} style={styles.menuButton}>
+                    <div 
+                      style={{ position: 'relative' }} 
+                      data-menu-container
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setMenuOpen(menuOpen === supplier.id ? null : supplier.id)
+                        }} 
+                        style={styles.menuButton}
+                      >
                         <MoreVertical size={18} />
                       </button>
                       {menuOpen === supplier.id && (
-                        <div style={{ ...styles.menu, backgroundColor: darkMode ? '#1f1f2e' : '#ffffff' }}>
-                          <button onClick={() => { setEditingSupplier(supplier); setShowModal(true); setMenuOpen(null) }} style={styles.menuItem}>
+                        <div 
+                          style={{ 
+                            ...styles.menu, 
+                            backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
+                            zIndex: 1000
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setEditingSupplier(supplier)
+                              setShowModal(true)
+                              setMenuOpen(null)
+                            }} 
+                            style={styles.menuItem}
+                          >
                             <Edit size={14} /> Editar
                           </button>
-                          <button onClick={() => handleDelete(supplier)} style={{ ...styles.menuItem, color: '#ef4444' }}>
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleDelete(supplier)
+                            }} 
+                            style={{ ...styles.menuItem, color: '#ef4444' }}
+                          >
                             <Trash2 size={14} /> Eliminar
                           </button>
                         </div>
