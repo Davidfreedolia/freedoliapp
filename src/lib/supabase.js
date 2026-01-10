@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { RECEIPTS_BUCKET } from './storageBuckets'
 
 // IMPORTANT: No static imports of demoMode, auditLog, or demoModeFilter to avoid circular dependencies.
 // All imports from these modules must be dynamic (inside functions).
@@ -3383,16 +3384,29 @@ export const getStickyNoteWithTask = async (id) => {
  */
 const checkReceiptsBucket = async () => {
   try {
-    const { data, error } = await supabase.storage.getBucket('receipts')
+    // Use getSupabaseClient directly to avoid Proxy issues in production
+    const client = getSupabaseClient()
+    if (!client || !client.storage || typeof client.storage.getBucket !== 'function') {
+      return false
+    }
+    
+    const { data, error } = await client.storage.getBucket(RECEIPTS_BUCKET)
     if (error) {
-      if (error.message?.includes('not found') || error.statusCode === '404') {
+      if (error.message?.includes('not found') || error.statusCode === '404' || error.code === '404') {
         return false
       }
       throw error
     }
     return !!data
   } catch (err) {
-    console.error('Error checking receipts bucket:', err)
+    // Silently return false if bucket doesn't exist (expected in some setups)
+    if (err.message?.includes('not found') || err.statusCode === '404' || err.code === '404') {
+      return false
+    }
+    // Only log unexpected errors (not bucket missing)
+    if (import.meta.env.DEV) {
+      console.error('Error checking receipts bucket:', err)
+    }
     return false
   }
 }
@@ -3409,7 +3423,8 @@ export const getExpenseAttachments = async (expenseId) => {
   const demoMode = await getDemoMode()
   const userId = await getCurrentUserId()
   
-  const { data, error } = await supabase
+  const client = getSupabaseClient()
+  const { data, error } = await client
     .from('expense_attachments')
     .select('*')
     .eq('expense_id', expenseId)
@@ -3429,11 +3444,28 @@ export const getExpenseAttachments = async (expenseId) => {
 export const getAttachmentSignedUrl = async (filePath) => {
   if (!filePath) return null
   
-  const { data, error } = await supabase.storage
-    .from('receipts')
+  // Demo mode: return null (no real URLs in demo)
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  if (demoMode) {
+    return null
+  }
+  
+  const client = getSupabaseClient()
+  if (!client || !client.storage || typeof client.storage.from !== 'function') {
+    return null
+  }
+  
+  const { data, error } = await client.storage
+    .from(RECEIPTS_BUCKET)
     .createSignedUrl(filePath, 3600) // 1 hour expiry
   
-  if (error) throw error
+  if (error) {
+    if (import.meta.env.DEV) {
+      console.error('Error creating signed URL:', error)
+    }
+    return null
+  }
   return data?.signedUrl || null
 }
 
@@ -3454,10 +3486,25 @@ export const uploadReceipt = async (file, expenseId) => {
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
 
-  // Verificar que el bucket existe
+  // Check demo mode - in demo mode, skip real upload
+  if (demoMode) {
+    // In demo mode, simulate upload without actually uploading to storage
+    // Return mock attachment data
+    return {
+      id: `demo-${Date.now()}`,
+      url: null, // No real URL in demo
+      path: `demo/${userId}/expenses/${expenseId}/${Date.now()}_${file.name}`,
+      filename: file.name,
+      size: file.size,
+      mime_type: file.type,
+      created_at: new Date().toISOString()
+    }
+  }
+  
+  // Verificar que el bucket existe (only in real mode)
   const bucketExists = await checkReceiptsBucket()
   if (!bucketExists) {
-    throw new Error("Receipts storage not configured (bucket 'receipts' missing)")
+    throw new Error(`Receipts storage not configured (missing bucket: '${RECEIPTS_BUCKET}')`)
   }
 
   // Validar tipus de fitxer
@@ -3478,18 +3525,30 @@ export const uploadReceipt = async (file, expenseId) => {
   const filePath = `${userId}/expenses/${expenseId}/${timestamp}_${sanitizedFileName}`
 
   try {
+    // Use getSupabaseClient directly to avoid Proxy issues in production
+    const client = getSupabaseClient()
+    if (!client || !client.storage || typeof client.storage.from !== 'function') {
+      throw new Error('Supabase storage client not available')
+    }
+    
     // Upload a Supabase Storage
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('receipts')
+    const { data: uploadData, error: uploadError } = await client.storage
+      .from(RECEIPTS_BUCKET)
       .upload(filePath, file, {
         cacheControl: '3600',
         upsert: false
       })
 
-    if (uploadError) throw uploadError
+    if (uploadError) {
+      // Provide clearer error message for bucket-related errors
+      if (uploadError.message?.includes('Bucket not found') || uploadError.message?.includes('bucket')) {
+        throw new Error(`Receipts storage not configured (missing bucket: '${RECEIPTS_BUCKET}')`)
+      }
+      throw uploadError
+    }
 
-    // Guardar metadata en expense_attachments
-    const { data: attachmentData, error: dbError } = await supabase
+    // Guardar metadata en expense_attachments (use client directly)
+    const { data: attachmentData, error: dbError } = await client
       .from('expense_attachments')
       .insert([{
         user_id: userId,
@@ -3506,9 +3565,11 @@ export const uploadReceipt = async (file, expenseId) => {
     if (dbError) {
       // Si falla la inserción en DB, intentar eliminar el archivo de storage
       try {
-        await supabase.storage.from('receipts').remove([filePath])
+        await client.storage.from(RECEIPTS_BUCKET).remove([filePath])
       } catch (cleanupErr) {
-        console.error('Error cleaning up storage after DB failure:', cleanupErr)
+        if (import.meta.env.DEV) {
+          console.error('Error cleaning up storage after DB failure:', cleanupErr)
+        }
       }
       throw dbError
     }
@@ -3526,7 +3587,13 @@ export const uploadReceipt = async (file, expenseId) => {
       created_at: attachmentData.created_at
     }
   } catch (err) {
-    console.error('Error uploading receipt:', err)
+    // Re-throw with clearer message if it's already our custom error
+    if (err.message?.includes('Receipts storage not configured')) {
+      throw err
+    }
+    if (import.meta.env.DEV) {
+      console.error('Error uploading receipt:', err)
+    }
     throw new Error(`Error pujant receipt: ${err.message || 'Error desconegut'}`)
   }
 }
@@ -3543,9 +3610,16 @@ export const deleteReceipt = async (attachmentId) => {
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
 
+  // In demo mode, just return success (no real deletion)
+  if (demoMode) {
+    return true
+  }
+
+  const client = getSupabaseClient()
+
   try {
     // Obtener el attachment para tener el file_path
-    const { data: attachment, error: fetchError } = await supabase
+    const { data: attachment, error: fetchError } = await client
       .from('expense_attachments')
       .select('file_path')
       .eq('id', attachmentId)
@@ -3558,18 +3632,22 @@ export const deleteReceipt = async (attachmentId) => {
 
     // Eliminar de storage (best effort - si falla, continuar con DB delete)
     let storageError = null
-    try {
-      const { error: storageErr } = await supabase.storage
-        .from('receipts')
-        .remove([attachment.file_path])
-      if (storageErr) storageError = storageErr
-    } catch (storageErr) {
-      storageError = storageErr
-      console.error('Error deleting from storage (non-critical):', storageErr)
+    if (client && client.storage && typeof client.storage.from === 'function' && attachment.file_path) {
+      try {
+        const { error: storageErr } = await client.storage
+          .from(RECEIPTS_BUCKET)
+          .remove([attachment.file_path])
+        if (storageErr) storageError = storageErr
+      } catch (storageErr) {
+        storageError = storageErr
+        if (import.meta.env.DEV) {
+          console.error('Error deleting from storage (non-critical):', storageErr)
+        }
+      }
     }
 
     // Eliminar de base de datos
-    const { error: dbError } = await supabase
+    const { error: dbError } = await client
       .from('expense_attachments')
       .delete()
       .eq('id', attachmentId)
@@ -3580,13 +3658,17 @@ export const deleteReceipt = async (attachmentId) => {
 
     // Si storage delete falló pero DB delete fue exitoso, mostrar warning pero retornar success
     if (storageError) {
-      console.warn('Attachment deleted from DB but storage delete failed:', storageError)
+      if (import.meta.env.DEV) {
+        console.warn('Attachment deleted from DB but storage delete failed:', storageError)
+      }
       // No lanzar error, el attachment está eliminado de la DB y eso es lo importante
     }
 
     return true
   } catch (err) {
-    console.error('Error deleting receipt:', err)
+    if (import.meta.env.DEV) {
+      console.error('Error deleting receipt:', err)
+    }
     throw new Error(`Error eliminant receipt: ${err.message || 'Error desconegut'}`)
   }
 }

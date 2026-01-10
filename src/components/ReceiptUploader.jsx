@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Upload, FileText, Image, AlertCircle, Eye, Trash2, Download } from 'lucide-react'
 import { uploadReceipt, deleteReceipt, getExpenseAttachments, getAttachmentSignedUrl } from '../lib/supabase'
 import { showToast } from './Toast'
+import DeleteConfirmationModal from './DeleteConfirmationModal'
 
 const ALLOWED_TYPES = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg']
 const MAX_SIZE = 10 * 1024 * 1024 // 10MB
@@ -18,6 +19,9 @@ export default function ReceiptUploader({
   const [attachments, setAttachments] = useState([])
   const [loading, setLoading] = useState(false)
   const [dragActive, setDragActive] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [attachmentToDelete, setAttachmentToDelete] = useState(null)
+  const [deleting, setDeleting] = useState(false)
 
   // Cargar attachments cuando expenseId cambia
   useEffect(() => {
@@ -108,13 +112,24 @@ export default function ReceiptUploader({
     }
   }
 
-  // Drag & Drop handlers
-  const handleDrag = (e) => {
+  // Drag & Drop handlers - Improved to work reliably
+  const handleDragEnter = (e) => {
     e.preventDefault()
     e.stopPropagation()
-    if (e.type === 'dragenter' || e.type === 'dragover') {
-      setDragActive(true)
-    } else if (e.type === 'dragleave') {
+    setDragActive(true)
+  }
+
+  const handleDragOver = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragActive(true)
+  }
+
+  const handleDragLeave = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    // Only set dragActive to false if we're leaving the dropzone itself
+    if (!e.currentTarget.contains(e.relatedTarget)) {
       setDragActive(false)
     }
   }
@@ -135,20 +150,37 @@ export default function ReceiptUploader({
     }
   }
 
-  const handleDelete = async (attachmentId, fileName) => {
-    if (!confirm(`Eliminar aquest receipt: ${fileName}?`)) return
+  const handleDeleteClick = (attachment) => {
+    setAttachmentToDelete(attachment)
+    setShowDeleteModal(true)
+  }
 
+  const handleConfirmDelete = async () => {
+    if (!attachmentToDelete) return
+
+    setDeleting(true)
     try {
-      await deleteReceipt(attachmentId)
-      showToast('Receipt eliminat', 'success')
+      await deleteReceipt(attachmentToDelete.id)
+      showToast('Receipt eliminat correctament', 'success')
       await loadAttachments()
       if (onAttachmentsChanged) {
         onAttachmentsChanged([])
       }
+      setShowDeleteModal(false)
+      setAttachmentToDelete(null)
     } catch (err) {
-      console.error('Error deleting attachment:', err)
+      if (import.meta.env.DEV) {
+        console.error('Error deleting attachment:', err)
+      }
       showToast('Error eliminant receipt: ' + (err.message || 'Error desconegut'), 'error')
+    } finally {
+      setDeleting(false)
     }
+  }
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false)
+    setAttachmentToDelete(null)
   }
 
   const handleView = async (attachment) => {
@@ -355,9 +387,9 @@ export default function ReceiptUploader({
             ...styles.dropzone,
             ...(uploading ? styles.dropzoneDisabled : {})
           }}
-          onDragEnter={handleDrag}
-          onDragLeave={handleDrag}
-          onDragOver={handleDrag}
+          onDragEnter={handleDragEnter}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={() => !uploading && expenseId && fileInputRef.current?.click()}
         >
@@ -424,9 +456,10 @@ export default function ReceiptUploader({
                   Obrir
                 </button>
                 <button
-                  onClick={() => handleDelete(attachment.id, attachment.file_name)}
+                  onClick={() => handleDeleteClick(attachment)}
                   style={styles.deleteButton}
                   title="Eliminar receipt"
+                  disabled={deleting}
                 >
                   <Trash2 size={16} />
                 </button>
@@ -439,6 +472,18 @@ export default function ReceiptUploader({
       {!loading && !expenseId && attachments.length === 0 && (
         <div style={styles.uploadHint}>(No hi ha receipts pendents d'adjuntar)</div>
       )}
+
+      <DeleteConfirmationModal
+        show={showDeleteModal}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        itemName={attachmentToDelete?.file_name || ''}
+        entityType="Receipt"
+        isSaving={deleting}
+        darkMode={darkMode}
+        warningMessage="Això eliminarà el fitxer del servidor. Aquesta acció no es pot desfer."
+        fkWarning=""
+      />
     </div>
   )
 }
