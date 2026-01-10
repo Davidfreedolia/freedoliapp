@@ -156,6 +156,22 @@ export default function Finances() {
     }
   }, [activeView])
 
+  // Close actions menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuOpen && !event.target.closest('[data-menu-container]')) {
+        setMenuOpen(null)
+      }
+    }
+    
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside)
+      }
+    }
+  }, [menuOpen])
+
   const loadData = async () => {
     setLoading(true)
     setError(null)
@@ -589,9 +605,37 @@ export default function Finances() {
       marketplace: type === 'income' ? 'ES' : null,
       order_id: type === 'income' ? '' : null,
       supplier_id: type === 'expense' ? null : null,
-      notes: ''
+      notes: '',
+      id: null // No id = new transaction
     })
     setShowTransactionModal(true)
+  }
+
+  // Open existing transaction in edit mode
+  const handleEditTransaction = (transaction) => {
+    // Map ledger item to editingTransaction format
+    const expenseDate = transaction.type === 'expense' ? transaction.date : null
+    const incomeDate = transaction.type === 'income' ? transaction.date : null
+    
+    setEditingTransaction({
+      id: transaction.id,
+      type: transaction.type,
+      project_id: transaction.project_id || null,
+      category_id: transaction.category_id || null,
+      description: transaction.description || '',
+      amount: Math.abs(transaction.amount).toFixed(2),
+      currency: transaction.currency || 'EUR',
+      date: expenseDate || incomeDate || new Date().toISOString().split('T')[0],
+      reference_number: transaction.reference_number || '',
+      payment_status: transaction.payment_status || 'pending',
+      supplier_id: transaction.supplier_id || null,
+      notes: transaction.notes || '',
+      platform: transaction.platform || '',
+      marketplace: transaction.marketplace || '',
+      order_id: transaction.order_id || ''
+    })
+    setShowTransactionModal(true)
+    setMenuOpen(null) // Close menu if open
   }
 
   const handleSaveTransaction = async () => {
@@ -704,8 +748,19 @@ export default function Finances() {
       
       showToast('Transacció guardada', 'success')
       await loadData()
-      setShowTransactionModal(false)
-      setEditingTransaction(null)
+      
+      // Keep modal open if it's a new expense (to allow uploading receipts)
+      // For existing expenses or incomes, close normally
+      const isNewExpense = !editingTransaction.id && editingTransaction.type === 'expense'
+      
+      if (isNewExpense) {
+        // Modal stays open, expenseId is now set so ReceiptUploader will work
+        // User can manually close or upload receipts
+      } else {
+        // Close modal for updates or incomes
+        setShowTransactionModal(false)
+        setEditingTransaction(null)
+      }
     } catch (err) {
       notifyError(err, { context: 'Finances:handleSaveTransaction' })
     }
@@ -1101,7 +1156,20 @@ export default function Finances() {
                   filteredLedger.map((item, index) => {
                     const catInfo = getCategoryInfo(item.category_id, item.type)
                       return (
-                      <tr key={`${item.type}-${item.id}`} style={styles.tr}>
+                      <tr 
+                        key={`${item.type}-${item.id}`} 
+                        style={{
+                          ...styles.tr,
+                          cursor: 'pointer'
+                        }}
+                        onClick={(e) => {
+                          // Don't trigger row click if clicking on menu button or menu
+                          if (e.target.closest('[data-menu-container]') || e.target.closest('button')) {
+                            return
+                          }
+                          handleEditTransaction(item)
+                        }}
+                      >
                         {visibleColumns.includes('date') && (
                           <td style={{...styles.td, color: darkMode ? '#9ca3af' : '#6b7280'}}>
                             {formatDate(item.date)}
@@ -1165,28 +1233,42 @@ export default function Finances() {
                           </td>
                         )}
                           <td style={styles.td}>
-                            <div style={{position: 'relative'}}>
+                            <div 
+                              style={{position: 'relative'}} 
+                              data-menu-container
+                              onClick={(e) => e.stopPropagation()}
+                            >
                             <button
-                              onClick={() => setMenuOpen(menuOpen === item.id ? null : item.id)}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setMenuOpen(menuOpen === item.id ? null : item.id)
+                              }}
                               style={styles.menuButton}
                             >
                                 <MoreVertical size={18} />
                               </button>
                             {menuOpen === item.id && (
-                                <div style={{...styles.menu, backgroundColor: darkMode ? '#1f1f2e' : '#ffffff'}}>
+                                <div 
+                                  style={{
+                                    ...styles.menu, 
+                                    backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
+                                    zIndex: 1000
+                                  }}
+                                  onClick={(e) => e.stopPropagation()}
+                                >
                                 <button
-                                  onClick={() => {
-                                    setEditingTransaction(item)
-                                    setShowTransactionModal(true)
-                                    setMenuOpen(null)
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleEditTransaction(item)
                                   }}
                                   style={styles.menuItem}
                                 >
-                                    <Edit size={14} /> Editar
-                                  </button>
+                                  <Edit size={14} /> Editar
+                                </button>
                                 {item.type === 'expense' && item.is_recurring && item.recurring_status === 'expected' && (
                                   <button
-                                    onClick={async () => {
+                                    onClick={async (e) => {
+                                      e.stopPropagation()
                                       try {
                                         await markRecurringExpenseAsPaid(item.id)
                                         showToast('Despesa marcada com pagada', 'success')
@@ -1202,11 +1284,14 @@ export default function Finances() {
                                   </button>
                                 )}
                                 <button
-                                  onClick={() => handleDeleteTransaction(item)}
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleDeleteTransaction(item)
+                                  }}
                                   style={{...styles.menuItem, color: '#ef4444'}}
                                 >
-                                    <Trash2 size={14} /> Eliminar
-                                  </button>
+                                  <Trash2 size={14} /> Eliminar
+                                </button>
                                 </div>
                               )}
                             </div>
@@ -1427,7 +1512,13 @@ export default function Finances() {
 
       {/* Transaction Modal */}
       {showTransactionModal && editingTransaction && (
-        <div style={{...styles.modalOverlay, ...modalStyles.overlay}} onClick={() => setShowTransactionModal(false)}>
+        <div 
+          style={{...styles.modalOverlay, ...modalStyles.overlay}} 
+          onClick={() => {
+            setShowTransactionModal(false)
+            setEditingTransaction(null)
+          }}
+        >
           <div style={{...styles.modal, ...modalStyles.modal, maxWidth: '700px'}} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeader}>
               <h3 style={{...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827'}}>
@@ -1435,7 +1526,13 @@ export default function Finances() {
                   ? `Editar ${editingTransaction.type === 'income' ? 'Ingrés' : 'Despesa'}` 
                   : `Nova ${editingTransaction.type === 'income' ? 'Ingrés' : 'Despesa'}`}
               </h3>
-              <button onClick={() => setShowTransactionModal(false)} style={styles.closeButton}>
+              <button 
+                onClick={() => {
+                  setShowTransactionModal(false)
+                  setEditingTransaction(null)
+                }} 
+                style={styles.closeButton}
+              >
                 <X size={20} />
               </button>
             </div>
@@ -1678,8 +1775,14 @@ export default function Finances() {
             </div>
 
             <div style={styles.modalFooter}>
-              <button onClick={() => setShowTransactionModal(false)} style={styles.cancelButton}>
-                Cancel·lar
+              <button 
+                onClick={() => {
+                  setShowTransactionModal(false)
+                  setEditingTransaction(null)
+                }} 
+                style={styles.cancelButton}
+              >
+                Tancar
               </button>
               <button
                 onClick={handleSaveTransaction}
@@ -1875,11 +1978,12 @@ const styles = {
     position: 'absolute',
     right: 0,
     top: '100%',
+    marginTop: '4px',
     minWidth: '140px',
     borderRadius: '10px',
     border: '1px solid var(--border-color)',
     boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-    zIndex: 10,
+    zIndex: 1000,
     padding: '4px'
   },
   menuItem: {
