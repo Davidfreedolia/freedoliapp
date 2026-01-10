@@ -26,6 +26,8 @@ import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
 import { getButtonStyles, useButtonState } from '../utils/buttonStyles'
 import { useTranslation } from 'react-i18next'
+import DeleteConfirmationModal from '../components/DeleteConfirmationModal'
+import { showToast } from '../components/Toast'
 
 // Magatzems Amazon FBA pre-definits
 const AMAZON_FBA_WAREHOUSES = [
@@ -65,7 +67,7 @@ const WAREHOUSE_TYPES = [
 ]
 
 export default function Warehouses() {
-  const { darkMode, driveConnected } = useApp()
+  const { darkMode, driveConnected, demoMode } = useApp()
   const { t } = useTranslation()
   const { isMobile, isTablet } = useBreakpoint()
   const modalStyles = getModalStyles(isMobile, darkMode)
@@ -86,6 +88,9 @@ export default function Warehouses() {
   const [editingWarehouse, setEditingWarehouse] = useState(null)
   const [saving, setSaving] = useState(false)
   const [selectedAmazonWarehouses, setSelectedAmazonWarehouses] = useState([])
+  
+  // Delete confirmation
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, warehouse: null, isDeleting: false })
 
   useEffect(() => {
     loadData()
@@ -162,14 +167,38 @@ export default function Warehouses() {
   }
 
   const handleDeleteWarehouse = async (warehouse) => {
-    if (!confirm(`Segur que vols eliminar "${warehouse.name}"?`)) return
+    // Check demo mode
+    if (demoMode) {
+      showToast('En mode demo no es poden eliminar dades', 'error')
+      return
+    }
+    
+    setDeleteModal({ isOpen: true, warehouse, isDeleting: false })
+    setMenuOpen(null)
+  }
+
+  const handleConfirmDelete = async () => {
+    const { warehouse } = deleteModal
+    if (!warehouse) return
+
+    setDeleteModal(prev => ({ ...prev, isDeleting: true }))
+    
     try {
       await deleteWarehouse(warehouse.id)
+      showToast('Eliminat correctament', 'success')
       await loadData()
-      setMenuOpen(null)
+      setDeleteModal({ isOpen: false, warehouse: null, isDeleting: false })
     } catch (err) {
-      console.error('Error:', err)
-      alert('Error eliminant magatzem')
+      console.error('Error eliminant magatzem:', err)
+      
+      // Check for FK constraint violation (PostgreSQL error code 23503)
+      if (err.code === '23503' || err.message?.includes('foreign key') || err.message?.includes('violates foreign key')) {
+        showToast('No es pot eliminar perquè està en ús (comandes/despeses/projectes). Elimina o desvincula els elements relacionats primer.', 'error')
+      } else {
+        showToast('Error eliminant magatzem: ' + (err.message || 'Error desconegut'), 'error')
+      }
+      
+      setDeleteModal(prev => ({ ...prev, isDeleting: false }))
     }
   }
 
@@ -581,6 +610,18 @@ export default function Warehouses() {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => !deleteModal.isDeleting && setDeleteModal({ isOpen: false, warehouse: null, isDeleting: false })}
+        onConfirm={handleConfirmDelete}
+        entityName={deleteModal.warehouse?.name || ''}
+        entityType="magatzem"
+        isDeleting={deleteModal.isDeleting}
+        darkMode={darkMode}
+        showUsageWarning={true}
+      />
     </div>
   )
 }

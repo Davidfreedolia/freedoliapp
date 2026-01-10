@@ -1800,7 +1800,17 @@ export const updateWarehouse = async (id, updates) => {
 }
 
 export const deleteWarehouse = async (id) => {
-  const { error } = await supabase.from('warehouses').delete().eq('id', id)
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
+  const userId = await getCurrentUserId()
+  const { error } = await supabase
+    .from('warehouses')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', userId) // Ensure user can only delete their own warehouses
+    .eq('is_demo', demoMode) // Ensure demo/real mode consistency
   if (error) throw error
   return true
 }

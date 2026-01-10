@@ -32,6 +32,8 @@ import Header from '../components/Header'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
 import SupplierMemory from '../components/SupplierMemory'
+import DeleteConfirmationModal from '../components/DeleteConfirmationModal'
+import { showToast } from '../components/Toast'
 
 // Tipus de proveïdors
 const SUPPLIER_TYPES = [
@@ -72,7 +74,7 @@ const COUNTRIES_CITIES = {
 }
 
 export default function Suppliers() {
-  const { darkMode, driveConnected } = useApp()
+  const { darkMode, driveConnected, demoMode } = useApp()
   const { isMobile, isTablet } = useBreakpoint()
   const modalStyles = getModalStyles(isMobile, darkMode)
   
@@ -85,6 +87,9 @@ export default function Suppliers() {
   const [showModal, setShowModal] = useState(false)
   const [editingSupplier, setEditingSupplier] = useState(null)
   const [saving, setSaving] = useState(false)
+  
+  // Delete confirmation
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, supplier: null, isDeleting: false })
   
   // Custom cities (per guardar ciutats afegides manualment)
   const [customCities, setCustomCities] = useState({})
@@ -204,14 +209,38 @@ export default function Suppliers() {
   }
 
   const handleDelete = async (supplier) => {
-    if (!confirm(`Segur que vols eliminar "${supplier.name}"?`)) return
+    // Check demo mode
+    if (demoMode) {
+      showToast('En mode demo no es poden eliminar dades', 'error')
+      return
+    }
+    
+    setDeleteModal({ isOpen: true, supplier, isDeleting: false })
+    setMenuOpen(null)
+  }
+
+  const handleConfirmDelete = async () => {
+    const { supplier } = deleteModal
+    if (!supplier) return
+
+    setDeleteModal(prev => ({ ...prev, isDeleting: true }))
+    
     try {
       await deleteSupplier(supplier.id)
+      showToast('Eliminat correctament', 'success')
       await loadData()
-      setMenuOpen(null)
+      setDeleteModal({ isOpen: false, supplier: null, isDeleting: false })
     } catch (err) {
-      console.error('Error eliminant:', err)
-      alert('Error eliminant el proveïdor')
+      console.error('Error eliminant proveïdor:', err)
+      
+      // Check for FK constraint violation (PostgreSQL error code 23503)
+      if (err.code === '23503' || err.message?.includes('foreign key') || err.message?.includes('violates foreign key')) {
+        showToast('No es pot eliminar perquè està en ús (comandes/despeses/projectes). Elimina o desvincula els elements relacionats primer.', 'error')
+      } else {
+        showToast('Error eliminant proveïdor: ' + (err.message || 'Error desconegut'), 'error')
+      }
+      
+      setDeleteModal(prev => ({ ...prev, isDeleting: false }))
     }
   }
 
@@ -720,6 +749,18 @@ export default function Suppliers() {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => !deleteModal.isDeleting && setDeleteModal({ isOpen: false, supplier: null, isDeleting: false })}
+        onConfirm={handleConfirmDelete}
+        entityName={deleteModal.supplier?.name || ''}
+        entityType="proveïdor"
+        isDeleting={deleteModal.isDeleting}
+        darkMode={darkMode}
+        showUsageWarning={true}
+      />
     </div>
   )
 }

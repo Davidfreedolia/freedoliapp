@@ -36,6 +36,7 @@ import Header from '../components/Header'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
 import { showToast } from '../components/Toast'
+import DeleteConfirmationModal from '../components/DeleteConfirmationModal'
 
 // Països i ciutats
 const COUNTRIES_CITIES = {
@@ -63,7 +64,7 @@ const PAYMENT_TERMS = [
 const INCOTERMS = ['EXW', 'FOB', 'CIF', 'CFR', 'DDP', 'DAP', 'FCA', 'CPT']
 
 export default function Forwarders() {
-  const { darkMode, driveConnected } = useApp()
+  const { darkMode, driveConnected, demoMode } = useApp()
   const { isMobile, isTablet } = useBreakpoint()
   const modalStyles = getModalStyles(isMobile, darkMode)
   
@@ -80,6 +81,14 @@ export default function Forwarders() {
   const [editingForwarder, setEditingForwarder] = useState(null)
   const [editingWarehouse, setEditingWarehouse] = useState(null)
   const [saving, setSaving] = useState(false)
+  
+  // Delete confirmation
+  const [deleteModal, setDeleteModal] = useState({ 
+    isOpen: false, 
+    entity: null, 
+    entityType: null, // 'forwarder' or 'warehouse'
+    isDeleting: false 
+  })
   
   // Ciutats
   const [availableCities, setAvailableCities] = useState([])
@@ -246,15 +255,14 @@ export default function Forwarders() {
   }
 
   const handleDeleteForwarder = async (forwarder) => {
-    if (!confirm(`Segur que vols eliminar "${forwarder.name}"?`)) return
-    try {
-      await deleteSupplier(forwarder.id)
-      await loadData()
-      setMenuOpen(null)
-    } catch (err) {
-      console.error('Error:', err)
-      alert('Error eliminant transitari')
+    // Check demo mode
+    if (demoMode) {
+      showToast('En mode demo no es poden eliminar dades', 'error')
+      return
     }
+    
+    setDeleteModal({ isOpen: true, entity: forwarder, entityType: 'forwarder', isDeleting: false })
+    setMenuOpen(null)
   }
 
   // CRUD Magatzem
@@ -305,14 +313,44 @@ export default function Forwarders() {
   }
 
   const handleDeleteWarehouse = async (warehouse) => {
-    if (!confirm(`Segur que vols eliminar "${warehouse.name}"?`)) return
+    // Check demo mode
+    if (demoMode) {
+      showToast('En mode demo no es poden eliminar dades', 'error')
+      return
+    }
+    
+    setDeleteModal({ isOpen: true, entity: warehouse, entityType: 'warehouse', isDeleting: false })
+    setMenuOpen(null)
+  }
+
+  const handleConfirmDelete = async () => {
+    const { entity, entityType } = deleteModal
+    if (!entity || !entityType) return
+
+    setDeleteModal(prev => ({ ...prev, isDeleting: true }))
+    
     try {
-      await deleteWarehouse(warehouse.id)
+      if (entityType === 'forwarder') {
+        await deleteSupplier(entity.id)
+      } else if (entityType === 'warehouse') {
+        await deleteWarehouse(entity.id)
+      }
+      
+      showToast('Eliminat correctament', 'success')
       await loadData()
-      setMenuOpen(null)
+      setDeleteModal({ isOpen: false, entity: null, entityType: null, isDeleting: false })
     } catch (err) {
-      console.error('Error:', err)
-      alert('Error eliminant magatzem')
+      console.error(`Error eliminant ${entityType}:`, err)
+      
+      // Check for FK constraint violation (PostgreSQL error code 23503)
+      if (err.code === '23503' || err.message?.includes('foreign key') || err.message?.includes('violates foreign key')) {
+        showToast('No es pot eliminar perquè està en ús (comandes/despeses/projectes). Elimina o desvincula els elements relacionats primer.', 'error')
+      } else {
+        const entityName = entityType === 'forwarder' ? 'transitari' : 'magatzem'
+        showToast(`Error eliminant ${entityName}: ` + (err.message || 'Error desconegut'), 'error')
+      }
+      
+      setDeleteModal(prev => ({ ...prev, isDeleting: false }))
     }
   }
 
@@ -715,6 +753,18 @@ export default function Forwarders() {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => !deleteModal.isDeleting && setDeleteModal({ isOpen: false, entity: null, entityType: null, isDeleting: false })}
+        onConfirm={handleConfirmDelete}
+        entityName={deleteModal.entity?.name || ''}
+        entityType={deleteModal.entityType === 'forwarder' ? 'transitari' : 'magatzem'}
+        isDeleting={deleteModal.isDeleting}
+        darkMode={darkMode}
+        showUsageWarning={true}
+      />
     </div>
   )
 }
