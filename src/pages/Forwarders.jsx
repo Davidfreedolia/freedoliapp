@@ -104,6 +104,11 @@ export default function Forwarders() {
   const loadData = async () => {
     setLoading(true)
     try {
+      // Verify functions are available before calling
+      if (typeof getSuppliersByType !== 'function' || typeof getWarehouses !== 'function') {
+        throw new Error('Database functions not available')
+      }
+      
       const [forwardersData, warehousesData] = await Promise.all([
         getSuppliersByType('freight'),
         getWarehouses()
@@ -112,13 +117,34 @@ export default function Forwarders() {
       setWarehouses(warehousesData || [])
     } catch (err) {
       console.error('Error carregant dades:', err)
+      showToast('Error carregant transitaris: ' + (err.message || 'Error desconegut'), 'error')
+      // Set empty arrays on error to prevent crashes
+      setForwarders([])
+      setWarehouses([])
     }
     setLoading(false)
   }
 
   const loadCustomCities = async () => {
     try {
-      const { data } = await supabase.from('custom_cities').select('*')
+      // Verify supabase client is valid before using it
+      if (!supabase || typeof supabase.from !== 'function') {
+        // Supabase client not available for custom cities - silently fail
+        return
+      }
+      
+      const { data, error } = await supabase
+        .from('custom_cities')
+        .select('*')
+      
+      if (error) {
+        // Silently fail if table doesn't exist
+        if (error.code === 'PGRST116' || error.message?.includes('does not exist')) {
+          return
+        }
+        throw error
+      }
+      
       if (data) {
         const grouped = {}
         data.forEach(c => {
@@ -128,7 +154,8 @@ export default function Forwarders() {
         setCustomCities(grouped)
       }
     } catch (err) {
-      console.log('No custom cities table yet')
+      // Silently fail for custom cities - it's optional data
+      // Silently fail for custom cities - it's optional data
     }
   }
 
@@ -147,7 +174,7 @@ export default function Forwarders() {
     try {
       await supabase.from('custom_cities').insert({ country, city })
     } catch (err) {
-      console.log('Custom cities saved locally')
+      // Custom cities saved locally
     }
     
     setCustomCities(prev => ({
@@ -230,28 +257,47 @@ export default function Forwarders() {
   }
 
   const handleSaveForwarder = async () => {
-    if (!editingForwarder.name) {
+    if (!editingForwarder.name || !editingForwarder.name.trim()) {
       showToast('El nom és obligatori', 'error')
       return
     }
+    
+    // Verify required functions are available
+    if (typeof createSupplier !== 'function' || typeof updateSupplier !== 'function') {
+      showToast('Error: Funcions de base de dades no disponibles', 'error')
+      return
+    }
+    
     setSaving(true)
     try {
       if (editingForwarder.id) {
-        await updateSupplier(editingForwarder.id, editingForwarder)
+        // Ensure type is set when updating
+        const updateData = { ...editingForwarder, type: 'freight' }
+        const result = await updateSupplier(editingForwarder.id, updateData)
+        if (!result) {
+          throw new Error('No es va rebre resposta de l\'actualització')
+        }
         showToast('Transitari actualitzat correctament', 'success')
       } else {
-        await createSupplier({ ...editingForwarder, type: 'freight' })
+        // Ensure type is set when creating
+        const createData = { ...editingForwarder, type: 'freight' }
+        const result = await createSupplier(createData)
+        if (!result) {
+          throw new Error('No es va rebre resposta de la creació')
+        }
         showToast('Transitari creat correctament', 'success')
       }
       await loadData()
       setShowForwarderModal(false)
       setEditingForwarder(null)
     } catch (err) {
-      console.error('Error:', err)
-      showToast('Error guardant transitari: ' + (err.message || 'Error desconegut'), 'error')
+      console.error('Error guardant transitari:', err)
+      const errorMessage = err.message || 'Error desconegut'
+      showToast('Error guardant transitari: ' + errorMessage, 'error')
       // NO tancar modal si hi ha error
+    } finally {
+      setSaving(false)
     }
-    setSaving(false)
   }
 
   const handleDeleteForwarder = async (forwarder) => {

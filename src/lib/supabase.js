@@ -322,7 +322,13 @@ export const createSupplier = async (supplier) => {
   const { user_id, ...supplierData } = supplier
   const userId = await getCurrentUserId()
   
-  const { data, error } = await supabase
+  // Use getSupabaseClient directly to avoid Proxy issues in production
+  const client = getSupabaseClient()
+  if (!client || typeof client.from !== 'function') {
+    throw new Error('Supabase client not available')
+  }
+  
+  const { data, error } = await client
     .from('suppliers')
     .insert([{
       ...supplierData,
@@ -331,6 +337,7 @@ export const createSupplier = async (supplier) => {
     }])
     .select()
     .single()
+  
   if (error) throw error
   return data
 }
@@ -344,7 +351,13 @@ export const updateSupplier = async (id, updates) => {
   const { user_id, ...updateData } = updates
   const userId = await getCurrentUserId()
   
-  const { data, error } = await supabase
+  // Use getSupabaseClient directly to avoid Proxy issues in production
+  const client = getSupabaseClient()
+  if (!client || typeof client.from !== 'function') {
+    throw new Error('Supabase client not available')
+  }
+  
+  const { data, error } = await client
     .from('suppliers')
     .update({ ...updateData, updated_at: new Date().toISOString() })
     .eq('id', id)
@@ -352,6 +365,7 @@ export const updateSupplier = async (id, updates) => {
     .eq('is_demo', demoMode) // Ensure demo/real mode consistency
     .select()
     .single()
+  
   if (error) throw error
   return data
 }
@@ -362,12 +376,20 @@ export const deleteSupplier = async (id) => {
   const demoMode = await getDemoMode()
   
   const userId = await getCurrentUserId()
-  const { error } = await supabase
+  
+  // Use getSupabaseClient directly to avoid Proxy issues in production
+  const client = getSupabaseClient()
+  if (!client || typeof client.from !== 'function') {
+    throw new Error('Supabase client not available')
+  }
+  
+  const { error } = await client
     .from('suppliers')
     .delete()
     .eq('id', id)
     .eq('user_id', userId) // Ensure user can only delete their own suppliers
     .eq('is_demo', demoMode) // Ensure demo/real mode consistency
+  
   if (error) throw error
   return true
 }
@@ -379,15 +401,23 @@ export const getSuppliersByType = async (type) => {
   const demoMode = await getDemoMode()
   
   const userId = await getCurrentUserId()
-  const { data, error } = await supabase
+  
+  // Use getSupabaseClient directly to avoid Proxy issues in production
+  const client = getSupabaseClient()
+  if (!client || typeof client.from !== 'function') {
+    throw new Error('Supabase client not available')
+  }
+  
+  const { data, error } = await client
     .from('suppliers')
     .select('*')
     .eq('user_id', userId)
     .eq('is_demo', demoMode) // Filter by demo mode
     .eq('type', type)
     .order('name', { ascending: true })
+  
   if (error) throw error
-  return data
+  return data || []
 }
 
 // TRANSITARIS (ara és un tipus de supplier)
@@ -1754,14 +1784,22 @@ export const getWarehouses = async () => {
   // Avoid relationship ambiguity - fetch warehouses without embedded supplier
   // If supplier info is needed, it can be fetched separately using supplier_id
   const userId = await getCurrentUserId()
-  const { data, error } = await supabase
+  
+  // Use getSupabaseClient directly to avoid Proxy issues in production
+  const client = getSupabaseClient()
+  if (!client || typeof client.from !== 'function') {
+    throw new Error('Supabase client not available')
+  }
+  
+  const { data, error } = await client
     .from('warehouses')
     .select('*')
     .eq('user_id', userId)
     .eq('is_demo', demoMode) // Filter by demo mode
     .order('name', { ascending: true })
+  
   if (error) throw error
-  return data
+  return data || []
 }
 
 export const getWarehouse = async (id) => {
@@ -1805,12 +1843,20 @@ export const deleteWarehouse = async (id) => {
   const demoMode = await getDemoMode()
   
   const userId = await getCurrentUserId()
-  const { error } = await supabase
+  
+  // Use getSupabaseClient directly to avoid Proxy issues in production
+  const client = getSupabaseClient()
+  if (!client || typeof client.from !== 'function') {
+    throw new Error('Supabase client not available')
+  }
+  
+  const { error } = await client
     .from('warehouses')
     .delete()
     .eq('id', id)
     .eq('user_id', userId) // Ensure user can only delete their own warehouses
     .eq('is_demo', demoMode) // Ensure demo/real mode consistency
+  
   if (error) throw error
   return true
 }
