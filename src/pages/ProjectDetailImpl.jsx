@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { 
   ArrowLeft, 
   ChevronRight, 
+  ChevronDown,
   Check,
   Upload,
   FileText,
@@ -16,11 +17,16 @@ import {
   Package,
   CheckCircle2,
   Clock,
-  XCircle
+  XCircle,
+  Trash2,
+  Eye,
+  Loader2,
+  Image
 } from 'lucide-react'
 import Header from '../components/Header'
 import FileUploader from '../components/FileUploader'
 import FileBrowser from '../components/FileBrowser'
+import DeleteConfirmationModal from '../components/DeleteConfirmationModal'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 // Dynamic imports for components that import supabase statically to avoid circular dependencies during module initialization
 const IdentifiersSection = lazy(() => import('../components/IdentifiersSection'))
@@ -118,7 +124,7 @@ export default function ProjectDetail() {
 function ProjectDetailInner({ useApp }) {
   const { id: rawId } = useParams()
   const navigate = useNavigate()
-  const { darkMode, driveConnected, refreshProjects } = useApp()
+  const { darkMode, driveConnected, refreshProjects, demoMode } = useApp()
   const { isMobile, isTablet } = useBreakpoint()
   const { t } = useTranslation()
   const identifiersSectionRef = useRef(null)
@@ -133,6 +139,16 @@ function ProjectDetailInner({ useApp }) {
   const [selectedFolder, setSelectedFolder] = useState(null)
   const [documents, setDocuments] = useState([])
   const [projectSubfolders, setProjectSubfolders] = useState([])
+  
+  // Arts Finals state
+  const [artsFinalsExpanded, setArtsFinalsExpanded] = useState(false)
+  const [artsFinalsFolderId, setArtsFinalsFolderId] = useState(null)
+  const [artsFinalsFiles, setArtsFinalsFiles] = useState([])
+  const [loadingArtsFinals, setLoadingArtsFinals] = useState(false)
+  const [uploadingArtsFinals, setUploadingArtsFinals] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [fileToDelete, setFileToDelete] = useState(null)
+  const [deletingFile, setDeletingFile] = useState(false)
 
   const loadProject = async () => {
     if (!id) {
@@ -168,6 +184,11 @@ function ProjectDetailInner({ useApp }) {
       setProject(data)
       const docs = await getDocuments(id)
       setDocuments(Array.isArray(docs) ? docs : [])
+      
+      // Load Arts Finals folder ID if exists
+      if (data.drive_art_finals_folder_id) {
+        setArtsFinalsFolderId(data.drive_art_finals_folder_id)
+      }
     } catch (err) {
       try {
         const { formatError, notifyError } = await import('../lib/errorHandling')
@@ -344,6 +365,190 @@ function ProjectDetailInner({ useApp }) {
       }
     }
   }
+
+  // ==================== ARTS FINALS FUNCTIONS ====================
+  
+  const handleCreateArtsFinalsFolder = async () => {
+    if (demoMode) {
+      const { showToast } = await import('../components/Toast')
+      showToast('En mode demo no es poden crear carpetes de Drive', 'info')
+      return
+    }
+    
+    if (!driveConnected) {
+      const { showToast } = await import('../components/Toast')
+      showToast('Connecta Google Drive primer', 'error')
+      return
+    }
+    
+    setLoadingArtsFinals(true)
+    try {
+      const googleDriveModule = await import('../lib/googleDrive')
+      const driveService = googleDriveModule.driveService
+      const supabaseModule = await import('../lib/supabase')
+      const { updateProject } = supabaseModule
+      
+      // Use same format as createProjectFolders: projectCode_name
+      const projectCode = project.project_code || project.sku || ''
+      const projectFolderName = projectCode && project.name 
+        ? `${projectCode}_${project.name}`
+        : (projectCode || project.name || 'project')
+      
+      const folderId = await driveService.ensureProjectArtsFinalsFolder({
+        projectId: project.id,
+        projectNameOrCode: projectFolderName,
+        drive_art_finals_folder_id: project.drive_art_finals_folder_id || null,
+        drive_folder_id: project.drive_folder_id || null
+      })
+      
+      // Save folder ID to project
+      await updateProject(project.id, { drive_art_finals_folder_id: folderId })
+      setArtsFinalsFolderId(folderId)
+      setProject({ ...project, drive_art_finals_folder_id: folderId })
+      
+      const { showToast } = await import('../components/Toast')
+      showToast('Carpeta Arts Finals creada correctament', 'success')
+      
+      // Load files immediately
+      await loadArtsFinalsFiles(folderId)
+      setArtsFinalsExpanded(true)
+    } catch (err) {
+      const { showToast } = await import('../components/Toast')
+      if (err.message === 'AUTH_REQUIRED') {
+        showToast('Sessió de Google Drive expirada. Reconecta a Configuració', 'error')
+      } else {
+        showToast(`Error creant carpeta: ${err.message || 'Error desconegut'}`, 'error')
+      }
+    } finally {
+      setLoadingArtsFinals(false)
+    }
+  }
+
+  const loadArtsFinalsFiles = async (folderId = null) => {
+    if (demoMode) {
+      setArtsFinalsFiles([])
+      return
+    }
+    
+    if (!driveConnected) {
+      setArtsFinalsFiles([])
+      return
+    }
+    
+    const targetFolderId = folderId || artsFinalsFolderId
+    if (!targetFolderId) {
+      setArtsFinalsFiles([])
+      return
+    }
+    
+    setLoadingArtsFinals(true)
+    try {
+      const googleDriveModule = await import('../lib/googleDrive')
+      const driveService = googleDriveModule.driveService
+      const files = await driveService.listFolderFiles(targetFolderId)
+      setArtsFinalsFiles(files || [])
+    } catch (err) {
+      const { showToast } = await import('../components/Toast')
+      if (err.message === 'AUTH_REQUIRED') {
+        showToast('Sessió de Google Drive expirada', 'error')
+      } else {
+        showToast(`Error carregant fitxers: ${err.message || 'Error desconegut'}`, 'error')
+      }
+      setArtsFinalsFiles([])
+    } finally {
+      setLoadingArtsFinals(false)
+    }
+  }
+
+  const handleArtsFinalsUpload = async (files) => {
+    if (demoMode) {
+      const { showToast } = await import('../components/Toast')
+      showToast('En mode demo no es poden pujar fitxers', 'info')
+      return
+    }
+    
+    if (!driveConnected || !artsFinalsFolderId) {
+      const { showToast } = await import('../components/Toast')
+      showToast('Connecta Google Drive i crea la carpeta Arts Finals primer', 'error')
+      return
+    }
+    
+    setUploadingArtsFinals(true)
+    try {
+      const googleDriveModule = await import('../lib/googleDrive')
+      const driveService = googleDriveModule.driveService
+      const fileArray = Array.from(files)
+      
+      await driveService.uploadFilesToFolder(artsFinalsFolderId, fileArray)
+      
+      const { showToast } = await import('../components/Toast')
+      showToast(`${fileArray.length} fitxer(s) pujat(s) correctament`, 'success')
+      
+      // Reload files
+      await loadArtsFinalsFiles()
+    } catch (err) {
+      const { showToast } = await import('../components/Toast')
+      if (err.message === 'AUTH_REQUIRED') {
+        showToast('Sessió de Google Drive expirada', 'error')
+      } else {
+        showToast(`Error pujant fitxers: ${err.message || 'Error desconegut'}`, 'error')
+      }
+    } finally {
+      setUploadingArtsFinals(false)
+    }
+  }
+
+  const handleOpenFile = async (file) => {
+    try {
+      const googleDriveModule = await import('../lib/googleDrive')
+      const driveService = googleDriveModule.driveService
+      const url = await driveService.openDriveFileUrl(file.id, file.webViewLink)
+      window.open(url, '_blank', 'noopener,noreferrer')
+    } catch (err) {
+      const { showToast } = await import('../components/Toast')
+      showToast(`Error obrint fitxer: ${err.message || 'Error desconegut'}`, 'error')
+    }
+  }
+
+  const handleDeleteFileClick = (file) => {
+    setFileToDelete(file)
+    setShowDeleteModal(true)
+  }
+
+  const handleConfirmDeleteFile = async () => {
+    if (!fileToDelete || demoMode) return
+    
+    setDeletingFile(true)
+    try {
+      const googleDriveModule = await import('../lib/googleDrive')
+      const driveService = googleDriveModule.driveService
+      await driveService.deleteFile(fileToDelete.id)
+      
+      const { showToast } = await import('../components/Toast')
+      showToast('Fitxer eliminat correctament', 'success')
+      
+      // Reload files
+      await loadArtsFinalsFiles()
+      setShowDeleteModal(false)
+      setFileToDelete(null)
+    } catch (err) {
+      const { showToast } = await import('../components/Toast')
+      if (err.message === 'AUTH_REQUIRED') {
+        showToast('Sessió de Google Drive expirada', 'error')
+      } else {
+        showToast(`Error eliminant fitxer: ${err.message || 'Error desconegut'}`, 'error')
+      }
+    } finally {
+      setDeletingFile(false)
+    }
+  }
+
+  // Load Arts Finals files when folder ID changes or section expands
+  useEffect(() => {
+    if (artsFinalsExpanded && artsFinalsFolderId && driveConnected && !demoMode) {
+      loadArtsFinalsFiles()
+    }
+  }, [artsFinalsExpanded, artsFinalsFolderId, driveConnected, demoMode])
 
   const handleUploadComplete = async (files) => {
     // Guardar referències a Supabase (evita duplicats automàticament)
@@ -895,6 +1100,291 @@ function ProjectDetailInner({ useApp }) {
           )}
         </div>
 
+        {/* Arts Finals Section */}
+        <div style={{
+          marginBottom: '24px',
+          backgroundColor: darkMode ? '#15151f' : '#ffffff',
+          borderRadius: '12px',
+          border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+          overflow: 'hidden'
+        }}>
+          <div
+            onClick={() => setArtsFinalsExpanded(!artsFinalsExpanded)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '16px 20px',
+              cursor: 'pointer',
+              borderBottom: artsFinalsExpanded ? `1px solid ${darkMode ? '#374151' : '#e5e7eb'}` : 'none'
+            }}
+          >
+            <h3 style={{
+              margin: 0,
+              fontSize: '16px',
+              fontWeight: '600',
+              color: darkMode ? '#ffffff' : '#111827',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px'
+            }}>
+              <Image size={20} />
+              Arts Finals
+            </h3>
+            {artsFinalsExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+          </div>
+
+          {artsFinalsExpanded && (
+            <div style={{ padding: '20px' }}>
+              {demoMode ? (
+                <div style={{
+                  padding: '16px',
+                  backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                  borderRadius: '8px',
+                  border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+                  color: darkMode ? '#9ca3af' : '#6b7280',
+                  fontSize: '14px',
+                  textAlign: 'center'
+                }}>
+                  En mode demo, Arts Finals no està disponible
+                </div>
+              ) : !driveConnected ? (
+                <div style={{
+                  padding: '16px',
+                  backgroundColor: '#fffbe6',
+                  borderRadius: '8px',
+                  border: '1px solid #ffe58f',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  color: '#8a6d3b'
+                }}>
+                  <AlertCircle size={20} />
+                  <span>Connecta Google Drive per gestionar Arts Finals</span>
+                </div>
+              ) : !artsFinalsFolderId ? (
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                  alignItems: 'center',
+                  padding: '20px',
+                  textAlign: 'center'
+                }}>
+                  <p style={{
+                    margin: 0,
+                    color: darkMode ? '#9ca3af' : '#6b7280',
+                    fontSize: '14px'
+                  }}>
+                    Crea o vincula la carpeta "Arts Finals" per començar a pujar fitxers
+                  </p>
+                  <button
+                    onClick={handleCreateArtsFinalsFolder}
+                    disabled={loadingArtsFinals}
+                    style={{
+                      padding: '10px 20px',
+                      backgroundColor: '#4f46e5',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      cursor: loadingArtsFinals ? 'not-allowed' : 'pointer',
+                      opacity: loadingArtsFinals ? 0.6 : 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}
+                  >
+                    {loadingArtsFinals ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin" />
+                        Creant...
+                      </>
+                    ) : (
+                      <>
+                        <Plus size={16} />
+                        Crear/Enllaçar Carpeta Arts Finals
+                      </>
+                    )}
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {/* Upload button */}
+                  <div>
+                    <input
+                      type="file"
+                      id="artsFinalsUpload"
+                      multiple
+                      style={{ display: 'none' }}
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files.length > 0) {
+                          handleArtsFinalsUpload(e.target.files)
+                          e.target.value = '' // Reset input
+                        }
+                      }}
+                    />
+                    <button
+                      onClick={() => document.getElementById('artsFinalsUpload')?.click()}
+                      disabled={uploadingArtsFinals}
+                      style={{
+                        padding: '10px 20px',
+                        backgroundColor: '#4f46e5',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        cursor: uploadingArtsFinals ? 'not-allowed' : 'pointer',
+                        opacity: uploadingArtsFinals ? 0.6 : 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}
+                    >
+                      {uploadingArtsFinals ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin" />
+                          Pujant...
+                        </>
+                      ) : (
+                        <>
+                          <Upload size={16} />
+                          Pujar Fitxers
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Files list */}
+                  {loadingArtsFinals ? (
+                    <div style={{
+                      padding: '40px',
+                      textAlign: 'center',
+                      color: darkMode ? '#9ca3af' : '#6b7280'
+                    }}>
+                      <Loader2 size={24} className="animate-spin" style={{ margin: '0 auto 12px' }} />
+                      <p style={{ margin: 0 }}>Carregant fitxers...</p>
+                    </div>
+                  ) : artsFinalsFiles.length === 0 ? (
+                    <div style={{
+                      padding: '40px',
+                      textAlign: 'center',
+                      color: darkMode ? '#9ca3af' : '#6b7280',
+                      fontSize: '14px'
+                    }}>
+                      No hi ha fitxers encara. Puja el primer fitxer per començar.
+                    </div>
+                  ) : (
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px'
+                    }}>
+                      {artsFinalsFiles.map((file) => {
+                        const fileSize = file.size ? (file.size / 1024 / 1024).toFixed(2) + ' MB' : 'N/A'
+                        const modifiedDate = file.modifiedTime 
+                          ? new Date(file.modifiedTime).toLocaleDateString('ca-ES', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })
+                          : 'N/A'
+                        
+                        return (
+                          <div
+                            key={file.id}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '12px 16px',
+                              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                              borderRadius: '8px',
+                              border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+                            }}
+                          >
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                                marginBottom: '4px'
+                              }}>
+                                <FileText size={18} color={darkMode ? '#9ca3af' : '#6b7280'} />
+                                <span style={{
+                                  fontWeight: '500',
+                                  color: darkMode ? '#ffffff' : '#111827',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap'
+                                }}>
+                                  {file.name}
+                                </span>
+                              </div>
+                              <div style={{
+                                fontSize: '12px',
+                                color: darkMode ? '#9ca3af' : '#6b7280',
+                                marginLeft: '28px'
+                              }}>
+                                {fileSize} • {modifiedDate}
+                              </div>
+                            </div>
+                            <div style={{
+                              display: 'flex',
+                              gap: '8px',
+                              alignItems: 'center'
+                            }}>
+                              <button
+                                onClick={() => handleOpenFile(file)}
+                                style={{
+                                  padding: '6px 12px',
+                                  backgroundColor: 'transparent',
+                                  border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+                                  borderRadius: '6px',
+                                  color: darkMode ? '#ffffff' : '#111827',
+                                  fontSize: '13px',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '6px'
+                                }}
+                              >
+                                <Eye size={14} />
+                                Obrir
+                              </button>
+                              <button
+                                onClick={() => handleDeleteFileClick(file)}
+                                style={{
+                                  padding: '6px 12px',
+                                  backgroundColor: 'transparent',
+                                  border: 'none',
+                                  borderRadius: '6px',
+                                  color: '#ef4444',
+                                  fontSize: '13px',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '6px'
+                                }}
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
         {/* Actions per fase */}
         <div style={{
           ...styles.actionsSection,
@@ -952,6 +1442,21 @@ function ProjectDetailInner({ useApp }) {
             )}
           </div>
         </div>
+
+        {/* Delete Confirmation Modal for Arts Finals files */}
+        <DeleteConfirmationModal
+          isOpen={showDeleteModal}
+          onClose={() => {
+            setShowDeleteModal(false)
+            setFileToDelete(null)
+          }}
+          onConfirm={handleConfirmDeleteFile}
+          entityName={fileToDelete?.name || ''}
+          entityType="Fitxer"
+          isDeleting={deletingFile}
+          darkMode={darkMode}
+          showUsageWarning={false}
+        />
       </div>
     </div>
   )

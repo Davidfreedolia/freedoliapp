@@ -776,6 +776,142 @@ class GoogleDriveService {
     }
   }
 
+  /**
+   * Ensure Arts Finals folder exists for a project (IDEMPOTENT)
+   * Creates the folder structure: Projects/{project_code}_name/Arts Finals
+   * @param {object} params - { projectId, projectNameOrCode, drive_art_finals_folder_id (optional), drive_folder_id (optional) }
+   * @returns {Promise<string>} folderId of Arts Finals folder
+   */
+  async ensureProjectArtsFinalsFolder({ projectId, projectNameOrCode, drive_art_finals_folder_id, drive_folder_id }) {
+    try {
+      await this.ensureDriveReady()
+    } catch (err) {
+      if (err.message === 'AUTH_REQUIRED') {
+        throw err
+      }
+      logDriveError('ensureProjectArtsFinalsFolder', err, { projectId })
+      throw new Error('No s\'ha pogut connectar a Google Drive')
+    }
+
+    // CAS 1: Si ja té drive_art_finals_folder_id, verificar que existeix
+    if (drive_art_finals_folder_id) {
+      try {
+        const folderInfo = await this.getFileInfo(drive_art_finals_folder_id)
+        if (folderInfo.mimeType === 'application/vnd.google-apps.folder') {
+          return drive_art_finals_folder_id
+        }
+        logDriveError('ensureProjectArtsFinalsFolder', 'drive_art_finals_folder_id no és una carpeta', {
+          drive_art_finals_folder_id,
+          mimeType: folderInfo.mimeType
+        })
+      } catch (err) {
+        if (err.status === 404 || err.code === 404) {
+          logDriveError('ensureProjectArtsFinalsFolder', 'drive_art_finals_folder_id no existeix (404)', {
+            drive_art_finals_folder_id
+          })
+          // Continuar per crear nova carpeta
+        } else {
+          throw err
+        }
+      }
+    }
+
+    // CAS 2: Usar drive_folder_id del projecte (si existeix) o buscar/crear carpeta del projecte
+    let projectFolderId = drive_folder_id
+    if (!projectFolderId) {
+      // Buscar carpeta del projecte per nom (usa el mateix format que createProjectFolders)
+      // projectNameOrCode ja ve format com project_code_name
+      const projectFolderName = projectNameOrCode
+      try {
+        const query = `name='${projectFolderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false and '${DRIVE_FOLDERS.projects}' in parents`
+        const response = await window.gapi.client.drive.files.list({
+          q: query,
+          fields: 'files(id, name)',
+          spaces: 'drive'
+        })
+        if (response.result.files && response.result.files.length > 0) {
+          projectFolderId = response.result.files[0].id
+        }
+      } catch (err) {
+        logDriveError('ensureProjectArtsFinalsFolder', 'Error buscant carpeta del projecte', { error: err })
+      }
+      
+      // Si no existeix, crear-la
+      if (!projectFolderId) {
+        const projectFolder = await this.findOrCreateFolder(projectFolderName, DRIVE_FOLDERS.projects)
+        projectFolderId = projectFolder.id
+      }
+    }
+
+    // CAS 3: Buscar o crear subcarpeta "Arts Finals" dins la carpeta del projecte
+    const artsFinalsFolder = await this.findOrCreateFolder('Arts Finals', projectFolderId)
+    
+    return artsFinalsFolder.id
+  }
+
+  /**
+   * Upload multiple files to a Drive folder
+   * @param {string} folderId - Drive folder ID
+   * @param {File[]} files - Array of File objects
+   * @returns {Promise<Array>} Array of uploaded file metadata
+   */
+  async uploadFilesToFolder(folderId, files) {
+    const uploadPromises = files.map(file => this.uploadFile(file, folderId))
+    return Promise.all(uploadPromises)
+  }
+
+  /**
+   * List files in a folder (non-recursive, files only, not subfolders)
+   * @param {string} folderId - Drive folder ID
+   * @returns {Promise<Array>} Array of file metadata objects
+   */
+  async listFolderFiles(folderId) {
+    try {
+      await this.ensureDriveReady()
+    } catch (err) {
+      if (err.message === 'AUTH_REQUIRED') {
+        throw err
+      }
+      logDriveError('listFolderFiles', err, { folderId })
+      throw new Error('No connectat a Google Drive')
+    }
+
+    try {
+      const response = await window.gapi.client.drive.files.list({
+        q: `'${folderId}' in parents and trashed=false and mimeType != 'application/vnd.google-apps.folder'`,
+        fields: 'files(id, name, mimeType, webViewLink, webContentLink, size, createdTime, modifiedTime)',
+        orderBy: 'modifiedTime desc'
+      })
+      return response.result.files || []
+    } catch (err) {
+      if (err.status === 401 || err.code === 401) {
+        handleAuthError('listFolderFiles', err)
+        throw new Error('AUTH_REQUIRED')
+      }
+      logDriveError('listFolderFiles', err, { folderId, status: err.status })
+      throw new Error('Error llistant fitxers: ' + (err.message || 'Error desconegut'))
+    }
+  }
+
+  /**
+   * Helper to get Drive file URL for opening in browser
+   * @param {string} fileId - Drive file ID
+   * @param {string} webViewLink - Optional webViewLink (if already available)
+   * @returns {Promise<string>} URL to open file in Drive
+   */
+  async openDriveFileUrl(fileId, webViewLink = null) {
+    if (webViewLink) {
+      return webViewLink
+    }
+    try {
+      const fileInfo = await this.getFileInfo(fileId)
+      return fileInfo.webViewLink || `https://drive.google.com/file/d/${fileId}/view`
+    } catch (err) {
+      logDriveError('openDriveFileUrl', err, { fileId })
+      return `https://drive.google.com/file/d/${fileId}/view`
+    }
+  }
+
   // ==================== OPERACIONS AMB FITXERS ====================
 
   async uploadFile(file, folderId, customName = null) {
@@ -1057,13 +1193,17 @@ export const useDrive = () => {
     
     createProjectFolders: (code, name) => driveService.createProjectFolders(code, name),
     ensureProjectDriveFolders: (project) => driveService.ensureProjectDriveFolders(project),
+    ensureProjectArtsFinalsFolder: (params) => driveService.ensureProjectArtsFinalsFolder(params),
     listFolderContents: (folderId) => driveService.listFolderContents(folderId),
+    listFolderFiles: (folderId) => driveService.listFolderFiles(folderId),
     findOrCreateFolder: (name, parentId) => driveService.findOrCreateFolder(name, parentId),
     
     uploadFile: (file, folderId, name) => driveService.uploadFile(file, folderId, name),
+    uploadFilesToFolder: (folderId, files) => driveService.uploadFilesToFolder(folderId, files),
     uploadPdfBlob: (blob, name, folderId) => driveService.uploadPdfBlob(blob, name, folderId),
     deleteFile: (fileId) => driveService.deleteFile(fileId),
     getFileInfo: (fileId) => driveService.getFileInfo(fileId),
+    openDriveFileUrl: (fileId, webViewLink) => driveService.openDriveFileUrl(fileId, webViewLink),
     searchFiles: (query, folderId) => driveService.searchFiles(query, folderId),
     getShareableLink: (fileId) => driveService.getShareableLink(fileId),
     moveFile: (fileId, newFolderId, oldFolderId) => driveService.moveFile(fileId, newFolderId, oldFolderId),
