@@ -3674,6 +3674,56 @@ export const deleteReceipt = async (attachmentId) => {
 }
 
 /**
+ * Update attachment file name (rename)
+ * @param {string} attachmentId - Attachment ID from expense_attachments table
+ * @param {string} newFileName - New file name
+ * @returns {Promise<object>} Updated attachment
+ */
+export const updateAttachmentName = async (attachmentId, newFileName) => {
+  if (!attachmentId || !newFileName || !newFileName.trim()) {
+    throw new Error('Attachment ID and file name are required')
+  }
+
+  const userId = await getCurrentUserId()
+  if (!userId) throw new Error('User not authenticated')
+
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+
+  // In demo mode, just return success (no real update)
+  if (demoMode) {
+    return {
+      id: attachmentId,
+      file_name: newFileName.trim(),
+      // Return mock data structure
+    }
+  }
+
+  const client = getSupabaseClient()
+
+  try {
+    const { data, error } = await client
+      .from('expense_attachments')
+      .update({ file_name: newFileName.trim() })
+      .eq('id', attachmentId)
+      .eq('user_id', userId)
+      .eq('is_demo', demoMode)
+      .select()
+      .single()
+
+    if (error) throw error
+    if (!data) throw new Error('Attachment not found')
+
+    return data
+  } catch (err) {
+    if (import.meta.env.DEV) {
+      console.error('Error updating attachment name:', err)
+    }
+    throw new Error(`Error renombrant receipt: ${err.message || 'Error desconegut'}`)
+  }
+}
+
+/**
  * Get public URL for receipt (legacy function for backward compatibility)
  * @param {string} filePath - Path del fitxer
  * @returns {string} Public URL

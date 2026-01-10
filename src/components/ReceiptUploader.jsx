@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
-import { Upload, FileText, Image, AlertCircle, Eye, Trash2, Download } from 'lucide-react'
-import { uploadReceipt, deleteReceipt, getExpenseAttachments, getAttachmentSignedUrl } from '../lib/supabase'
+import { Upload, FileText, Image, AlertCircle, Eye, Trash2, Edit, MoreVertical, X, Save } from 'lucide-react'
+import { uploadReceipt, deleteReceipt, getExpenseAttachments, getAttachmentSignedUrl, updateAttachmentName } from '../lib/supabase'
 import { showToast } from './Toast'
 import DeleteConfirmationModal from './DeleteConfirmationModal'
 
@@ -22,6 +22,14 @@ export default function ReceiptUploader({
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [attachmentToDelete, setAttachmentToDelete] = useState(null)
   const [deleting, setDeleting] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(null)
+  const [showPreviewModal, setShowPreviewModal] = useState(false)
+  const [previewUrl, setPreviewUrl] = useState(null)
+  const [previewType, setPreviewType] = useState(null) // 'image' or 'pdf'
+  const [showRenameModal, setShowRenameModal] = useState(false)
+  const [attachmentToRename, setAttachmentToRename] = useState(null)
+  const [newFileName, setNewFileName] = useState('')
+  const [renaming, setRenaming] = useState(false)
 
   // Cargar attachments cuando expenseId cambia
   useEffect(() => {
@@ -31,6 +39,22 @@ export default function ReceiptUploader({
       setAttachments([])
     }
   }, [expenseId])
+
+  // Close actions menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuOpen && !event.target.closest('[data-menu-container]')) {
+        setMenuOpen(null)
+      }
+    }
+    
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside)
+      }
+    }
+  }, [menuOpen])
 
   const loadAttachments = async () => {
     if (!expenseId) return
@@ -151,6 +175,7 @@ export default function ReceiptUploader({
   }
 
   const handleDeleteClick = (attachment) => {
+    setMenuOpen(null)
     setAttachmentToDelete(attachment)
     setShowDeleteModal(true)
   }
@@ -185,17 +210,66 @@ export default function ReceiptUploader({
 
   const handleView = async (attachment) => {
     try {
+      setMenuOpen(null)
       // Obtener signed URL (1 hora de validez)
       const signedUrl = await getAttachmentSignedUrl(attachment.file_path)
-      if (signedUrl) {
-        window.open(signedUrl, '_blank', 'noopener,noreferrer')
-      } else {
+      if (!signedUrl) {
         showToast('Error obrint l\'arxiu', 'error')
+        return
+      }
+
+      // Check if it's an image or PDF
+      const isImage = attachment.mime_type?.startsWith('image/') || 
+                     attachment.file_name?.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/i)
+      
+      if (isImage) {
+        // Open in modal preview
+        setPreviewUrl(signedUrl)
+        setPreviewType('image')
+        setShowPreviewModal(true)
+      } else {
+        // Open PDF in new window
+        window.open(signedUrl, '_blank', 'noopener,noreferrer')
       }
     } catch (err) {
       console.error('Error getting signed URL:', err)
       showToast('Error obrint l\'arxiu: ' + (err.message || 'Error desconegut'), 'error')
     }
+  }
+
+  const handleRenameClick = (attachment) => {
+    setMenuOpen(null)
+    setAttachmentToRename(attachment)
+    setNewFileName(attachment.file_name)
+    setShowRenameModal(true)
+  }
+
+  const handleConfirmRename = async () => {
+    if (!attachmentToRename || !newFileName.trim()) {
+      showToast('El nom del fitxer és obligatori', 'error')
+      return
+    }
+
+    setRenaming(true)
+    try {
+      await updateAttachmentName(attachmentToRename.id, newFileName.trim())
+      showToast('Fitxer renombrat correctament', 'success')
+      await loadAttachments()
+      setShowRenameModal(false)
+      setAttachmentToRename(null)
+      setNewFileName('')
+    } catch (err) {
+      console.error('Error renaming attachment:', err)
+      showToast('Error renombrant fitxer: ' + (err.message || 'Error desconegut'), 'error')
+    } finally {
+      setRenaming(false)
+    }
+  }
+
+  const handleCancelRename = () => {
+    setShowRenameModal(false)
+    setAttachmentToRename(null)
+    setNewFileName('')
   }
 
   const formatFileSize = (bytes) => {
@@ -434,38 +508,233 @@ export default function ReceiptUploader({
       )}
 
       {!loading && attachments.length > 0 && (
-        <div style={styles.attachmentsList}>
-          {attachments.map((attachment) => (
-            <div key={attachment.id} style={styles.attachmentItem}>
-              <div style={styles.attachmentLeft}>
-                {getFileIcon(attachment.mime_type, attachment.file_name)}
-                <div style={styles.attachmentInfo}>
-                  <div style={styles.attachmentName}>{attachment.file_name}</div>
-                  <div style={styles.attachmentMeta}>
-                    {formatFileSize(attachment.size)} • {formatDate(attachment.created_at)}
-                  </div>
-                </div>
-              </div>
-              <div style={styles.attachmentActions}>
-                <button
-                  onClick={() => handleView(attachment)}
-                  style={styles.actionButton}
-                  title="Obrir receipt"
+        <div style={{ marginTop: '16px', overflowX: 'auto' }}>
+          <table style={{
+            width: '100%',
+            borderCollapse: 'collapse',
+            fontSize: '14px'
+          }}>
+            <thead>
+              <tr style={{
+                borderBottom: `2px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+              }}>
+                <th style={{
+                  textAlign: 'left',
+                  padding: '12px',
+                  color: darkMode ? '#9ca3af' : '#6b7280',
+                  fontWeight: '600',
+                  fontSize: '12px',
+                  textTransform: 'uppercase'
+                }}>Fitxer</th>
+                <th style={{
+                  textAlign: 'left',
+                  padding: '12px',
+                  color: darkMode ? '#9ca3af' : '#6b7280',
+                  fontWeight: '600',
+                  fontSize: '12px',
+                  textTransform: 'uppercase'
+                }}>Mida</th>
+                <th style={{
+                  textAlign: 'left',
+                  padding: '12px',
+                  color: darkMode ? '#9ca3af' : '#6b7280',
+                  fontWeight: '600',
+                  fontSize: '12px',
+                  textTransform: 'uppercase'
+                }}>Data</th>
+                <th style={{
+                  textAlign: 'right',
+                  padding: '12px',
+                  color: darkMode ? '#9ca3af' : '#6b7280',
+                  fontWeight: '600',
+                  fontSize: '12px',
+                  textTransform: 'uppercase',
+                  width: '80px'
+                }}>Accions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {attachments.map((attachment) => (
+                <tr 
+                  key={attachment.id}
+                  style={{
+                    borderBottom: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+                    transition: 'background-color 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = darkMode ? '#1f1f2e' : '#f9fafb'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent'
+                  }}
                 >
-                  <Eye size={14} />
-                  Obrir
-                </button>
-                <button
-                  onClick={() => handleDeleteClick(attachment)}
-                  style={styles.deleteButton}
-                  title="Eliminar receipt"
-                  disabled={deleting}
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            </div>
-          ))}
+                  <td style={{ padding: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      {getFileIcon(attachment.mime_type, attachment.file_name)}
+                      <span style={{
+                        color: darkMode ? '#ffffff' : '#111827',
+                        fontWeight: '500'
+                      }}>
+                        {attachment.file_name}
+                      </span>
+                    </div>
+                  </td>
+                  <td style={{
+                    padding: '12px',
+                    color: darkMode ? '#9ca3af' : '#6b7280'
+                  }}>
+                    {formatFileSize(attachment.size)}
+                  </td>
+                  <td style={{
+                    padding: '12px',
+                    color: darkMode ? '#9ca3af' : '#6b7280',
+                    fontSize: '13px'
+                  }}>
+                    {formatDate(attachment.created_at)}
+                  </td>
+                  <td style={{ padding: '12px', textAlign: 'right' }}>
+                    <div 
+                      style={{ position: 'relative', display: 'inline-block' }} 
+                      data-menu-container
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setMenuOpen(menuOpen === attachment.id ? null : attachment.id)
+                        }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          padding: '6px',
+                          color: darkMode ? '#9ca3af' : '#6b7280',
+                          display: 'flex',
+                          alignItems: 'center',
+                          borderRadius: '4px',
+                          transition: 'background-color 0.2s'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = darkMode ? '#374151' : '#e5e7eb'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent'
+                        }}
+                      >
+                        <MoreVertical size={18} />
+                      </button>
+                      {menuOpen === attachment.id && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            right: 0,
+                            top: '100%',
+                            marginTop: '4px',
+                            backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
+                            border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                            minWidth: '160px',
+                            zIndex: 1000,
+                            overflow: 'hidden'
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleView(attachment)
+                            }}
+                            style={{
+                              width: '100%',
+                              padding: '10px 16px',
+                              textAlign: 'left',
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                              color: darkMode ? '#ffffff' : '#111827',
+                              fontSize: '14px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              transition: 'background-color 0.2s'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = darkMode ? '#374151' : '#f3f4f6'
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = 'transparent'
+                            }}
+                          >
+                            <Eye size={14} />
+                            Obrir
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleRenameClick(attachment)
+                            }}
+                            style={{
+                              width: '100%',
+                              padding: '10px 16px',
+                              textAlign: 'left',
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                              color: darkMode ? '#ffffff' : '#111827',
+                              fontSize: '14px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              transition: 'background-color 0.2s'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = darkMode ? '#374151' : '#f3f4f6'
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = 'transparent'
+                            }}
+                          >
+                            <Edit size={14} />
+                            Renombrar
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleDeleteClick(attachment)
+                            }}
+                            style={{
+                              width: '100%',
+                              padding: '10px 16px',
+                              textAlign: 'left',
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                              color: '#ef4444',
+                              fontSize: '14px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              transition: 'background-color 0.2s'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = darkMode ? '#374151' : '#fee2e2'
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = 'transparent'
+                            }}
+                          >
+                            <Trash2 size={14} />
+                            Eliminar
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
@@ -479,11 +748,255 @@ export default function ReceiptUploader({
         onConfirm={handleConfirmDelete}
         itemName={attachmentToDelete?.file_name || ''}
         entityType="Receipt"
-        isSaving={deleting}
+        isDeleting={deleting}
         darkMode={darkMode}
-        warningMessage="Això eliminarà el fitxer del servidor. Aquesta acció no es pot desfer."
-        fkWarning=""
       />
+
+      {/* Image Preview Modal */}
+      {showPreviewModal && previewUrl && previewType === 'image' && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 2000,
+            padding: '20px'
+          }}
+          onClick={() => {
+            setShowPreviewModal(false)
+            setPreviewUrl(null)
+            setPreviewType(null)
+          }}
+        >
+          <div
+            style={{
+              position: 'relative',
+              maxWidth: '90vw',
+              maxHeight: '90vh',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => {
+                setShowPreviewModal(false)
+                setPreviewUrl(null)
+                setPreviewType(null)
+              }}
+              style={{
+                position: 'absolute',
+                top: '-40px',
+                right: 0,
+                background: 'rgba(255, 255, 255, 0.1)',
+                border: 'none',
+                borderRadius: '50%',
+                width: '36px',
+                height: '36px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                color: '#ffffff',
+                transition: 'background-color 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
+              }}
+            >
+              <X size={20} />
+            </button>
+            <img
+              src={previewUrl}
+              alt="Preview"
+              style={{
+                maxWidth: '100%',
+                maxHeight: '90vh',
+                objectFit: 'contain',
+                borderRadius: '8px'
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Rename Modal */}
+      {showRenameModal && attachmentToRename && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1500,
+            padding: '20px'
+          }}
+          onClick={handleCancelRename}
+        >
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '480px',
+              backgroundColor: darkMode ? '#15151f' : '#ffffff',
+              borderRadius: '16px',
+              border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+              overflow: 'hidden',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '20px 24px',
+              borderBottom: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+            }}>
+              <h3 style={{
+                margin: 0,
+                fontSize: '18px',
+                fontWeight: '600',
+                color: darkMode ? '#ffffff' : '#111827'
+              }}>
+                Renombrar fitxer
+              </h3>
+              <button
+                onClick={handleCancelRename}
+                disabled={renaming}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: renaming ? 'not-allowed' : 'pointer',
+                  color: '#6b7280',
+                  padding: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  opacity: renaming ? 0.5 : 1
+                }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div style={{ padding: '24px' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '500',
+                color: darkMode ? '#ffffff' : '#111827',
+                marginBottom: '8px'
+              }}>
+                Nom del fitxer
+              </label>
+              <input
+                type="text"
+                value={newFileName}
+                onChange={(e) => setNewFileName(e.target.value)}
+                disabled={renaming}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  fontSize: '14px',
+                  backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                  color: darkMode ? '#ffffff' : '#111827',
+                  border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+                  borderRadius: '8px',
+                  outline: 'none',
+                  transition: 'border-color 0.2s'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#4f46e5'
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = darkMode ? '#374151' : '#e5e7eb'
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !renaming && newFileName.trim()) {
+                    handleConfirmRename()
+                  }
+                  if (e.key === 'Escape') {
+                    handleCancelRename()
+                  }
+                }}
+                autoFocus
+              />
+            </div>
+
+            {/* Footer */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '12px',
+              padding: '20px 24px',
+              borderTop: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+            }}>
+              <button
+                onClick={handleCancelRename}
+                disabled={renaming}
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: renaming ? 'not-allowed' : 'pointer',
+                  backgroundColor: 'transparent',
+                  color: darkMode ? '#9ca3af' : '#6b7280',
+                  border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+                  transition: 'opacity 0.2s',
+                  opacity: renaming ? 0.5 : 1
+                }}
+              >
+                Cancel·lar
+              </button>
+              <button
+                onClick={handleConfirmRename}
+                disabled={renaming || !newFileName.trim()}
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: (renaming || !newFileName.trim()) ? 'not-allowed' : 'pointer',
+                  backgroundColor: (renaming || !newFileName.trim()) ? '#9ca3af' : '#4f46e5',
+                  color: '#ffffff',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'opacity 0.2s',
+                  opacity: (renaming || !newFileName.trim()) ? 0.5 : 1
+                }}
+              >
+                {renaming ? (
+                  'Renombrant...'
+                ) : (
+                  <>
+                    <Save size={14} />
+                    Guardar
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
