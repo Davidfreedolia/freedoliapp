@@ -589,12 +589,7 @@ export default function Finances() {
       marketplace: type === 'income' ? 'ES' : null,
       order_id: type === 'income' ? '' : null,
       supplier_id: type === 'expense' ? null : null,
-      notes: '',
-      // Receipt fields
-      receipt_url: null,
-      receipt_filename: null,
-      receipt_size: null,
-      receipt_drive_file_id: null
+      notes: ''
     })
     setShowTransactionModal(true)
   }
@@ -632,26 +627,38 @@ export default function Finances() {
           payment_status: editingTransaction.payment_status,
           supplier_id: editingTransaction.supplier_id || null,
           notes: editingTransaction.notes,
-          receipt_url: editingTransaction.receipt_url || null,
-          receipt_filename: editingTransaction.receipt_filename || null,
-          receipt_size: editingTransaction.receipt_size || null,
-          receipt_drive_file_id: editingTransaction.receipt_drive_file_id || null,
           user_id: userId
         }
         
         if (editingTransaction.id) {
-          const { error } = await supabase
+          const { data: updatedData, error } = await supabase
             .from('expenses')
             .update(data)
             .eq('id', editingTransaction.id)
             .select()
+            .single()
           if (error) throw error
+          // Update editingTransaction with returned data to ensure ID is set
+          if (updatedData) {
+            setEditingTransaction({
+              ...editingTransaction,
+              id: updatedData.id
+            })
+          }
         } else {
-          const { error } = await supabase
+          const { data: insertedData, error } = await supabase
             .from('expenses')
             .insert(data)
             .select()
+            .single()
           if (error) throw error
+          // Update editingTransaction with new ID so ReceiptUploader can work
+          if (insertedData) {
+            setEditingTransaction({
+              ...editingTransaction,
+              id: insertedData.id
+            })
+          }
         }
       } else {
         // Get category name from category_id (REQUIRED for DB NOT NULL constraint)
@@ -1130,27 +1137,6 @@ export default function Finances() {
                                 <span style={{fontSize: '11px', color: '#6b7280'}}>
                                   Order: {item.order_id}
                                 </span>
-                              )}
-                              {item.type === 'expense' && item.receipt_url && (
-                                <button
-                                  onClick={() => window.open(item.receipt_url, '_blank', 'noopener,noreferrer')}
-                                  style={{
-                                    padding: '4px 8px',
-                                    backgroundColor: 'transparent',
-                                    border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`,
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '4px',
-                                    color: '#4f46e5',
-                                    fontSize: '12px'
-                                  }}
-                                  title={`Veure receipt${item.receipt_filename ? ': ' + item.receipt_filename : ''}`}
-                                >
-                                  <FileText size={12} />
-                                  <Eye size={12} />
-                              </button>
                               )}
                             </div>
                           </td>
@@ -1679,26 +1665,10 @@ export default function Finances() {
                 {editingTransaction.type === 'expense' && (
                   <div style={{...styles.formGroup, gridColumn: 'span 2'}}>
                     <ReceiptUploader
-                      expenseId={editingTransaction.id}
-                      currentReceiptUrl={editingTransaction.receipt_url}
-                      currentReceiptFilename={editingTransaction.receipt_filename}
-                      onReceiptUploaded={(receiptData) => {
-                        setEditingTransaction({
-                          ...editingTransaction,
-                          receipt_url: receiptData.url,
-                          receipt_filename: receiptData.filename,
-                          receipt_size: receiptData.size,
-                          receipt_drive_file_id: receiptData.drive_file_id || null
-                        })
-                      }}
-                      onReceiptDeleted={() => {
-                        setEditingTransaction({
-                          ...editingTransaction,
-                          receipt_url: null,
-                          receipt_filename: null,
-                          receipt_size: null,
-                          receipt_drive_file_id: null
-                        })
+                      expenseId={editingTransaction.id || null}
+                      onAttachmentsChanged={() => {
+                        // Attachments are handled by ReceiptUploader internally via DB
+                        // This callback can be used for refresh if needed
                       }}
                       darkMode={darkMode}
                     />

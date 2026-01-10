@@ -13,14 +13,16 @@ import {
   RefreshCw,
   Package,
   FileSpreadsheet,
-  ExternalLink
+  ExternalLink,
+  Lock,
+  Trash2
 } from 'lucide-react'
 import { 
   getGtinPool, 
-  addGtinToPool, 
   releaseGtinFromProject,
   supabase
 } from '../lib/supabase'
+import { getDemoMode } from '../lib/demoModeFilter'
 import { showToast } from './Toast'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
@@ -57,16 +59,14 @@ export default function GTINPoolSection({ darkMode }) {
     loadGtins()
   }, [loadGtins])
 
-  // Estadístiques
-  const stats = {
-    total: gtins.length,
-    available: gtins.filter(g => g.status === 'available').length,
-    assigned: gtins.filter(g => g.status === 'assigned').length,
-    archived: gtins.filter(g => g.status === 'archived').length
-  }
+  // Derive status from assigned_to_project_id for all gtins
+  const gtinsWithDerivedStatus = gtins.map(gtin => ({
+    ...gtin,
+    status: gtin.assigned_to_project_id ? 'assigned' : 'available'
+  }))
 
-  // Filtrar GTINs
-  const filteredGtins = gtins.filter(gtin => {
+  // Filtrar GTINs (ya están filtrados por deleted_at en la query)
+  const filteredGtins = gtinsWithDerivedStatus.filter(gtin => {
     // Búsqueda específica por gtin_code
     const matchesSearch = !searchTerm || 
       gtin.gtin_code?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -74,6 +74,13 @@ export default function GTINPoolSection({ darkMode }) {
     const matchesStatus = !statusFilter || gtin.status === statusFilter
     return matchesSearch && matchesStatus
   })
+
+  // Estadístiques calculadas del dataset filtrado actual
+  const stats = {
+    total: filteredGtins.length,
+    available: filteredGtins.filter(g => !g.assigned_to_project_id).length,
+    assigned: filteredGtins.filter(g => g.assigned_to_project_id).length
+  }
 
   // Validar format GTIN
   const validateGtin = (code) => {
@@ -224,12 +231,13 @@ export default function GTINPoolSection({ darkMode }) {
     try {
       const validRows = importPreview.rows.filter(r => r.valid && !importPreview.conflicts.includes(r.gtin_code))
       
-      const toInsert = validRows.map(row => {
+      // Validar i normalitzar GTINs
+      const validatedGtins = validRows.map(row => {
         const code = row.gtin_code.trim().replace(/\D/g, '')
         const normalizedType = normalizeGtinType(row.gtin_type)
         const type = normalizedType || detectGtinType(code) || 'EAN'
         
-        // Validar que el tipus final sigui vàlid abans d'inserir
+        // Validar que el tipus final sigui vàlid
         if (!['EAN', 'UPC', 'GTIN_EXEMPT'].includes(type)) {
           throw new Error(`Fila ${row.row}: Tipus GTIN invàlid: "${row.gtin_type}". Valors vàlids: EAN, UPC, GTIN_EXEMPT`)
         }
@@ -237,54 +245,80 @@ export default function GTINPoolSection({ darkMode }) {
         return {
           gtin_code: code,
           gtin_type: type,
-          notes: row.notes || null,
-          status: 'available'
+          notes: row.notes || null
         }
       })
 
-      // Inserir GTINs al pool
-      const inserted = []
-      const alreadyExisted = []
-      const errors = []
-      for (const gtin of toInsert) {
+      // Obtenir demo mode
+      const demoMode = await getDemoMode()
+
+      // Agrupar per tipus i notes per processar en batches
+      const groupedByType = {}
+      validatedGtins.forEach(gtin => {
+        const key = `${gtin.gtin_type}|||${gtin.notes || ''}`
+        if (!groupedByType[key]) {
+          groupedByType[key] = {
+            gtin_type: gtin.gtin_type,
+            notes: gtin.notes,
+            codes: []
+          }
+        }
+        groupedByType[key].codes.push(gtin.gtin_code)
+      })
+
+      // Processar cada grup amb la funció RPC
+      let totalInserted = 0
+      let totalRestored = 0
+      let totalSkipped = 0
+      let totalErrors = 0
+
+      for (const group of Object.values(groupedByType)) {
         try {
-          await addGtinToPool(gtin)
-          inserted.push(gtin.gtin_code)
+          const { data, error } = await supabase.rpc('import_gtins', {
+            p_codes: group.codes,
+            p_gtin_type: group.gtin_type,
+            p_notes: group.notes,
+            p_is_demo: demoMode
+          })
+
+          if (error) throw error
+
+          if (data && data.length > 0) {
+            totalInserted += data[0].inserted_count || 0
+            totalRestored += data[0].restored_count || 0
+            totalSkipped += data[0].skipped_count || 0
+            totalErrors += data[0].error_count || 0
+          }
         } catch (err) {
-          // Si ja existeix, comptar com "already existed"
-          if (err.code === '23505') {
-            alreadyExisted.push(gtin.gtin_code)
-            continue
-          }
-          // Si és error de constraint, afegir a errors
-          if (err.code === '23514') {
-            errors.push(`${gtin.gtin_code}: Tipus invàlid "${gtin.gtin_type}"`)
-            continue
-          }
-          // Altres errors, llançar
-          throw err
+          console.error('Error en import_gtins RPC:', err)
+          totalErrors += group.codes.length
         }
       }
 
-      // Mostrar feedback: "X imported, Y already existed, Z invalid"
-      const invalidCount = importPreview.invalid
+      // Mostrar feedback
       const parts = []
-      if (inserted.length > 0) {
-        parts.push(`${inserted.length} importat${inserted.length !== 1 ? 's' : ''}`)
+      if (totalInserted > 0) {
+        parts.push(`${totalInserted} importat${totalInserted !== 1 ? 's' : ''}`)
       }
-      if (alreadyExisted.length > 0) {
-        parts.push(`${alreadyExisted.length} ja existien`)
+      if (totalRestored > 0) {
+        parts.push(`${totalRestored} restaurat${totalRestored !== 1 ? 's' : ''}`)
       }
-      if (invalidCount > 0) {
-        parts.push(`${invalidCount} invàlid${invalidCount !== 1 ? 's' : ''}`)
+      if (totalSkipped > 0) {
+        parts.push(`${totalSkipped} ja existien`)
       }
-      
-      if (errors.length > 0) {
-        showToast(`${parts.join(', ')}. ${errors.length} error${errors.length !== 1 ? 's' : ''}: ${errors.join('; ')}`, 'warning')
-      } else if (parts.length > 0) {
-        showToast(parts.join(', '), inserted.length > 0 ? 'success' : 'warning')
+      if (totalErrors > 0) {
+        parts.push(`${totalErrors} error${totalErrors !== 1 ? 's' : ''}`)
+      }
+      if (importPreview.invalid > 0) {
+        parts.push(`${importPreview.invalid} invàlid${importPreview.invalid !== 1 ? 's' : ''}`)
       }
 
+      if (parts.length > 0) {
+        const hasSuccess = totalInserted > 0 || totalRestored > 0
+        showToast(parts.join(', '), hasSuccess ? 'success' : 'warning')
+      }
+
+      // Forçar refetch immediat
       await loadGtins()
       setShowImportModal(false)
       setImportPreview(null)
@@ -309,20 +343,23 @@ export default function GTINPoolSection({ darkMode }) {
     }
   }
 
-  // Arxivar GTIN
-  const handleArchiveGtin = async (gtinId) => {
+  // Eliminar GTIN (soft delete)
+  const handleDeleteGtin = async (gtinId) => {
+    if (!confirm('Eliminar aquest GTIN?')) return
+
     try {
       const { error } = await supabase
         .from('gtin_pool')
-        .update({ status: 'archived' })
+        .update({ deleted_at: new Date().toISOString() })
         .eq('id', gtinId)
 
       if (error) throw error
       
       await loadGtins()
+      showToast(t('settings.gtinPool.deletedSuccess') || 'GTIN eliminat', 'success')
     } catch (err) {
-      console.error('Error arxivant GTIN:', err)
-      alert('Error arxivant GTIN: ' + err.message)
+      console.error('Error eliminant GTIN:', err)
+      showToast(t('settings.gtinPool.deleteError') || 'Error eliminant GTIN: ' + err.message, 'error')
     }
   }
 
@@ -538,13 +575,10 @@ export default function GTINPoolSection({ darkMode }) {
                     </span>
                     <span style={{
                       ...styles.badge,
-                      backgroundColor: gtin.status === 'available' ? '#22c55e15' : 
-                                       gtin.status === 'assigned' ? '#f59e0b15' : '#6b728015',
-                      color: gtin.status === 'available' ? '#22c55e' : 
-                            gtin.status === 'assigned' ? '#f59e0b' : '#6b7280'
+                      backgroundColor: gtin.status === 'available' ? '#22c55e15' : '#f59e0b15',
+                      color: gtin.status === 'available' ? '#22c55e' : '#f59e0b'
                     }}>
-                      {gtin.status === 'available' ? t('settings.gtinPool.statusAvailable') : 
-                       gtin.status === 'assigned' ? t('settings.gtinPool.statusAssigned') : t('settings.gtinPool.statusArchived')}
+                      {gtin.status === 'available' ? t('settings.gtinPool.statusAvailable') : t('settings.gtinPool.statusAssigned')}
                     </span>
                   </div>
                 </div>
@@ -580,21 +614,27 @@ export default function GTINPoolSection({ darkMode }) {
               )}
               
               <div style={styles.cardActions}>
-                {gtin.status === 'assigned' && (
+                {gtin.assigned_to_project_id ? (
+                  // Assigned: show lock icon (disabled)
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    color: '#6b7280',
+                    fontSize: '12px'
+                  }} title="Assignat: bloquejat">
+                    <Lock size={14} />
+                    <span>Assignat</span>
+                  </div>
+                ) : (
+                  // Available: show delete button
                   <button
-                    onClick={() => handleReleaseGtin(gtin.id)}
-                    style={styles.actionButton}
+                    onClick={() => handleDeleteGtin(gtin.id)}
+                    style={{...styles.actionButton, color: '#ef4444'}}
+                    title="Eliminar GTIN"
                   >
-                    <X size={14} />
-                    {t('settings.gtinPool.release')}
-                  </button>
-                )}
-                {gtin.status !== 'archived' && (
-                  <button
-                    onClick={() => handleArchiveGtin(gtin.id)}
-                    style={{...styles.actionButton, color: '#6b7280'}}
-                  >
-                    Arxivar
+                    <Trash2 size={14} />
+                    Eliminar
                   </button>
                 )}
               </div>
@@ -641,13 +681,10 @@ export default function GTINPoolSection({ darkMode }) {
                   <td style={styles.td}>
                     <span style={{
                       ...styles.badge,
-                      backgroundColor: gtin.status === 'available' ? '#22c55e15' : 
-                                       gtin.status === 'assigned' ? '#f59e0b15' : '#6b728015',
-                      color: gtin.status === 'available' ? '#22c55e' : 
-                            gtin.status === 'assigned' ? '#f59e0b' : '#6b7280'
+                      backgroundColor: gtin.status === 'available' ? '#22c55e15' : '#f59e0b15',
+                      color: gtin.status === 'available' ? '#22c55e' : '#f59e0b'
                     }}>
-                      {gtin.status === 'available' ? t('settings.gtinPool.statusAvailable') : 
-                       gtin.status === 'assigned' ? t('settings.gtinPool.statusAssigned') : t('settings.gtinPool.statusArchived')}
+                      {gtin.status === 'available' ? t('settings.gtinPool.statusAvailable') : t('settings.gtinPool.statusAssigned')}
                     </span>
                   </td>
                   <td style={styles.td}>
@@ -676,23 +713,28 @@ export default function GTINPoolSection({ darkMode }) {
                     {gtin.notes || '-'}
                   </td>
                   <td style={styles.td}>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      {gtin.status === 'assigned' && (
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      {gtin.assigned_to_project_id ? (
+                        // Assigned: show lock icon (disabled)
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          color: '#6b7280',
+                          fontSize: '12px',
+                          padding: '6px 12px'
+                        }} title="Assignat: bloquejat">
+                          <Lock size={14} />
+                          <span>Assignat</span>
+                        </div>
+                      ) : (
+                        // Available: show delete button
                         <button
-                          onClick={() => handleReleaseGtin(gtin.id)}
-                          style={styles.actionButton}
-                          title={t('settings.gtinPool.release')}
+                          onClick={() => handleDeleteGtin(gtin.id)}
+                          style={{...styles.actionButton, color: '#ef4444'}}
+                          title="Eliminar GTIN"
                         >
-                          <X size={14} />
-                        </button>
-                      )}
-                      {gtin.status !== 'archived' && (
-                        <button
-                          onClick={() => handleArchiveGtin(gtin.id)}
-                          style={{...styles.actionButton, color: '#6b7280'}}
-                          title={t('settings.gtinPool.archive')}
-                        >
-                          {t('settings.gtinPool.archive')}
+                          <Trash2 size={14} />
                         </button>
                       )}
                     </div>

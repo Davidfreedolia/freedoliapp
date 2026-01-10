@@ -3318,18 +3318,91 @@ export const getStickyNoteWithTask = async (id) => {
 }
 
 // ============================================
-// RECEIPT UPLOAD (STORAGE)
+// EXPENSE ATTACHMENTS (RECEIPTS)
 // ============================================
 
 /**
- * Upload receipt file to Supabase Storage bucket "receipts"
- * @param {File} file - File to upload (PDF, JPG, PNG)
- * @param {string} expenseId - Expense ID (for folder structure)
- * @returns {Promise<{url: string, path: string}>} Public URL and path
+ * Check if receipts bucket exists
+ * @returns {Promise<boolean>} True if bucket exists
  */
-export const uploadReceipt = async (file, expenseId = null) => {
+const checkReceiptsBucket = async () => {
+  try {
+    const { data, error } = await supabase.storage.getBucket('receipts')
+    if (error) {
+      if (error.message?.includes('not found') || error.statusCode === '404') {
+        return false
+      }
+      throw error
+    }
+    return !!data
+  } catch (err) {
+    console.error('Error checking receipts bucket:', err)
+    return false
+  }
+}
+
+/**
+ * Get all attachments for an expense
+ * @param {string} expenseId - Expense ID
+ * @returns {Promise<Array>} Array of attachment objects
+ */
+export const getExpenseAttachments = async (expenseId) => {
+  if (!expenseId) return []
+  
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  const userId = await getCurrentUserId()
+  
+  const { data, error } = await supabase
+    .from('expense_attachments')
+    .select('*')
+    .eq('expense_id', expenseId)
+    .eq('user_id', userId)
+    .eq('is_demo', demoMode)
+    .order('created_at', { ascending: false })
+  
+  if (error) throw error
+  return data || []
+}
+
+/**
+ * Get signed URL for an attachment (expires in 1 hour)
+ * @param {string} filePath - Path del archivo en storage
+ * @returns {Promise<string>} Signed URL
+ */
+export const getAttachmentSignedUrl = async (filePath) => {
+  if (!filePath) return null
+  
+  const { data, error } = await supabase.storage
+    .from('receipts')
+    .createSignedUrl(filePath, 3600) // 1 hour expiry
+  
+  if (error) throw error
+  return data?.signedUrl || null
+}
+
+/**
+ * Upload receipt file to Supabase Storage bucket "receipts" and save to expense_attachments
+ * @param {File} file - File to upload (PDF, JPG, PNG)
+ * @param {string} expenseId - Expense ID (required)
+ * @returns {Promise<{id: string, url: string, path: string, filename: string, size: number}>} Attachment data
+ */
+export const uploadReceipt = async (file, expenseId) => {
+  if (!expenseId) {
+    throw new Error('Expense ID is required to upload receipts')
+  }
+
   const userId = await getCurrentUserId()
   if (!userId) throw new Error('User not authenticated')
+
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+
+  // Verificar que el bucket existe
+  const bucketExists = await checkReceiptsBucket()
+  if (!bucketExists) {
+    throw new Error("Receipts storage not configured (bucket 'receipts' missing)")
+  }
 
   // Validar tipus de fitxer
   const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg']
@@ -3343,34 +3416,58 @@ export const uploadReceipt = async (file, expenseId = null) => {
     throw new Error('El fitxer és massa gran. Màxim 10MB.')
   }
 
-  // Generar nom únic: userId/expenseId-timestamp-filename
+  // Generar path: userId/expenses/expenseId/timestamp_filename
   const timestamp = Date.now()
   const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
-  const filePath = expenseId 
-    ? `${userId}/${expenseId}-${timestamp}-${sanitizedFileName}`
-    : `${userId}/${timestamp}-${sanitizedFileName}`
+  const filePath = `${userId}/expenses/${expenseId}/${timestamp}_${sanitizedFileName}`
 
   try {
     // Upload a Supabase Storage
-    const { data, error } = await supabase.storage
+    const { data: uploadData, error: uploadError } = await supabase.storage
       .from('receipts')
       .upload(filePath, file, {
         cacheControl: '3600',
         upsert: false
       })
 
-    if (error) throw error
+    if (uploadError) throw uploadError
 
-    // Obtenir URL pública
-    const { data: urlData } = supabase.storage
-      .from('receipts')
-      .getPublicUrl(filePath)
+    // Guardar metadata en expense_attachments
+    const { data: attachmentData, error: dbError } = await supabase
+      .from('expense_attachments')
+      .insert([{
+        user_id: userId,
+        expense_id: expenseId,
+        file_path: filePath,
+        file_name: file.name,
+        mime_type: file.type,
+        size: file.size,
+        is_demo: demoMode
+      }])
+      .select()
+      .single()
+
+    if (dbError) {
+      // Si falla la inserción en DB, intentar eliminar el archivo de storage
+      try {
+        await supabase.storage.from('receipts').remove([filePath])
+      } catch (cleanupErr) {
+        console.error('Error cleaning up storage after DB failure:', cleanupErr)
+      }
+      throw dbError
+    }
+
+    // Generar signed URL (1 hora de validez)
+    const signedUrl = await getAttachmentSignedUrl(filePath)
 
     return {
-      url: urlData.publicUrl,
+      id: attachmentData.id,
+      url: signedUrl,
       path: filePath,
       filename: file.name,
-      size: file.size
+      size: file.size,
+      mime_type: file.type,
+      created_at: attachmentData.created_at
     }
   } catch (err) {
     console.error('Error uploading receipt:', err)
@@ -3379,16 +3476,58 @@ export const uploadReceipt = async (file, expenseId = null) => {
 }
 
 /**
- * Delete receipt from Supabase Storage
- * @param {string} filePath - Path del fitxer a eliminar
+ * Delete receipt attachment (from storage and database)
+ * @param {string} attachmentId - Attachment ID from expense_attachments table
+ * @returns {Promise<boolean>} True if deleted successfully
  */
-export const deleteReceipt = async (filePath) => {
+export const deleteReceipt = async (attachmentId) => {
+  const userId = await getCurrentUserId()
+  if (!userId) throw new Error('User not authenticated')
+
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+
   try {
-    const { error } = await supabase.storage
-      .from('receipts')
-      .remove([filePath])
-    
-    if (error) throw error
+    // Obtener el attachment para tener el file_path
+    const { data: attachment, error: fetchError } = await supabase
+      .from('expense_attachments')
+      .select('file_path')
+      .eq('id', attachmentId)
+      .eq('user_id', userId)
+      .eq('is_demo', demoMode)
+      .single()
+
+    if (fetchError) throw fetchError
+    if (!attachment) throw new Error('Attachment not found')
+
+    // Eliminar de storage (best effort - si falla, continuar con DB delete)
+    let storageError = null
+    try {
+      const { error: storageErr } = await supabase.storage
+        .from('receipts')
+        .remove([attachment.file_path])
+      if (storageErr) storageError = storageErr
+    } catch (storageErr) {
+      storageError = storageErr
+      console.error('Error deleting from storage (non-critical):', storageErr)
+    }
+
+    // Eliminar de base de datos
+    const { error: dbError } = await supabase
+      .from('expense_attachments')
+      .delete()
+      .eq('id', attachmentId)
+      .eq('user_id', userId)
+      .eq('is_demo', demoMode)
+
+    if (dbError) throw dbError
+
+    // Si storage delete falló pero DB delete fue exitoso, mostrar warning pero retornar success
+    if (storageError) {
+      console.warn('Attachment deleted from DB but storage delete failed:', storageError)
+      // No lanzar error, el attachment está eliminado de la DB y eso es lo importante
+    }
+
     return true
   } catch (err) {
     console.error('Error deleting receipt:', err)
@@ -3397,7 +3536,7 @@ export const deleteReceipt = async (filePath) => {
 }
 
 /**
- * Get public URL for receipt
+ * Get public URL for receipt (legacy function for backward compatibility)
  * @param {string} filePath - Path del fitxer
  * @returns {string} Public URL
  */
@@ -3406,7 +3545,7 @@ export const getReceiptUrl = (filePath) => {
   const { data } = supabase.storage
     .from('receipts')
     .getPublicUrl(filePath)
-  return data.publicUrl
+  return data?.publicUrl || null
 }
 
 // ============================================
