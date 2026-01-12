@@ -89,259 +89,157 @@ a, button {
 }
 
 /* ============================================
-   APP CALENDAR STYLES
+   FREEDOLIAPP CALENDAR STYLES
    ============================================
    Styles for react-big-calendar to match app design system
    Rounded cards, clean spacing, consistent border radius
+   FULL Catalan localization
 */
 
-:root {
-  --app-radius: 14px; /* Single radius token for day tiles and events */
-}
-
-.app-calendar {
-  /* Use app-wide radius tokens */
-  --calendar-radius: var(--app-radius);
-  --calendar-day-radius: var(--app-radius);
-  --calendar-border: 1px solid var(--border-color);
+.fd-calendar {
+  --fd-radius: 14px; /* Single radius token for day tiles and events - used everywhere */
 }
 
 /* Calendar container - rounded card */
-.app-calendar .rbc-calendar {
+.fd-calendar .rbc-calendar {
   border-radius: 16px;
-  overflow: hidden;
-  background-color: var(--bg-card);
-  border: var(--calendar-border);
-  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 14px;
 }
 
-/* Toolbar - modern buttons */
-.app-calendar .rbc-toolbar {
-  margin-bottom: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 0 4px;
-}
-
-.app-calendar .rbc-toolbar-label {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-primary);
-  letter-spacing: -0.01em;
-}
-
-.app-calendar .rbc-btn-group {
-  display: flex;
-  gap: 6px;
-}
-
-.app-calendar .rbc-toolbar button {
-  color: var(--text-secondary);
-  background-color: var(--bg-secondary);
-  border: var(--calendar-border);
-  padding: 8px 16px;
-  border-radius: 12px !important;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  cursor: pointer;
-}
-
-.app-calendar .rbc-toolbar button:hover {
-  background-color: var(--bg-secondary);
-  color: var(--text-primary);
-  border-color: var(--border-color);
-}
-
-.app-calendar .rbc-toolbar button.rbc-active {
-  background-color: var(--accent);
-  color: #ffffff;
-  border-color: var(--accent);
-  box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
-}
-
-body.dark .app-calendar .rbc-toolbar button {
-  background-color: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.10);
-}
-
-body.dark .app-calendar .rbc-toolbar button.rbc-active {
-  background-color: rgba(255, 255, 255, 0.18);
-}
-
-/* Headers - Days of week */
-.app-calendar .rbc-header {
-  color: var(--text-secondary);
-  border: none;
-  padding: 10px 0;
-  font-weight: 600;
-  font-size: 13px;
-  text-transform: capitalize;
-  background-color: var(--bg-card);
-  opacity: 0.85;
-}
-
-/* Month view - Day cells as rounded tiles */
-.app-calendar .rbc-month-view {
-  border: none;
-}
-
-.app-calendar .rbc-month-row {
-  border: none;
-  border-bottom: none;
-}
-
-/* Remove harsh grid lines */
-.app-calendar .rbc-theme-standard td,
-.app-calendar .rbc-theme-standard th {
-  border: none;
-}
-
-/* Day cell as rounded tile - reduced spacing */
-.app-calendar .rbc-day-bg {
-  border: none;
-  border-width: 0;
-  background-color: var(--bg-secondary);
+body:not(.dark) .fd-calendar .rbc-calendar {
+  background: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: var(--app-radius);
+}
+
+/* No grid hard */
+.fd-calendar .rbc-theme-standard td,
+.fd-calendar .rbc-theme-standard th {
+  border: none;
+}
+
+/* Month title */
+.fd-calendar .rbc-toolbar-label {
+  font-size: 18px;
+  font-weight: 650;
+}
+
+/* Weekday header */
+.fd-calendar .rbc-header {
+  opacity: 0.85;
+  font-weight: 600;
+  padding: 10px 0;
+}
+
+/* Day tile */
+.fd-calendar .rbc-day-bg {
+  border-radius: var(--fd-radius);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.07);
   margin: 6px;
-  padding: 0;
-  transition: all 0.2s ease;
   overflow: hidden;
-  min-height: 86px; /* Reduced height - less empty space */
+  min-height: 88px;
 }
 
-body.dark .app-calendar .rbc-day-bg {
-  background-color: rgba(255, 255, 255, 0.02);
-  border-color: rgba(255, 255, 255, 0.06);
+body:not(.dark) .fd-calendar .rbc-day-bg {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
 }
 
-.app-calendar .rbc-day-bg:hover {
-  border-color: var(--accent);
-  box-shadow: 0 1px 3px rgba(79, 70, 229, 0.1);
-}
-
-/* Today highlight - subtle */
-.app-calendar .rbc-today .rbc-day-bg {
-  background-color: rgba(79, 70, 229, 0.05);
-  border-color: rgba(79, 70, 229, 0.12);
-}
-
-body.dark .app-calendar .rbc-today .rbc-day-bg {
-  background-color: rgba(255, 255, 255, 0.06);
+/* Today subtle */
+.fd-calendar .rbc-today .rbc-day-bg {
+  background: rgba(255, 255, 255, 0.06);
   border-color: rgba(255, 255, 255, 0.12);
 }
 
-/* Off-range days */
-.app-calendar .rbc-off-range-bg {
-  background-color: var(--bg-primary);
-  opacity: 0.5;
-  border-color: transparent;
+body:not(.dark) .fd-calendar .rbc-today .rbc-day-bg {
+  background: rgba(79, 70, 229, 0.05);
+  border-color: rgba(79, 70, 229, 0.12);
 }
 
-/* Day number - positioned top-right, clear hierarchy */
-.app-calendar .rbc-date-cell {
+/* Day number */
+.fd-calendar .rbc-date-cell {
   padding: 8px 10px;
-  position: relative;
-  z-index: 1;
-  text-align: right;
 }
 
-.app-calendar .rbc-date-cell > a {
-  color: var(--text-primary);
+.fd-calendar .rbc-date-cell > a {
   font-weight: 700;
-  font-size: 14px;
-  padding: 0;
-  border-radius: 0;
-  transition: all 0.2s ease;
-  display: inline-block;
   opacity: 0.9;
-  line-height: 1;
 }
 
-.app-calendar .rbc-date-cell > a:hover {
-  opacity: 1;
-}
-
-.app-calendar .rbc-off-range > a {
-  color: var(--text-secondary);
-  opacity: 0.4;
-}
-
-.app-calendar .rbc-now > a {
-  color: var(--accent);
-  font-weight: 700;
-  opacity: 1;
-}
-
-/* Events - rounded rectangles with SAME radius as day tiles */
-.app-calendar .rbc-event {
-  border-radius: var(--app-radius) !important; /* SAME as day tiles */
+/* Event rectangle with same radius */
+.fd-calendar .rbc-event {
+  border: none !important;
+  border-radius: var(--fd-radius) !important;
   padding: 6px 10px !important;
   margin: 6px 8px 0 8px !important;
-  border: none !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-  transition: all 0.2s ease;
-  font-weight: 500;
-  font-size: 13px;
   line-height: 1.15;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 13px;
 }
 
-.app-calendar .rbc-event:hover {
+/* Event hover */
+.fd-calendar .rbc-event:hover {
   opacity: 0.9;
   cursor: pointer;
 }
 
-.app-calendar .rbc-event:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+/* Buttons */
+.fd-calendar .rbc-toolbar button {
+  border-radius: 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
 }
 
-.app-calendar .rbc-event-label {
-  font-size: 12px;
-  opacity: 0.9;
+body:not(.dark) .fd-calendar .rbc-toolbar button {
+  border: 1px solid var(--border-color) !important;
+  background: var(--bg-secondary) !important;
+}
+
+.fd-calendar .rbc-toolbar button.rbc-active {
+  background: rgba(255, 255, 255, 0.18) !important;
+}
+
+body:not(.dark) .fd-calendar .rbc-toolbar button.rbc-active {
+  background: var(--accent) !important;
+  color: #ffffff !important;
+  border-color: var(--accent) !important;
 }
 
 /* Week/Day view - Time slots */
-.app-calendar .rbc-time-view {
+.fd-calendar .rbc-time-view {
   border: none;
 }
 
-.app-calendar .rbc-time-slot {
+.fd-calendar .rbc-time-slot {
   border-color: var(--border-color);
   border-top-width: 1px;
   opacity: 0.3;
 }
 
-.app-calendar .rbc-time-header-content {
+.fd-calendar .rbc-time-header-content {
   border-color: var(--border-color);
 }
 
-.app-calendar .rbc-time-content {
+.fd-calendar .rbc-time-content {
   border-color: var(--border-color);
 }
 
-.app-calendar .rbc-time-header-gutter {
-  border-color: var(--border-color);
-  background-color: var(--bg-card);
-}
-
-.app-calendar .rbc-time-gutter {
+.fd-calendar .rbc-time-header-gutter {
   border-color: var(--border-color);
   background-color: var(--bg-card);
 }
 
-.app-calendar .rbc-time-gutter .rbc-timeslot-group {
+.fd-calendar .rbc-time-gutter {
+  border-color: var(--border-color);
+  background-color: var(--bg-card);
+}
+
+.fd-calendar .rbc-time-gutter .rbc-timeslot-group {
   border-color: var(--border-color);
 }
 
-.app-calendar .rbc-label {
+.fd-calendar .rbc-label {
   color: var(--text-secondary);
   font-size: 11px;
   font-weight: 500;
@@ -349,13 +247,13 @@ body.dark .app-calendar .rbc-today .rbc-day-bg {
 }
 
 /* Current time indicator */
-.app-calendar .rbc-current-time-indicator {
+.fd-calendar .rbc-current-time-indicator {
   background-color: #ef4444;
   height: 2px;
   box-shadow: 0 0 4px rgba(239, 68, 68, 0.5);
 }
 
-.app-calendar .rbc-current-time-indicator::before {
+.fd-calendar .rbc-current-time-indicator::before {
   content: '';
   position: absolute;
   width: 8px;
@@ -368,18 +266,18 @@ body.dark .app-calendar .rbc-today .rbc-day-bg {
 }
 
 /* Agenda/List view */
-.app-calendar .rbc-agenda-view {
+.fd-calendar .rbc-agenda-view {
   color: var(--text-primary);
 }
 
-.app-calendar .rbc-agenda-table {
-  border-radius: var(--app-radius);
+.fd-calendar .rbc-agenda-table {
+  border-radius: var(--fd-radius);
   overflow: hidden;
   border: var(--calendar-border);
 }
 
-.app-calendar .rbc-agenda-date-cell,
-.app-calendar .rbc-agenda-time-cell {
+.fd-calendar .rbc-agenda-date-cell,
+.fd-calendar .rbc-agenda-time-cell {
   border-color: var(--border-color);
   color: var(--text-secondary);
   padding: 12px 16px;
@@ -387,22 +285,22 @@ body.dark .app-calendar .rbc-today .rbc-day-bg {
   background-color: var(--bg-card);
 }
 
-.app-calendar .rbc-agenda-event-cell {
+.fd-calendar .rbc-agenda-event-cell {
   border-color: var(--border-color);
   padding: 12px 16px;
   background-color: var(--bg-card);
   transition: background-color 0.2s ease;
 }
 
-.app-calendar .rbc-agenda-event-cell:hover {
+.fd-calendar .rbc-agenda-event-cell:hover {
   background-color: var(--bg-secondary);
 }
 
 /* Show more link */
-.app-calendar .rbc-show-more {
+.fd-calendar .rbc-show-more {
   background-color: var(--bg-secondary);
   color: var(--text-secondary);
-  border-radius: var(--app-radius);
+  border-radius: var(--fd-radius);
   padding: 4px 8px;
   font-size: 12px;
   font-weight: 500;
@@ -411,28 +309,28 @@ body.dark .app-calendar .rbc-today .rbc-day-bg {
   border: var(--calendar-border);
 }
 
-.app-calendar .rbc-show-more:hover {
+.fd-calendar .rbc-show-more:hover {
   background-color: var(--bg-secondary);
   color: var(--text-primary);
   border-color: var(--accent);
 }
 
 /* Remove default harsh borders */
-.app-calendar .rbc-month-view,
-.app-calendar .rbc-time-view,
-.app-calendar .rbc-agenda-view {
+.fd-calendar .rbc-month-view,
+.fd-calendar .rbc-time-view,
+.fd-calendar .rbc-agenda-view {
   border: none;
 }
 
 /* Smooth transitions for day cells */
-.app-calendar .rbc-day-slot .rbc-time-slot {
+.fd-calendar .rbc-day-slot .rbc-time-slot {
   transition: background-color 0.2s ease;
 }
 
-.app-calendar .rbc-day-slot .rbc-time-slot:hover {
+.fd-calendar .rbc-day-slot .rbc-time-slot:hover {
   background-color: rgba(79, 70, 229, 0.02);
 }
 
-body.dark .app-calendar .rbc-day-slot .rbc-time-slot:hover {
+body.dark .fd-calendar .rbc-day-slot .rbc-time-slot:hover {
   background-color: rgba(255, 255, 255, 0.02);
 }

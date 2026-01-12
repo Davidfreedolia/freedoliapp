@@ -12,6 +12,7 @@ import { getProjects } from '../lib/supabase'
 import { Calendar as CalendarIcon, Filter, X } from 'lucide-react'
 
 // Force moment to use Catalan locale immediately and ensure it's loaded
+// This MUST be done before creating the localizer
 moment.locale('ca')
 
 // Configure moment for Catalan locale with week starting Monday
@@ -24,6 +25,7 @@ moment.updateLocale('ca', {
 
 // Create localizer with moment configured for Catalan
 // The localizer will use moment's current locale (Catalan)
+// This ensures week starts on Monday and all dates are in Catalan
 const localizer = momentLocalizer(moment)
 
 const VIEWS = {
@@ -472,7 +474,7 @@ export default function CalendarPage() {
         
         {/* Calendar */}
         {!loading && !error && (
-          <div style={styles.calendarContainer} className="app-calendar">
+          <div style={styles.calendarContainer} className="fd-calendar">
             <Calendar
               localizer={localizer}
               events={calendarEvents}
@@ -497,21 +499,28 @@ export default function CalendarPage() {
                 // Weekday headers in month/week/day views - MUST be short format in Catalan
                 // This is the key format that was being overridden by CustomHeader component
                 weekdayFormat: (date, culture, localizer) => {
-                  // Ensure moment is in Catalan locale
+                  // Force moment to Catalan locale
                   moment.locale('ca')
-                  // Return short weekday name (dl., dt., dc., dj., dv., ds., dg.)
-                  // 'ddd' format gives abbreviated weekday names in Catalan
-                  return moment(date).locale('ca').format('ddd')
+                  // Use 'dd' for 2-letter abbreviation without period (Dl, Dt, Dc, Dj, Dv, Ds, Dg)
+                  // This gives cleaner look: "Dl" instead of "dl."
+                  const weekday = moment(date).locale('ca').format('dd')
+                  // Capitalize first letter for consistency
+                  return weekday.charAt(0).toUpperCase() + weekday.slice(1)
                 },
                 // Day format for month view day numbers (just the number)
                 dayFormat: (date, culture, localizer) => {
                   moment.locale('ca')
                   return moment(date).locale('ca').format('D')
                 },
-                // Month header format - full month name in Catalan (e.g., "gener 2026")
+                // Month header format - full month name in Catalan (e.g., "Gener 2026")
+                // Force moment to Catalan locale and format month name
                 monthHeaderFormat: (date, culture, localizer) => {
+                  // Ensure moment is in Catalan locale
                   moment.locale('ca')
-                  return moment(date).locale('ca').format('MMMM YYYY')
+                  // Format: "MMMM YYYY" gives "gener 2026" in Catalan
+                  const formatted = moment(date).locale('ca').format('MMMM YYYY')
+                  // Capitalize first letter: "gener 2026" -> "Gener 2026"
+                  return formatted.charAt(0).toUpperCase() + formatted.slice(1)
                 },
                 // Day header format for week/day views
                 dayHeaderFormat: (date, culture, localizer) => {
