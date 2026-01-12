@@ -960,7 +960,7 @@ export default function Finances() {
     height: '40px',
     minWidth: '140px',
     width: '100%',
-    boxSizing: 'border-box' as const,
+    boxSizing: 'border-box',
     outline: 'none',
     cursor: 'pointer'
   }
@@ -2045,7 +2045,7 @@ const styles = {
     height: '40px',
     minWidth: '200px',
     width: '100%',
-    boxSizing: 'border-box' as const
+    boxSizing: 'border-box'
   },
   searchInput: {
     flex: 1,
@@ -2088,7 +2088,7 @@ const styles = {
     fontWeight: '500',
     cursor: 'pointer',
     transition: 'all 0.15s ease',
-    whiteSpace: 'nowrap' as const
+    whiteSpace: 'nowrap'
   },
   expenseButton: {
     display: 'flex',
@@ -2103,7 +2103,7 @@ const styles = {
     fontWeight: '500',
     cursor: 'pointer',
     transition: 'all 0.15s ease',
-    whiteSpace: 'nowrap' as const
+    whiteSpace: 'nowrap'
   },
   applyButton: {
     display: 'flex',
@@ -2118,9 +2118,9 @@ const styles = {
     fontWeight: '500',
     cursor: 'pointer',
     transition: 'all 0.15s ease',
-    whiteSpace: 'nowrap' as const,
+    whiteSpace: 'nowrap',
     height: '40px',
-    boxSizing: 'border-box' as const
+    boxSizing: 'border-box'
   },
   statsRow: {
     display: 'grid',
@@ -2400,24 +2400,6 @@ const styles = {
     fontSize: '14px',
     cursor: 'pointer',
     width: '100%',
-    justifyContent: 'center'
-  },
-  applyButton: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    padding: '10px 16px',
-    borderRadius: '10px',
-    fontSize: '14px',
-    fontWeight: '500',
-    border: '1px solid var(--border-color)',
-    outline: 'none',
-    transition: 'all 0.2s',
-    flexShrink: 0,
-    minWidth: '140px',
-    whiteSpace: 'nowrap',
-    height: '40px',
-    boxSizing: 'border-box',
     justifyContent: 'center'
   }
 }
