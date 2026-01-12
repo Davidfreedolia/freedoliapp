@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { StickyNote, HelpCircle, Sun, Moon, LogOut, Settings } from 'lucide-react'
+import { StickyNote, HelpCircle, Sun, Moon, LogOut, Settings, Globe } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useApp } from '../context/AppContext'
@@ -11,6 +11,7 @@ import HelpModal from './HelpModal'
 import WorldClocks from './WorldClocks'
 import Avatar from './Avatar'
 import AvatarSelector from './AvatarSelector'
+import LanguageSelector from './LanguageSelector'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { showToast } from './Toast'
 
@@ -18,12 +19,13 @@ export default function TopNavbar() {
   const { darkMode, setDarkMode } = useApp()
   const navigate = useNavigate()
   const location = useLocation()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { isMobile } = useBreakpoint()
   const { refresh } = useNotes()
   const [showNoteModal, setShowNoteModal] = useState(false)
   const [showHelpModal, setShowHelpModal] = useState(false)
   const [showAvatarSelector, setShowAvatarSelector] = useState(false)
+  const [showLanguageSelector, setShowLanguageSelector] = useState(false)
   const [userEmail, setUserEmail] = useState('')
   const [userName, setUserName] = useState('')
 
@@ -115,6 +117,31 @@ export default function TopNavbar() {
           {/* World Clocks */}
           <WorldClocks />
 
+          {/* Language Selector */}
+          <button
+            onClick={() => setShowLanguageSelector(true)}
+            style={{
+              ...styles.iconButton,
+              backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6',
+              position: 'relative'
+            }}
+            title={t('navbar.language') || 'Idioma'}
+            aria-label={t('navbar.language') || 'Idioma'}
+          >
+            <Globe size={18} color={darkMode ? '#9ca3af' : '#6b7280'} />
+            {!isMobile && (
+              <span style={{
+                marginLeft: '6px',
+                fontSize: '12px',
+                fontWeight: '600',
+                color: darkMode ? '#9ca3af' : '#6b7280',
+                textTransform: 'uppercase'
+              }}>
+                {i18n.language?.toUpperCase() || 'CA'}
+              </span>
+            )}
+          </button>
+
           {/* Avatar */}
           <Avatar
             userEmail={userEmail}
@@ -197,6 +224,12 @@ export default function TopNavbar() {
         onClose={() => setShowAvatarSelector(false)}
         userEmail={userEmail}
         userName={userName}
+      />
+
+      {/* Language Selector */}
+      <LanguageSelector
+        isOpen={showLanguageSelector}
+        onClose={() => setShowLanguageSelector(false)}
       />
     </>
   )

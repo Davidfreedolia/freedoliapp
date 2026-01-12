@@ -949,84 +949,33 @@ export default function Finances() {
     return catList.find(c => c.id === categoryId) || { name: 'Sense categoria', color: '#6b7280', icon: 'Receipt' }
   }
 
-  // Calculate responsive toolbar styles
-  // Use a more flexible grid that handles wrapping better
-  // For desktop: flexible columns that wrap cleanly
-  // For tablet/mobile: single or double column layout
-  const toolbarStyles = {
-    ...styles.toolbar,
+  // Base filter/input styles using design tokens
+  const baseFilterStyle = {
+    backgroundColor: 'var(--color-surface)',
+    color: 'var(--color-text)',
+    border: '1px solid var(--color-border)',
+    borderRadius: 'var(--radius-ui)',
+    padding: '10px 16px',
+    fontSize: '14px',
+    height: '40px',
+    minWidth: '140px',
+    width: '100%',
+    boxSizing: 'border-box' as const,
+    outline: 'none',
+    cursor: 'pointer'
+  }
+  
+  const baseInputStyle = {
+    ...baseFilterStyle,
+    cursor: 'text'
+  }
+
+  // Dynamic toolbar row style based on screen size
+  const toolbarRowStyle = {
+    ...styles.toolbarRow,
     gridTemplateColumns: isMobile 
       ? '1fr' 
-      : isTablet
-      ? 'repeat(2, 1fr)'
-      : 'repeat(auto-fill, minmax(150px, auto)) minmax(200px, 1fr) repeat(auto-fill, minmax(150px, auto))',
-    gridAutoRows: '40px',
-    gridAutoFlow: isMobile ? 'row' : 'row dense',
-    alignContent: 'start',
-    alignItems: 'center'
-  }
-  
-  const viewsSectionStyles = {
-    ...styles.viewsSection,
-    gridColumn: isMobile ? '1 / -1' : undefined
-  }
-  
-  const searchContainerStyles = {
-    ...styles.searchContainer,
-    gridColumn: isMobile ? '1 / -1' : undefined,
-    minWidth: isMobile ? '100%' : '200px',
-    height: '40px'
-  }
-  
-  const applyButtonStyles = {
-    ...styles.applyButton,
-    gridColumn: isMobile ? '1 / -1' : undefined,
-    justifySelf: isMobile ? 'stretch' : 'start',
-    height: '40px'
-  }
-  
-  const actionsSectionStyles = {
-    ...styles.actionsSection,
-    gridColumn: isMobile ? '1 / -1' : undefined,
-    justifyContent: isMobile ? 'flex-start' : 'flex-end',
-    justifySelf: isMobile ? 'stretch' : 'end',
-    height: '40px'
-  }
-  
-  // Individual filter styles to ensure consistent height
-  const typeFilterStyles = {
-    ...styles.filterSelect,
-    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-    color: darkMode ? '#ffffff' : '#111827',
-    height: '40px'
-  }
-  
-  const projectFilterStyles = {
-    ...styles.filterSelect,
-    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-    color: darkMode ? '#ffffff' : '#111827',
-    height: '40px'
-  }
-  
-  const categoryFilterStyles = {
-    ...styles.filterSelect,
-    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-    color: darkMode ? '#ffffff' : '#111827',
-    height: '40px'
-  }
-  
-  const dateFromStyles = {
-    ...styles.filterInput,
-    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-    color: darkMode ? '#ffffff' : '#111827',
-    height: '40px'
-  }
-  
-  const dateToStyles = {
-    ...styles.filterInput,
-    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-    color: darkMode ? '#ffffff' : '#111827',
-    height: '40px'
+      : 'auto auto auto 1fr auto'
   }
 
   return (
@@ -1034,182 +983,149 @@ export default function Finances() {
       <Header title="Finances" />
 
       <div style={styles.content}>
-        {/* Toolbar */}
-        <div style={toolbarStyles}>
-          {/* View Selector */}
-          <div style={viewsSectionStyles}>
-            <select
-              value={activeView?.id || ''}
-              onChange={(e) => {
-                const view = savedViews.find(v => v.id === e.target.value)
-                setActiveView(view || null)
-              }}
-              style={{
-                ...styles.viewSelect,
-                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                color: darkMode ? '#ffffff' : '#111827'
-              }}
-            >
-              <option value="">Vista actual</option>
-              {savedViews.map(view => (
-                <option key={view.id} value={view.id}>{view.name}</option>
-              ))}
-            </select>
-            <button
-              onClick={() => {
-                setEditingView({ name: '', filters: appliedFilters, columns: visibleColumns, is_default: false })
-                setShowViewModal(true)
-              }}
-              style={styles.iconButton}
-              title="Guardar vista"
-            >
-              <Save size={18} />
-            </button>
-            {activeView && (
+        {/* Toolbar - 2 líneas máximo */}
+        <div style={styles.toolbarContainer}>
+          {/* Primera línea: Vista + Projecte + Categoria + Cercador + Accions */}
+          <div style={toolbarRowStyle}>
+            {/* Vista */}
+            <div style={styles.viewsSection}>
+              <select
+                value={activeView?.id || ''}
+                onChange={(e) => {
+                  const view = savedViews.find(v => v.id === e.target.value)
+                  setActiveView(view || null)
+                }}
+                style={baseFilterStyle}
+              >
+                <option value="">Vista actual</option>
+                {savedViews.map(view => (
+                  <option key={view.id} value={view.id}>{view.name}</option>
+                ))}
+              </select>
               <button
                 onClick={() => {
-                  setEditingView(activeView)
+                  setEditingView({ name: '', filters: appliedFilters, columns: visibleColumns, is_default: false })
                   setShowViewModal(true)
                 }}
                 style={styles.iconButton}
-                title="Editar vista"
+                title="Guardar vista"
               >
-                <Edit size={18} />
+                <Save size={18} />
+              </button>
+              {activeView && (
+                <button
+                  onClick={() => {
+                    setEditingView(activeView)
+                    setShowViewModal(true)
+                  }}
+                  style={styles.iconButton}
+                  title="Editar vista"
+                >
+                  <Edit size={18} />
+                </button>
+              )}
+            </div>
+
+            {/* Projecte */}
+            <select
+              value={draftFilters.project_id || ''}
+              onChange={e => setDraftFilters({...draftFilters, project_id: e.target.value || null})}
+              style={baseFilterStyle}
+            >
+              <option value="">Tots els projectes</option>
+              {projects.map(p => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+
+            {/* Categoria */}
+            <select
+              value={draftFilters.category_id || ''}
+              onChange={e => setDraftFilters({...draftFilters, category_id: e.target.value || null})}
+              style={baseFilterStyle}
+            >
+              <option value="">Totes les categories</option>
+              {[...categories.income, ...categories.expense].map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+
+            {/* Cercador */}
+            <div style={styles.searchContainer}>
+              <Search size={18} color="var(--color-muted)" />
+              <input
+                type="text"
+                placeholder="Buscar..."
+                value={draftFilters.search}
+                onChange={e => setDraftFilters({...draftFilters, search: e.target.value})}
+                style={styles.searchInput}
+              />
+            </div>
+
+            {/* Accions (dreta) */}
+            <div style={styles.actionsSection}>
+              <button
+                onClick={() => setShowCategoryModal(true)}
+                style={styles.iconButton}
+                title="Gestionar categories"
+              >
+                <Tag size={18} />
+              </button>
+              <button
+                onClick={handleExportCSV}
+                style={styles.iconButton}
+                title="Exportar a CSV"
+              >
+                <FileSpreadsheet size={18} />
+              </button>
+              <button
+                onClick={() => handleNewTransaction('income')}
+                style={styles.incomeButton}
+              >
+                <Plus size={18} /> Ingrés
+              </button>
+              <button
+                onClick={() => handleNewTransaction('expense')}
+                style={styles.expenseButton}
+              >
+                <Plus size={18} /> Despesa
+              </button>
+            </div>
+          </div>
+
+          {/* Segona línea: Dates + Aplicar filtres */}
+          <div style={toolbarRowStyle}>
+            {/* Date From */}
+            <input
+              type="date"
+              value={draftFilters.date_from || ''}
+              onChange={e => setDraftFilters({...draftFilters, date_from: e.target.value || null})}
+              placeholder="Des de"
+              style={baseInputStyle}
+            />
+
+            {/* Date To */}
+            <input
+              type="date"
+              value={draftFilters.date_to || ''}
+              onChange={e => setDraftFilters({...draftFilters, date_to: e.target.value || null})}
+              placeholder="Fins a"
+              style={baseInputStyle}
+            />
+
+            {/* Aplicar filtres (només si hi ha canvis pendents) */}
+            {hasPendingFilters && (
+              <button
+                onClick={handleApplyFilters}
+                data-testid="apply-filters"
+                aria-label="Aplicar filtres"
+                title="Aplicar filtres"
+                style={styles.applyButton}
+              >
+                <Filter size={16} style={{ marginRight: '6px' }} />
+                Aplicar filtres
               </button>
             )}
-          </div>
-
-          {/* Type Filter */}
-          <select
-            value={draftFilters.type}
-            onChange={e => setDraftFilters({...draftFilters, type: e.target.value})}
-            style={typeFilterStyles}
-          >
-            <option value="all">Tots</option>
-            <option value="income">Ingressos</option>
-            <option value="expense">Despeses</option>
-          </select>
-
-          {/* Project Filter */}
-          <select
-            value={draftFilters.project_id || ''}
-            onChange={e => setDraftFilters({...draftFilters, project_id: e.target.value || null})}
-            style={projectFilterStyles}
-          >
-            <option value="">Tots els projectes</option>
-            {projects.map(p => (
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
-          </select>
-
-          {/* Category Filter */}
-          <select
-            value={draftFilters.category_id || ''}
-            onChange={e => setDraftFilters({...draftFilters, category_id: e.target.value || null})}
-            style={categoryFilterStyles}
-          >
-            <option value="">Totes les categories</option>
-            {[...categories.income, ...categories.expense].map(c => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-
-          {/* Date From */}
-          <input
-            type="date"
-            value={draftFilters.date_from || ''}
-            onChange={e => setDraftFilters({...draftFilters, date_from: e.target.value || null})}
-            placeholder="Des de"
-            style={dateFromStyles}
-          />
-
-          {/* Date To */}
-          <input
-            type="date"
-            value={draftFilters.date_to || ''}
-            onChange={e => setDraftFilters({...draftFilters, date_to: e.target.value || null})}
-            placeholder="Fins a"
-            style={dateToStyles}
-          />
-
-          {/* Search */}
-          <div style={{
-            ...searchContainerStyles,
-            backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
-          }}>
-            <Search size={18} color="#9ca3af" />
-            <input
-              type="text"
-              placeholder="Buscar..."
-              value={draftFilters.search}
-              onChange={e => setDraftFilters({...draftFilters, search: e.target.value})}
-              style={{...styles.searchInput, color: darkMode ? '#ffffff' : '#111827'}}
-            />
-          </div>
-
-          {/* Apply Filters Button */}
-          <button
-            onClick={handleApplyFilters}
-            disabled={!hasPendingFilters}
-            data-testid="apply-filters"
-            aria-label="Aplicar filtres"
-            title="Aplicar filtres"
-            style={{
-              ...applyButtonStyles,
-              backgroundColor: hasPendingFilters ? '#4f46e5' : (darkMode ? '#1f1f2e' : '#f9fafb'),
-              color: hasPendingFilters ? '#ffffff' : (darkMode ? '#6b7280' : '#9ca3af'),
-              cursor: hasPendingFilters ? 'pointer' : 'not-allowed',
-              opacity: hasPendingFilters ? 1 : 0.6,
-              border: `1px solid ${hasPendingFilters ? '#4f46e5' : 'var(--border-color)'}`,
-              whiteSpace: 'nowrap'
-            }}
-          >
-            <Filter size={16} style={{ marginRight: '6px' }} />
-            Aplicar filtres
-            {hasPendingFilters && (
-              <span style={{
-                marginLeft: '6px',
-                fontSize: '10px',
-                backgroundColor: '#ef4444',
-                color: '#ffffff',
-                borderRadius: '50%',
-                width: '16px',
-                height: '16px',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>!</span>
-            )}
-          </button>
-
-          {/* Actions */}
-          <div style={actionsSectionStyles}>
-            <button
-              onClick={() => setShowCategoryModal(true)}
-              style={styles.iconButton}
-              title="Gestionar categories"
-            >
-              <Tag size={18} />
-            </button>
-            <button
-              onClick={handleExportCSV}
-              style={styles.iconButton}
-              title="Exportar a CSV"
-            >
-              <FileSpreadsheet size={18} />
-            </button>
-            <button
-              onClick={() => handleNewTransaction('income')}
-              style={{...styles.newButton, backgroundColor: '#22c55e', border: '1px solid #16a34a'}}
-            >
-              <Plus size={18} /> Ingrés
-            </button>
-            <button
-              onClick={() => handleNewTransaction('expense')}
-              style={{...styles.newButton, backgroundColor: '#ef4444', border: '1px solid #dc2626'}}
-            >
-              <Plus size={18} /> Despesa
-            </button>
           </div>
         </div>
 
@@ -2101,69 +2017,35 @@ export default function Finances() {
 const styles = {
   container: { flex: 1, display: 'flex', flexDirection: 'column' },
   content: { padding: '16px', overflowY: 'auto' },
-  toolbar: {
+  toolbarContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+    marginBottom: '24px'
+  },
+  toolbarRow: {
     display: 'grid',
     gap: '12px',
-    marginBottom: '24px',
     alignItems: 'center',
-    gridAutoRows: '40px',
-    // Flexible grid: filters on left, search in middle (flexible), actions on right
-    // When wrapping, items maintain alignment with consistent row height
-    // Use auto-fill to ensure consistent column distribution when wrapping
-    gridTemplateColumns: 'repeat(auto-fill, minmax(150px, auto)) minmax(200px, 1fr) repeat(auto-fill, minmax(150px, auto))',
-    gridAutoFlow: 'row dense'
+    minHeight: '40px'
   },
   viewsSection: {
     display: 'flex',
     gap: '8px',
     alignItems: 'center'
   },
-  viewSelect: {
-    padding: '10px 16px',
-    borderRadius: '10px',
-    border: '1px solid var(--border-color)',
-    fontSize: '14px',
-    outline: 'none',
-    cursor: 'pointer',
-    minWidth: '150px',
-    height: '40px',
-    width: '100%',
-    boxSizing: 'border-box'
-  },
-  filterSelect: {
-    padding: '10px 16px',
-    borderRadius: '10px',
-    border: '1px solid var(--border-color)',
-    fontSize: '14px',
-    outline: 'none',
-    cursor: 'pointer',
-    height: '40px',
-    minWidth: '150px',
-    width: '100%',
-    boxSizing: 'border-box'
-  },
-  filterInput: {
-    padding: '10px 16px',
-    borderRadius: '10px',
-    border: '1px solid var(--border-color)',
-    fontSize: '14px',
-    outline: 'none',
-    height: '40px',
-    minWidth: '140px',
-    width: '100%',
-    boxSizing: 'border-box'
-  },
   searchContainer: {
     display: 'flex',
     alignItems: 'center',
     gap: '10px',
     padding: '0 16px',
-    borderRadius: '10px',
-    border: '1px solid var(--border-color)',
+    backgroundColor: 'var(--color-surface)',
+    border: '1px solid var(--color-border)',
+    borderRadius: 'var(--radius-ui)',
     height: '40px',
     minWidth: '200px',
     width: '100%',
-    boxSizing: 'border-box'
+    boxSizing: 'border-box' as const
   },
   searchInput: {
     flex: 1,
@@ -2171,12 +2053,14 @@ const styles = {
     border: 'none',
     outline: 'none',
     fontSize: '14px',
-    background: 'transparent'
+    background: 'transparent',
+    color: 'var(--color-text)'
   },
   actionsSection: {
     display: 'flex',
     gap: '8px',
-    alignItems: 'center'
+    alignItems: 'center',
+    justifyContent: 'flex-end'
   },
   iconButton: {
     width: '40px',
@@ -2184,23 +2068,59 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'var(--bg-secondary)',
-    border: '1px solid var(--border-color)',
-    borderRadius: '10px',
+    backgroundColor: 'var(--color-surface)',
+    border: '1px solid var(--color-border)',
+    borderRadius: 'var(--radius-ui)',
     cursor: 'pointer',
-    color: 'inherit'
+    color: 'var(--color-text)',
+    transition: 'all 0.15s ease'
   },
-  newButton: {
+  incomeButton: {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
     padding: '10px 20px',
-    color: '#ffffff',
-    border: 'none',
-    borderRadius: '10px',
+    backgroundColor: 'var(--color-primary-soft-bg)',
+    color: 'var(--color-primary-soft-text)',
+    border: '1px solid var(--color-primary-soft-border)',
+    borderRadius: 'var(--radius-ui)',
     fontSize: '14px',
     fontWeight: '500',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    transition: 'all 0.15s ease',
+    whiteSpace: 'nowrap' as const
+  },
+  expenseButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '10px 20px',
+    backgroundColor: 'var(--color-warning-soft-bg)',
+    color: 'var(--color-warning-soft-text)',
+    border: '1px solid var(--color-warning-soft-border)',
+    borderRadius: 'var(--radius-ui)',
+    fontSize: '14px',
+    fontWeight: '500',
+    cursor: 'pointer',
+    transition: 'all 0.15s ease',
+    whiteSpace: 'nowrap' as const
+  },
+  applyButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '10px 20px',
+    backgroundColor: 'var(--color-primary)',
+    color: '#FFFFFF',
+    border: '1px solid var(--color-primary)',
+    borderRadius: 'var(--radius-ui)',
+    fontSize: '14px',
+    fontWeight: '500',
+    cursor: 'pointer',
+    transition: 'all 0.15s ease',
+    whiteSpace: 'nowrap' as const,
+    height: '40px',
+    boxSizing: 'border-box' as const
   },
   statsRow: {
     display: 'grid',

@@ -9,9 +9,17 @@ import esTranslations from './locales/es.json'
 
 // Detectar idioma desde localStorage (síncrono para inicialización rápida)
 const detectLanguage = () => {
-  const storedLang = localStorage.getItem('freedolia_language')
+  // P0: localStorage, luego navegador
+  const storedLang = localStorage.getItem('freedoliapp.lang')
   if (storedLang && ['ca', 'en', 'es'].includes(storedLang)) {
     return storedLang
+  }
+  // Fallback: navegador si no hay preferencia guardada
+  if (typeof navigator !== 'undefined' && navigator.language) {
+    const browserLang = navigator.language.substring(0, 2)
+    if (['ca', 'en', 'es'].includes(browserLang)) {
+      return browserLang
+    }
   }
   return 'ca'
 }
@@ -36,7 +44,7 @@ if (!i18n.isInitialized) {
       detection: {
         order: ['localStorage', 'navigator'],
         caches: ['localStorage'],
-        lookupLocalStorage: 'freedolia_language'
+        lookupLocalStorage: 'freedoliapp.lang'
       },
       react: {
         useSuspense: false // Evitar Suspense per evitar errors amb lazy loading

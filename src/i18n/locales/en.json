@@ -336,7 +336,11 @@
     "darkMode": "Dark mode",
     "lightMode": "Light mode",
     "logout": "Logout",
-    "settings": "Settings"
+    "settings": "Settings",
+    "language": "Language"
+  },
+  "language": {
+    "select": "Select language"
   },
   "tasks": {
     "title": "Tasks",

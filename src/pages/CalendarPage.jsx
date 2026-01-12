@@ -3,7 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { Calendar, momentLocalizer } from 'react-big-calendar'
 import moment from 'moment'
 import 'moment/locale/ca'
+import 'moment/locale/en'
+import 'moment/locale/es'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
+import { useTranslation } from 'react-i18next'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { useApp } from '../context/AppContext'
 import Header from '../components/Header'
@@ -11,22 +14,28 @@ import { useProjectCalendarEvents } from '../features/calendar/useProjectCalenda
 import { getProjects } from '../lib/supabase'
 import { Calendar as CalendarIcon, Filter, X } from 'lucide-react'
 
-// Force moment to use Catalan locale immediately and ensure it's loaded
-// This MUST be done before creating the localizer
-moment.locale('ca')
-
-// Configure moment for Catalan locale with week starting Monday
-moment.updateLocale('ca', {
-  week: {
-    dow: 1, // Monday is the first day of the week
-    doy: 4  // The week that contains Jan 4th is the first week of the year
-  }
-})
-
-// Create localizer with moment configured for Catalan
-// The localizer will use moment's current locale (Catalan)
-// This ensures week starts on Monday and all dates are in Catalan
+// Create localizer (locale will be set dynamically based on i18n)
 const localizer = momentLocalizer(moment)
+
+// Map i18n language codes to moment locale codes
+const getMomentLocale = (i18nLang) => {
+  const langMap = { ca: 'ca', en: 'en', es: 'es' }
+  return langMap[i18nLang] || 'ca'
+}
+
+// Configure locales for week starting Monday
+const configureLocale = (locale) => {
+  moment.updateLocale(locale, {
+    week: {
+      dow: 1, // Monday is the first day of the week
+      doy: 4  // The week that contains Jan 4th is the first week of the year
+    }
+  })
+}
+
+// Configure default locale
+moment.locale('ca')
+configureLocale('ca')
 
 const VIEWS = {
   MONTH: 'month',
@@ -39,6 +48,7 @@ export default function CalendarPage() {
   const { darkMode, projects: contextProjects } = useApp()
   const navigate = useNavigate()
   const { isMobile } = useBreakpoint()
+  const { t, i18n } = useTranslation()
   
   const [view, setView] = useState(isMobile ? 'agenda' : 'month')
   const [date, setDate] = useState(new Date())
@@ -48,10 +58,15 @@ export default function CalendarPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [showFilters, setShowFilters] = useState(false)
   
-  // Ensure moment locale is always Catalan
+  // Update moment locale when i18n language changes
   useEffect(() => {
-    moment.locale('ca')
-  }, [])
+    const momentLocale = getMomentLocale(i18n.language)
+    moment.locale(momentLocale)
+    configureLocale(momentLocale)
+  }, [i18n.language])
+  
+  // Get current moment locale
+  const currentMomentLocale = getMomentLocale(i18n.language)
   
   // Calculate date range based on current view and date
   const { fromDate, toDate } = useMemo(() => {
@@ -492,78 +507,65 @@ export default function CalendarPage() {
                 // Removed header component - it was causing timestamp rendering
                 // Weekday headers are handled by weekdayFormat in formats prop
               }}
-              culture="ca"
-              // Ensure week starts on Monday (dow: 1 is already set in moment.updateLocale)
+              culture={currentMomentLocale}
+              // Ensure week starts on Monday (dow: 1 is set in configureLocale)
               // react-big-calendar uses moment's locale configuration
               formats={{
-                // Weekday headers in month/week/day views - MUST be short format in Catalan
-                // This is the key format that was being overridden by CustomHeader component
+                // Weekday headers in month/week/day views - short format based on current locale
                 weekdayFormat: (date, culture, localizer) => {
-                  // Force moment to Catalan locale
-                  moment.locale('ca')
-                  // Use 'dd' for 2-letter abbreviation without period (Dl, Dt, Dc, Dj, Dv, Ds, Dg)
-                  // This gives cleaner look: "Dl" instead of "dl."
-                  const weekday = moment(date).locale('ca').format('dd')
-                  // Capitalize first letter for consistency
+                  const locale = currentMomentLocale
+                  const weekday = moment(date).locale(locale).format('dd')
                   return weekday.charAt(0).toUpperCase() + weekday.slice(1)
                 },
                 // Day format for month view day numbers (just the number)
                 dayFormat: (date, culture, localizer) => {
-                  moment.locale('ca')
-                  return moment(date).locale('ca').format('D')
+                  return moment(date).locale(currentMomentLocale).format('D')
                 },
-                // Month header format - full month name in Catalan (e.g., "Gener 2026")
-                // Force moment to Catalan locale and format month name
+                // Month header format - full month name in current locale
                 monthHeaderFormat: (date, culture, localizer) => {
-                  // Ensure moment is in Catalan locale
-                  moment.locale('ca')
-                  // Format: "MMMM YYYY" gives "gener 2026" in Catalan
-                  const formatted = moment(date).locale('ca').format('MMMM YYYY')
-                  // Capitalize first letter: "gener 2026" -> "Gener 2026"
+                  const formatted = moment(date).locale(currentMomentLocale).format('MMMM YYYY')
                   return formatted.charAt(0).toUpperCase() + formatted.slice(1)
                 },
                 // Day header format for week/day views
                 dayHeaderFormat: (date, culture, localizer) => {
-                  moment.locale('ca')
-                  return moment(date).locale('ca').format('dddd D MMMM')
+                  return moment(date).locale(currentMomentLocale).format('dddd D MMMM')
                 },
                 // Day range header format
                 dayRangeHeaderFormat: ({ start, end }, culture, localizer) => {
-                  moment.locale('ca')
-                  return `${moment(start).locale('ca').format('D MMMM')} - ${moment(end).locale('ca').format('D MMMM YYYY')}`
+                  const locale = currentMomentLocale
+                  return `${moment(start).locale(locale).format('D MMMM')} - ${moment(end).locale(locale).format('D MMMM YYYY')}`
                 },
-                // Time formats
+                // Time formats (24h format)
                 timeGutterFormat: (date, culture, localizer) => {
-                  moment.locale('ca')
-                  return moment(date).locale('ca').format('HH:mm')
+                  return moment(date).locale(currentMomentLocale).format('HH:mm')
                 },
                 eventTimeRangeFormat: ({ start, end }, culture, localizer) => {
-                  moment.locale('ca')
-                  return `${moment(start).locale('ca').format('HH:mm')} - ${moment(end).locale('ca').format('HH:mm')}`
+                  const locale = currentMomentLocale
+                  return `${moment(start).locale(locale).format('HH:mm')} - ${moment(end).locale(locale).format('HH:mm')}`
                 },
                 agendaTimeFormat: (date, culture, localizer) => {
-                  moment.locale('ca')
-                  return moment(date).locale('ca').format('HH:mm')
+                  return moment(date).locale(currentMomentLocale).format('HH:mm')
                 },
                 agendaTimeRangeFormat: ({ start, end }, culture, localizer) => {
-                  moment.locale('ca')
-                  return `${moment(start).locale('ca').format('HH:mm')} - ${moment(end).locale('ca').format('HH:mm')}`
+                  const locale = currentMomentLocale
+                  return `${moment(start).locale(locale).format('HH:mm')} - ${moment(end).locale(locale).format('HH:mm')}`
                 }
               }}
               messages={{
-                next: 'Següent',
-                previous: 'Anterior',
-                today: 'Avui',
-                month: 'Mes',
-                week: 'Setmana',
-                day: 'Dia',
-                agenda: 'Llista',
-                date: 'Data',
-                time: 'Hora',
-                event: 'Esdeveniment',
-                noEventsInRange: 'No hi ha esdeveniments en aquest rang',
-                showMore: total => `+${total} més`
+                next: t('calendar.next'),
+                previous: t('calendar.previous'),
+                today: t('calendar.today'),
+                month: t('calendar.month'),
+                week: t('calendar.week'),
+                day: t('calendar.day'),
+                agenda: t('calendar.agenda'),
+                date: t('calendar.date'),
+                time: t('calendar.time'),
+                event: t('calendar.event'),
+                noEventsInRange: t('calendar.noEvents'),
+                showMore: total => `+${total} ${t('common.more')}`
               }}
+              key={i18n.language} // Force re-render on language change
             />
           </div>
         )}

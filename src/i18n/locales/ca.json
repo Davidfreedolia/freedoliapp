@@ -349,7 +349,11 @@
     "darkMode": "Mode fosc",
     "lightMode": "Mode clar",
     "logout": "Tancar sessió",
-    "settings": "Configuració"
+    "settings": "Configuració",
+    "language": "Idioma"
+  },
+  "language": {
+    "select": "Seleccionar idioma"
   },
   "tasks": {
     "title": "Tasques",
