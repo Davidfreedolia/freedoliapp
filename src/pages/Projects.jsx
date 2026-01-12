@@ -8,7 +8,9 @@ import {
   ArrowRight,
   MoreVertical,
   Trash2,
-  Edit
+  Edit,
+  XCircle,
+  RotateCw
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { deleteProject } from '../lib/supabase'
@@ -57,6 +59,38 @@ export default function Projects() {
     } catch (err) {
       console.error('Error eliminant:', err)
       alert('Error eliminant el projecte')
+    }
+  }
+
+  const handleClose = async (e, project) => {
+    e.stopPropagation()
+    try {
+      const { updateProject } = await import('../lib/supabase')
+      const { showToast } = await import('../components/Toast')
+      await updateProject(project.id, { status: 'closed' })
+      showToast('Projecte tancat', 'success')
+      await refreshProjects()
+      setMenuOpen(null)
+    } catch (err) {
+      console.error('Error tancant projecte:', err)
+      const { showToast } = await import('../components/Toast')
+      showToast('Error tancant projecte: ' + (err.message || 'Error desconegut'), 'error')
+    }
+  }
+
+  const handleReopen = async (e, project) => {
+    e.stopPropagation()
+    try {
+      const { updateProject } = await import('../lib/supabase')
+      const { showToast } = await import('../components/Toast')
+      await updateProject(project.id, { status: 'active' })
+      showToast('Projecte reobert', 'success')
+      await refreshProjects()
+      setMenuOpen(null)
+    } catch (err) {
+      console.error('Error reobrint projecte:', err)
+      const { showToast } = await import('../components/Toast')
+      showToast('Error reobrint projecte: ' + (err.message || 'Error desconegut'), 'error')
     }
   }
 
@@ -195,6 +229,10 @@ export default function Projects() {
               const phase = PHASES[project.current_phase] || PHASES[1]
               const progress = ((project.current_phase) / 7) * 100
               
+              // Compute canClose and canReopen based on status
+              const canClose = project.status && ['draft', 'active'].includes(project.status)
+              const canReopen = project.status && ['closed', 'archived'].includes(project.status)
+              
               return (
                 <div 
                   key={project.id}
@@ -230,6 +268,22 @@ export default function Projects() {
                           >
                             <Edit size={14} /> Editar
                           </button>
+                          {canClose && (
+                            <button 
+                              onClick={e => handleClose(e, project)}
+                              style={styles.menuItem}
+                            >
+                              <XCircle size={14} /> Tancar
+                            </button>
+                          )}
+                          {canReopen && (
+                            <button 
+                              onClick={e => handleReopen(e, project)}
+                              style={styles.menuItem}
+                            >
+                              <RotateCw size={14} /> Reobrir
+                            </button>
+                          )}
                           <button 
                             onClick={e => handleDelete(e, project)}
                             style={{...styles.menuItem, color: '#ef4444'}}

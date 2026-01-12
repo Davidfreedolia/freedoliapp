@@ -777,12 +777,33 @@ class GoogleDriveService {
   }
 
   /**
-   * Ensure Arts Finals folder exists for a project (IDEMPOTENT)
-   * Creates the folder structure: Projects/{project_code}_name/Arts Finals
-   * @param {object} params - { projectId, projectNameOrCode, drive_art_finals_folder_id (optional), drive_folder_id (optional) }
-   * @returns {Promise<string>} folderId of Arts Finals folder
+   * Ensure "Arts Finals" parent folder exists under root (IDEMPOTENT)
+   * Creates the folder structure: Root / Arts Finals
+   * @returns {Promise<string>} folderId of Arts Finals parent folder
    */
-  async ensureProjectArtsFinalsFolder({ projectId, projectNameOrCode, drive_art_finals_folder_id, drive_folder_id }) {
+  async ensureArtsFinalsParentFolder() {
+    try {
+      await this.ensureDriveReady()
+    } catch (err) {
+      if (err.message === 'AUTH_REQUIRED') {
+        throw err
+      }
+      logDriveError('ensureArtsFinalsParentFolder', err)
+      throw new Error('No s\'ha pogut connectar a Google Drive')
+    }
+
+    // Buscar o crear carpeta "Arts Finals" dins del root
+    const artsFinalsParentFolder = await this.findOrCreateFolder('Arts Finals', DRIVE_FOLDERS.root)
+    return artsFinalsParentFolder.id
+  }
+
+  /**
+   * Ensure Arts Finals folder exists for a project (IDEMPOTENT)
+   * Creates the folder structure: Root / Arts Finals / {PROJECT_REF} - {PROJECT_NAME}
+   * @param {object} params - { projectId, projectCode, projectName, arts_finals_folder_id (optional) }
+   * @returns {Promise<string>} folderId of project Arts Finals folder
+   */
+  async ensureProjectArtsFinalsFolder({ projectId, projectCode, projectName, arts_finals_folder_id }) {
     try {
       await this.ensureDriveReady()
     } catch (err) {
@@ -793,21 +814,21 @@ class GoogleDriveService {
       throw new Error('No s\'ha pogut connectar a Google Drive')
     }
 
-    // CAS 1: Si ja té drive_art_finals_folder_id, verificar que existeix
-    if (drive_art_finals_folder_id) {
+    // CAS 1: Si ja té arts_finals_folder_id, verificar que existeix
+    if (arts_finals_folder_id) {
       try {
-        const folderInfo = await this.getFileInfo(drive_art_finals_folder_id)
+        const folderInfo = await this.getFileInfo(arts_finals_folder_id)
         if (folderInfo.mimeType === 'application/vnd.google-apps.folder') {
-          return drive_art_finals_folder_id
+          return arts_finals_folder_id
         }
-        logDriveError('ensureProjectArtsFinalsFolder', 'drive_art_finals_folder_id no és una carpeta', {
-          drive_art_finals_folder_id,
+        logDriveError('ensureProjectArtsFinalsFolder', 'arts_finals_folder_id no és una carpeta', {
+          arts_finals_folder_id,
           mimeType: folderInfo.mimeType
         })
       } catch (err) {
         if (err.status === 404 || err.code === 404) {
-          logDriveError('ensureProjectArtsFinalsFolder', 'drive_art_finals_folder_id no existeix (404)', {
-            drive_art_finals_folder_id
+          logDriveError('ensureProjectArtsFinalsFolder', 'arts_finals_folder_id no existeix (404)', {
+            arts_finals_folder_id
           })
           // Continuar per crear nova carpeta
         } else {
@@ -816,37 +837,16 @@ class GoogleDriveService {
       }
     }
 
-    // CAS 2: Usar drive_folder_id del projecte (si existeix) o buscar/crear carpeta del projecte
-    let projectFolderId = drive_folder_id
-    if (!projectFolderId) {
-      // Buscar carpeta del projecte per nom (usa el mateix format que createProjectFolders)
-      // projectNameOrCode ja ve format com project_code_name
-      const projectFolderName = projectNameOrCode
-      try {
-        const query = `name='${projectFolderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false and '${DRIVE_FOLDERS.projects}' in parents`
-        const response = await window.gapi.client.drive.files.list({
-          q: query,
-          fields: 'files(id, name)',
-          spaces: 'drive'
-        })
-        if (response.result.files && response.result.files.length > 0) {
-          projectFolderId = response.result.files[0].id
-        }
-      } catch (err) {
-        logDriveError('ensureProjectArtsFinalsFolder', 'Error buscant carpeta del projecte', { error: err })
-      }
-      
-      // Si no existeix, crear-la
-      if (!projectFolderId) {
-        const projectFolder = await this.findOrCreateFolder(projectFolderName, DRIVE_FOLDERS.projects)
-        projectFolderId = projectFolder.id
-      }
-    }
+    // CAS 2: Crear/buscar carpeta pare "Arts Finals" sota root
+    const artsFinalsParentFolderId = await this.ensureArtsFinalsParentFolder()
 
-    // CAS 3: Buscar o crear subcarpeta "Arts Finals" dins la carpeta del projecte
-    const artsFinalsFolder = await this.findOrCreateFolder('Arts Finals', projectFolderId)
+    // CAS 3: Crear/buscar carpeta del projecte dins "Arts Finals"
+    // Format: {PROJECT_CODE} - {PROJECT_NAME}
+    const projectFolderName = `${projectCode} - ${projectName}`
     
-    return artsFinalsFolder.id
+    const projectArtsFinalsFolder = await this.findOrCreateFolder(projectFolderName, artsFinalsParentFolderId)
+    
+    return projectArtsFinalsFolder.id
   }
 
   /**
@@ -982,6 +982,42 @@ class GoogleDriveService {
   async uploadPdfBlob(blob, fileName, folderId) {
     const file = new File([blob], fileName, { type: 'application/pdf' })
     return await this.uploadFile(file, folderId)
+  }
+
+  /**
+   * Rename a file in Drive
+   * @param {string} fileId - Drive file ID
+   * @param {string} newName - New file name
+   * @returns {Promise<Object>} Updated file metadata
+   */
+  async renameFile(fileId, newName) {
+    try {
+      await this.ensureDriveReady()
+    } catch (err) {
+      if (err.message === 'AUTH_REQUIRED') {
+        throw err
+      }
+      logDriveError('renameFile', err, { fileId, newName })
+      throw new Error('No connectat a Google Drive')
+    }
+
+    try {
+      const response = await window.gapi.client.drive.files.update({
+        fileId: fileId,
+        resource: {
+          name: newName
+        },
+        fields: 'id, name, webViewLink'
+      })
+      return response.result
+    } catch (err) {
+      if (err.status === 401 || err.code === 401) {
+        handleAuthError('renameFile', err)
+        throw new Error('AUTH_REQUIRED')
+      }
+      logDriveError('renameFile', err, { fileId, newName, status: err.status })
+      throw new Error('Error reanomenant fitxer: ' + (err.message || 'Error desconegut'))
+    }
   }
 
   async deleteFile(fileId) {
@@ -1193,6 +1229,7 @@ export const useDrive = () => {
     
     createProjectFolders: (code, name) => driveService.createProjectFolders(code, name),
     ensureProjectDriveFolders: (project) => driveService.ensureProjectDriveFolders(project),
+    ensureArtsFinalsParentFolder: () => driveService.ensureArtsFinalsParentFolder(),
     ensureProjectArtsFinalsFolder: (params) => driveService.ensureProjectArtsFinalsFolder(params),
     listFolderContents: (folderId) => driveService.listFolderContents(folderId),
     listFolderFiles: (folderId) => driveService.listFolderFiles(folderId),
@@ -1201,6 +1238,7 @@ export const useDrive = () => {
     uploadFile: (file, folderId, name) => driveService.uploadFile(file, folderId, name),
     uploadFilesToFolder: (folderId, files) => driveService.uploadFilesToFolder(folderId, files),
     uploadPdfBlob: (blob, name, folderId) => driveService.uploadPdfBlob(blob, name, folderId),
+    renameFile: (fileId, newName) => driveService.renameFile(fileId, newName),
     deleteFile: (fileId) => driveService.deleteFile(fileId),
     getFileInfo: (fileId) => driveService.getFileInfo(fileId),
     openDriveFileUrl: (fileId, webViewLink) => driveService.openDriveFileUrl(fileId, webViewLink),

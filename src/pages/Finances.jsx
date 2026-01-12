@@ -104,6 +104,9 @@ export default function Finances() {
   const [editingTransaction, setEditingTransaction] = useState(null)
   const [menuOpen, setMenuOpen] = useState(null)
   const [saving, setSaving] = useState(false)
+  const [showInlineCategoryModal, setShowInlineCategoryModal] = useState(false)
+  const [inlineCategoryName, setInlineCategoryName] = useState('')
+  const [creatingInlineCategory, setCreatingInlineCategory] = useState(false)
   const [visibleColumns, setVisibleColumns] = useState([
     'date', 'type', 'category', 'description', 'project', 'amount', 'balance'
   ])
@@ -158,17 +161,36 @@ export default function Finances() {
 
   // Close actions menu when clicking outside
   useEffect(() => {
+    if (!menuOpen) return
+
+    let isInitialClick = true
+    const initialTimeout = setTimeout(() => {
+      isInitialClick = false
+    }, 150)
+
     const handleClickOutside = (event) => {
-      if (menuOpen && !event.target.closest('[data-menu-container]')) {
+      // Ignore the initial click that opened the menu (prevent race condition)
+      if (isInitialClick) {
+        return
+      }
+      
+      // Check if click is outside the menu container
+      const menuContainer = event.target.closest('[data-menu-container]')
+      if (!menuContainer) {
         setMenuOpen(null)
       }
     }
     
-    if (menuOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-      return () => {
-        document.removeEventListener('mousedown', handleClickOutside)
-      }
+    // Use 'click' event instead of 'mousedown' to avoid race condition
+    // Add small delay to let the menu state update and render first
+    const timeoutId = setTimeout(() => {
+      document.addEventListener('click', handleClickOutside, true)
+    }, 0)
+    
+    return () => {
+      clearTimeout(initialTimeout)
+      clearTimeout(timeoutId)
+      document.removeEventListener('click', handleClickOutside, true)
     }
   }, [menuOpen])
 
@@ -455,6 +477,69 @@ export default function Finances() {
     setShowCategoryModal(true)
   }
 
+  // Inline category creation (from transaction modal)
+  const handleCreateInlineCategory = async () => {
+    if (!inlineCategoryName.trim()) {
+      showToast('El nom és obligatori', 'error')
+      return
+    }
+
+    setCreatingInlineCategory(true)
+    try {
+      const userId = await getCurrentUserId()
+      const transactionType = editingTransaction?.type || 'expense'
+      const normalizedType = transactionType === 'expense' ? 'expense' : 'income'
+      
+      const cleanData = {
+        name: inlineCategoryName.trim(),
+        type: normalizedType,
+        user_id: userId,
+        is_demo: demoMode === true,
+        is_system: false,
+        color: '#6b7280',
+        icon: 'Receipt',
+        sort_order: 0
+      }
+      
+      const { data: insertedData, error } = await supabase
+        .from('finance_categories')
+        .insert(cleanData)
+        .select()
+        .single()
+      
+      if (error) {
+        if (error.code === '23505') {
+          showToast('Ja existeix una categoria amb aquest nom i tipus', 'error')
+        } else if (error.code === '42501') {
+          showToast('No tens permisos per crear categories', 'error')
+        } else {
+          throw error
+        }
+        return
+      }
+      
+      // Reload categories to include the new one
+      await loadData()
+      
+      // Auto-select the newly created category
+      if (insertedData && editingTransaction) {
+        setEditingTransaction({
+          ...editingTransaction,
+          category_id: insertedData.id
+        })
+      }
+      
+      // Close inline modal
+      setShowInlineCategoryModal(false)
+      setInlineCategoryName('')
+      showToast('Categoria creada i seleccionada', 'success')
+    } catch (err) {
+      notifyError(err, { context: 'Finances:handleCreateInlineCategory' })
+    } finally {
+      setCreatingInlineCategory(false)
+    }
+  }
+
   const handleSaveCategory = async () => {
     if (!editingCategory.name) {
       showToast('El nom és obligatori', 'error')
@@ -468,36 +553,74 @@ export default function Finances() {
       // Normalize type to canonical values (expense/income)
       const normalizedType = editingCategory.type === 'expense' ? 'expense' : 'income'
       
-      const data = {
-        ...editingCategory,
-        type: normalizedType, // Ensure canonical type value
+      // Clean data: remove id if it's a new category, remove undefined values
+      const cleanData = {
+        name: editingCategory.name.trim(),
+        type: normalizedType,
         user_id: userId,
-        is_demo: demoMode, // Set is_demo based on current mode
-        is_system: false // User-created categories are never system
+        is_demo: demoMode === true, // Explicit boolean
+        is_system: false, // User-created categories are never system
+        color: editingCategory.color || '#6b7280',
+        icon: editingCategory.icon || 'Receipt',
+        sort_order: editingCategory.sort_order || 0
+      }
+      
+      // Remove parent_id if not set
+      if (editingCategory.parent_id) {
+        cleanData.parent_id = editingCategory.parent_id
       }
       
       if (editingCategory.id) {
+        // Update existing category
         const { error } = await supabase
           .from('finance_categories')
-          .update(data)
+          .update(cleanData)
           .eq('id', editingCategory.id)
-        if (error) throw error
+        if (error) {
+          // Handle unique constraint error
+          if (error.code === '23505') {
+            showToast('Ja existeix una categoria amb aquest nom i tipus', 'error')
+          } else {
+            throw error
+          }
+          return
+        }
         showToast('Categoria actualitzada', 'success')
       } else {
-        const { error } = await supabase
+        // Insert new category
+        const { data: insertedData, error } = await supabase
           .from('finance_categories')
-          .insert(data)
-        if (error) throw error
+          .insert(cleanData)
+          .select()
+          .single()
+        if (error) {
+          // Handle unique constraint error
+          if (error.code === '23505') {
+            showToast('Ja existeix una categoria amb aquest nom i tipus', 'error')
+          } else if (error.code === '42501') {
+            showToast('No tens permisos per crear categories', 'error')
+          } else {
+            throw error
+          }
+          return
+        }
         showToast('Categoria creada', 'success')
+        // Return the created category if this is an inline creation
+        if (insertedData) {
+          return insertedData
+        }
       }
       
       await loadData()
       setShowCategoryModal(false)
       setEditingCategory(null)
+      return null
     } catch (err) {
       notifyError(err, { context: 'Finances:handleSaveCategory' })
+      return null
+    } finally {
+      setSaving(false)
     }
-    setSaving(false)
   }
 
   const handleDeleteCategory = async (category) => {
@@ -826,22 +949,102 @@ export default function Finances() {
     return catList.find(c => c.id === categoryId) || { name: 'Sense categoria', color: '#6b7280', icon: 'Receipt' }
   }
 
+  // Calculate responsive toolbar styles
+  // Use a more flexible grid that handles wrapping better
+  // For desktop: flexible columns that wrap cleanly
+  // For tablet/mobile: single or double column layout
+  const toolbarStyles = {
+    ...styles.toolbar,
+    gridTemplateColumns: isMobile 
+      ? '1fr' 
+      : isTablet
+      ? 'repeat(2, 1fr)'
+      : 'repeat(auto-fill, minmax(150px, auto)) minmax(200px, 1fr) repeat(auto-fill, minmax(150px, auto))',
+    gridAutoRows: '40px',
+    gridAutoFlow: isMobile ? 'row' : 'row dense',
+    alignContent: 'start',
+    alignItems: 'center'
+  }
+  
+  const viewsSectionStyles = {
+    ...styles.viewsSection,
+    gridColumn: isMobile ? '1 / -1' : undefined
+  }
+  
+  const searchContainerStyles = {
+    ...styles.searchContainer,
+    gridColumn: isMobile ? '1 / -1' : undefined,
+    minWidth: isMobile ? '100%' : '200px',
+    height: '40px'
+  }
+  
+  const applyButtonStyles = {
+    ...styles.applyButton,
+    gridColumn: isMobile ? '1 / -1' : undefined,
+    justifySelf: isMobile ? 'stretch' : 'start',
+    height: '40px'
+  }
+  
+  const actionsSectionStyles = {
+    ...styles.actionsSection,
+    gridColumn: isMobile ? '1 / -1' : undefined,
+    justifyContent: isMobile ? 'flex-start' : 'flex-end',
+    justifySelf: isMobile ? 'stretch' : 'end',
+    height: '40px'
+  }
+  
+  // Individual filter styles to ensure consistent height
+  const typeFilterStyles = {
+    ...styles.filterSelect,
+    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+    color: darkMode ? '#ffffff' : '#111827',
+    height: '40px'
+  }
+  
+  const projectFilterStyles = {
+    ...styles.filterSelect,
+    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+    color: darkMode ? '#ffffff' : '#111827',
+    height: '40px'
+  }
+  
+  const categoryFilterStyles = {
+    ...styles.filterSelect,
+    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+    color: darkMode ? '#ffffff' : '#111827',
+    height: '40px'
+  }
+  
+  const dateFromStyles = {
+    ...styles.filterInput,
+    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+    color: darkMode ? '#ffffff' : '#111827',
+    height: '40px'
+  }
+  
+  const dateToStyles = {
+    ...styles.filterInput,
+    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+    color: darkMode ? '#ffffff' : '#111827',
+    height: '40px'
+  }
+
   return (
     <div style={styles.container}>
       <Header title="Finances" />
 
       <div style={styles.content}>
         {/* Toolbar */}
-        <div style={styles.toolbar}>
-          {/* Saved Views */}
-          <div style={styles.viewsSection}>
+        <div style={toolbarStyles}>
+          {/* View Selector */}
+          <div style={viewsSectionStyles}>
             <select
               value={activeView?.id || ''}
               onChange={(e) => {
                 const view = savedViews.find(v => v.id === e.target.value)
                 setActiveView(view || null)
               }}
-            style={{
+              style={{
                 ...styles.viewSelect,
                 backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
                 color: darkMode ? '#ffffff' : '#111827'
@@ -852,7 +1055,7 @@ export default function Finances() {
                 <option key={view.id} value={view.id}>{view.name}</option>
               ))}
             </select>
-          <button
+            <button
               onClick={() => {
                 setEditingView({ name: '', filters: appliedFilters, columns: visibleColumns, is_default: false })
                 setShowViewModal(true)
@@ -861,9 +1064,9 @@ export default function Finances() {
               title="Guardar vista"
             >
               <Save size={18} />
-          </button>
+            </button>
             {activeView && (
-          <button
+              <button
                 onClick={() => {
                   setEditingView(activeView)
                   setShowViewModal(true)
@@ -872,34 +1075,26 @@ export default function Finances() {
                 title="Editar vista"
               >
                 <Edit size={18} />
-          </button>
+              </button>
             )}
-        </div>
+          </div>
 
-          {/* Filters */}
-          <div style={styles.filtersSection}>
-            <select
-              value={draftFilters.type}
-              onChange={e => setDraftFilters({...draftFilters, type: e.target.value})}
-              style={{
-                ...styles.filterSelect,
-                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                color: darkMode ? '#ffffff' : '#111827'
-              }}
-            >
-              <option value="all">Tots</option>
-              <option value="income">Ingressos</option>
-              <option value="expense">Despeses</option>
-            </select>
-
+          {/* Type Filter */}
           <select
-              value={draftFilters.project_id || ''}
-              onChange={e => setDraftFilters({...draftFilters, project_id: e.target.value || null})}
-            style={{
-              ...styles.filterSelect,
-              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-              color: darkMode ? '#ffffff' : '#111827'
-            }}
+            value={draftFilters.type}
+            onChange={e => setDraftFilters({...draftFilters, type: e.target.value})}
+            style={typeFilterStyles}
+          >
+            <option value="all">Tots</option>
+            <option value="income">Ingressos</option>
+            <option value="expense">Despeses</option>
+          </select>
+
+          {/* Project Filter */}
+          <select
+            value={draftFilters.project_id || ''}
+            onChange={e => setDraftFilters({...draftFilters, project_id: e.target.value || null})}
+            style={projectFilterStyles}
           >
             <option value="">Tots els projectes</option>
             {projects.map(p => (
@@ -907,112 +1102,102 @@ export default function Finances() {
             ))}
           </select>
 
+          {/* Category Filter */}
           <select
-              value={draftFilters.category_id || ''}
-              onChange={e => setDraftFilters({...draftFilters, category_id: e.target.value || null})}
-            style={{
-              ...styles.filterSelect,
-              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-              color: darkMode ? '#ffffff' : '#111827'
-            }}
+            value={draftFilters.category_id || ''}
+            onChange={e => setDraftFilters({...draftFilters, category_id: e.target.value || null})}
+            style={categoryFilterStyles}
           >
-              <option value="">Totes les categories</option>
-              {[...categories.income, ...categories.expense].map(c => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
+            <option value="">Totes les categories</option>
+            {[...categories.income, ...categories.expense].map(c => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
           </select>
 
+          {/* Date From */}
+          <input
+            type="date"
+            value={draftFilters.date_from || ''}
+            onChange={e => setDraftFilters({...draftFilters, date_from: e.target.value || null})}
+            placeholder="Des de"
+            style={dateFromStyles}
+          />
+
+          {/* Date To */}
+          <input
+            type="date"
+            value={draftFilters.date_to || ''}
+            onChange={e => setDraftFilters({...draftFilters, date_to: e.target.value || null})}
+            placeholder="Fins a"
+            style={dateToStyles}
+          />
+
+          {/* Search */}
+          <div style={{
+            ...searchContainerStyles,
+            backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
+          }}>
+            <Search size={18} color="#9ca3af" />
             <input
-              type="date"
-              value={draftFilters.date_from || ''}
-              onChange={e => setDraftFilters({...draftFilters, date_from: e.target.value || null})}
-              placeholder="Des de"
-              style={{
-                ...styles.filterInput,
-                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                color: darkMode ? '#ffffff' : '#111827'
-              }}
+              type="text"
+              placeholder="Buscar..."
+              value={draftFilters.search}
+              onChange={e => setDraftFilters({...draftFilters, search: e.target.value})}
+              style={{...styles.searchInput, color: darkMode ? '#ffffff' : '#111827'}}
             />
-
-            <input
-              type="date"
-              value={draftFilters.date_to || ''}
-              onChange={e => setDraftFilters({...draftFilters, date_to: e.target.value || null})}
-              placeholder="Fins a"
-              style={{
-                ...styles.filterInput,
-                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                color: darkMode ? '#ffffff' : '#111827'
-              }}
-            />
-
-            <div style={{
-              ...styles.searchContainer,
-              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
-            }}>
-              <Search size={18} color="#9ca3af" />
-              <input
-                type="text"
-                placeholder="Buscar..."
-                value={draftFilters.search}
-                onChange={e => setDraftFilters({...draftFilters, search: e.target.value})}
-                style={{...styles.searchInput, color: darkMode ? '#ffffff' : '#111827'}}
-              />
-            </div>
-
-            {/* Apply Filters Button - ALWAYS VISIBLE */}
-            <button
-              onClick={handleApplyFilters}
-              disabled={!hasPendingFilters}
-              data-testid="apply-filters"
-              aria-label="Aplicar filtres"
-              title="Aplicar filtres"
-              style={{
-                ...styles.applyButton,
-                backgroundColor: hasPendingFilters ? '#4f46e5' : (darkMode ? '#1f1f2e' : '#f9fafb'),
-                color: hasPendingFilters ? '#ffffff' : (darkMode ? '#6b7280' : '#9ca3af'),
-                cursor: hasPendingFilters ? 'pointer' : 'not-allowed',
-                opacity: hasPendingFilters ? 1 : 0.6,
-                border: `1px solid ${hasPendingFilters ? '#4f46e5' : 'var(--border-color)'}`,
-                flexShrink: 0,
-                whiteSpace: 'nowrap'
-              }}
-            >
-              <Filter size={16} style={{ marginRight: '6px' }} />
-              Aplicar filtres
-              {hasPendingFilters && (
-                <span style={{
-                  marginLeft: '6px',
-                  fontSize: '10px',
-                  backgroundColor: '#ef4444',
-                  color: '#ffffff',
-                  borderRadius: '50%',
-                  width: '16px',
-                  height: '16px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>!</span>
-              )}
-            </button>
           </div>
 
+          {/* Apply Filters Button */}
+          <button
+            onClick={handleApplyFilters}
+            disabled={!hasPendingFilters}
+            data-testid="apply-filters"
+            aria-label="Aplicar filtres"
+            title="Aplicar filtres"
+            style={{
+              ...applyButtonStyles,
+              backgroundColor: hasPendingFilters ? '#4f46e5' : (darkMode ? '#1f1f2e' : '#f9fafb'),
+              color: hasPendingFilters ? '#ffffff' : (darkMode ? '#6b7280' : '#9ca3af'),
+              cursor: hasPendingFilters ? 'pointer' : 'not-allowed',
+              opacity: hasPendingFilters ? 1 : 0.6,
+              border: `1px solid ${hasPendingFilters ? '#4f46e5' : 'var(--border-color)'}`,
+              whiteSpace: 'nowrap'
+            }}
+          >
+            <Filter size={16} style={{ marginRight: '6px' }} />
+            Aplicar filtres
+            {hasPendingFilters && (
+              <span style={{
+                marginLeft: '6px',
+                fontSize: '10px',
+                backgroundColor: '#ef4444',
+                color: '#ffffff',
+                borderRadius: '50%',
+                width: '16px',
+                height: '16px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>!</span>
+            )}
+          </button>
+
           {/* Actions */}
-          <div style={styles.actionsSection}>
+          <div style={actionsSectionStyles}>
             <button
               onClick={() => setShowCategoryModal(true)}
               style={styles.iconButton}
               title="Gestionar categories"
             >
               <Tag size={18} />
-              </button>
+            </button>
             <button
               onClick={handleExportCSV}
               style={styles.iconButton}
               title="Exportar a CSV"
             >
               <FileSpreadsheet size={18} />
-              </button>
+            </button>
             <button
               onClick={() => handleNewTransaction('income')}
               style={{...styles.newButton, backgroundColor: '#22c55e', border: '1px solid #16a34a'}}
@@ -1241,6 +1426,7 @@ export default function Finances() {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation()
+                                // Toggle menu state
                                 setMenuOpen(menuOpen === item.id ? null : item.id)
                               }}
                               style={styles.menuButton}
@@ -1252,9 +1438,12 @@ export default function Finances() {
                                   style={{
                                     ...styles.menu, 
                                     backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
-                                    zIndex: 1000
+                                    zIndex: 3000 // Higher z-index to ensure it's above table overflow containers
                                   }}
-                                  onClick={(e) => e.stopPropagation()}
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    e.preventDefault()
+                                  }}
                                 >
                                 <button
                                   onClick={(e) => {
@@ -1561,7 +1750,15 @@ export default function Finances() {
                   <label style={styles.label}>Categoria *</label>
                   <select
                     value={editingTransaction.category_id || ''}
-                    onChange={e => setEditingTransaction({...editingTransaction, category_id: e.target.value || null})}
+                    onChange={e => {
+                      const value = e.target.value
+                      if (value === '__create_new__') {
+                        setShowInlineCategoryModal(true)
+                        setInlineCategoryName('')
+                      } else {
+                        setEditingTransaction({...editingTransaction, category_id: value || null})
+                      }
+                    }}
                     style={{
                       ...styles.input,
                       backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
@@ -1572,6 +1769,13 @@ export default function Finances() {
                     {(editingTransaction.type === 'income' ? categories.income : categories.expense).map(c => (
                       <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
+                    <option value="__create_new__" style={{ 
+                      fontStyle: 'italic', 
+                      color: darkMode ? '#4f46e5' : '#4f46e5',
+                      fontWeight: '500'
+                    }}>
+                      + Crear nova categoria
+                    </option>
                   </select>
                 </div>
 
@@ -1799,6 +2003,97 @@ export default function Finances() {
           </div>
         </div>
       )}
+
+      {/* Inline Category Creation Modal */}
+      {showInlineCategoryModal && (
+        <div 
+          style={{...styles.modalOverlay, ...modalStyles.overlay}} 
+          onClick={() => {
+            setShowInlineCategoryModal(false)
+            setInlineCategoryName('')
+          }}
+        >
+          <div 
+            style={{
+              ...styles.modal, 
+              ...modalStyles.modal, 
+              maxWidth: '400px'
+            }} 
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={styles.modalHeader}>
+              <h3 style={{...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827'}}>
+                Crear nova categoria
+              </h3>
+              <button 
+                onClick={() => {
+                  setShowInlineCategoryModal(false)
+                  setInlineCategoryName('')
+                }} 
+                style={styles.closeButton}
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div style={styles.modalBody}>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>
+                  Nom de la categoria *
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ex: Marketing, R&D, etc."
+                  value={inlineCategoryName}
+                  onChange={e => setInlineCategoryName(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && inlineCategoryName.trim()) {
+                      handleCreateInlineCategory()
+                    }
+                  }}
+                  autoFocus
+                  style={{
+                    ...styles.input,
+                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                    color: darkMode ? '#ffffff' : '#111827'
+                  }}
+                />
+                <p style={{
+                  fontSize: '12px',
+                  color: '#6b7280',
+                  margin: '4px 0 0 0'
+                }}>
+                  Tipus: {editingTransaction?.type === 'income' ? 'Ingrés' : 'Despesa'}
+                </p>
+              </div>
+            </div>
+
+            <div style={styles.modalFooter}>
+              <button 
+                onClick={() => {
+                  setShowInlineCategoryModal(false)
+                  setInlineCategoryName('')
+                }} 
+                style={styles.cancelButton}
+              >
+                Cancel·lar
+              </button>
+              <button
+                onClick={handleCreateInlineCategory}
+                disabled={!inlineCategoryName.trim() || creatingInlineCategory}
+                style={{
+                  ...styles.saveButton,
+                  backgroundColor: creatingInlineCategory ? '#9ca3af' : '#4f46e5',
+                  opacity: (!inlineCategoryName.trim() || creatingInlineCategory) ? 0.6 : 1,
+                  cursor: (!inlineCategoryName.trim() || creatingInlineCategory) ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {creatingInlineCategory ? 'Creant...' : <><Plus size={16} /> Crear</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -1807,11 +2102,16 @@ const styles = {
   container: { flex: 1, display: 'flex', flexDirection: 'column' },
   content: { padding: '16px', overflowY: 'auto' },
   toolbar: {
-    display: 'flex',
+    display: 'grid',
     gap: '12px',
     marginBottom: '24px',
-    flexWrap: 'wrap',
-    alignItems: 'center'
+    alignItems: 'center',
+    gridAutoRows: '40px',
+    // Flexible grid: filters on left, search in middle (flexible), actions on right
+    // When wrapping, items maintain alignment with consistent row height
+    // Use auto-fill to ensure consistent column distribution when wrapping
+    gridTemplateColumns: 'repeat(auto-fill, minmax(150px, auto)) minmax(200px, 1fr) repeat(auto-fill, minmax(150px, auto))',
+    gridAutoFlow: 'row dense'
   },
   viewsSection: {
     display: 'flex',
@@ -1825,13 +2125,10 @@ const styles = {
     fontSize: '14px',
     outline: 'none',
     cursor: 'pointer',
-    minWidth: '150px'
-  },
-  filtersSection: {
-    display: 'flex',
-    gap: '8px',
-    flex: 1,
-    flexWrap: 'wrap'
+    minWidth: '150px',
+    height: '40px',
+    width: '100%',
+    boxSizing: 'border-box'
   },
   filterSelect: {
     padding: '10px 16px',
@@ -1839,24 +2136,34 @@ const styles = {
     border: '1px solid var(--border-color)',
     fontSize: '14px',
     outline: 'none',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    height: '40px',
+    minWidth: '150px',
+    width: '100%',
+    boxSizing: 'border-box'
   },
   filterInput: {
     padding: '10px 16px',
     borderRadius: '10px',
     border: '1px solid var(--border-color)',
     fontSize: '14px',
-    outline: 'none'
+    outline: 'none',
+    height: '40px',
+    minWidth: '140px',
+    width: '100%',
+    boxSizing: 'border-box'
   },
   searchContainer: {
-    flex: 1,
-    minWidth: '200px',
     display: 'flex',
     alignItems: 'center',
     gap: '10px',
     padding: '0 16px',
     borderRadius: '10px',
-    border: '1px solid var(--border-color)'
+    border: '1px solid var(--border-color)',
+    height: '40px',
+    minWidth: '200px',
+    width: '100%',
+    boxSizing: 'border-box'
   },
   searchInput: {
     flex: 1,
@@ -1926,8 +2233,9 @@ const styles = {
   tableContainer: {
     borderRadius: '16px',
     border: '1px solid var(--border-color)',
-    overflow: 'hidden',
-    overflowX: 'auto'
+    overflowX: 'auto',
+    overflowY: 'visible', // Allow dropdowns to escape container
+    position: 'relative' // Ensure proper stacking context for dropdowns
   },
   table: {
     width: '100%',
@@ -1983,7 +2291,7 @@ const styles = {
     borderRadius: '10px',
     border: '1px solid var(--border-color)',
     boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-    zIndex: 1000,
+    zIndex: 3000, // High z-index to appear above table overflow
     padding: '4px'
   },
   menuItem: {
@@ -2187,6 +2495,9 @@ const styles = {
     transition: 'all 0.2s',
     flexShrink: 0,
     minWidth: '140px',
-    whiteSpace: 'nowrap'
+    whiteSpace: 'nowrap',
+    height: '40px',
+    boxSizing: 'border-box',
+    justifyContent: 'center'
   }
 }

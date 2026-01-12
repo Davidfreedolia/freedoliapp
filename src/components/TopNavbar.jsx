@@ -8,6 +8,7 @@ import { logSuccess } from '../lib/auditLog'
 import { useNotes } from '../hooks/useNotes'
 import AddStickyNoteModal from './AddStickyNoteModal'
 import HelpModal from './HelpModal'
+import WorldClocks from './WorldClocks'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { showToast } from './Toast'
 
@@ -89,6 +90,9 @@ export default function TopNavbar() {
         </div>
 
         <div style={styles.rightSection}>
+          {/* World Clocks */}
+          <WorldClocks />
+
           {/* Settings */}
           <button 
             onClick={() => navigate('/settings')}

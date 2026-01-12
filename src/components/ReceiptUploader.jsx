@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
-import { Upload, FileText, Image, AlertCircle, Eye, Trash2, Edit, MoreVertical, X, Save } from 'lucide-react'
-import { uploadReceipt, deleteReceipt, getExpenseAttachments, getAttachmentSignedUrl, updateAttachmentName } from '../lib/supabase'
+import { Upload, FileText, Image, AlertCircle, Eye, Trash2, Edit, MoreVertical, X, Save, Loader, RefreshCw } from 'lucide-react'
+import { uploadReceipt, deleteReceipt, getExpenseAttachments, getAttachmentSignedUrl, updateAttachmentName, replaceReceipt, validateReceiptFile } from '../lib/supabase'
 import { showToast } from './Toast'
 import DeleteConfirmationModal from './DeleteConfirmationModal'
 
@@ -30,6 +30,8 @@ export default function ReceiptUploader({
   const [attachmentToRename, setAttachmentToRename] = useState(null)
   const [newFileName, setNewFileName] = useState('')
   const [renaming, setRenaming] = useState(false)
+  const [uploadingFiles, setUploadingFiles] = useState({}) // { fileId: { file: File, progress: number, error: string } }
+  const [replacingFileId, setReplacingFileId] = useState(null)
 
   // Cargar attachments cuando expenseId cambia
   useEffect(() => {
@@ -72,16 +74,15 @@ export default function ReceiptUploader({
   }
 
   const validateFile = (file) => {
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      throw new Error(`${file.name}: Tipus no permès. Només PDF, JPG i PNG.`)
-    }
-    if (file.size > MAX_SIZE) {
-      throw new Error(`${file.name}: Massa gran (màx 10MB)`)
+    // Use helper from supabase.js for consistency
+    const validation = validateReceiptFile(file)
+    if (!validation.ok) {
+      throw new Error(validation.error)
     }
     return true
   }
 
-  const handleFiles = async (files) => {
+  const handleFiles = async (files, replaceAttachmentId = null) => {
     if (!expenseId) {
       showToast('Guarda l\'expense primer per pujar receipts', 'error')
       return
@@ -90,39 +91,124 @@ export default function ReceiptUploader({
     const fileArray = Array.from(files)
     if (fileArray.length === 0) return
 
-    setUploading(true)
+    // Si es un replace, solo procesar el primer archivo
+    const filesToProcess = replaceAttachmentId ? [fileArray[0]] : fileArray
+
+    if (replaceAttachmentId) {
+      setReplacingFileId(replaceAttachmentId)
+    } else {
+      setUploading(true)
+    }
     setError(null)
 
     const results = []
     const errors = []
 
-    for (const file of fileArray) {
+    for (const file of filesToProcess) {
+      const fileId = replaceAttachmentId || `upload-${Date.now()}-${file.name}`
+      
+      // Agregar a uploadingFiles
+      setUploadingFiles(prev => ({
+        ...prev,
+        [fileId]: { file, progress: 0, error: null }
+      }))
+
       try {
         validateFile(file)
-        const result = await uploadReceipt(file, expenseId)
+        
+        // Upload o Replace
+        let result
+        if (replaceAttachmentId) {
+          result = await replaceReceipt(file, replaceAttachmentId)
+          // Show cleanup warning if present
+          if (result.cleanupWarning) {
+            showToast(result.cleanupWarning, 'warning')
+          }
+        } else {
+          result = await uploadReceipt(file, expenseId)
+        }
+        
         results.push(result)
-        showToast(`${file.name} pujat correctament`, 'success')
+        
+        // Actualizar estado: éxito
+        setUploadingFiles(prev => ({
+          ...prev,
+          [fileId]: { ...prev[fileId], progress: 100 }
+        }))
+        
+        showToast(
+          replaceAttachmentId 
+            ? `Fitxer substituit correctament: ${file.name}` 
+            : `${file.name} pujat correctament`, 
+          'success'
+        )
       } catch (err) {
-        console.error(`Error uploading ${file.name}:`, err)
-        errors.push({ file: file.name, error: err.message || 'Error desconegut' })
-        showToast(`Error pujant ${file.name}: ${err.message || 'Error desconegut'}`, 'error')
+        console.error(`Error ${replaceAttachmentId ? 'replacing' : 'uploading'} ${file.name}:`, err)
+        
+        // Handle demo mode blocking
+        const errorMessage = err.message || 'Error desconegut'
+        const isDemoBlocked = errorMessage === 'Disabled in demo mode'
+        
+        errors.push({ file: file.name, error: errorMessage, fileId })
+        
+        // Actualizar estado: error
+        setUploadingFiles(prev => ({
+          ...prev,
+          [fileId]: { ...prev[fileId], error: errorMessage }
+        }))
+        
+        showToast(
+          isDemoBlocked 
+            ? 'Desactivat en mode demo'
+            : `Error ${replaceAttachmentId ? 'substituint' : 'pujant'} ${file.name}: ${errorMessage}`, 
+          'error'
+        )
       }
     }
 
-    setUploading(false)
+    if (replaceAttachmentId) {
+      setReplacingFileId(null)
+    } else {
+      setUploading(false)
+    }
 
-    // Recargar attachments después de subir
+    // Recargar attachments después de subir/reemplazar
     if (results.length > 0) {
       await loadAttachments()
       if (onAttachmentsChanged) {
         onAttachmentsChanged(results)
       }
+      // Limpiar uploadingFiles después de un delay
+      setTimeout(() => {
+        setUploadingFiles(prev => {
+          const updated = { ...prev }
+          filesToProcess.forEach((_, idx) => {
+            const fileId = Object.keys(prev).find(k => prev[k].file?.name === filesToProcess[idx].name) || `upload-${idx}`
+            delete updated[fileId]
+          })
+          return updated
+        })
+      }, 2000)
     }
 
     // Mostrar resumen de errores si hay
     if (errors.length > 0 && results.length === 0) {
-      setError(`${errors.length} fitxer(s) no s'han pogut pujar`)
+      setError(`${errors.length} fitxer(s) no s'han pogut ${replaceAttachmentId ? 'substituir' : 'pujar'}`)
     }
+  }
+
+  const handleRetryUpload = async (fileId) => {
+    const uploadInfo = uploadingFiles[fileId]
+    if (!uploadInfo || !uploadInfo.file) return
+
+    // Reset error
+    setUploadingFiles(prev => ({
+      ...prev,
+      [fileId]: { ...prev[fileId], error: null, progress: 0 }
+    }))
+
+    // Retry upload
+    await handleFiles([uploadInfo.file])
   }
 
   const handleFileSelect = async (e) => {
@@ -242,6 +328,39 @@ export default function ReceiptUploader({
     setAttachmentToRename(attachment)
     setNewFileName(attachment.file_name)
     setShowRenameModal(true)
+  }
+
+  const handleReplaceClick = (attachment) => {
+    setMenuOpen(null)
+    
+    // Check demo mode first
+    const checkDemoMode = async () => {
+      try {
+        const { getDemoMode } = await import('../lib/demoModeFilter')
+        const demoMode = await getDemoMode()
+        if (demoMode) {
+          showToast('Desactivat en mode demo', 'error')
+          return
+        }
+      } catch (err) {
+        // Continue if check fails
+      }
+      
+      // Trigger file picker para reemplazar
+      const input = document.createElement('input')
+      input.type = 'file'
+      input.accept = 'application/pdf,image/jpeg,image/png'
+      input.multiple = false
+      input.onchange = async (e) => {
+        const files = e.target.files
+        if (files && files.length > 0) {
+          await handleFiles(files, attachment.id)
+        }
+      }
+      input.click()
+    }
+    
+    checkDemoMode()
   }
 
   const handleConfirmRename = async () => {
@@ -470,7 +589,7 @@ export default function ReceiptUploader({
           <input
             ref={fileInputRef}
             type="file"
-            accept=".pdf,.jpg,.jpeg,.png"
+            accept="application/pdf,image/jpeg,image/png"
             multiple
             onChange={handleFileSelect}
             style={styles.fileInput}
@@ -479,7 +598,7 @@ export default function ReceiptUploader({
           
           {uploading ? (
             <>
-              <Upload size={24} style={{...styles.uploadIcon, animation: 'pulse 1s ease-in-out infinite'}} />
+              <Loader size={24} color="#4f46e5" style={{...styles.uploadIcon, animation: 'spin 1s linear infinite'}} />
               <div style={styles.uploadText}>Pujant receipts...</div>
             </>
           ) : (
@@ -505,6 +624,112 @@ export default function ReceiptUploader({
 
       {loading && (
         <div style={styles.loadingText}>Carregant attachments...</div>
+      )}
+
+      {/* Uploading files list (before they appear in attachments table) */}
+      {Object.keys(uploadingFiles).length > 0 && (
+        <div style={{ marginTop: '16px' }}>
+          {Object.entries(uploadingFiles).map(([fileId, uploadInfo]) => {
+            if (uploadInfo.error) {
+              return (
+                <div
+                  key={fileId}
+                  style={{
+                    padding: '12px',
+                    backgroundColor: darkMode ? '#1f1f2e' : '#fee2e2',
+                    border: `1px solid ${darkMode ? '#374151' : '#fecaca'}`,
+                    borderRadius: '6px',
+                    marginBottom: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '12px'
+                  }}
+                >
+                  <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <AlertCircle size={16} color="#dc2626" style={{ flexShrink: 0 }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        color: darkMode ? '#ffffff' : '#991b1b',
+                        marginBottom: '4px'
+                      }}>
+                        {uploadInfo.file.name}
+                      </div>
+                      <div style={{
+                        fontSize: '12px',
+                        color: darkMode ? '#fca5a5' : '#dc2626'
+                      }}>
+                        {uploadInfo.error}
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleRetryUpload(fileId)}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      fontSize: '13px',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      backgroundColor: '#4f46e5',
+                      color: '#ffffff',
+                      border: 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      transition: 'opacity 0.2s'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.opacity = '0.9'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.opacity = '1'
+                    }}
+                  >
+                    <RefreshCw size={14} />
+                    Reintentar
+                  </button>
+                </div>
+              )
+            }
+            
+            return (
+              <div
+                key={fileId}
+                style={{
+                  padding: '12px',
+                  backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                  border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+                  borderRadius: '6px',
+                  marginBottom: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px'
+                }}
+              >
+                <Loader size={18} color="#4f46e5" style={{ animation: 'spin 1s linear infinite' }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    color: darkMode ? '#ffffff' : '#111827'
+                  }}>
+                    {uploadInfo.file.name}
+                  </div>
+                  <div style={{
+                    fontSize: '12px',
+                    color: darkMode ? '#9ca3af' : '#6b7280',
+                    marginTop: '2px'
+                  }}>
+                    Pujant...
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
       )}
 
       {!loading && attachments.length > 0 && (
@@ -570,13 +795,27 @@ export default function ReceiptUploader({
                 >
                   <td style={{ padding: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      {getFileIcon(attachment.mime_type, attachment.file_name)}
+                      {replacingFileId === attachment.id ? (
+                        <Loader size={18} color="#4f46e5" style={{ animation: 'spin 1s linear infinite' }} />
+                      ) : (
+                        getFileIcon(attachment.mime_type, attachment.file_name)
+                      )}
                       <span style={{
                         color: darkMode ? '#ffffff' : '#111827',
-                        fontWeight: '500'
+                        fontWeight: '500',
+                        opacity: replacingFileId === attachment.id ? 0.6 : 1
                       }}>
                         {attachment.file_name}
                       </span>
+                      {replacingFileId === attachment.id && (
+                        <span style={{
+                          fontSize: '12px',
+                          color: '#4f46e5',
+                          fontStyle: 'italic'
+                        }}>
+                          (Substituint...)
+                        </span>
+                      )}
                     </div>
                   </td>
                   <td style={{
@@ -674,22 +913,26 @@ export default function ReceiptUploader({
                               e.stopPropagation()
                               handleRenameClick(attachment)
                             }}
+                            disabled={replacingFileId === attachment.id}
                             style={{
                               width: '100%',
                               padding: '10px 16px',
                               textAlign: 'left',
                               background: 'none',
                               border: 'none',
-                              cursor: 'pointer',
+                              cursor: replacingFileId === attachment.id ? 'not-allowed' : 'pointer',
                               color: darkMode ? '#ffffff' : '#111827',
                               fontSize: '14px',
                               display: 'flex',
                               alignItems: 'center',
                               gap: '8px',
-                              transition: 'background-color 0.2s'
+                              transition: 'background-color 0.2s',
+                              opacity: replacingFileId === attachment.id ? 0.5 : 1
                             }}
                             onMouseEnter={(e) => {
-                              e.currentTarget.style.backgroundColor = darkMode ? '#374151' : '#f3f4f6'
+                              if (replacingFileId !== attachment.id) {
+                                e.currentTarget.style.backgroundColor = darkMode ? '#374151' : '#f3f4f6'
+                              }
                             }}
                             onMouseLeave={(e) => {
                               e.currentTarget.style.backgroundColor = 'transparent'
@@ -701,24 +944,61 @@ export default function ReceiptUploader({
                           <button
                             onClick={(e) => {
                               e.stopPropagation()
-                              handleDeleteClick(attachment)
+                              handleReplaceClick(attachment)
                             }}
+                            disabled={replacingFileId === attachment.id || uploading}
                             style={{
                               width: '100%',
                               padding: '10px 16px',
                               textAlign: 'left',
                               background: 'none',
                               border: 'none',
-                              cursor: 'pointer',
+                              cursor: (replacingFileId === attachment.id || uploading) ? 'not-allowed' : 'pointer',
+                              color: darkMode ? '#ffffff' : '#111827',
+                              fontSize: '14px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              transition: 'background-color 0.2s',
+                              opacity: (replacingFileId === attachment.id || uploading) ? 0.5 : 1
+                            }}
+                            onMouseEnter={(e) => {
+                              if (replacingFileId !== attachment.id && !uploading) {
+                                e.currentTarget.style.backgroundColor = darkMode ? '#374151' : '#f3f4f6'
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = 'transparent'
+                            }}
+                          >
+                            <Upload size={14} />
+                            {replacingFileId === attachment.id ? 'Substituint...' : 'Substituir'}
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleDeleteClick(attachment)
+                            }}
+                            disabled={replacingFileId === attachment.id || deleting}
+                            style={{
+                              width: '100%',
+                              padding: '10px 16px',
+                              textAlign: 'left',
+                              background: 'none',
+                              border: 'none',
+                              cursor: (replacingFileId === attachment.id || deleting) ? 'not-allowed' : 'pointer',
                               color: '#ef4444',
                               fontSize: '14px',
                               display: 'flex',
                               alignItems: 'center',
                               gap: '8px',
-                              transition: 'background-color 0.2s'
+                              transition: 'background-color 0.2s',
+                              opacity: (replacingFileId === attachment.id || deleting) ? 0.5 : 1
                             }}
                             onMouseEnter={(e) => {
-                              e.currentTarget.style.backgroundColor = darkMode ? '#374151' : '#fee2e2'
+                              if (replacingFileId !== attachment.id && !deleting) {
+                                e.currentTarget.style.backgroundColor = darkMode ? '#374151' : '#fee2e2'
+                              }
                             }}
                             onMouseLeave={(e) => {
                               e.currentTarget.style.backgroundColor = 'transparent'

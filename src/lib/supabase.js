@@ -267,6 +267,35 @@ export const updateProject = async (id, updates) => {
   return data
 }
 
+/**
+ * Update project's Arts Finals folder ID
+ * @param {string} projectId - Project ID
+ * @param {string} folderId - Google Drive folder ID (or null to clear)
+ * @returns {Promise<Object>} Updated project
+ */
+export const updateProjectArtsFinalsFolderId = async (projectId, folderId) => {
+  // Dynamic import to avoid circular dependency
+  const { isDemoMode } = await import('../demo/demoMode')
+  
+  // Demo mode: return mock data, don't actually update
+  if (isDemoMode()) {
+    return {
+      id: projectId,
+      arts_finals_folder_id: folderId
+    }
+  }
+  
+  const { data, error } = await supabase
+    .from('projects')
+    .update({ arts_finals_folder_id: folderId })
+    .eq('id', projectId)
+    .select()
+    .single()
+  
+  if (error) throw error
+  return data
+}
+
 export const deleteProject = async (id) => {
   // Dynamic import to avoid circular dependency
   const { isDemoMode } = await import('../demo/demoMode')
@@ -3382,6 +3411,128 @@ export const getStickyNoteWithTask = async (id) => {
  * Check if receipts bucket exists
  * @returns {Promise<boolean>} True if bucket exists
  */
+// ============================================
+// RECEIPT ATTACHMENTS HELPERS
+// ============================================
+
+/**
+ * Validates a receipt file before upload/replace
+ * @param {File} file - File to validate
+ * @returns {{ok: boolean, error?: string}} Validation result
+ */
+export const validateReceiptFile = (file) => {
+  const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png']
+  const maxSize = 10 * 1024 * 1024 // 10MB
+
+  if (!allowedTypes.includes(file.type)) {
+    return { 
+      ok: false, 
+      error: `${file.name}: Tipus no permès. Només PDF, JPG i PNG.` 
+    }
+  }
+
+  if (file.size > maxSize) {
+    return { 
+      ok: false, 
+      error: `${file.name}: Massa gran (màx 10MB)` 
+    }
+  }
+
+  return { ok: true }
+}
+
+/**
+ * Builds a unique storage path for a receipt file
+ * NOTE: This function sanitizes the file name for storage path only.
+ * The actual file_name stored in DB preserves full Unicode (including Chinese characters).
+ * Storage paths need ASCII-safe characters, but the DB field file_name accepts full Unicode.
+ * 
+ * @param {object} params - {userId, expenseId, fileName}
+ * @returns {string} Storage path (sanitized for filesystem compatibility)
+ */
+export const buildReceiptPath = ({ userId, expenseId, fileName }) => {
+  const timestamp = Date.now()
+  // Sanitize ONLY for storage path (filesystems may not support Unicode in paths)
+  // The file_name field in DB stores the original Unicode name
+  const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9.-]/g, '_')
+  return `${userId}/expenses/${expenseId}/${timestamp}_${sanitizedFileName}`
+}
+
+/**
+ * Uploads a file to Supabase Storage (receipts bucket)
+ * @param {object} params - {userId, expenseId, file}
+ * @returns {Promise<{file_path: string, file_name: string, mime_type: string, size: number}>}
+ */
+export const uploadReceiptToStorage = async ({ userId, expenseId, file }) => {
+  const client = getSupabaseClient()
+  if (!client || !client.storage || typeof client.storage.from !== 'function') {
+    throw new Error('Supabase storage client not available')
+  }
+
+  // Check bucket exists
+  const bucketExists = await checkReceiptsBucket()
+  if (!bucketExists) {
+    throw new Error(`Receipts storage not configured (missing bucket: '${RECEIPTS_BUCKET}')`)
+  }
+
+  const filePath = buildReceiptPath({ userId, expenseId, fileName: file.name })
+
+  const { data: uploadData, error: uploadError } = await client.storage
+    .from(RECEIPTS_BUCKET)
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: false
+    })
+
+  if (uploadError) {
+    if (uploadError.message?.includes('Bucket not found') || uploadError.message?.includes('bucket')) {
+      throw new Error(`Receipts storage not configured (missing bucket: '${RECEIPTS_BUCKET}')`)
+    }
+    throw uploadError
+  }
+
+  return {
+    file_path: filePath,
+    file_name: file.name,
+    mime_type: file.type,
+    size: file.size
+  }
+}
+
+/**
+ * Deletes a file from Supabase Storage (best-effort, non-critical)
+ * @param {string} file_path - Path of file to delete
+ * @returns {Promise<boolean>} True if successful or non-critical failure
+ */
+export const deleteReceiptFromStorage = async (file_path) => {
+  if (!file_path) return true
+
+  try {
+    const client = getSupabaseClient()
+    if (!client || !client.storage || typeof client.storage.from !== 'function') {
+      return false
+    }
+
+    const { error } = await client.storage
+      .from(RECEIPTS_BUCKET)
+      .remove([file_path])
+
+    if (error) {
+      if (import.meta.env.DEV) {
+        console.warn('Error deleting receipt from storage (non-critical):', error)
+      }
+      return false
+    }
+
+    return true
+  } catch (err) {
+    if (import.meta.env.DEV) {
+      console.warn('Error deleting receipt from storage (non-critical):', err)
+    }
+    return false
+  }
+}
+
 const checkReceiptsBucket = async () => {
   try {
     // Use getSupabaseClient directly to avoid Proxy issues in production
@@ -3486,109 +3637,65 @@ export const uploadReceipt = async (file, expenseId) => {
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
 
-  // Check demo mode - in demo mode, skip real upload
+  // Validate file first
+  const validation = validateReceiptFile(file)
+  if (!validation.ok) {
+    throw new Error(validation.error)
+  }
+
+  // BLOCK in demo mode (no Storage writes, no DB inserts)
   if (demoMode) {
-    // In demo mode, simulate upload without actually uploading to storage
-    // Return mock attachment data
-    return {
-      id: `demo-${Date.now()}`,
-      url: null, // No real URL in demo
-      path: `demo/${userId}/expenses/${expenseId}/${Date.now()}_${file.name}`,
-      filename: file.name,
-      size: file.size,
-      mime_type: file.type,
-      created_at: new Date().toISOString()
-    }
+    throw new Error('Disabled in demo mode')
   }
   
-  // Verificar que el bucket existe (only in real mode)
-  const bucketExists = await checkReceiptsBucket()
-  if (!bucketExists) {
-    throw new Error(`Receipts storage not configured (missing bucket: '${RECEIPTS_BUCKET}')`)
-  }
-
-  // Validar tipus de fitxer
-  const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg']
-  if (!allowedTypes.includes(file.type)) {
-    throw new Error('Tipus de fitxer no permès. Només PDF, JPG i PNG.')
-  }
-
-  // Validar mida (max 10MB)
-  const maxSize = 10 * 1024 * 1024 // 10MB
-  if (file.size > maxSize) {
-    throw new Error('El fitxer és massa gran. Màxim 10MB.')
-  }
-
-  // Generar path: userId/expenses/expenseId/timestamp_filename
-  const timestamp = Date.now()
-  const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
-  const filePath = `${userId}/expenses/${expenseId}/${timestamp}_${sanitizedFileName}`
-
   try {
-    // Use getSupabaseClient directly to avoid Proxy issues in production
     const client = getSupabaseClient()
-    if (!client || !client.storage || typeof client.storage.from !== 'function') {
-      throw new Error('Supabase storage client not available')
-    }
-    
-    // Upload a Supabase Storage
-    const { data: uploadData, error: uploadError } = await client.storage
-      .from(RECEIPTS_BUCKET)
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: false
-      })
-
-    if (uploadError) {
-      // Provide clearer error message for bucket-related errors
-      if (uploadError.message?.includes('Bucket not found') || uploadError.message?.includes('bucket')) {
-        throw new Error(`Receipts storage not configured (missing bucket: '${RECEIPTS_BUCKET}')`)
-      }
-      throw uploadError
+    if (!client || typeof client.from !== 'function') {
+      throw new Error('Supabase client not available')
     }
 
-    // Guardar metadata en expense_attachments (use client directly)
+    // Upload to storage using helper
+    const uploadResult = await uploadReceiptToStorage({ userId, expenseId, file })
+
+    // Insert metadata into expense_attachments
     const { data: attachmentData, error: dbError } = await client
       .from('expense_attachments')
       .insert([{
         user_id: userId,
         expense_id: expenseId,
-        file_path: filePath,
-        file_name: file.name,
-        mime_type: file.type,
-        size: file.size,
+        file_path: uploadResult.file_path,
+        file_name: uploadResult.file_name,
+        mime_type: uploadResult.mime_type,
+        size: uploadResult.size,
         is_demo: demoMode
       }])
       .select()
       .single()
 
     if (dbError) {
-      // Si falla la inserción en DB, intentar eliminar el archivo de storage
-      try {
-        await client.storage.from(RECEIPTS_BUCKET).remove([filePath])
-      } catch (cleanupErr) {
-        if (import.meta.env.DEV) {
-          console.error('Error cleaning up storage after DB failure:', cleanupErr)
-        }
-      }
+      // ROLLBACK: Delete uploaded file if DB insert fails
+      await deleteReceiptFromStorage(uploadResult.file_path)
       throw dbError
     }
 
-    // Generar signed URL (1 hora de validez)
-    const signedUrl = await getAttachmentSignedUrl(filePath)
+    // Generate signed URL (1 hour validity)
+    const signedUrl = await getAttachmentSignedUrl(uploadResult.file_path)
 
     return {
       id: attachmentData.id,
       url: signedUrl,
-      path: filePath,
-      filename: file.name,
-      size: file.size,
-      mime_type: file.type,
+      path: uploadResult.file_path,
+      filename: uploadResult.file_name,
+      size: uploadResult.size,
+      mime_type: uploadResult.mime_type,
       created_at: attachmentData.created_at
     }
   } catch (err) {
     // Re-throw with clearer message if it's already our custom error
     if (err.message?.includes('Receipts storage not configured')) {
+      throw err
+    }
+    if (err.message === 'Disabled in demo mode') {
       throw err
     }
     if (import.meta.env.DEV) {
@@ -3720,6 +3827,172 @@ export const updateAttachmentName = async (attachmentId, newFileName) => {
       console.error('Error updating attachment name:', err)
     }
     throw new Error(`Error renombrant receipt: ${err.message || 'Error desconegut'}`)
+  }
+}
+
+/**
+ * Replace expense attachment file (Strategy #2: upload to NEW path + update DB + delete old)
+ * Orchestrates replace with rollback + cleanup
+ * @param {object} params - {attachment, userId, file, isDemo}
+ * @returns {Promise<{attachment: object, cleanupWarning?: string}>}
+ */
+export const replaceExpenseAttachmentFile = async ({ attachment, userId, file, isDemo }) => {
+  if (!attachment || !attachment.id) {
+    throw new Error('Attachment ID is required to replace receipt')
+  }
+
+  if (!userId) throw new Error('User not authenticated')
+
+  // BLOCK in demo mode (no Storage writes, no DB updates)
+  if (isDemo) {
+    throw new Error('Disabled in demo mode')
+  }
+
+  // Validate file first
+  const validation = validateReceiptFile(file)
+  if (!validation.ok) {
+    throw new Error(validation.error)
+  }
+
+  const client = getSupabaseClient()
+  if (!client || typeof client.from !== 'function') {
+    throw new Error('Supabase client not available')
+  }
+
+  const oldFilePath = attachment.file_path
+  const expenseId = attachment.expense_id
+  let newFilePath = null
+  let cleanupWarning = null
+
+  try {
+    // 1. Upload new file to storage (NEW path)
+    const uploadResult = await uploadReceiptToStorage({ userId, expenseId, file })
+    newFilePath = uploadResult.file_path
+
+    // 2. Update DB row with new metadata
+    const { data: updatedAttachment, error: updateError } = await client
+      .from('expense_attachments')
+      .update({
+        file_path: uploadResult.file_path,
+        file_name: uploadResult.file_name, // Use new file name
+        mime_type: uploadResult.mime_type,
+        size: uploadResult.size
+        // Keep created_at original
+      })
+      .eq('id', attachment.id)
+      .eq('user_id', userId)
+      .eq('is_demo', isDemo)
+      .select()
+      .single()
+
+    if (updateError) {
+      // ROLLBACK: Delete newly uploaded file if DB update fails
+      const deleted = await deleteReceiptFromStorage(newFilePath)
+      if (!deleted && import.meta.env.DEV) {
+        console.error('Failed to rollback storage file after DB update failure:', newFilePath)
+      }
+      throw updateError
+    }
+
+    // 3. Cleanup old storage file (best-effort, non-critical)
+    if (oldFilePath && oldFilePath !== newFilePath) {
+      const deleted = await deleteReceiptFromStorage(oldFilePath)
+      if (!deleted) {
+        cleanupWarning = `El fitxer antic no s'ha pogut eliminar del servidor (no crític)`
+      }
+    }
+
+    // 4. Generate signed URL for new file
+    const signedUrl = await getAttachmentSignedUrl(newFilePath)
+
+    return {
+      attachment: {
+        ...updatedAttachment,
+        url: signedUrl,
+        filename: uploadResult.file_name,
+        path: uploadResult.file_path
+      },
+      cleanupWarning
+    }
+  } catch (err) {
+    // If we uploaded a file but something failed, try cleanup
+    if (newFilePath && err.message !== 'Supabase storage client not available') {
+      await deleteReceiptFromStorage(newFilePath)
+    }
+    
+    if (err.message?.includes('Receipts storage not configured')) {
+      throw err
+    }
+    if (err.message === 'Disabled in demo mode') {
+      throw err
+    }
+    
+    if (import.meta.env.DEV) {
+      console.error('Error replacing expense attachment:', err)
+    }
+    throw new Error(`Error substituint receipt: ${err.message || 'Error desconegut'}`)
+  }
+}
+
+/**
+ * Replace receipt attachment file (public API wrapper)
+ * @param {File} file - New file to upload (PDF, JPG, PNG)
+ * @param {string} attachmentId - Existing attachment ID to replace
+ * @returns {Promise<object>} Updated attachment data
+ */
+export const replaceReceipt = async (file, attachmentId) => {
+  const userId = await getCurrentUserId()
+  if (!userId) throw new Error('User not authenticated')
+
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+
+  // Validate first
+  const validation = validateReceiptFile(file)
+  if (!validation.ok) {
+    throw new Error(validation.error)
+  }
+
+  // BLOCK in demo mode
+  if (demoMode) {
+    throw new Error('Disabled in demo mode')
+  }
+
+  const client = getSupabaseClient()
+  if (!client || typeof client.from !== 'function') {
+    throw new Error('Supabase client not available')
+  }
+
+  // Fetch existing attachment
+  const { data: existingAttachment, error: fetchError } = await client
+    .from('expense_attachments')
+    .select('*')
+    .eq('id', attachmentId)
+    .eq('user_id', userId)
+    .eq('is_demo', demoMode)
+    .single()
+
+  if (fetchError) throw fetchError
+  if (!existingAttachment) throw new Error('Attachment not found')
+
+  // Use orchestrator function
+  const result = await replaceExpenseAttachmentFile({
+    attachment: existingAttachment,
+    userId,
+    file,
+    isDemo: demoMode
+  })
+
+  // Return compatible format
+  return {
+    id: result.attachment.id,
+    url: result.attachment.url,
+    path: result.attachment.file_path || result.attachment.path,
+    filename: result.attachment.file_name || result.attachment.filename,
+    size: result.attachment.size,
+    mime_type: result.attachment.mime_type,
+    created_at: result.attachment.created_at,
+    cleanupWarning: result.cleanupWarning
   }
 }
 

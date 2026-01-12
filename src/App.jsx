@@ -61,7 +61,7 @@ const Analytics = lazyWithErrorBoundary(() => import('./pages/Analytics'), 'Anal
 const Suppliers = lazyWithErrorBoundary(() => import('./pages/Suppliers'), 'Suppliers')
 const Forwarders = lazyWithErrorBoundary(() => import('./pages/Forwarders'), 'Forwarders')
 const Warehouses = lazyWithErrorBoundary(() => import('./pages/Warehouses'), 'Warehouses')
-const Calendar = lazyWithErrorBoundary(() => import('./pages/Calendar'), 'Calendar')
+const Calendar = lazyWithErrorBoundary(() => import('./pages/CalendarPage'), 'Calendar')
 const Diagnostics = lazyWithErrorBoundary(() => import('./pages/Diagnostics'), 'Diagnostics')
 const DevSeed = lazyWithErrorBoundary(() => import('./pages/DevSeed'), 'DevSeed')
 const Help = lazyWithErrorBoundary(() => import('./pages/Help'), 'Help')
