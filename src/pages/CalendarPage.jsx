@@ -474,7 +474,7 @@ export default function CalendarPage() {
         
         {/* Calendar */}
         {!loading && !error && (
-          <div style={styles.calendarContainer} className="fd-calendar">
+          <div style={styles.calendarContainer} className="fd-calendar-asana">
             <Calendar
               localizer={localizer}
               events={calendarEvents}

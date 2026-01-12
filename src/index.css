@@ -4,29 +4,106 @@
   box-sizing: border-box;
 }
 
+/* ============================================
+   CANADIAN PALETTE (Flat UI Colors CA)
+   ============================================
+   Official color palette for entire application
+   https://flatuicolors.com/palette/ca
+*/
 :root {
-  --bg-primary: #f8f9fc;
-  --bg-secondary: #f3f4f6;
-  --bg-card: #ffffff;
-  --text-primary: #111827;
-  --text-secondary: #6b7280;
-  --border-color: #e5e7eb;
-  --accent: #4f46e5;
-  /* Border radius tokens - unified across app */
-  --radius-base: 10px;      /* Base radius for buttons, events, day tiles */
-  --radius-sm: 6px;         /* Small elements */
-  --radius-md: 12px;        /* Medium cards */
-  --radius-lg: 16px;         /* Large containers */
+  /* Canadian Palette - Base Colors */
+  --ca-turquoise: #1ABC9C;
+  --ca-emerald: #2ECC71;
+  --ca-peter-river: #3498DB;
+  --ca-amethyst: #9B59B6;
+  --ca-wet-asphalt: #34495E;
+  --ca-green-sea: #16A085;
+  --ca-nephritis: #27AE60;
+  --ca-belize-hole: #2980B9;
+  --ca-wisteria: #8E44AD;
+  --ca-midnight-blue: #2C3E50;
+  --ca-sun-flower: #F1C40F;
+  --ca-carrot: #E67E22;
+  --ca-alizarin: #E74C3C;
+  --ca-clouds: #ECF0F1;
+  --ca-concrete: #95A5A6;
+  --ca-orange: #F39C12;
+  --ca-pumpkin: #D35400;
+  --ca-pomegranate: #C0392B;
+  --ca-silver: #BDC3C7;
+  --ca-asbestos: #7F8C8D;
+
+  /* Semantic Color Tokens - Light Mode */
+  --color-primary: var(--ca-peter-river);
+  --color-secondary: var(--ca-wet-asphalt);
+  --color-accent: var(--ca-belize-hole);
+  --color-success: var(--ca-emerald);
+  --color-warning: var(--ca-carrot);
+  --color-danger: var(--ca-alizarin);
+  --color-bg: var(--ca-clouds);
+  --color-surface: #FFFFFF;
+  --color-border: var(--ca-silver);
+  --color-text: var(--ca-midnight-blue);
+  --color-muted: var(--ca-concrete);
+
+  /* Legacy compatibility - mapped to Canadian Palette */
+  --bg-primary: var(--color-bg);
+  --bg-secondary: #E8E9EA;
+  --bg-card: var(--color-surface);
+  --text-primary: var(--color-text);
+  --text-secondary: var(--color-muted);
+  --border-color: var(--color-border);
+  --accent: var(--color-accent);
+
+  /* Single UI Radius - UNIFIED ACROSS ENTIRE APP */
+  --radius-ui: 10px;
+  /* Legacy compatibility */
+  --radius-base: var(--radius-ui);
+  --radius-sm: var(--radius-ui);
+  --radius-md: var(--radius-ui);
+  --radius-lg: var(--radius-ui);
+
+  /* Spacing System - 8px grid */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+
+  /* Shadows - Soft, Asana-like */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 8px 16px rgba(0, 0, 0, 0.12);
+
+  /* Focus Ring */
+  --focus-ring: 0 0 0 2px var(--color-accent);
+  --focus-ring-offset: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-accent);
 }
 
 body.dark {
-  --bg-primary: #0a0a0f;
-  --bg-secondary: #1f1f2e;
-  --bg-card: #15151f;
-  --text-primary: #ffffff;
-  --text-secondary: #9ca3af;
-  --border-color: #2a2a3a;
-  --accent: #6366f1;
+  /* Semantic Color Tokens - Dark Mode */
+  --color-primary: var(--ca-belize-hole);
+  --color-secondary: var(--ca-wet-asphalt);
+  --color-accent: var(--ca-peter-river);
+  --color-success: var(--ca-nephritis);
+  --color-warning: var(--ca-orange);
+  --color-danger: var(--ca-pomegranate);
+  --color-bg: var(--ca-midnight-blue);
+  --color-surface: var(--ca-wet-asphalt);
+  --color-border: var(--ca-concrete);
+  --color-text: #FFFFFF;
+  --color-muted: var(--ca-silver);
+
+  /* Legacy compatibility - mapped to Canadian Palette */
+  --bg-primary: var(--color-bg);
+  --bg-secondary: var(--ca-midnight-blue);
+  --bg-card: var(--color-surface);
+  --text-primary: var(--color-text);
+  --text-secondary: var(--color-muted);
+  --border-color: var(--color-border);
+  --accent: var(--color-accent);
 }
 
 body {
@@ -68,13 +145,13 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Focus styles */
+/* Focus styles - Asana-like soft ring */
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 /* Transitions */
@@ -89,248 +166,288 @@ a, button {
 }
 
 /* ============================================
-   FREEDOLIAPP CALENDAR STYLES
+   CALENDAR - ASANA STYLE
    ============================================
-   Styles for react-big-calendar to match app design system
-   Rounded cards, clean spacing, consistent border radius
+   Clean, compact, readable calendar styling
+   Uses Canadian Palette and single radius token
    FULL Catalan localization
+   All styles scoped under .fd-calendar-asana
 */
 
-.fd-calendar {
-  --fd-radius: 14px; /* Single radius token for day tiles and events - used everywhere */
+.fd-calendar-asana {
+  /* Use single UI radius */
+  --calendar-radius: var(--radius-ui);
 }
 
-/* Calendar container - rounded card */
-.fd-calendar .rbc-calendar {
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 14px;
+/* Calendar container - clean surface */
+.fd-calendar-asana .rbc-calendar {
+  border-radius: var(--radius-ui);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: 16px;
 }
 
-body:not(.dark) .fd-calendar .rbc-calendar {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
+body.dark .fd-calendar-asana .rbc-calendar {
+  background: var(--color-surface);
+  border-color: var(--color-border);
 }
 
-/* No grid hard */
-.fd-calendar .rbc-theme-standard td,
-.fd-calendar .rbc-theme-standard th {
+/* Remove harsh grid lines */
+.fd-calendar-asana .rbc-theme-standard td,
+.fd-calendar-asana .rbc-theme-standard th {
+  border: none;
+}
+
+.fd-calendar-asana .rbc-month-view,
+.fd-calendar-asana .rbc-time-view,
+.fd-calendar-asana .rbc-agenda-view {
   border: none;
 }
 
 /* Month title */
-.fd-calendar .rbc-toolbar-label {
+.fd-calendar-asana .rbc-toolbar-label {
   font-size: 18px;
-  font-weight: 650;
-}
-
-/* Weekday header */
-.fd-calendar .rbc-header {
-  opacity: 0.85;
   font-weight: 600;
-  padding: 10px 0;
+  color: var(--color-text);
 }
 
-/* Day tile */
-.fd-calendar .rbc-day-bg {
-  border-radius: var(--fd-radius);
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  margin: 6px;
-  overflow: hidden;
-  min-height: 88px;
-}
-
-body:not(.dark) .fd-calendar .rbc-day-bg {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-}
-
-/* Today subtle */
-.fd-calendar .rbc-today .rbc-day-bg {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.12);
-}
-
-body:not(.dark) .fd-calendar .rbc-today .rbc-day-bg {
-  background: rgba(79, 70, 229, 0.05);
-  border-color: rgba(79, 70, 229, 0.12);
-}
-
-/* Day number */
-.fd-calendar .rbc-date-cell {
-  padding: 8px 10px;
-}
-
-.fd-calendar .rbc-date-cell > a {
-  font-weight: 700;
-  opacity: 0.9;
-}
-
-/* Event rectangle with same radius */
-.fd-calendar .rbc-event {
-  border: none !important;
-  border-radius: var(--fd-radius) !important;
-  padding: 6px 10px !important;
-  margin: 6px 8px 0 8px !important;
-  line-height: 1.15;
+/* Weekday headers - clean and subtle */
+.fd-calendar-asana .rbc-header {
+  color: var(--color-muted);
+  font-weight: 600;
   font-size: 13px;
-}
-
-/* Event hover */
-.fd-calendar .rbc-event:hover {
-  opacity: 0.9;
-  cursor: pointer;
-}
-
-/* Buttons */
-.fd-calendar .rbc-toolbar button {
-  border-radius: 12px !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  background: rgba(255, 255, 255, 0.06) !important;
-}
-
-body:not(.dark) .fd-calendar .rbc-toolbar button {
-  border: 1px solid var(--border-color) !important;
-  background: var(--bg-secondary) !important;
-}
-
-.fd-calendar .rbc-toolbar button.rbc-active {
-  background: rgba(255, 255, 255, 0.18) !important;
-}
-
-body:not(.dark) .fd-calendar .rbc-toolbar button.rbc-active {
-  background: var(--accent) !important;
-  color: #ffffff !important;
-  border-color: var(--accent) !important;
-}
-
-/* Week/Day view - Time slots */
-.fd-calendar .rbc-time-view {
+  padding: 10px 0;
+  text-transform: capitalize;
   border: none;
 }
 
-.fd-calendar .rbc-time-slot {
-  border-color: var(--border-color);
+/* Day tiles - compact rounded cards */
+.fd-calendar-asana .rbc-day-bg {
+  border-radius: var(--radius-ui);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  margin: 4px;
+  overflow: hidden;
+  min-height: 80px;
+  transition: all 0.15s ease;
+}
+
+body.dark .fd-calendar-asana .rbc-day-bg {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.fd-calendar-asana .rbc-day-bg:hover {
+  border-color: var(--color-accent);
+}
+
+/* Today highlight - subtle */
+.fd-calendar-asana .rbc-today .rbc-day-bg {
+  background: rgba(52, 152, 219, 0.08);
+  border-color: var(--color-accent);
+}
+
+body.dark .fd-calendar-asana .rbc-today .rbc-day-bg {
+  background: rgba(52, 152, 219, 0.12);
+  border-color: var(--color-accent);
+}
+
+/* Day number - small and discrete */
+.fd-calendar-asana .rbc-date-cell {
+  padding: 6px 8px;
+  text-align: right;
+}
+
+.fd-calendar-asana .rbc-date-cell > a {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--color-text);
+  opacity: 0.85;
+}
+
+.fd-calendar-asana .rbc-today .rbc-date-cell > a {
+  color: var(--color-accent);
+  opacity: 1;
+  font-weight: 700;
+}
+
+/* Events - compact horizontal bars */
+.fd-calendar-asana .rbc-event {
+  border: none !important;
+  border-radius: var(--radius-ui) !important;
+  padding: 4px 8px !important;
+  margin: 2px 6px 2px 6px !important;
+  line-height: 1.4;
+  font-size: 12px;
+  font-weight: 500;
+  min-height: 20px;
+  max-height: 22px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-shadow: none;
+}
+
+.fd-calendar-asana .rbc-event:hover {
+  opacity: 0.9;
+  cursor: pointer;
+  transform: translateY(-1px);
+}
+
+/* Toolbar buttons */
+.fd-calendar-asana .rbc-toolbar {
+  margin-bottom: 16px;
+}
+
+.fd-calendar-asana .rbc-toolbar button {
+  border-radius: var(--radius-ui) !important;
+  border: 1px solid var(--color-border) !important;
+  background: var(--color-surface) !important;
+  color: var(--color-text) !important;
+  padding: 6px 12px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  transition: all 0.15s ease !important;
+}
+
+body.dark .fd-calendar-asana .rbc-toolbar button {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.fd-calendar-asana .rbc-toolbar button:hover {
+  background: var(--color-bg) !important;
+}
+
+.fd-calendar-asana .rbc-toolbar button.rbc-active {
+  background: var(--color-accent) !important;
+  color: #FFFFFF !important;
+  border-color: var(--color-accent) !important;
+}
+
+body.dark .fd-calendar-asana .rbc-toolbar button.rbc-active {
+  background: var(--color-accent) !important;
+  border-color: var(--color-accent) !important;
+}
+
+/* Week/Day view - Time slots */
+.fd-calendar-asana .rbc-time-view {
+  border: none;
+}
+
+.fd-calendar-asana .rbc-time-slot {
+  border-color: var(--color-border);
   border-top-width: 1px;
-  opacity: 0.3;
+  opacity: 0.2;
 }
 
-.fd-calendar .rbc-time-header-content {
-  border-color: var(--border-color);
+.fd-calendar-asana .rbc-time-header-content {
+  border-color: var(--color-border);
 }
 
-.fd-calendar .rbc-time-content {
-  border-color: var(--border-color);
+.fd-calendar-asana .rbc-time-content {
+  border-color: var(--color-border);
 }
 
-.fd-calendar .rbc-time-header-gutter {
-  border-color: var(--border-color);
-  background-color: var(--bg-card);
+.fd-calendar-asana .rbc-time-header-gutter {
+  border-color: var(--color-border);
+  background-color: var(--color-surface);
 }
 
-.fd-calendar .rbc-time-gutter {
-  border-color: var(--border-color);
-  background-color: var(--bg-card);
+.fd-calendar-asana .rbc-time-gutter {
+  border-color: var(--color-border);
+  background-color: var(--color-surface);
 }
 
-.fd-calendar .rbc-time-gutter .rbc-timeslot-group {
-  border-color: var(--border-color);
+.fd-calendar-asana .rbc-time-gutter .rbc-timeslot-group {
+  border-color: var(--color-border);
 }
 
-.fd-calendar .rbc-label {
-  color: var(--text-secondary);
+.fd-calendar-asana .rbc-label {
+  color: var(--color-muted);
   font-size: 11px;
   font-weight: 500;
   padding: 4px 8px;
 }
 
 /* Current time indicator */
-.fd-calendar .rbc-current-time-indicator {
-  background-color: #ef4444;
+.fd-calendar-asana .rbc-current-time-indicator {
+  background-color: var(--ca-alizarin);
   height: 2px;
-  box-shadow: 0 0 4px rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 4px rgba(231, 76, 60, 0.4);
 }
 
-.fd-calendar .rbc-current-time-indicator::before {
+.fd-calendar-asana .rbc-current-time-indicator::before {
   content: '';
   position: absolute;
-  width: 8px;
-  height: 8px;
-  background-color: #ef4444;
+  width: 6px;
+  height: 6px;
+  background-color: var(--ca-alizarin);
   border-radius: 50%;
-  left: -4px;
-  top: -3px;
-  box-shadow: 0 0 4px rgba(239, 68, 68, 0.5);
+  left: -3px;
+  top: -2px;
+  box-shadow: 0 0 4px rgba(231, 76, 60, 0.4);
 }
 
 /* Agenda/List view */
-.fd-calendar .rbc-agenda-view {
-  color: var(--text-primary);
+.fd-calendar-asana .rbc-agenda-view {
+  color: var(--color-text);
 }
 
-.fd-calendar .rbc-agenda-table {
-  border-radius: var(--fd-radius);
+.fd-calendar-asana .rbc-agenda-table {
+  border-radius: var(--radius-ui);
   overflow: hidden;
-  border: var(--calendar-border);
+  border: 1px solid var(--color-border);
 }
 
-.fd-calendar .rbc-agenda-date-cell,
-.fd-calendar .rbc-agenda-time-cell {
-  border-color: var(--border-color);
-  color: var(--text-secondary);
+.fd-calendar-asana .rbc-agenda-date-cell,
+.fd-calendar-asana .rbc-agenda-time-cell {
+  border-color: var(--color-border);
+  color: var(--color-muted);
   padding: 12px 16px;
   font-size: 13px;
-  background-color: var(--bg-card);
+  background-color: var(--color-surface);
 }
 
-.fd-calendar .rbc-agenda-event-cell {
-  border-color: var(--border-color);
+.fd-calendar-asana .rbc-agenda-event-cell {
+  border-color: var(--color-border);
   padding: 12px 16px;
-  background-color: var(--bg-card);
-  transition: background-color 0.2s ease;
+  background-color: var(--color-surface);
+  transition: background-color 0.15s ease;
 }
 
-.fd-calendar .rbc-agenda-event-cell:hover {
-  background-color: var(--bg-secondary);
+.fd-calendar-asana .rbc-agenda-event-cell:hover {
+  background-color: var(--color-bg);
 }
 
 /* Show more link */
-.fd-calendar .rbc-show-more {
-  background-color: var(--bg-secondary);
-  color: var(--text-secondary);
-  border-radius: var(--fd-radius);
+.fd-calendar-asana .rbc-show-more {
+  background-color: var(--color-bg);
+  color: var(--color-muted);
+  border-radius: var(--radius-ui);
   padding: 4px 8px;
   font-size: 12px;
   font-weight: 500;
   margin-top: 4px;
-  transition: all 0.2s ease;
-  border: var(--calendar-border);
+  transition: all 0.15s ease;
+  border: 1px solid var(--color-border);
 }
 
-.fd-calendar .rbc-show-more:hover {
-  background-color: var(--bg-secondary);
-  color: var(--text-primary);
-  border-color: var(--accent);
-}
-
-/* Remove default harsh borders */
-.fd-calendar .rbc-month-view,
-.fd-calendar .rbc-time-view,
-.fd-calendar .rbc-agenda-view {
-  border: none;
+.fd-calendar-asana .rbc-show-more:hover {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  border-color: var(--color-accent);
 }
 
 /* Smooth transitions for day cells */
-.fd-calendar .rbc-day-slot .rbc-time-slot {
-  transition: background-color 0.2s ease;
+.fd-calendar-asana .rbc-day-slot .rbc-time-slot {
+  transition: background-color 0.15s ease;
 }
 
-.fd-calendar .rbc-day-slot .rbc-time-slot:hover {
-  background-color: rgba(79, 70, 229, 0.02);
+.fd-calendar-asana .rbc-day-slot .rbc-time-slot:hover {
+  background-color: rgba(52, 152, 219, 0.03);
 }
 
-body.dark .fd-calendar .rbc-day-slot .rbc-time-slot:hover {
+body.dark .fd-calendar-asana .rbc-day-slot .rbc-time-slot:hover {
   background-color: rgba(255, 255, 255, 0.02);
 }

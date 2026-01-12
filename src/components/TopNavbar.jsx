@@ -9,6 +9,8 @@ import { useNotes } from '../hooks/useNotes'
 import AddStickyNoteModal from './AddStickyNoteModal'
 import HelpModal from './HelpModal'
 import WorldClocks from './WorldClocks'
+import Avatar from './Avatar'
+import AvatarSelector from './AvatarSelector'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { showToast } from './Toast'
 
@@ -21,6 +23,26 @@ export default function TopNavbar() {
   const { refresh } = useNotes()
   const [showNoteModal, setShowNoteModal] = useState(false)
   const [showHelpModal, setShowHelpModal] = useState(false)
+  const [showAvatarSelector, setShowAvatarSelector] = useState(false)
+  const [userEmail, setUserEmail] = useState('')
+  const [userName, setUserName] = useState('')
+
+  // Load user info
+  useEffect(() => {
+    const loadUserInfo = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session?.user) {
+          setUserEmail(session.user.email || '')
+          // Try to get user name from metadata or use email
+          setUserName(session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || '')
+        }
+      } catch (err) {
+        console.error('Error loading user info:', err)
+      }
+    }
+    loadUserInfo()
+  }, [])
 
   // No mostrar navbar a login
   if (location.pathname === '/login') return null
@@ -93,6 +115,17 @@ export default function TopNavbar() {
           {/* World Clocks */}
           <WorldClocks />
 
+          {/* Avatar */}
+          <Avatar
+            userEmail={userEmail}
+            userName={userName}
+            size={36}
+            onClick={() => setShowAvatarSelector(true)}
+            style={{
+              marginLeft: '8px'
+            }}
+          />
+
           {/* Settings */}
           <button 
             onClick={() => navigate('/settings')}
@@ -156,6 +189,14 @@ export default function TopNavbar() {
         isOpen={showHelpModal}
         onClose={() => setShowHelpModal(false)}
         darkMode={darkMode}
+      />
+
+      {/* Avatar Selector */}
+      <AvatarSelector
+        isOpen={showAvatarSelector}
+        onClose={() => setShowAvatarSelector(false)}
+        userEmail={userEmail}
+        userName={userName}
       />
     </>
   )
