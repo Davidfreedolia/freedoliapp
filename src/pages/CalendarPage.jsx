@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Calendar, momentLocalizer } from 'react-big-calendar'
 import moment from 'moment'
+import 'moment/locale/ca'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { useApp } from '../context/AppContext'
@@ -11,14 +12,15 @@ import { getProjects } from '../lib/supabase'
 import { Calendar as CalendarIcon, Filter, X } from 'lucide-react'
 import { useEffect } from 'react'
 
-const localizer = momentLocalizer(moment)
-
-// Set moment locale to start week on Monday
+// Configure moment for Catalan locale
 moment.locale('ca', {
   week: {
-    dow: 1 // Monday is the first day of the week
+    dow: 1, // Monday is the first day of the week
+    doy: 4  // The week that contains Jan 4th is the first week of the year
   }
 })
+
+const localizer = momentLocalizer(moment)
 
 const VIEWS = {
   MONTH: 'month',
@@ -154,10 +156,12 @@ export default function CalendarPage() {
         backgroundColor,
         borderColor: backgroundColor,
         color: '#ffffff',
-        borderRadius: '4px',
+        borderRadius: '999px', // Pill shape
         border: 'none',
-        padding: '2px 4px',
-        fontSize: '12px'
+        padding: '4px 10px',
+        fontSize: '12px',
+        fontWeight: '500',
+        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
       }
     }
   }
@@ -298,11 +302,12 @@ export default function CalendarPage() {
     calendarContainer: {
       flex: 1,
       backgroundColor: darkMode ? '#15151f' : '#ffffff',
-      borderRadius: '12px',
-      padding: isMobile ? '12px' : '20px',
+      borderRadius: '16px',
+      padding: isMobile ? '16px' : '24px',
       border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
       overflow: 'hidden',
-      minHeight: isMobile ? '500px' : '600px'
+      minHeight: isMobile ? '500px' : '600px',
+      boxShadow: darkMode ? '0 1px 3px rgba(0, 0, 0, 0.2)' : '0 1px 3px rgba(0, 0, 0, 0.05)'
     },
     loading: {
       display: 'flex',
@@ -473,6 +478,20 @@ export default function CalendarPage() {
                 event: CustomEvent
               }}
               culture="ca"
+              formats={{
+                dayFormat: 'dddd D',
+                weekdayFormat: 'ddd',
+                monthHeaderFormat: 'MMMM YYYY',
+                dayHeaderFormat: 'dddd D MMMM',
+                dayRangeHeaderFormat: ({ start, end }) => 
+                  `${moment(start).format('D MMMM')} - ${moment(end).format('D MMMM YYYY')}`,
+                timeGutterFormat: 'HH:mm',
+                eventTimeRangeFormat: ({ start, end }) => 
+                  `${moment(start).format('HH:mm')} - ${moment(end).format('HH:mm')}`,
+                agendaTimeFormat: 'HH:mm',
+                agendaTimeRangeFormat: ({ start, end }) => 
+                  `${moment(start).format('HH:mm')} - ${moment(end).format('HH:mm')}`
+              }}
               messages={{
                 next: 'Següent',
                 previous: 'Anterior',
@@ -484,7 +503,8 @@ export default function CalendarPage() {
                 date: 'Data',
                 time: 'Hora',
                 event: 'Esdeveniment',
-                noEventsInRange: 'No hi ha esdeveniments en aquest rang'
+                noEventsInRange: 'No hi ha esdeveniments en aquest rang',
+                showMore: total => `+${total} més`
               }}
             />
           </div>
@@ -492,72 +512,269 @@ export default function CalendarPage() {
       </div>
       
       <style>{`
+        /* Base calendar styles */
         .rbc-calendar {
           font-family: inherit;
+          border-radius: 12px;
+          overflow: hidden;
         }
+        
+        /* Toolbar - Modern buttons */
+        .rbc-toolbar {
+          margin-bottom: 20px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+        
+        .rbc-toolbar-label {
+          font-size: 18px;
+          font-weight: 600;
+          color: ${darkMode ? '#ffffff' : '#111827'};
+          letter-spacing: -0.01em;
+        }
+        
+        .rbc-btn-group {
+          display: flex;
+          gap: 6px;
+        }
+        
+        .rbc-toolbar button {
+          color: ${darkMode ? '#9ca3af' : '#6b7280'};
+          background-color: ${darkMode ? '#1f1f2e' : '#f9fafb'};
+          border: 1px solid ${darkMode ? '#374151' : '#e5e7eb'};
+          padding: 8px 16px;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: 500;
+          transition: all 0.2s ease;
+          cursor: pointer;
+        }
+        
+        .rbc-toolbar button:hover {
+          background-color: ${darkMode ? '#2a2a3a' : '#f3f4f6'};
+          color: ${darkMode ? '#ffffff' : '#111827'};
+          border-color: ${darkMode ? '#4b5563' : '#d1d5db'};
+        }
+        
+        .rbc-toolbar button.rbc-active {
+          background-color: ${darkMode ? '#4f46e5' : '#4f46e5'};
+          color: #ffffff;
+          border-color: ${darkMode ? '#4f46e5' : '#4f46e5'};
+          box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+        }
+        
+        /* Headers - Days of week */
         .rbc-header {
           color: ${darkMode ? '#9ca3af' : '#6b7280'};
           border-color: ${darkMode ? '#374151' : '#e5e7eb'};
-          padding: 12px 8px;
+          padding: 14px 8px;
           font-weight: 600;
+          font-size: 13px;
+          text-transform: capitalize;
+          border-bottom: 2px solid ${darkMode ? '#374151' : '#e5e7eb'};
         }
+        
+        /* Day cells - Rounded corners */
         .rbc-day-bg {
           border-color: ${darkMode ? '#374151' : '#e5e7eb'};
+          border-width: 1px;
         }
+        
+        .rbc-day-bg:first-child {
+          border-left: none;
+        }
+        
+        .rbc-day-bg:last-child {
+          border-right: none;
+        }
+        
+        /* Today highlight - Subtle */
         .rbc-today {
-          background-color: ${darkMode ? '#1f1f2e' : '#f3f4f6'};
+          background-color: ${darkMode ? 'rgba(79, 70, 229, 0.1)' : 'rgba(79, 70, 229, 0.05)'};
         }
+        
+        .rbc-today .rbc-day-bg {
+          background-color: ${darkMode ? 'rgba(79, 70, 229, 0.1)' : 'rgba(79, 70, 229, 0.05)'};
+        }
+        
+        /* Off-range days */
         .rbc-off-range-bg {
-          background-color: ${darkMode ? '#0a0a0f' : '#f9fafb'};
+          background-color: ${darkMode ? '#0f0f15' : '#fafafa'};
+          opacity: 0.5;
         }
-        .rbc-toolbar {
-          margin-bottom: 16px;
-        }
-        .rbc-toolbar button {
-          color: ${darkMode ? '#ffffff' : '#111827'};
-          background-color: ${darkMode ? '#1f1f2e' : '#ffffff'};
-          border-color: ${darkMode ? '#374151' : '#e5e7eb'};
-          padding: 8px 16px;
-          border-radius: 6px;
-        }
-        .rbc-toolbar button:hover {
-          background-color: ${darkMode ? '#2a2a3a' : '#f3f4f6'};
-        }
-        .rbc-toolbar button.rbc-active {
-          background-color: #4f46e5;
-          color: #ffffff;
-          border-color: #4f46e5;
-        }
+        
+        /* Events - Pill shape */
         .rbc-event {
-          border-radius: 4px;
-          padding: 2px 4px;
+          border-radius: 999px !important;
+          padding: 4px 10px !important;
+          border: none !important;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+          transition: all 0.2s ease;
         }
+        
+        .rbc-event:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+        
         .rbc-event:focus {
           outline: 2px solid #4f46e5;
           outline-offset: 2px;
         }
+        
+        .rbc-event-label {
+          font-size: 11px;
+          opacity: 0.9;
+        }
+        
+        /* Month view - Day numbers */
+        .rbc-date-cell {
+          padding: 8px;
+        }
+        
+        .rbc-date-cell > a {
+          color: ${darkMode ? '#ffffff' : '#111827'};
+          font-weight: 500;
+          font-size: 14px;
+          padding: 4px 8px;
+          border-radius: 6px;
+          transition: all 0.2s ease;
+        }
+        
+        .rbc-date-cell > a:hover {
+          background-color: ${darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'};
+        }
+        
+        .rbc-off-range > a {
+          color: ${darkMode ? '#4b5563' : '#9ca3af'};
+          opacity: 0.4;
+        }
+        
+        .rbc-now > a {
+          color: #4f46e5;
+          font-weight: 700;
+          background-color: ${darkMode ? 'rgba(79, 70, 229, 0.2)' : 'rgba(79, 70, 229, 0.1)'};
+        }
+        
+        /* Week/Day view - Time slots */
+        .rbc-time-slot {
+          border-color: ${darkMode ? '#2a2a3a' : '#f3f4f6'};
+          border-top-width: 1px;
+        }
+        
+        .rbc-time-header-content {
+          border-color: ${darkMode ? '#374151' : '#e5e7eb'};
+        }
+        
+        .rbc-time-content {
+          border-color: ${darkMode ? '#374151' : '#e5e7eb'};
+        }
+        
+        .rbc-time-header-gutter {
+          border-color: ${darkMode ? '#374151' : '#e5e7eb'};
+        }
+        
+        .rbc-time-gutter {
+          border-color: ${darkMode ? '#374151' : '#e5e7eb'};
+        }
+        
+        .rbc-time-gutter .rbc-timeslot-group {
+          border-color: ${darkMode ? '#2a2a3a' : '#f3f4f6'};
+        }
+        
+        .rbc-label {
+          color: ${darkMode ? '#6b7280' : '#9ca3af'};
+          font-size: 11px;
+          font-weight: 500;
+          padding: 4px 8px;
+        }
+        
+        /* Current time indicator */
+        .rbc-current-time-indicator {
+          background-color: #ef4444;
+          height: 2px;
+          box-shadow: 0 0 4px rgba(239, 68, 68, 0.5);
+        }
+        
+        .rbc-current-time-indicator::before {
+          content: '';
+          position: absolute;
+          width: 8px;
+          height: 8px;
+          background-color: #ef4444;
+          border-radius: 50%;
+          left: -4px;
+          top: -3px;
+          box-shadow: 0 0 4px rgba(239, 68, 68, 0.5);
+        }
+        
+        /* Agenda/List view */
         .rbc-agenda-view {
           color: ${darkMode ? '#ffffff' : '#111827'};
         }
+        
+        .rbc-agenda-table {
+          border-radius: 8px;
+          overflow: hidden;
+        }
+        
         .rbc-agenda-date-cell,
         .rbc-agenda-time-cell {
           border-color: ${darkMode ? '#374151' : '#e5e7eb'};
           color: ${darkMode ? '#9ca3af' : '#6b7280'};
+          padding: 12px 16px;
+          font-size: 13px;
         }
+        
         .rbc-agenda-event-cell {
           border-color: ${darkMode ? '#374151' : '#e5e7eb'};
+          padding: 12px 16px;
         }
-        .rbc-time-slot {
+        
+        .rbc-agenda-event-cell:hover {
+          background-color: ${darkMode ? '#1f1f2e' : '#f9fafb'};
+        }
+        
+        /* Month view - Show more link */
+        .rbc-show-more {
+          background-color: ${darkMode ? '#1f1f2e' : '#f9fafb'};
+          color: ${darkMode ? '#9ca3af' : '#6b7280'};
+          border-radius: 6px;
+          padding: 4px 8px;
+          font-size: 12px;
+          font-weight: 500;
+          margin-top: 4px;
+          transition: all 0.2s ease;
+        }
+        
+        .rbc-show-more:hover {
+          background-color: ${darkMode ? '#2a2a3a' : '#f3f4f6'};
+          color: ${darkMode ? '#ffffff' : '#111827'};
+        }
+        
+        /* Remove harsh borders */
+        .rbc-month-row {
           border-color: ${darkMode ? '#374151' : '#e5e7eb'};
         }
-        .rbc-time-header-content {
-          border-color: ${darkMode ? '#374151' : '#e5e7eb'};
+        
+        .rbc-month-view {
+          border: none;
         }
-        .rbc-time-content {
-          border-color: ${darkMode ? '#374151' : '#e5e7eb'};
+        
+        .rbc-time-view {
+          border: none;
         }
-        .rbc-current-time-indicator {
-          background-color: #ef4444;
+        
+        /* Smooth transitions */
+        .rbc-day-slot .rbc-time-slot {
+          transition: background-color 0.2s ease;
+        }
+        
+        .rbc-day-slot .rbc-time-slot:hover {
+          background-color: ${darkMode ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.01)'};
         }
       `}</style>
     </div>
