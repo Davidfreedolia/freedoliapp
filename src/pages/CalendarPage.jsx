@@ -210,13 +210,6 @@ export default function CalendarPage() {
     )
   }
   
-  // Custom header component to ensure Catalan weekday names
-  const CustomHeader = ({ label, date, localizer, format, culture }) => {
-    // Force moment to use Catalan locale
-    moment.locale('ca')
-    const formatted = localizer.format(date, format, culture)
-    return <span>{formatted}</span>
-  }
   
   const styles = {
     container: {
@@ -479,7 +472,7 @@ export default function CalendarPage() {
         
         {/* Calendar */}
         {!loading && !error && (
-          <div style={styles.calendarContainer} className="freedoliapp-calendar">
+          <div style={styles.calendarContainer} className="app-calendar">
             <Calendar
               localizer={localizer}
               events={calendarEvents}
@@ -493,36 +486,58 @@ export default function CalendarPage() {
               onSelectEvent={handleEventClick}
               eventPropGetter={eventStyleGetter}
               components={{
-                event: CustomEvent,
-                header: CustomHeader
+                event: CustomEvent
+                // Removed header component - it was causing timestamp rendering
+                // Weekday headers are handled by weekdayFormat in formats prop
               }}
               culture="ca"
+              // Ensure week starts on Monday (dow: 1 is already set in moment.updateLocale)
+              // react-big-calendar uses moment's locale configuration
               formats={{
-                dayFormat: (date, culture, localizer) => {
-                  return moment(date).locale('ca').format('dddd D')
-                },
+                // Weekday headers in month/week/day views - MUST be short format in Catalan
+                // This is the key format that was being overridden by CustomHeader component
                 weekdayFormat: (date, culture, localizer) => {
+                  // Ensure moment is in Catalan locale
+                  moment.locale('ca')
+                  // Return short weekday name (dl., dt., dc., dj., dv., ds., dg.)
+                  // 'ddd' format gives abbreviated weekday names in Catalan
                   return moment(date).locale('ca').format('ddd')
                 },
+                // Day format for month view day numbers (just the number)
+                dayFormat: (date, culture, localizer) => {
+                  moment.locale('ca')
+                  return moment(date).locale('ca').format('D')
+                },
+                // Month header format - full month name in Catalan (e.g., "gener 2026")
                 monthHeaderFormat: (date, culture, localizer) => {
+                  moment.locale('ca')
                   return moment(date).locale('ca').format('MMMM YYYY')
                 },
+                // Day header format for week/day views
                 dayHeaderFormat: (date, culture, localizer) => {
+                  moment.locale('ca')
                   return moment(date).locale('ca').format('dddd D MMMM')
                 },
+                // Day range header format
                 dayRangeHeaderFormat: ({ start, end }, culture, localizer) => {
+                  moment.locale('ca')
                   return `${moment(start).locale('ca').format('D MMMM')} - ${moment(end).locale('ca').format('D MMMM YYYY')}`
                 },
+                // Time formats
                 timeGutterFormat: (date, culture, localizer) => {
+                  moment.locale('ca')
                   return moment(date).locale('ca').format('HH:mm')
                 },
                 eventTimeRangeFormat: ({ start, end }, culture, localizer) => {
+                  moment.locale('ca')
                   return `${moment(start).locale('ca').format('HH:mm')} - ${moment(end).locale('ca').format('HH:mm')}`
                 },
                 agendaTimeFormat: (date, culture, localizer) => {
+                  moment.locale('ca')
                   return moment(date).locale('ca').format('HH:mm')
                 },
                 agendaTimeRangeFormat: ({ start, end }, culture, localizer) => {
+                  moment.locale('ca')
                   return `${moment(start).locale('ca').format('HH:mm')} - ${moment(end).locale('ca').format('HH:mm')}`
                 }
               }}
