@@ -59,7 +59,7 @@ import { useTranslation } from 'react-i18next'
 import ReceiptUploader from '../components/ReceiptUploader'
 import { formatError, notifyError } from '../lib/errorHandling'
 import RecurringExpensesSection from '../components/RecurringExpensesSection'
-import { PALETTE_CA, normalizeToPalette } from '../theme/tokens'
+import { PALETTE_CA, CANADIAN_PALETTE_COLORS, normalizeToPalette } from '../theme/tokens'
 
 export default function Finances() {
   const { darkMode, demoMode } = useApp()
@@ -468,13 +468,17 @@ export default function Finances() {
 
   // Category CRUD
   const handleNewCategory = (type) => {
+    // Ensure default color is from PALETTE_CA
+    const defaultColor = type === 'income' ? PALETTE_CA[1] : PALETTE_CA[7] // Emerald for income, Alizarin for expense
     setEditingCategory({
+      id: null, // Explicitly null for new category
       name: '',
       type: type,
-      color: '#6b7280',
+      color: defaultColor, // Always a valid HEX from PALETTE_CA
       icon: 'Receipt',
       parent_id: null,
-      is_system: false
+      is_system: false,
+      sort_order: 0
     })
     setShowCategoryModal(true)
   }
@@ -543,20 +547,39 @@ export default function Finances() {
   }
 
   const handleSaveCategory = async () => {
-    if (!editingCategory.name) {
+    // Client-side validation
+    if (!editingCategory || !editingCategory.name || !editingCategory.name.trim()) {
       showToast('El nom és obligatori', 'error')
+      return
+    }
+    
+    // Validate color exists and is from palette
+    if (!editingCategory.color) {
+      showToast('Si us plau, selecciona un color de la paleta', 'error')
       return
     }
     
     setSaving(true)
     try {
       const userId = await getCurrentUserId()
+      if (!userId) {
+        showToast('Error: usuari no autenticat', 'error')
+        setSaving(false)
+        return
+      }
       
       // Normalize type to canonical values (expense/income)
       const normalizedType = editingCategory.type === 'expense' ? 'expense' : 'income'
       
       // Validate and normalize color - MUST be a valid HEX string from Canadian Palette
-      const normalizedColor = normalizeToPalette(editingCategory.color, '#95A5A6')
+      const normalizedColor = normalizeToPalette(editingCategory.color, PALETTE_CA[14]) // Default to concrete (#95A5A6)
+      
+      // Verify color is actually in palette (double-check)
+      if (!PALETTE_CA.includes(normalizedColor.toUpperCase())) {
+        showToast('Color no vàlid. Si us plau, selecciona un color de la paleta.', 'error')
+        setSaving(false)
+        return
+      }
       
       // Clean data: remove id if it's a new category, remove undefined values
       // Only include fields that exist in the database schema
@@ -566,44 +589,61 @@ export default function Finances() {
         user_id: userId,
         is_demo: demoMode === true, // Explicit boolean
         is_system: false, // User-created categories are never system
-        color: normalizedColor, // Always valid HEX string
+        color: normalizedColor.toUpperCase(), // Always valid HEX string, uppercase
         icon: String(editingCategory.icon || 'Receipt'),
         sort_order: Number(editingCategory.sort_order || 0)
       }
       
-      // Remove parent_id if not set (only include if it exists)
-      if (editingCategory.parent_id) {
-        cleanData.parent_id = editingCategory.parent_id
+      // Remove parent_id if not set (only include if it exists and is valid)
+      if (editingCategory.parent_id && String(editingCategory.parent_id).trim()) {
+        cleanData.parent_id = String(editingCategory.parent_id).trim()
       }
       
-      if (editingCategory.id) {
-        // Update existing category - ensure ID is valid UUID
+      // Determine if this is an update or insert
+      const hasValidId = editingCategory.id && String(editingCategory.id).trim()
+      
+      if (hasValidId) {
+        // UPDATE: existing category - ensure ID is valid UUID
         const categoryId = String(editingCategory.id).trim()
-        if (!categoryId) {
-          throw new Error('Invalid category ID')
-        }
         
-        const { error } = await supabase
+        // Log payload for debugging (remove in production if needed)
+        console.log('[Category Update] Payload:', JSON.stringify(cleanData, null, 2))
+        
+        const { data: updatedData, error } = await supabase
           .from('finance_categories')
           .update(cleanData)
           .eq('id', categoryId)
           .eq('user_id', userId) // Ensure user owns the category
+          .select()
+          .single()
         
         if (error) {
-          // Handle unique constraint error
+          console.error('[Category Update] Error:', error)
+          // Handle specific error codes
           if (error.code === '23505') {
             showToast('Ja existeix una categoria amb aquest nom i tipus', 'error')
           } else if (error.code === '42501') {
             showToast('No tens permisos per actualitzar aquesta categoria', 'error')
+          } else if (error.code === 'PGRST116') {
+            showToast('Categoria no trobada', 'error')
           } else {
-            console.error('Category update error:', error)
+            showToast(`Error actualitzant categoria: ${error.message}`, 'error')
             throw error
           }
           return
         }
+        
+        if (!updatedData) {
+          showToast('Error: categoria no actualitzada', 'error')
+          return
+        }
+        
         showToast('Categoria actualitzada', 'success')
       } else {
-        // Insert new category
+        // INSERT: new category
+        // Log payload for debugging (remove in production if needed)
+        console.log('[Category Insert] Payload:', JSON.stringify(cleanData, null, 2))
+        
         const { data: insertedData, error } = await supabase
           .from('finance_categories')
           .insert(cleanData)
@@ -611,17 +651,26 @@ export default function Finances() {
           .single()
         
         if (error) {
-          // Handle unique constraint error
+          console.error('[Category Insert] Error:', error)
+          // Handle specific error codes
           if (error.code === '23505') {
             showToast('Ja existeix una categoria amb aquest nom i tipus', 'error')
           } else if (error.code === '42501') {
             showToast('No tens permisos per crear categories', 'error')
+          } else if (error.code === '23502') {
+            showToast('Error: camps obligatoris faltants', 'error')
           } else {
-            console.error('Category insert error:', error)
+            showToast(`Error creant categoria: ${error.message}`, 'error')
             throw error
           }
           return
         }
+        
+        if (!insertedData) {
+          showToast('Error: categoria no creada', 'error')
+          return
+        }
+        
         showToast('Categoria creada', 'success')
         // Return the created category if this is an inline creation
         if (insertedData) {

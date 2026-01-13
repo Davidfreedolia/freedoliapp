@@ -146,8 +146,8 @@ export default function TopNavbar() {
 
 const styles = {
   navbar: {
-    height: '70px',
-    padding: '0 var(--spacing-lg)',
+    height: '64px',
+    padding: '0 24px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -156,47 +156,49 @@ const styles = {
     zIndex: 100,
     backgroundColor: 'var(--color-surface)',
     borderBottom: '1px solid var(--color-border)',
-    boxShadow: 'var(--shadow-sm)'
+    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
   },
   leftSection: {
     display: 'flex',
     alignItems: 'center',
-    gap: 'var(--spacing-sm)'
+    gap: '8px' // Consistent spacing between Notes and Help
   },
   rightSection: {
     display: 'flex',
     alignItems: 'center',
-    gap: 'var(--spacing-sm)'
+    gap: '8px' // Consistent spacing between widgets
   },
   notesButton: {
-    height: '40px',
-    padding: '0 var(--spacing-md)',
+    height: '36px',
+    padding: '0 12px',
     borderRadius: 'var(--radius-ui)',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     transition: 'all 0.15s ease',
-    gap: 'var(--spacing-xs)',
+    gap: '6px',
     backgroundColor: '#FFE066',
     color: '#5F4B00',
     fontWeight: '600',
-    border: '2px solid #fbbf24',
-    boxShadow: 'var(--shadow-sm)'
+    border: '1px solid #fbbf24',
+    fontSize: '14px',
+    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
   },
   helpButton: {
-    height: '40px',
-    padding: '0 var(--spacing-md)',
+    height: '36px',
+    padding: '0 12px',
     borderRadius: 'var(--radius-ui)',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     transition: 'all 0.15s ease',
-    gap: 'var(--spacing-xs)',
+    gap: '6px',
     backgroundColor: 'var(--color-surface)',
     color: 'var(--color-muted)',
-    border: '1px solid var(--color-border)'
+    border: '1px solid var(--color-border)',
+    fontSize: '14px'
   }
 }
 

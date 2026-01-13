@@ -151,12 +151,13 @@ export default function HeaderTimeWidget() {
   const widgetStyle = {
     display: 'flex',
     alignItems: 'center',
-    gap: 'var(--spacing-xs)',
-    padding: 'var(--spacing-xs) var(--spacing-sm)',
+    gap: '10px',
+    padding: '6px 10px',
     borderRadius: 'var(--radius-ui)',
     backgroundColor: 'var(--color-surface)',
     border: '1px solid var(--color-border)',
-    fontSize: '13px'
+    fontSize: '13px',
+    height: '36px' // Consistent height with other widgets
   }
 
   const clockStyle = {

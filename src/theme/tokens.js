@@ -30,6 +30,9 @@ export const PALETTE_CA = [
   '#7F8C8D'  // asbestos
 ]
 
+// Alias for backward compatibility (P0 fix)
+export const CANADIAN_PALETTE_COLORS = PALETTE_CA
+
 // ============================================
 // SEMANTIC COLOR TOKENS
 // ============================================

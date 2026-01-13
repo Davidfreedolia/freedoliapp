@@ -17,11 +17,12 @@ export default function HeaderPreferencesWidget({ onLanguageClick }) {
   const widgetStyle = {
     display: 'flex',
     alignItems: 'center',
-    gap: 'var(--spacing-xs)',
-    padding: 'var(--spacing-xs) var(--spacing-sm)',
+    gap: '6px',
+    padding: '6px 8px',
     borderRadius: 'var(--radius-ui)',
     backgroundColor: 'var(--color-surface)',
-    border: '1px solid var(--color-border)'
+    border: '1px solid var(--color-border)',
+    height: '36px' // Consistent height with other widgets
   }
 
   const buttonStyle = {
