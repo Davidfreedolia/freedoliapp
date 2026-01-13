@@ -50,6 +50,9 @@
   --color-primary-soft-bg: rgba(52, 152, 219, 0.1); /* Peter River with opacity */
   --color-primary-soft-text: var(--ca-belize-hole); /* Belize Hole (darker blue) */
   --color-primary-soft-border: rgba(52, 152, 219, 0.2);
+  --color-success-soft-bg: rgba(46, 204, 113, 0.1); /* Emerald soft (for income) */
+  --color-success-soft-text: var(--ca-nephritis); /* Nephritis (darker green) */
+  --color-success-soft-border: rgba(46, 204, 113, 0.2);
   --color-warning-soft-bg: rgba(231, 76, 60, 0.08); /* Alizarin soft (for expenses, NOT destructive) */
   --color-warning-soft-text: #C0392B; /* Pomegranate (softer red) */
   --color-warning-soft-border: rgba(231, 76, 60, 0.15);

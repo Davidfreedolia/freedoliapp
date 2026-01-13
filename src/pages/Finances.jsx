@@ -36,7 +36,8 @@ import {
   BookOpen as BookIcon,
   CheckCircle2,
   AlertCircle,
-  RefreshCw
+  RefreshCw,
+  Check
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { 
@@ -553,34 +554,66 @@ export default function Finances() {
       // Normalize type to canonical values (expense/income)
       const normalizedType = editingCategory.type === 'expense' ? 'expense' : 'income'
       
+      // Validate and normalize color - MUST be a valid HEX string from Canadian Palette
+      let normalizedColor = '#95A5A6' // Default: concrete (gray)
+      if (editingCategory.color) {
+        const colorStr = String(editingCategory.color).trim()
+        // Check if it's a valid HEX color (starts with # and is 7 chars)
+        if (colorStr.match(/^#[0-9A-Fa-f]{6}$/)) {
+          // Verify it's in the Canadian Palette
+          if (CANADIAN_PALETTE_COLORS.includes(colorStr.toUpperCase())) {
+            normalizedColor = colorStr.toUpperCase()
+          } else {
+            // If not in palette, use default
+            console.warn(`Color ${colorStr} not in Canadian Palette, using default`)
+            normalizedColor = '#95A5A6'
+          }
+        } else {
+          // Invalid format, use default
+          console.warn(`Invalid color format: ${colorStr}, using default`)
+          normalizedColor = '#95A5A6'
+        }
+      }
+      
       // Clean data: remove id if it's a new category, remove undefined values
+      // Only include fields that exist in the database schema
       const cleanData = {
-        name: editingCategory.name.trim(),
+        name: String(editingCategory.name).trim(),
         type: normalizedType,
         user_id: userId,
         is_demo: demoMode === true, // Explicit boolean
         is_system: false, // User-created categories are never system
-        color: editingCategory.color || '#6b7280',
-        icon: editingCategory.icon || 'Receipt',
-        sort_order: editingCategory.sort_order || 0
+        color: normalizedColor, // Always valid HEX string
+        icon: String(editingCategory.icon || 'Receipt'),
+        sort_order: Number(editingCategory.sort_order || 0)
       }
       
-      // Remove parent_id if not set
+      // Remove parent_id if not set (only include if it exists)
       if (editingCategory.parent_id) {
         cleanData.parent_id = editingCategory.parent_id
       }
       
       if (editingCategory.id) {
-        // Update existing category
+        // Update existing category - ensure ID is valid UUID
+        const categoryId = String(editingCategory.id).trim()
+        if (!categoryId) {
+          throw new Error('Invalid category ID')
+        }
+        
         const { error } = await supabase
           .from('finance_categories')
           .update(cleanData)
-          .eq('id', editingCategory.id)
+          .eq('id', categoryId)
+          .eq('user_id', userId) // Ensure user owns the category
+        
         if (error) {
           // Handle unique constraint error
           if (error.code === '23505') {
             showToast('Ja existeix una categoria amb aquest nom i tipus', 'error')
+          } else if (error.code === '42501') {
+            showToast('No tens permisos per actualitzar aquesta categoria', 'error')
           } else {
+            console.error('Category update error:', error)
             throw error
           }
           return
@@ -593,6 +626,7 @@ export default function Finances() {
           .insert(cleanData)
           .select()
           .single()
+        
         if (error) {
           // Handle unique constraint error
           if (error.code === '23505') {
@@ -600,6 +634,7 @@ export default function Finances() {
           } else if (error.code === '42501') {
             showToast('No tens permisos per crear categories', 'error')
           } else {
+            console.error('Category insert error:', error)
             throw error
           }
           return
@@ -616,6 +651,7 @@ export default function Finances() {
       setEditingCategory(null)
       return null
     } catch (err) {
+      console.error('Error saving category:', err)
       notifyError(err, { context: 'Finances:handleSaveCategory' })
       return null
     } finally {
@@ -970,12 +1006,14 @@ export default function Finances() {
     cursor: 'text'
   }
 
-  // Dynamic toolbar row style based on screen size
+  // Dynamic toolbar row style - single line on desktop
   const toolbarRowStyle = {
     ...styles.toolbarRow,
-    gridTemplateColumns: isMobile 
-      ? '1fr' 
-      : 'auto auto auto 1fr auto'
+    gridTemplateColumns: isMobile
+      ? '1fr' // Mobile: stack
+      : isTablet
+        ? 'auto auto auto auto auto 1fr auto' // Tablet: View, Project, Category, From, To, Search, Actions
+        : 'auto auto auto auto auto 320px auto' // Desktop: View, Project, Category, From, To, Search (fixed 320px), Actions
   }
 
   return (
@@ -983,9 +1021,8 @@ export default function Finances() {
       <Header title="Finances" />
 
       <div style={styles.content}>
-        {/* Toolbar - 2 líneas máximo */}
+        {/* Toolbar - 1 línea en desktop, responsive */}
         <div style={styles.toolbarContainer}>
-          {/* Primera línea: Vista + Projecte + Categoria + Cercador + Accions */}
           <div style={toolbarRowStyle}>
             {/* Vista */}
             <div style={styles.viewsSection}>
@@ -1050,7 +1087,25 @@ export default function Finances() {
               ))}
             </select>
 
-            {/* Cercador */}
+            {/* Date From */}
+            <input
+              type="date"
+              value={draftFilters.date_from || ''}
+              onChange={e => setDraftFilters({...draftFilters, date_from: e.target.value || null})}
+              placeholder="Des de"
+              style={baseInputStyle}
+            />
+
+            {/* Date To */}
+            <input
+              type="date"
+              value={draftFilters.date_to || ''}
+              onChange={e => setDraftFilters({...draftFilters, date_to: e.target.value || null})}
+              placeholder="Fins a"
+              style={baseInputStyle}
+            />
+
+            {/* Cercador - Max width 320px */}
             <div style={styles.searchContainer}>
               <Search size={18} color="var(--color-muted)" />
               <input
@@ -1090,42 +1145,20 @@ export default function Finances() {
               >
                 <Plus size={18} /> Despesa
               </button>
+              {/* Apply Filters Button - inline with actions */}
+              {hasPendingFilters && (
+                <button
+                  onClick={handleApplyFilters}
+                  data-testid="apply-filters"
+                  aria-label="Aplicar filtres"
+                  title="Aplicar filtres"
+                  style={styles.applyButton}
+                >
+                  <Filter size={16} style={{ marginRight: '6px' }} />
+                  Aplicar
+                </button>
+              )}
             </div>
-          </div>
-
-          {/* Segona línea: Dates + Aplicar filtres */}
-          <div style={toolbarRowStyle}>
-            {/* Date From */}
-            <input
-              type="date"
-              value={draftFilters.date_from || ''}
-              onChange={e => setDraftFilters({...draftFilters, date_from: e.target.value || null})}
-              placeholder="Des de"
-              style={baseInputStyle}
-            />
-
-            {/* Date To */}
-            <input
-              type="date"
-              value={draftFilters.date_to || ''}
-              onChange={e => setDraftFilters({...draftFilters, date_to: e.target.value || null})}
-              placeholder="Fins a"
-              style={baseInputStyle}
-            />
-
-            {/* Aplicar filtres (només si hi ha canvis pendents) */}
-            {hasPendingFilters && (
-              <button
-                onClick={handleApplyFilters}
-                data-testid="apply-filters"
-                aria-label="Aplicar filtres"
-                title="Aplicar filtres"
-                style={styles.applyButton}
-              >
-                <Filter size={16} style={{ marginRight: '6px' }} />
-                Aplicar filtres
-              </button>
-            )}
           </div>
         </div>
 
@@ -1289,13 +1322,23 @@ export default function Finances() {
                         )}
                         {visibleColumns.includes('category') && (
                           <td style={styles.td}>
-                            <span style={{
-                              ...styles.categoryBadge,
-                              backgroundColor: `${catInfo.color}15`,
-                              color: catInfo.color
-                            }}>
-                              {catInfo.name}
-                            </span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <div style={{
+                                width: '20px',
+                                height: '20px',
+                                borderRadius: '50%',
+                                backgroundColor: catInfo.color || '#95A5A6',
+                                flexShrink: 0,
+                                border: '2px solid var(--color-border)'
+                              }} />
+                              <span style={{
+                                ...styles.categoryBadge,
+                                backgroundColor: `${catInfo.color || '#95A5A6'}15`,
+                                color: catInfo.color || '#95A5A6'
+                              }}>
+                                {catInfo.name}
+                              </span>
+                            </div>
                           </td>
                         )}
                         {visibleColumns.includes('description') && (
@@ -1430,8 +1473,15 @@ export default function Finances() {
                   onClick={() => setEditingCategory({...editingCategory, type: 'income'})}
                   style={{
                     ...styles.categoryTab,
-                    backgroundColor: editingCategory?.type === 'income' ? '#22c55e' : 'transparent',
-                    color: editingCategory?.type === 'income' ? '#ffffff' : 'inherit'
+                    backgroundColor: editingCategory?.type === 'income' 
+                      ? 'var(--color-success-soft-bg)' 
+                      : 'transparent',
+                    color: editingCategory?.type === 'income' 
+                      ? 'var(--color-success-soft-text)' 
+                      : 'var(--color-text)',
+                    border: `1px solid ${editingCategory?.type === 'income' 
+                      ? 'var(--color-success-soft-border)' 
+                      : 'var(--color-border)'}`
                   }}
                 >
                   Ingressos
@@ -1440,8 +1490,15 @@ export default function Finances() {
                   onClick={() => setEditingCategory({...editingCategory, type: 'expense'})}
                   style={{
                     ...styles.categoryTab,
-                    backgroundColor: editingCategory?.type === 'expense' ? '#ef4444' : 'transparent',
-                    color: editingCategory?.type === 'expense' ? '#ffffff' : 'inherit'
+                    backgroundColor: editingCategory?.type === 'expense' 
+                      ? 'var(--color-warning-soft-bg)' 
+                      : 'transparent',
+                    color: editingCategory?.type === 'expense' 
+                      ? 'var(--color-warning-soft-text)' 
+                      : 'var(--color-text)',
+                    border: `1px solid ${editingCategory?.type === 'expense' 
+                      ? 'var(--color-warning-soft-border)' 
+                      : 'var(--color-border)'}`
                   }}
                 >
                   Despeses
@@ -1451,18 +1508,19 @@ export default function Finances() {
               <div style={styles.categoriesList}>
                 {(editingCategory?.type === 'income' ? categories.income : categories.expense).map(cat => (
                   <div key={cat.id} style={styles.categoryItem}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div style={{
-                        width: '12px',
-                        height: '12px',
-                        borderRadius: '3px',
-                        backgroundColor: cat.color || '#6b7280',
-                        flexShrink: 0
+                        width: '22px',
+                        height: '22px',
+                        borderRadius: '50%',
+                        backgroundColor: cat.color || '#95A5A6',
+                        flexShrink: 0,
+                        border: '2px solid var(--color-border)'
                       }} />
                       <span style={{
                         ...styles.categoryBadge,
-                        backgroundColor: `${cat.color || '#6b7280'}15`,
-                        color: cat.color || '#6b7280'
+                        backgroundColor: `${cat.color || '#95A5A6'}15`,
+                        color: cat.color || '#95A5A6'
                       }}>
                         {cat.name}
                       </span>
@@ -1480,7 +1538,7 @@ export default function Finances() {
                         </button>
                         <button
                           onClick={() => handleDeleteCategory(cat)}
-                          style={{...styles.smallButton, color: '#ef4444'}}
+                          style={{...styles.smallButton, color: 'var(--color-danger)'}}
                         >
                           <Trash2 size={14} />
                         </button>
@@ -1499,29 +1557,42 @@ export default function Finances() {
                     onChange={e => setEditingCategory({...editingCategory, name: e.target.value})}
                     style={{
                       ...styles.input,
-                      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                      color: darkMode ? '#ffffff' : '#111827'
+                      backgroundColor: 'var(--color-surface)',
+                      color: 'var(--color-text)',
+                      border: '1px solid var(--color-border)',
+                      borderRadius: 'var(--radius-ui)',
+                      padding: 'var(--spacing-sm) var(--spacing-md)'
                     }}
                   />
-                  <input
-                    type="color"
-                    value={editingCategory.color || '#6b7280'}
-                    onChange={e => setEditingCategory({...editingCategory, color: e.target.value})}
-                    style={styles.colorInput}
-                  />
+                  
+                  {/* Color Selector - Canadian Palette Only */}
+                  <div style={styles.colorSelectorContainer}>
+                    <label style={styles.colorLabel}>Color (Paleta Canadenca)</label>
+                    <div style={styles.colorSwatchesGrid}>
+                      {CANADIAN_PALETTE_COLORS.map(color => (
+                        <button
+                          key={color}
+                          type="button"
+                          onClick={() => setEditingCategory({...editingCategory, color})}
+                          style={{
+                            ...styles.colorSwatch,
+                            backgroundColor: color,
+                            border: editingCategory.color === color 
+                              ? `3px solid var(--color-primary)` 
+                              : `2px solid var(--color-border)`,
+                            transform: editingCategory.color === color ? 'scale(1.1)' : 'scale(1)'
+                          }}
+                          title={color}
+                        >
+                          {editingCategory.color === color && (
+                            <Check size={16} color="#FFFFFF" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))' }} />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   <div style={styles.formActions}>
-                    <button
-                      onClick={handleSaveCategory}
-                      disabled={saving}
-                      style={{
-                        ...styles.saveButton,
-                        backgroundColor: saving ? '#9ca3af' : '#4f46e5',
-                        opacity: saving ? 0.6 : 1,
-                        cursor: saving ? 'not-allowed' : 'pointer'
-                      }}
-                    >
-                      {saving ? 'Guardant...' : <><Save size={16} /> Guardar</>}
-                    </button>
                     <button
                       onClick={() => {
                         setEditingCategory(null)
@@ -1530,6 +1601,27 @@ export default function Finances() {
                       style={styles.cancelButton}
                     >
                       Cancel·lar
+                    </button>
+                    <button
+                      onClick={handleSaveCategory}
+                      disabled={saving}
+                      style={{
+                        ...styles.saveButton,
+                        backgroundColor: saving ? 'var(--color-muted)' : 'var(--color-primary)',
+                        opacity: saving ? 0.6 : 1,
+                        cursor: saving ? 'not-allowed' : 'pointer',
+                        color: '#FFFFFF',
+                        border: 'none',
+                        borderRadius: 'var(--radius-ui)',
+                        padding: 'var(--spacing-sm) var(--spacing-md)',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 'var(--spacing-xs)'
+                      }}
+                    >
+                      {saving ? 'Guardant...' : <><Save size={16} /> Guardar</>}
                     </button>
                 </div>
                 </div>
@@ -1999,9 +2091,18 @@ export default function Finances() {
                 disabled={!inlineCategoryName.trim() || creatingInlineCategory}
                 style={{
                   ...styles.saveButton,
-                  backgroundColor: creatingInlineCategory ? '#9ca3af' : '#4f46e5',
+                  backgroundColor: creatingInlineCategory ? 'var(--color-muted)' : 'var(--color-primary)',
                   opacity: (!inlineCategoryName.trim() || creatingInlineCategory) ? 0.6 : 1,
-                  cursor: (!inlineCategoryName.trim() || creatingInlineCategory) ? 'not-allowed' : 'pointer'
+                  cursor: (!inlineCategoryName.trim() || creatingInlineCategory) ? 'not-allowed' : 'pointer',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  borderRadius: 'var(--radius-ui)',
+                  padding: 'var(--spacing-sm) var(--spacing-md)',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 'var(--spacing-xs)'
                 }}
               >
                 {creatingInlineCategory ? 'Creant...' : <><Plus size={16} /> Crear</>}
@@ -2020,14 +2121,15 @@ const styles = {
   toolbarContainer: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '12px',
-    marginBottom: '24px'
+    gap: 'var(--spacing-sm)',
+    marginBottom: 'var(--spacing-lg)'
   },
   toolbarRow: {
     display: 'grid',
-    gap: '12px',
+    gap: 'var(--spacing-sm)',
     alignItems: 'center',
-    minHeight: '40px'
+    minHeight: '40px',
+    width: '100%'
   },
   viewsSection: {
     display: 'flex',
@@ -2043,7 +2145,7 @@ const styles = {
     border: '1px solid var(--color-border)',
     borderRadius: 'var(--radius-ui)',
     height: '40px',
-    minWidth: '200px',
+    maxWidth: '320px',
     width: '100%',
     boxSizing: 'border-box'
   },
@@ -2307,25 +2409,28 @@ const styles = {
     fontFamily: 'inherit'
   },
   cancelButton: {
-    padding: '10px 20px',
-    backgroundColor: 'transparent',
-    color: '#6b7280',
-    border: '1px solid var(--border-color)',
-    borderRadius: '8px',
+    padding: 'var(--spacing-sm) var(--spacing-md)',
+    backgroundColor: 'var(--color-surface)',
+    color: 'var(--color-text)',
+    border: '1px solid var(--color-border)',
+    borderRadius: 'var(--radius-ui)',
     fontSize: '14px',
-    cursor: 'pointer'
+    fontWeight: '500',
+    cursor: 'pointer',
+    transition: 'all 0.15s ease'
   },
   saveButton: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
-    padding: '10px 20px',
-    color: '#ffffff',
+    gap: 'var(--spacing-xs)',
+    padding: 'var(--spacing-sm) var(--spacing-md)',
+    color: '#FFFFFF',
     border: 'none',
-    borderRadius: '8px',
+    borderRadius: 'var(--radius-ui)',
     fontSize: '14px',
     fontWeight: '500',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    transition: 'all 0.15s ease'
   },
   // Category modal specific
   categoryTabs: {
@@ -2334,11 +2439,14 @@ const styles = {
     marginBottom: '20px'
   },
   categoryTab: {
-    padding: '8px 16px',
-    borderRadius: '8px',
-    border: '1px solid var(--border-color)',
+    padding: 'var(--spacing-sm) var(--spacing-md)',
+    borderRadius: 'var(--radius-ui)',
+    border: '1px solid var(--color-border)',
     cursor: 'pointer',
-    fontSize: '14px'
+    fontSize: '14px',
+    fontWeight: '500',
+    transition: 'all 0.15s ease',
+    backgroundColor: 'var(--color-surface)'
   },
   categoriesList: {
     display: 'flex',
@@ -2352,9 +2460,10 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '12px',
-    borderRadius: '8px',
-    border: '1px solid var(--border-color)'
+    padding: 'var(--spacing-sm)',
+    borderRadius: 'var(--radius-ui)',
+    border: '1px solid var(--color-border)',
+    backgroundColor: 'var(--color-surface)'
   },
   categoryActions: {
     display: 'flex',
@@ -2376,13 +2485,6 @@ const styles = {
     border: '1px solid var(--border-color)',
     marginTop: '20px'
   },
-  colorInput: {
-    width: '60px',
-    height: '40px',
-    border: '1px solid var(--border-color)',
-    borderRadius: '8px',
-    cursor: 'pointer'
-  },
   formActions: {
     display: 'flex',
     gap: '8px',
@@ -2391,15 +2493,17 @@ const styles = {
   newCategoryButton: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
-    padding: '10px 20px',
-    backgroundColor: '#4f46e5',
-    color: '#ffffff',
+    gap: 'var(--spacing-xs)',
+    padding: 'var(--spacing-sm) var(--spacing-md)',
+    backgroundColor: 'var(--color-primary)',
+    color: '#FFFFFF',
     border: 'none',
-    borderRadius: '8px',
+    borderRadius: 'var(--radius-ui)',
     fontSize: '14px',
+    fontWeight: '500',
     cursor: 'pointer',
     width: '100%',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    transition: 'all 0.15s ease'
   }
 }
