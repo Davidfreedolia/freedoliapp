@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { StickyNote, HelpCircle, Sun, Moon, LogOut, Settings, Globe } from 'lucide-react'
+import { StickyNote, HelpCircle } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useApp } from '../context/AppContext'
@@ -8,10 +8,10 @@ import { logSuccess } from '../lib/auditLog'
 import { useNotes } from '../hooks/useNotes'
 import AddStickyNoteModal from './AddStickyNoteModal'
 import HelpModal from './HelpModal'
-import WorldClocks from './WorldClocks'
-import Avatar from './Avatar'
 import AvatarSelector from './AvatarSelector'
-import LanguageSelector from './LanguageSelector'
+import HeaderTimeWidget from './HeaderTimeWidget'
+import HeaderPreferencesWidget from './HeaderPreferencesWidget'
+import HeaderUserWidget from './HeaderUserWidget'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { showToast } from './Toast'
 
@@ -25,7 +25,6 @@ export default function TopNavbar() {
   const [showNoteModal, setShowNoteModal] = useState(false)
   const [showHelpModal, setShowHelpModal] = useState(false)
   const [showAvatarSelector, setShowAvatarSelector] = useState(false)
-  const [showLanguageSelector, setShowLanguageSelector] = useState(false)
   const [userEmail, setUserEmail] = useState('')
   const [userName, setUserName] = useState('')
 
@@ -73,23 +72,12 @@ export default function TopNavbar() {
 
   return (
     <>
-      <nav style={{
-        ...styles.navbar,
-        backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-        borderBottom: 'none',
-        boxShadow: 'none'
-      }}>
+      <nav style={styles.navbar}>
+        {/* Left Section: Notes + Help grouped */}
         <div style={styles.leftSection}>
-          {/* Notes Button - Always first */}
           <button 
             onClick={() => setShowNoteModal(true)}
-            style={{
-              ...styles.notesButton,
-              backgroundColor: '#FFE066',
-              color: '#5F4B00',
-              fontWeight: '600',
-              border: '2px solid #fbbf24'
-            }}
+            style={styles.notesButton}
             title={t('navbar.addNote')}
             aria-label={t('navbar.addNote')}
           >
@@ -97,106 +85,32 @@ export default function TopNavbar() {
             {!isMobile && <span style={{ marginLeft: '6px', fontSize: '14px' }}>+ {t('navbar.notes')}</span>}
           </button>
 
-          {/* Help Button */}
           <button 
             onClick={() => setShowHelpModal(true)}
-            style={{
-              ...styles.helpButton,
-              backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6',
-              color: darkMode ? '#9ca3af' : '#6b7280'
-            }}
+            style={styles.helpButton}
             title={t('navbar.help')}
             aria-label={t('navbar.help')}
           >
-            <HelpCircle size={20} />
+            <HelpCircle size={18} />
             {!isMobile && <span style={{ marginLeft: '6px', fontSize: '14px' }}>{t('navbar.help')}</span>}
           </button>
         </div>
 
+        {/* Right Section: 3 grouped widgets */}
         <div style={styles.rightSection}>
-          {/* World Clocks */}
-          <WorldClocks />
+          {/* Time Widget */}
+          <HeaderTimeWidget />
 
-          {/* Language Selector */}
-          <button
-            onClick={() => setShowLanguageSelector(true)}
-            style={{
-              ...styles.iconButton,
-              backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6',
-              position: 'relative'
-            }}
-            title={t('navbar.language') || 'Idioma'}
-            aria-label={t('navbar.language') || 'Idioma'}
-          >
-            <Globe size={18} color={darkMode ? '#9ca3af' : '#6b7280'} />
-            {!isMobile && (
-              <span style={{
-                marginLeft: '6px',
-                fontSize: '12px',
-                fontWeight: '600',
-                color: darkMode ? '#9ca3af' : '#6b7280',
-                textTransform: 'uppercase'
-              }}>
-                {i18n.language?.toUpperCase() || 'CA'}
-              </span>
-            )}
-          </button>
+          {/* Preferences Widget */}
+          <HeaderPreferencesWidget />
 
-          {/* Avatar */}
-          <Avatar
+          {/* User Widget */}
+          <HeaderUserWidget
             userEmail={userEmail}
             userName={userName}
-            size={36}
-            onClick={() => setShowAvatarSelector(true)}
-            style={{
-              marginLeft: '8px'
-            }}
+            onAvatarClick={() => setShowAvatarSelector(true)}
+            onLogout={handleLogout}
           />
-
-          {/* Settings */}
-          <button 
-            onClick={() => navigate('/settings')}
-            style={{
-              ...styles.iconButton,
-              backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6'
-            }}
-            title={t('navbar.settings')}
-            aria-label={t('navbar.settings')}
-          >
-            <Settings size={20} color={darkMode ? '#9ca3af' : '#6b7280'} />
-          </button>
-
-          {/* Notifications - Hidden until implemented */}
-
-          {/* Toggle Dark Mode */}
-          <button 
-            onClick={() => setDarkMode(!darkMode)}
-            style={{
-              ...styles.iconButton,
-              backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6'
-            }}
-            title={darkMode ? t('navbar.lightMode') : t('navbar.darkMode')}
-            aria-label={darkMode ? t('navbar.lightMode') : t('navbar.darkMode')}
-          >
-            {darkMode ? (
-              <Sun size={20} color="#fbbf24" />
-            ) : (
-              <Moon size={20} color="#6b7280" />
-            )}
-          </button>
-
-          {/* Logout */}
-          <button 
-            onClick={handleLogout}
-            style={{
-              ...styles.iconButton,
-              backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6'
-            }}
-            title={t('navbar.logout')}
-            aria-label={t('navbar.logout')}
-          >
-            <LogOut size={20} color={darkMode ? '#9ca3af' : '#6b7280'} />
-          </button>
         </div>
       </nav>
 
@@ -226,11 +140,6 @@ export default function TopNavbar() {
         userName={userName}
       />
 
-      {/* Language Selector */}
-      <LanguageSelector
-        isOpen={showLanguageSelector}
-        onClose={() => setShowLanguageSelector(false)}
-      />
     </>
   )
 }
@@ -238,61 +147,56 @@ export default function TopNavbar() {
 const styles = {
   navbar: {
     height: '70px',
-    padding: '0 32px',
+    padding: '0 var(--spacing-lg)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
     position: 'sticky',
     top: 0,
     zIndex: 100,
-    borderBottom: 'none',
-    boxShadow: 'none'
+    backgroundColor: 'var(--color-surface)',
+    borderBottom: '1px solid var(--color-border)',
+    boxShadow: 'var(--shadow-sm)'
   },
   leftSection: {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px'
+    gap: 'var(--spacing-sm)'
   },
   rightSection: {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px'
+    gap: 'var(--spacing-sm)'
   },
   notesButton: {
     height: '40px',
-    padding: '0 14px',
-    borderRadius: '10px',
+    padding: '0 var(--spacing-md)',
+    borderRadius: 'var(--radius-ui)',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    transition: 'all 0.2s ease',
-    gap: '6px',
-    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-    border: 'none'
+    transition: 'all 0.15s ease',
+    gap: 'var(--spacing-xs)',
+    backgroundColor: '#FFE066',
+    color: '#5F4B00',
+    fontWeight: '600',
+    border: '2px solid #fbbf24',
+    boxShadow: 'var(--shadow-sm)'
   },
   helpButton: {
     height: '40px',
-    padding: '0 14px',
-    borderRadius: '10px',
+    padding: '0 var(--spacing-md)',
+    borderRadius: 'var(--radius-ui)',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    transition: 'all 0.2s ease',
-    gap: '6px',
-    border: '1px solid var(--border-color, #e5e7eb)'
-  },
-  iconButton: {
-    width: '40px',
-    height: '40px',
-    border: '1px solid var(--border-color, #e5e7eb)',
-    borderRadius: '10px',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transition: 'all 0.2s ease'
+    transition: 'all 0.15s ease',
+    gap: 'var(--spacing-xs)',
+    backgroundColor: 'var(--color-surface)',
+    color: 'var(--color-muted)',
+    border: '1px solid var(--color-border)'
   }
 }
 

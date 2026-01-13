@@ -59,6 +59,7 @@ import { useTranslation } from 'react-i18next'
 import ReceiptUploader from '../components/ReceiptUploader'
 import { formatError, notifyError } from '../lib/errorHandling'
 import RecurringExpensesSection from '../components/RecurringExpensesSection'
+import { PALETTE_CA, normalizeToPalette } from '../theme/tokens'
 
 export default function Finances() {
   const { darkMode, demoMode } = useApp()
@@ -555,25 +556,7 @@ export default function Finances() {
       const normalizedType = editingCategory.type === 'expense' ? 'expense' : 'income'
       
       // Validate and normalize color - MUST be a valid HEX string from Canadian Palette
-      let normalizedColor = '#95A5A6' // Default: concrete (gray)
-      if (editingCategory.color) {
-        const colorStr = String(editingCategory.color).trim()
-        // Check if it's a valid HEX color (starts with # and is 7 chars)
-        if (colorStr.match(/^#[0-9A-Fa-f]{6}$/)) {
-          // Verify it's in the Canadian Palette
-          if (CANADIAN_PALETTE_COLORS.includes(colorStr.toUpperCase())) {
-            normalizedColor = colorStr.toUpperCase()
-          } else {
-            // If not in palette, use default
-            console.warn(`Color ${colorStr} not in Canadian Palette, using default`)
-            normalizedColor = '#95A5A6'
-          }
-        } else {
-          // Invalid format, use default
-          console.warn(`Invalid color format: ${colorStr}, using default`)
-          normalizedColor = '#95A5A6'
-        }
-      }
+      const normalizedColor = normalizeToPalette(editingCategory.color, '#95A5A6')
       
       // Clean data: remove id if it's a new category, remove undefined values
       // Only include fields that exist in the database schema
@@ -1569,7 +1552,7 @@ export default function Finances() {
                   <div style={styles.colorSelectorContainer}>
                     <label style={styles.colorLabel}>Color (Paleta Canadenca)</label>
                     <div style={styles.colorSwatchesGrid}>
-                      {CANADIAN_PALETTE_COLORS.map(color => (
+                      {PALETTE_CA.map(color => (
                         <button
                           key={color}
                           type="button"

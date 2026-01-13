@@ -7,20 +7,9 @@ import caTranslations from './locales/ca.json'
 import enTranslations from './locales/en.json'
 import esTranslations from './locales/es.json'
 
-// Detectar idioma desde localStorage (síncrono para inicialización rápida)
+// Detectar idioma - FORZAR CATALÁN (P0 pragmatic)
 const detectLanguage = () => {
-  // P0: localStorage, luego navegador
-  const storedLang = localStorage.getItem('freedoliapp.lang')
-  if (storedLang && ['ca', 'en', 'es'].includes(storedLang)) {
-    return storedLang
-  }
-  // Fallback: navegador si no hay preferencia guardada
-  if (typeof navigator !== 'undefined' && navigator.language) {
-    const browserLang = navigator.language.substring(0, 2)
-    if (['ca', 'en', 'es'].includes(browserLang)) {
-      return browserLang
-    }
-  }
+  // Always return Catalan for now
   return 'ca'
 }
 
@@ -42,9 +31,9 @@ if (!i18n.isInitialized) {
         escapeValue: false
       },
       detection: {
-        order: ['localStorage', 'navigator'],
-        caches: ['localStorage'],
-        lookupLocalStorage: 'freedoliapp.lang'
+        // Disabled - forcing Catalan only (P0 pragmatic)
+        order: [],
+        caches: []
       },
       react: {
         useSuspense: false // Evitar Suspense per evitar errors amb lazy loading
