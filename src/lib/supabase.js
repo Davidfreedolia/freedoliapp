@@ -4127,6 +4127,315 @@ export const markRecurringExpenseAsPaid = async (expenseId) => {
 }
 
 /**
+ * Get recurring expense occurrences for a recurring expense
+ * Returns occurrences for previous, current, and next month (P0)
+ */
+export const getRecurringExpenseOccurrences = async (recurringExpenseId) => {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
+  const userId = await getCurrentUserId()
+  const today = new Date()
+  const currentMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+  const prevMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+  const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1)
+  
+  const { data, error } = await supabase
+    .from('recurring_expense_occurrences')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('recurring_expense_id', recurringExpenseId)
+    .eq('is_demo', demoMode)
+    .in('month', [
+      prevMonth.toISOString().split('T')[0],
+      currentMonth.toISOString().split('T')[0],
+      nextMonth.toISOString().split('T')[0]
+    ])
+    .order('month', { ascending: false })
+  if (error) throw error
+  return data || []
+}
+
+/**
+ * Generate occurrence for a specific month
+ * @param {string} recurringExpenseId - ID of the recurring expense
+ * @param {Date} targetMonthDate - Target month (defaults to current month)
+ * @returns {Promise<Object>} The created occurrence
+ */
+export const generateOccurrenceForMonth = async (recurringExpenseId, targetMonthDate = null) => {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
+  const userId = await getCurrentUserId()
+  
+  // Get recurring expense details
+  const { data: recurring, error: fetchError } = await supabase
+    .from('recurring_expenses')
+    .select('*')
+    .eq('id', recurringExpenseId)
+    .eq('user_id', userId)
+    .eq('is_demo', demoMode)
+    .single()
+  
+  if (fetchError || !recurring) {
+    throw new Error('Recurring expense not found or access denied')
+  }
+  
+  // Determine target month (first day of month)
+  const targetDate = targetMonthDate || new Date()
+  const monthFirstDay = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1)
+  const monthStr = monthFirstDay.toISOString().split('T')[0]
+  
+  // Calculate due_date based on day_of_month (clamp to last day of month)
+  const lastDayOfMonth = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0).getDate()
+  const dayOfMonth = Math.min(recurring.day_of_month, lastDayOfMonth)
+  const dueDate = new Date(targetDate.getFullYear(), targetDate.getMonth(), dayOfMonth)
+  const dueDateStr = dueDate.toISOString().split('T')[0]
+  
+  // Determine initial status
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const dueDateObj = new Date(dueDate)
+  dueDateObj.setHours(0, 0, 0, 0)
+  
+  // If due_date has passed, set to 'invoice_missing', else 'expected'
+  const initialStatus = dueDateObj < today ? 'invoice_missing' : 'expected'
+  
+  // Insert occurrence (handle unique conflict gracefully)
+  const { data: occurrence, error: insertError } = await supabase
+    .from('recurring_expense_occurrences')
+    .insert([{
+      user_id: userId,
+      recurring_expense_id: recurringExpenseId,
+      month: monthStr,
+      due_date: dueDateStr,
+      amount_expected: recurring.amount,
+      currency: recurring.currency || 'EUR',
+      status: initialStatus,
+      is_demo: demoMode
+    }])
+    .select()
+    .single()
+  
+  // If conflict (already exists), return existing occurrence
+  if (insertError) {
+    if (insertError.code === '23505') { // Unique violation
+      const { data: existing } = await supabase
+        .from('recurring_expense_occurrences')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('recurring_expense_id', recurringExpenseId)
+        .eq('month', monthStr)
+        .eq('is_demo', demoMode)
+        .single()
+      if (existing) {
+        return existing
+      }
+    }
+    throw insertError
+  }
+  
+  return occurrence
+}
+
+/**
+ * Generate occurrence for current month (alias for convenience)
+ */
+export const generateRecurringExpenseOccurrence = async (recurringExpenseId) => {
+  return generateOccurrenceForMonth(recurringExpenseId, new Date())
+}
+
+/**
+ * Update recurring expense occurrence
+ */
+export const updateRecurringExpenseOccurrence = async (id, updates) => {
+  const userId = await getCurrentUserId()
+  const { user_id, ...data } = updates
+  const { data: result, error } = await supabase
+    .from('recurring_expense_occurrences')
+    .update(data)
+    .eq('id', id)
+    .eq('user_id', userId)
+    .select()
+    .single()
+  if (error) throw error
+  return result
+}
+
+/**
+ * Mark occurrence as paid
+ */
+export const markOccurrenceAsPaid = async (id, paidDate = null) => {
+  const userId = await getCurrentUserId()
+  const { data, error } = await supabase
+    .from('recurring_expense_occurrences')
+    .update({
+      status: 'paid',
+      paid_date: paidDate || new Date().toISOString().split('T')[0]
+    })
+    .eq('id', id)
+    .eq('user_id', userId)
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}
+
+/**
+ * Get or ensure global project exists
+ */
+export const getOrCreateGlobalProject = async () => {
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  const userId = await getCurrentUserId()
+  
+  // Buscar proyecto global
+  const { data: existing } = await supabase
+    .from('projects')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('is_demo', demoMode)
+    .ilike('name', '%FREEDOLIA%General%')
+    .maybeSingle()
+  
+  if (existing) {
+    return existing
+  }
+  
+  // Crear proyecto global si no existe
+  const { data: newProject, error } = await supabase
+    .from('projects')
+    .insert([{
+      name: 'FREEDOLIA (General)',
+      project_code: 'PR-FRDL-GLOBAL',
+      sku: 'FRDL-GLOBAL',
+      status: 'active',
+      current_phase: 1,
+      user_id: userId,
+      is_demo: demoMode
+    }])
+    .select()
+    .single()
+  
+  if (error) throw error
+  return newProject
+}
+
+/**
+ * Ensure expense exists for occurrence (create if needed, return existing if present)
+ * @param {Object} occurrence - The occurrence object with recurring_expense_id
+ * @returns {Promise<string>} The expense_id
+ */
+export const ensureExpenseForOccurrence = async (occurrence) => {
+  // Get demo mode setting
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  
+  const userId = await getCurrentUserId()
+  
+  // If expense_id already exists, verify and return it
+  if (occurrence.expense_id) {
+    // Verify the expense belongs to the user
+    const { data: existingExpense, error: checkError } = await supabase
+      .from('expenses')
+      .select('id')
+      .eq('id', occurrence.expense_id)
+      .eq('user_id', userId)
+      .eq('is_demo', demoMode)
+      .maybeSingle()
+    
+    if (existingExpense && !checkError) {
+      // Expense exists and belongs to user, return it
+      return occurrence.expense_id
+    }
+    // If expense doesn't exist or doesn't belong to user, continue to create new one
+    // Clear invalid expense_id from occurrence
+    if (checkError || !existingExpense) {
+      await supabase
+        .from('recurring_expense_occurrences')
+        .update({ expense_id: null })
+        .eq('id', occurrence.id)
+        .eq('user_id', userId)
+    }
+  }
+  
+  // Get recurring expense details
+  const { data: recurring, error: fetchError } = await supabase
+    .from('recurring_expenses')
+    .select('*')
+    .eq('id', occurrence.recurring_expense_id)
+    .eq('user_id', userId)
+    .eq('is_demo', demoMode)
+    .single()
+  
+  if (fetchError || !recurring) {
+    throw new Error('Recurring expense not found or access denied')
+  }
+  
+  // Get or create global project
+  const globalProject = await getOrCreateGlobalProject()
+  
+  // Get category name (required for expenses table)
+  let categoryName = 'Despesa Recurrent'
+  if (recurring.category_id) {
+    const { data: category } = await supabase
+      .from('finance_categories')
+      .select('name')
+      .eq('id', recurring.category_id)
+      .single()
+    if (category) {
+      categoryName = category.name
+    }
+  }
+  
+  // Calculate period (YYYY-MM) from occurrence.month
+  const monthDate = new Date(occurrence.month)
+  const period = `${monthDate.getFullYear()}-${String(monthDate.getMonth() + 1).padStart(2, '0')}`
+  
+  // Create expense
+  const expenseData = {
+    project_id: recurring.project_id || globalProject.id,
+    supplier_id: recurring.supplier_id || null,
+    category_id: recurring.category_id || null,
+    category: categoryName, // REQUIRED: category (string) NOT NULL in DB
+    description: recurring.description,
+    amount: occurrence.amount_actual || occurrence.amount_expected,
+    currency: occurrence.currency || recurring.currency || 'EUR',
+    expense_date: occurrence.due_date,
+    notes: `Recurring: ${recurring.description} | Period: ${period}${recurring.notes ? ` | ${recurring.notes}` : ''}`,
+    payment_status: 'pending',
+    user_id: userId,
+    is_demo: demoMode
+  }
+  
+  const { data: newExpense, error: createError } = await supabase
+    .from('expenses')
+    .insert([expenseData])
+    .select()
+    .single()
+  
+  if (createError) {
+    throw new Error(`Error creating expense: ${createError.message}`)
+  }
+  
+  // Update occurrence with expense_id
+  const { error: updateError } = await supabase
+    .from('recurring_expense_occurrences')
+    .update({ expense_id: newExpense.id })
+    .eq('id', occurrence.id)
+    .eq('user_id', userId)
+  
+  if (updateError) {
+    // If update fails, we still return the expense_id (it was created successfully)
+    console.error('Error updating occurrence with expense_id:', updateError)
+  }
+  
+  return newExpense.id
+}
+
+/**
  * Get recurring expenses KPIs
  */
 export const getRecurringExpensesKPIs = async () => {
