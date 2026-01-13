@@ -154,9 +154,8 @@ const styles = {
     position: 'sticky',
     top: 0,
     zIndex: 100,
-    backgroundColor: 'var(--color-surface)',
-    borderBottom: '1px solid var(--color-border)',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
+    backgroundColor: 'transparent', // No background - floating over page
+    // No border, no shadow - clean Asana-like aesthetic
   },
   leftSection: {
     display: 'flex',

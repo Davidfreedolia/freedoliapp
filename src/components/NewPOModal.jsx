@@ -1051,18 +1051,21 @@ const styles = {
     width: '100%',
     maxWidth: '900px',
     maxHeight: '90vh',
-    borderRadius: '16px',
-    border: '1px solid var(--border-color)',
+    borderRadius: 'var(--radius-ui)', // Unified radius
+    border: 'none', // No border - use shadow
     display: 'flex',
     flexDirection: 'column',
-    overflow: 'hidden'
+    overflow: 'hidden',
+    backgroundColor: 'var(--surface-bg)',
+    boxShadow: 'var(--shadow-lg)' // Stronger shadow for modals
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '20px 24px',
-    borderBottom: '1px solid var(--border-color)'
+    borderBottom: 'none', // No border - use subtle background difference
+    backgroundColor: 'var(--surface-bg-2)'
   },
   title: {
     margin: 0,
@@ -1098,11 +1101,12 @@ const styles = {
   },
   section: {
     padding: '20px',
-    borderRadius: '12px',
-    border: '1px solid var(--border-color)',
-    backgroundColor: 'var(--bg-secondary)',
+    borderRadius: 'var(--radius-ui)', // Unified radius
+    border: 'none', // No border - use shadow
+    backgroundColor: 'var(--surface-bg)',
     boxSizing: 'border-box',
-    width: '100%'
+    width: '100%',
+    boxShadow: 'var(--shadow-soft)'
   },
   sectionHeader: {
     display: 'flex',

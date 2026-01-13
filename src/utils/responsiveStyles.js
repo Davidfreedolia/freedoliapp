@@ -51,20 +51,21 @@ export const getModalStyles = (isMobile, darkMode) => {
       width: '90%',
       maxWidth: '600px',
       maxHeight: '90vh',
-      borderRadius: '16px',
-      border: '1px solid var(--border-color)',
+      borderRadius: 'var(--radius-ui)', // Unified radius
+      border: 'none', // No border - use shadow
       overflow: 'hidden',
       display: 'flex',
       flexDirection: 'column',
-      backgroundColor: darkMode ? '#15151f' : '#ffffff',
-      boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
+      backgroundColor: 'var(--surface-bg)',
+      boxShadow: 'var(--shadow-lg)' // Stronger shadow for modals
     },
     header: {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
       padding: '20px 24px',
-      borderBottom: `1px solid ${darkMode ? '#2a2a3a' : '#e5e7eb'}`
+      borderBottom: 'none', // No border - use subtle background difference
+      backgroundColor: 'var(--surface-bg-2)'
     },
     body: {
       padding: '24px',
@@ -79,7 +80,7 @@ export const getModalStyles = (isMobile, darkMode) => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      borderRadius: '4px',
+      borderRadius: 'var(--radius-ui)', // Unified radius
       transition: 'background-color 0.2s'
     }
   }

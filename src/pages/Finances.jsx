@@ -60,6 +60,7 @@ import ReceiptUploader from '../components/ReceiptUploader'
 import { formatError, notifyError } from '../lib/errorHandling'
 import RecurringExpensesSection from '../components/RecurringExpensesSection'
 import { PALETTE_CA, CANADIAN_PALETTE_COLORS, normalizeToPalette } from '../theme/tokens'
+import Button from '../components/Button'
 
 export default function Finances() {
   const { darkMode, demoMode } = useApp()
@@ -302,7 +303,7 @@ export default function Finances() {
       
       // Load categories (real mode only)
       // Include both user categories AND system categories (is_system=true)
-      // Filter: is_demo = false OR is_demo IS NULL (handle legacy data)
+      // NOTE: finance_categories table does NOT have is_demo column
       const { data: categoriesData, error: categoriesError } = await supabase
         .from('finance_categories')
         .select('*')
@@ -313,10 +314,8 @@ export default function Finances() {
         console.error('Error loading categories:', categoriesError)
       }
       
-      // Filter client-side: is_demo = false OR is_demo IS NULL (real mode)
-      const realCategories = (categoriesData || []).filter(c => 
-        c.is_demo === false || c.is_demo === null || c.is_demo === undefined
-      )
+      // No need to filter by is_demo - column doesn't exist in finance_categories
+      const realCategories = categoriesData || []
       
       // Robust type mapping: handle case-insensitive and variations
       const normalizeType = (type) => {
@@ -496,13 +495,16 @@ export default function Finances() {
       const transactionType = editingTransaction?.type || 'expense'
       const normalizedType = transactionType === 'expense' ? 'expense' : 'income'
       
+      // Use default color from PALETTE_CA based on type
+      const defaultColor = normalizedType === 'income' ? PALETTE_CA[1] : PALETTE_CA[7] // Emerald for income, Alizarin for expense
+      
+      // NOTE: is_demo column does NOT exist in finance_categories table
       const cleanData = {
-        name: inlineCategoryName.trim(),
+        name: String(inlineCategoryName.trim()),
         type: normalizedType,
         user_id: userId,
-        is_demo: demoMode === true,
         is_system: false,
-        color: '#6b7280',
+        color: defaultColor.toUpperCase(), // Use defaultColor from PALETTE_CA
         icon: 'Receipt',
         sort_order: 0
       }
@@ -583,11 +585,11 @@ export default function Finances() {
       
       // Clean data: remove id if it's a new category, remove undefined values
       // Only include fields that exist in the database schema
+      // NOTE: is_demo column does NOT exist in finance_categories table
       const cleanData = {
         name: String(editingCategory.name).trim(),
         type: normalizedType,
         user_id: userId,
-        is_demo: demoMode === true, // Explicit boolean
         is_system: false, // User-created categories are never system
         color: normalizedColor.toUpperCase(), // Always valid HEX string, uppercase
         icon: String(editingCategory.icon || 'Receipt'),
@@ -1152,7 +1154,24 @@ export default function Finances() {
             {/* Accions (dreta) */}
             <div style={styles.actionsSection}>
               <button
-                onClick={() => setShowCategoryModal(true)}
+                onClick={() => {
+                  // Initialize editingCategory if it doesn't exist when opening modal
+                  if (!editingCategory) {
+                    const defaultType = 'expense'
+                    const defaultColor = PALETTE_CA[7] // Alizarin for expense
+                    setEditingCategory({
+                      id: null,
+                      name: '',
+                      type: defaultType,
+                      color: defaultColor,
+                      icon: 'Receipt',
+                      parent_id: null,
+                      is_system: false,
+                      sort_order: 0
+                    })
+                  }
+                  setShowCategoryModal(true)
+                }}
                 style={styles.iconButton}
                 title="Gestionar categories"
               >
@@ -1165,18 +1184,18 @@ export default function Finances() {
               >
                 <FileSpreadsheet size={18} />
               </button>
-              <button
+              <Button
+                variant="success-soft"
                 onClick={() => handleNewTransaction('income')}
-                style={styles.incomeButton}
               >
                 <Plus size={18} /> Ingrés
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="warning-soft"
                 onClick={() => handleNewTransaction('expense')}
-                style={styles.expenseButton}
               >
                 <Plus size={18} /> Despesa
-              </button>
+              </Button>
               {/* Apply Filters Button - inline with actions */}
               {hasPendingFilters && (
                 <button
@@ -1245,8 +1264,8 @@ export default function Finances() {
             padding: '48px',
             textAlign: 'center',
             backgroundColor: darkMode ? '#15151f' : '#ffffff',
-            borderRadius: '16px',
-            border: `1px solid ${darkMode ? '#2a2a3a' : '#e5e7eb'}`,
+            borderRadius: 'var(--radius-ui)',
+            border: 'var(--border)', // Unified border
             margin: '24px 0'
           }}>
             <AlertCircle size={48} color="#ef4444" style={{ margin: '0 auto 16px' }} />
@@ -1272,7 +1291,7 @@ export default function Finances() {
                 backgroundColor: '#4f46e5',
                 color: '#ffffff',
                 border: 'none',
-                borderRadius: '8px',
+                borderRadius: 'var(--radius-ui)',
                 fontSize: '14px',
                 fontWeight: '500',
                 cursor: 'pointer'
@@ -1463,15 +1482,17 @@ export default function Finances() {
                                     <CheckCircle2 size={14} /> Marcar com pagada
                                   </button>
                                 )}
-                                <button
+                                <Button
+                                  variant="danger"
+                                  size="sm"
                                   onClick={(e) => {
                                     e.stopPropagation()
                                     handleDeleteTransaction(item)
                                   }}
-                                  style={{...styles.menuItem, color: '#ef4444'}}
+                                  style={{...styles.menuItem, padding: '8px 12px'}}
                                 >
                                   <Trash2 size={14} /> Eliminar
-                                </button>
+                                </Button>
                                 </div>
                               )}
                             </div>
@@ -1502,7 +1523,15 @@ export default function Finances() {
             <div style={styles.modalBody}>
               <div style={styles.categoryTabs}>
                 <button
-                  onClick={() => setEditingCategory({...editingCategory, type: 'income'})}
+                  onClick={() => {
+                    const newType = 'income'
+                    const defaultColor = PALETTE_CA[1] // Emerald for income
+                    setEditingCategory({
+                      ...(editingCategory || {}),
+                      type: newType,
+                      color: editingCategory?.color || defaultColor
+                    })
+                  }}
                   style={{
                     ...styles.categoryTab,
                     backgroundColor: editingCategory?.type === 'income' 
@@ -1519,7 +1548,15 @@ export default function Finances() {
                   Ingressos
                 </button>
                 <button
-                  onClick={() => setEditingCategory({...editingCategory, type: 'expense'})}
+                  onClick={() => {
+                    const newType = 'expense'
+                    const defaultColor = PALETTE_CA[7] // Alizarin for expense
+                    setEditingCategory({
+                      ...(editingCategory || {}),
+                      type: newType,
+                      color: editingCategory?.color || defaultColor
+                    })
+                  }}
                   style={{
                     ...styles.categoryTab,
                     backgroundColor: editingCategory?.type === 'expense' 
@@ -1568,105 +1605,150 @@ export default function Finances() {
                         >
                           <Edit size={14} />
                         </button>
-                        <button
+                        <Button
+                          variant="danger"
+                          size="sm"
                           onClick={() => handleDeleteCategory(cat)}
-                          style={{...styles.smallButton, color: 'var(--color-danger)'}}
                         >
                           <Trash2 size={14} />
-                        </button>
+                        </Button>
                       </div>
                     )}
                   </div>
                 ))}
                 </div>
 
-              {editingCategory && (
-                <div style={styles.categoryForm}>
-                  <input
-                    type="text"
-                    placeholder="Nom de la categoria"
-                    value={editingCategory.name || ''}
-                    onChange={e => setEditingCategory({...editingCategory, name: e.target.value})}
-                    style={{
-                      ...styles.input,
-                      backgroundColor: 'var(--color-surface)',
-                      color: 'var(--color-text)',
-                      border: '1px solid var(--color-border)',
-                      borderRadius: 'var(--radius-ui)',
-                      padding: 'var(--spacing-sm) var(--spacing-md)'
-                    }}
-                  />
-                  
-                  {/* Color Selector - Canadian Palette Only */}
-                  <div style={styles.colorSelectorContainer}>
-                    <label style={styles.colorLabel}>Color (Paleta Canadenca)</label>
-                    <div style={styles.colorSwatchesGrid}>
-                      {PALETTE_CA.map(color => (
-                        <button
-                          key={color}
-                          type="button"
-                          onClick={() => setEditingCategory({...editingCategory, color})}
-                          style={{
-                            ...styles.colorSwatch,
-                            backgroundColor: color,
-                            border: editingCategory.color === color 
-                              ? `3px solid var(--color-primary)` 
-                              : `2px solid var(--color-border)`,
-                            transform: editingCategory.color === color ? 'scale(1.1)' : 'scale(1)'
-                          }}
-                          title={color}
-                        >
-                          {editingCategory.color === color && (
-                            <Check size={16} color="#FFFFFF" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))' }} />
-                          )}
-                        </button>
-                      ))}
-                    </div>
+              {/* Category Form - Always visible when modal is open */}
+              <div style={styles.categoryForm}>
+                <input
+                  type="text"
+                  placeholder="Nom de la categoria *"
+                  value={editingCategory?.name || ''}
+                  onChange={e => {
+                    const currentCategory = editingCategory || {
+                      id: null,
+                      name: '',
+                      type: editingCategory?.type || 'expense',
+                      color: editingCategory?.color || (editingCategory?.type === 'income' ? PALETTE_CA[1] : PALETTE_CA[7]),
+                      icon: 'Receipt',
+                      parent_id: null,
+                      is_system: false,
+                      sort_order: 0
+                    }
+                    setEditingCategory({...currentCategory, name: e.target.value})
+                  }}
+                  style={{
+                    ...styles.input,
+                    backgroundColor: 'var(--color-surface)',
+                    color: 'var(--color-text)',
+                    border: '1px solid var(--color-border)',
+                    borderRadius: 'var(--radius-ui)',
+                    padding: 'var(--spacing-sm) var(--spacing-md)'
+                  }}
+                />
+                {!editingCategory?.name?.trim() && (
+                  <div style={{
+                    fontSize: '12px',
+                    color: 'var(--color-danger)',
+                    marginTop: '-8px',
+                    marginBottom: '4px'
+                  }}>
+                    El nom de la categoria és obligatori
                   </div>
-
-                  <div style={styles.formActions}>
-                    <button
-                      onClick={() => {
-                        setEditingCategory(null)
-                        setShowCategoryModal(false)
-                      }}
-                      style={styles.cancelButton}
-                    >
-                      Cancel·lar
-                    </button>
-                    <button
-                      onClick={handleSaveCategory}
-                      disabled={saving}
-                      style={{
-                        ...styles.saveButton,
-                        backgroundColor: saving ? 'var(--color-muted)' : 'var(--color-primary)',
-                        opacity: saving ? 0.6 : 1,
-                        cursor: saving ? 'not-allowed' : 'pointer',
-                        color: '#FFFFFF',
-                        border: 'none',
-                        borderRadius: 'var(--radius-ui)',
-                        padding: 'var(--spacing-sm) var(--spacing-md)',
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 'var(--spacing-xs)'
-                      }}
-                    >
-                      {saving ? 'Guardant...' : <><Save size={16} /> Guardar</>}
-                    </button>
+                )}
+                
+                {/* Color Selector - Canadian Palette Only - ALWAYS VISIBLE */}
+                <div style={styles.colorSelectorContainer}>
+                  <label style={styles.colorLabel}>Color (Paleta Canadenca) *</label>
+                  {!PALETTE_CA || PALETTE_CA.length === 0 ? (
+                    <div style={{
+                      padding: '12px',
+                      backgroundColor: 'var(--color-warning-soft-bg)',
+                      color: 'var(--color-warning-soft-text)',
+                      borderRadius: 'var(--radius-ui)',
+                      fontSize: '13px'
+                    }}>
+                      Error: Paleta de colors no disponible. No es pot guardar la categoria.
+                    </div>
+                  ) : (
+                    <div style={styles.colorSwatchesGrid}>
+                      {PALETTE_CA.map(color => {
+                        const currentColor = editingCategory?.color?.toUpperCase() || ''
+                        const isSelected = currentColor === color.toUpperCase()
+                        return (
+                          <button
+                            key={color}
+                            type="button"
+                            onClick={() => {
+                              const currentCategory = editingCategory || {
+                                id: null,
+                                name: '',
+                                type: editingCategory?.type || 'expense',
+                                color: editingCategory?.type === 'income' ? PALETTE_CA[1] : PALETTE_CA[7],
+                                icon: 'Receipt',
+                                parent_id: null,
+                                is_system: false,
+                                sort_order: 0
+                              }
+                              setEditingCategory({...currentCategory, color: color.toUpperCase()})
+                            }}
+                            style={{
+                              ...styles.colorSwatch,
+                              backgroundColor: color,
+                              border: isSelected
+                                ? `3px solid var(--color-primary)` 
+                                : `2px solid var(--color-border)`,
+                              transform: isSelected ? 'scale(1.1)' : 'scale(1)',
+                              boxShadow: isSelected ? '0 2px 8px rgba(52, 152, 219, 0.3)' : 'none'
+                            }}
+                            title={color}
+                            aria-label={`Seleccionar color ${color}`}
+                          >
+                            {isSelected && (
+                              <Check size={16} color="#FFFFFF" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))' }} />
+                            )}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )}
+                  {!editingCategory?.color && (
+                    <div style={{
+                      fontSize: '12px',
+                      color: 'var(--color-danger)',
+                      marginTop: '4px'
+                    }}>
+                      Si us plau, selecciona un color
+                    </div>
+                  )}
                 </div>
-                </div>
-              )}
 
-              {!editingCategory && (
-                <button
-                  onClick={() => handleNewCategory(editingCategory?.type || 'expense')}
-                  style={styles.newCategoryButton}
-                >
-                  <Plus size={16} /> Nova Categoria
-                </button>
-              )}
+                <div style={styles.formActions}>
+                  <button
+                    onClick={() => {
+                      setEditingCategory(null)
+                      setShowCategoryModal(false)
+                    }}
+                    style={styles.cancelButton}
+                  >
+                    Cancel·lar
+                  </button>
+                  <Button
+                    variant="primary"
+                    onClick={handleSaveCategory}
+                    disabled={
+                      saving || 
+                      !editingCategory?.name?.trim() || 
+                      !editingCategory?.color || 
+                      !PALETTE_CA || 
+                      PALETTE_CA.length === 0 ||
+                      !PALETTE_CA.includes(editingCategory.color.toUpperCase())
+                    }
+                  >
+                    {saving ? 'Guardant...' : <><Save size={16} /> Guardar</>}
+                  </Button>
+                </div>
+              </div>
                 </div>
           </div>
         </div>
@@ -1712,27 +1794,27 @@ export default function Finances() {
                 </label>
                   </div>
               <div style={styles.formActions}>
-                        <button 
+                        <Button 
+                  variant="primary"
                   onClick={handleSaveView}
                   disabled={saving}
-                  style={styles.saveButton}
                         >
                   {saving ? 'Guardant...' : <><Save size={16} /> Guardar</>}
-                        </button>
+                        </Button>
                 {editingView.id && (
-                  <button
+                  <Button
+                    variant="danger"
                     onClick={() => handleDeleteView(editingView)}
-                    style={{...styles.cancelButton, color: '#ef4444'}}
                   >
                     <Trash2 size={16} /> Eliminar
-                  </button>
+                  </Button>
                 )}
-                <button
+                <Button
+                  variant="ghost"
                   onClick={() => setShowViewModal(false)}
-                  style={styles.cancelButton}
                 >
                   Cancel·lar
-              </button>
+              </Button>
               </div>
             </div>
           </div>
@@ -2028,17 +2110,13 @@ export default function Finances() {
               >
                 Tancar
               </button>
-              <button
+              <Button
+                variant={editingTransaction.type === 'income' ? 'success-soft' : 'warning-soft'}
                 onClick={handleSaveTransaction}
                 disabled={saving}
-                style={{
-                  ...styles.saveButton,
-                  backgroundColor: editingTransaction.type === 'income' ? '#22c55e' : '#ef4444',
-                  border: editingTransaction.type === 'income' ? '1px solid #16a34a' : '1px solid #dc2626'
-                }}
               >
                 {saving ? 'Guardant...' : <><Save size={16} /> Guardar</>}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -2118,27 +2196,13 @@ export default function Finances() {
               >
                 Cancel·lar
               </button>
-              <button
+              <Button
+                variant="primary"
                 onClick={handleCreateInlineCategory}
                 disabled={!inlineCategoryName.trim() || creatingInlineCategory}
-                style={{
-                  ...styles.saveButton,
-                  backgroundColor: creatingInlineCategory ? 'var(--color-muted)' : 'var(--color-primary)',
-                  opacity: (!inlineCategoryName.trim() || creatingInlineCategory) ? 0.6 : 1,
-                  cursor: (!inlineCategoryName.trim() || creatingInlineCategory) ? 'not-allowed' : 'pointer',
-                  color: '#FFFFFF',
-                  border: 'none',
-                  borderRadius: 'var(--radius-ui)',
-                  padding: 'var(--spacing-sm) var(--spacing-md)',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 'var(--spacing-xs)'
-                }}
               >
                 {creatingInlineCategory ? 'Creant...' : <><Plus size={16} /> Crear</>}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -2202,12 +2266,13 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'var(--color-surface)',
-    border: '1px solid var(--color-border)',
+    backgroundColor: 'var(--surface-bg)',
+    border: 'none', // No border - use shadow
     borderRadius: 'var(--radius-ui)',
     cursor: 'pointer',
-    color: 'var(--color-text)',
-    transition: 'all 0.15s ease'
+    color: 'var(--text)',
+    transition: 'all 0.15s ease',
+    boxShadow: 'var(--shadow-soft)'
   },
   incomeButton: {
     display: 'flex',
@@ -2267,8 +2332,10 @@ const styles = {
     alignItems: 'center',
     gap: '16px',
     padding: '20px',
-    borderRadius: '12px',
-    border: '1px solid var(--border-color)'
+    borderRadius: 'var(--radius-ui)', // Unified radius
+    border: 'none', // No border - use shadow
+    backgroundColor: 'var(--surface-bg)',
+    boxShadow: 'var(--shadow-soft)'
   },
   statValue: {
     display: 'block',
@@ -2285,11 +2352,13 @@ const styles = {
     color: '#6b7280'
   },
   tableContainer: {
-    borderRadius: '16px',
-    border: '1px solid var(--border-color)',
+    borderRadius: 'var(--radius-ui)', // Unified radius
+    border: 'none', // No border - use shadow
     overflowX: 'auto',
     overflowY: 'visible', // Allow dropdowns to escape container
-    position: 'relative' // Ensure proper stacking context for dropdowns
+    position: 'relative', // Ensure proper stacking context for dropdowns
+    backgroundColor: 'var(--surface-bg)',
+    boxShadow: 'var(--shadow-soft)'
   },
   table: {
     width: '100%',
@@ -2302,11 +2371,13 @@ const styles = {
     fontSize: '12px',
     fontWeight: '600',
     textTransform: 'uppercase',
-    borderBottom: '1px solid var(--border-color)',
+    borderBottom: 'none', // No border - use subtle background difference
+    backgroundColor: 'var(--surface-bg-2)',
     whiteSpace: 'nowrap'
   },
   tr: {
-    borderBottom: '1px solid var(--border-color)'
+    borderBottom: 'none', // No border - use subtle background alternate
+    // Alternating row backgrounds handled via inline styles if needed
   },
   td: {
     padding: '14px 16px',
@@ -2317,7 +2388,7 @@ const styles = {
     display: 'inline-flex',
     alignItems: 'center',
     padding: '4px 10px',
-    borderRadius: '6px',
+    borderRadius: 'var(--radius-ui)',
     fontSize: '12px',
     fontWeight: '500'
   },
@@ -2325,7 +2396,7 @@ const styles = {
     display: 'inline-flex',
     alignItems: 'center',
     padding: '4px 10px',
-    borderRadius: '6px',
+    borderRadius: 'var(--radius-ui)',
     fontSize: '12px',
     fontWeight: '500'
   },
@@ -2377,17 +2448,19 @@ const styles = {
     width: '100%',
     maxWidth: '600px',
     maxHeight: '90vh',
-    borderRadius: '16px',
-    border: '1px solid var(--border-color)',
+    borderRadius: 'var(--radius-ui)', // Unified radius
+    border: 'none', // No border - use shadow
     overflow: 'hidden',
-    backgroundColor: 'var(--bg-primary)'
+    backgroundColor: 'var(--surface-bg)',
+    boxShadow: 'var(--shadow-lg)' // Stronger shadow for modals
   },
   modalHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '20px 24px',
-    borderBottom: '1px solid var(--border-color)'
+    borderBottom: 'none', // No border - use subtle background difference
+    backgroundColor: 'var(--surface-bg-2)'
   },
   modalTitle: {
     margin: 0,
@@ -2404,14 +2477,16 @@ const styles = {
   modalBody: {
     padding: '24px',
     overflowY: 'auto',
-    maxHeight: '60vh'
+    maxHeight: '60vh',
+    overflowX: 'visible' // Ensure color selector is not clipped
   },
   modalFooter: {
     display: 'flex',
     justifyContent: 'flex-end',
     gap: '12px',
     padding: '20px 24px',
-    borderTop: '1px solid var(--border-color)'
+    borderTop: 'none', // No border - use subtle background difference
+    backgroundColor: 'var(--surface-bg-2)'
   },
   formGrid: {
     display: 'grid',
@@ -2430,8 +2505,9 @@ const styles = {
   },
   input: {
     padding: '10px 12px',
-    borderRadius: '8px',
-    border: '1px solid var(--border-color)',
+    borderRadius: 'var(--radius-ui)', // Unified radius
+    border: 'var(--input-border)', // Subtle outline only for inputs
+    backgroundColor: 'var(--input-bg)',
     fontSize: '14px',
     outline: 'none'
   },
@@ -2493,9 +2569,10 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 'var(--spacing-sm)',
-    borderRadius: 'var(--radius-ui)',
-    border: '1px solid var(--color-border)',
-    backgroundColor: 'var(--color-surface)'
+    borderRadius: 'var(--radius-ui)', // Unified radius
+    border: 'none', // No border - use shadow
+    backgroundColor: 'var(--surface-bg)',
+    boxShadow: 'var(--shadow-soft)'
   },
   categoryActions: {
     display: 'flex',
@@ -2513,8 +2590,10 @@ const styles = {
     flexDirection: 'column',
     gap: '12px',
     padding: '16px',
-    borderRadius: '8px',
-    border: '1px solid var(--border-color)',
+    borderRadius: 'var(--radius-ui)', // Unified radius
+    border: 'none', // No border - use shadow
+    backgroundColor: 'var(--surface-bg)',
+    boxShadow: 'var(--shadow-soft)',
     marginTop: '20px'
   },
   formActions: {
@@ -2537,5 +2616,45 @@ const styles = {
     width: '100%',
     justifyContent: 'center',
     transition: 'all 0.15s ease'
+  },
+  // Color selector styles - MUST be visible
+  colorSelectorContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+    padding: '16px 0',
+    minHeight: '120px', // Ensure it doesn't collapse
+    width: '100%',
+    overflow: 'visible' // Ensure no overflow hiding
+  },
+  colorLabel: {
+    fontSize: '14px',
+    fontWeight: '500',
+    color: 'var(--color-text)',
+    marginBottom: '8px'
+  },
+  colorSwatchesGrid: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '10px',
+    width: '100%',
+    padding: '8px 0',
+    overflow: 'visible', // Ensure no overflow hiding
+    minHeight: '80px' // Ensure grid doesn't collapse
+  },
+  colorSwatch: {
+    width: '32px',
+    height: '32px',
+    borderRadius: '50%',
+    border: '2px solid var(--color-border)',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.15s ease',
+    flexShrink: 0,
+    boxSizing: 'border-box',
+    position: 'relative',
+    overflow: 'visible' // Ensure check icon is visible
   }
 }

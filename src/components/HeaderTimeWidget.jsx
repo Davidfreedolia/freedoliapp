@@ -203,7 +203,7 @@ export default function HeaderTimeWidget() {
     display: 'flex',
     alignItems: 'center',
     color: 'var(--color-muted)',
-    borderRadius: '4px',
+    borderRadius: 'var(--radius-ui)',
     transition: 'all 0.15s ease'
   }
 

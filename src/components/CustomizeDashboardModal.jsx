@@ -400,18 +400,21 @@ const styles = {
   modal: {
     width: '90%',
     maxWidth: '600px',
-    borderRadius: '16px',
+    borderRadius: 'var(--radius-ui)', // Unified radius
     display: 'flex',
     flexDirection: 'column',
     maxHeight: '80vh',
-    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+    border: 'none', // No border - use shadow
+    backgroundColor: 'var(--surface-bg)',
+    boxShadow: 'var(--shadow-lg)' // Stronger shadow for modals
   },
   header: {
     padding: '24px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderBottom: '1px solid var(--border-color)'
+    borderBottom: 'none', // No border - use subtle background difference
+    backgroundColor: 'var(--surface-bg-2)'
   },
   title: {
     margin: 0,
@@ -448,12 +451,14 @@ const styles = {
   },
   widgetItem: {
     padding: '16px',
-    borderRadius: '12px',
-    border: '1px solid',
+    borderRadius: 'var(--radius-ui)', // Unified radius
+    border: 'none', // No border - use shadow
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: '16px'
+    gap: '16px',
+    backgroundColor: 'var(--surface-bg)',
+    boxShadow: 'var(--shadow-soft)'
   },
   widgetInfo: {
     flex: 1

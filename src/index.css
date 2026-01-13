@@ -74,6 +74,15 @@
   --radius-md: var(--radius-ui);
   --radius-lg: var(--radius-ui);
 
+  /* Background System - Surface layers (no borders, use color differences) */
+  --page-bg: var(--color-bg);
+  --surface-bg: var(--color-surface);
+  --surface-bg-2: rgba(255, 255, 255, 0.5); /* Slightly different for subtle separation */
+  
+  /* Text System */
+  --text: var(--color-text);
+  --muted: var(--color-muted);
+
   /* Spacing System - 8px grid */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
@@ -82,11 +91,17 @@
   --spacing-xl: 32px;
   --spacing-2xl: 48px;
 
-  /* Shadows - Soft, Asana-like */
+  /* Shadows - Soft, Asana-like (for separation instead of borders) */
+  --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-soft-hover: 0 2px 6px rgba(0, 0, 0, 0.08);
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.1);
   --shadow-xl: 0 8px 16px rgba(0, 0, 0, 0.12);
+  
+  /* Input-specific: subtle outline for visibility (only for inputs) */
+  --input-border: 1px solid rgba(0, 0, 0, 0.08);
+  --input-bg: var(--surface-bg);
 
   /* Focus Ring */
   --focus-ring: 0 0 0 2px var(--color-accent);
@@ -115,13 +130,21 @@ body.dark {
   --color-warning-soft-text: #E67E7E; /* Softer red for dark mode */
   --color-warning-soft-border: rgba(231, 76, 60, 0.25);
 
+  /* Background System - Dark Mode */
+  --page-bg: var(--color-bg);
+  --surface-bg: var(--color-surface);
+  --surface-bg-2: rgba(255, 255, 255, 0.02); /* Slightly different for subtle separation */
+  
+  /* Input-specific: subtle outline for visibility (only for inputs) */
+  --input-border: 1px solid rgba(255, 255, 255, 0.1);
+  --input-bg: var(--surface-bg);
+
   /* Legacy compatibility - mapped to Canadian Palette */
   --bg-primary: var(--color-bg);
   --bg-secondary: var(--ca-midnight-blue);
   --bg-card: var(--color-surface);
   --text-primary: var(--color-text);
   --text-secondary: var(--color-muted);
-  --border-color: var(--color-border);
   --accent: var(--color-accent);
 }
 
@@ -185,6 +208,46 @@ a, button {
 }
 
 /* ============================================
+   UTILITY CLASSES - UNIFIED UI COMPONENTS
+   ============================================
+   Shared classes for consistent styling across the app
+*/
+
+/* Card - Surface with shadow (no border) */
+.ui-card {
+  background-color: var(--surface-bg);
+  border: none; /* No borders - use surface color + shadow */
+  border-radius: var(--radius-ui);
+  padding: var(--spacing-md);
+  box-shadow: var(--shadow-soft);
+  transition: all 0.15s ease;
+}
+
+.ui-card:hover {
+  box-shadow: var(--shadow-soft-hover);
+}
+
+/* Input - Consistent height, radius, subtle outline for visibility */
+.ui-input {
+  height: 36px;
+  padding: 0 var(--spacing-md);
+  border-radius: var(--radius-ui);
+  border: var(--input-border); /* Subtle outline only for inputs */
+  background-color: var(--input-bg);
+  color: var(--text);
+  font-size: 14px;
+  transition: all 0.15s ease;
+}
+
+.ui-input:focus {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-color: var(--color-accent);
+}
+
+/* Button variants already defined in Button.jsx component */
+
+/* ============================================
    CALENDAR - ASANA STYLE
    ============================================
    Clean, compact, readable calendar styling
@@ -207,8 +270,8 @@ a, button {
 }
 
 body.dark .fd-calendar-asana .rbc-calendar {
-  background: var(--color-surface);
-  border-color: var(--color-border);
+  background: var(--surface-bg);
+  /* No border in dark mode either */
 }
 
 /* Remove harsh grid lines */
@@ -240,11 +303,11 @@ body.dark .fd-calendar-asana .rbc-calendar {
   border: none;
 }
 
-/* Day tiles - compact rounded cards */
+/* Day tiles - compact rounded cards (no border) */
 .fd-calendar-asana .rbc-day-bg {
   border-radius: var(--radius-ui);
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
+  background: var(--page-bg);
+  border: none; /* No border - use surface color difference */
   margin: 4px;
   overflow: hidden;
   min-height: 80px;
@@ -253,22 +316,23 @@ body.dark .fd-calendar-asana .rbc-calendar {
 
 body.dark .fd-calendar-asana .rbc-day-bg {
   background: rgba(255, 255, 255, 0.02);
-  border-color: rgba(255, 255, 255, 0.08);
+  /* No border in dark mode */
 }
 
 .fd-calendar-asana .rbc-day-bg:hover {
-  border-color: var(--color-accent);
+  background: var(--surface-bg-2);
+  box-shadow: var(--shadow-soft);
 }
 
-/* Today highlight - subtle */
+/* Today highlight - subtle (no border) */
 .fd-calendar-asana .rbc-today .rbc-day-bg {
   background: rgba(52, 152, 219, 0.08);
-  border-color: var(--color-accent);
+  /* No border - use background color only */
 }
 
 body.dark .fd-calendar-asana .rbc-today .rbc-day-bg {
   background: rgba(52, 152, 219, 0.12);
-  border-color: var(--color-accent);
+  /* No border in dark mode */
 }
 
 /* Day number - small and discrete */
@@ -320,33 +384,35 @@ body.dark .fd-calendar-asana .rbc-today .rbc-day-bg {
 
 .fd-calendar-asana .rbc-toolbar button {
   border-radius: var(--radius-ui) !important;
-  border: 1px solid var(--color-border) !important;
-  background: var(--color-surface) !important;
-  color: var(--color-text) !important;
+  border: none !important; /* No border */
+  background: var(--surface-bg) !important;
+  color: var(--text) !important;
   padding: 6px 12px !important;
   font-size: 13px !important;
   font-weight: 500 !important;
   transition: all 0.15s ease !important;
+  box-shadow: var(--shadow-soft) !important;
 }
 
 body.dark .fd-calendar-asana .rbc-toolbar button {
   background: rgba(255, 255, 255, 0.05) !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
+  /* No border in dark mode */
 }
 
 .fd-calendar-asana .rbc-toolbar button:hover {
-  background: var(--color-bg) !important;
+  background: var(--surface-bg-2) !important;
+  box-shadow: var(--shadow-soft-hover) !important;
 }
 
 .fd-calendar-asana .rbc-toolbar button.rbc-active {
   background: var(--color-accent) !important;
   color: #FFFFFF !important;
-  border-color: var(--color-accent) !important;
+  border: none !important; /* No border */
 }
 
 body.dark .fd-calendar-asana .rbc-toolbar button.rbc-active {
   background: var(--color-accent) !important;
-  border-color: var(--color-accent) !important;
+  border: none !important; /* No border in dark mode */
 }
 
 /* Week/Day view - Time slots */
@@ -416,23 +482,35 @@ body.dark .fd-calendar-asana .rbc-toolbar button.rbc-active {
 .fd-calendar-asana .rbc-agenda-table {
   border-radius: var(--radius-ui);
   overflow: hidden;
-  border: 1px solid var(--color-border);
+  border: none; /* No border - use shadow */
+  box-shadow: var(--shadow-soft);
 }
 
 .fd-calendar-asana .rbc-agenda-date-cell,
 .fd-calendar-asana .rbc-agenda-time-cell {
-  border-color: var(--color-border);
-  color: var(--color-muted);
+  border: none; /* No border */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05); /* Subtle row separator only */
+  color: var(--muted);
   padding: 12px 16px;
   font-size: 13px;
-  background-color: var(--color-surface);
+  background-color: var(--surface-bg);
+}
+
+body.dark .fd-calendar-asana .rbc-agenda-date-cell,
+body.dark .fd-calendar-asana .rbc-agenda-time-cell {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05); /* Subtle row separator in dark mode */
 }
 
 .fd-calendar-asana .rbc-agenda-event-cell {
-  border-color: var(--color-border);
+  border: none; /* No border */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05); /* Subtle row separator only */
   padding: 12px 16px;
-  background-color: var(--color-surface);
+  background-color: var(--surface-bg);
   transition: background-color 0.15s ease;
+}
+
+body.dark .fd-calendar-asana .rbc-agenda-event-cell {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05); /* Subtle row separator in dark mode */
 }
 
 .fd-calendar-asana .rbc-agenda-event-cell:hover {
@@ -441,21 +519,22 @@ body.dark .fd-calendar-asana .rbc-toolbar button.rbc-active {
 
 /* Show more link */
 .fd-calendar-asana .rbc-show-more {
-  background-color: var(--color-bg);
-  color: var(--color-muted);
+  background-color: var(--page-bg);
+  color: var(--muted);
   border-radius: var(--radius-ui);
   padding: 4px 8px;
   font-size: 12px;
   font-weight: 500;
   margin-top: 4px;
   transition: all 0.15s ease;
-  border: 1px solid var(--color-border);
+  border: none; /* No border */
+  box-shadow: var(--shadow-soft);
 }
 
 .fd-calendar-asana .rbc-show-more:hover {
-  background-color: var(--color-surface);
-  color: var(--color-text);
-  border-color: var(--color-accent);
+  background-color: var(--surface-bg);
+  color: var(--text);
+  box-shadow: var(--shadow-soft-hover);
 }
 
 /* Smooth transitions for day cells */
