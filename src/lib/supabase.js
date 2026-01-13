@@ -4046,12 +4046,29 @@ export const createRecurringExpense = async (recurringExpense) => {
   const demoMode = await getDemoMode()
   
   const userId = await getCurrentUserId()
-  const { user_id, ...data } = recurringExpense
+  const { user_id, category, project, supplier, ...data } = recurringExpense
+  
+  // Filter only valid columns for recurring_expenses table
+  // Valid columns: description, amount, currency, category_id, project_id, supplier_id, 
+  // day_of_month, is_active, notes, auto_generate, auto_remind, next_generation_date, last_generated_at
+  const validData = {
+    description: data.description,
+    amount: data.amount,
+    currency: data.currency || 'EUR',
+    category_id: data.category_id || null,
+    project_id: data.project_id || null,
+    supplier_id: data.supplier_id || null,
+    day_of_month: data.day_of_month,
+    is_active: data.is_active !== undefined ? data.is_active : true,
+    notes: data.notes || null,
+    auto_generate: data.auto_generate || false,
+    auto_remind: data.auto_remind !== undefined ? data.auto_remind : true
+  }
   
   // Calcular next_generation_date
   const today = new Date()
   const currentMonth = new Date(today.getFullYear(), today.getMonth(), 1)
-  const dayOfMonth = data.day_of_month || 1
+  const dayOfMonth = validData.day_of_month || 1
   const targetDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), dayOfMonth)
   
   // Si el dia ja ha passat aquest mes, generar per al mes següent
@@ -4062,7 +4079,7 @@ export const createRecurringExpense = async (recurringExpense) => {
   const { data: result, error } = await supabase
     .from('recurring_expenses')
     .insert([{
-      ...data,
+      ...validData,
       user_id: userId,
       is_demo: demoMode, // Mark with current demo mode
       next_generation_date: targetDate.toISOString().split('T')[0]
@@ -4077,10 +4094,29 @@ export const createRecurringExpense = async (recurringExpense) => {
  * Update recurring expense
  */
 export const updateRecurringExpense = async (id, updates) => {
-  const { user_id, ...data } = updates
+  const { user_id, category, project, supplier, ...data } = updates
+  
+  // Filter only valid columns for recurring_expenses table
+  // Valid columns: description, amount, currency, category_id, project_id, supplier_id, 
+  // day_of_month, is_active, notes, auto_generate, auto_remind, next_generation_date, last_generated_at
+  const validData = {}
+  if (data.description !== undefined) validData.description = data.description
+  if (data.amount !== undefined) validData.amount = data.amount
+  if (data.currency !== undefined) validData.currency = data.currency
+  if (data.category_id !== undefined) validData.category_id = data.category_id || null
+  if (data.project_id !== undefined) validData.project_id = data.project_id || null
+  if (data.supplier_id !== undefined) validData.supplier_id = data.supplier_id || null
+  if (data.day_of_month !== undefined) validData.day_of_month = data.day_of_month
+  if (data.is_active !== undefined) validData.is_active = data.is_active
+  if (data.notes !== undefined) validData.notes = data.notes || null
+  if (data.auto_generate !== undefined) validData.auto_generate = data.auto_generate
+  if (data.auto_remind !== undefined) validData.auto_remind = data.auto_remind
+  if (data.next_generation_date !== undefined) validData.next_generation_date = data.next_generation_date
+  if (data.last_generated_at !== undefined) validData.last_generated_at = data.last_generated_at
+  
   const { data: result, error } = await supabase
     .from('recurring_expenses')
-    .update(data)
+    .update(validData)
     .eq('id', id)
     .select()
     .single()
@@ -4188,11 +4224,22 @@ export const generateOccurrenceForMonth = async (recurringExpenseId, targetMonth
   const monthFirstDay = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1)
   const monthStr = monthFirstDay.toISOString().split('T')[0]
   
-  // Calculate due_date based on day_of_month (clamp to last day of month)
-  const lastDayOfMonth = new Date(targetDate.getFullYear(), targetDate.getMonth() + 1, 0).getDate()
+  // Calculate due_date based on day_of_month (MUST stay within same month as monthFirstDay)
+  // Clamp day_of_month to last day of the target month to prevent spillover
+  const lastDayOfMonth = new Date(monthFirstDay.getFullYear(), monthFirstDay.getMonth() + 1, 0).getDate()
   const dayOfMonth = Math.min(recurring.day_of_month, lastDayOfMonth)
-  const dueDate = new Date(targetDate.getFullYear(), targetDate.getMonth(), dayOfMonth)
-  const dueDateStr = dueDate.toISOString().split('T')[0]
+  // Ensure dueDate is in the SAME month as monthFirstDay (never spill into next month)
+  const dueDate = new Date(monthFirstDay.getFullYear(), monthFirstDay.getMonth(), dayOfMonth)
+  
+  // Double-check: dueDate must be in the same month as monthFirstDay
+  let dueDateStr
+  if (dueDate.getMonth() !== monthFirstDay.getMonth() || dueDate.getFullYear() !== monthFirstDay.getFullYear()) {
+    // Fallback: use last day of month if calculation went wrong
+    const lastDay = new Date(monthFirstDay.getFullYear(), monthFirstDay.getMonth() + 1, 0)
+    dueDateStr = lastDay.toISOString().split('T')[0]
+  } else {
+    dueDateStr = dueDate.toISOString().split('T')[0]
+  }
   
   // Determine initial status
   const today = new Date()
