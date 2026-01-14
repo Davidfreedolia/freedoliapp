@@ -36,6 +36,46 @@ export default function ReceiptUploader({
   // Cargar attachments cuando expenseId cambia
   useEffect(() => {
     if (expenseId) {
+  const [bucketHealthy, setBucketHealthy] = useState(true)
+  // Check bucket health on mount
+  useEffect(() => {
+    const checkBucketHealth = async () => {
+      try {
+        // Try to get bucket info from Supabase
+        const { data: { user } } = await import('../lib/supabase').then(m => m.default.auth.getUser())
+        
+        if (!user) {
+          // Not logged in, skip health check
+          return
+        }
+
+        // Import supabase dynamically to check bucket
+        const supabase = (await import('../lib/supabase')).default
+        
+        // Try to list bucket - this will fail if bucket doesn't exist
+        const { data, error } = await supabase
+          .storage
+          .from('receipts')
+          .list('', { limit: 1 })
+        
+        if (error) {
+          // Check if it's a bucket not found error
+          if (error.message?.includes('not') || error.message?.includes('400')) {
+            setBucketHealthy(false)
+            setBucketError("Receipts no està configurat a Supabase (bucket 'receipts' no existeix o l'entorn és incorrecte).")
+          }
+        }
+      } catch (error) {
+        // Silently handle errors, don't spam console
+        setBucketHealthy(false)
+        setBucketError("Receipts no està configurat a Supabase (bucket 'receipts' no existeix o l'entorn és incorrecte).")
+      }
+    }
+
+    checkBucketHealth()
+  }, [])
+
+  const [bucketError, setBucketError] = useState(null)
       loadAttachments()
     } else {
       setAttachments([])
@@ -605,6 +645,15 @@ export default function ReceiptUploader({
   return (
     <div style={styles.container}>
       <label style={styles.label}>Receipts (PDF, JPG, PNG)</label>
+
+      {/* Bucket health check error */}
+      {!bucketHealthy && bucketError && (
+        <div style={{...styles.errorBox, marginTop: 0}}>
+          <AlertCircle size={16} />
+          <span>{bucketError}</span>
+        </div>
+      )}
+
       
       {!expenseId ? (
         <div style={{...styles.warningBox, marginTop: 0}}>
