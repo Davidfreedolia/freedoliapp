@@ -165,7 +165,7 @@ export default function Finances() {
 
   // Close actions menu when clicking outside
   useEffect(() => {
-    if (!menuOpen) retur, visibleColumns])
+        if (!menuOpen) return;
 
     let isInitialClick = true
     const initialTimeout = setTimeout(() => {
