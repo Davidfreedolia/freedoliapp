@@ -145,8 +145,7 @@ export default function Finances() {
     autoGenerate()
   }, [loading, demoMode]) // Run when loading changes from true to false or demoMode changes
 
-  161
-    (() => {
+    useEffect(() => {
     if (activeView) {
       const viewFilters = activeView.filters || {
         project_id: null,
