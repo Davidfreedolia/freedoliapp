@@ -32,6 +32,8 @@ export default function ReceiptUploader({
   const [renaming, setRenaming] = useState(false)
   const [uploadingFiles, setUploadingFiles] = useState({}) // { fileId: { file: File, progress: number, error: string } }
   const [replacingFileId, setReplacingFileId] = useState(null)
+    const [bucketHealthy, setBucketHealthy] = useState(true)
+    const [bucketError, setBucketError] = useState(null)
 
   // Cargar attachments cuando expenseId cambia
   useEffect(() => {
