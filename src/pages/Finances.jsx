@@ -161,7 +161,7 @@ export default function Finances() {
       setAppliedFilters(viewFilters)
       setVisibleColumns(activeView.columns || visibleColumns)
     }
-  }, [activeVie, visibleColumns])
+  }, [activeView, visibleColumns])
 
   // Close actions menu when clicking outside
   useEffect(() => {
