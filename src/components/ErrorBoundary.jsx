@@ -28,6 +28,28 @@ class ErrorBoundary extends React.Component {
     }
     if (debugErrors) {
       console.error(error, errorInfo)
+      const truncate = (value, max = 12000) => {
+        if (!value || typeof value !== 'string') return value
+        if (value.length <= max) return value
+        return `${value.slice(0, max)}\n... [truncated ${value.length - max} chars]`
+      }
+      const payload = {
+        message: String(error?.message ?? error ?? 'Unknown error'),
+        stack: truncate(error?.stack),
+        componentStack: truncate(errorInfo?.componentStack),
+        time: new Date().toISOString(),
+        path: window.location.pathname
+      }
+      try {
+        window.__lastError = payload
+      } catch {
+        // Ignore window assignment errors
+      }
+      try {
+        localStorage.setItem('lastError', JSON.stringify(payload))
+      } catch {
+        // Ignore localStorage errors
+      }
     }
     
     this.setState({

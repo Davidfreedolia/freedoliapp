@@ -67,7 +67,63 @@ export default function Finances() {
   const { isMobile, isTablet } = useBreakpoint()
   const { t } = useTranslation()
   const modalStyles = getModalStyles(isMobile, darkMode)
-  const disableReceiptsDebug = localStorage.getItem('debugDisableReceipts') === '1'
+  const readLocalFlag = (key) => {
+    try {
+      return localStorage.getItem(key) === '1'
+    } catch {
+      return false
+    }
+  }
+  const writeLocalFlag = (key, value) => {
+    try {
+      localStorage.setItem(key, value ? '1' : '0')
+    } catch {
+      // Ignore localStorage errors
+    }
+  }
+
+  const [qaPanelEnabled, setQaPanelEnabled] = useState(() => readLocalFlag('qaPanel'))
+  const [debugErrorsEnabled, setDebugErrorsEnabled] = useState(() => readLocalFlag('debugErrors'))
+  const [debugReceiptsDisabled, setDebugReceiptsDisabled] = useState(() => readLocalFlag('debugDisableReceipts'))
+  const [qaActiveStep, setQaActiveStep] = useState(null)
+  const [qaResults, setQaResults] = useState({
+    income: null,
+    expenseReceiptsOn: null,
+    expenseReceiptsOff: null
+  })
+  const [qaLastError, setQaLastError] = useState(null)
+
+  const readLastErrorPayload = () => {
+    try {
+      if (window.__lastError) return window.__lastError
+      const stored = localStorage.getItem('lastError')
+      return stored ? JSON.parse(stored) : null
+    } catch {
+      return null
+    }
+  }
+
+  const copyToClipboard = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      showToast('Copiat al porta-retalls', 'success')
+      return true
+    } catch {
+      try {
+        const textarea = document.createElement('textarea')
+        textarea.value = text
+        document.body.appendChild(textarea)
+        textarea.select()
+        document.execCommand('copy')
+        document.body.removeChild(textarea)
+        showToast('Copiat al porta-retalls', 'success')
+        return true
+      } catch {
+        showToast('No s’ha pogut copiar', 'error')
+        return false
+      }
+    }
+  }
   
   // Data
   const [ledger, setLedger] = useState([]) // Combined incomes + expenses
@@ -2099,7 +2155,7 @@ export default function Finances() {
                 </div>
 
                 {/* Receipt Upload - Solo para expenses */}
-                {editingTransaction.type === 'expense' && !disableReceiptsDebug && (
+                {editingTransaction.type === 'expense' && !debugReceiptsDisabled && (
                   <div style={{...styles.formGroup, gridColumn: 'span 2'}}>
                     <ReceiptUploader
                       expenseId={editingTransaction.id || null}
@@ -2218,6 +2274,218 @@ export default function Finances() {
                 {creatingInlineCategory ? 'Creant...' : <><Plus size={16} /> Crear</>}
               </Button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {qaPanelEnabled && (
+        <div style={{
+          position: 'fixed',
+          right: '16px',
+          bottom: '16px',
+          width: '360px',
+          zIndex: 9999,
+          backgroundColor: darkMode ? '#15151f' : '#ffffff',
+          color: darkMode ? '#ffffff' : '#111827',
+          border: `1px solid ${darkMode ? '#2a2a3a' : '#e5e7eb'}`,
+          borderRadius: '12px',
+          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
+          padding: '16px'
+        }}>
+          <div style={{ fontWeight: '600', marginBottom: '8px' }}>QA Panel (Finances)</div>
+          <div style={{ fontSize: '12px', color: darkMode ? '#9ca3af' : '#6b7280', marginBottom: '12px' }}>
+            Visible només amb localStorage.qaPanel = 1
+          </div>
+
+          <div style={{ marginBottom: '12px' }}>
+            <div style={{ fontSize: '13px', marginBottom: '6px' }}>Toggles</div>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <Button
+                size="sm"
+                variant={debugErrorsEnabled ? 'success-soft' : 'warning-soft'}
+                onClick={() => {
+                  writeLocalFlag('debugErrors', true)
+                  setDebugErrorsEnabled(true)
+                }}
+              >
+                Enable debugErrors
+              </Button>
+              <Button
+                size="sm"
+                variant={debugReceiptsDisabled ? 'success-soft' : 'warning-soft'}
+                onClick={() => {
+                  writeLocalFlag('debugDisableReceipts', true)
+                  setDebugReceiptsDisabled(true)
+                }}
+              >
+                Disable receipts
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  writeLocalFlag('debugErrors', false)
+                  writeLocalFlag('debugDisableReceipts', false)
+                  setDebugErrorsEnabled(false)
+                  setDebugReceiptsDisabled(false)
+                }}
+              >
+                Reset toggles
+              </Button>
+            </div>
+          </div>
+
+          <div style={{ marginBottom: '12px' }}>
+            <div style={{ fontSize: '13px', marginBottom: '6px' }}>Matrix test</div>
+            <Button
+              size="sm"
+              variant="primary"
+              onClick={() => {
+                writeLocalFlag('debugErrors', true)
+                setDebugErrorsEnabled(true)
+                setQaActiveStep('income')
+              }}
+            >
+              Run Matrix Test
+            </Button>
+            {qaActiveStep && (
+              <div style={{
+                marginTop: '10px',
+                padding: '10px',
+                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                borderRadius: '8px',
+                fontSize: '12px'
+              }}>
+                <div style={{ marginBottom: '8px' }}>
+                  {qaActiveStep === 'income' && 'Step A: Click an INCOME row now'}
+                  {qaActiveStep === 'expenseReceiptsOn' && 'Step B: Click an EXPENSE row now (receipts ON)'}
+                  {qaActiveStep === 'expenseReceiptsOff' && 'Step C: Enable debugDisableReceipts=1 and click same EXPENSE row again'}
+                </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <Button
+                    size="sm"
+                    variant="success-soft"
+                    onClick={() => {
+                      setQaResults(prev => ({
+                        ...prev,
+                        [qaActiveStep]: true
+                      }))
+                      if (qaActiveStep === 'income') setQaActiveStep('expenseReceiptsOn')
+                      else if (qaActiveStep === 'expenseReceiptsOn') setQaActiveStep('expenseReceiptsOff')
+                      else setQaActiveStep(null)
+                    }}
+                  >
+                    Mark PASS
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    onClick={() => {
+                      setQaResults(prev => ({
+                        ...prev,
+                        [qaActiveStep]: false
+                      }))
+                      const err = readLastErrorPayload()
+                      if (err) setQaLastError(err)
+                      if (qaActiveStep === 'income') setQaActiveStep('expenseReceiptsOn')
+                      else if (qaActiveStep === 'expenseReceiptsOn') setQaActiveStep('expenseReceiptsOff')
+                      else setQaActiveStep(null)
+                    }}
+                  >
+                    Mark FAIL
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div style={{ marginBottom: '12px' }}>
+            <div style={{ fontSize: '13px', marginBottom: '6px' }}>Last error</div>
+            <div style={{
+              padding: '10px',
+              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+              borderRadius: '8px',
+              maxHeight: '160px',
+              overflow: 'auto',
+              fontSize: '11px',
+              fontFamily: 'monospace'
+            }}>
+              {qaLastError ? (
+                <>
+                  <div style={{ marginBottom: '6px' }}>{qaLastError.message}</div>
+                  {qaLastError.stack && <pre style={{ whiteSpace: 'pre-wrap' }}>{qaLastError.stack}</pre>}
+                  {qaLastError.componentStack && <pre style={{ whiteSpace: 'pre-wrap' }}>{qaLastError.componentStack}</pre>}
+                </>
+              ) : (
+                <div style={{ color: '#6b7280' }}>No error captured</div>
+              )}
+            </div>
+            <div style={{ marginTop: '8px', display: 'flex', gap: '8px' }}>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  const err = readLastErrorPayload()
+                  if (err) {
+                    setQaLastError(err)
+                  } else {
+                    showToast('Cap error disponible', 'info')
+                  }
+                }}
+              >
+                Refresh error
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  if (!qaLastError) return
+                  copyToClipboard(JSON.stringify(qaLastError, null, 2))
+                }}
+              >
+                Copy error
+              </Button>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <Button
+              size="sm"
+              variant="primary"
+              onClick={() => {
+                const report = {
+                  incomeOpens: qaResults.income === true ? 'YES' : qaResults.income === false ? 'NO' : 'UNKNOWN',
+                  expenseOpensReceiptsOn: qaResults.expenseReceiptsOn === true ? 'YES' : qaResults.expenseReceiptsOn === false ? 'NO' : 'UNKNOWN',
+                  expenseOpensReceiptsOff: qaResults.expenseReceiptsOff === true ? 'YES' : qaResults.expenseReceiptsOff === false ? 'NO' : 'UNKNOWN',
+                  lastError: qaLastError || readLastErrorPayload() || null
+                }
+                const reportText = [
+                  `Income opens: ${report.incomeOpens}`,
+                  `Expense opens (receipts ON): ${report.expenseOpensReceiptsOn}`,
+                  `Expense opens (receipts OFF): ${report.expenseOpensReceiptsOff}`,
+                  `Last error: ${report.lastError ? JSON.stringify(report.lastError, null, 2) : 'none'}`
+                ].join('\n')
+                console.log('[QA Report]', report)
+                copyToClipboard(reportText)
+              }}
+            >
+              Copy Report
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                setQaResults({
+                  income: null,
+                  expenseReceiptsOn: null,
+                  expenseReceiptsOff: null
+                })
+                setQaActiveStep(null)
+                setQaLastError(null)
+              }}
+            >
+              Reset
+            </Button>
           </div>
         </div>
       )}
