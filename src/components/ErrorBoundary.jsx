@@ -20,6 +20,15 @@ class ErrorBoundary extends React.Component {
   componentDidCatch(error, errorInfo) {
     // Log error
     const errorId = this.logError(error, errorInfo)
+    let debugErrors = false
+    try {
+      debugErrors = localStorage.getItem('debugErrors') === '1'
+    } catch {
+      debugErrors = false
+    }
+    if (debugErrors) {
+      console.error(error, errorInfo)
+    }
     
     this.setState({
       error,
@@ -71,6 +80,12 @@ class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       const { darkMode = false, showDetails = false } = this.props
+      let debugErrors = false
+      try {
+        debugErrors = localStorage.getItem('debugErrors') === '1'
+      } catch {
+        debugErrors = false
+      }
       
       return (
         <div style={{
@@ -151,6 +166,43 @@ class ErrorBoundary extends React.Component {
                 </p>
               )}
             </div>
+
+            {debugErrors && (
+              <div style={{
+                marginBottom: '24px',
+                padding: '16px',
+                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                borderRadius: '8px',
+                fontSize: '12px',
+                fontFamily: 'monospace',
+                color: darkMode ? '#9ca3af' : '#6b7280',
+                maxHeight: '300px',
+                overflow: 'auto'
+              }}>
+                <div style={{ marginBottom: '8px', fontWeight: '600' }}>Debug error</div>
+                <div style={{ marginBottom: '8px' }}>
+                  {String(this.state.error?.message ?? this.state.error ?? 'Unknown error')}
+                </div>
+                {this.state.error?.stack && (
+                  <pre style={{
+                    margin: '0 0 8px 0',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word'
+                  }}>
+                    {this.state.error.stack}
+                  </pre>
+                )}
+                {this.state.errorInfo?.componentStack && (
+                  <pre style={{
+                    margin: 0,
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word'
+                  }}>
+                    {this.state.errorInfo.componentStack}
+                  </pre>
+                )}
+              </div>
+            )}
 
             {showDetails && this.state.errorInfo && (
               <details style={{

@@ -67,6 +67,7 @@ export default function Finances() {
   const { isMobile, isTablet } = useBreakpoint()
   const { t } = useTranslation()
   const modalStyles = getModalStyles(isMobile, darkMode)
+  const disableReceiptsDebug = localStorage.getItem('debugDisableReceipts') === '1'
   
   // Data
   const [ledger, setLedger] = useState([]) // Combined incomes + expenses
@@ -2098,7 +2099,7 @@ export default function Finances() {
                 </div>
 
                 {/* Receipt Upload - Solo para expenses */}
-                {editingTransaction.type === 'expense' && (
+                {editingTransaction.type === 'expense' && !disableReceiptsDebug && (
                   <div style={{...styles.formGroup, gridColumn: 'span 2'}}>
                     <ReceiptUploader
                       expenseId={editingTransaction.id || null}
