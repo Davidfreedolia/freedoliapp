@@ -38,6 +38,7 @@ import ArtsFinalsSection from '../components/ArtsFinalsSection'
 import CollapsibleSection from '../components/CollapsibleSection'
 import PhaseChecklist from '../components/projects/PhaseChecklist'
 import { useBreakpoint } from '../hooks/useBreakpoint'
+import { PHASE_STYLES, getPhaseStyle } from '../utils/phaseStyles'
 // Dynamic imports for components that import supabase statically to avoid circular dependencies during module initialization
 const IdentifiersSection = lazy(() => import('../components/IdentifiersSection'))
 const ProfitabilityCalculator = lazy(() => import('../components/ProfitabilityCalculator'))
@@ -48,15 +49,7 @@ const DecisionLog = lazy(() => import('../components/DecisionLog'))
 const AmazonReadinessBadge = lazy(() => import('../components/AmazonReadinessBadge'))
 const ProjectEventsTimeline = lazy(() => import('../components/ProjectEventsTimeline'))
 
-const PHASES = [
-  { id: 1, name: 'Recerca', icon: '🔍', color: '#6366f1', description: 'Investigació de producte i mercat' },
-  { id: 2, name: 'Viabilitat', icon: '📊', color: '#8b5cf6', description: 'Anàlisi de costos i rentabilitat' },
-  { id: 3, name: 'Proveïdors', icon: '🏭', color: '#ec4899', description: 'Cerca i negociació amb fabricants' },
-  { id: 4, name: 'Mostres', icon: '📦', color: '#f59e0b', description: 'Sol·licitud i verificació de mostres' },
-  { id: 5, name: 'Producció', icon: '⚙️', color: '#10b981', description: 'Fabricació i control de qualitat' },
-  { id: 6, name: 'Listing', icon: '📝', color: '#3b82f6', description: 'Creació del listing a Amazon' },
-  { id: 7, name: 'Live', icon: '🚀', color: '#22c55e', description: 'Producte actiu, seguiment vendes' }
-]
+const PHASES = Object.values(PHASE_STYLES)
 
 // Mapeig fase -> carpeta Drive
 const PHASE_FOLDER_MAP = {
@@ -646,7 +639,7 @@ function ProjectDetailInner({ useApp }) {
     )
   }
 
-  const currentPhase = PHASES.find(p => p.id === project.current_phase) || PHASES[0]
+  const currentPhase = getPhaseStyle(project.current_phase)
 
   return (
     <div style={styles.container}>
@@ -732,6 +725,8 @@ function ProjectDetailInner({ useApp }) {
               {PHASES.map((phase, index) => {
                 const isActive = phase.id === project.current_phase
                 const isCompleted = phase.id < project.current_phase
+                const isFuture = phase.id > project.current_phase
+                const PhaseIcon = phase.icon
                 
                 return (
                   <div key={phase.id} style={styles.timelineItem}>
@@ -739,16 +734,23 @@ function ProjectDetailInner({ useApp }) {
                       onClick={() => handlePhaseChange(phase.id)}
                       style={{
                         ...styles.phaseButton,
-                        backgroundColor: isActive ? phase.color : (isCompleted ? `${phase.color}30` : 'var(--bg-secondary)'),
-                        borderColor: isActive || isCompleted ? phase.color : 'var(--border-color)',
-                        color: isActive ? '#ffffff' : (isCompleted ? phase.color : '#6b7280')
+                        backgroundColor: isActive
+                          ? phase.bg
+                          : (isCompleted ? phase.bg : 'var(--bg-secondary)'),
+                        borderColor: isActive || isCompleted ? phase.accent : 'var(--border-color)',
+                        color: isFuture ? '#9ca3af' : phase.accent,
+                        boxShadow: isActive ? `0 0 0 6px ${phase.bg}` : 'none'
                       }}
                     >
-                      {isCompleted ? <Check size={20} /> : <span style={{ fontSize: '20px' }}>{phase.icon}</span>}
+                      {isCompleted ? (
+                        <Check size={20} color={phase.accent} />
+                      ) : (
+                        <PhaseIcon size={20} color={isFuture ? '#9ca3af' : phase.accent} />
+                      )}
                     </button>
                     <span style={{
                       ...styles.phaseName,
-                      color: isActive ? phase.color : (darkMode ? '#9ca3af' : '#6b7280'),
+                      color: isActive ? phase.accent : (darkMode ? '#9ca3af' : '#6b7280'),
                       fontWeight: isActive ? '600' : '400'
                     }}>
                       {phase.name}
@@ -756,7 +758,7 @@ function ProjectDetailInner({ useApp }) {
                     {index < PHASES.length - 1 && !isMobile && (
                       <div style={{
                         ...styles.timelineConnector,
-                        backgroundColor: isCompleted ? phase.color : 'var(--border-color)'
+                        backgroundColor: isCompleted ? phase.accent : 'var(--border-color)'
                       }} />
                     )}
                   </div>
@@ -767,13 +769,13 @@ function ProjectDetailInner({ useApp }) {
             {/* Current phase info */}
             <div style={{
               ...styles.currentPhaseInfo,
-              backgroundColor: `${currentPhase.color}10`,
-              borderColor: currentPhase.color
+              backgroundColor: currentPhase.bg,
+              borderColor: currentPhase.accent
             }}>
               <div style={styles.currentPhaseHeader}>
-                <span style={{ fontSize: '24px' }}>{currentPhase.icon}</span>
+                <currentPhase.icon size={24} color={currentPhase.accent} />
                 <div>
-                  <h4 style={{ margin: 0, color: currentPhase.color }}>{currentPhase.name}</h4>
+                  <h4 style={{ margin: 0, color: currentPhase.accent }}>{currentPhase.name}</h4>
                   <p style={{ margin: 0, fontSize: '14px', color: '#6b7280' }}>{currentPhase.description}</p>
                 </div>
               </div>

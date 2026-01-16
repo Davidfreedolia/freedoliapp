@@ -12,20 +12,11 @@ import {
   XCircle,
   RotateCw
 } from 'lucide-react'
+import { getPhaseStyle } from '../utils/phaseStyles'
 import { useApp } from '../context/AppContext'
 import { deleteProject } from '../lib/supabase'
 import Header from '../components/Header'
 import NewProjectModal from '../components/NewProjectModal'
-
-const PHASES = {
-  1: { name: 'Recerca', icon: '🔍', color: '#6366f1' },
-  2: { name: 'Viabilitat', icon: '📊', color: '#8b5cf6' },
-  3: { name: 'Proveïdors', icon: '🏭', color: '#ec4899' },
-  4: { name: 'Mostres', icon: '📦', color: '#f59e0b' },
-  5: { name: 'Producció', icon: '⚙️', color: '#10b981' },
-  6: { name: 'Listing', icon: '📝', color: '#3b82f6' },
-  7: { name: 'Live', icon: '🚀', color: '#22c55e' }
-}
 
 export default function Projects() {
   const { projects, refreshProjects, darkMode, driveConnected } = useApp()
@@ -226,8 +217,9 @@ export default function Projects() {
             gap: isMobile ? '12px' : '20px'
           }}>
             {filteredProjects.map(project => {
-              const phase = PHASES[project.current_phase] || PHASES[1]
+              const phase = getPhaseStyle(project.current_phase)
               const progress = ((project.current_phase) / 7) * 100
+              const PhaseIcon = phase.icon
               
               // Compute canClose and canReopen based on status
               const canClose = project.status && ['draft', 'active'].includes(project.status)
@@ -314,7 +306,7 @@ export default function Projects() {
                       <div style={{
                         ...styles.progressFill,
                         width: `${progress}%`,
-                        backgroundColor: phase.color
+                        backgroundColor: phase.accent
                       }} />
                     </div>
                     <span style={styles.progressText}>{Math.round(progress)}%</span>
@@ -324,10 +316,11 @@ export default function Projects() {
                   <div style={styles.cardFooter}>
                     <div style={{
                       ...styles.phaseBadge,
-                      backgroundColor: `${phase.color}15`,
-                      color: phase.color
+                      backgroundColor: phase.bg,
+                      color: phase.accent,
+                      border: `1px solid ${phase.accent}`
                     }}>
-                      <span>{phase.icon}</span>
+                      <PhaseIcon size={14} />
                       <span>{phase.name}</span>
                     </div>
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { CheckCircle, AlertTriangle } from 'lucide-react'
 import { validatePhaseTransition } from '../../modules/projects/phaseGates'
 import supabase from '../../lib/supabase'
+import { getPhaseStyle } from '../../utils/phaseStyles'
 
 const REQUIREMENTS_BY_PHASE = {
   1: [
@@ -68,6 +69,7 @@ const normalizeMissing = (missing) => {
 export default function PhaseChecklist({ project, currentPhase, projectId, darkMode }) {
   const [missingItems, setMissingItems] = useState([])
   const [loading, setLoading] = useState(false)
+  const phaseStyle = useMemo(() => getPhaseStyle(currentPhase), [currentPhase])
 
   const requirements = REQUIREMENTS_BY_PHASE[currentPhase] || []
 
@@ -126,8 +128,8 @@ export default function PhaseChecklist({ project, currentPhase, projectId, darkM
       marginTop: '16px',
       padding: '16px',
       borderRadius: '12px',
-      border: `1px solid ${darkMode ? '#2a2a3a' : '#e5e7eb'}`,
-      backgroundColor: darkMode ? '#15151f' : '#ffffff'
+      border: `1px solid ${phaseStyle.accent}`,
+      backgroundColor: phaseStyle.bg
     }}>
       <div style={{
         fontSize: '16px',
