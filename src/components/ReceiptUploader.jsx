@@ -642,10 +642,6 @@ export default function ReceiptUploader({
     }
   }
 
-  if (import.meta.env.DEV) {
-    console.log('ReceiptUploader mounted', { expenseId })
-  }
-
   return (
     <div style={styles.container}>
       <label style={styles.label}>Receipts (PDF, JPG, PNG)</label>

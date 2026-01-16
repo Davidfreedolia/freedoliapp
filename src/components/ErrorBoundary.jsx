@@ -175,9 +175,11 @@ class ErrorBoundary extends React.Component {
                 color: darkMode ? '#9ca3af' : '#6b7280',
                 lineHeight: '1.5'
               }}>
-                {this.state.error?.message || 'Error desconegut'}
+                {debugErrors
+                  ? (this.state.error?.message || 'Error desconegut')
+                  : 'S\'ha produït un error inesperat.'}
               </p>
-              {this.state.errorId && (
+              {debugErrors && this.state.errorId && (
                 <p style={{
                   margin: '8px 0 0',
                   fontSize: '12px',
