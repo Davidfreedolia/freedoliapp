@@ -290,8 +290,11 @@ function ProjectDetailInner({ useApp }) {
   }
 
   const handlePhaseChange = async (newPhase) => {
-    // Bloquejar canvi de fase si està DISCARDED
-    if (project.decision === 'DISCARDED') {
+    const currentPhase = project?.current_phase || 1
+    const isForward = newPhase > currentPhase
+
+    // Bloquejar canvi de fase si està DISCARDED (només endavant)
+    if (project.decision === 'DISCARDED' && isForward) {
       try {
         const { showToast } = await import('../components/Toast')
         showToast('No es pot canviar la fase d\'un projecte descartat. Restaura el projecte primer.', 'warning')
@@ -300,15 +303,63 @@ function ProjectDetailInner({ useApp }) {
       }
       return
     }
+
+    // No permetre saltar fases endavant
+    if (newPhase > currentPhase + 1) {
+      try {
+        const { showToast } = await import('../components/Toast')
+        showToast('No es pot saltar fases. Avança només una fase cada cop.', 'warning')
+      } catch (importErr) {
+        // Silent fail for toast
+      }
+      return
+    }
     
     try {
       let updateProject
+      let supabaseClient
+      let validatePhaseTransition
       try {
         const supabaseModule = await import('../lib/supabase')
         updateProject = supabaseModule.updateProject
+        supabaseClient = supabaseModule.default
+        const gatesModule = await import('../modules/projects/phaseGates')
+        validatePhaseTransition = gatesModule.validatePhaseTransition
       } catch (importErr) {
         setError('Error carregant mòduls')
         return
+      }
+
+      if (isForward && validatePhaseTransition) {
+        try {
+          const { ok, missing } = await validatePhaseTransition({
+            projectId: id,
+            fromPhase: currentPhase,
+            toPhase: newPhase,
+            project,
+            supabaseClient
+          })
+
+          if (!ok) {
+            const uniqueMissing = Array.from(new Set(missing || [])).filter(Boolean)
+            try {
+              const { showToast } = await import('../components/Toast')
+              const details = uniqueMissing.length > 0 ? uniqueMissing.join(', ') : 'Requisits pendents'
+              showToast(`No es pot avançar de fase. Falta: ${details}`, 'warning')
+            } catch (importErr) {
+              // Silent fail for toast
+            }
+            return
+          }
+        } catch (gateErr) {
+          try {
+            const { showToast } = await import('../components/Toast')
+            showToast('No es pot avançar de fase. Error validant requisits.', 'warning')
+          } catch (importErr) {
+            // Silent fail for toast
+          }
+          return
+        }
       }
       
       await updateProject(id, { current_phase: newPhase })
