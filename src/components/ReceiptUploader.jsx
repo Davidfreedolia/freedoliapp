@@ -32,20 +32,25 @@ export default function ReceiptUploader({
   const [renaming, setRenaming] = useState(false)
   const [uploadingFiles, setUploadingFiles] = useState({}) // { fileId: { file: File, progress: number, error: string } }
   const [replacingFileId, setReplacingFileId] = useState(null)
-    const [bucketHealthy, setBucketHealthy] = useState(true)
-    const [bucketError, setBucketError] = useState(null)
+  const [bucketHealthy, setBucketHealthy] = useState(true)
+  const [bucketError, setBucketError] = useState(null)
 
   // Cargar attachments cuando expenseId cambia
   useEffect(() => {
     if (expenseId) {
-  const [bucketHealthy, setBucketHealthy] = useState(true)
+      loadAttachments()
+    } else {
+      setAttachments([])
+    }
+  }, [expenseId])
+
   // Check bucket health on mount
   useEffect(() => {
     const checkBucketHealth = async () => {
       try {
         // Try to get bucket info from Supabase
         const { data: { user } } = await import('../lib/supabase').then(m => m.default.auth.getUser())
-        
+
         if (!user) {
           // Not logged in, skip health check
           return
@@ -53,13 +58,13 @@ export default function ReceiptUploader({
 
         // Import supabase dynamically to check bucket
         const supabase = (await import('../lib/supabase')).default
-        
+
         // Try to list bucket - this will fail if bucket doesn't exist
-        const { data, error } = await supabase
+        const { error } = await supabase
           .storage
           .from('receipts')
           .list('', { limit: 1 })
-        
+
         if (error) {
           // Check if it's a bucket not found error
           if (error.message?.includes('not') || error.message?.includes('400')) {
@@ -76,13 +81,6 @@ export default function ReceiptUploader({
 
     checkBucketHealth()
   }, [])
-
-  const [bucketError, setBucketError] = useState(null)
-      loadAttachments()
-    } else {
-      setAttachments([])
-    }
-  }, [expenseId])
 
   // Close actions menu when clicking outside
   useEffect(() => {
@@ -642,6 +640,10 @@ export default function ReceiptUploader({
       textAlign: 'center',
       padding: '12px'
     }
+  }
+
+  if (import.meta.env.DEV) {
+    console.log('ReceiptUploader mounted', { expenseId })
   }
 
   return (
