@@ -36,6 +36,7 @@ import FileBrowser from '../components/FileBrowser'
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal'
 import ArtsFinalsSection from '../components/ArtsFinalsSection'
 import CollapsibleSection from '../components/CollapsibleSection'
+import PhaseChecklist from '../components/projects/PhaseChecklist'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 // Dynamic imports for components that import supabase statically to avoid circular dependencies during module initialization
 const IdentifiersSection = lazy(() => import('../components/IdentifiersSection'))
@@ -777,6 +778,13 @@ function ProjectDetailInner({ useApp }) {
                 </div>
               </div>
             </div>
+
+            <PhaseChecklist
+              project={project}
+              currentPhase={project.current_phase}
+              projectId={id}
+              darkMode={darkMode}
+            />
           </div>
 
           {/* Amazon Readiness Badge */}
