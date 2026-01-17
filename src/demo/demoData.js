@@ -248,7 +248,7 @@ export const demoProjects = [
 // Demo Purchase Orders (más POs para mostrar diferentes estados)
 export const demoPurchaseOrders = [
   {
-    id: 'demo-po-1',
+    id: '2f8f2b4a-1111-4a7b-9c1a-111111111111',
     po_number: 'PO-2024-001',
     project_id: 'demo-proj-1',
     supplier_id: 'demo-supplier-1',
@@ -266,7 +266,7 @@ export const demoPurchaseOrders = [
     expected_delivery_date: daysAgo(5)
   },
   {
-    id: 'demo-po-2',
+    id: '2f8f2b4a-2222-4a7b-9c1a-222222222222',
     po_number: 'PO-2024-002',
     project_id: 'demo-proj-2',
     supplier_id: 'demo-supplier-2',
@@ -284,7 +284,7 @@ export const demoPurchaseOrders = [
     expected_delivery_date: daysFromNow(5)
   },
   {
-    id: 'demo-po-3',
+    id: '2f8f2b4a-3333-4a7b-9c1a-333333333333',
     po_number: 'PO-2024-003',
     project_id: 'demo-proj-4',
     supplier_id: 'demo-supplier-3',
@@ -302,7 +302,7 @@ export const demoPurchaseOrders = [
     expected_delivery_date: daysFromNow(3)
   },
   {
-    id: 'demo-po-4',
+    id: '2f8f2b4a-4444-4a7b-9c1a-444444444444',
     po_number: 'PO-2024-004',
     project_id: 'demo-proj-5',
     supplier_id: 'demo-supplier-1',
@@ -320,7 +320,7 @@ export const demoPurchaseOrders = [
     expected_delivery_date: daysFromNow(20)
   },
   {
-    id: 'demo-po-5',
+    id: '2f8f2b4a-5555-4a7b-9c1a-555555555555',
     po_number: 'PO-2024-005',
     project_id: 'demo-proj-7',
     supplier_id: 'demo-supplier-2',
@@ -338,7 +338,7 @@ export const demoPurchaseOrders = [
     expected_delivery_date: daysFromNow(15)
   },
   {
-    id: 'demo-po-6',
+    id: '2f8f2b4a-6666-4a7b-9c1a-666666666666',
     po_number: 'PO-2024-006',
     project_id: 'demo-proj-9',
     supplier_id: 'demo-supplier-3',
@@ -841,10 +841,10 @@ export const demoCalendarEvents = [
     end: daysFromNow(5),
     type: 'shipment',
     entity_type: 'purchase_order',
-    entity_id: 'demo-po-2',
+    entity_id: '2f8f2b4a-2222-4a7b-9c1a-222222222222',
     project_id: 'demo-proj-2',
     status: 'in_transit',
-    resource: demoPurchaseOrders.find(po => po.id === 'demo-po-2')
+    resource: demoPurchaseOrders.find(po => po.id === '2f8f2b4a-2222-4a7b-9c1a-222222222222')
   },
   {
     id: 'demo-event-4',
@@ -853,10 +853,10 @@ export const demoCalendarEvents = [
     end: daysFromNow(3),
     type: 'shipment',
     entity_type: 'purchase_order',
-    entity_id: 'demo-po-3',
+    entity_id: '2f8f2b4a-3333-4a7b-9c1a-333333333333',
     project_id: 'demo-proj-4',
     status: 'in_transit',
-    resource: demoPurchaseOrders.find(po => po.id === 'demo-po-3')
+    resource: demoPurchaseOrders.find(po => po.id === '2f8f2b4a-3333-4a7b-9c1a-333333333333')
   },
   {
     id: 'demo-event-5',
@@ -901,7 +901,7 @@ export const demoCalendarEvents = [
 
 // Demo Manufacturer Pack Data
 export const demoManufacturerPackData = {
-  'demo-po-1': {
+  '2f8f2b4a-1111-4a7b-9c1a-111111111111': {
     generated: true,
     generated_at: daysAgo(10),
     sent: true,
@@ -913,7 +913,7 @@ export const demoManufacturerPackData = {
       carton_labels: true
     }
   },
-  'demo-po-4': {
+  '2f8f2b4a-4444-4a7b-9c1a-444444444444': {
     generated: true,
     generated_at: daysAgo(5),
     sent: false,
