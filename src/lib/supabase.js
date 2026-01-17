@@ -1894,6 +1894,10 @@ export const deleteWarehouse = async (id) => {
 
 // CONFIGURACIÓ EMPRESA
 export const getCompanySettings = async () => {
+  const { isDemoMode } = await import('../demo/demoMode')
+  if (isDemoMode()) {
+    return { demo_mode: false }
+  }
   const userId = await getCurrentUserId()
   const { data, error } = await supabase
     .from('company_settings')
@@ -3231,6 +3235,10 @@ export const getStickyNotes = async (filters = {}) => {
 }
 
 export const createStickyNote = async (note) => {
+  const { isDemoMode } = await import('../demo/demoMode')
+  if (isDemoMode()) {
+    return { id: `demo-note-${Date.now()}`, ...note }
+  }
   // Get demo mode setting
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
@@ -3253,6 +3261,10 @@ export const createStickyNote = async (note) => {
 }
 
 export const updateStickyNote = async (id, updates) => {
+  const { isDemoMode } = await import('../demo/demoMode')
+  if (isDemoMode()) {
+    return { id, ...updates }
+  }
   const userId = await getCurrentUserId()
   
   const { data, error } = await supabase
@@ -3268,6 +3280,10 @@ export const updateStickyNote = async (id, updates) => {
 }
 
 export const deleteStickyNote = async (id) => {
+  const { isDemoMode } = await import('../demo/demoMode')
+  if (isDemoMode()) {
+    return true
+  }
   const userId = await getCurrentUserId()
   
   const { data, error } = await supabase
@@ -3288,6 +3304,10 @@ export const markStickyNoteDone = async (id) => {
 
 // Convert sticky note to task
 export const convertStickyNoteToTask = async (stickyNoteId, options = {}) => {
+  const { isDemoMode } = await import('../demo/demoMode')
+  if (isDemoMode()) {
+    return null
+  }
   const userId = await getCurrentUserId()
   
   // Get sticky note

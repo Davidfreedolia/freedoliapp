@@ -22,6 +22,14 @@ export async function getDemoMode() {
     return _cachedDemoMode
   }
 
+  // Local demo toggle: skip Supabase lookups to avoid unauthenticated errors
+  const { isDemoMode } = await import('../demo/demoMode')
+  if (isDemoMode()) {
+    _cachedDemoMode = false
+    _cacheTimestamp = now
+    return false
+  }
+
   try {
     // Dynamic import to avoid circular dependency with supabase.js
     const { getCompanySettings } = await import('./supabase')
