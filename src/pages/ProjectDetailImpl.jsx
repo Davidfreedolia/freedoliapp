@@ -7,6 +7,7 @@ import {
   ChevronRight, 
   ChevronDown,
   Check,
+  AlertTriangle,
   Upload,
   FileText,
   FolderOpen,
