@@ -376,8 +376,10 @@ function ProjectDetailInner({ useApp }) {
             const uniqueMissing = Array.from(new Set(missing || [])).filter(Boolean)
             try {
               const { showToast } = await import('../components/Toast')
-              const details = uniqueMissing.length > 0 ? uniqueMissing.join(', ') : 'Requisits pendents'
-              showToast(`No es pot avançar de fase. Falta: ${details}`, 'warning')
+              const details = uniqueMissing.length > 0
+                ? `• ${uniqueMissing.join('\n• ')}`
+                : '• Requisits pendents'
+              showToast(`No es pot avançar de fase\n${details}`, 'warning')
             } catch (importErr) {
               // Silent fail for toast
             }
