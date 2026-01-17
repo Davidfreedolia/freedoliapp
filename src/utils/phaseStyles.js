@@ -60,3 +60,47 @@ export const PHASE_STYLES = {
 }
 
 export const getPhaseStyle = (phaseId) => PHASE_STYLES[phaseId] || PHASE_STYLES[1]
+
+const hexToRgba = (hex, alpha) => {
+  if (!hex) return ''
+  const normalized = hex.replace('#', '')
+  const isShort = normalized.length === 3
+  const expanded = isShort
+    ? normalized.split('').map((ch) => ch + ch).join('')
+    : normalized
+  const r = parseInt(expanded.slice(0, 2), 16)
+  const g = parseInt(expanded.slice(2, 4), 16)
+  const b = parseInt(expanded.slice(4, 6), 16)
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
+export const getPhaseSurfaceStyles = (phaseStyle, options = {}) => {
+  const { darkMode = false, borderWidth = 2 } = options
+  const hasPhaseStyle = Boolean(phaseStyle?.bg && phaseStyle?.accent)
+  if (!hasPhaseStyle) {
+    return { hasPhaseStyle: false }
+  }
+
+  const cardOverlay = darkMode ? 'rgba(0, 0, 0, 0.18)' : 'rgba(255, 255, 255, 0.6)'
+  const contentOverlay = darkMode ? 'rgba(0, 0, 0, 0.28)' : 'rgba(255, 255, 255, 0.78)'
+  const headerHoverBg = hexToRgba(phaseStyle.accent, darkMode ? 0.16 : 0.1)
+
+  return {
+    hasPhaseStyle,
+    headerHoverBg,
+    wrapperStyle: {
+      backgroundColor: phaseStyle.bg,
+      borderLeft: `4px solid ${phaseStyle.accent}`
+    },
+    cardStyle: {
+      background: `linear-gradient(${cardOverlay}, ${cardOverlay}), ${phaseStyle.bg}`,
+      borderLeft: `${borderWidth}px solid ${phaseStyle.accent}`
+    },
+    contentStyle: {
+      background: `linear-gradient(${contentOverlay}, ${contentOverlay}), ${phaseStyle.bg}`
+    },
+    accentStyle: {
+      borderLeft: `${borderWidth}px solid ${phaseStyle.accent}`
+    }
+  }
+}

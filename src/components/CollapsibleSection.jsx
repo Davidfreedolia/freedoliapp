@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronRight } from 'lucide-react'
+import { getPhaseSurfaceStyles } from '../utils/phaseStyles'
 
 /**
  * CollapsibleSection - Reusable accordion section component
@@ -15,16 +16,24 @@ export default function CollapsibleSection({
   icon: Icon, 
   defaultOpen = false, 
   children,
-  darkMode = false 
+  darkMode = false,
+  phaseStyle = null
 }) {
   const [isOpen, setIsOpen] = useState(defaultOpen)
+  const phaseSurface = getPhaseSurfaceStyles(phaseStyle, { darkMode, borderWidth: 2 })
+  const hasPhaseStyle = phaseSurface?.hasPhaseStyle
+  const headerHoverBg = phaseSurface?.headerHoverBg || (darkMode ? '#1f1f2e' : '#f9fafb')
+  const cardBackground = hasPhaseStyle ? phaseSurface.cardStyle.background : (darkMode ? '#15151f' : '#ffffff')
+  const cardBorderLeft = hasPhaseStyle ? phaseSurface.cardStyle.borderLeft : undefined
+  const contentBackground = hasPhaseStyle ? phaseSurface.contentStyle.background : (darkMode ? '#0f0f15' : '#fafafa')
 
   return (
     <div style={{
       marginBottom: '24px',
       borderRadius: 'var(--radius-md)',
       border: `1px solid var(--border-color)`,
-      backgroundColor: darkMode ? '#15151f' : '#ffffff',
+      borderLeft: cardBorderLeft,
+      background: cardBackground,
       overflow: 'hidden',
       transition: 'all 0.2s ease'
     }}>
@@ -44,7 +53,7 @@ export default function CollapsibleSection({
           transition: 'background-color 0.2s ease'
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = darkMode ? '#1f1f2e' : '#f9fafb'
+          e.currentTarget.style.backgroundColor = headerHoverBg
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.backgroundColor = 'transparent'
@@ -92,7 +101,7 @@ export default function CollapsibleSection({
         <div style={{
           padding: '20px',
           borderTop: `1px solid var(--border-color)`,
-          backgroundColor: darkMode ? '#0f0f15' : '#fafafa'
+          background: contentBackground
         }}>
           {children}
         </div>

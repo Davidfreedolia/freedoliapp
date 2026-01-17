@@ -38,7 +38,7 @@ import ArtsFinalsSection from '../components/ArtsFinalsSection'
 import CollapsibleSection from '../components/CollapsibleSection'
 import PhaseChecklist from '../components/projects/PhaseChecklist'
 import { useBreakpoint } from '../hooks/useBreakpoint'
-import { PHASE_STYLES, getPhaseStyle } from '../utils/phaseStyles'
+import { PHASE_STYLES, getPhaseStyle, getPhaseSurfaceStyles } from '../utils/phaseStyles'
 // Dynamic imports for components that import supabase statically to avoid circular dependencies during module initialization
 const IdentifiersSection = lazy(() => import('../components/IdentifiersSection'))
 const ProfitabilityCalculator = lazy(() => import('../components/ProfitabilityCalculator'))
@@ -640,6 +640,18 @@ function ProjectDetailInner({ useApp }) {
   }
 
   const currentPhase = getPhaseStyle(project.current_phase)
+  const phaseSurface = getPhaseSurfaceStyles(currentPhase, { darkMode, borderWidth: 2 })
+  const phaseWrapperStyle = {
+    ...phaseSurface.wrapperStyle,
+    borderRadius: '16px',
+    padding: isMobile ? '16px' : '24px',
+    marginTop: '12px'
+  }
+  const phaseCardStyle = {
+    border: `1px solid var(--border-color)`,
+    borderRadius: 'var(--radius-base)',
+    ...phaseSurface.cardStyle
+  }
 
   return (
     <div style={styles.container}>
@@ -693,424 +705,141 @@ function ProjectDetailInner({ useApp }) {
           </div>
         </div>
 
-        {/* 1) OVERVIEW SECTION */}
-        <CollapsibleSection
-          title="Resum del Projecte"
-          icon={Info}
-          defaultOpen={true}
-          darkMode={darkMode}
-        >
-          {/* Phase Timeline */}
-          <div style={{
-            ...styles.timelineSection,
-            backgroundColor: 'transparent',
-            border: 'none',
-            padding: 0,
-            marginBottom: '24px'
-          }}>
-            <h3 style={{
-              ...styles.sectionTitle,
-              color: darkMode ? '#ffffff' : '#111827',
-              marginBottom: '16px'
-            }}>
-              Progrés del Projecte
-            </h3>
-            
-            <div style={{
-              ...styles.timeline,
-              flexWrap: isMobile ? 'wrap' : 'nowrap',
-              gap: isMobile ? '12px' : '0',
-              overflowX: 'visible'
-            }}>
-              {PHASES.map((phase, index) => {
-                const isActive = phase.id === project.current_phase
-                const isCompleted = phase.id < project.current_phase
-                const isFuture = phase.id > project.current_phase
-                const PhaseIcon = phase.icon
-                
-                return (
-                  <div key={phase.id} style={styles.timelineItem}>
-                    <button
-                      onClick={() => handlePhaseChange(phase.id)}
-                      style={{
-                        ...styles.phaseButton,
-                        backgroundColor: isActive
-                          ? phase.bg
-                          : (isCompleted ? phase.bg : 'var(--bg-secondary)'),
-                        borderColor: isActive || isCompleted ? phase.accent : 'var(--border-color)',
-                        color: isFuture ? '#9ca3af' : phase.accent,
-                        boxShadow: isActive ? `0 0 0 6px ${phase.bg}` : 'none'
-                      }}
-                    >
-                      {isCompleted ? (
-                        <Check size={20} color={phase.accent} />
-                      ) : (
-                        <PhaseIcon size={20} color={isFuture ? '#9ca3af' : phase.accent} />
-                      )}
-                    </button>
-                    <span style={{
-                      ...styles.phaseName,
-                      color: isActive ? phase.accent : (darkMode ? '#9ca3af' : '#6b7280'),
-                      fontWeight: isActive ? '600' : '400'
-                    }}>
-                      {phase.name}
-                    </span>
-                    {index < PHASES.length - 1 && !isMobile && (
-                      <div style={{
-                        ...styles.timelineConnector,
-                        backgroundColor: isCompleted ? phase.accent : 'var(--border-color)'
-                      }} />
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-
-            {/* Current phase info */}
-            <div style={{
-              ...styles.currentPhaseInfo,
-              backgroundColor: currentPhase.bg,
-              borderColor: currentPhase.accent
-            }}>
-              <div style={styles.currentPhaseHeader}>
-                <currentPhase.icon size={24} color={currentPhase.accent} />
-                <div>
-                  <h4 style={{ margin: 0, color: currentPhase.accent }}>{currentPhase.name}</h4>
-                  <p style={{ margin: 0, fontSize: '14px', color: '#6b7280' }}>{currentPhase.description}</p>
-                </div>
-              </div>
-            </div>
-
-            <PhaseChecklist
-              project={project}
-              currentPhase={project.current_phase}
-              projectId={id}
-              darkMode={darkMode}
-            />
-          </div>
-
-          {/* Amazon Readiness Badge */}
-          <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
-            <AmazonReadinessBadge
-              projectId={id}
-              darkMode={darkMode}
-              onAssignGtin={() => {
-                // Scroll to IdentifiersSection
-                const identifiersSection = document.getElementById('identifiers-section')
-                if (identifiersSection) {
-                  identifiersSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                }
-              }}
-              onCreatePO={() => {
-                // Navigate to Orders page with project filter - modal will open automatically if action=create
-                navigate(`/orders?project=${id}&action=create`)
-              }}
-              onMarkExempt={() => {
-                // Use ref to call markAsExempt method (React-controlled, no DOM manipulation)
-                if (identifiersSectionRef.current) {
-                  identifiersSectionRef.current.markAsExempt()
-                }
-              }}
-            />
-          </Suspense>
-
-          {/* Identifiers Section */}
-          <div id="identifiers-section" style={{ marginTop: '24px' }}>
-            <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
-              <IdentifiersSection ref={identifiersSectionRef} projectId={id} darkMode={darkMode} />
-            </Suspense>
-          </div>
-
-          {/* Key Actions */}
-          <div style={{
-            marginTop: '24px',
-            padding: '20px',
-            borderRadius: 'var(--radius-base)',
-            backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-            border: `1px solid var(--border-color)`
-          }}>
-            <h4 style={{
-              margin: '0 0 16px 0',
-              fontSize: '14px',
-              fontWeight: '600',
-              color: darkMode ? '#ffffff' : '#111827'
-            }}>
-              Accions Ràpides
-            </h4>
-            <div style={styles.actionsGrid}>
-              {/* Briefing - disponible des de fase 3 */}
-              {project.current_phase >= 3 && (
-                <button 
-                  style={{...styles.actionButton, backgroundColor: '#8b5cf6'}} 
-                  onClick={() => navigate(`/projects/${id}/briefing`)}
-                >
-                  <ClipboardList size={18} />
-                  Briefing del Producte
-                </button>
-              )}
-              
-              {/* Nova Comanda - disponible des de fase 3 */}
-              {project.current_phase >= 3 && (
-                <button 
-                  style={{
-                    ...styles.actionButton, 
-                    backgroundColor: '#4f46e5',
-                    opacity: !driveConnected ? 0.5 : 1,
-                    cursor: !driveConnected ? 'not-allowed' : 'pointer'
-                  }} 
-                  disabled={!driveConnected}
-                  title={!driveConnected ? "Connecta Google Drive per crear" : ""}
-                  onClick={() => {
-                    if (!driveConnected) return
-                    navigate(`/orders?project=${id}`)
-                  }}
-                >
-                  <ShoppingCart size={18} />
-                  Crear Comanda (PO)
-                </button>
-              )}
-              
-              {/* Gestionar Stock - fase 7 */}
-              {project.current_phase === 7 && (
-                <button 
-                  style={{...styles.actionButton, backgroundColor: '#22c55e', border: '1px solid #16a34a'}} 
-                  onClick={() => navigate(`/inventory?project=${id}`)}
-                >
-                  <Package size={18} />
-                  Gestionar Stock
-                </button>
-              )}
-            </div>
-          </div>
-        </CollapsibleSection>
-
-        {/* 2) TIMELINE SECTION */}
-        <CollapsibleSection
-          title="Timeline"
-          icon={Calendar}
-          defaultOpen={true}
-          darkMode={darkMode}
-        >
-          <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
-            <ProjectEventsTimeline 
-              projectId={id}
-              projectStatus={project?.status}
-              darkMode={darkMode}
-            />
-          </Suspense>
-        </CollapsibleSection>
-
-        {/* 3) PURCHASE ORDERS SECTION */}
-        <CollapsibleSection
-          title="Comandes de Compra"
-          icon={Receipt}
-          defaultOpen={false}
-          darkMode={darkMode}
-        >
-          <div style={{
-            padding: '16px',
-            borderRadius: 'var(--radius-base)',
-            backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-            border: `1px solid var(--border-color)`,
-            textAlign: 'center'
-          }}>
-            <p style={{
-              margin: '0 0 16px 0',
-              fontSize: '14px',
-              color: darkMode ? '#9ca3af' : '#6b7280'
-            }}>
-              Gestiona les comandes de compra d'aquest projecte
-            </p>
-            <button
-              onClick={() => navigate(`/orders?project=${id}`)}
-              style={{
-                ...styles.actionButton,
-                backgroundColor: '#4f46e5',
-                margin: '0 auto'
-              }}
-            >
-              <ShoppingCart size={18} />
-              Veure Comandes
-            </button>
-          </div>
-        </CollapsibleSection>
-
-        {/* 4) EXPENSES / INCOMES SECTION */}
-        <CollapsibleSection
-          title="Despeses i Ingressos"
-          icon={DollarSign}
-          defaultOpen={false}
-          darkMode={darkMode}
-        >
-          <div style={{
-            padding: '16px',
-            borderRadius: 'var(--radius-base)',
-            backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-            border: `1px solid var(--border-color)`,
-            textAlign: 'center'
-          }}>
-            <p style={{
-              margin: '0 0 16px 0',
-              fontSize: '14px',
-              color: darkMode ? '#9ca3af' : '#6b7280'
-            }}>
-              Gestiona les despeses i ingressos d'aquest projecte
-            </p>
-            <button
-              onClick={() => navigate(`/finances?project=${id}`)}
-              style={{
-                ...styles.actionButton,
-                backgroundColor: '#4f46e5',
-                margin: '0 auto'
-              }}
-            >
-              <DollarSign size={18} />
-              Veure Finances
-            </button>
-          </div>
-        </CollapsibleSection>
-
-        {/* 5) ARTS FINALS SECTION */}
-        {project && (
+        <div style={phaseWrapperStyle}>
+          {/* 1) OVERVIEW SECTION */}
           <CollapsibleSection
-            title="Arts Finals"
-            icon={FileImage}
-            defaultOpen={false}
+            title="Resum del Projecte"
+            icon={Info}
+            defaultOpen={true}
             darkMode={darkMode}
+            phaseStyle={currentPhase}
           >
-            <ArtsFinalsSection
-              project={project}
-              darkMode={darkMode}
-              onProjectUpdated={handleProjectUpdated}
-            />
-          </CollapsibleSection>
-        )}
-
-        {/* 6) DOCUMENTS / ATTACHMENTS SECTION */}
-        {(driveConnected && projectFolders) && (
-          <CollapsibleSection
-            title="Documents i Adjunts"
-            icon={Paperclip}
-            defaultOpen={false}
-            darkMode={darkMode}
-          >
+            {/* Phase Timeline */}
             <div style={{
-              display: 'grid',
-              gridTemplateColumns: isMobile ? '1fr' : (isTablet ? '200px 1fr' : '280px 1fr'),
-              gap: isMobile ? '16px' : '24px'
+              ...styles.timelineSection,
+              backgroundColor: 'transparent',
+              border: 'none',
+              padding: 0,
+              marginBottom: '24px'
             }}>
-              {/* Folder selector */}
-              <div style={{
-                ...styles.foldersPanel,
-                backgroundColor: 'transparent',
-                border: 'none',
-                padding: 0
+              <h3 style={{
+                ...styles.sectionTitle,
+                color: darkMode ? '#ffffff' : '#111827',
+                marginBottom: '16px'
               }}>
-                <h4 style={{
-                  ...styles.sectionTitle,
-                  color: darkMode ? '#ffffff' : '#111827',
-                  fontSize: '14px',
-                  marginBottom: '12px'
-                }}>
-                  <FolderOpen size={16} />
-                  Carpetes del Projecte
-                </h4>
-                
-                <div style={styles.foldersList}>
-                  {(projectSubfolders || []).map(folderName => {
-                    const folder = projectFolders.subfolders?.[folderName]
-                    const isSelected = selectedFolder?.name === folderName
-                    
-                    return (
+                Progrés del Projecte
+              </h3>
+              
+              <div style={{
+                ...styles.timeline,
+                flexWrap: isMobile ? 'wrap' : 'nowrap',
+                gap: isMobile ? '12px' : '0',
+                overflowX: 'visible'
+              }}>
+                {PHASES.map((phase, index) => {
+                  const isActive = phase.id === project.current_phase
+                  const isCompleted = phase.id < project.current_phase
+                  const isFuture = phase.id > project.current_phase
+                  const PhaseIcon = phase.icon
+                  
+                  return (
+                    <div key={phase.id} style={styles.timelineItem}>
                       <button
-                        key={folderName}
-                        onClick={() => folder && setSelectedFolder(folder)}
-                        disabled={!folder}
+                        onClick={() => handlePhaseChange(phase.id)}
                         style={{
-                          ...styles.folderButton,
-                          backgroundColor: isSelected ? '#4f46e510' : 'transparent',
-                          borderColor: isSelected ? '#4f46e5' : 'var(--border-color)',
-                          opacity: folder ? 1 : 0.5
+                          ...styles.phaseButton,
+                          backgroundColor: isActive
+                            ? phase.bg
+                            : (isCompleted ? phase.bg : 'var(--bg-secondary)'),
+                          borderColor: isActive || isCompleted ? phase.accent : 'var(--border-color)',
+                          color: isFuture ? '#9ca3af' : phase.accent,
+                          boxShadow: isActive ? `0 0 0 6px ${phase.bg}` : 'none'
                         }}
                       >
-                        <FolderOpen size={16} color={isSelected ? '#4f46e5' : '#6b7280'} />
-                        <span style={{
-                          color: isSelected ? '#4f46e5' : (darkMode ? '#ffffff' : '#111827')
-                        }}>
-                          {folderName.replace(/^\d+_/, '')}
-                        </span>
+                        {isCompleted ? (
+                          <Check size={20} color={phase.accent} />
+                        ) : (
+                          <PhaseIcon size={20} color={isFuture ? '#9ca3af' : phase.accent} />
+                        )}
                       </button>
-                    )
-                  })}
-                </div>
-
-                {/* Open in Drive link */}
-                <a 
-                  href={`https://drive.google.com/drive/folders/${projectFolders.main.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={styles.driveLink}
-                >
-                  <ExternalLink size={14} />
-                  Obrir a Google Drive
-                </a>
+                      <span style={{
+                        ...styles.phaseName,
+                        color: isActive ? phase.accent : (darkMode ? '#9ca3af' : '#6b7280'),
+                        fontWeight: isActive ? '600' : '400'
+                      }}>
+                        {phase.name}
+                      </span>
+                      {index < PHASES.length - 1 && !isMobile && (
+                        <div style={{
+                          ...styles.timelineConnector,
+                          backgroundColor: isCompleted ? phase.accent : 'var(--border-color)'
+                        }} />
+                      )}
+                    </div>
+                  )
+                })}
               </div>
 
-              {/* File browser & uploader */}
-              {selectedFolder ? (
-                <div style={styles.filesPanel}>
-                  <FileUploader
-                    folderId={selectedFolder.id}
-                    onUploadComplete={handleUploadComplete}
-                    label={`Arrossega arxius a ${selectedFolder.name?.replace(/^\d+_/, '')}`}
-                  />
-                  
-                  <FileBrowser
-                    folderId={selectedFolder.id}
-                    folderName={selectedFolder.name?.replace(/^\d+_/, '')}
-                    allowDelete={true}
-                  />
+              {/* Current phase info */}
+              <div style={{
+                ...styles.currentPhaseInfo,
+                backgroundColor: currentPhase.bg,
+                borderColor: currentPhase.accent
+              }}>
+                <div style={styles.currentPhaseHeader}>
+                  <currentPhase.icon size={24} color={currentPhase.accent} />
+                  <div>
+                    <h4 style={{ margin: 0, color: currentPhase.accent }}>{currentPhase.name}</h4>
+                    <p style={{ margin: 0, fontSize: '14px', color: '#6b7280' }}>{currentPhase.description}</p>
+                  </div>
                 </div>
-              ) : (
-                <div style={{
-                  padding: '40px',
-                  textAlign: 'center',
-                  color: darkMode ? '#9ca3af' : '#6b7280',
-                  fontSize: '14px'
-                }}>
-                  Selecciona una carpeta per veure els documents
-                </div>
-              )}
-            </div>
-          </CollapsibleSection>
-        )}
+              </div>
 
-        {/* 7) NOTES / MISC SECTION */}
-        <CollapsibleSection
-          title="Notes i Miscel·lània"
-          icon={StickyNote}
-          defaultOpen={false}
-          darkMode={darkMode}
-        >
-          {/* Tasks Section */}
-          <div style={{ marginBottom: '24px' }}>
+              <PhaseChecklist
+                project={project}
+                currentPhase={project.current_phase}
+                projectId={id}
+                darkMode={darkMode}
+              />
+            </div>
+
+            {/* Amazon Readiness Badge */}
             <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
-              <TasksSection 
-                entityType="project" 
-                entityId={id} 
-                darkMode={darkMode} 
+              <AmazonReadinessBadge
+                projectId={id}
+                darkMode={darkMode}
+                onAssignGtin={() => {
+                  // Scroll to IdentifiersSection
+                  const identifiersSection = document.getElementById('identifiers-section')
+                  if (identifiersSection) {
+                    identifiersSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  }
+                }}
+                onCreatePO={() => {
+                  // Navigate to Orders page with project filter - modal will open automatically if action=create
+                  navigate(`/orders?project=${id}&action=create`)
+                }}
+                onMarkExempt={() => {
+                  // Use ref to call markAsExempt method (React-controlled, no DOM manipulation)
+                  if (identifiersSectionRef.current) {
+                    identifiersSectionRef.current.markAsExempt()
+                  }
+                }}
               />
             </Suspense>
-          </div>
 
-          {/* Decision Block - Visible a fase Research (1) */}
-          {project.current_phase === 1 && (
+            {/* Identifiers Section */}
+            <div id="identifiers-section" style={{ marginTop: '24px' }}>
+              <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
+                <IdentifiersSection ref={identifiersSectionRef} projectId={id} darkMode={darkMode} />
+              </Suspense>
+            </div>
+
+            {/* Key Actions */}
             <div style={{
-              marginBottom: '24px',
+              marginTop: '24px',
               padding: '20px',
-              borderRadius: 'var(--radius-base)',
-              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-              border: `1px solid var(--border-color)`
+            ...phaseCardStyle
             }}>
               <h4 style={{
                 margin: '0 0 16px 0',
@@ -1118,58 +847,342 @@ function ProjectDetailInner({ useApp }) {
                 fontWeight: '600',
                 color: darkMode ? '#ffffff' : '#111827'
               }}>
-                Decision
+                Accions Ràpides
               </h4>
+              <div style={styles.actionsGrid}>
+                {/* Briefing - disponible des de fase 3 */}
+                {project.current_phase >= 3 && (
+                  <button 
+                    style={{...styles.actionButton, backgroundColor: '#8b5cf6'}} 
+                    onClick={() => navigate(`/projects/${id}/briefing`)}
+                  >
+                    <ClipboardList size={18} />
+                    Briefing del Producte
+                  </button>
+                )}
+                
+                {/* Nova Comanda - disponible des de fase 3 */}
+                {project.current_phase >= 3 && (
+                  <button 
+                    style={{
+                      ...styles.actionButton, 
+                      backgroundColor: '#4f46e5',
+                      opacity: !driveConnected ? 0.5 : 1,
+                      cursor: !driveConnected ? 'not-allowed' : 'pointer'
+                    }} 
+                    disabled={!driveConnected}
+                    title={!driveConnected ? "Connecta Google Drive per crear" : ""}
+                    onClick={() => {
+                      if (!driveConnected) return
+                      navigate(`/orders?project=${id}`)
+                    }}
+                  >
+                    <ShoppingCart size={18} />
+                    Crear Comanda (PO)
+                  </button>
+                )}
+                
+                {/* Gestionar Stock - fase 7 */}
+                {project.current_phase === 7 && (
+                  <button 
+                    style={{...styles.actionButton, backgroundColor: '#22c55e', border: '1px solid #16a34a'}} 
+                    onClick={() => navigate(`/inventory?project=${id}`)}
+                  >
+                    <Package size={18} />
+                    Gestionar Stock
+                  </button>
+                )}
+              </div>
+            </div>
+          </CollapsibleSection>
+
+          {/* 2) TIMELINE SECTION */}
+          <CollapsibleSection
+            title="Timeline"
+            icon={Calendar}
+            defaultOpen={true}
+            darkMode={darkMode}
+            phaseStyle={currentPhase}
+          >
+            <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
+              <ProjectEventsTimeline 
+                projectId={id}
+                projectStatus={project?.status}
+                darkMode={darkMode}
+              />
+            </Suspense>
+          </CollapsibleSection>
+
+          {/* 3) PURCHASE ORDERS SECTION */}
+          <CollapsibleSection
+            title="Comandes de Compra"
+            icon={Receipt}
+            defaultOpen={false}
+            darkMode={darkMode}
+            phaseStyle={currentPhase}
+          >
+            <div style={{
+              padding: '16px',
+            ...phaseCardStyle,
+              textAlign: 'center'
+            }}>
+              <p style={{
+                margin: '0 0 16px 0',
+                fontSize: '14px',
+                color: darkMode ? '#9ca3af' : '#6b7280'
+              }}>
+                Gestiona les comandes de compra d'aquest projecte
+              </p>
+              <button
+                onClick={() => navigate(`/orders?project=${id}`)}
+                style={{
+                  ...styles.actionButton,
+                  backgroundColor: '#4f46e5',
+                  margin: '0 auto'
+                }}
+              >
+                <ShoppingCart size={18} />
+                Veure Comandes
+              </button>
+            </div>
+          </CollapsibleSection>
+
+          {/* 4) EXPENSES / INCOMES SECTION */}
+          <CollapsibleSection
+            title="Despeses i Ingressos"
+            icon={DollarSign}
+            defaultOpen={false}
+            darkMode={darkMode}
+            phaseStyle={currentPhase}
+          >
+            <div style={{
+              padding: '16px',
+            ...phaseCardStyle,
+              textAlign: 'center'
+            }}>
+              <p style={{
+                margin: '0 0 16px 0',
+                fontSize: '14px',
+                color: darkMode ? '#9ca3af' : '#6b7280'
+              }}>
+                Gestiona les despeses i ingressos d'aquest projecte
+              </p>
+              <button
+                onClick={() => navigate(`/finances?project=${id}`)}
+                style={{
+                  ...styles.actionButton,
+                  backgroundColor: '#4f46e5',
+                  margin: '0 auto'
+                }}
+              >
+                <DollarSign size={18} />
+                Veure Finances
+              </button>
+            </div>
+          </CollapsibleSection>
+
+          {/* 5) ARTS FINALS SECTION */}
+          {project && (
+            <CollapsibleSection
+              title="Arts Finals"
+              icon={FileImage}
+              defaultOpen={false}
+              darkMode={darkMode}
+              phaseStyle={currentPhase}
+            >
+              <ArtsFinalsSection
+                project={project}
+                darkMode={darkMode}
+                onProjectUpdated={handleProjectUpdated}
+              />
+            </CollapsibleSection>
+          )}
+
+          {/* 6) DOCUMENTS / ATTACHMENTS SECTION */}
+          {(driveConnected && projectFolders) && (
+            <CollapsibleSection
+              title="Documents i Adjunts"
+              icon={Paperclip}
+              defaultOpen={false}
+              darkMode={darkMode}
+              phaseStyle={currentPhase}
+            >
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: isMobile ? '1fr' : (isTablet ? '200px 1fr' : '280px 1fr'),
+                gap: isMobile ? '16px' : '24px'
+              }}>
+                {/* Folder selector */}
+                <div style={{
+                  ...styles.foldersPanel,
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  padding: 0
+                }}>
+                  <h4 style={{
+                    ...styles.sectionTitle,
+                    color: darkMode ? '#ffffff' : '#111827',
+                    fontSize: '14px',
+                    marginBottom: '12px'
+                  }}>
+                    <FolderOpen size={16} />
+                    Carpetes del Projecte
+                  </h4>
+                  
+                  <div style={styles.foldersList}>
+                    {(projectSubfolders || []).map(folderName => {
+                      const folder = projectFolders.subfolders?.[folderName]
+                      const isSelected = selectedFolder?.name === folderName
+                      
+                      return (
+                        <button
+                          key={folderName}
+                          onClick={() => folder && setSelectedFolder(folder)}
+                          disabled={!folder}
+                          style={{
+                            ...styles.folderButton,
+                            backgroundColor: isSelected ? '#4f46e510' : 'transparent',
+                            borderColor: isSelected ? '#4f46e5' : 'var(--border-color)',
+                            opacity: folder ? 1 : 0.5
+                          }}
+                        >
+                          <FolderOpen size={16} color={isSelected ? '#4f46e5' : '#6b7280'} />
+                          <span style={{
+                            color: isSelected ? '#4f46e5' : (darkMode ? '#ffffff' : '#111827')
+                          }}>
+                            {folderName.replace(/^\d+_/, '')}
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+
+                  {/* Open in Drive link */}
+                  <a 
+                    href={`https://drive.google.com/drive/folders/${projectFolders.main.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={styles.driveLink}
+                  >
+                    <ExternalLink size={14} />
+                    Obrir a Google Drive
+                  </a>
+                </div>
+
+                {/* File browser & uploader */}
+                {selectedFolder ? (
+                  <div style={styles.filesPanel}>
+                    <FileUploader
+                      folderId={selectedFolder.id}
+                      onUploadComplete={handleUploadComplete}
+                      label={`Arrossega arxius a ${selectedFolder.name?.replace(/^\d+_/, '')}`}
+                    />
+                    
+                    <FileBrowser
+                      folderId={selectedFolder.id}
+                      folderName={selectedFolder.name?.replace(/^\d+_/, '')}
+                      allowDelete={true}
+                    />
+                  </div>
+                ) : (
+                  <div style={{
+                    padding: '40px',
+                    textAlign: 'center',
+                    color: darkMode ? '#9ca3af' : '#6b7280',
+                    fontSize: '14px'
+                  }}>
+                    Selecciona una carpeta per veure els documents
+                  </div>
+                )}
+              </div>
+            </CollapsibleSection>
+          )}
+
+          {/* 7) NOTES / MISC SECTION */}
+          <CollapsibleSection
+            title="Notes i Miscel·lània"
+            icon={StickyNote}
+            defaultOpen={false}
+            darkMode={darkMode}
+            phaseStyle={currentPhase}
+          >
+            {/* Tasks Section */}
+            <div style={{ marginBottom: '24px' }}>
               <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
-                <DecisionLog 
+                <TasksSection 
                   entityType="project" 
                   entityId={id} 
-                  darkMode={darkMode}
-                  allowedDecisions={[
-                    { value: 'go', label: 'GO', icon: CheckCircle2, color: '#10b981' },
-                    { value: 'hold', label: 'HOLD', icon: Clock, color: '#f59e0b' },
-                    { value: 'discarded', label: 'DISCARDED', icon: XCircle, color: '#ef4444' }
-                  ]}
+                  darkMode={darkMode} 
                 />
               </Suspense>
             </div>
-          )}
 
-          {/* Quick Supplier Price Estimate - Visible a fase Research (1) */}
-          {project.current_phase === 1 && (
-            <div style={{ marginBottom: '24px' }}>
-              <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
-                <QuickSupplierPriceEstimate 
-                  projectId={id} 
-                  darkMode={darkMode}
-                  onCopyToProfitability={(priceInEUR) => {
-                    window.dispatchEvent(new CustomEvent('copyPriceToCOGS', { 
-                      detail: { price: priceInEUR } 
-                    }))
-                  }}
-                />
-              </Suspense>
-            </div>
-          )}
+            {/* Decision Block - Visible a fase Research (1) */}
+            {project.current_phase === 1 && (
+              <div style={{
+                marginBottom: '24px',
+                padding: '20px',
+                ...phaseCardStyle
+              }}>
+                <h4 style={{
+                  margin: '0 0 16px 0',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: darkMode ? '#ffffff' : '#111827'
+                }}>
+                  Decision
+                </h4>
+                <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
+                  <DecisionLog 
+                    entityType="project" 
+                    entityId={id} 
+                    darkMode={darkMode}
+                    allowedDecisions={[
+                      { value: 'go', label: 'GO', icon: CheckCircle2, color: '#10b981' },
+                      { value: 'hold', label: 'HOLD', icon: Clock, color: '#f59e0b' },
+                      { value: 'discarded', label: 'DISCARDED', icon: XCircle, color: '#ef4444' }
+                    ]}
+                  />
+                </Suspense>
+              </div>
+            )}
 
-          {/* Quick Profitability Calculator - Visible a fase Research (1) */}
-          {project.current_phase === 1 && (
-            <div style={{ marginBottom: '24px' }}>
-              <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
-                <ProfitabilityCalculator projectId={id} darkMode={darkMode} />
-              </Suspense>
-            </div>
-          )}
+            {/* Quick Supplier Price Estimate - Visible a fase Research (1) */}
+            {project.current_phase === 1 && (
+              <div style={{ marginBottom: '24px' }}>
+                <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
+                  <QuickSupplierPriceEstimate 
+                    projectId={id} 
+                    darkMode={darkMode}
+                    onCopyToProfitability={(priceInEUR) => {
+                      window.dispatchEvent(new CustomEvent('copyPriceToCOGS', { 
+                        detail: { price: priceInEUR } 
+                      }))
+                    }}
+                  />
+                </Suspense>
+              </div>
+            )}
 
-          {/* Supplier Quotes Section - Visible desde fase 2 (Viabilitat) */}
-          {project.current_phase >= 2 && (
-            <div style={{ marginBottom: '24px' }}>
-              <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
-                <QuotesSection projectId={id} darkMode={darkMode} />
-              </Suspense>
-            </div>
-          )}
-        </CollapsibleSection>
+            {/* Quick Profitability Calculator - Visible a fase Research (1) */}
+            {project.current_phase === 1 && (
+              <div style={{ marginBottom: '24px' }}>
+                <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
+                  <ProfitabilityCalculator projectId={id} darkMode={darkMode} />
+                </Suspense>
+              </div>
+            )}
+
+            {/* Supplier Quotes Section - Visible desde fase 2 (Viabilitat) */}
+            {project.current_phase >= 2 && (
+              <div style={{ marginBottom: '24px' }}>
+                <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
+                  <QuotesSection projectId={id} darkMode={darkMode} />
+                </Suspense>
+              </div>
+            )}
+          </CollapsibleSection>
+        </div>
 
       </div>
     </div>
