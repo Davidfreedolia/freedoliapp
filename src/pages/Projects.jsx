@@ -134,7 +134,7 @@ export default function Projects() {
               <option value="">Totes les fases</option>
               {Object.entries(PHASES).map(([key, phase]) => (
                 <option key={key} value={key}>
-                  {phase.icon} {phase.name}
+                  {phase.name}
                 </option>
               ))}
             </select>

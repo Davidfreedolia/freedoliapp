@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { DEMO_USER_UUID } from '../utils/demoConstants'
 import { RECEIPTS_BUCKET } from './storageBuckets'
 
 // IMPORTANT: No static imports of demoMode, auditLog, or demoModeFilter to avoid circular dependencies.
@@ -105,7 +106,7 @@ export const getCurrentUserId = async () => {
   
   // Demo mode: return demo user ID
   if (isDemoMode()) {
-    return 'demo-user-id'
+    return DEMO_USER_UUID
   }
   
   const { data: { user } } = await supabase.auth.getUser()
