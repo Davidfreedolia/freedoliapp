@@ -376,10 +376,10 @@ function ProjectDetailInner({ useApp }) {
             const uniqueMissing = Array.from(new Set(missing || [])).filter(Boolean)
             try {
               const { showToast } = await import('../components/Toast')
-              const details = uniqueMissing.length > 0
-                ? `• ${uniqueMissing.join('\n• ')}`
-                : '• Requisits pendents'
-              showToast(`No es pot avançar de fase\n${details}`, 'warning')
+                const details = uniqueMissing.length > 0
+                  ? uniqueMissing.map(item => `• ${item}`).join(' ')
+                  : '• Requisits pendents'
+                showToast(`No es pot avançar de fase ${details}`, 'warning')
             } catch (importErr) {
               // Silent fail for toast
             }
@@ -887,7 +887,17 @@ function ProjectDetailInner({ useApp }) {
                       <span style={{
                         ...styles.phaseName,
                         color: isActive ? phase.accent : (darkMode ? '#9ca3af' : '#6b7280'),
-                        fontWeight: isActive ? '600' : '400'
+                        fontWeight: isActive ? '600' : '400',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => handlePhaseChange(phase.id)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault()
+                          handlePhaseChange(phase.id)
+                        }
                       }}>
                         {phase.name}
                       </span>
