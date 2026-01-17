@@ -1337,6 +1337,10 @@ export const getProgrammaticallyAssignedGTIN = async () => {
 // ============================================
 
 export const getPoAmazonReadiness = async (purchaseOrderId) => {
+  const { isDemoMode } = await import('../demo/demoMode')
+  if (isDemoMode() || String(purchaseOrderId).startsWith('demo-')) {
+    return null
+  }
   const userId = await getCurrentUserId()
   const { data, error } = await supabase
     .from('po_amazon_readiness')
@@ -1349,6 +1353,10 @@ export const getPoAmazonReadiness = async (purchaseOrderId) => {
 }
 
 export const upsertPoAmazonReadiness = async (purchaseOrderId, projectId, readinessData) => {
+  const { isDemoMode } = await import('../demo/demoMode')
+  if (isDemoMode() || String(purchaseOrderId).startsWith('demo-')) {
+    return null
+  }
   // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
   const { user_id, ...data } = readinessData
   const userId = await getCurrentUserId()
@@ -1371,6 +1379,10 @@ export const upsertPoAmazonReadiness = async (purchaseOrderId, projectId, readin
 }
 
 export const updatePoAmazonReadinessLabels = async (purchaseOrderId, labelsData) => {
+  const { isDemoMode } = await import('../demo/demoMode')
+  if (isDemoMode() || String(purchaseOrderId).startsWith('demo-')) {
+    return null
+  }
   const userId = await getCurrentUserId()
   const { data, error } = await supabase
     .from('po_amazon_readiness')
@@ -1389,6 +1401,10 @@ export const updatePoAmazonReadinessLabels = async (purchaseOrderId, labelsData)
 }
 
 export const updateManufacturerPackGenerated = async (purchaseOrderId, version) => {
+  const { isDemoMode } = await import('../demo/demoMode')
+  if (isDemoMode() || String(purchaseOrderId).startsWith('demo-')) {
+    return null
+  }
   const userId = await getCurrentUserId()
   
   // Buscar o crear readiness record
@@ -1437,6 +1453,10 @@ export const updateManufacturerPackGenerated = async (purchaseOrderId, version) 
 }
 
 export const markManufacturerPackAsSent = async (purchaseOrderId) => {
+  const { isDemoMode } = await import('../demo/demoMode')
+  if (isDemoMode() || String(purchaseOrderId).startsWith('demo-')) {
+    return null
+  }
   const userId = await getCurrentUserId()
   const { data, error } = await supabase
     .from('po_amazon_readiness')
@@ -3262,7 +3282,7 @@ export const createStickyNote = async (note) => {
 
 export const updateStickyNote = async (id, updates) => {
   const { isDemoMode } = await import('../demo/demoMode')
-  if (isDemoMode()) {
+  if (isDemoMode() || String(id).startsWith('demo-')) {
     return { id, ...updates }
   }
   const userId = await getCurrentUserId()
@@ -3281,7 +3301,7 @@ export const updateStickyNote = async (id, updates) => {
 
 export const deleteStickyNote = async (id) => {
   const { isDemoMode } = await import('../demo/demoMode')
-  if (isDemoMode()) {
+  if (isDemoMode() || String(id).startsWith('demo-')) {
     return true
   }
   const userId = await getCurrentUserId()
@@ -3305,7 +3325,7 @@ export const markStickyNoteDone = async (id) => {
 // Convert sticky note to task
 export const convertStickyNoteToTask = async (stickyNoteId, options = {}) => {
   const { isDemoMode } = await import('../demo/demoMode')
-  if (isDemoMode()) {
+  if (isDemoMode() || String(stickyNoteId).startsWith('demo-')) {
     return null
   }
   const userId = await getCurrentUserId()
