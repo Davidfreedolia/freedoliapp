@@ -65,6 +65,17 @@ export const validatePhaseTransition = async ({
   try {
     switch (`${fromPhase}->${toPhase}`) {
       case '1->2': {
+        let identifiers = null
+        try {
+          identifiers = await getProductIdentifiers(projectId, supabaseClient)
+        } catch {
+          missing.push('ASIN competidor')
+        }
+
+        if (!identifiers?.asin) {
+          missing.push('ASIN competidor')
+        }
+
         if (!['GO', 'RISKY'].includes((project?.decision || '').toUpperCase())) {
           missing.push('Decisió GO o RISKY')
         }
@@ -92,6 +103,17 @@ export const validatePhaseTransition = async ({
         break
       }
       case '2->3': {
+        let identifiers = null
+        try {
+          identifiers = await getProductIdentifiers(projectId, supabaseClient)
+        } catch {
+          missing.push('Dades competidor (ASIN)')
+        }
+
+        if (!identifiers?.asin) {
+          missing.push('Dades competidor (ASIN)')
+        }
+
         let profitability = null
         try {
           profitability = await getProjectProfitability(projectId, supabaseClient)

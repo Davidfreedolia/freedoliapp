@@ -36,7 +36,12 @@ const hexToRgba = (hex, alpha) => {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`
 }
 
-const IdentifiersSection = forwardRef(function IdentifiersSection({ projectId, darkMode, phaseStyle }, ref) {
+const IdentifiersSection = forwardRef(function IdentifiersSection({
+  projectId,
+  darkMode,
+  phaseStyle,
+  showAsin = false
+}, ref) {
   const { isMobile } = useBreakpoint()
   const { t } = useTranslation()
   const modalStyles = getModalStyles(isMobile, darkMode)
@@ -136,6 +141,10 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({ projectId, d
   const handleSave = async () => {
     // Validacions
     let dataToSave = { ...formData }
+    if (!showAsin && !dataToSave.asin) {
+      delete dataToSave.asin
+    }
+
     if (dataToSave.gtin_type === 'GTIN_EXEMPT') {
       if (!dataToSave.exemption_reason || !dataToSave.exemption_reason.trim()) {
         alert('La raó d\'exempció és obligatòria per GTIN_EXEMPT')
@@ -421,29 +430,31 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({ projectId, d
           </>
         )}
 
-        {/* ASIN */}
-        <div style={styles.formGroup}>
-          <label style={{
-            ...styles.label,
-            color: darkMode ? '#e5e7eb' : '#374151',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px'
-          }}>
-            ASIN
-            <HelpIcon helpKey="research.asin" size="small" darkMode={darkMode} />
-          </label>
-          <input
-            type="text"
-            value={formData.asin}
-            onChange={e => setFormData({ ...formData, asin: e.target.value })}
-            placeholder="Ex: B08XYZ1234"
-            style={{
-              ...styles.input,
-              ...inputSurfaceStyle
-            }}
-          />
-        </div>
+        {/* ASIN (opcional segons fase) */}
+        {showAsin && (
+          <div style={styles.formGroup}>
+            <label style={{
+              ...styles.label,
+              color: darkMode ? '#e5e7eb' : '#374151',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}>
+              ASIN
+              <HelpIcon helpKey="research.asin" size="small" darkMode={darkMode} />
+            </label>
+            <input
+              type="text"
+              value={formData.asin}
+              onChange={e => setFormData({ ...formData, asin: e.target.value })}
+              placeholder="Ex: B08XYZ1234"
+              style={{
+                ...styles.input,
+                ...inputSurfaceStyle
+              }}
+            />
+          </div>
+        )}
 
         {/* FNSKU */}
         <div style={styles.formGroup}>

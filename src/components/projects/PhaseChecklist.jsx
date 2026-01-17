@@ -6,10 +6,12 @@ import { getPhaseStyle } from '../../utils/phaseStyles'
 
 const REQUIREMENTS_BY_PHASE = {
   1: [
+    'ASIN competidor',
     'Decisió GO o RISKY',
     'Document d\'anàlisi o estimació de preu de proveïdor'
   ],
   2: [
+    'Dades competidor (ASIN)',
     'Registre de profitabilitat',
     'Preu de venda > 0',
     'COGS > 0',
@@ -41,6 +43,9 @@ const normalizeMissing = (missing) => {
   if (normalized.has('Document d\'anàlisi') || normalized.has('Estimació de preu de proveïdor')) {
     normalized.add('Document d\'anàlisi o estimació de preu de proveïdor')
   }
+  if (normalized.has('ASIN competidor')) {
+    normalized.add('Dades competidor (ASIN)')
+  }
   if (normalized.has('Pressupost de proveïdor')) {
     normalized.add('Almenys 1 pressupost de proveïdor')
   }
@@ -66,7 +71,14 @@ const normalizeMissing = (missing) => {
   return normalized
 }
 
-export default function PhaseChecklist({ project, currentPhase, projectId, darkMode }) {
+export default function PhaseChecklist({
+  project,
+  currentPhase,
+  projectId,
+  darkMode,
+  onProgressUpdate,
+  id
+}) {
   const [missingItems, setMissingItems] = useState([])
   const [loading, setLoading] = useState(false)
   const phaseStyle = useMemo(() => getPhaseStyle(currentPhase), [currentPhase])
@@ -122,9 +134,20 @@ export default function PhaseChecklist({ project, currentPhase, projectId, darkM
   }))
 
   const allOk = items.every(item => item.ok)
+  const completedCount = items.filter(item => item.ok).length
+
+  useEffect(() => {
+    if (typeof onProgressUpdate === 'function') {
+      onProgressUpdate({
+        completed: completedCount,
+        total: items.length,
+        allOk
+      })
+    }
+  }, [completedCount, items.length, allOk, onProgressUpdate])
 
   return (
-    <div style={{
+    <div id={id} style={{
       marginTop: '16px',
       padding: '16px',
       borderRadius: '12px',

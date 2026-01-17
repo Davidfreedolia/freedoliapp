@@ -8,7 +8,7 @@ import HelpIcon from './HelpIcon'
  * Calculadora de profitabilitat ràpida (Nivell 1.5)
  * Visible a la fase Research del projecte
  */
-export default function ProfitabilityCalculator({ projectId, darkMode }) {
+export default function ProfitabilityCalculator({ projectId, darkMode, showAsinCapture = true }) {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [data, setData] = useState({
@@ -460,15 +460,15 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
         <HelpIcon helpKey="profitability" size="medium" darkMode={darkMode} />
       </h3>
 
-      {/* Amazon ASIN Capture Section */}
-      <div style={{
-        ...styles.asinSection,
-        backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-        border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
-        borderRadius: '8px',
-        padding: '16px',
-        marginBottom: '24px'
-      }}>
+      {showAsinCapture && (
+        <div style={{
+          ...styles.asinSection,
+          backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+          border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+          borderRadius: '8px',
+          padding: '16px',
+          marginBottom: '24px'
+        }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -609,7 +609,8 @@ export default function ProfitabilityCalculator({ projectId, darkMode }) {
             {asinError}
           </div>
         )}
-      </div>
+        </div>
+      )}
 
       <div style={styles.grid}>
         {/* Columna esquerra - Inputs */}

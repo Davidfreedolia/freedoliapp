@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { 
   ArrowLeft, 
+  Barcode,
   ChevronRight, 
   ChevronDown,
   Check,
@@ -48,8 +49,24 @@ const QuotesSection = lazy(() => import('../components/QuotesSection'))
 const DecisionLog = lazy(() => import('../components/DecisionLog'))
 const AmazonReadinessBadge = lazy(() => import('../components/AmazonReadinessBadge'))
 const ProjectEventsTimeline = lazy(() => import('../components/ProjectEventsTimeline'))
+const CompetitiveAsinSection = lazy(() => import('../components/CompetitiveAsinSection'))
 
 const PHASES = Object.values(PHASE_STYLES)
+const PHASE_GROUPS = [
+  { label: 'DISCOVERY', phases: [1, 2] },
+  { label: 'SUPPLY', phases: [3, 4, 5] },
+  { label: 'EXECUTION', phases: [6] },
+  { label: 'LIVE', phases: [7] }
+]
+const PHASE_WORKFLOW_COPY = {
+  1: 'Validar demanda i competidors amb ASIN.',
+  2: 'Ajustar costos i validar la rendibilitat.',
+  3: 'Negociar proveïdors i obtenir pressupostos.',
+  4: 'Validar mostres i aprovacions.',
+  5: 'Producció en marxa i PO confirmada.',
+  6: 'Preparar listing i identificadors Amazon.',
+  7: 'Seguiment live, inventari i vendes.'
+}
 
 // Mapeig fase -> carpeta Drive
 const PHASE_FOLDER_MAP = {
@@ -143,6 +160,7 @@ function ProjectDetailInner({ useApp }) {
   const [selectedFolder, setSelectedFolder] = useState(null)
   const [documents, setDocuments] = useState([])
   const [projectSubfolders, setProjectSubfolders] = useState([])
+  const [phaseProgress, setPhaseProgress] = useState({ completed: 0, total: 0, allOk: false })
   
 
   const loadProject = async () => {
@@ -652,6 +670,8 @@ function ProjectDetailInner({ useApp }) {
     borderRadius: 'var(--radius-base)',
     ...phaseSurface.cardStyle
   }
+  const currentGroup = PHASE_GROUPS.find(group => group.phases.includes(project.current_phase))
+  const phaseSubtitle = PHASE_WORKFLOW_COPY[project.current_phase] || currentPhase.description
 
   return (
     <div style={styles.container}>
@@ -706,6 +726,57 @@ function ProjectDetailInner({ useApp }) {
         </div>
 
         <div style={phaseWrapperStyle}>
+          <div style={{
+            ...styles.phaseWorkspaceHeader,
+            ...phaseCardStyle
+          }}>
+            <div style={styles.phaseWorkspaceMeta}>
+              <span style={{
+                ...styles.phaseGroupLabel,
+                color: currentPhase.accent
+              }}>
+                {currentGroup?.label || 'PHASE'}
+              </span>
+              <h2 style={{
+                margin: '4px 0 4px',
+                fontSize: isMobile ? '18px' : '20px',
+                color: darkMode ? '#ffffff' : '#111827'
+              }}>
+                {currentPhase.name}
+              </h2>
+              <p style={{
+                margin: 0,
+                fontSize: '14px',
+                color: darkMode ? '#e5e7eb' : '#6b7280'
+              }}>
+                {phaseSubtitle}
+              </p>
+            </div>
+            <div style={styles.phaseWorkspaceStats}>
+              <div style={styles.phaseProgress}>
+                <span style={{ fontSize: '12px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
+                  Progrés fase
+                </span>
+                <strong style={{ color: currentPhase.accent }}>
+                  {phaseProgress.total ? `${phaseProgress.completed}/${phaseProgress.total}` : '—'}
+                </strong>
+              </div>
+              <button
+                onClick={() => {
+                  const checklist = document.getElementById('phase-checklist')
+                  if (checklist) {
+                    checklist.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  }
+                }}
+                style={{
+                  ...styles.phaseCta,
+                  backgroundColor: currentPhase.accent
+                }}
+              >
+                Completa checklist
+              </button>
+            </div>
+          </div>
           {/* 1) OVERVIEW SECTION */}
           <CollapsibleSection
             title="Resum del Projecte"
@@ -729,6 +800,29 @@ function ProjectDetailInner({ useApp }) {
               }}>
                 Progrés del Projecte
               </h3>
+
+              <div style={styles.phaseGroupRow}>
+                {PHASE_GROUPS.map((group, index) => {
+                  const isCurrentGroup = group.phases.includes(project.current_phase)
+                  return (
+                    <div
+                      key={group.label}
+                      style={{
+                        ...styles.phaseGroupItem,
+                        flex: group.phases.length,
+                        borderRight: index < PHASE_GROUPS.length - 1 ? `1px solid ${darkMode ? '#2a2a3a' : '#e5e7eb'}` : 'none'
+                      }}
+                    >
+                      <span style={{
+                        ...styles.phaseGroupText,
+                        color: isCurrentGroup ? currentPhase.accent : (darkMode ? '#9ca3af' : '#6b7280')
+                      }}>
+                        {group.label}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
               
               <div style={{
                 ...styles.timeline,
@@ -800,6 +894,8 @@ function ProjectDetailInner({ useApp }) {
                 currentPhase={project.current_phase}
                 projectId={id}
                 darkMode={darkMode}
+                id="phase-checklist"
+                onProgressUpdate={setPhaseProgress}
               />
             </div>
 
@@ -809,10 +905,12 @@ function ProjectDetailInner({ useApp }) {
                 projectId={id}
                 darkMode={darkMode}
                 onAssignGtin={() => {
-                  // Scroll to IdentifiersSection
-                  const identifiersSection = document.getElementById('identifiers-section')
-                  if (identifiersSection) {
-                    identifiersSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  const targetId = project.current_phase >= 6
+                    ? 'identifiers-section'
+                    : 'competitive-asin-section'
+                  const target = document.getElementById(targetId)
+                  if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' })
                   }
                 }}
                 onCreatePO={() => {
@@ -828,17 +926,18 @@ function ProjectDetailInner({ useApp }) {
               />
             </Suspense>
 
-            {/* Identifiers Section */}
-            <div id="identifiers-section" style={{ marginTop: '24px' }}>
-              <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
-                    <IdentifiersSection
-                      ref={identifiersSectionRef}
-                      projectId={id}
-                      darkMode={darkMode}
-                      phaseStyle={currentPhase}
-                    />
-              </Suspense>
-            </div>
+            {/* Competitive ASIN (Phase 1-2) */}
+            {project.current_phase <= 2 && (
+              <div id="competitive-asin-section" style={{ marginTop: '24px' }}>
+                <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
+                  <CompetitiveAsinSection
+                    projectId={id}
+                    darkMode={darkMode}
+                    phaseStyle={currentPhase}
+                  />
+                </Suspense>
+              </div>
+            )}
 
             {/* Key Actions */}
             <div style={{
@@ -914,10 +1013,33 @@ function ProjectDetailInner({ useApp }) {
                 projectId={id}
                 projectStatus={project?.status}
                 darkMode={darkMode}
-                    phaseStyle={currentPhase}
+                phaseStyle={currentPhase}
               />
             </Suspense>
           </CollapsibleSection>
+
+          {/* 2.5) PRODUCT IDENTIFIERS (Listing) */}
+          {project.current_phase >= 6 && (
+            <CollapsibleSection
+              title="Identificadors de producte"
+              icon={Barcode}
+              defaultOpen={true}
+              darkMode={darkMode}
+              phaseStyle={currentPhase}
+            >
+              <div id="identifiers-section">
+                <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
+                  <IdentifiersSection
+                    ref={identifiersSectionRef}
+                    projectId={id}
+                    darkMode={darkMode}
+                    phaseStyle={currentPhase}
+                    showAsin={false}
+                  />
+                </Suspense>
+              </div>
+            </CollapsibleSection>
+          )}
 
           {/* 3) PURCHASE ORDERS SECTION */}
           <CollapsibleSection
@@ -1174,7 +1296,7 @@ function ProjectDetailInner({ useApp }) {
             {project.current_phase === 1 && (
               <div style={{ marginBottom: '24px' }}>
                 <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
-                  <ProfitabilityCalculator projectId={id} darkMode={darkMode} />
+                    <ProfitabilityCalculator projectId={id} darkMode={darkMode} showAsinCapture={false} />
                 </Suspense>
               </div>
             )}
@@ -1270,6 +1392,45 @@ const styles = {
     border: '1px solid var(--border-color)',
     marginBottom: '24px'
   },
+  phaseWorkspaceHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: '16px',
+    padding: '20px',
+    marginBottom: '24px',
+    flexWrap: 'wrap'
+  },
+  phaseWorkspaceMeta: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px'
+  },
+  phaseWorkspaceStats: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px',
+    flexWrap: 'wrap'
+  },
+  phaseProgress: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px'
+  },
+  phaseCta: {
+    padding: '10px 16px',
+    border: 'none',
+    borderRadius: '10px',
+    color: '#ffffff',
+    fontSize: '13px',
+    fontWeight: '600',
+    cursor: 'pointer'
+  },
+  phaseGroupLabel: {
+    fontSize: '12px',
+    fontWeight: '700',
+    letterSpacing: '0.08em'
+  },
   sectionTitle: {
     margin: '0 0 20px 0',
     fontSize: '16px',
@@ -1284,6 +1445,23 @@ const styles = {
     justifyContent: 'space-between',
     position: 'relative',
     marginBottom: '24px'
+  },
+  phaseGroupRow: {
+    display: 'flex',
+    alignItems: 'center',
+    marginBottom: '12px',
+    borderRadius: '10px',
+    overflow: 'hidden'
+  },
+  phaseGroupItem: {
+    display: 'flex',
+    justifyContent: 'center',
+    padding: '6px 8px'
+  },
+  phaseGroupText: {
+    fontSize: '11px',
+    fontWeight: '600',
+    letterSpacing: '0.06em'
   },
   timelineItem: {
     display: 'flex',
