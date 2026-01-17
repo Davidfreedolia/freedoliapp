@@ -67,6 +67,26 @@ const PHASE_WORKFLOW_COPY = {
   6: 'Preparar listing i identificadors Amazon.',
   7: 'Seguiment live, inventari i vendes.'
 }
+const PHASE_NAME_TO_ID = {
+  research: 1,
+  discovery: 1,
+  viability: 2,
+  suppliers: 3,
+  provider: 3,
+  samples: 4,
+  production: 5,
+  manufacturing: 5,
+  listing: 6,
+  live: 7,
+  shipping: 5
+}
+
+const getPhaseIdFromProject = (project) => {
+  if (!project) return 1
+  if (project.current_phase) return project.current_phase
+  const phaseName = (project.phase || '').toString().toLowerCase()
+  return PHASE_NAME_TO_ID[phaseName] || 1
+}
 
 // Mapeig fase -> carpeta Drive
 const PHASE_FOLDER_MAP = {
@@ -284,7 +304,7 @@ function ProjectDetailInner({ useApp }) {
         }
         
         // Seleccionar carpeta segons fase actual
-        const folderName = PHASE_FOLDER_MAP[project?.current_phase]
+        const folderName = PHASE_FOLDER_MAP[getPhaseIdFromProject(project)]
         if (folders?.subfolders && folderName && folders.subfolders[folderName]) {
           setSelectedFolder(folders.subfolders[folderName])
         }
@@ -302,7 +322,7 @@ function ProjectDetailInner({ useApp }) {
   }
 
   const handlePhaseChange = async (newPhase) => {
-    const currentPhase = project?.current_phase || 1
+    const currentPhase = getPhaseIdFromProject(project)
     const isForward = newPhase > currentPhase
 
     // Bloquejar canvi de fase si està DISCARDED (només endavant)
@@ -467,7 +487,7 @@ function ProjectDetailInner({ useApp }) {
           name: file.name,
           file_url: file.webViewLink || file.driveUrl,
           drive_file_id: file.id,
-          category: getCategoryForPhase(project?.current_phase || 1),
+          category: getCategoryForPhase(getPhaseIdFromProject(project)),
           file_size: file.size
         })
         savedCount++
@@ -657,7 +677,8 @@ function ProjectDetailInner({ useApp }) {
     )
   }
 
-  const currentPhase = getPhaseStyle(project.current_phase)
+  const phaseId = getPhaseIdFromProject(project)
+  const currentPhase = getPhaseStyle(phaseId)
   const phaseSurface = getPhaseSurfaceStyles(currentPhase, { darkMode, borderWidth: 2 })
   const phaseWrapperStyle = {
     ...phaseSurface.wrapperStyle,
@@ -670,8 +691,8 @@ function ProjectDetailInner({ useApp }) {
     borderRadius: 'var(--radius-base)',
     ...phaseSurface.cardStyle
   }
-  const currentGroup = PHASE_GROUPS.find(group => group.phases.includes(project.current_phase))
-  const phaseSubtitle = PHASE_WORKFLOW_COPY[project.current_phase] || currentPhase.description
+  const currentGroup = PHASE_GROUPS.find(group => group.phases.includes(phaseId))
+  const phaseSubtitle = PHASE_WORKFLOW_COPY[phaseId] || currentPhase.description
 
   return (
     <div style={styles.container}>
@@ -803,7 +824,7 @@ function ProjectDetailInner({ useApp }) {
 
               <div style={styles.phaseGroupRow}>
                 {PHASE_GROUPS.map((group, index) => {
-                  const isCurrentGroup = group.phases.includes(project.current_phase)
+                  const isCurrentGroup = group.phases.includes(phaseId)
                   return (
                     <div
                       key={group.label}
@@ -831,9 +852,9 @@ function ProjectDetailInner({ useApp }) {
                 overflowX: 'visible'
               }}>
                 {PHASES.map((phase, index) => {
-                  const isActive = phase.id === project.current_phase
-                  const isCompleted = phase.id < project.current_phase
-                  const isFuture = phase.id > project.current_phase
+                  const isActive = phase.id === phaseId
+                  const isCompleted = phase.id < phaseId
+                  const isFuture = phase.id > phaseId
                   const PhaseIcon = phase.icon
                   
                   return (
@@ -891,7 +912,7 @@ function ProjectDetailInner({ useApp }) {
 
               <PhaseChecklist
                 project={project}
-                currentPhase={project.current_phase}
+                currentPhase={phaseId}
                 projectId={id}
                 darkMode={darkMode}
                 id="phase-checklist"
@@ -905,7 +926,7 @@ function ProjectDetailInner({ useApp }) {
                 projectId={id}
                 darkMode={darkMode}
                 onAssignGtin={() => {
-                  const targetId = project.current_phase >= 6
+                  const targetId = phaseId >= 6
                     ? 'identifiers-section'
                     : 'competitive-asin-section'
                   const target = document.getElementById(targetId)
@@ -927,7 +948,7 @@ function ProjectDetailInner({ useApp }) {
             </Suspense>
 
             {/* Competitive ASIN (Phase 1-2) */}
-            {project.current_phase <= 2 && (
+            {phaseId <= 2 && (
               <div id="competitive-asin-section" style={{ marginTop: '24px' }}>
                 <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
                   <CompetitiveAsinSection
@@ -955,7 +976,7 @@ function ProjectDetailInner({ useApp }) {
               </h4>
               <div style={styles.actionsGrid}>
                 {/* Briefing - disponible des de fase 3 */}
-                {project.current_phase >= 3 && (
+                {phaseId >= 3 && (
                   <button 
                     style={{...styles.actionButton, backgroundColor: '#8b5cf6'}} 
                     onClick={() => navigate(`/projects/${id}/briefing`)}
@@ -966,7 +987,7 @@ function ProjectDetailInner({ useApp }) {
                 )}
                 
                 {/* Nova Comanda - disponible des de fase 3 */}
-                {project.current_phase >= 3 && (
+                {phaseId >= 3 && (
                   <button 
                     style={{
                       ...styles.actionButton, 
@@ -987,7 +1008,7 @@ function ProjectDetailInner({ useApp }) {
                 )}
                 
                 {/* Gestionar Stock - fase 7 */}
-                {project.current_phase === 7 && (
+                {phaseId === 7 && (
                   <button 
                     style={{...styles.actionButton, backgroundColor: '#22c55e', border: '1px solid #16a34a'}} 
                     onClick={() => navigate(`/inventory?project=${id}`)}
@@ -1019,7 +1040,7 @@ function ProjectDetailInner({ useApp }) {
           </CollapsibleSection>
 
           {/* 2.5) PRODUCT IDENTIFIERS (Listing) */}
-          {project.current_phase >= 6 && (
+          {phaseId >= 6 && (
             <CollapsibleSection
               title="Identificadors de producte"
               icon={Barcode}
@@ -1246,7 +1267,7 @@ function ProjectDetailInner({ useApp }) {
             </div>
 
             {/* Decision Block - Visible a fase Research (1) */}
-            {project.current_phase === 1 && (
+            {phaseId === 1 && (
               <div style={{
                 marginBottom: '24px',
                 padding: '20px',
@@ -1276,7 +1297,7 @@ function ProjectDetailInner({ useApp }) {
             )}
 
             {/* Quick Supplier Price Estimate - Visible a fase Research (1) */}
-            {project.current_phase === 1 && (
+            {phaseId === 1 && (
               <div style={{ marginBottom: '24px' }}>
                 <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
                   <QuickSupplierPriceEstimate 
@@ -1293,7 +1314,7 @@ function ProjectDetailInner({ useApp }) {
             )}
 
             {/* Quick Profitability Calculator - Visible a fase Research (1) */}
-            {project.current_phase === 1 && (
+            {phaseId === 1 && (
               <div style={{ marginBottom: '24px' }}>
                 <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
                     <ProfitabilityCalculator projectId={id} darkMode={darkMode} showAsinCapture={false} />
@@ -1302,7 +1323,7 @@ function ProjectDetailInner({ useApp }) {
             )}
 
             {/* Supplier Quotes Section - Visible desde fase 2 (Viabilitat) */}
-            {project.current_phase >= 2 && (
+            {phaseId >= 2 && (
               <div style={{ marginBottom: '24px' }}>
                 <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
                   <QuotesSection projectId={id} darkMode={darkMode} />
