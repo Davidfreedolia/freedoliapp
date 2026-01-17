@@ -43,7 +43,7 @@ const getCompetitorSnapshot = (projectId) => {
   try {
     const raw = window.localStorage.getItem(`${COMPETITOR_STORAGE_PREFIX}${projectId}`)
     return raw ? JSON.parse(raw) : null
-  } catch {
+  } catch (err) {
     return null
   }
 }
@@ -100,7 +100,7 @@ export const validatePhaseTransition = async ({
         let identifiers = null
         try {
           identifiers = await getProductIdentifiers(projectId, supabaseClient)
-        } catch {
+        } catch (err) {
           missing.push('ASIN competidor definit')
         }
 
@@ -115,12 +115,12 @@ export const validatePhaseTransition = async ({
         let documents = null
         try {
           documents = await getDocuments(projectId, supabaseClient)
-        }
+        } catch (err) {}
 
         let estimates = null
         try {
           estimates = await getSupplierPriceEstimates(projectId, supabaseClient)
-        }
+        } catch (err) {}
 
         const hasAnalysisDoc = documents ? hasDocCategory(documents, 'analysis') : false
         const hasPriceEstimate = estimates ? (estimates.length > 0) : false
@@ -141,7 +141,7 @@ export const validatePhaseTransition = async ({
         let profitability = null
         try {
           profitability = await getProjectProfitability(projectId, supabaseClient)
-        } catch {
+        } catch (err) {
           missing.push('Profitabilitat guardada')
         }
 
@@ -163,7 +163,7 @@ export const validatePhaseTransition = async ({
         let quotes = null
         try {
           quotes = await getSupplierQuotes(projectId, supabaseClient)
-        } catch {
+        } catch (err) {
           missing.push('Pressupost de proveïdor')
         }
 
@@ -184,7 +184,7 @@ export const validatePhaseTransition = async ({
         let documents = null
         try {
           documents = await getDocuments(projectId, supabaseClient)
-        } catch {
+        } catch (err) {
           missing.push('Document de mostra')
         }
 
@@ -199,7 +199,7 @@ export const validatePhaseTransition = async ({
             entityType: 'project',
             entityId: projectId
           }, supabaseClient)
-        } catch {
+        } catch (err) {
           missing.push('Tasques de validació de mostra')
         }
 
@@ -212,7 +212,7 @@ export const validatePhaseTransition = async ({
         let purchaseOrders = null
         try {
           purchaseOrders = await getPurchaseOrders(projectId, supabaseClient)
-        } catch {
+        } catch (err) {
           missing.push('Comanda de compra')
         }
 
@@ -228,7 +228,7 @@ export const validatePhaseTransition = async ({
         let documents = null
         try {
           documents = await getDocuments(projectId, supabaseClient)
-        } catch {
+        } catch (err) {
           missing.push('Document de PO')
         }
 
@@ -241,7 +241,7 @@ export const validatePhaseTransition = async ({
         let identifiers = null
         try {
           identifiers = await getProductIdentifiers(projectId, supabaseClient)
-        } catch {
+        } catch (err) {
           missing.push('Identificadors de producte')
         }
 
@@ -254,7 +254,7 @@ export const validatePhaseTransition = async ({
         let documents = null
         try {
           documents = await getDocuments(projectId, supabaseClient)
-        } catch {
+        } catch (err) {
           missing.push('Document de listing')
         }
 
@@ -266,7 +266,7 @@ export const validatePhaseTransition = async ({
       default:
         break
     }
-  } catch {
+  } catch (err) {
     missing.push('Validació de fase')
   }
 

@@ -182,6 +182,7 @@ function ProjectDetailInner({ useApp }) {
   const [projectSubfolders, setProjectSubfolders] = useState([])
   const [phaseProgress, setPhaseProgress] = useState({ completed: 0, total: 0, allOk: false })
   const [phaseBlockMessage, setPhaseBlockMessage] = useState(null)
+  const [phaseBlockVisible, setPhaseBlockVisible] = useState(false)
   
 
   const loadProject = async () => {
@@ -379,6 +380,15 @@ function ProjectDetailInner({ useApp }) {
               ? uniqueMissing.map(item => `• ${item}`).join(' ')
               : '• Requisits pendents'
             const blockMessage = `No es pot avançar de fase ${details}`
+            if (typeof window !== 'undefined') {
+              window.__phaseGateLastBlock = {
+                at: Date.now(),
+                fromPhase: currentPhase,
+                toPhase: newPhase,
+                missing: uniqueMissing,
+                message: blockMessage
+              }
+            }
             try {
               const { showToast } = await import('../components/Toast')
               if (showToast) {
@@ -386,16 +396,28 @@ function ProjectDetailInner({ useApp }) {
               }
             } catch (importErr) {}
             setPhaseBlockMessage(blockMessage)
+            setPhaseBlockVisible(true)
             return
           }
         } catch (gateErr) {
+          const blockMessage = 'No es pot avançar de fase. Error validant requisits.'
+          if (typeof window !== 'undefined') {
+            window.__phaseGateLastBlock = {
+              at: Date.now(),
+              fromPhase: currentPhase,
+              toPhase: newPhase,
+              missing: [],
+              message: blockMessage
+            }
+          }
           try {
             const { showToast } = await import('../components/Toast')
             if (showToast) {
-              showToast('No es pot avançar de fase. Error validant requisits.', 'warning')
+              showToast(blockMessage, 'warning')
             }
           } catch (importErr) {}
-          setPhaseBlockMessage('No es pot avançar de fase. Error validant requisits.')
+          setPhaseBlockMessage(blockMessage)
+          setPhaseBlockVisible(true)
           return
         }
       }
@@ -809,29 +831,33 @@ function ProjectDetailInner({ useApp }) {
               )}
             </div>
           </div>
-          {phaseBlockMessage && (
-            <div
-              data-testid="phase-gate-block-banner"
-              style={{
-                ...styles.phaseGateBanner,
-                borderColor: currentPhase.accent,
-                backgroundColor: currentPhase.bg,
-                color: darkMode ? '#ffffff' : '#111827'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <AlertTriangle size={18} color={currentPhase.accent} />
-                <span style={{ fontSize: '14px', lineHeight: '1.4' }}>{phaseBlockMessage}</span>
-              </div>
-              <button
-                onClick={() => setPhaseBlockMessage(null)}
-                style={styles.phaseGateBannerClose}
-                aria-label="Tancar"
-              >
-                ×
-              </button>
+          <div
+            data-testid="phase-gate-block-banner"
+            data-revealed={phaseBlockVisible ? 'true' : 'false'}
+            aria-hidden={phaseBlockVisible ? 'false' : 'true'}
+            style={{
+              ...styles.phaseGateBanner,
+              borderColor: currentPhase.accent,
+              backgroundColor: currentPhase.bg,
+              color: darkMode ? '#ffffff' : '#111827',
+              display: phaseBlockVisible ? 'flex' : 'none'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <AlertTriangle size={18} color={currentPhase.accent} />
+              <span style={{ fontSize: '14px', lineHeight: '1.4' }}>{phaseBlockMessage}</span>
             </div>
-          )}
+            <button
+              onClick={() => {
+                setPhaseBlockMessage(null)
+                setPhaseBlockVisible(false)
+              }}
+              style={styles.phaseGateBannerClose}
+              aria-label="Tancar"
+            >
+              ×
+            </button>
+          </div>
           {/* 1) OVERVIEW SECTION */}
           <CollapsibleSection
             title="Resum del Projecte"
