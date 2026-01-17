@@ -24,7 +24,7 @@ const daysFromNow = (days) => {
 // Demo Projects (10 projects with different states)
 export const demoProjects = [
   {
-    id: 'demo-proj-1',
+    id: '1a111111-1111-4111-8111-111111111111',
     name: 'Wireless Bluetooth Earbuds Pro',
     project_code: 'PR-FRDL250001',
     sku_internal: 'FRDL-EARBUDS-001',
@@ -46,7 +46,7 @@ export const demoProjects = [
     status: 'active'
   },
   {
-    id: 'demo-proj-2',
+    id: '1a111111-2222-4111-8111-222222222222',
     name: 'USB-C Fast Charging Cable Set',
     project_code: 'PR-FRDL250002',
     sku_internal: 'FRDL-CABLE-002',
@@ -68,7 +68,7 @@ export const demoProjects = [
     status: 'active'
   },
   {
-    id: 'demo-proj-3',
+    id: '1a111111-3333-4111-8111-333333333333',
     name: 'Smart Watch Band Leather',
     project_code: 'PR-FRDL250003',
     sku_internal: 'FRDL-BAND-003',
@@ -90,7 +90,7 @@ export const demoProjects = [
     status: 'active'
   },
   {
-    id: 'demo-proj-4',
+    id: '1a111111-4444-4111-8111-444444444444',
     name: 'Phone Stand Adjustable',
     project_code: 'PR-FRDL250004',
     sku_internal: 'FRDL-STAND-004',
@@ -112,7 +112,7 @@ export const demoProjects = [
     status: 'active'
   },
   {
-    id: 'demo-proj-5',
+    id: '1a111111-5555-4111-8111-555555555555',
     name: 'Laptop Cooling Pad RGB',
     project_code: 'PR-FRDL250005',
     sku_internal: 'FRDL-PAD-005',
@@ -134,7 +134,7 @@ export const demoProjects = [
     status: 'active'
   },
   {
-    id: 'demo-proj-6',
+    id: '1a111111-6666-4111-8111-666666666666',
     name: 'Car Phone Mount Magnetic',
     project_code: 'PR-FRDL250006',
     sku_internal: 'FRDL-MOUNT-006',
@@ -156,7 +156,7 @@ export const demoProjects = [
     status: 'active'
   },
   {
-    id: 'demo-proj-7',
+    id: '1a111111-7777-4111-8111-777777777777',
     name: 'Wireless Mouse Ergonomic',
     project_code: 'PR-FRDL250007',
     sku_internal: 'FRDL-MOUSE-007',
@@ -178,7 +178,7 @@ export const demoProjects = [
     status: 'active'
   },
   {
-    id: 'demo-proj-8',
+    id: '1a111111-8888-4111-8111-888888888888',
     name: 'Tablet Stand Foldable',
     project_code: 'PR-FRDL250008',
     sku_internal: 'FRDL-STAND-008',
@@ -200,7 +200,7 @@ export const demoProjects = [
     status: 'active'
   },
   {
-    id: 'demo-proj-9',
+    id: '1a111111-9999-4111-8111-999999999999',
     name: 'HDMI Cable 4K 10ft',
     project_code: 'PR-FRDL250009',
     sku_internal: 'FRDL-CABLE-009',
@@ -222,7 +222,7 @@ export const demoProjects = [
     status: 'active'
   },
   {
-    id: 'demo-proj-10',
+    id: '1a111111-aaaa-4111-8111-aaaaaaaaaaaa',
     name: 'Gaming Headset RGB',
     project_code: 'PR-FRDL250010',
     sku_internal: 'FRDL-HEADSET-010',
@@ -250,7 +250,7 @@ export const demoPurchaseOrders = [
   {
     id: '2f8f2b4a-1111-4a7b-9c1a-111111111111',
     po_number: 'PO-2024-001',
-    project_id: 'demo-proj-1',
+    project_id: '1a111111-1111-4111-8111-111111111111',
     supplier_id: 'demo-supplier-1',
     status: 'received',
     created_at: daysAgo(60),
@@ -268,7 +268,7 @@ export const demoPurchaseOrders = [
   {
     id: '2f8f2b4a-2222-4a7b-9c1a-222222222222',
     po_number: 'PO-2024-002',
-    project_id: 'demo-proj-2',
+    project_id: '1a111111-2222-4111-8111-222222222222',
     supplier_id: 'demo-supplier-2',
     status: 'in_transit',
     created_at: daysAgo(30),
@@ -286,7 +286,7 @@ export const demoPurchaseOrders = [
   {
     id: '2f8f2b4a-3333-4a7b-9c1a-333333333333',
     po_number: 'PO-2024-003',
-    project_id: 'demo-proj-4',
+    project_id: '1a111111-4444-4111-8111-444444444444',
     supplier_id: 'demo-supplier-3',
     status: 'in_transit',
     created_at: daysAgo(20),
@@ -304,7 +304,7 @@ export const demoPurchaseOrders = [
   {
     id: '2f8f2b4a-4444-4a7b-9c1a-444444444444',
     po_number: 'PO-2024-004',
-    project_id: 'demo-proj-5',
+    project_id: '1a111111-5555-4111-8111-555555555555',
     supplier_id: 'demo-supplier-1',
     status: 'waiting_manufacturer',
     created_at: daysAgo(15),
@@ -322,7 +322,7 @@ export const demoPurchaseOrders = [
   {
     id: '2f8f2b4a-5555-4a7b-9c1a-555555555555',
     po_number: 'PO-2024-005',
-    project_id: 'demo-proj-7',
+    project_id: '1a111111-7777-4111-8111-777777777777',
     supplier_id: 'demo-supplier-2',
     status: 'confirmed',
     created_at: daysAgo(10),
@@ -340,7 +340,7 @@ export const demoPurchaseOrders = [
   {
     id: '2f8f2b4a-6666-4a7b-9c1a-666666666666',
     po_number: 'PO-2024-006',
-    project_id: 'demo-proj-9',
+    project_id: '1a111111-9999-4111-8111-999999999999',
     supplier_id: 'demo-supplier-3',
     status: 'waiting_manufacturer',
     created_at: daysAgo(8),
@@ -395,9 +395,9 @@ export const demoSuppliers = [
 export const demoTasks = [
   {
     id: 'demo-task-1',
-    project_id: 'demo-proj-3',
+    project_id: '1a111111-3333-4111-8111-333333333333',
     entity_type: 'project',
-    entity_id: 'demo-proj-3',
+    entity_id: '1a111111-3333-4111-8111-333333333333',
     title: 'Compare supplier quotes',
     description: 'Get quotes from 3 suppliers for leather bands',
     status: 'open',
@@ -408,9 +408,9 @@ export const demoTasks = [
   },
   {
     id: 'demo-task-2',
-    project_id: 'demo-proj-2',
+    project_id: '1a111111-2222-4111-8111-222222222222',
     entity_type: 'project',
-    entity_id: 'demo-proj-2',
+    entity_id: '1a111111-2222-4111-8111-222222222222',
     title: 'Request FNSKU from Amazon',
     description: 'Submit FNSKU request for USB-C cables',
     status: 'open',
@@ -421,9 +421,9 @@ export const demoTasks = [
   },
   {
     id: 'demo-task-3',
-    project_id: 'demo-proj-6',
+    project_id: '1a111111-6666-4111-8111-666666666666',
     entity_type: 'project',
-    entity_id: 'demo-proj-6',
+    entity_id: '1a111111-6666-4111-8111-666666666666',
     title: 'Order samples',
     description: 'Order 5 samples of magnetic car mount',
     status: 'open',
@@ -434,9 +434,9 @@ export const demoTasks = [
   },
   {
     id: 'demo-task-4',
-    project_id: 'demo-proj-8',
+    project_id: '1a111111-8888-4111-8111-888888888888',
     entity_type: 'project',
-    entity_id: 'demo-proj-8',
+    entity_id: '1a111111-8888-4111-8111-888888888888',
     title: 'Review profitability',
     description: 'Final review before GO decision',
     status: 'open',
@@ -447,9 +447,9 @@ export const demoTasks = [
   },
   {
     id: 'demo-task-5',
-    project_id: 'demo-proj-1',
+    project_id: '1a111111-1111-4111-8111-111111111111',
     entity_type: 'project',
-    entity_id: 'demo-proj-1',
+    entity_id: '1a111111-1111-4111-8111-111111111111',
     title: 'Replenish inventory',
     description: 'Order more earbuds, stock running low',
     status: 'done',
@@ -461,9 +461,9 @@ export const demoTasks = [
   },
   {
     id: 'demo-task-6',
-    project_id: 'demo-proj-4',
+    project_id: '1a111111-4444-4111-8111-444444444444',
     entity_type: 'project',
-    entity_id: 'demo-proj-4',
+    entity_id: '1a111111-4444-4111-8111-444444444444',
     title: 'Track shipment',
     description: 'Monitor PO-2024-003 in transit',
     status: 'open',
@@ -501,7 +501,7 @@ export const demoStickyNotes = [
   },
   {
     id: 'demo-note-2',
-    project_id: 'demo-proj-3',
+    project_id: '1a111111-3333-4111-8111-333333333333',
     content: 'Waiting for supplier response on leather samples',
     color: 'blue',
     status: 'open',
@@ -521,7 +521,7 @@ export const demoStickyNotes = [
   },
   {
     id: 'demo-note-4',
-    project_id: 'demo-proj-5',
+    project_id: '1a111111-5555-4111-8111-555555555555',
     content: 'Low margin warning - consider price increase',
     color: 'red',
     status: 'open',
@@ -531,7 +531,7 @@ export const demoStickyNotes = [
   },
   {
     id: 'demo-note-5',
-    project_id: 'demo-proj-2',
+    project_id: '1a111111-2222-4111-8111-222222222222',
     content: 'FNSKU request submitted, waiting for Amazon response',
     color: 'yellow',
     status: 'open',
@@ -555,7 +555,7 @@ export const demoStickyNotes = [
 export const demoExpenses = [
   {
     id: 'demo-expense-1',
-    project_id: 'demo-proj-1',
+    project_id: '1a111111-1111-4111-8111-111111111111',
     amount: 1850.00,
     currency: 'EUR',
     expense_date: daysAgo(60),
@@ -566,7 +566,7 @@ export const demoExpenses = [
   },
   {
     id: 'demo-expense-2',
-    project_id: 'demo-proj-2',
+    project_id: '1a111111-2222-4111-8111-222222222222',
     amount: 650.00,
     currency: 'EUR',
     expense_date: daysAgo(30),
@@ -587,7 +587,7 @@ export const demoExpenses = [
   },
   {
     id: 'demo-expense-4',
-    project_id: 'demo-proj-4',
+    project_id: '1a111111-4444-4111-8111-444444444444',
     amount: 900.00,
     currency: 'EUR',
     expense_date: daysAgo(20),
@@ -598,7 +598,7 @@ export const demoExpenses = [
   },
   {
     id: 'demo-expense-5',
-    project_id: 'demo-proj-3',
+    project_id: '1a111111-3333-4111-8111-333333333333',
     amount: 120.00,
     currency: 'EUR',
     expense_date: daysAgo(10),
@@ -622,7 +622,7 @@ export const demoExpenses = [
 export const demoIncomes = [
   {
     id: 'demo-income-1',
-    project_id: 'demo-proj-1',
+    project_id: '1a111111-1111-4111-8111-111111111111',
     amount: 4999.00,
     currency: 'EUR',
     income_date: daysAgo(20),
@@ -631,7 +631,7 @@ export const demoIncomes = [
   },
   {
     id: 'demo-income-2',
-    project_id: 'demo-proj-1',
+    project_id: '1a111111-1111-4111-8111-111111111111',
     amount: 3500.00,
     currency: 'EUR',
     income_date: daysAgo(10),
@@ -640,7 +640,7 @@ export const demoIncomes = [
   },
   {
     id: 'demo-income-3',
-    project_id: 'demo-proj-4',
+    project_id: '1a111111-4444-4111-8111-444444444444',
     amount: 2499.00,
     currency: 'EUR',
     income_date: daysAgo(5),
@@ -649,7 +649,7 @@ export const demoIncomes = [
   },
   {
     id: 'demo-income-4',
-    project_id: 'demo-proj-2',
+    project_id: '1a111111-2222-4111-8111-222222222222',
     amount: 1999.00,
     currency: 'EUR',
     income_date: daysAgo(2),
@@ -711,7 +711,7 @@ export const demoFinanceCategories = [
 export const demoSupplierPriceEstimates = [
   {
     id: 'demo-estimate-1',
-    project_id: 'demo-proj-3',
+    project_id: '1a111111-3333-4111-8111-333333333333',
     source: '1688',
     price: 12.50,
     currency: 'CNY',
@@ -721,7 +721,7 @@ export const demoSupplierPriceEstimates = [
   },
   {
     id: 'demo-estimate-2',
-    project_id: 'demo-proj-3',
+    project_id: '1a111111-3333-4111-8111-333333333333',
     source: 'Alibaba',
     price: 13.20,
     currency: 'USD',
@@ -731,7 +731,7 @@ export const demoSupplierPriceEstimates = [
   },
   {
     id: 'demo-estimate-3',
-    project_id: 'demo-proj-3',
+    project_id: '1a111111-3333-4111-8111-333333333333',
     source: 'Zentrada',
     price: 11.80,
     currency: 'EUR',
@@ -741,7 +741,7 @@ export const demoSupplierPriceEstimates = [
   },
   {
     id: 'demo-estimate-4',
-    project_id: 'demo-proj-6',
+    project_id: '1a111111-6666-4111-8111-666666666666',
     source: '1688',
     price: 5.80,
     currency: 'CNY',
@@ -751,7 +751,7 @@ export const demoSupplierPriceEstimates = [
   },
   {
     id: 'demo-estimate-5',
-    project_id: 'demo-proj-6',
+    project_id: '1a111111-6666-4111-8111-666666666666',
     source: 'Alibaba',
     price: 6.20,
     currency: 'USD',
@@ -761,7 +761,7 @@ export const demoSupplierPriceEstimates = [
   },
   {
     id: 'demo-estimate-6',
-    project_id: 'demo-proj-8',
+    project_id: '1a111111-8888-4111-8111-888888888888',
     source: '1688',
     price: 4.20,
     currency: 'CNY',
@@ -815,8 +815,8 @@ export const demoCalendarEvents = [
     end: daysFromNow(7),
     type: 'task',
     entity_type: 'project',
-    entity_id: 'demo-proj-3',
-    project_id: 'demo-proj-3',
+    entity_id: '1a111111-3333-4111-8111-333333333333',
+    project_id: '1a111111-3333-4111-8111-333333333333',
     status: 'open',
     priority: 'high',
     resource: demoTasks.find(t => t.id === 'demo-task-1')
@@ -828,8 +828,8 @@ export const demoCalendarEvents = [
     end: daysFromNow(3),
     type: 'task',
     entity_type: 'project',
-    entity_id: 'demo-proj-2',
-    project_id: 'demo-proj-2',
+    entity_id: '1a111111-2222-4111-8111-222222222222',
+    project_id: '1a111111-2222-4111-8111-222222222222',
     status: 'open',
     priority: 'high',
     resource: demoTasks.find(t => t.id === 'demo-task-2')
@@ -842,7 +842,7 @@ export const demoCalendarEvents = [
     type: 'shipment',
     entity_type: 'purchase_order',
     entity_id: '2f8f2b4a-2222-4a7b-9c1a-222222222222',
-    project_id: 'demo-proj-2',
+    project_id: '1a111111-2222-4111-8111-222222222222',
     status: 'in_transit',
     resource: demoPurchaseOrders.find(po => po.id === '2f8f2b4a-2222-4a7b-9c1a-222222222222')
   },
@@ -854,7 +854,7 @@ export const demoCalendarEvents = [
     type: 'shipment',
     entity_type: 'purchase_order',
     entity_id: '2f8f2b4a-3333-4a7b-9c1a-333333333333',
-    project_id: 'demo-proj-4',
+    project_id: '1a111111-4444-4111-8111-444444444444',
     status: 'in_transit',
     resource: demoPurchaseOrders.find(po => po.id === '2f8f2b4a-3333-4a7b-9c1a-333333333333')
   },
@@ -865,8 +865,8 @@ export const demoCalendarEvents = [
     end: daysFromNow(14),
     type: 'task',
     entity_type: 'project',
-    entity_id: 'demo-proj-6',
-    project_id: 'demo-proj-6',
+    entity_id: '1a111111-6666-4111-8111-666666666666',
+    project_id: '1a111111-6666-4111-8111-666666666666',
     status: 'open',
     priority: 'medium',
     resource: demoTasks.find(t => t.id === 'demo-task-3')
@@ -878,8 +878,8 @@ export const demoCalendarEvents = [
     end: daysFromNow(10),
     type: 'task',
     entity_type: 'project',
-    entity_id: 'demo-proj-8',
-    project_id: 'demo-proj-8',
+    entity_id: '1a111111-8888-4111-8111-888888888888',
+    project_id: '1a111111-8888-4111-8111-888888888888',
     status: 'open',
     priority: 'medium',
     resource: demoTasks.find(t => t.id === 'demo-task-4')
@@ -891,8 +891,8 @@ export const demoCalendarEvents = [
     end: daysFromNow(3),
     type: 'task',
     entity_type: 'project',
-    entity_id: 'demo-proj-4',
-    project_id: 'demo-proj-4',
+    entity_id: '1a111111-4444-4111-8111-444444444444',
+    project_id: '1a111111-4444-4111-8111-444444444444',
     status: 'open',
     priority: 'medium',
     resource: demoTasks.find(t => t.id === 'demo-task-6')
