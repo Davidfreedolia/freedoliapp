@@ -181,6 +181,7 @@ function ProjectDetailInner({ useApp }) {
   const [documents, setDocuments] = useState([])
   const [projectSubfolders, setProjectSubfolders] = useState([])
   const [phaseProgress, setPhaseProgress] = useState({ completed: 0, total: 0, allOk: false })
+  const [phaseBlockMessage, setPhaseBlockMessage] = useState(null)
   
 
   const loadProject = async () => {
@@ -374,24 +375,27 @@ function ProjectDetailInner({ useApp }) {
 
           if (!ok) {
             const uniqueMissing = Array.from(new Set(missing || [])).filter(Boolean)
+            const details = uniqueMissing.length > 0
+              ? uniqueMissing.map(item => `• ${item}`).join(' ')
+              : '• Requisits pendents'
+            const blockMessage = `No es pot avançar de fase ${details}`
             try {
               const { showToast } = await import('../components/Toast')
-                const details = uniqueMissing.length > 0
-                  ? uniqueMissing.map(item => `• ${item}`).join(' ')
-                  : '• Requisits pendents'
-                showToast(`No es pot avançar de fase ${details}`, 'warning')
-            } catch (importErr) {
-              // Silent fail for toast
-            }
+              if (showToast) {
+                showToast(blockMessage, 'warning')
+              }
+            } catch (importErr) {}
+            setPhaseBlockMessage(blockMessage)
             return
           }
         } catch (gateErr) {
           try {
             const { showToast } = await import('../components/Toast')
-            showToast('No es pot avançar de fase. Error validant requisits.', 'warning')
-          } catch (importErr) {
-            // Silent fail for toast
-          }
+            if (showToast) {
+              showToast('No es pot avançar de fase. Error validant requisits.', 'warning')
+            }
+          } catch (importErr) {}
+          setPhaseBlockMessage('No es pot avançar de fase. Error validant requisits.')
           return
         }
       }
@@ -805,6 +809,29 @@ function ProjectDetailInner({ useApp }) {
               )}
             </div>
           </div>
+          {phaseBlockMessage && (
+            <div
+              data-testid="phase-gate-block-banner"
+              style={{
+                ...styles.phaseGateBanner,
+                borderColor: currentPhase.accent,
+                backgroundColor: currentPhase.bg,
+                color: darkMode ? '#ffffff' : '#111827'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <AlertTriangle size={18} color={currentPhase.accent} />
+                <span style={{ fontSize: '14px', lineHeight: '1.4' }}>{phaseBlockMessage}</span>
+              </div>
+              <button
+                onClick={() => setPhaseBlockMessage(null)}
+                style={styles.phaseGateBannerClose}
+                aria-label="Tancar"
+              >
+                ×
+              </button>
+            </div>
+          )}
           {/* 1) OVERVIEW SECTION */}
           <CollapsibleSection
             title="Resum del Projecte"
@@ -1501,6 +1528,24 @@ const styles = {
     fontSize: '11px',
     fontWeight: '600',
     letterSpacing: '0.06em'
+  },
+  phaseGateBanner: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: '12px',
+    padding: '12px 16px',
+    borderRadius: '12px',
+    border: '1px solid',
+    marginBottom: '20px'
+  },
+  phaseGateBannerClose: {
+    background: 'transparent',
+    border: 'none',
+    cursor: 'pointer',
+    color: '#6b7280',
+    fontSize: '18px',
+    lineHeight: 1
   },
   timelineItem: {
     display: 'flex',
