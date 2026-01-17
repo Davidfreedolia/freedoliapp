@@ -831,7 +831,12 @@ function ProjectDetailInner({ useApp }) {
             {/* Identifiers Section */}
             <div id="identifiers-section" style={{ marginTop: '24px' }}>
               <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
-                <IdentifiersSection ref={identifiersSectionRef} projectId={id} darkMode={darkMode} />
+                    <IdentifiersSection
+                      ref={identifiersSectionRef}
+                      projectId={id}
+                      darkMode={darkMode}
+                      phaseStyle={currentPhase}
+                    />
               </Suspense>
             </div>
 
@@ -909,6 +914,7 @@ function ProjectDetailInner({ useApp }) {
                 projectId={id}
                 projectStatus={project?.status}
                 darkMode={darkMode}
+                    phaseStyle={currentPhase}
               />
             </Suspense>
           </CollapsibleSection>

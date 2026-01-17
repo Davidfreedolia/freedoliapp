@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useApp } from '../context/AppContext'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import DeleteConfirmationModal from './DeleteConfirmationModal'
+import { getPhaseSurfaceStyles } from '../utils/phaseStyles'
 
 const EVENT_TYPES = [
   { value: 'milestone', label: 'Milestone' },
@@ -42,7 +43,7 @@ function formatDateDisplay(dateStr) {
   }
 }
 
-export default function ProjectEventsTimeline({ projectId, projectStatus, darkMode }) {
+export default function ProjectEventsTimeline({ projectId, projectStatus, darkMode, phaseStyle }) {
   const { demoMode } = useApp()
   const { isMobile } = useBreakpoint()
   const [events, setEvents] = useState([])
@@ -191,12 +192,17 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
     }
   }
 
+  const hasPhaseStyle = Boolean(phaseStyle?.bg && phaseStyle?.accent)
+  const phaseSurface = getPhaseSurfaceStyles(phaseStyle, { darkMode, borderWidth: 2 })
   const styles = {
     container: {
       borderRadius: '12px',
       border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
       padding: '20px',
-      backgroundColor: darkMode ? '#15151f' : '#ffffff'
+      background: hasPhaseStyle
+        ? phaseSurface.cardStyle.background
+        : (darkMode ? '#15151f' : '#ffffff'),
+      borderLeft: hasPhaseStyle ? phaseSurface.cardStyle.borderLeft : undefined
     },
     header: {
       display: 'flex',

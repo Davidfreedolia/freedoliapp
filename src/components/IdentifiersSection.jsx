@@ -15,6 +15,7 @@ import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
 import { getButtonStyles, useButtonState } from '../utils/buttonStyles'
 import { showToast } from '../components/Toast'
+import { getPhaseSurfaceStyles } from '../utils/phaseStyles'
 
 const GTIN_TYPES = [
   { value: 'EAN', label: 'EAN' },
@@ -22,7 +23,20 @@ const GTIN_TYPES = [
   { value: 'GTIN_EXEMPT', label: 'GTIN Exempt (Amazon)' }
 ]
 
-const IdentifiersSection = forwardRef(function IdentifiersSection({ projectId, darkMode }, ref) {
+const hexToRgba = (hex, alpha) => {
+  if (!hex) return ''
+  const normalized = hex.replace('#', '')
+  const isShort = normalized.length === 3
+  const expanded = isShort
+    ? normalized.split('').map((ch) => ch + ch).join('')
+    : normalized
+  const r = parseInt(expanded.slice(0, 2), 16)
+  const g = parseInt(expanded.slice(2, 4), 16)
+  const b = parseInt(expanded.slice(4, 6), 16)
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
+const IdentifiersSection = forwardRef(function IdentifiersSection({ projectId, darkMode, phaseStyle }, ref) {
   const { isMobile } = useBreakpoint()
   const { t } = useTranslation()
   const modalStyles = getModalStyles(isMobile, darkMode)
@@ -45,6 +59,24 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({ projectId, d
     asin: '',
     fnsku: ''
   })
+  const hasPhaseStyle = Boolean(phaseStyle?.bg && phaseStyle?.accent)
+  const phaseSurface = getPhaseSurfaceStyles(phaseStyle, { darkMode, borderWidth: 2 })
+  const inputBorderColor = hasPhaseStyle
+    ? hexToRgba(phaseStyle.accent, 0.25)
+    : (darkMode ? '#374151' : '#d1d5db')
+  const inputSurfaceStyle = {
+    backgroundColor: '#ffffff',
+    color: '#111827',
+    borderColor: inputBorderColor
+  }
+  const sectionSurfaceStyle = hasPhaseStyle
+    ? {
+        background: phaseSurface.cardStyle.background,
+        borderLeft: phaseSurface.cardStyle.borderLeft
+      }
+    : {
+        backgroundColor: darkMode ? '#15151f' : '#ffffff'
+      }
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -249,7 +281,7 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({ projectId, d
     return (
       <div style={{
         ...styles.section,
-        backgroundColor: darkMode ? '#15151f' : '#ffffff'
+        ...sectionSurfaceStyle
       }}>
         <div style={styles.loading}>Carregant identificadors...</div>
       </div>
@@ -259,7 +291,7 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({ projectId, d
   return (
     <div style={{
       ...styles.section,
-      backgroundColor: darkMode ? '#15151f' : '#ffffff'
+      ...sectionSurfaceStyle
     }}>
       <div style={styles.header}>
         <h3 style={{
@@ -317,9 +349,7 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({ projectId, d
             onChange={e => handleGtinTypeChange(e.target.value)}
             style={{
               ...styles.input,
-              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-              color: darkMode ? '#ffffff' : '#111827',
-              borderColor: darkMode ? '#374151' : '#d1d5db'
+              ...inputSurfaceStyle
             }}
           >
             <option value="">Selecciona un tipus</option>
@@ -345,9 +375,7 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({ projectId, d
               placeholder="Ex: 1234567890123"
               style={{
                 ...styles.input,
-                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                color: darkMode ? '#ffffff' : '#111827',
-                borderColor: darkMode ? '#374151' : '#d1d5db'
+                ...inputSurfaceStyle
               }}
             />
           </div>
@@ -386,9 +414,7 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({ projectId, d
                 rows={3}
                 style={{
                   ...styles.textarea,
-                  backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                  color: darkMode ? '#ffffff' : '#111827',
-                  borderColor: darkMode ? '#374151' : '#d1d5db'
+                  ...inputSurfaceStyle
                 }}
               />
             </div>
@@ -414,9 +440,7 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({ projectId, d
             placeholder="Ex: B08XYZ1234"
             style={{
               ...styles.input,
-              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-              color: darkMode ? '#ffffff' : '#111827',
-              borderColor: darkMode ? '#374151' : '#d1d5db'
+              ...inputSurfaceStyle
             }}
           />
         </div>
@@ -440,9 +464,7 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({ projectId, d
             placeholder="Ex: X001ABCD1234"
             style={{
               ...styles.input,
-              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-              color: darkMode ? '#ffffff' : '#111827',
-              borderColor: darkMode ? '#374151' : '#d1d5db'
+              ...inputSurfaceStyle
             }}
           />
         </div>
@@ -533,9 +555,7 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({ projectId, d
                       placeholder="Ex: SKU-001"
                       style={{
                         ...styles.input,
-                        backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                        color: darkMode ? '#ffffff' : '#111827',
-                        borderColor: darkMode ? '#374151' : '#d1d5db'
+                        ...inputSurfaceStyle
                       }}
                     />
                   </div>
@@ -554,9 +574,7 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({ projectId, d
                       placeholder="Ex: X001ABCD1234"
                       style={{
                         ...styles.input,
-                        backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                        color: darkMode ? '#ffffff' : '#111827',
-                        borderColor: darkMode ? '#374151' : '#d1d5db'
+                        ...inputSurfaceStyle
                       }}
                     />
                   </div>
