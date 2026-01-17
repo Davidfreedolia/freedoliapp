@@ -12,7 +12,7 @@ import {
   XCircle,
   RotateCw
 } from 'lucide-react'
-import { getPhaseStyle } from '../utils/phaseStyles'
+import { PHASE_STYLES, getPhaseStyle } from '../utils/phaseStyles'
 import { useApp } from '../context/AppContext'
 import { deleteProject } from '../lib/supabase'
 import Header from '../components/Header'
@@ -27,6 +27,7 @@ export default function Projects() {
   const [filterPhase, setFilterPhase] = useState(null)
   const [showDiscarded, setShowDiscarded] = useState(false)
   const [menuOpen, setMenuOpen] = useState(null)
+  const PHASES = PHASE_STYLES
 
   const filteredProjects = projects.filter(project => {
     const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
