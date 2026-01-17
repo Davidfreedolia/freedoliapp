@@ -10,6 +10,7 @@ import {
 } from '../../lib/supabase'
 
 const normalizeText = (value) => (value || '').toString().trim().toLowerCase()
+const COMPETITOR_STORAGE_PREFIX = 'competitive_asin_meta_'
 
 const hasDocCategory = (documents, category) => {
   const target = normalizeText(category)
@@ -35,6 +36,37 @@ const isGtinValid = (identifiers) => {
     return Boolean(normalizeText(identifiers.gtin_code))
   }
   return false
+}
+
+const getCompetitorSnapshot = (projectId) => {
+  if (typeof window === 'undefined') return null
+  try {
+    const raw = window.localStorage.getItem(`${COMPETITOR_STORAGE_PREFIX}${projectId}`)
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+
+const hasSnapshotInput = (snapshot) => {
+  if (!snapshot) return false
+  return [
+    snapshot.competitor_price,
+    snapshot.category_guess,
+    snapshot.size_tier,
+    snapshot.weight_g,
+    snapshot.brand
+  ].some(value => normalizeText(value))
+}
+
+const isSnapshotComplete = (snapshot) => {
+  if (!snapshot) return false
+  const price = parseFloat(snapshot.competitor_price || 0)
+  const weight = parseFloat(snapshot.weight_g || 0)
+  const hasCategory = Boolean(normalizeText(snapshot.category_guess))
+  const hasSize = Boolean(normalizeText(snapshot.size_tier))
+  const hasBrand = Boolean(normalizeText(snapshot.brand))
+  return price > 0 && weight > 0 && hasCategory && hasSize && hasBrand
 }
 
 export const validatePhaseTransition = async ({
@@ -69,11 +101,11 @@ export const validatePhaseTransition = async ({
         try {
           identifiers = await getProductIdentifiers(projectId, supabaseClient)
         } catch {
-          missing.push('ASIN competidor')
+          missing.push('ASIN competidor definit')
         }
 
         if (!identifiers?.asin) {
-          missing.push('ASIN competidor')
+          missing.push('ASIN competidor definit')
         }
 
         if (!['GO', 'RISKY'].includes((project?.decision || '').toUpperCase())) {
@@ -83,46 +115,38 @@ export const validatePhaseTransition = async ({
         let documents = null
         try {
           documents = await getDocuments(projectId, supabaseClient)
-        } catch {
-          missing.push('Document d\'anàlisi')
         }
 
         let estimates = null
         try {
           estimates = await getSupplierPriceEstimates(projectId, supabaseClient)
-        } catch {
-          missing.push('Estimació de preu de proveïdor')
         }
 
         const hasAnalysisDoc = documents ? hasDocCategory(documents, 'analysis') : false
         const hasPriceEstimate = estimates ? (estimates.length > 0) : false
+        const snapshot = getCompetitorSnapshot(projectId)
+        const hasSnapshot = hasSnapshotInput(snapshot)
 
-        if (!hasAnalysisDoc && !hasPriceEstimate) {
-          missing.push('Document d\'anàlisi o estimació de preu de proveïdor')
+        if (!hasAnalysisDoc && !hasPriceEstimate && !hasSnapshot) {
+          missing.push('Recerca validada (anàlisi/preu/snapshot)')
         }
         break
       }
       case '2->3': {
-        let identifiers = null
-        try {
-          identifiers = await getProductIdentifiers(projectId, supabaseClient)
-        } catch {
-          missing.push('Dades competidor (ASIN)')
-        }
-
-        if (!identifiers?.asin) {
-          missing.push('Dades competidor (ASIN)')
+        const snapshot = getCompetitorSnapshot(projectId)
+        if (!isSnapshotComplete(snapshot)) {
+          missing.push('Snapshot competidor complet')
         }
 
         let profitability = null
         try {
           profitability = await getProjectProfitability(projectId, supabaseClient)
         } catch {
-          missing.push('Registre de profitabilitat')
+          missing.push('Profitabilitat guardada')
         }
 
         if (!profitability) {
-          missing.push('Registre de profitabilitat')
+          missing.push('Profitabilitat guardada')
           break
         }
 
@@ -130,9 +154,9 @@ export const validatePhaseTransition = async ({
         const cogs = parseFloat(profitability.cogs || 0)
         const { net_profit } = calculateQuickProfitability(profitability)
 
-        if (sellingPrice <= 0) missing.push('Preu de venda > 0')
-        if (cogs <= 0) missing.push('COGS > 0')
-        if ((net_profit || 0) <= 0) missing.push('Profit per unitat > 0')
+        if (sellingPrice <= 0 || cogs <= 0 || (net_profit || 0) <= 0) {
+          missing.push('Profit per unitat > 0')
+        }
         break
       }
       case '3->4': {

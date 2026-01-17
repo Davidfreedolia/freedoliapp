@@ -6,15 +6,13 @@ import { getPhaseStyle } from '../../utils/phaseStyles'
 
 const REQUIREMENTS_BY_PHASE = {
   1: [
-    'ASIN competidor',
-    'Decisió GO o RISKY',
-    'Document d\'anàlisi o estimació de preu de proveïdor'
+    'ASIN competidor definit',
+    'Recerca validada (anàlisi/preu/snapshot)',
+    'Decisió GO o RISKY'
   ],
   2: [
-    'Dades competidor (ASIN)',
-    'Registre de profitabilitat',
-    'Preu de venda > 0',
-    'COGS > 0',
+    'Snapshot competidor complet',
+    'Profitabilitat guardada',
     'Profit per unitat > 0'
   ],
   3: [
@@ -44,7 +42,22 @@ const normalizeMissing = (missing) => {
     normalized.add('Document d\'anàlisi o estimació de preu de proveïdor')
   }
   if (normalized.has('ASIN competidor')) {
-    normalized.add('Dades competidor (ASIN)')
+    normalized.add('ASIN competidor definit')
+  }
+  if (normalized.has('Recerca validada (anàlisi/preu/snapshot)')) {
+    normalized.add('Recerca validada (anàlisi/preu/snapshot)')
+  }
+  if (normalized.has('Document d\'anàlisi o estimació de preu de proveïdor')) {
+    normalized.add('Recerca validada (anàlisi/preu/snapshot)')
+  }
+  if (normalized.has('Snapshot competidor complet')) {
+    normalized.add('Snapshot competidor complet')
+  }
+  if (normalized.has('Registre de profitabilitat')) {
+    normalized.add('Profitabilitat guardada')
+  }
+  if (normalized.has('Preu de venda > 0') || normalized.has('COGS > 0')) {
+    normalized.add('Profit per unitat > 0')
   }
   if (normalized.has('Pressupost de proveïdor')) {
     normalized.add('Almenys 1 pressupost de proveïdor')

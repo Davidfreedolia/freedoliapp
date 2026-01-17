@@ -59,8 +59,8 @@ const PHASE_GROUPS = [
   { label: 'LIVE', phases: [7] }
 ]
 const PHASE_WORKFLOW_COPY = {
-  1: 'Validar demanda i competidors amb ASIN.',
-  2: 'Ajustar costos i validar la rendibilitat.',
+  1: 'Analitzant mercat i competència',
+  2: 'Validant números i viabilitat real',
   3: 'Negociar proveïdors i obtenir pressupostos.',
   4: 'Validar mostres i aprovacions.',
   5: 'Producció en marxa i PO confirmada.',
@@ -693,6 +693,9 @@ function ProjectDetailInner({ useApp }) {
   }
   const currentGroup = PHASE_GROUPS.find(group => group.phases.includes(phaseId))
   const phaseSubtitle = PHASE_WORKFLOW_COPY[phaseId] || currentPhase.description
+  const phaseGroupLabel = phaseId <= 2
+    ? 'DISCOVERY — Market & Viability'
+    : (currentGroup?.label || 'PHASE')
 
   return (
     <div style={styles.container}>
@@ -756,7 +759,7 @@ function ProjectDetailInner({ useApp }) {
                 ...styles.phaseGroupLabel,
                 color: currentPhase.accent
               }}>
-                {currentGroup?.label || 'PHASE'}
+                {phaseGroupLabel}
               </span>
               <h2 style={{
                 margin: '4px 0 4px',
@@ -782,20 +785,22 @@ function ProjectDetailInner({ useApp }) {
                   {phaseProgress.total ? `${phaseProgress.completed}/${phaseProgress.total}` : '—'}
                 </strong>
               </div>
-              <button
-                onClick={() => {
-                  const checklist = document.getElementById('phase-checklist')
-                  if (checklist) {
-                    checklist.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                  }
-                }}
-                style={{
-                  ...styles.phaseCta,
-                  backgroundColor: currentPhase.accent
-                }}
-              >
-                Completa checklist
-              </button>
+              {phaseId > 2 && (
+                <button
+                  onClick={() => {
+                    const checklist = document.getElementById('phase-checklist')
+                    if (checklist) {
+                      checklist.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                    }
+                  }}
+                  style={{
+                    ...styles.phaseCta,
+                    backgroundColor: currentPhase.accent
+                  }}
+                >
+                  Completa checklist
+                </button>
+              )}
             </div>
           </div>
           {/* 1) OVERVIEW SECTION */}
@@ -925,6 +930,7 @@ function ProjectDetailInner({ useApp }) {
               <AmazonReadinessBadge
                 projectId={id}
                 darkMode={darkMode}
+                phaseId={phaseId}
                 onAssignGtin={() => {
                   const targetId = phaseId >= 6
                     ? 'identifiers-section'

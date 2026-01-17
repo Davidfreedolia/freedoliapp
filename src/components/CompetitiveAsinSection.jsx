@@ -73,6 +73,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
   const [loading, setLoading] = useState(true)
   const [savingAsin, setSavingAsin] = useState(false)
   const [asinInput, setAsinInput] = useState('')
+  const [amazonUrl, setAmazonUrl] = useState('')
   const [asinError, setAsinError] = useState('')
   const [capturedAsin, setCapturedAsin] = useState(null)
   const [marketplace, setMarketplace] = useState('es')
@@ -108,6 +109,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
         if (stored) {
           const parsed = JSON.parse(stored)
           setMeta(prev => ({ ...prev, ...parsed }))
+          setAmazonUrl(parsed.amazon_url || '')
         }
       } catch (err) {
         console.error('Error carregant ASIN competidor:', err)
@@ -121,8 +123,9 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
 
   const handleSaveAsin = async () => {
     setAsinError('')
-    if (!asinInput.trim()) return
-    const extracted = extractAsin(asinInput)
+    const inputValue = asinInput.trim() || amazonUrl.trim()
+    if (!inputValue) return
+    const extracted = extractAsin(inputValue)
     const asinValue = typeof extracted === 'string' ? extracted : extracted?.asin
     if (!asinValue) {
       setAsinError('Format invàlid. Introdueix una URL d\'Amazon o un ASIN de 10 caràcters.')
@@ -159,7 +162,10 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
 
   const handleSaveMeta = () => {
     try {
-      localStorage.setItem(storageKey, JSON.stringify(meta))
+      localStorage.setItem(storageKey, JSON.stringify({
+        ...meta,
+        amazon_url: amazonUrl.trim()
+      }))
     } catch (err) {
       console.error('Error guardant dades competidor:', err)
     }
@@ -206,31 +212,69 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
 
       <div style={styles.asinBlock}>
         {!capturedAsin ? (
-          <div style={styles.asinInputRow}>
-            <input
-              type="text"
-              value={asinInput}
-              onChange={(e) => setAsinInput(e.target.value)}
-              placeholder="Pega una URL d'Amazon o un ASIN (ex: B08XYZ1234)"
-              style={{
-                ...styles.input,
-                backgroundColor: '#ffffff',
-                color: '#111827',
-                borderColor: inputBorderColor
-              }}
-            />
+          <>
+            <div style={styles.field}>
+              <label style={{
+                ...styles.label,
+                color: darkMode ? '#e5e7eb' : '#374151'
+              }}>
+                ASIN competidor (obligatori)
+              </label>
+              <div style={styles.asinInputRow}>
+                <input
+                  type="text"
+                  value={asinInput}
+                  onChange={(e) => setAsinInput(e.target.value)}
+                  placeholder="Ex: B08XYZ1234"
+                  style={{
+                    ...styles.input,
+                    backgroundColor: '#ffffff',
+                    color: '#111827',
+                    borderColor: inputBorderColor
+                  }}
+                />
+              </div>
+            </div>
+            <div style={styles.field}>
+              <label style={{
+                ...styles.label,
+                color: darkMode ? '#e5e7eb' : '#374151'
+              }}>
+                URL d'Amazon (opcional)
+              </label>
+              <input
+                type="text"
+                value={amazonUrl}
+                onChange={(e) => setAmazonUrl(e.target.value)}
+                placeholder="Pega una URL d'Amazon per extreure l'ASIN"
+                style={{
+                  ...styles.input,
+                  backgroundColor: '#ffffff',
+                  color: '#111827',
+                  borderColor: inputBorderColor
+                }}
+              />
+            </div>
             <button
               onClick={handleSaveAsin}
-              disabled={savingAsin || !asinInput.trim()}
+              disabled={savingAsin || (!asinInput.trim() && !amazonUrl.trim())}
               style={{
                 ...styles.captureButton,
-                opacity: (savingAsin || !asinInput.trim()) ? 0.6 : 1,
-                cursor: (savingAsin || !asinInput.trim()) ? 'not-allowed' : 'pointer'
+                opacity: (savingAsin || (!asinInput.trim() && !amazonUrl.trim())) ? 0.6 : 1,
+                cursor: (savingAsin || (!asinInput.trim() && !amazonUrl.trim())) ? 'not-allowed' : 'pointer',
+                marginTop: '8px'
               }}
             >
-              {savingAsin ? 'Guardant...' : 'Capturar'}
+              {savingAsin ? 'Guardant...' : 'Capturar ASIN'}
             </button>
-          </div>
+            <div style={{
+              marginTop: '8px',
+              fontSize: '12px',
+              color: darkMode ? '#9ca3af' : '#6b7280'
+            }}>
+              Cal un ASIN per desbloquejar el snapshot de competència.
+            </div>
+          </>
         ) : (
           <div style={{
             ...styles.asinCaptured,
@@ -252,7 +296,17 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
         )}
       </div>
 
-      <div style={styles.metaGrid}>
+      {capturedAsin && (
+        <>
+          <div style={{
+            marginBottom: '12px',
+            fontSize: '14px',
+            fontWeight: '600',
+            color: darkMode ? '#ffffff' : '#111827'
+          }}>
+            Competitor Snapshot
+          </div>
+          <div style={styles.metaGrid}>
         <div style={styles.field}>
           <label style={{
             ...styles.label,
@@ -363,30 +417,32 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             }}
           />
         </div>
-      </div>
+          </div>
 
-      <div style={styles.saveRow}>
-        <button
-          onClick={handleSaveMeta}
-          {...saveButtonState}
-          style={getButtonStyles({
-            variant: 'primary',
-            darkMode,
-            disabled: false,
-            isHovered: saveButtonState.isHovered,
-            isActive: saveButtonState.isActive
-          })}
-        >
-          <Save size={16} />
-          Guardar dades competidor
-        </button>
-        <span style={{
-          ...styles.helper,
-          color: darkMode ? '#9ca3af' : '#6b7280'
-        }}>
-          Guardat localment per projecte.
-        </span>
-      </div>
+          <div style={styles.saveRow}>
+            <button
+              onClick={handleSaveMeta}
+              {...saveButtonState}
+              style={getButtonStyles({
+                variant: 'primary',
+                darkMode,
+                disabled: false,
+                isHovered: saveButtonState.isHovered,
+                isActive: saveButtonState.isActive
+              })}
+            >
+              <Save size={16} />
+              Guardar dades competidor
+            </button>
+            <span style={{
+              ...styles.helper,
+              color: darkMode ? '#9ca3af' : '#6b7280'
+            }}>
+              Guardat localment per projecte.
+            </span>
+          </div>
+        </>
+      )}
     </div>
   )
 }

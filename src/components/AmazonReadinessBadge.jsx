@@ -3,7 +3,14 @@ import { CheckCircle2, AlertCircle, XCircle, Plus, Barcode, Shield } from 'lucid
 import { getProductIdentifiers, getPurchaseOrders } from '../lib/supabase'
 import { getButtonStyles, useButtonState } from '../utils/buttonStyles'
 
-export default function AmazonReadinessBadge({ projectId, darkMode, onAssignGtin, onCreatePO, onMarkExempt }) {
+export default function AmazonReadinessBadge({
+  projectId,
+  darkMode,
+  onAssignGtin,
+  onCreatePO,
+  onMarkExempt,
+  phaseId
+}) {
   const [readiness, setReadiness] = useState(null) // null = loading, { status, message, action }
   const [loading, setLoading] = useState(true)
   const assignButtonState = useButtonState()
@@ -17,6 +24,15 @@ export default function AmazonReadinessBadge({ projectId, darkMode, onAssignGtin
   const loadReadiness = async () => {
     setLoading(true)
     try {
+      if (phaseId <= 2) {
+        setReadiness({
+          status: 'not_ready',
+          message: "En Discovery cal definir l'ASIN competidor i completar el snapshot per validar la viabilitat.",
+          action: { type: 'discovery_asin', label: 'Completar ASIN competidor' }
+        })
+        return
+      }
+
       // Obtener GTIN y estado de exempción
       const identifiers = await getProductIdentifiers(projectId)
       const hasGtin = !!(identifiers?.gtin_code)
@@ -204,27 +220,27 @@ export default function AmazonReadinessBadge({ projectId, darkMode, onAssignGtin
           ) : (
             <button
               onClick={() => {
-                if (action.type === 'assign_gtin' && onAssignGtin) {
+                if ((action.type === 'assign_gtin' || action.type === 'discovery_asin') && onAssignGtin) {
                   onAssignGtin()
                 } else if (action.type === 'create_po' && onCreatePO) {
                   onCreatePO()
                 }
               }}
-              {...(action.type === 'assign_gtin' ? assignButtonState : createPOButtonState)}
+              {...((action.type === 'assign_gtin' || action.type === 'discovery_asin') ? assignButtonState : createPOButtonState)}
               style={{
                 ...getButtonStyles({
                   variant: 'primary',
                   darkMode,
                   disabled: false,
-                  isHovered: (action.type === 'assign_gtin' ? assignButtonState : createPOButtonState).isHovered,
-                  isActive: (action.type === 'assign_gtin' ? assignButtonState : createPOButtonState).isActive
+                  isHovered: ((action.type === 'assign_gtin' || action.type === 'discovery_asin') ? assignButtonState : createPOButtonState).isHovered,
+                  isActive: ((action.type === 'assign_gtin' || action.type === 'discovery_asin') ? assignButtonState : createPOButtonState).isActive
                 }),
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px'
               }}
             >
-              {action.type === 'assign_gtin' ? <Barcode size={16} /> : <Plus size={16} />}
+              {(action.type === 'assign_gtin' || action.type === 'discovery_asin') ? <Barcode size={16} /> : <Plus size={16} />}
               {action.label}
             </button>
           )}
