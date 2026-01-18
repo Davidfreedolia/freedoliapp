@@ -7,8 +7,8 @@ import { getPhaseStyle } from '../../utils/phaseStyles'
 const REQUIREMENTS_BY_PHASE = {
   1: [
     'ASIN competidor definit',
-    'Recerca validada (anàlisi/preu/snapshot)',
-    'Decisió GO o RISKY'
+    'Decisió GO o RISKY',
+    'Document d\'anàlisi o estimació de preu'
   ],
   2: [
     'Snapshot competidor complet',
@@ -29,9 +29,9 @@ const REQUIREMENTS_BY_PHASE = {
     'Almenys 1 document de PO'
   ],
   6: [
-    'SKU/FNSKU assignat',
+    'SKU definit',
     'GTIN vàlid (EAN/UPC o exempt)',
-    'Almenys 1 document de listing'
+    'Document listing'
   ]
 }
 
@@ -39,16 +39,13 @@ const normalizeMissing = (missing) => {
   const normalized = new Set(missing || [])
 
   if (normalized.has('Document d\'anàlisi') || normalized.has('Estimació de preu de proveïdor')) {
-    normalized.add('Document d\'anàlisi o estimació de preu de proveïdor')
+    normalized.add('Document d\'anàlisi o estimació de preu')
   }
   if (normalized.has('ASIN competidor')) {
     normalized.add('ASIN competidor definit')
   }
   if (normalized.has('Recerca validada (anàlisi/preu/snapshot)')) {
-    normalized.add('Recerca validada (anàlisi/preu/snapshot)')
-  }
-  if (normalized.has('Document d\'anàlisi o estimació de preu de proveïdor')) {
-    normalized.add('Recerca validada (anàlisi/preu/snapshot)')
+    normalized.add('Document d\'anàlisi o estimació de preu')
   }
   if (normalized.has('Snapshot competidor complet')) {
     normalized.add('Snapshot competidor complet')
@@ -75,11 +72,11 @@ const normalizeMissing = (missing) => {
     normalized.add('Almenys 1 comanda de compra')
   }
   if (normalized.has('Identificadors de producte')) {
-    normalized.add('SKU/FNSKU assignat')
+    normalized.add('SKU definit')
     normalized.add('GTIN vàlid (EAN/UPC o exempt)')
   }
-  if (normalized.has('Document de listing')) {
-    normalized.add('Almenys 1 document de listing')
+  if (normalized.has('Document de listing') || normalized.has('Almenys 1 document de listing')) {
+    normalized.add('Document listing')
   }
 
   return normalized

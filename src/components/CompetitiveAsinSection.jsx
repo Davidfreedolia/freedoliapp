@@ -195,7 +195,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
           color: darkMode ? '#ffffff' : '#111827'
         }}>
           <Barcode size={20} />
-          ASIN competidor i snapshot
+          ASIN competidor & Snapshot
         </h3>
         {capturedAsin && (
           <a
