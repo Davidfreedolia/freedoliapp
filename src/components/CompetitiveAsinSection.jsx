@@ -195,7 +195,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
           color: darkMode ? '#ffffff' : '#111827'
         }}>
           <Barcode size={20} />
-          ASIN competidor
+          ASIN competidor i snapshot
         </h3>
         {capturedAsin && (
           <a
@@ -304,7 +304,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             fontWeight: '600',
             color: darkMode ? '#ffffff' : '#111827'
           }}>
-            Competitor Snapshot
+            Snapshot de competidor
           </div>
           <div style={styles.metaGrid}>
         <div style={styles.field}>

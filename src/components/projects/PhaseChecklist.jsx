@@ -29,7 +29,7 @@ const REQUIREMENTS_BY_PHASE = {
     'Almenys 1 document de PO'
   ],
   6: [
-    'Identificadors de producte',
+    'SKU/FNSKU assignat',
     'GTIN vàlid (EAN/UPC o exempt)',
     'Almenys 1 document de listing'
   ]
@@ -75,6 +75,7 @@ const normalizeMissing = (missing) => {
     normalized.add('Almenys 1 comanda de compra')
   }
   if (normalized.has('Identificadors de producte')) {
+    normalized.add('SKU/FNSKU assignat')
     normalized.add('GTIN vàlid (EAN/UPC o exempt)')
   }
   if (normalized.has('Document de listing')) {
