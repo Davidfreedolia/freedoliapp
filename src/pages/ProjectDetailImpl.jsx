@@ -584,6 +584,63 @@ function ProjectDetailInner({ useApp }) {
     return map[phase] || 'other'
   }
 
+  const phaseId = getPhaseIdFromProject(project)
+  const currentPhase = getPhaseStyle(phaseId)
+  const phaseSurface = getPhaseSurfaceStyles(currentPhase, { darkMode, borderWidth: 2 })
+  const phaseWrapperStyle = {
+    ...phaseSurface.wrapperStyle,
+    borderRadius: '16px',
+    padding: isMobile ? '16px' : '24px',
+    marginTop: '12px'
+  }
+  const phaseCardStyle = {
+    border: `1px solid var(--border-color)`,
+    borderRadius: 'var(--radius-base)',
+    ...phaseSurface.cardStyle
+  }
+  const currentGroup = PHASE_GROUPS.find(group => group.phases.includes(phaseId))
+  const phaseSubtitle = PHASE_WORKFLOW_COPY[phaseId] || currentPhase.description
+  const phaseGroupLabel = currentGroup?.label || 'PHASE'
+  const nextPhaseId = phaseId < 7 ? phaseId + 1 : null
+  const nextPhaseLabel = nextPhaseId ? getPhaseStyle(nextPhaseId).name : null
+
+  useEffect(() => {
+    let isMounted = true
+    const loadNextGate = async () => {
+      if (!project || !nextPhaseId) {
+        if (isMounted) setNextGateState({ loading: false, missing: [] })
+        return
+      }
+      setNextGateState(prev => ({ ...prev, loading: true }))
+      try {
+        const gatesModule = await import('../modules/projects/phaseGates')
+        const supabaseModule = await import('../lib/supabase')
+        const { validatePhaseTransition } = gatesModule
+        const supabaseClient = supabaseModule.default
+        if (validatePhaseTransition) {
+          const { missing } = await validatePhaseTransition({
+            projectId: id,
+            fromPhase: phaseId,
+            toPhase: nextPhaseId,
+            project,
+            supabaseClient
+          })
+          if (isMounted) {
+            setNextGateState({ loading: false, missing: missing || [] })
+          }
+        } else if (isMounted) {
+          setNextGateState({ loading: false, missing: [] })
+        }
+      } catch (err) {
+        if (isMounted) setNextGateState({ loading: false, missing: [] })
+      }
+    }
+    loadNextGate()
+    return () => {
+      isMounted = false
+    }
+  }, [project, id, phaseId, nextPhaseId])
+
   if (loading) {
     return (
       <div style={styles.container}>
@@ -705,63 +762,6 @@ function ProjectDetailInner({ useApp }) {
       </div>
     )
   }
-
-  const phaseId = getPhaseIdFromProject(project)
-  const currentPhase = getPhaseStyle(phaseId)
-  const phaseSurface = getPhaseSurfaceStyles(currentPhase, { darkMode, borderWidth: 2 })
-  const phaseWrapperStyle = {
-    ...phaseSurface.wrapperStyle,
-    borderRadius: '16px',
-    padding: isMobile ? '16px' : '24px',
-    marginTop: '12px'
-  }
-  const phaseCardStyle = {
-    border: `1px solid var(--border-color)`,
-    borderRadius: 'var(--radius-base)',
-    ...phaseSurface.cardStyle
-  }
-  const currentGroup = PHASE_GROUPS.find(group => group.phases.includes(phaseId))
-  const phaseSubtitle = PHASE_WORKFLOW_COPY[phaseId] || currentPhase.description
-  const phaseGroupLabel = currentGroup?.label || 'PHASE'
-  const nextPhaseId = phaseId < 7 ? phaseId + 1 : null
-  const nextPhaseLabel = nextPhaseId ? getPhaseStyle(nextPhaseId).name : null
-
-  useEffect(() => {
-    let isMounted = true
-    const loadNextGate = async () => {
-      if (!project || !nextPhaseId) {
-        if (isMounted) setNextGateState({ loading: false, missing: [] })
-        return
-      }
-      setNextGateState(prev => ({ ...prev, loading: true }))
-      try {
-        const gatesModule = await import('../modules/projects/phaseGates')
-        const supabaseModule = await import('../lib/supabase')
-        const { validatePhaseTransition } = gatesModule
-        const supabaseClient = supabaseModule.default
-        if (validatePhaseTransition) {
-          const { missing } = await validatePhaseTransition({
-            projectId: id,
-            fromPhase: phaseId,
-            toPhase: nextPhaseId,
-            project,
-            supabaseClient
-          })
-          if (isMounted) {
-            setNextGateState({ loading: false, missing: missing || [] })
-          }
-        } else if (isMounted) {
-          setNextGateState({ loading: false, missing: [] })
-        }
-      } catch (err) {
-        if (isMounted) setNextGateState({ loading: false, missing: [] })
-      }
-    }
-    loadNextGate()
-    return () => {
-      isMounted = false
-    }
-  }, [project, id, phaseId, nextPhaseId])
 
   return (
     <div style={styles.container}>
