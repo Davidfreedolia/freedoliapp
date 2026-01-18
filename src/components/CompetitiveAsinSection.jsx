@@ -83,8 +83,21 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
     size_tier: '',
     weight_g: '',
     brand: '',
-    package_dimensions: ''
+    package_dimensions: '',
+    model: '',
+    country_of_origin: '',
+    dimensions_cm: '',
+    bsr_main_rank: '',
+    bsr_main_category: '',
+    bsr_sub_rank: '',
+    bsr_sub_category: '',
+    rating: '',
+    review_count: '',
+    launch_date: '',
+    main_image_url: ''
   })
+  const [detailsText, setDetailsText] = useState('')
+  const [parseWarning, setParseWarning] = useState('')
   const saveButtonState = useButtonState()
   const hasPhaseStyle = Boolean(phaseStyle?.bg && phaseStyle?.accent)
   const phaseSurface = getPhaseSurfaceStyles(phaseStyle, { darkMode, borderWidth: 2 })
@@ -169,6 +182,134 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
     } catch (err) {
       console.error('Error guardant dades competidor:', err)
     }
+  }
+
+  const parseNumber = (value) => {
+    if (!value) return ''
+    const normalized = value.replace(/\./g, '').replace(',', '.').trim()
+    const numeric = Number.parseFloat(normalized)
+    return Number.isFinite(numeric) ? numeric.toString() : ''
+  }
+
+  const parseWeightToGrams = (raw) => {
+    if (!raw) return ''
+    const normalized = raw.toLowerCase().replace(',', '.')
+    const match = normalized.match(/([\d.]+)\s*(kg|g|lb|oz)/i)
+    if (!match) return ''
+    const value = Number.parseFloat(match[1])
+    if (!Number.isFinite(value)) return ''
+    const unit = match[2]
+    if (unit === 'kg') return Math.round(value * 1000).toString()
+    if (unit === 'g') return Math.round(value).toString()
+    if (unit === 'lb') return Math.round(value * 453.592).toString()
+    if (unit === 'oz') return Math.round(value * 28.3495).toString()
+    return ''
+  }
+
+  const parseDimensionsToCm = (raw) => {
+    if (!raw) return ''
+    const normalized = raw.toLowerCase().replace(',', '.')
+    const numbers = normalized.match(/[\d.]+/g)
+    if (!numbers || numbers.length < 3) return raw.trim()
+    const isInches = normalized.includes('pulg') || normalized.includes('inch')
+    const converted = numbers.slice(0, 3).map((num) => {
+      const value = Number.parseFloat(num)
+      if (!Number.isFinite(value)) return null
+      return isInches ? value * 2.54 : value
+    })
+    if (converted.some(value => value == null)) return raw.trim()
+    return `${converted.map(value => value.toFixed(2)).join(' x ')} cm`
+  }
+
+  const handleParseDetails = () => {
+    setParseWarning('')
+    const text = detailsText || ''
+    if (!text.trim()) {
+      setParseWarning('Enganxa el bloc de detalls del producte per analitzar-lo.')
+      return
+    }
+
+    const nextMeta = { ...meta }
+    let matched = 0
+
+    const grabLine = (labelRegex) => {
+      const match = text.match(labelRegex)
+      return match ? match[1].trim() : ''
+    }
+
+    const asinFromText = grabLine(/ASIN\s*[:：]\s*([A-Z0-9]{10})/i)
+    if (asinFromText) {
+      matched += 1
+      if (!capturedAsin) {
+        setAsinInput(asinFromText)
+      }
+    }
+
+    const brand = grabLine(/Fabricante\s*[:：]\s*([^\n]+)/i)
+    if (brand) {
+      matched += 1
+      nextMeta.brand = brand
+    }
+    const model = grabLine(/N[uú]mero de modelo\s*[:：]\s*([^\n]+)/i)
+    if (model) {
+      matched += 1
+      nextMeta.model = model
+    }
+    const country = grabLine(/Pa[ií]s de origen\s*[:：]\s*([^\n]+)/i)
+    if (country) {
+      matched += 1
+      nextMeta.country_of_origin = country
+    }
+    const dimensionsRaw = grabLine(/Dimensiones del producto\s*[:：]\s*([^\n]+)/i)
+    if (dimensionsRaw) {
+      matched += 1
+      nextMeta.dimensions_cm = parseDimensionsToCm(dimensionsRaw)
+    }
+    const weightRaw = grabLine(/Peso del producto\s*[:：]\s*([^\n]+)/i)
+    const weightParsed = parseWeightToGrams(weightRaw)
+    if (weightParsed) {
+      matched += 1
+      nextMeta.weight_g = weightParsed
+    }
+    const launchDate = grabLine(/Producto en Amazon(?:\.es)?\s*desde\s*[:：]?\s*([^\n]+)/i)
+    if (launchDate) {
+      matched += 1
+      nextMeta.launch_date = launchDate
+    }
+
+    const bsrBlockMatch = text.match(/Clasificaci[oó]n en los m[aá]s vendidos de Amazon\s*[:：]\s*([^\n]+(?:\n[^\n]+){0,3})/i)
+    if (bsrBlockMatch?.[1]) {
+      const bsrBlock = bsrBlockMatch[1]
+      const rankMatches = Array.from(bsrBlock.matchAll(/n[ºo]\s*\.?\s*([\d.]+)\s+en\s+([^\n(]+)/gi))
+      if (rankMatches[0]) {
+        matched += 1
+        nextMeta.bsr_main_rank = rankMatches[0][1].replace(/\./g, '')
+        nextMeta.bsr_main_category = rankMatches[0][2].trim()
+      }
+      if (rankMatches[1]) {
+        matched += 1
+        nextMeta.bsr_sub_rank = rankMatches[1][1].replace(/\./g, '')
+        nextMeta.bsr_sub_category = rankMatches[1][2].trim()
+      }
+    }
+
+    const ratingMatch = text.match(/([0-9]+(?:[.,][0-9]+)?)\s*de\s*5\s*estrellas/i)
+    if (ratingMatch?.[1]) {
+      matched += 1
+      nextMeta.rating = parseNumber(ratingMatch[1])
+    }
+    const reviewsMatch = text.match(/([\d.,]+)\s*valoraciones/i)
+    if (reviewsMatch?.[1]) {
+      matched += 1
+      nextMeta.review_count = reviewsMatch[1].replace(/[.,]/g, '')
+    }
+
+    if (!matched) {
+      setParseWarning('No s\'han detectat camps. Revisa el text enganxat.')
+      return
+    }
+
+    setMeta(nextMeta)
   }
 
   if (loading) {
@@ -443,6 +584,334 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
           </div>
         </>
       )}
+
+      <div style={styles.detailsCard}>
+        <div style={styles.detailsHeader}>
+          <h4 style={{
+            margin: 0,
+            fontSize: '15px',
+            fontWeight: '600',
+            color: darkMode ? '#ffffff' : '#111827'
+          }}>
+            Amazon Product Details
+          </h4>
+          <span style={{
+            fontSize: '12px',
+            color: darkMode ? '#9ca3af' : '#6b7280'
+          }}>
+            Enganxa el bloc de detalls per omplir camps
+          </span>
+        </div>
+
+        <div style={styles.field}>
+          <label style={{
+            ...styles.label,
+            color: darkMode ? '#e5e7eb' : '#374151'
+          }}>ASIN</label>
+          <input
+            type="text"
+            value={capturedAsin || asinInput}
+            onChange={(e) => setAsinInput(e.target.value)}
+            placeholder="Ex: B08XYZ1234"
+            style={{
+              ...styles.input,
+              backgroundColor: '#ffffff',
+              color: '#111827',
+              borderColor: inputBorderColor
+            }}
+          />
+        </div>
+
+        <div style={styles.field}>
+          <label style={{
+            ...styles.label,
+            color: darkMode ? '#e5e7eb' : '#374151'
+          }}>URL d'Amazon (opcional)</label>
+          <input
+            type="text"
+            value={amazonUrl}
+            onChange={(e) => setAmazonUrl(e.target.value)}
+            placeholder="Pega la URL per extreure l'ASIN"
+            style={{
+              ...styles.input,
+              backgroundColor: '#ffffff',
+              color: '#111827',
+              borderColor: inputBorderColor
+            }}
+          />
+        </div>
+
+        <div style={styles.field}>
+          <label style={{
+            ...styles.label,
+            color: darkMode ? '#e5e7eb' : '#374151'
+          }}>Pega "Detalles del producto"</label>
+          <textarea
+            value={detailsText}
+            onChange={(e) => setDetailsText(e.target.value)}
+            placeholder="Ex: Fabricante: ... ASIN: ... Dimensiones del producto: ..."
+            style={{
+              ...styles.textarea,
+              backgroundColor: '#ffffff',
+              color: '#111827',
+              borderColor: inputBorderColor
+            }}
+            rows={6}
+          />
+        </div>
+
+        {parseWarning && (
+          <div style={styles.warningText}>{parseWarning}</div>
+        )}
+
+        <div style={styles.detailsActions}>
+          <button
+            onClick={handleParseDetails}
+            style={styles.secondaryButton}
+          >
+            Parsejar
+          </button>
+          <button
+            onClick={handleSaveMeta}
+            style={styles.captureButton}
+          >
+            Guardar
+          </button>
+        </div>
+
+        <div style={styles.metaGrid}>
+          <div style={styles.field}>
+            <label style={{
+              ...styles.label,
+              color: darkMode ? '#e5e7eb' : '#374151'
+            }}>Marca</label>
+            <input
+              type="text"
+              value={meta.brand}
+              onChange={(e) => setMeta({ ...meta, brand: e.target.value })}
+              style={{
+                ...styles.input,
+                backgroundColor: '#ffffff',
+                color: '#111827',
+                borderColor: inputBorderColor
+              }}
+            />
+          </div>
+          <div style={styles.field}>
+            <label style={{
+              ...styles.label,
+              color: darkMode ? '#e5e7eb' : '#374151'
+            }}>Model</label>
+            <input
+              type="text"
+              value={meta.model}
+              onChange={(e) => setMeta({ ...meta, model: e.target.value })}
+              style={{
+                ...styles.input,
+                backgroundColor: '#ffffff',
+                color: '#111827',
+                borderColor: inputBorderColor
+              }}
+            />
+          </div>
+          <div style={styles.field}>
+            <label style={{
+              ...styles.label,
+              color: darkMode ? '#e5e7eb' : '#374151'
+            }}>País d'origen</label>
+            <input
+              type="text"
+              value={meta.country_of_origin}
+              onChange={(e) => setMeta({ ...meta, country_of_origin: e.target.value })}
+              style={{
+                ...styles.input,
+                backgroundColor: '#ffffff',
+                color: '#111827',
+                borderColor: inputBorderColor
+              }}
+            />
+          </div>
+          <div style={styles.field}>
+            <label style={{
+              ...styles.label,
+              color: darkMode ? '#e5e7eb' : '#374151'
+            }}>Dimensions (cm)</label>
+            <input
+              type="text"
+              value={meta.dimensions_cm}
+              onChange={(e) => setMeta({ ...meta, dimensions_cm: e.target.value })}
+              style={{
+                ...styles.input,
+                backgroundColor: '#ffffff',
+                color: '#111827',
+                borderColor: inputBorderColor
+              }}
+            />
+          </div>
+          <div style={styles.field}>
+            <label style={{
+              ...styles.label,
+              color: darkMode ? '#e5e7eb' : '#374151'
+            }}>Pes (g)</label>
+            <input
+              type="number"
+              value={meta.weight_g}
+              onChange={(e) => setMeta({ ...meta, weight_g: e.target.value })}
+              style={{
+                ...styles.input,
+                backgroundColor: '#ffffff',
+                color: '#111827',
+                borderColor: inputBorderColor
+              }}
+            />
+          </div>
+          <div style={styles.field}>
+            <label style={{
+              ...styles.label,
+              color: darkMode ? '#e5e7eb' : '#374151'
+            }}>BSR principal</label>
+            <input
+              type="text"
+              value={meta.bsr_main_rank}
+              onChange={(e) => setMeta({ ...meta, bsr_main_rank: e.target.value })}
+              placeholder="nº"
+              style={{
+                ...styles.input,
+                backgroundColor: '#ffffff',
+                color: '#111827',
+                borderColor: inputBorderColor
+              }}
+            />
+          </div>
+          <div style={styles.field}>
+            <label style={{
+              ...styles.label,
+              color: darkMode ? '#e5e7eb' : '#374151'
+            }}>Categoria BSR principal</label>
+            <input
+              type="text"
+              value={meta.bsr_main_category}
+              onChange={(e) => setMeta({ ...meta, bsr_main_category: e.target.value })}
+              style={{
+                ...styles.input,
+                backgroundColor: '#ffffff',
+                color: '#111827',
+                borderColor: inputBorderColor
+              }}
+            />
+          </div>
+          <div style={styles.field}>
+            <label style={{
+              ...styles.label,
+              color: darkMode ? '#e5e7eb' : '#374151'
+            }}>BSR secundari</label>
+            <input
+              type="text"
+              value={meta.bsr_sub_rank}
+              onChange={(e) => setMeta({ ...meta, bsr_sub_rank: e.target.value })}
+              placeholder="nº"
+              style={{
+                ...styles.input,
+                backgroundColor: '#ffffff',
+                color: '#111827',
+                borderColor: inputBorderColor
+              }}
+            />
+          </div>
+          <div style={styles.field}>
+            <label style={{
+              ...styles.label,
+              color: darkMode ? '#e5e7eb' : '#374151'
+            }}>Categoria BSR secundària</label>
+            <input
+              type="text"
+              value={meta.bsr_sub_category}
+              onChange={(e) => setMeta({ ...meta, bsr_sub_category: e.target.value })}
+              style={{
+                ...styles.input,
+                backgroundColor: '#ffffff',
+                color: '#111827',
+                borderColor: inputBorderColor
+              }}
+            />
+          </div>
+          <div style={styles.field}>
+            <label style={{
+              ...styles.label,
+              color: darkMode ? '#e5e7eb' : '#374151'
+            }}>Rating</label>
+            <input
+              type="text"
+              value={meta.rating}
+              onChange={(e) => setMeta({ ...meta, rating: e.target.value })}
+              style={{
+                ...styles.input,
+                backgroundColor: '#ffffff',
+                color: '#111827',
+                borderColor: inputBorderColor
+              }}
+            />
+          </div>
+          <div style={styles.field}>
+            <label style={{
+              ...styles.label,
+              color: darkMode ? '#e5e7eb' : '#374151'
+            }}>Nº valoracions</label>
+            <input
+              type="text"
+              value={meta.review_count}
+              onChange={(e) => setMeta({ ...meta, review_count: e.target.value })}
+              style={{
+                ...styles.input,
+                backgroundColor: '#ffffff',
+                color: '#111827',
+                borderColor: inputBorderColor
+              }}
+            />
+          </div>
+          <div style={styles.field}>
+            <label style={{
+              ...styles.label,
+              color: darkMode ? '#e5e7eb' : '#374151'
+            }}>Data llançament</label>
+            <input
+              type="text"
+              value={meta.launch_date}
+              onChange={(e) => setMeta({ ...meta, launch_date: e.target.value })}
+              style={{
+                ...styles.input,
+                backgroundColor: '#ffffff',
+                color: '#111827',
+                borderColor: inputBorderColor
+              }}
+            />
+          </div>
+          <div style={styles.field}>
+            <label style={{
+              ...styles.label,
+              color: darkMode ? '#e5e7eb' : '#374151'
+            }}>Imatge principal (URL)</label>
+            <input
+              type="text"
+              value={meta.main_image_url}
+              onChange={(e) => setMeta({ ...meta, main_image_url: e.target.value })}
+              placeholder="https://..."
+              style={{
+                ...styles.input,
+                backgroundColor: '#ffffff',
+                color: '#111827',
+                borderColor: inputBorderColor
+              }}
+            />
+          </div>
+        </div>
+
+        {meta.main_image_url && (
+          <div style={styles.imagePreview}>
+            <img src={meta.main_image_url} alt="Amazon main" style={styles.imagePreviewImg} />
+          </div>
+        )}
+      </div>
     </div>
   )
 }
@@ -555,5 +1024,57 @@ const styles = {
   helper: {
     fontSize: '12px',
     color: '#6b7280'
+  },
+  detailsCard: {
+    marginTop: '24px',
+    padding: '20px',
+    borderRadius: '14px',
+    border: '1px dashed var(--border-color)',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '14px'
+  },
+  detailsHeader: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px'
+  },
+  textarea: {
+    padding: '10px 12px',
+    borderRadius: '8px',
+    border: '1px solid #d1d5db',
+    fontSize: '13px',
+    resize: 'vertical'
+  },
+  detailsActions: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px'
+  },
+  secondaryButton: {
+    padding: '8px 14px',
+    borderRadius: '8px',
+    border: '1px solid #d1d5db',
+    background: 'transparent',
+    fontSize: '13px',
+    cursor: 'pointer'
+  },
+  warningText: {
+    fontSize: '12px',
+    color: '#f59e0b'
+  },
+  imagePreview: {
+    marginTop: '8px',
+    padding: '12px',
+    borderRadius: '12px',
+    border: '1px solid #e5e7eb',
+    backgroundColor: '#f9fafb',
+    display: 'flex',
+    justifyContent: 'center'
+  },
+  imagePreviewImg: {
+    maxWidth: '100%',
+    maxHeight: '180px',
+    objectFit: 'contain'
   }
 }
