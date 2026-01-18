@@ -183,6 +183,7 @@ function ProjectDetailInner({ useApp }) {
   const [phaseProgress, setPhaseProgress] = useState({ completed: 0, total: 0, allOk: false })
   const [phaseBlockMessage, setPhaseBlockMessage] = useState(null)
   const [phaseBlockVisible, setPhaseBlockVisible] = useState(false)
+  const [nextGateState, setNextGateState] = useState({ loading: false, missing: [] })
   
 
   const loadProject = async () => {
@@ -722,6 +723,45 @@ function ProjectDetailInner({ useApp }) {
   const currentGroup = PHASE_GROUPS.find(group => group.phases.includes(phaseId))
   const phaseSubtitle = PHASE_WORKFLOW_COPY[phaseId] || currentPhase.description
   const phaseGroupLabel = currentGroup?.label || 'PHASE'
+  const nextPhaseId = phaseId < 7 ? phaseId + 1 : null
+  const nextPhaseLabel = nextPhaseId ? getPhaseStyle(nextPhaseId).name : null
+
+  useEffect(() => {
+    let isMounted = true
+    const loadNextGate = async () => {
+      if (!project || !nextPhaseId) {
+        if (isMounted) setNextGateState({ loading: false, missing: [] })
+        return
+      }
+      setNextGateState(prev => ({ ...prev, loading: true }))
+      try {
+        const gatesModule = await import('../modules/projects/phaseGates')
+        const supabaseModule = await import('../lib/supabase')
+        const { validatePhaseTransition } = gatesModule
+        const supabaseClient = supabaseModule.default
+        if (validatePhaseTransition) {
+          const { missing } = await validatePhaseTransition({
+            projectId: id,
+            fromPhase: phaseId,
+            toPhase: nextPhaseId,
+            project,
+            supabaseClient
+          })
+          if (isMounted) {
+            setNextGateState({ loading: false, missing: missing || [] })
+          }
+        } else if (isMounted) {
+          setNextGateState({ loading: false, missing: [] })
+        }
+      } catch (err) {
+        if (isMounted) setNextGateState({ loading: false, missing: [] })
+      }
+    }
+    loadNextGate()
+    return () => {
+      isMounted = false
+    }
+  }, [project, id, phaseId, nextPhaseId])
 
   return (
     <div style={styles.container}>
@@ -731,6 +771,101 @@ function ProjectDetailInner({ useApp }) {
         ...styles.content,
         padding: isMobile ? '16px' : '32px'
       }}>
+        <div style={{
+          ...styles.phaseStatusBar,
+          borderColor: currentPhase.accent,
+          backgroundColor: darkMode ? '#111827' : '#ffffff'
+        }}>
+          <div style={styles.phaseStatusLeft}>
+            <span style={{
+              ...styles.phaseStatusChip,
+              color: currentPhase.accent,
+              borderColor: currentPhase.accent
+            }}>
+              {phaseGroupLabel}
+            </span>
+            <span style={{
+              ...styles.phaseStatusTitle,
+              color: darkMode ? '#ffffff' : '#111827'
+            }}>
+              {currentPhase.name}
+            </span>
+          </div>
+          <div style={styles.phaseStatusCenter}>
+            <span style={{
+              fontSize: '12px',
+              color: darkMode ? '#9ca3af' : '#6b7280'
+            }}>
+              Checklist
+            </span>
+            <strong style={{ color: currentPhase.accent }}>
+              {phaseProgress.total ? `${phaseProgress.completed}/${phaseProgress.total}` : '—'}
+            </strong>
+          </div>
+          <div style={styles.phaseStatusRight}>
+            {nextPhaseLabel ? (
+              <div style={styles.phaseStatusNext}>
+                <span style={{
+                  fontSize: '12px',
+                  color: darkMode ? '#9ca3af' : '#6b7280'
+                }}>
+                  Següent fase
+                </span>
+                <div style={styles.phaseStatusNextRow}>
+                  <ChevronRight size={16} color={currentPhase.accent} />
+                  <span style={{
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    color: darkMode ? '#ffffff' : '#111827'
+                  }}>
+                    {nextPhaseLabel}
+                  </span>
+                  {!nextGateState.loading && nextGateState.missing.length > 0 && (
+                    <span style={{
+                      ...styles.phaseStatusWarning,
+                      borderColor: '#f59e0b',
+                      color: '#f59e0b'
+                    }}>
+                      {nextGateState.missing.length} pendent{nextGateState.missing.length > 1 ? 's' : ''}
+                    </span>
+                  )}
+                </div>
+                {!nextGateState.loading && nextGateState.missing.length > 0 && (
+                  <button
+                    onClick={() => {
+                      const checklist = document.getElementById('phase-checklist')
+                      if (checklist) {
+                        checklist.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                      }
+                    }}
+                    style={styles.phaseStatusAction}
+                  >
+                    Veure pendents
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div style={styles.phaseStatusNext}>
+                <span style={{
+                  fontSize: '12px',
+                  color: darkMode ? '#9ca3af' : '#6b7280'
+                }}>
+                  Estat
+                </span>
+                <div style={styles.phaseStatusNextRow}>
+                  <CheckCircle2 size={16} color={currentPhase.accent} />
+                  <span style={{
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    color: darkMode ? '#ffffff' : '#111827'
+                  }}>
+                    Totes les fases completes
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
         {/* Banner DISCARDED */}
         {project.decision === 'DISCARDED' && (
           <div style={{
@@ -1438,6 +1573,78 @@ const styles = {
   content: {
     padding: '32px',
     overflowY: 'auto'
+  },
+  phaseStatusBar: {
+    position: 'sticky',
+    top: '12px',
+    zIndex: 5,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: '16px',
+    padding: '12px 16px',
+    borderRadius: '12px',
+    border: '1px solid',
+    boxShadow: '0 6px 16px rgba(15, 23, 42, 0.08)',
+    marginBottom: '20px'
+  },
+  phaseStatusLeft: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    flexWrap: 'wrap'
+  },
+  phaseStatusChip: {
+    fontSize: '11px',
+    fontWeight: '700',
+    letterSpacing: '0.08em',
+    padding: '4px 10px',
+    borderRadius: '999px',
+    border: '1px solid'
+  },
+  phaseStatusTitle: {
+    fontSize: '14px',
+    fontWeight: '600'
+  },
+  phaseStatusCenter: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px',
+    alignItems: 'center',
+    minWidth: '90px'
+  },
+  phaseStatusRight: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-end'
+  },
+  phaseStatusNext: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
+    alignItems: 'flex-end'
+  },
+  phaseStatusNextRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px'
+  },
+  phaseStatusWarning: {
+    fontSize: '11px',
+    fontWeight: '600',
+    border: '1px solid',
+    borderRadius: '999px',
+    padding: '2px 8px'
+  },
+  phaseStatusAction: {
+    fontSize: '12px',
+    fontWeight: '600',
+    color: '#4f46e5',
+    background: 'transparent',
+    border: 'none',
+    cursor: 'pointer'
   },
   loading: {
     padding: '64px',
