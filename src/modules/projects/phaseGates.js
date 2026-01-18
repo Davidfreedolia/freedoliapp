@@ -48,6 +48,16 @@ const getCompetitorSnapshot = (projectId) => {
   }
 }
 
+const getViabilitySnapshot = (projectId) => {
+  if (typeof window === 'undefined') return null
+  try {
+    const raw = window.localStorage.getItem(`viability_${projectId}`)
+    return raw ? JSON.parse(raw) : null
+  } catch (err) {
+    return null
+  }
+}
+
 const hasSnapshotInput = (snapshot) => {
   if (!snapshot) return false
   return [
@@ -141,8 +151,20 @@ export const validatePhaseTransition = async ({
         let profitability = null
         try {
           profitability = await getProjectProfitability(projectId, supabaseClient)
-        } catch (err) {
-          missing.push('Profitabilitat guardada')
+        } catch (err) {}
+
+        if (!profitability) {
+          const viability = getViabilitySnapshot(projectId)
+          if (viability) {
+            profitability = {
+              selling_price: viability.selling_price,
+              cogs: viability.estimated_cogs,
+              shipping_per_unit: viability.shipping_to_fba_per_unit,
+              fba_fee_per_unit: viability.fba_fee_estimate,
+              ppc_per_unit: viability.ppc_per_unit,
+              other_costs_per_unit: viability.other_costs_per_unit
+            }
+          }
         }
 
         if (!profitability) {

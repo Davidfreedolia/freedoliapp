@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense, lazy, useRef } from 'react'
+import { useState, useEffect, Suspense, lazy, useRef, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { 
@@ -52,6 +52,7 @@ const DecisionLog = lazy(() => import('../components/DecisionLog'))
 const AmazonReadinessBadge = lazy(() => import('../components/AmazonReadinessBadge'))
 const ProjectEventsTimeline = lazy(() => import('../components/ProjectEventsTimeline'))
 const CompetitiveAsinSection = lazy(() => import('../components/CompetitiveAsinSection'))
+const ViabilityCalculator = lazy(() => import('../components/projects/ViabilityCalculator'))
 
 const PHASES = Object.values(PHASE_STYLES)
 const PHASE_GROUPS = [
@@ -239,6 +240,7 @@ function ProjectDetailInner({ useApp }) {
   const [phaseBlockMessage, setPhaseBlockMessage] = useState(null)
   const [phaseBlockVisible, setPhaseBlockVisible] = useState(false)
   const [nextGateState, setNextGateState] = useState({ loading: false, missing: [] })
+  const [viabilitySnapshot, setViabilitySnapshot] = useState(null)
   const [showNotesPanel, setShowNotesPanel] = useState(false)
   const { notes, loading: notesLoading } = useNotes()
   
@@ -660,6 +662,49 @@ function ProjectDetailInner({ useApp }) {
   const phaseGroupLabel = currentGroup?.label || 'PHASE'
   const nextPhaseId = phaseId < 7 ? phaseId + 1 : null
   const nextPhaseLabel = nextPhaseId ? getPhaseStyle(nextPhaseId).name : null
+  const computeViabilitySummary = (values) => {
+    if (!values) return null
+    const toNumber = (value) => {
+      const normalized = value?.toString().replace(',', '.') || ''
+      const numeric = Number.parseFloat(normalized)
+      return Number.isFinite(numeric) ? numeric : 0
+    }
+    const sellingPrice = toNumber(values.selling_price)
+    const vatPercent = toNumber(values.vat_percent)
+    const revenueNetVat = vatPercent > 0 ? sellingPrice / (1 + vatPercent / 100) : sellingPrice
+    const estimatedCogs = toNumber(values.estimated_cogs)
+    const fbaFee = toNumber(values.fba_fee_estimate)
+    const shippingToFba = toNumber(values.shipping_to_fba_per_unit)
+    const ppc = toNumber(values.ppc_per_unit)
+    const returnRate = toNumber(values.return_rate_percent)
+    const otherCosts = toNumber(values.other_costs_per_unit)
+    const returnsCost = sellingPrice * (returnRate / 100)
+    const totalCosts = estimatedCogs + fbaFee + shippingToFba + ppc + otherCosts + returnsCost
+    const profitPerUnit = revenueNetVat - totalCosts
+    const netMarginPercent = revenueNetVat > 0 ? (profitPerUnit / revenueNetVat) * 100 : 0
+    return { revenueNetVat, totalCosts, profitPerUnit, netMarginPercent }
+  }
+  const viabilitySummary = useMemo(() => {
+    if (!viabilitySnapshot) return null
+    if (viabilitySnapshot.computed) return viabilitySnapshot.computed
+    return computeViabilitySummary(viabilitySnapshot.values)
+  }, [viabilitySnapshot])
+  const hasViabilitySummary = phaseId === 2 && viabilitySummary
+
+  useEffect(() => {
+    if (!id) return
+    try {
+      const stored = localStorage.getItem(`viability_${id}`)
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        if (parsed) {
+          setViabilitySnapshot(prev => (prev?.values === parsed ? prev : { values: parsed }))
+        }
+      }
+    } catch (err) {
+      // ignore
+    }
+  }, [id])
   const nextMissing = Array.isArray(nextGateState.missing) ? nextGateState.missing : []
   const hasNextMissing = !nextGateState.loading && nextMissing.length > 0
   const missingPreview = hasNextMissing ? nextMissing.slice(0, 3).join(' · ') : ''
@@ -982,6 +1027,11 @@ function ProjectDetailInner({ useApp }) {
                         Veure pendents
                       </button>
                     </>
+                  )}
+                  {hasViabilitySummary && (
+                    <div style={styles.phaseViabilitySummary}>
+                      Viabilitat: {viabilitySummary.profitPerUnit.toFixed(2)}€ · {viabilitySummary.netMarginPercent.toFixed(1)}%
+                    </div>
                   )}
                 </div>
               ) : (
@@ -1334,9 +1384,14 @@ function ProjectDetailInner({ useApp }) {
           phaseStyle={getPhaseStyle(2)}
           darkMode={darkMode}
         >
-          <div style={styles.phasePlaceholder}>
-            Sense widgets específics encara per aquesta fase.
-          </div>
+          <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
+            <ViabilityCalculator
+              projectId={id}
+              darkMode={darkMode}
+              phaseStyle={getPhaseStyle(2)}
+              onSave={(payload) => setViabilitySnapshot(payload)}
+            />
+          </Suspense>
         </PhaseSection>
 
         <PhaseSection
@@ -1818,6 +1873,11 @@ const styles = {
     background: 'transparent',
     border: 'none',
     cursor: 'pointer'
+  },
+  phaseViabilitySummary: {
+    fontSize: '12px',
+    fontWeight: '600',
+    color: '#10b981'
   },
   notesOverlay: {
     position: 'fixed',
