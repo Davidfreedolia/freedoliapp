@@ -839,9 +839,9 @@ function ProjectDetailInner({ useApp }) {
           <div style={styles.phaseTimelineSticky}>
             <div style={{
               ...styles.timeline,
-              flexWrap: 'nowrap',
-              gap: '0',
-              overflowX: 'auto',
+              flexWrap: isMobile ? 'wrap' : 'nowrap',
+              gap: isMobile ? '12px' : '0',
+              overflowX: isMobile ? 'visible' : 'auto',
               paddingBottom: '6px'
             }}>
               {PHASES.map((phase, index) => {
@@ -1255,59 +1255,6 @@ function ProjectDetailInner({ useApp }) {
               </div>
             )}
 
-            <div style={{
-              marginTop: '24px',
-              padding: '20px',
-              ...phaseCardStyle
-            }}>
-              <h4 style={{
-                margin: '0 0 16px 0',
-                fontSize: '14px',
-                fontWeight: '600',
-                color: darkMode ? '#ffffff' : '#111827'
-              }}>
-                Accions Ràpides
-              </h4>
-              <div style={styles.actionsGrid}>
-                {phaseId >= 3 && (
-                  <button 
-                    style={{...styles.actionButton, backgroundColor: '#8b5cf6'}} 
-                    onClick={() => navigate(`/projects/${id}/briefing`)}
-                  >
-                    <ClipboardList size={18} />
-                    Briefing del Producte
-                  </button>
-                )}
-                {phaseId >= 3 && (
-                  <button 
-                    style={{
-                      ...styles.actionButton, 
-                      backgroundColor: '#4f46e5',
-                      opacity: !driveConnected ? 0.5 : 1,
-                      cursor: !driveConnected ? 'not-allowed' : 'pointer'
-                    }} 
-                    disabled={!driveConnected}
-                    title={!driveConnected ? "Connecta Google Drive per crear" : ""}
-                    onClick={() => {
-                      if (!driveConnected) return
-                      navigate(`/orders?project=${id}`)
-                    }}
-                  >
-                    <ShoppingCart size={18} />
-                    Crear Comanda (PO)
-                  </button>
-                )}
-                {phaseId === 7 && (
-                  <button 
-                    style={{...styles.actionButton, backgroundColor: '#22c55e', border: '1px solid #16a34a'}} 
-                    onClick={() => navigate(`/inventory?project=${id}`)}
-                  >
-                    <Package size={18} />
-                    Gestionar Stock
-                  </button>
-                )}
-              </div>
-            </div>
           </CollapsibleSection>
 
           <CollapsibleSection
