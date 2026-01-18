@@ -40,6 +40,7 @@ import ArtsFinalsSection from '../components/ArtsFinalsSection'
 import CollapsibleSection from '../components/CollapsibleSection'
 import PhaseChecklist from '../components/projects/PhaseChecklist'
 import { useBreakpoint } from '../hooks/useBreakpoint'
+import { useNotes } from '../hooks/useNotes'
 import { PHASE_STYLES, getPhaseStyle, getPhaseSurfaceStyles } from '../utils/phaseStyles'
 // Dynamic imports for components that import supabase statically to avoid circular dependencies during module initialization
 const IdentifiersSection = lazy(() => import('../components/IdentifiersSection'))
@@ -184,6 +185,8 @@ function ProjectDetailInner({ useApp }) {
   const [phaseBlockMessage, setPhaseBlockMessage] = useState(null)
   const [phaseBlockVisible, setPhaseBlockVisible] = useState(false)
   const [nextGateState, setNextGateState] = useState({ loading: false, missing: [] })
+  const [showNotesPanel, setShowNotesPanel] = useState(false)
+  const { notes, loading: notesLoading } = useNotes()
   
 
   const loadProject = async () => {
@@ -603,6 +606,9 @@ function ProjectDetailInner({ useApp }) {
   const phaseGroupLabel = currentGroup?.label || 'PHASE'
   const nextPhaseId = phaseId < 7 ? phaseId + 1 : null
   const nextPhaseLabel = nextPhaseId ? getPhaseStyle(nextPhaseId).name : null
+  const nextMissing = Array.isArray(nextGateState.missing) ? nextGateState.missing : []
+  const hasNextMissing = !nextGateState.loading && nextMissing.length > 0
+  const missingPreview = hasNextMissing ? nextMissing.slice(0, 3).join(' · ') : ''
 
   useEffect(() => {
     let isMounted = true
@@ -772,98 +778,217 @@ function ProjectDetailInner({ useApp }) {
         padding: isMobile ? '16px' : '32px'
       }}>
         <div style={{
-          ...styles.phaseStatusBar,
+          ...styles.phaseStickyContainer,
           borderColor: currentPhase.accent,
-          backgroundColor: darkMode ? '#111827' : '#ffffff'
+          backgroundColor: darkMode ? '#0f172a' : '#ffffff'
         }}>
-          <div style={styles.phaseStatusLeft}>
-            <span style={{
-              ...styles.phaseStatusChip,
-              color: currentPhase.accent,
-              borderColor: currentPhase.accent
+          <div style={styles.phaseTimelineSticky}>
+            <div style={{
+              ...styles.timeline,
+              flexWrap: 'nowrap',
+              gap: '0',
+              overflowX: 'auto',
+              paddingBottom: '6px'
             }}>
-              {phaseGroupLabel}
-            </span>
-            <span style={{
-              ...styles.phaseStatusTitle,
-              color: darkMode ? '#ffffff' : '#111827'
-            }}>
-              {currentPhase.name}
-            </span>
+              {PHASES.map((phase, index) => {
+                const isActive = phase.id === phaseId
+                const isCompleted = phase.id < phaseId
+                const isFuture = phase.id > phaseId
+                const PhaseIcon = phase.icon
+
+                return (
+                  <div key={phase.id} style={styles.timelineItem}>
+                    <button
+                      onClick={() => handlePhaseChange(phase.id)}
+                      style={{
+                        ...styles.phaseButton,
+                        backgroundColor: isActive
+                          ? phase.bg
+                          : (isCompleted ? phase.bg : 'var(--bg-secondary)'),
+                        borderColor: isActive || isCompleted ? phase.accent : 'var(--border-color)',
+                        color: isFuture ? '#9ca3af' : phase.accent,
+                        boxShadow: isActive ? `0 0 0 6px ${phase.bg}` : 'none'
+                      }}
+                    >
+                      {isCompleted ? (
+                        <Check size={20} color={phase.accent} />
+                      ) : (
+                        <PhaseIcon size={20} color={isFuture ? '#9ca3af' : phase.accent} />
+                      )}
+                    </button>
+                    <span style={{
+                      ...styles.phaseName,
+                      color: isActive ? phase.accent : (darkMode ? '#9ca3af' : '#6b7280'),
+                      fontWeight: isActive ? '600' : '400',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => handlePhaseChange(phase.id)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault()
+                        handlePhaseChange(phase.id)
+                      }
+                    }}>
+                      {phase.name}
+                    </span>
+                    {index < PHASES.length - 1 && (
+                      <div style={{
+                        ...styles.timelineConnector,
+                        backgroundColor: isCompleted ? phase.accent : 'var(--border-color)'
+                      }} />
+                    )}
+                  </div>
+                )
+              })}
+            </div>
           </div>
-          <div style={styles.phaseStatusCenter}>
-            <span style={{
-              fontSize: '12px',
-              color: darkMode ? '#9ca3af' : '#6b7280'
-            }}>
-              Checklist
-            </span>
-            <strong style={{ color: currentPhase.accent }}>
-              {phaseProgress.total ? `${phaseProgress.completed}/${phaseProgress.total}` : '—'}
-            </strong>
-          </div>
-          <div style={styles.phaseStatusRight}>
-            {nextPhaseLabel ? (
-              <div style={styles.phaseStatusNext}>
+          <div style={styles.phaseCurrentBar}>
+            <div style={styles.phaseCurrentInfo}>
+              <span style={{
+                ...styles.phaseStatusChip,
+                color: currentPhase.accent,
+                borderColor: currentPhase.accent
+              }}>
+                {phaseGroupLabel}
+              </span>
+              <div>
+                <div style={{
+                  ...styles.phaseStatusTitle,
+                  color: darkMode ? '#ffffff' : '#111827'
+                }}>
+                  {currentPhase.name}
+                </div>
+                <div style={{
+                  fontSize: '13px',
+                  color: darkMode ? '#9ca3af' : '#6b7280'
+                }}>
+                  {phaseSubtitle}
+                </div>
+              </div>
+            </div>
+            <div style={styles.phaseCurrentMeta}>
+              <div style={styles.phaseStatusCenter}>
                 <span style={{
                   fontSize: '12px',
                   color: darkMode ? '#9ca3af' : '#6b7280'
                 }}>
-                  Següent fase
+                  Checklist
                 </span>
-                <div style={styles.phaseStatusNextRow}>
-                  <ChevronRight size={16} color={currentPhase.accent} />
+                <strong style={{ color: currentPhase.accent }}>
+                  {phaseProgress.total ? `${phaseProgress.completed}/${phaseProgress.total}` : '—'}
+                </strong>
+              </div>
+              {nextPhaseLabel ? (
+                <div style={styles.phaseStatusNext}>
                   <span style={{
-                    fontSize: '13px',
-                    fontWeight: '600',
-                    color: darkMode ? '#ffffff' : '#111827'
+                    fontSize: '12px',
+                    color: darkMode ? '#9ca3af' : '#6b7280'
                   }}>
-                    {nextPhaseLabel}
+                    Següent fase
                   </span>
-                  {!nextGateState.loading && nextGateState.missing.length > 0 && (
+                  <div style={styles.phaseStatusNextRow}>
+                    <ChevronRight size={16} color={currentPhase.accent} />
                     <span style={{
-                      ...styles.phaseStatusWarning,
-                      borderColor: '#f59e0b',
-                      color: '#f59e0b'
+                      fontSize: '13px',
+                      fontWeight: '600',
+                      color: darkMode ? '#ffffff' : '#111827'
                     }}>
-                      {nextGateState.missing.length} pendent{nextGateState.missing.length > 1 ? 's' : ''}
+                      {nextPhaseLabel}
                     </span>
+                    {hasNextMissing && (
+                      <span style={{
+                        ...styles.phaseStatusWarning,
+                        borderColor: '#f59e0b',
+                        color: '#f59e0b'
+                      }}>
+                        {nextMissing.length} pendent{nextMissing.length > 1 ? 's' : ''}
+                      </span>
+                    )}
+                  </div>
+                  {hasNextMissing && (
+                    <>
+                      <div style={{
+                        fontSize: '12px',
+                        color: darkMode ? '#e5e7eb' : '#6b7280'
+                      }}>
+                        {missingPreview}
+                        {nextMissing.length > 3 ? '…' : ''}
+                      </div>
+                      <button
+                        onClick={() => {
+                          const checklist = document.getElementById('phase-checklist')
+                          if (checklist) {
+                            checklist.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                          }
+                        }}
+                        style={styles.phaseStatusAction}
+                      >
+                        Veure pendents
+                      </button>
+                    </>
                   )}
                 </div>
-                {!nextGateState.loading && nextGateState.missing.length > 0 && (
-                  <button
-                    onClick={() => {
-                      const checklist = document.getElementById('phase-checklist')
-                      if (checklist) {
-                        checklist.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                      }
-                    }}
-                    style={styles.phaseStatusAction}
-                  >
-                    Veure pendents
-                  </button>
-                )}
-              </div>
-            ) : (
-              <div style={styles.phaseStatusNext}>
-                <span style={{
-                  fontSize: '12px',
-                  color: darkMode ? '#9ca3af' : '#6b7280'
-                }}>
-                  Estat
-                </span>
-                <div style={styles.phaseStatusNextRow}>
-                  <CheckCircle2 size={16} color={currentPhase.accent} />
+              ) : (
+                <div style={styles.phaseStatusNext}>
                   <span style={{
-                    fontSize: '13px',
-                    fontWeight: '600',
-                    color: darkMode ? '#ffffff' : '#111827'
+                    fontSize: '12px',
+                    color: darkMode ? '#9ca3af' : '#6b7280'
                   }}>
-                    Totes les fases completes
+                    Estat
                   </span>
+                  <div style={styles.phaseStatusNextRow}>
+                    <CheckCircle2 size={16} color={currentPhase.accent} />
+                    <span style={{
+                      fontSize: '13px',
+                      fontWeight: '600',
+                      color: darkMode ? '#ffffff' : '#111827'
+                    }}>
+                      Totes les fases completes
+                    </span>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
+            <div style={styles.phaseActionsBar}>
+              {phaseId >= 3 && (
+                <button
+                  style={styles.phaseActionButton}
+                  onClick={() => navigate(`/projects/${id}/briefing`)}
+                >
+                  <ClipboardList size={16} />
+                  Briefing
+                </button>
+              )}
+              {phaseId >= 3 && (
+                <button
+                  style={{
+                    ...styles.phaseActionButton,
+                    opacity: !driveConnected ? 0.5 : 1,
+                    cursor: !driveConnected ? 'not-allowed' : 'pointer'
+                  }}
+                  disabled={!driveConnected}
+                  title={!driveConnected ? 'Connecta Google Drive per crear' : ''}
+                  onClick={() => {
+                    if (!driveConnected) return
+                    navigate(`/orders?project=${id}`)
+                  }}
+                >
+                  <ShoppingCart size={16} />
+                  Crear PO
+                </button>
+              )}
+              {phaseId === 7 && (
+                <button
+                  style={styles.phaseActionButton}
+                  onClick={() => navigate(`/inventory?project=${id}`)}
+                >
+                  <Package size={16} />
+                  Gestor stock
+                </button>
+              )}
+            </div>
           </div>
         </div>
         {/* Banner DISCARDED */}
@@ -908,62 +1033,80 @@ function ProjectDetailInner({ useApp }) {
               <span style={styles.sku}>Codi intern del projecte: {project.sku}</span>
             )}
           </div>
+          <button
+            style={styles.notesButton}
+            onClick={() => setShowNotesPanel(true)}
+          >
+            <StickyNote size={16} />
+            Notes
+          </button>
         </div>
 
-        <div style={phaseWrapperStyle}>
-          <div style={{
-            ...styles.phaseWorkspaceHeader,
-            ...phaseCardStyle
-          }}>
-            <div style={styles.phaseWorkspaceMeta}>
-              <span style={{
-                ...styles.phaseGroupLabel,
-                color: currentPhase.accent
-              }}>
-                {phaseGroupLabel}
-              </span>
-              <h2 style={{
-                margin: '4px 0 4px',
-                fontSize: isMobile ? '18px' : '20px',
+        {showNotesPanel && (
+          <div style={styles.notesOverlay} onClick={() => setShowNotesPanel(false)}>
+            <div
+              style={{
+                ...styles.notesModal,
+                backgroundColor: darkMode ? '#111827' : '#ffffff',
+                borderColor: darkMode ? '#2a2a3a' : '#e5e7eb',
                 color: darkMode ? '#ffffff' : '#111827'
-              }}>
-                {currentPhase.name}
-              </h2>
-              <p style={{
-                margin: 0,
-                fontSize: '14px',
-                color: darkMode ? '#e5e7eb' : '#6b7280'
-              }}>
-                {phaseSubtitle}
-              </p>
-            </div>
-            <div style={styles.phaseWorkspaceStats}>
-              <div style={styles.phaseProgress}>
-                <span style={{ fontSize: '12px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
-                  Progrés fase
-                </span>
-                <strong style={{ color: currentPhase.accent }}>
-                  {phaseProgress.total ? `${phaseProgress.completed}/${phaseProgress.total}` : '—'}
-                </strong>
-              </div>
-              {phaseId > 2 && (
+              }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div style={styles.notesHeader}>
+                <h3 style={{ margin: 0, fontSize: '16px' }}>Notes</h3>
                 <button
-                  onClick={() => {
-                    const checklist = document.getElementById('phase-checklist')
-                    if (checklist) {
-                      checklist.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                    }
-                  }}
+                  onClick={() => setShowNotesPanel(false)}
                   style={{
-                    ...styles.phaseCta,
-                    backgroundColor: currentPhase.accent
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: darkMode ? '#e5e7eb' : '#6b7280',
+                    fontSize: '18px'
                   }}
+                  aria-label="Tancar"
                 >
-                  Completa checklist
+                  ×
                 </button>
+              </div>
+              {notesLoading && (
+                <div style={{ fontSize: '13px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
+                  Carregant notes...
+                </div>
+              )}
+              {!notesLoading && (!notes || notes.length === 0) && (
+                <div style={{ fontSize: '13px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
+                  No hi ha notes actives.
+                </div>
+              )}
+              {!notesLoading && notes && notes.length > 0 && (
+                <div style={styles.notesList}>
+                  {notes.map(note => (
+                    <div
+                      key={note.id}
+                      style={{
+                        ...styles.notesItem,
+                        backgroundColor: darkMode ? '#0f172a' : '#f9fafb',
+                        borderColor: darkMode ? '#1f2937' : '#e5e7eb'
+                      }}
+                    >
+                      {note.title && (
+                        <div style={{ fontWeight: '600', marginBottom: '4px' }}>
+                          {note.title}
+                        </div>
+                      )}
+                      <div style={{ fontSize: '13px', whiteSpace: 'pre-wrap' }}>
+                        {note.content || '—'}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           </div>
+        )}
+
+        <div style={phaseWrapperStyle}>
           <div
             data-testid="phase-gate-block-banner"
             data-revealed={phaseBlockVisible ? 'true' : 'false'}
@@ -1007,115 +1150,6 @@ function ProjectDetailInner({ useApp }) {
             padding: 0,
             marginBottom: '24px'
           }}>
-            <h3 style={{
-              ...styles.sectionTitle,
-              color: darkMode ? '#ffffff' : '#111827',
-              marginBottom: '16px'
-            }}>
-              Progrés del Projecte
-            </h3>
-
-              <div style={styles.phaseGroupsWrapper}>
-                {PHASE_GROUPS.map((group, groupIndex) => {
-                  const isCurrentGroup = group.phases.includes(phaseId)
-                  const groupBorder = isCurrentGroup
-                    ? currentPhase.accent
-                    : (darkMode ? '#2a2a3a' : '#e5e7eb')
-                  const groupBg = isCurrentGroup
-                    ? (darkMode ? 'rgba(31, 41, 55, 0.45)' : '#f8f9fb')
-                    : (darkMode ? '#15151f' : '#ffffff')
-                  return (
-                    <div key={group.label} style={styles.phaseGroupBlock}>
-                      <div style={{
-                        ...styles.phaseGroupCard,
-                        borderColor: groupBorder,
-                        backgroundColor: groupBg
-                      }}>
-                        <div style={styles.phaseGroupHeader}>
-                          <span style={{
-                            ...styles.phaseGroupChip,
-                            color: isCurrentGroup ? currentPhase.accent : (darkMode ? '#9ca3af' : '#6b7280'),
-                            borderColor: isCurrentGroup ? currentPhase.accent : (darkMode ? '#2a2a3a' : '#e5e7eb')
-                          }}>
-                            {group.label}
-                          </span>
-                        </div>
-                        <div style={{
-                          ...styles.phaseGroupPhases,
-                          flexWrap: isMobile ? 'wrap' : 'nowrap'
-                        }}>
-                          {group.phases.map((phaseIdInGroup) => {
-                            const phase = PHASES.find(item => item.id === phaseIdInGroup)
-                            if (!phase) return null
-                            const isActive = phase.id === phaseId
-                            const isCompleted = phase.id < phaseId
-                            const isFuture = phase.id > phaseId
-                            const PhaseIcon = phase.icon
-                            return (
-                              <div key={phase.id} style={styles.timelineItem}>
-                                <button
-                                  onClick={() => handlePhaseChange(phase.id)}
-                                  style={{
-                                    ...styles.phaseButton,
-                                    backgroundColor: isActive
-                                      ? phase.bg
-                                      : (isCompleted ? phase.bg : 'var(--bg-secondary)'),
-                                    borderColor: isActive || isCompleted ? phase.accent : 'var(--border-color)',
-                                    color: isFuture ? '#9ca3af' : phase.accent,
-                                    boxShadow: isActive ? `0 0 0 6px ${phase.bg}` : 'none'
-                                  }}
-                                >
-                                  {isCompleted ? (
-                                    <Check size={20} color={phase.accent} />
-                                  ) : (
-                                    <PhaseIcon size={20} color={isFuture ? '#9ca3af' : phase.accent} />
-                                  )}
-                                </button>
-                                <span style={{
-                                  ...styles.phaseName,
-                                  color: isActive ? phase.accent : (darkMode ? '#9ca3af' : '#6b7280'),
-                                  fontWeight: isActive ? '600' : '400',
-                                  cursor: 'pointer'
-                                }}
-                                onClick={() => handlePhaseChange(phase.id)}
-                                role="button"
-                                tabIndex={0}
-                                onKeyDown={(event) => {
-                                  if (event.key === 'Enter' || event.key === ' ') {
-                                    event.preventDefault()
-                                    handlePhaseChange(phase.id)
-                                  }
-                                }}>
-                                  {phase.name}
-                                </span>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      </div>
-                      {groupIndex < PHASE_GROUPS.length - 1 && (
-                        <div style={styles.phaseGroupDivider} />
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-
-            {/* Current phase info */}
-            <div style={{
-              ...styles.currentPhaseInfo,
-              backgroundColor: currentPhase.bg,
-              borderColor: currentPhase.accent
-            }}>
-              <div style={styles.currentPhaseHeader}>
-                <currentPhase.icon size={24} color={currentPhase.accent} />
-                <div>
-                  <h4 style={{ margin: 0, color: currentPhase.accent }}>{currentPhase.name}</h4>
-                  <p style={{ margin: 0, fontSize: '14px', color: '#6b7280' }}>{currentPhase.description}</p>
-                </div>
-              </div>
-            </div>
-
             <PhaseChecklist
               project={project}
                 currentPhase={phaseId}
@@ -1574,25 +1608,59 @@ const styles = {
     padding: '32px',
     overflowY: 'auto'
   },
-  phaseStatusBar: {
+  phaseStickyContainer: {
     position: 'sticky',
     top: '12px',
-    zIndex: 5,
+    zIndex: 6,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+    padding: '12px 16px',
+    borderRadius: '14px',
+    border: '1px solid',
+    boxShadow: '0 10px 24px rgba(15, 23, 42, 0.12)',
+    marginBottom: '24px'
+  },
+  phaseTimelineSticky: {
+    display: 'flex',
+    alignItems: 'center'
+  },
+  phaseCurrentBar: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px'
+  },
+  phaseCurrentInfo: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: '16px',
-    padding: '12px 16px',
-    borderRadius: '12px',
-    border: '1px solid',
-    boxShadow: '0 6px 16px rgba(15, 23, 42, 0.08)',
-    marginBottom: '20px'
+    gap: '12px',
+    flexWrap: 'wrap'
   },
-  phaseStatusLeft: {
+  phaseCurrentMeta: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '20px',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between'
+  },
+  phaseActionsBar: {
     display: 'flex',
     alignItems: 'center',
     gap: '10px',
     flexWrap: 'wrap'
+  },
+  phaseActionButton: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    padding: '8px 12px',
+    borderRadius: '999px',
+    border: '1px solid var(--border-color)',
+    background: 'transparent',
+    fontSize: '12px',
+    fontWeight: '600',
+    color: '#4f46e5',
+    cursor: 'pointer'
   },
   phaseStatusChip: {
     fontSize: '11px',
@@ -1646,6 +1714,43 @@ const styles = {
     border: 'none',
     cursor: 'pointer'
   },
+  notesOverlay: {
+    position: 'fixed',
+    inset: 0,
+    backgroundColor: 'rgba(15, 23, 42, 0.35)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000
+  },
+  notesModal: {
+    width: 'min(640px, 90vw)',
+    maxHeight: '80vh',
+    overflowY: 'auto',
+    backgroundColor: '#ffffff',
+    borderRadius: '16px',
+    border: '1px solid #e5e7eb',
+    padding: '20px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px'
+  },
+  notesHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  notesList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px'
+  },
+  notesItem: {
+    border: '1px solid #e5e7eb',
+    borderRadius: '10px',
+    padding: '12px',
+    backgroundColor: '#f9fafb'
+  },
   loading: {
     padding: '64px',
     textAlign: 'center',
@@ -1666,6 +1771,18 @@ const styles = {
     border: '1px solid var(--border-color)',
     borderRadius: '10px',
     fontSize: '14px',
+    color: '#6b7280',
+    cursor: 'pointer'
+  },
+  notesButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '10px 14px',
+    backgroundColor: 'transparent',
+    border: '1px solid var(--border-color)',
+    borderRadius: '10px',
+    fontSize: '13px',
     color: '#6b7280',
     cursor: 'pointer'
   },
