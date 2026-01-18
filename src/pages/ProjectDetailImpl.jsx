@@ -55,9 +55,8 @@ const CompetitiveAsinSection = lazy(() => import('../components/CompetitiveAsinS
 const PHASES = Object.values(PHASE_STYLES)
 const PHASE_GROUPS = [
   { label: 'DISCOVERY', phases: [1, 2] },
-  { label: 'SUPPLY', phases: [3, 4, 5] },
-  { label: 'EXECUTION', phases: [6] },
-  { label: 'LIVE', phases: [7] }
+  { label: 'SOURCING', phases: [3, 4, 5] },
+  { label: 'LAUNCH', phases: [6, 7] }
 ]
 const PHASE_WORKFLOW_COPY = {
   1: 'Analitzant mercat i competència',
@@ -722,9 +721,7 @@ function ProjectDetailInner({ useApp }) {
   }
   const currentGroup = PHASE_GROUPS.find(group => group.phases.includes(phaseId))
   const phaseSubtitle = PHASE_WORKFLOW_COPY[phaseId] || currentPhase.description
-  const phaseGroupLabel = phaseId <= 2
-    ? 'DISCOVERY — Market & Viability'
-    : (currentGroup?.label || 'PHASE')
+  const phaseGroupLabel = currentGroup?.label || 'PHASE'
 
   return (
     <div style={styles.container}>
@@ -883,88 +880,91 @@ function ProjectDetailInner({ useApp }) {
               Progrés del Projecte
             </h3>
 
-              <div style={styles.phaseGroupRow}>
-                {PHASE_GROUPS.map((group, index) => {
+              <div style={styles.phaseGroupsWrapper}>
+                {PHASE_GROUPS.map((group, groupIndex) => {
                   const isCurrentGroup = group.phases.includes(phaseId)
+                  const groupBorder = isCurrentGroup
+                    ? currentPhase.accent
+                    : (darkMode ? '#2a2a3a' : '#e5e7eb')
+                  const groupBg = isCurrentGroup
+                    ? (darkMode ? 'rgba(31, 41, 55, 0.45)' : '#f8f9fb')
+                    : (darkMode ? '#15151f' : '#ffffff')
                   return (
-                    <div
-                      key={group.label}
-                      style={{
-                        ...styles.phaseGroupItem,
-                        flex: group.phases.length,
-                        borderRight: index < PHASE_GROUPS.length - 1 ? `1px solid ${darkMode ? '#2a2a3a' : '#e5e7eb'}` : 'none'
-                      }}
-                    >
-                      <span style={{
-                        ...styles.phaseGroupText,
-                        color: isCurrentGroup ? currentPhase.accent : (darkMode ? '#9ca3af' : '#6b7280')
+                    <div key={group.label} style={styles.phaseGroupBlock}>
+                      <div style={{
+                        ...styles.phaseGroupCard,
+                        borderColor: groupBorder,
+                        backgroundColor: groupBg
                       }}>
-                        {group.label}
-                      </span>
+                        <div style={styles.phaseGroupHeader}>
+                          <span style={{
+                            ...styles.phaseGroupChip,
+                            color: isCurrentGroup ? currentPhase.accent : (darkMode ? '#9ca3af' : '#6b7280'),
+                            borderColor: isCurrentGroup ? currentPhase.accent : (darkMode ? '#2a2a3a' : '#e5e7eb')
+                          }}>
+                            {group.label}
+                          </span>
+                        </div>
+                        <div style={{
+                          ...styles.phaseGroupPhases,
+                          flexWrap: isMobile ? 'wrap' : 'nowrap'
+                        }}>
+                          {group.phases.map((phaseIdInGroup) => {
+                            const phase = PHASES.find(item => item.id === phaseIdInGroup)
+                            if (!phase) return null
+                            const isActive = phase.id === phaseId
+                            const isCompleted = phase.id < phaseId
+                            const isFuture = phase.id > phaseId
+                            const PhaseIcon = phase.icon
+                            return (
+                              <div key={phase.id} style={styles.timelineItem}>
+                                <button
+                                  onClick={() => handlePhaseChange(phase.id)}
+                                  style={{
+                                    ...styles.phaseButton,
+                                    backgroundColor: isActive
+                                      ? phase.bg
+                                      : (isCompleted ? phase.bg : 'var(--bg-secondary)'),
+                                    borderColor: isActive || isCompleted ? phase.accent : 'var(--border-color)',
+                                    color: isFuture ? '#9ca3af' : phase.accent,
+                                    boxShadow: isActive ? `0 0 0 6px ${phase.bg}` : 'none'
+                                  }}
+                                >
+                                  {isCompleted ? (
+                                    <Check size={20} color={phase.accent} />
+                                  ) : (
+                                    <PhaseIcon size={20} color={isFuture ? '#9ca3af' : phase.accent} />
+                                  )}
+                                </button>
+                                <span style={{
+                                  ...styles.phaseName,
+                                  color: isActive ? phase.accent : (darkMode ? '#9ca3af' : '#6b7280'),
+                                  fontWeight: isActive ? '600' : '400',
+                                  cursor: 'pointer'
+                                }}
+                                onClick={() => handlePhaseChange(phase.id)}
+                                role="button"
+                                tabIndex={0}
+                                onKeyDown={(event) => {
+                                  if (event.key === 'Enter' || event.key === ' ') {
+                                    event.preventDefault()
+                                    handlePhaseChange(phase.id)
+                                  }
+                                }}>
+                                  {phase.name}
+                                </span>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                      {groupIndex < PHASE_GROUPS.length - 1 && (
+                        <div style={styles.phaseGroupDivider} />
+                      )}
                     </div>
                   )
                 })}
               </div>
-            
-            <div style={{
-              ...styles.timeline,
-              flexWrap: isMobile ? 'wrap' : 'nowrap',
-              gap: isMobile ? '12px' : '0',
-              overflowX: 'visible'
-            }}>
-              {PHASES.map((phase, index) => {
-                  const isActive = phase.id === phaseId
-                  const isCompleted = phase.id < phaseId
-                  const isFuture = phase.id > phaseId
-                const PhaseIcon = phase.icon
-                
-                return (
-                  <div key={phase.id} style={styles.timelineItem}>
-                    <button
-                      onClick={() => handlePhaseChange(phase.id)}
-                      style={{
-                        ...styles.phaseButton,
-                        backgroundColor: isActive
-                          ? phase.bg
-                          : (isCompleted ? phase.bg : 'var(--bg-secondary)'),
-                        borderColor: isActive || isCompleted ? phase.accent : 'var(--border-color)',
-                        color: isFuture ? '#9ca3af' : phase.accent,
-                        boxShadow: isActive ? `0 0 0 6px ${phase.bg}` : 'none'
-                      }}
-                    >
-                      {isCompleted ? (
-                        <Check size={20} color={phase.accent} />
-                      ) : (
-                        <PhaseIcon size={20} color={isFuture ? '#9ca3af' : phase.accent} />
-                      )}
-                    </button>
-                    <span style={{
-                      ...styles.phaseName,
-                      color: isActive ? phase.accent : (darkMode ? '#9ca3af' : '#6b7280'),
-                        fontWeight: isActive ? '600' : '400',
-                        cursor: 'pointer'
-                      }}
-                      onClick={() => handlePhaseChange(phase.id)}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(event) => {
-                        if (event.key === 'Enter' || event.key === ' ') {
-                          event.preventDefault()
-                          handlePhaseChange(phase.id)
-                        }
-                    }}>
-                      {phase.name}
-                    </span>
-                    {index < PHASES.length - 1 && !isMobile && (
-                      <div style={{
-                        ...styles.timelineConnector,
-                        backgroundColor: isCompleted ? phase.accent : 'var(--border-color)'
-                      }} />
-                    )}
-                  </div>
-                )
-              })}
-            </div>
 
             {/* Current phase info */}
             <div style={{
@@ -1539,22 +1539,51 @@ const styles = {
     position: 'relative',
     marginBottom: '24px'
   },
-  phaseGroupRow: {
+  phaseGroupsWrapper: {
+    display: 'flex',
+    gap: '16px',
+    alignItems: 'stretch',
+    flexWrap: 'wrap',
+    marginBottom: '16px'
+  },
+  phaseGroupBlock: {
+    display: 'flex',
+    alignItems: 'stretch',
+    gap: '16px',
+    flex: 1,
+    minWidth: '220px'
+  },
+  phaseGroupCard: {
+    flex: 1,
+    borderRadius: '14px',
+    border: '1px solid',
+    padding: '12px 14px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px'
+  },
+  phaseGroupHeader: {
     display: 'flex',
     alignItems: 'center',
-    marginBottom: '12px',
-    borderRadius: '10px',
-    overflow: 'hidden'
+    justifyContent: 'space-between'
   },
-  phaseGroupItem: {
-    display: 'flex',
-    justifyContent: 'center',
-    padding: '6px 8px'
-  },
-  phaseGroupText: {
+  phaseGroupChip: {
     fontSize: '11px',
-    fontWeight: '600',
-    letterSpacing: '0.06em'
+    fontWeight: '700',
+    letterSpacing: '0.08em',
+    padding: '4px 10px',
+    borderRadius: '999px',
+    border: '1px solid',
+    background: 'transparent'
+  },
+  phaseGroupPhases: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px'
+  },
+  phaseGroupDivider: {
+    width: '1px',
+    backgroundColor: 'var(--border-color)'
   },
   phaseGateBanner: {
     display: 'flex',
