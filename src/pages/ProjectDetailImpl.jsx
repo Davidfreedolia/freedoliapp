@@ -43,6 +43,7 @@ import { useBreakpoint } from '../hooks/useBreakpoint'
 import { useNotes } from '../hooks/useNotes'
 import { PHASE_STYLES, getPhaseStyle, getPhaseSurfaceStyles } from '../utils/phaseStyles'
 import { getModalStyles } from '../utils/responsiveStyles'
+import Button from '../components/Button'
 // Dynamic imports for components that import supabase statically to avoid circular dependencies during module initialization
 const IdentifiersSection = lazy(() => import('../components/IdentifiersSection'))
 const ProfitabilityCalculator = lazy(() => import('../components/ProfitabilityCalculator'))
@@ -1063,11 +1064,9 @@ function ProjectDetailInner({ useApp }) {
         }}>
           <div style={styles.phaseTimelineSticky}>
             <div style={{
-              ...styles.timeline,
-              flexWrap: isMobile ? 'wrap' : 'nowrap',
-              gap: isMobile ? '12px' : '0',
-              overflowX: isMobile ? 'visible' : 'auto',
-              paddingBottom: '6px'
+              ...styles.phaseNavBar,
+              flexWrap: isMobile ? 'nowrap' : 'wrap',
+              overflowX: isMobile ? 'auto' : 'visible'
             }}>
               {PHASES.map((phase, index) => {
                 const isActive = phase.id === phaseId
@@ -1076,49 +1075,33 @@ function ProjectDetailInner({ useApp }) {
                 const PhaseIcon = phase.icon
 
                 return (
-                  <div key={phase.id} style={styles.timelineItem}>
-                    <button
-                      onClick={() => handlePhaseChange(phase.id)}
-                      style={{
-                        ...styles.phaseButton,
-                        backgroundColor: isActive
-                          ? phase.bg
-                          : (isCompleted ? phase.bg : 'var(--bg-secondary)'),
-                        borderColor: isActive || isCompleted ? phase.accent : 'var(--border-color)',
-                        color: isFuture ? '#9ca3af' : phase.accent,
-                        boxShadow: isActive ? `0 0 0 6px ${phase.bg}` : 'none'
-                      }}
-                    >
-                      {isCompleted ? (
-                        <Check size={20} color={phase.accent} />
-                      ) : (
-                        <PhaseIcon size={20} color={isFuture ? '#9ca3af' : phase.accent} />
-                      )}
-                    </button>
-                    <span style={{
-                      ...styles.phaseName,
-                      color: isActive ? phase.accent : (darkMode ? '#9ca3af' : '#6b7280'),
-                      fontWeight: isActive ? '600' : '400',
-                      cursor: 'pointer'
-                    }}
+                  <button
+                    key={phase.id}
                     onClick={() => handlePhaseChange(phase.id)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault()
-                        handlePhaseChange(phase.id)
-                      }
+                    style={{
+                      ...styles.phaseNavButton,
+                      borderColor: isActive ? phase.accent : (darkMode ? '#2a2a3a' : '#e5e7eb'),
+                      backgroundColor: isActive
+                        ? phase.bg
+                        : (isCompleted ? (darkMode ? '#111827' : '#f8fafc') : 'transparent'),
+                      color: isFuture ? (darkMode ? '#6b7280' : '#9ca3af') : phase.accent
+                    }}
+                  >
+                    <span style={styles.phaseNavIcon}>
+                      {isCompleted ? (
+                        <Check size={14} color={phase.accent} />
+                      ) : (
+                        <PhaseIcon size={14} color={isFuture ? (darkMode ? '#6b7280' : '#9ca3af') : phase.accent} />
+                      )}
+                    </span>
+                    <span style={{
+                      ...styles.phaseNavLabel,
+                      fontWeight: isActive ? '700' : '500',
+                      color: isActive ? phase.accent : (darkMode ? '#e5e7eb' : '#374151')
                     }}>
                       {phase.name}
                     </span>
-                    {index < PHASES.length - 1 && (
-                      <div style={{
-                        ...styles.timelineConnector,
-                        backgroundColor: isCompleted ? phase.accent : 'var(--border-color)'
-                      }} />
-                    )}
-                  </div>
+                  </button>
                 )
               })}
             </div>
@@ -1237,23 +1220,20 @@ function ProjectDetailInner({ useApp }) {
             </div>
             <div style={styles.phaseActionsBar}>
               {phaseId >= 3 && (
-                <button
-                  style={styles.phaseActionButton}
+                <Button
+                  variant={phaseId >= 3 ? 'ghost' : 'primary'}
+                  size="sm"
                   onClick={() => navigate(`/projects/${id}/briefing`)}
                 >
                   <ClipboardList size={16} />
                   Briefing
-                </button>
+                </Button>
               )}
               {phaseId >= 3 && (
-                <button
-                  style={{
-                    ...styles.phaseActionButton,
-                    opacity: !driveConnected ? 0.5 : 1,
-                    cursor: !driveConnected ? 'not-allowed' : 'pointer'
-                  }}
+                <Button
+                  variant={phaseId === 7 ? 'ghost' : 'primary'}
+                  size="sm"
                   disabled={!driveConnected}
-                  title={!driveConnected ? 'Connecta Google Drive per crear' : ''}
                   onClick={() => {
                     if (!driveConnected) return
                     navigate(`/orders?project=${id}`)
@@ -1261,26 +1241,28 @@ function ProjectDetailInner({ useApp }) {
                 >
                   <ShoppingCart size={16} />
                   Crear PO
-                </button>
+                </Button>
               )}
               {phaseId === 7 && (
-                <button
-                  style={styles.phaseActionButton}
+                <Button
+                  variant="primary"
+                  size="sm"
                   onClick={() => navigate(`/inventory?project=${id}`)}
                 >
                   <Package size={16} />
                   Gestor stock
-                </button>
+                </Button>
               )}
               <div style={styles.createMenuWrapper} data-create-menu>
-                <button
-                  style={styles.phaseActionButton}
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setCreateMenuOpen(prev => !prev)}
                 >
                   <Plus size={16} />
                   Crear...
                   <ChevronDown size={14} />
-                </button>
+                </Button>
                 {createMenuOpen && (
                   <div style={{
                     ...styles.createMenu,
@@ -1963,17 +1945,14 @@ function ProjectDetailInner({ useApp }) {
             }}>
               Gestiona les comandes de compra d'aquest projecte
             </p>
-            <button
-              onClick={() => navigate(`/orders?project=${id}`)}
-              style={{
-                ...styles.actionButton,
-                backgroundColor: '#4f46e5',
-                margin: '0 auto'
-              }}
-            >
-              <ShoppingCart size={18} />
-              Veure Comandes
-            </button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => navigate(`/orders?project=${id}`)}
+              >
+                <ShoppingCart size={16} />
+                Veure Comandes
+              </Button>
           </div>
         </CollapsibleSection>
 
@@ -1990,16 +1969,13 @@ function ProjectDetailInner({ useApp }) {
                 <div style={{ flex: 1 }}>
                   Connecta Google Drive per gestionar els documents del projecte.
                 </div>
-            <button
+                <Button
+                  variant="warning-soft"
+                  size="sm"
                   onClick={() => navigate('/settings')}
-              style={{
-                ...styles.actionButton,
-                    backgroundColor: '#f59e0b',
-                    borderColor: '#f59e0b'
-              }}
-            >
+                >
                   Connectar
-            </button>
+                </Button>
           </div>
             )}
             {driveConnected && projectFolders && (
@@ -2115,17 +2091,14 @@ function ProjectDetailInner({ useApp }) {
               }}>
                 Gestiona les despeses i ingressos d'aquest projecte
               </p>
-              <button
+              <Button
+                variant="primary"
+                size="sm"
                 onClick={() => navigate(`/finances?project=${id}`)}
-                style={{
-                  ...styles.actionButton,
-                  backgroundColor: '#4f46e5',
-                  margin: '0 auto'
-                }}
               >
-                <DollarSign size={18} />
+                <DollarSign size={16} />
                 Veure Finances
-              </button>
+              </Button>
             </div>
           </CollapsibleSection>
         </PhaseSection>
@@ -2324,19 +2297,6 @@ const styles = {
     alignItems: 'center',
     gap: '10px',
     flexWrap: 'wrap'
-  },
-  phaseActionButton: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '6px',
-    padding: '8px 12px',
-    borderRadius: '999px',
-    border: '1px solid var(--border-color)',
-    background: 'transparent',
-    fontSize: '12px',
-    fontWeight: '600',
-    color: '#4f46e5',
-    cursor: 'pointer'
   },
   createMenuWrapper: {
     position: 'relative'
@@ -2627,6 +2587,36 @@ const styles = {
     position: 'relative',
     marginBottom: '24px'
   },
+  phaseNavBar: {
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    flexWrap: 'wrap',
+    paddingBottom: '4px',
+    scrollSnapType: 'x mandatory'
+  },
+  phaseNavButton: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '8px 12px',
+    borderRadius: '999px',
+    border: '1px solid',
+    background: 'transparent',
+    fontSize: '13px',
+    cursor: 'pointer',
+    scrollSnapAlign: 'center',
+    whiteSpace: 'nowrap'
+  },
+  phaseNavIcon: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  phaseNavLabel: {
+    fontSize: '13px'
+  },
   phaseGroupsWrapper: {
     display: 'flex',
     gap: '16px',
@@ -2785,23 +2775,5 @@ const styles = {
     borderRadius: '16px',
     border: '1px solid var(--border-color)'
   },
-  actionsGrid: {
-    display: 'flex',
-    gap: '12px',
-    flexWrap: 'wrap'
-  },
-  actionButton: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '12px 20px',
-    backgroundColor: '#4f46e5',
-    color: '#ffffff',
-    border: '1px solid #3730a3',
-    borderRadius: '10px',
-    fontSize: '14px',
-    fontWeight: '500',
-    cursor: 'pointer',
-    transition: 'transform 0.2s, box-shadow 0.2s'
-  }
+  
 }
