@@ -42,6 +42,7 @@ import PhaseChecklist from '../components/projects/PhaseChecklist'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { useNotes } from '../hooks/useNotes'
 import { PHASE_STYLES, getPhaseStyle, getPhaseSurfaceStyles } from '../utils/phaseStyles'
+import { getModalStyles } from '../utils/responsiveStyles'
 // Dynamic imports for components that import supabase statically to avoid circular dependencies during module initialization
 const IdentifiersSection = lazy(() => import('../components/IdentifiersSection'))
 const ProfitabilityCalculator = lazy(() => import('../components/ProfitabilityCalculator'))
@@ -225,6 +226,7 @@ function ProjectDetailInner({ useApp }) {
   const { isMobile, isTablet } = useBreakpoint()
   const { t } = useTranslation()
   const identifiersSectionRef = useRef(null)
+  const modalStyles = getModalStyles(isMobile, darkMode)
   
   // Extreure UUID net del paràmetre de ruta (eliminar qualsevol sufix com "Fes:")
   const id = rawId?.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i)?.[0] || null
@@ -241,6 +243,11 @@ function ProjectDetailInner({ useApp }) {
   const [phaseBlockVisible, setPhaseBlockVisible] = useState(false)
   const [nextGateState, setNextGateState] = useState({ loading: false, missing: [] })
   const [viabilitySnapshot, setViabilitySnapshot] = useState(null)
+  const [createMenuOpen, setCreateMenuOpen] = useState(false)
+  const [createModalType, setCreateModalType] = useState(null)
+  const [createForm, setCreateForm] = useState(null)
+  const [createSaving, setCreateSaving] = useState(false)
+  const [expenseCategories, setExpenseCategories] = useState([])
   const [showNotesPanel, setShowNotesPanel] = useState(false)
   const { notes, loading: notesLoading } = useNotes()
   
@@ -318,6 +325,44 @@ function ProjectDetailInner({ useApp }) {
     }
   }, [project, driveConnected])
 
+  useEffect(() => {
+    if (!createMenuOpen) return
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('[data-create-menu]')) {
+        setCreateMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [createMenuOpen])
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const supabaseModule = await import('../lib/supabase')
+        const supabaseClient = supabaseModule.default
+        const { data } = await supabaseClient
+          .from('finance_categories')
+          .select('*')
+          .order('name', { ascending: true })
+        const expenseCats = (data || []).filter(cat => cat.type === 'expense')
+        setExpenseCategories(expenseCats)
+      } catch (err) {
+        setExpenseCategories([])
+      }
+    }
+    loadCategories()
+  }, [])
+
+  useEffect(() => {
+    if (createModalType !== 'expense' || !createForm) return
+    if (!createForm.category_id && expenseCategories.length > 0) {
+      setCreateForm({ ...createForm, category_id: expenseCategories[0].id })
+    }
+  }, [createModalType, createForm, expenseCategories])
+
   const loadDriveFolders = async () => {
     if (!project) return
     
@@ -380,6 +425,130 @@ function ProjectDetailInner({ useApp }) {
       }
       // Don't show alert, just log - Drive is optional
       setProjectFolders(null)
+    }
+  }
+
+  const openCreateModal = (type) => {
+    if (!driveConnected && (type === 'supplier' || type === 'warehouse' || type === 'forwarder')) {
+      import('../components/Toast').then(({ showToast }) => {
+        showToast('Connecta Google Drive per crear aquest element.', 'warning')
+      }).catch(() => {})
+      return
+    }
+    const baseExpenseCategory = expenseCategories[0]?.id || null
+    const today = new Date().toISOString().split('T')[0]
+    const templates = {
+      supplier: {
+        name: '',
+        type: 'manufacturer',
+        contact_name: '',
+        email: '',
+        phone: '',
+        country: 'China',
+        city: '',
+        notes: ''
+      },
+      warehouse: {
+        name: '',
+        type: 'custom',
+        address: '',
+        city: '',
+        country: '',
+        contact_name: '',
+        contact_phone: '',
+        contact_email: '',
+        notes: ''
+      },
+      forwarder: {
+        name: '',
+        contact_name: '',
+        email: '',
+        phone: '',
+        country: 'Xina',
+        city: '',
+        notes: ''
+      },
+      expense: {
+        project_id: id,
+        category_id: baseExpenseCategory,
+        description: '',
+        amount: '',
+        currency: 'EUR',
+        date: today,
+        payment_status: 'pending',
+        notes: ''
+      }
+    }
+    setCreateForm(templates[type] || null)
+    setCreateModalType(type)
+  }
+
+  const handleCreateSave = async () => {
+    if (!createModalType || !createForm) return
+    setCreateSaving(true)
+    try {
+      const supabaseModule = await import('../lib/supabase')
+      const { createSupplier, createWarehouse, createForwarder, getCurrentUserId } = supabaseModule
+      if (createModalType === 'supplier') {
+        if (!createForm.name?.trim()) {
+          throw new Error('El nom és obligatori')
+        }
+        await createSupplier(createForm)
+        const { showToast } = await import('../components/Toast')
+        showToast('Proveïdor creat correctament', 'success')
+      }
+      if (createModalType === 'warehouse') {
+        if (!createForm.name?.trim()) {
+          throw new Error('El nom és obligatori')
+        }
+        await createWarehouse(createForm)
+        const { showToast } = await import('../components/Toast')
+        showToast('Magatzem creat correctament', 'success')
+      }
+      if (createModalType === 'forwarder') {
+        if (!createForm.name?.trim()) {
+          throw new Error('El nom és obligatori')
+        }
+        await createForwarder(createForm)
+        const { showToast } = await import('../components/Toast')
+        showToast('Transitari creat correctament', 'success')
+      }
+      if (createModalType === 'expense') {
+        if (!createForm.amount || !createForm.category_id) {
+          throw new Error('Import i categoria són obligatoris')
+        }
+        const supabaseClient = supabaseModule.default
+        const userId = await getCurrentUserId()
+        const category = expenseCategories.find(cat => cat.id === createForm.category_id)
+        if (!category) {
+          throw new Error('Categoria no vàlida')
+        }
+        const amount = Math.abs(parseFloat(createForm.amount))
+        const { error } = await supabaseClient.from('expenses').insert([{
+          project_id: createForm.project_id || null,
+          category_id: createForm.category_id,
+          category: category.name,
+          description: createForm.description,
+          amount: amount,
+          currency: createForm.currency,
+          expense_date: createForm.date,
+          payment_status: createForm.payment_status,
+          notes: createForm.notes,
+          user_id: userId
+        }])
+        if (error) throw error
+        const { showToast } = await import('../components/Toast')
+        showToast('Despesa creada correctament', 'success')
+      }
+      setCreateModalType(null)
+      setCreateForm(null)
+    } catch (err) {
+      try {
+        const { showToast } = await import('../components/Toast')
+        showToast(err.message || 'Error creant element', 'error')
+      } catch (importErr) {}
+    } finally {
+      setCreateSaving(false)
     }
   }
 
@@ -1092,6 +1261,72 @@ function ProjectDetailInner({ useApp }) {
                   Gestor stock
                 </button>
               )}
+              <div style={styles.createMenuWrapper} data-create-menu>
+                <button
+                  style={styles.phaseActionButton}
+                  onClick={() => setCreateMenuOpen(prev => !prev)}
+                >
+                  <Plus size={16} />
+                  Crear...
+                  <ChevronDown size={14} />
+                </button>
+                {createMenuOpen && (
+                  <div style={{
+                    ...styles.createMenu,
+                    backgroundColor: darkMode ? '#111827' : '#ffffff',
+                    borderColor: darkMode ? '#1f2937' : '#e5e7eb'
+                  }}>
+                    <button
+                      style={{
+                        ...styles.createMenuItem,
+                        color: darkMode ? '#e5e7eb' : '#374151'
+                      }}
+                      onClick={() => {
+                        setCreateMenuOpen(false)
+                        openCreateModal('supplier')
+                      }}
+                    >
+                      + Proveïdor
+                    </button>
+                    <button
+                      style={{
+                        ...styles.createMenuItem,
+                        color: darkMode ? '#e5e7eb' : '#374151'
+                      }}
+                      onClick={() => {
+                        setCreateMenuOpen(false)
+                        openCreateModal('warehouse')
+                      }}
+                    >
+                      + Magatzem
+                    </button>
+                    <button
+                      style={{
+                        ...styles.createMenuItem,
+                        color: darkMode ? '#e5e7eb' : '#374151'
+                      }}
+                      onClick={() => {
+                        setCreateMenuOpen(false)
+                        openCreateModal('forwarder')
+                      }}
+                    >
+                      + Transitari
+                    </button>
+                    <button
+                      style={{
+                        ...styles.createMenuItem,
+                        color: darkMode ? '#e5e7eb' : '#374151'
+                      }}
+                      onClick={() => {
+                        setCreateMenuOpen(false)
+                        openCreateModal('expense')
+                      }}
+                    >
+                      + Despesa
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -1159,9 +1394,9 @@ function ProjectDetailInner({ useApp }) {
             >
               <div style={styles.notesHeader}>
                 <h3 style={{ margin: 0, fontSize: '16px' }}>Notes</h3>
-                <button
+                    <button
                   onClick={() => setShowNotesPanel(false)}
-                  style={{
+                      style={{
                     background: 'transparent',
                     border: 'none',
                     cursor: 'pointer',
@@ -1171,7 +1406,7 @@ function ProjectDetailInner({ useApp }) {
                   aria-label="Tancar"
                 >
                   ×
-                </button>
+                    </button>
               </div>
               {notesLoading && (
                 <div style={{ fontSize: '13px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
@@ -1181,7 +1416,7 @@ function ProjectDetailInner({ useApp }) {
               {!notesLoading && (!notes || notes.length === 0) && (
                 <div style={{ fontSize: '13px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
                   No hi ha notes actives.
-                </div>
+                  </div>
               )}
               {!notesLoading && notes && notes.length > 0 && (
                 <div style={styles.notesList}>
@@ -1197,15 +1432,273 @@ function ProjectDetailInner({ useApp }) {
                       {note.title && (
                         <div style={{ fontWeight: '600', marginBottom: '4px' }}>
                           {note.title}
-                        </div>
+            </div>
                       )}
                       <div style={{ fontSize: '13px', whiteSpace: 'pre-wrap' }}>
                         {note.content || '—'}
-                      </div>
-                    </div>
-                  ))}
                 </div>
+              </div>
+                  ))}
+            </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {createModalType && createForm && (
+          <div style={modalStyles.overlay} onClick={() => setCreateModalType(null)}>
+            <div
+              style={{
+                ...modalStyles.modal,
+                backgroundColor: darkMode ? '#111827' : '#ffffff'
+              }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div style={modalStyles.header || styles.createModalHeader}>
+                <h3 style={{ margin: 0, fontSize: '16px' }}>
+                  {createModalType === 'supplier' && 'Crear Proveïdor'}
+                  {createModalType === 'warehouse' && 'Crear Magatzem'}
+                  {createModalType === 'forwarder' && 'Crear Transitari'}
+                  {createModalType === 'expense' && 'Crear Despesa'}
+                </h3>
+                <button
+                  onClick={() => setCreateModalType(null)}
+                  style={modalStyles.closeButton || styles.createModalClose}
+                  aria-label="Tancar"
+                >
+                  ×
+                    </button>
+              </div>
+              <div style={modalStyles.body || styles.createModalBody}>
+                {createModalType === 'supplier' && (
+                  <div style={styles.createFormGrid}>
+                    <label style={styles.createLabel}>
+                      Nom
+                      <input
+                        type="text"
+                        value={createForm.name}
+                        onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
+                        style={styles.createInput}
+                      />
+                    </label>
+                    <label style={styles.createLabel}>
+                      Tipus
+                      <select
+                        value={createForm.type}
+                        onChange={(e) => setCreateForm({ ...createForm, type: e.target.value })}
+                        style={styles.createInput}
+                      >
+                        <option value="manufacturer">Fabricant</option>
+                        <option value="trading">Trading Company</option>
+                        <option value="agent">Agent</option>
+                        <option value="freight">Transitari</option>
+                      </select>
+                    </label>
+                    <label style={styles.createLabel}>
+                      Contacte
+                      <input
+                        type="text"
+                        value={createForm.contact_name}
+                        onChange={(e) => setCreateForm({ ...createForm, contact_name: e.target.value })}
+                        style={styles.createInput}
+                      />
+                    </label>
+                    <label style={styles.createLabel}>
+                      Email
+                      <input
+                        type="email"
+                        value={createForm.email}
+                        onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
+                        style={styles.createInput}
+                      />
+                    </label>
+                    <label style={styles.createLabel}>
+                      País
+                      <input
+                        type="text"
+                        value={createForm.country}
+                        onChange={(e) => setCreateForm({ ...createForm, country: e.target.value })}
+                        style={styles.createInput}
+                      />
+                    </label>
+                    <label style={styles.createLabel}>
+                      Ciutat
+                      <input
+                        type="text"
+                        value={createForm.city}
+                        onChange={(e) => setCreateForm({ ...createForm, city: e.target.value })}
+                        style={styles.createInput}
+                      />
+                    </label>
+                  </div>
+                )}
+
+                {createModalType === 'warehouse' && (
+                  <div style={styles.createFormGrid}>
+                    <label style={styles.createLabel}>
+                      Nom
+                      <input
+                        type="text"
+                        value={createForm.name}
+                        onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
+                        style={styles.createInput}
+                      />
+                    </label>
+                    <label style={styles.createLabel}>
+                      Tipus
+                      <select
+                        value={createForm.type}
+                        onChange={(e) => setCreateForm({ ...createForm, type: e.target.value })}
+                        style={styles.createInput}
+                      >
+                        <option value="custom">Personalitzat</option>
+                        <option value="amazon_fba">Amazon FBA</option>
+                        <option value="amazon_fbm">Amazon FBM</option>
+                        <option value="3pl">3PL</option>
+                        <option value="own">Magatzem propi</option>
+                      </select>
+                    </label>
+                    <label style={styles.createLabel}>
+                      País
+                      <input
+                        type="text"
+                        value={createForm.country}
+                        onChange={(e) => setCreateForm({ ...createForm, country: e.target.value })}
+                        style={styles.createInput}
+                      />
+                    </label>
+                    <label style={styles.createLabel}>
+                      Ciutat
+                      <input
+                        type="text"
+                        value={createForm.city}
+                        onChange={(e) => setCreateForm({ ...createForm, city: e.target.value })}
+                        style={styles.createInput}
+                      />
+                    </label>
+                    <label style={styles.createLabel}>
+                      Adreça
+                      <input
+                        type="text"
+                        value={createForm.address}
+                        onChange={(e) => setCreateForm({ ...createForm, address: e.target.value })}
+                        style={styles.createInput}
+                      />
+                    </label>
+                  </div>
+                )}
+
+                {createModalType === 'forwarder' && (
+                  <div style={styles.createFormGrid}>
+                    <label style={styles.createLabel}>
+                      Nom
+                      <input
+                        type="text"
+                        value={createForm.name}
+                        onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
+                        style={styles.createInput}
+                      />
+                    </label>
+                    <label style={styles.createLabel}>
+                      Contacte
+                      <input
+                        type="text"
+                        value={createForm.contact_name}
+                        onChange={(e) => setCreateForm({ ...createForm, contact_name: e.target.value })}
+                        style={styles.createInput}
+                      />
+                    </label>
+                    <label style={styles.createLabel}>
+                      Email
+                      <input
+                        type="email"
+                        value={createForm.email}
+                        onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
+                        style={styles.createInput}
+                      />
+                    </label>
+                    <label style={styles.createLabel}>
+                      País
+                      <input
+                        type="text"
+                        value={createForm.country}
+                        onChange={(e) => setCreateForm({ ...createForm, country: e.target.value })}
+                        style={styles.createInput}
+                      />
+                    </label>
+                    <label style={styles.createLabel}>
+                      Ciutat
+                      <input
+                        type="text"
+                        value={createForm.city}
+                        onChange={(e) => setCreateForm({ ...createForm, city: e.target.value })}
+                        style={styles.createInput}
+                      />
+                    </label>
+            </div>
+                )}
+
+                {createModalType === 'expense' && (
+                  <div style={styles.createFormGrid}>
+                    <label style={styles.createLabel}>
+                      Categoria
+                      <select
+                        value={createForm.category_id || ''}
+                        onChange={(e) => setCreateForm({ ...createForm, category_id: e.target.value })}
+                        style={styles.createInput}
+                      >
+                        <option value="">Selecciona categoria</option>
+                        {expenseCategories.map(category => (
+                          <option key={category.id} value={category.id}>{category.name}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label style={styles.createLabel}>
+                      Import (EUR)
+                      <input
+                        type="number"
+                        value={createForm.amount}
+                        onChange={(e) => setCreateForm({ ...createForm, amount: e.target.value })}
+                        style={styles.createInput}
+                      />
+                    </label>
+                    <label style={styles.createLabel}>
+                      Data
+                      <input
+                        type="date"
+                        value={createForm.date}
+                        onChange={(e) => setCreateForm({ ...createForm, date: e.target.value })}
+                        style={styles.createInput}
+                      />
+                    </label>
+                    <label style={styles.createLabel}>
+                      Descripció
+                      <input
+                        type="text"
+                        value={createForm.description}
+                        onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
+                        style={styles.createInput}
+                      />
+                    </label>
+                </div>
+                )}
+
+                <div style={styles.createModalFooter}>
+                  <button
+                    onClick={() => setCreateModalType(null)}
+                    style={styles.createCancel}
+                  >
+                    Cancel·lar
+                  </button>
+                  <button
+                    onClick={handleCreateSave}
+                    style={styles.createSubmit}
+                    disabled={createSaving}
+                  >
+                    {createSaving ? 'Guardant...' : 'Crear'}
+                  </button>
+              </div>
+            </div>
             </div>
           </div>
         )}
@@ -1258,51 +1751,51 @@ function ProjectDetailInner({ useApp }) {
               padding: 0,
               marginBottom: '24px'
             }}>
-              <PhaseChecklist
-                project={project}
+            <PhaseChecklist
+              project={project}
                 currentPhase={phaseId}
-                projectId={id}
-                darkMode={darkMode}
+              projectId={id}
+              darkMode={darkMode}
                 id="phase-checklist"
                 onProgressUpdate={setPhaseProgress}
-              />
-            </div>
+            />
+          </div>
 
-            <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
-              <AmazonReadinessBadge
-                projectId={id}
-                darkMode={darkMode}
+          <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
+            <AmazonReadinessBadge
+              projectId={id}
+              darkMode={darkMode}
                 phaseId={phaseId}
-                onAssignGtin={() => {
+              onAssignGtin={() => {
                   const targetId = phaseId >= 6
                     ? 'identifiers-section'
                     : 'competitive-asin-section'
                   const target = document.getElementById(targetId)
                   if (target) {
                     target.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                  }
-                }}
-                onCreatePO={() => {
-                  navigate(`/orders?project=${id}&action=create`)
-                }}
-                onMarkExempt={() => {
-                  if (identifiersSectionRef.current) {
-                    identifiersSectionRef.current.markAsExempt()
-                  }
-                }}
-              />
-            </Suspense>
+                }
+              }}
+              onCreatePO={() => {
+                navigate(`/orders?project=${id}&action=create`)
+              }}
+              onMarkExempt={() => {
+                if (identifiersSectionRef.current) {
+                  identifiersSectionRef.current.markAsExempt()
+                }
+              }}
+            />
+          </Suspense>
 
             {phaseId <= 2 && (
               <div id="competitive-asin-section" style={{ marginTop: '24px' }}>
-                <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
+            <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
                   <CompetitiveAsinSection
                     projectId={id}
                     darkMode={darkMode}
                     phaseStyle={currentPhase}
                   />
-                </Suspense>
-              </div>
+            </Suspense>
+          </div>
             )}
 
           </CollapsibleSection>
@@ -1325,19 +1818,19 @@ function ProjectDetailInner({ useApp }) {
           </CollapsibleSection>
 
           {phaseId === 1 && (
-            <div style={{
+          <div style={{
               marginBottom: '24px',
-              padding: '20px',
+            padding: '20px',
               ...phaseCardStyle
+          }}>
+            <h4 style={{
+              margin: '0 0 16px 0',
+              fontSize: '14px',
+              fontWeight: '600',
+              color: darkMode ? '#ffffff' : '#111827'
             }}>
-              <h4 style={{
-                margin: '0 0 16px 0',
-                fontSize: '14px',
-                fontWeight: '600',
-                color: darkMode ? '#ffffff' : '#111827'
-              }}>
                 Decision
-              </h4>
+            </h4>
               <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
                 <DecisionLog 
                   entityType="project" 
@@ -1437,47 +1930,47 @@ function ProjectDetailInner({ useApp }) {
                 darkMode={darkMode}
                 onProjectUpdated={handleProjectUpdated}
               />
-            </CollapsibleSection>
+        </CollapsibleSection>
           )}
 
-          <CollapsibleSection
-            title="Comandes de Compra"
-            icon={Receipt}
-            defaultOpen={false}
-            darkMode={darkMode}
+        <CollapsibleSection
+          title="Comandes de Compra"
+          icon={Receipt}
+          defaultOpen={false}
+          darkMode={darkMode}
             phaseStyle={currentPhase}
-          >
-            <div style={{
-              padding: '16px',
+        >
+          <div style={{
+            padding: '16px',
               ...phaseCardStyle,
-              textAlign: 'center'
+            textAlign: 'center'
+          }}>
+            <p style={{
+              margin: '0 0 16px 0',
+              fontSize: '14px',
+              color: darkMode ? '#9ca3af' : '#6b7280'
             }}>
-              <p style={{
-                margin: '0 0 16px 0',
-                fontSize: '14px',
-                color: darkMode ? '#9ca3af' : '#6b7280'
-              }}>
-                Gestiona les comandes de compra d'aquest projecte
-              </p>
-              <button
-                onClick={() => navigate(`/orders?project=${id}`)}
-                style={{
-                  ...styles.actionButton,
-                  backgroundColor: '#4f46e5',
-                  margin: '0 auto'
-                }}
-              >
-                <ShoppingCart size={18} />
-                Veure Comandes
-              </button>
-            </div>
-          </CollapsibleSection>
+              Gestiona les comandes de compra d'aquest projecte
+            </p>
+            <button
+              onClick={() => navigate(`/orders?project=${id}`)}
+              style={{
+                ...styles.actionButton,
+                backgroundColor: '#4f46e5',
+                margin: '0 auto'
+              }}
+            >
+              <ShoppingCart size={18} />
+              Veure Comandes
+            </button>
+          </div>
+        </CollapsibleSection>
 
-          <CollapsibleSection
+        <CollapsibleSection
             title="Documents i Adjunts"
             icon={Paperclip}
-            defaultOpen={false}
-            darkMode={darkMode}
+          defaultOpen={false}
+          darkMode={darkMode}
             phaseStyle={currentPhase}
           >
             {!driveConnected && (
@@ -1486,104 +1979,104 @@ function ProjectDetailInner({ useApp }) {
                 <div style={{ flex: 1 }}>
                   Connecta Google Drive per gestionar els documents del projecte.
                 </div>
-                <button
+            <button
                   onClick={() => navigate('/settings')}
-                  style={{
-                    ...styles.actionButton,
+              style={{
+                ...styles.actionButton,
                     backgroundColor: '#f59e0b',
                     borderColor: '#f59e0b'
-                  }}
-                >
+              }}
+            >
                   Connectar
-                </button>
-              </div>
+            </button>
+          </div>
             )}
             {driveConnected && projectFolders && (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: isMobile ? '1fr' : (isTablet ? '200px 1fr' : '280px 1fr'),
+              gap: isMobile ? '16px' : '24px'
+            }}>
               <div style={{
-                display: 'grid',
-                gridTemplateColumns: isMobile ? '1fr' : (isTablet ? '200px 1fr' : '280px 1fr'),
-                gap: isMobile ? '16px' : '24px'
+                ...styles.foldersPanel,
+                backgroundColor: 'transparent',
+                border: 'none',
+                padding: 0
               }}>
-                <div style={{
-                  ...styles.foldersPanel,
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  padding: 0
+                <h4 style={{
+                  ...styles.sectionTitle,
+                  color: darkMode ? '#ffffff' : '#111827',
+                  fontSize: '14px',
+                  marginBottom: '12px'
                 }}>
-                  <h4 style={{
-                    ...styles.sectionTitle,
-                    color: darkMode ? '#ffffff' : '#111827',
-                    fontSize: '14px',
-                    marginBottom: '12px'
-                  }}>
-                    <FolderOpen size={16} />
-                    Carpetes del Projecte
-                  </h4>
-                  
-                  <div style={styles.foldersList}>
-                    {(projectSubfolders || []).map(folderName => {
-                      const folder = projectFolders.subfolders?.[folderName]
-                      const isSelected = selectedFolder?.name === folderName
-                      
-                      return (
-                        <button
-                          key={folderName}
-                          onClick={() => folder && setSelectedFolder(folder)}
-                          disabled={!folder}
-                          style={{
-                            ...styles.folderButton,
-                            backgroundColor: isSelected ? '#4f46e510' : 'transparent',
-                            borderColor: isSelected ? '#4f46e5' : 'var(--border-color)',
-                            opacity: folder ? 1 : 0.5
-                          }}
-                        >
-                          <FolderOpen size={16} color={isSelected ? '#4f46e5' : '#6b7280'} />
-                          <span style={{
-                            color: isSelected ? '#4f46e5' : (darkMode ? '#ffffff' : '#111827')
-                          }}>
-                            {folderName.replace(/^\d+_/, '')}
-                          </span>
-                        </button>
-                      )
-                    })}
-                  </div>
-
-                  <a 
-                    href={`https://drive.google.com/drive/folders/${projectFolders.main.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={styles.driveLink}
-                  >
-                    <ExternalLink size={14} />
-                    Obrir a Google Drive
-                  </a>
+                  <FolderOpen size={16} />
+                  Carpetes del Projecte
+                </h4>
+                
+                <div style={styles.foldersList}>
+                  {(projectSubfolders || []).map(folderName => {
+                    const folder = projectFolders.subfolders?.[folderName]
+                    const isSelected = selectedFolder?.name === folderName
+                    
+                    return (
+                      <button
+                        key={folderName}
+                        onClick={() => folder && setSelectedFolder(folder)}
+                        disabled={!folder}
+                        style={{
+                          ...styles.folderButton,
+                          backgroundColor: isSelected ? '#4f46e510' : 'transparent',
+                          borderColor: isSelected ? '#4f46e5' : 'var(--border-color)',
+                          opacity: folder ? 1 : 0.5
+                        }}
+                      >
+                        <FolderOpen size={16} color={isSelected ? '#4f46e5' : '#6b7280'} />
+                        <span style={{
+                          color: isSelected ? '#4f46e5' : (darkMode ? '#ffffff' : '#111827')
+                        }}>
+                          {folderName.replace(/^\d+_/, '')}
+                        </span>
+                      </button>
+                    )
+                  })}
                 </div>
 
-                {selectedFolder ? (
-                  <div style={styles.filesPanel}>
-                    <FileUploader
-                      folderId={selectedFolder.id}
-                      onUploadComplete={handleUploadComplete}
-                      label={`Arrossega arxius a ${selectedFolder.name?.replace(/^\d+_/, '')}`}
-                    />
-                    
-                    <FileBrowser
-                      folderId={selectedFolder.id}
-                      folderName={selectedFolder.name?.replace(/^\d+_/, '')}
-                      allowDelete={true}
-                    />
-                  </div>
-                ) : (
-                  <div style={{
-                    padding: '40px',
-                    textAlign: 'center',
-                    color: darkMode ? '#9ca3af' : '#6b7280',
-                    fontSize: '14px'
-                  }}>
-                    Selecciona una carpeta per veure els documents
-                  </div>
-                )}
+                <a 
+                  href={`https://drive.google.com/drive/folders/${projectFolders.main.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={styles.driveLink}
+                >
+                  <ExternalLink size={14} />
+                  Obrir a Google Drive
+                </a>
               </div>
+
+              {selectedFolder ? (
+                <div style={styles.filesPanel}>
+                  <FileUploader
+                    folderId={selectedFolder.id}
+                    onUploadComplete={handleUploadComplete}
+                    label={`Arrossega arxius a ${selectedFolder.name?.replace(/^\d+_/, '')}`}
+                  />
+                  
+                  <FileBrowser
+                    folderId={selectedFolder.id}
+                    folderName={selectedFolder.name?.replace(/^\d+_/, '')}
+                    allowDelete={true}
+                  />
+                </div>
+              ) : (
+                <div style={{
+                  padding: '40px',
+                  textAlign: 'center',
+                  color: darkMode ? '#9ca3af' : '#6b7280',
+                  fontSize: '14px'
+                }}>
+                  Selecciona una carpeta per veure els documents
+                </div>
+              )}
+            </div>
             )}
             {driveConnected && !projectFolders && (
               <div style={{ fontSize: '13px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
@@ -1592,11 +2085,11 @@ function ProjectDetailInner({ useApp }) {
             )}
           </CollapsibleSection>
 
-          <CollapsibleSection
+        <CollapsibleSection
             title="Despeses i Ingressos"
             icon={DollarSign}
-            defaultOpen={false}
-            darkMode={darkMode}
+          defaultOpen={false}
+          darkMode={darkMode}
             phaseStyle={currentPhase}
           >
             <div style={{
@@ -1643,7 +2136,7 @@ function ProjectDetailInner({ useApp }) {
               <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
                 <IdentifiersSection
                   ref={identifiersSectionRef}
-                  projectId={id}
+                  projectId={id} 
                   darkMode={darkMode}
                   phaseStyle={currentPhase}
                   showAsin={false}
@@ -1675,7 +2168,7 @@ function ProjectDetailInner({ useApp }) {
                 />
               </Suspense>
             </div>
-          </CollapsibleSection>
+        </CollapsibleSection>
         </PhaseSection>
         </div>
 
@@ -1820,6 +2313,89 @@ const styles = {
     fontSize: '12px',
     fontWeight: '600',
     color: '#4f46e5',
+    cursor: 'pointer'
+  },
+  createMenuWrapper: {
+    position: 'relative'
+  },
+  createMenu: {
+    position: 'absolute',
+    top: '42px',
+    right: 0,
+    minWidth: '180px',
+    backgroundColor: '#ffffff',
+    border: '1px solid #e5e7eb',
+    borderRadius: '10px',
+    boxShadow: '0 10px 24px rgba(15, 23, 42, 0.12)',
+    padding: '6px',
+    zIndex: 10
+  },
+  createMenuItem: {
+    width: '100%',
+    textAlign: 'left',
+    padding: '8px 10px',
+    border: 'none',
+    background: 'transparent',
+    fontSize: '13px',
+    color: '#374151',
+    cursor: 'pointer',
+    borderRadius: '8px'
+  },
+  createModalHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '16px 20px',
+    borderBottom: '1px solid #e5e7eb'
+  },
+  createModalClose: {
+    background: 'transparent',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '18px'
+  },
+  createModalBody: {
+    padding: '20px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px'
+  },
+  createFormGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gap: '12px'
+  },
+  createLabel: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
+    fontSize: '12px',
+    color: '#6b7280'
+  },
+  createInput: {
+    padding: '8px 10px',
+    borderRadius: '8px',
+    border: '1px solid #d1d5db',
+    fontSize: '13px'
+  },
+  createModalFooter: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '10px'
+  },
+  createCancel: {
+    padding: '8px 14px',
+    borderRadius: '8px',
+    border: '1px solid #d1d5db',
+    background: 'transparent',
+    cursor: 'pointer'
+  },
+  createSubmit: {
+    padding: '8px 14px',
+    borderRadius: '8px',
+    border: '1px solid #4f46e5',
+    backgroundColor: '#4f46e5',
+    color: '#ffffff',
     cursor: 'pointer'
   },
   phaseStatusChip: {
