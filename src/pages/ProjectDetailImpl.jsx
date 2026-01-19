@@ -172,7 +172,7 @@ function PhaseSection({ phaseId, currentPhaseId, phaseStyle, darkMode, children 
   const isPast = phaseId < currentPhaseId
   const isFuture = phaseId > currentPhaseId
   const sectionBorder = isCurrent ? phaseStyle.accent : (darkMode ? '#2a2a3a' : '#e5e7eb')
-  const sectionBg = isCurrent ? phaseStyle.bg : (darkMode ? '#111827' : '#ffffff')
+  const sectionBg = darkMode ? '#111827' : '#ffffff'
 
   useEffect(() => {
     if (phaseId === currentPhaseId) {
@@ -1064,9 +1064,11 @@ function ProjectDetailInner({ useApp }) {
         }}>
           <div style={styles.phaseTimelineSticky}>
             <div style={{
-              ...styles.phaseNavBar,
-              flexWrap: isMobile ? 'nowrap' : 'wrap',
-              overflowX: isMobile ? 'auto' : 'visible'
+              ...styles.timeline,
+              flexWrap: 'nowrap',
+              gap: '0',
+              overflowX: 'auto',
+              paddingBottom: '6px'
             }}>
               {PHASES.map((phase, index) => {
                 const isActive = phase.id === phaseId
@@ -1075,33 +1077,49 @@ function ProjectDetailInner({ useApp }) {
                 const PhaseIcon = phase.icon
 
                 return (
-                  <button
-                    key={phase.id}
-                    onClick={() => handlePhaseChange(phase.id)}
-                    style={{
-                      ...styles.phaseNavButton,
-                      borderColor: isActive ? phase.accent : (darkMode ? '#2a2a3a' : '#e5e7eb'),
-                      backgroundColor: isActive
-                        ? phase.bg
-                        : (isCompleted ? (darkMode ? '#111827' : '#f8fafc') : 'transparent'),
-                      color: isFuture ? (darkMode ? '#6b7280' : '#9ca3af') : phase.accent
-                    }}
-                  >
-                    <span style={styles.phaseNavIcon}>
+                  <div key={phase.id} style={styles.timelineItem}>
+                    <button
+                      onClick={() => handlePhaseChange(phase.id)}
+                      style={{
+                        ...styles.phaseButton,
+                        backgroundColor: isActive
+                          ? phase.bg
+                          : (isCompleted ? phase.bg : 'var(--bg-secondary)'),
+                        borderColor: isActive || isCompleted ? phase.accent : 'var(--border-color)',
+                        color: isFuture ? '#9ca3af' : phase.accent,
+                        boxShadow: isActive ? `0 0 0 6px ${phase.bg}` : 'none'
+                      }}
+                    >
                       {isCompleted ? (
-                        <Check size={14} color={phase.accent} />
+                        <Check size={20} color={phase.accent} />
                       ) : (
-                        <PhaseIcon size={14} color={isFuture ? (darkMode ? '#6b7280' : '#9ca3af') : phase.accent} />
+                        <PhaseIcon size={20} color={isFuture ? '#9ca3af' : phase.accent} />
                       )}
-                    </span>
+                    </button>
                     <span style={{
-                      ...styles.phaseNavLabel,
-                      fontWeight: isActive ? '700' : '500',
-                      color: isActive ? phase.accent : (darkMode ? '#e5e7eb' : '#374151')
+                      ...styles.phaseName,
+                      color: isActive ? phase.accent : (darkMode ? '#9ca3af' : '#6b7280'),
+                      fontWeight: isActive ? '600' : '400',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => handlePhaseChange(phase.id)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault()
+                        handlePhaseChange(phase.id)
+                      }
                     }}>
                       {phase.name}
                     </span>
-                  </button>
+                    {index < PHASES.length - 1 && (
+                      <div style={{
+                        ...styles.timelineConnector,
+                        backgroundColor: isCompleted ? phase.accent : 'var(--border-color)'
+                      }} />
+                    )}
+                  </div>
                 )
               })}
             </div>
@@ -2586,36 +2604,6 @@ const styles = {
     justifyContent: 'space-between',
     position: 'relative',
     marginBottom: '24px'
-  },
-  phaseNavBar: {
-    width: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    flexWrap: 'wrap',
-    paddingBottom: '4px',
-    scrollSnapType: 'x mandatory'
-  },
-  phaseNavButton: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '8px 12px',
-    borderRadius: '999px',
-    border: '1px solid',
-    background: 'transparent',
-    fontSize: '13px',
-    cursor: 'pointer',
-    scrollSnapAlign: 'center',
-    whiteSpace: 'nowrap'
-  },
-  phaseNavIcon: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  phaseNavLabel: {
-    fontSize: '13px'
   },
   phaseGroupsWrapper: {
     display: 'flex',
