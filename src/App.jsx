@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import React, { Suspense } from 'react'
 import { AppProvider, useApp } from './context/AppContext'
 import Sidebar from './components/Sidebar'
@@ -69,6 +69,8 @@ const Help = lazyWithErrorBoundary(() => import('./pages/Help'), 'Help')
 function AppContent() {
   const { sidebarCollapsed, darkMode } = useApp()
   const { isMobile, isTablet } = useBreakpoint()
+  const location = useLocation()
+  const isProjectDetail = location.pathname.startsWith('/projects/') && location.pathname.split('/').length >= 3
 
   // Calcular margin-left segons breakpoint
   const getMarginLeft = () => {
@@ -264,7 +266,7 @@ function AppContent() {
         </ErrorBoundary>
       </main>
       <ToastContainer darkMode={darkMode} />
-      <FloatingNotesLayer />
+      {!isProjectDetail && <FloatingNotesLayer />}
     </div>
   )
 }

@@ -1058,7 +1058,7 @@ function ProjectDetailInner({ useApp }) {
       }}>
         <div style={{
           ...styles.phaseStickyContainer,
-          borderColor: currentPhase.accent,
+          borderColor: darkMode ? '#1f2937' : '#e5e7eb',
           backgroundColor: darkMode ? '#0f172a' : '#ffffff'
         }}>
           <div style={styles.phaseTimelineSticky}>
