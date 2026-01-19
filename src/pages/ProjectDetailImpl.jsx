@@ -167,8 +167,11 @@ export default function ProjectDetail() {
 
 function PhaseSection({ phaseId, currentPhaseId, phaseStyle, darkMode, children }) {
   const [isOpen, setIsOpen] = useState(phaseId <= currentPhaseId)
+  const isCurrent = phaseId === currentPhaseId
+  const isPast = phaseId < currentPhaseId
   const isFuture = phaseId > currentPhaseId
-  const surface = getPhaseSurfaceStyles(phaseStyle, { darkMode, borderWidth: 2 })
+  const sectionBorder = isCurrent ? phaseStyle.accent : (darkMode ? '#2a2a3a' : '#e5e7eb')
+  const sectionBg = isCurrent ? phaseStyle.bg : (darkMode ? '#111827' : '#ffffff')
 
   useEffect(() => {
     if (phaseId === currentPhaseId) {
@@ -179,8 +182,8 @@ function PhaseSection({ phaseId, currentPhaseId, phaseStyle, darkMode, children 
   return (
     <section style={{
       ...styles.phaseSection,
-      borderColor: phaseStyle.accent,
-      backgroundColor: surface.wrapperStyle.backgroundColor || 'transparent'
+      borderColor: sectionBorder,
+      backgroundColor: sectionBg
     }}>
       <button
         type="button"
@@ -189,8 +192,11 @@ function PhaseSection({ phaseId, currentPhaseId, phaseStyle, darkMode, children 
         aria-expanded={isOpen}
       >
         <div style={styles.phaseSectionHeaderText}>
-          <span style={{ ...styles.phaseSectionTitle, color: phaseStyle.accent }}>
-            Fase {phaseId} · {phaseStyle.name}
+          <span style={{
+            ...styles.phaseSectionTitle,
+            color: isCurrent ? phaseStyle.accent : (darkMode ? '#e5e7eb' : '#111827')
+          }}>
+            {phaseStyle.name}
           </span>
           <span style={{
             fontSize: '13px',
@@ -200,6 +206,11 @@ function PhaseSection({ phaseId, currentPhaseId, phaseStyle, darkMode, children 
           </span>
         </div>
         <div style={styles.phaseSectionHeaderMeta}>
+          {isPast && (
+            <span style={styles.phasePastChip}>
+              ✓ Completada
+            </span>
+          )}
           {isFuture && (
             <span style={styles.phasePreviewChip}>Preview</span>
           )}
@@ -2253,6 +2264,18 @@ const styles = {
     border: '1px solid #e5e7eb',
     color: '#6b7280',
     backgroundColor: '#f3f4f6'
+  },
+  phasePastChip: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    fontSize: '11px',
+    fontWeight: '600',
+    padding: '4px 10px',
+    borderRadius: '999px',
+    border: '1px solid #d1d5db',
+    color: '#6b7280',
+    backgroundColor: '#f9fafb'
   },
   phasePlaceholder: {
     padding: '16px',
