@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Save, AlertTriangle, CheckCircle2, XCircle, ExternalLink, Link2 } from 'lucide-react'
-import { getProjectProfitability, upsertProjectProfitability, getProductIdentifiers, upsertProductIdentifiers } from '../lib/supabase'
+import supabase, { getProductIdentifiers, upsertProductIdentifiers } from '../lib/supabase'
 import { calculateQuickProfitability } from '../lib/profitability'
 import HelpIcon from './HelpIcon'
 
@@ -9,8 +9,12 @@ import HelpIcon from './HelpIcon'
  * Visible a la fase Research del projecte
  */
 export default function ProfitabilityCalculator({ projectId, darkMode, showAsinCapture = true }) {
+  const VIABILITY_STORAGE_PREFIX = 'project_viability_'
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [saveStatus, setSaveStatus] = useState('idle')
+  const [saveError, setSaveError] = useState(null)
+  const saveTimeoutRef = useRef(null)
   const [data, setData] = useState({
     selling_price: '0',
     cogs: '0',
@@ -32,6 +36,13 @@ export default function ProfitabilityCalculator({ projectId, darkMode, showAsinC
   const [asinError, setAsinError] = useState(null)
 
   // This will be set up after loadData and loadAsin are defined
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+    }
+  }, [])
 
   // Listen for price copy events from QuickSupplierPriceEstimate
   useEffect(() => {
@@ -76,38 +87,49 @@ export default function ProfitabilityCalculator({ projectId, darkMode, showAsinC
     if (!projectId) return
     setLoading(true)
     try {
-      let profitability = await getProjectProfitability(projectId)
-      
-      // Si no existeix registre, crear-lo amb defaults
-      if (!profitability) {
-        await upsertProjectProfitability(projectId, {
-          selling_price: 0,
-          cogs: 0,
-          shipping_per_unit: 0,
-          referral_fee_percent: 15,
-          fba_fee_per_unit: 0,
-          ppc_per_unit: 0,
-          other_costs_per_unit: 0,
-          fixed_costs: 0
-        })
-        // Recarregar després de crear
-        profitability = await getProjectProfitability(projectId)
+      const { isDemoMode } = await import('../demo/demoMode')
+      if (isDemoMode()) {
+        const raw = localStorage.getItem(`${VIABILITY_STORAGE_PREFIX}${projectId}`)
+        if (raw) {
+          const payload = JSON.parse(raw)
+          setData({
+            selling_price: (payload.selling_price ?? 0).toString(),
+            cogs: (payload.cogs ?? 0).toString(),
+            shipping_per_unit: (payload.shipping_per_unit ?? 0).toString(),
+            referral_fee_percent: (payload.referral_fee_percent ?? 15).toString(),
+            fba_fee_per_unit: (payload.fba_fee_per_unit ?? 0).toString(),
+            ppc_per_unit: (payload.ppc_per_unit ?? 0).toString(),
+            other_costs_per_unit: (payload.other_costs_per_unit ?? 0).toString(),
+            fixed_costs: (payload.fixed_costs ?? 0).toString()
+          })
+        }
+        setLoading(false)
+        return
       }
 
-      if (profitability) {
+      const { data: row, error } = await supabase
+        .from('project_viability')
+        .select('*')
+        .eq('project_id', projectId)
+        .maybeSingle()
+
+      if (error) throw error
+
+      if (row?.data) {
+        const payload = row.data || {}
         setData({
-          selling_price: (profitability.selling_price ?? 0).toString(),
-          cogs: (profitability.cogs ?? 0).toString(),
-          shipping_per_unit: (profitability.shipping_per_unit ?? 0).toString(),
-          referral_fee_percent: (profitability.referral_fee_percent ?? 15).toString(),
-          fba_fee_per_unit: (profitability.fba_fee_per_unit ?? 0).toString(),
-          ppc_per_unit: (profitability.ppc_per_unit ?? 0).toString(),
-          other_costs_per_unit: (profitability.other_costs_per_unit ?? 0).toString(),
-          fixed_costs: (profitability.fixed_costs ?? 0).toString()
+          selling_price: (payload.selling_price ?? 0).toString(),
+          cogs: (payload.cogs ?? 0).toString(),
+          shipping_per_unit: (payload.shipping_per_unit ?? 0).toString(),
+          referral_fee_percent: (payload.referral_fee_percent ?? 15).toString(),
+          fba_fee_per_unit: (payload.fba_fee_per_unit ?? 0).toString(),
+          ppc_per_unit: (payload.ppc_per_unit ?? 0).toString(),
+          other_costs_per_unit: (payload.other_costs_per_unit ?? 0).toString(),
+          fixed_costs: (payload.fixed_costs ?? 0).toString()
         })
       }
     } catch (err) {
-      console.error('Error carregant profitability:', err)
+      console.error('Error carregant viability:', err)
     }
     setLoading(false)
   }, [projectId])
@@ -305,11 +327,22 @@ export default function ProfitabilityCalculator({ projectId, darkMode, showAsinC
   }
 
   const handleSave = async () => {
-    if (!projectId) return
-    
+    const { isDemoMode } = await import('../demo/demoMode')
+    const isDemo = isDemoMode()
+    console.log('[VIABILITY] save click', { projectId, isDemo })
+    if (!projectId) {
+      console.error('[VIABILITY] upsert crash', new Error('projectId missing'))
+      setSaveError('projectId missing')
+      setSaveStatus('error')
+      return
+    }
+
     setSaving(true)
+    setSaveStatus('saving')
+    setSaveError(null)
     try {
-      await upsertProjectProfitability(projectId, {
+      console.log('[VIABILITY] upsert start')
+      const payload = {
         selling_price: parseFloat(data.selling_price) || 0,
         cogs: parseFloat(data.cogs) || 0,
         shipping_per_unit: parseFloat(data.shipping_per_unit) || 0,
@@ -318,10 +351,29 @@ export default function ProfitabilityCalculator({ projectId, darkMode, showAsinC
         ppc_per_unit: parseFloat(data.ppc_per_unit) || 0,
         other_costs_per_unit: parseFloat(data.other_costs_per_unit) || 0,
         fixed_costs: parseFloat(data.fixed_costs) || 0
-      })
+      }
+      if (isDemo) {
+        localStorage.setItem(`${VIABILITY_STORAGE_PREFIX}${projectId}`, JSON.stringify(payload))
+      } else {
+        const { error } = await supabase
+          .from('project_viability')
+          .upsert({ project_id: projectId, data: payload }, { onConflict: 'project_id' })
+        console.log('[VIABILITY] upsert done', { error })
+        if (error) throw error
+      }
+
+      setSaveStatus('saved')
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+      saveTimeoutRef.current = setTimeout(() => {
+        setSaveStatus('idle')
+      }, 1500)
     } catch (err) {
-      console.error('Error guardant profitability:', err)
-      alert('Error guardant la profitabilitat: ' + (err.message || 'Error desconegut'))
+      console.error('[VIABILITY] upsert crash', err)
+      console.error('Error guardant viability:', err)
+      setSaveError(err.message || 'Error desconegut')
+      setSaveStatus('error')
     } finally {
       setSaving(false)
     }
@@ -749,11 +801,22 @@ export default function ProfitabilityCalculator({ projectId, darkMode, showAsinC
           <button
             onClick={handleSave}
             disabled={saving}
+            type="button"
             style={styles.saveButton}
           >
             <Save size={16} />
             {saving ? 'Guardant...' : 'Guardar'}
           </button>
+          {saveStatus === 'saved' && (
+            <div style={{ marginTop: '8px', fontSize: '12px', color: '#10b981' }}>
+              ✅ Guardat
+            </div>
+          )}
+          {saveStatus === 'error' && (
+            <div style={{ marginTop: '8px', fontSize: '12px', color: '#ef4444' }}>
+              ❌ Error: {saveError || 'Error desconegut'}
+            </div>
+          )}
         </div>
 
         {/* Columna dreta - Resultats */}
