@@ -1675,116 +1675,118 @@ function ProjectDetailInner({ useApp }) {
             </div>
           </div>
           <div style={styles.phaseCurrentBar}>
-            <div style={styles.phaseCurrentInfo}>
-              <span style={{
-                ...styles.phaseStatusChip,
-                color: currentPhase.accent,
-                borderColor: currentPhase.accent
-              }}>
-                {phaseGroupLabel}
-              </span>
-              <div>
-                <div style={{
-                  ...styles.phaseStatusTitle,
-                  color: darkMode ? '#ffffff' : '#111827'
-                }}>
-                  {currentPhase.name}
-                </div>
-                <div style={{
-                  fontSize: '13px',
-                  color: darkMode ? '#9ca3af' : '#6b7280'
-                }}>
-                  {phaseSubtitle}
-                </div>
-              </div>
-            </div>
-            <div style={styles.phaseCurrentMeta}>
-              <div style={styles.phaseStatusCenter}>
+            <div style={styles.phaseCurrentTopRow}>
+              <div style={styles.phaseCurrentInfo}>
                 <span style={{
-                  fontSize: '12px',
-                  color: darkMode ? '#9ca3af' : '#6b7280'
+                  ...styles.phaseStatusChip,
+                  color: currentPhase.accent,
+                  borderColor: currentPhase.accent
                 }}>
-                  Checklist
+                  {phaseGroupLabel}
                 </span>
-                <strong style={{ color: currentPhase.accent }}>
-                  {phaseProgress.total ? `${phaseProgress.completed}/${phaseProgress.total}` : '—'}
-                </strong>
+                <div>
+                  <div style={{
+                    ...styles.phaseStatusTitle,
+                    color: darkMode ? '#ffffff' : '#111827'
+                  }}>
+                    {currentPhase.name}
+                  </div>
+                  <div style={{
+                    fontSize: '13px',
+                    color: darkMode ? '#9ca3af' : '#6b7280'
+                  }}>
+                    {phaseSubtitle}
+                  </div>
+                </div>
               </div>
-              {nextPhaseLabel ? (
-                <div style={styles.phaseStatusNext}>
+              <div style={styles.phaseCurrentMeta}>
+                <div style={styles.phaseStatusCenter}>
                   <span style={{
                     fontSize: '12px',
                     color: darkMode ? '#9ca3af' : '#6b7280'
                   }}>
-                    Següent fase
+                    Checklist
                   </span>
-                  <div style={styles.phaseStatusNextRow}>
-                    <ChevronRight size={16} color={currentPhase.accent} />
+                  <strong style={{ color: currentPhase.accent }}>
+                    {phaseProgress.total ? `${phaseProgress.completed}/${phaseProgress.total}` : '—'}
+                  </strong>
+                </div>
+                {nextPhaseLabel ? (
+                  <div style={styles.phaseStatusNext}>
                     <span style={{
-                      fontSize: '13px',
-                      fontWeight: '600',
-                      color: darkMode ? '#ffffff' : '#111827'
+                      fontSize: '12px',
+                      color: darkMode ? '#9ca3af' : '#6b7280'
                     }}>
-                      {nextPhaseLabel}
+                      Següent fase
                     </span>
-                    {hasNextMissing && (
+                    <div style={styles.phaseStatusNextRow}>
+                      <ChevronRight size={16} color={currentPhase.accent} />
                       <span style={{
-                        ...styles.phaseStatusWarning,
-                        borderColor: '#f59e0b',
-                        color: '#f59e0b'
+                        fontSize: '13px',
+                        fontWeight: '600',
+                        color: darkMode ? '#ffffff' : '#111827'
                       }}>
-                        {nextMissing.length} pendent{nextMissing.length > 1 ? 's' : ''}
+                        {nextPhaseLabel}
                       </span>
+                      {hasNextMissing && (
+                        <span style={{
+                          ...styles.phaseStatusWarning,
+                          borderColor: '#f59e0b',
+                          color: '#f59e0b'
+                        }}>
+                          {nextMissing.length} pendent{nextMissing.length > 1 ? 's' : ''}
+                        </span>
+                      )}
+                    </div>
+                    {hasNextMissing && (
+                      <>
+                        <div style={{
+                          fontSize: '12px',
+                          color: darkMode ? '#e5e7eb' : '#6b7280'
+                        }}>
+                          {missingPreview}
+                          {nextMissing.length > 3 ? '…' : ''}
+                        </div>
+                        <button
+                          onClick={() => {
+                            const checklist = document.getElementById('phase-checklist')
+                            if (checklist) {
+                              checklist.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                            }
+                          }}
+                          style={styles.phaseStatusAction}
+                        >
+                          Veure pendents
+                        </button>
+                      </>
+                    )}
+                    {hasViabilitySummary && (
+                      <div style={styles.phaseViabilitySummary}>
+                        Viabilitat: {viabilitySummary.profitPerUnit.toFixed(2)}€ · {viabilitySummary.netMarginPercent.toFixed(1)}%
+                      </div>
                     )}
                   </div>
-                  {hasNextMissing && (
-                    <>
-                      <div style={{
-                        fontSize: '12px',
-                        color: darkMode ? '#e5e7eb' : '#6b7280'
-                      }}>
-                        {missingPreview}
-                        {nextMissing.length > 3 ? '…' : ''}
-                      </div>
-                      <button
-                        onClick={() => {
-                          const checklist = document.getElementById('phase-checklist')
-                          if (checklist) {
-                            checklist.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                          }
-                        }}
-                        style={styles.phaseStatusAction}
-                      >
-                        Veure pendents
-                      </button>
-                    </>
-                  )}
-                  {hasViabilitySummary && (
-                    <div style={styles.phaseViabilitySummary}>
-                      Viabilitat: {viabilitySummary.profitPerUnit.toFixed(2)}€ · {viabilitySummary.netMarginPercent.toFixed(1)}%
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div style={styles.phaseStatusNext}>
-                  <span style={{
-                    fontSize: '12px',
-                    color: darkMode ? '#9ca3af' : '#6b7280'
-                  }}>
-                    Estat
-                  </span>
-                  <div style={styles.phaseStatusNextRow}>
-                    <CheckCircle2 size={16} color={currentPhase.accent} />
+                ) : (
+                  <div style={styles.phaseStatusNext}>
                     <span style={{
-                      fontSize: '13px',
-                      fontWeight: '600',
-                      color: darkMode ? '#ffffff' : '#111827'
+                      fontSize: '12px',
+                      color: darkMode ? '#9ca3af' : '#6b7280'
                     }}>
-                      Totes les fases completes
+                      Estat
                     </span>
+                    <div style={styles.phaseStatusNextRow}>
+                      <CheckCircle2 size={16} color={currentPhase.accent} />
+                      <span style={{
+                        fontSize: '13px',
+                        fontWeight: '600',
+                        color: darkMode ? '#ffffff' : '#111827'
+                      }}>
+                        Totes les fases completes
+                      </span>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
             <div style={styles.phaseActionsBar}>
               {phaseId >= 3 && (
@@ -2622,20 +2624,28 @@ const styles = {
   phaseCurrentBar: {
     display: 'flex',
     flexDirection: 'column',
+    width: '100%',
     gap: '12px'
+  },
+  phaseCurrentTopRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: '16px',
+    width: '100%'
   },
   phaseCurrentInfo: {
     display: 'flex',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: '12px',
-    flexWrap: 'wrap'
+    flex: 1,
+    minWidth: 0
   },
   phaseCurrentMeta: {
     display: 'flex',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: '20px',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between'
+    flexShrink: 0
   },
   phaseActionsBar: {
     display: 'flex',
