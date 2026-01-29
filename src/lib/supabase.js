@@ -136,9 +136,6 @@ export const getProjects = async (includeDiscarded = false) => {
   }
   
   const userId = await getCurrentUserId()
-  if (!userId) {
-    return authRequired()
-  }
   if (!userId) return []
   let query = supabase
     .from('projects')
@@ -1392,9 +1389,7 @@ export const getPoAmazonReadiness = async (purchaseOrderId) => {
     return null
   }
   const userId = await getCurrentUserId()
-  if (!userId) {
-    return authRequired()
-  }
+  if (!userId) return null
   const { data, error } = await supabase
     .from('po_amazon_readiness')
     .select('*')
