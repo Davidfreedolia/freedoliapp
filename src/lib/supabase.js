@@ -110,9 +110,14 @@ export const getCurrentUserId = async () => {
   }
   
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('No hi ha usuari autenticat')
+  if (!user) return null
   return user.id
 }
+
+const authRequired = () => ({
+  data: null,
+  error: { code: 'AUTH_REQUIRED', message: 'AUTH_REQUIRED' }
+})
 
 // ============================================
 // FUNCIONS API
@@ -131,6 +136,10 @@ export const getProjects = async (includeDiscarded = false) => {
   }
   
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
+  if (!userId) return []
   let query = supabase
     .from('projects')
     .select('*')
@@ -162,13 +171,14 @@ export const getProject = async (id) => {
   }
   
   const userId = await getCurrentUserId()
+  if (!userId) return null
   const { data, error } = await supabase
     .from('projects')
     .select('*')
     .eq('id', id)
     .eq('user_id', userId)
     .eq('is_demo', demoMode) // Filter by demo mode
-    .single()
+    .maybeSingle()
   if (error) throw error
   return data
 }
@@ -179,6 +189,9 @@ export const createProject = async (project) => {
   const demoMode = await getDemoMode()
   
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   
   // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
   const { user_id, ...projectData } = project
@@ -197,7 +210,7 @@ export const createProject = async (project) => {
           is_demo: demoMode // Mark with current demo mode
         }])
         .select()
-        .single()
+        .maybeSingle()
       
       if (error) {
         // Check if it's a duplicate SKU error (23505 = unique_violation)
@@ -263,7 +276,7 @@ export const updateProject = async (id, updates) => {
     .update(updateData)
     .eq('id', id)
     .select()
-    .single()
+    .maybeSingle()
   if (error) throw error
   return data
 }
@@ -291,7 +304,7 @@ export const updateProjectArtsFinalsFolderId = async (projectId, folderId) => {
     .update({ arts_finals_folder_id: folderId })
     .eq('id', projectId)
     .select()
-    .single()
+    .maybeSingle()
   
   if (error) throw error
   return data
@@ -339,7 +352,7 @@ export const getSupplier = async (id) => {
     .from('suppliers')
     .select('*')
     .eq('id', id)
-    .single()
+    .maybeSingle()
   if (error) throw error
   return data
 }
@@ -352,6 +365,9 @@ export const createSupplier = async (supplier) => {
   // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
   const { user_id, ...supplierData } = supplier
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   
   // Use getSupabaseClient directly to avoid Proxy issues in production
   const client = getSupabaseClient()
@@ -367,7 +383,7 @@ export const createSupplier = async (supplier) => {
       is_demo: demoMode // Set is_demo based on current mode
     }])
     .select()
-    .single()
+    .maybeSingle()
   
   if (error) throw error
   return data
@@ -381,6 +397,9 @@ export const updateSupplier = async (id, updates) => {
   // Eliminar user_id si ve del client (no es pot canviar)
   const { user_id, ...updateData } = updates
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   
   // Use getSupabaseClient directly to avoid Proxy issues in production
   const client = getSupabaseClient()
@@ -395,7 +414,7 @@ export const updateSupplier = async (id, updates) => {
     .eq('user_id', userId) // Ensure user can only update their own suppliers
     .eq('is_demo', demoMode) // Ensure demo/real mode consistency
     .select()
-    .single()
+    .maybeSingle()
   
   if (error) throw error
   return data
@@ -407,6 +426,9 @@ export const deleteSupplier = async (id) => {
   const demoMode = await getDemoMode()
   
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   
   // Use getSupabaseClient directly to avoid Proxy issues in production
   const client = getSupabaseClient()
@@ -512,7 +534,7 @@ export const getPurchaseOrder = async (id) => {
     `
     )
     .eq('id', id)
-    .single()
+    .maybeSingle()
   if (error) throw error
   return data
 }
@@ -524,11 +546,15 @@ export const createPurchaseOrder = async (po) => {
   
   // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
   const { user_id, ...poData } = po
+  const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   const { data, error } = await supabase
     .from('purchase_orders')
     .insert([{ ...poData, is_demo: demoMode }]) // Mark with current demo mode
     .select()
-    .single()
+    .maybeSingle()
   if (error) throw error
   return data
 }
@@ -536,6 +562,10 @@ export const createPurchaseOrder = async (po) => {
 export const updatePurchaseOrder = async (id, updates) => {
   // Eliminar user_id si ve del client (no es pot canviar)
   const { user_id, ...updateData } = updates
+  const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   
   // El trigger de la BD actualitzarà logistics_updated_at automàticament
   // quan canvien logistics_status o tracking_number, però per seguretat
@@ -545,7 +575,7 @@ export const updatePurchaseOrder = async (id, updates) => {
     .update({ ...updateData, updated_at: new Date().toISOString() })
     .eq('id', id)
     .select()
-    .single()
+    .maybeSingle()
   if (error) throw error
   return data
 }
@@ -613,7 +643,7 @@ export const createDocument = async (doc) => {
           .update({ drive_file_id: docData.drive_file_id, file_url: docData.file_url })
           .eq('id', existingByName.id)
           .select()
-          .single()
+          .maybeSingle()
         if (updateError) throw updateError
         return updated
       }
@@ -626,7 +656,7 @@ export const createDocument = async (doc) => {
     .from('documents')
     .insert([docData])
     .select()
-    .single()
+    .maybeSingle()
   if (error) throw error
   return data
 }
@@ -665,11 +695,15 @@ export const createPayment = async (payment) => {
   
   // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
   const { user_id, ...paymentData } = payment
+  const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   const { data, error } = await supabase
     .from('payments')
     .insert([{ ...paymentData, is_demo: demoMode }]) // Mark with current demo mode
     .select()
-    .single()
+    .maybeSingle()
   if (error) throw error
   return data
 }
@@ -677,12 +711,16 @@ export const createPayment = async (payment) => {
 export const updatePayment = async (id, updates) => {
   // Eliminar user_id si ve del client (no es pot canviar)
   const { user_id, ...updateData } = updates
+  const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   const { data, error } = await supabase
     .from('payments')
     .update(updateData)
     .eq('id', id)
     .select()
-    .single()
+    .maybeSingle()
   if (error) throw error
   return data
 }
@@ -706,6 +744,15 @@ export const getDashboardStats = async () => {
   }
   
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return {
+      totalProjects: 0,
+      activeProjects: 0,
+      completedProjects: 0,
+      discardedProjects: 0,
+      totalInvested: 0,
+    }
+  }
   // RLS maneja el filtrado por user_id automáticamente, pero afegim is_demo filter
   const { data: projects, error } = await supabase
     .from('projects')
@@ -879,7 +926,7 @@ export const getProjectSku = async (projectId) => {
     .from('projects')
     .select('sku, project_code')
     .eq('id', projectId)
-    .single()
+    .maybeSingle()
   if (error) throw error
   return data?.sku || null
 }
@@ -917,7 +964,7 @@ export const createSupplierPriceEstimate = async (projectId, estimate) => {
       ...estimateData
     }])
     .select()
-    .single()
+    .maybeSingle()
   if (error) throw error
   return data
 }
@@ -933,7 +980,7 @@ export const updateSupplierPriceEstimate = async (id, estimate) => {
     })
     .eq('id', id)
     .select()
-    .single()
+    .maybeSingle()
   if (error) throw error
   return data
 }
@@ -965,7 +1012,7 @@ export const getProductIdentifiers = async (projectId) => {
     .from('product_identifiers')
     .select('*')
     .eq('project_id', projectId)
-    .single()
+    .maybeSingle()
   if (error && error.code !== 'PGRST116') throw error // PGRST116 = no rows found
   return data
 }
@@ -988,7 +1035,7 @@ export const upsertProductIdentifiers = async (projectId, identifiers) => {
       onConflict: 'user_id,project_id'
     })
     .select()
-    .single()
+    .maybeSingle()
   if (error) throw error
   return data
 }
@@ -1065,7 +1112,7 @@ export const assignGtinFromPool = async (gtinPoolId, projectId) => {
     .from('gtin_pool')
     .select('*')
     .eq('id', gtinPoolId)
-    .single()
+    .maybeSingle()
   if (gtinError) throw gtinError
   
   if (gtinData.assigned_to_project_id) {
@@ -1101,7 +1148,7 @@ export const assignGtinFromPool = async (gtinPoolId, projectId) => {
       })
       .eq('id', existingIdentifiers.id)
       .select()
-      .single()
+      .maybeSingle()
     if (error) throw error
     return data
   } else {
@@ -1113,7 +1160,7 @@ export const assignGtinFromPool = async (gtinPoolId, projectId) => {
         ...identifiersData
       }])
       .select()
-      .single()
+      .maybeSingle()
     if (error) throw error
     return data
   }
@@ -1147,7 +1194,7 @@ export const addGtinToPool = async (gtinData) => {
       .eq('gtin_code', poolData.gtin_code)
       .eq('is_demo', demoMode)
       .is('deleted_at', null)
-      .single()
+      .maybeSingle()
     
     if (fetchError) throw fetchError
     return gtin
@@ -1159,7 +1206,7 @@ export const addGtinToPool = async (gtinData) => {
     .select('*')
     .eq('gtin_code', poolData.gtin_code)
     .eq('is_demo', demoMode)
-    .single()
+    .maybeSingle()
   
   if (fetchError) throw fetchError
   return existing
@@ -1167,6 +1214,9 @@ export const addGtinToPool = async (gtinData) => {
 
 export const releaseGtinFromProject = async (gtinPoolId) => {
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   
   // Obtenir el GTIN
   const { data: gtinData, error: gtinError } = await supabase
@@ -1174,7 +1224,7 @@ export const releaseGtinFromProject = async (gtinPoolId) => {
     .select('assigned_to_project_id')
     .eq('id', gtinPoolId)
     .eq('user_id', userId)
-    .single()
+    .maybeSingle()
   if (gtinError) throw gtinError
   
   if (!gtinData.assigned_to_project_id) {
@@ -1342,12 +1392,15 @@ export const getPoAmazonReadiness = async (purchaseOrderId) => {
     return null
   }
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   const { data, error } = await supabase
     .from('po_amazon_readiness')
     .select('*')
     .eq('purchase_order_id', purchaseOrderId)
     .eq('user_id', userId)
-    .single()
+    .maybeSingle()
   if (error && error.code !== 'PGRST116') throw error // PGRST116 = no rows found
   return data
 }
@@ -1360,6 +1413,9 @@ export const upsertPoAmazonReadiness = async (purchaseOrderId, projectId, readin
   // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
   const { user_id, ...data } = readinessData
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   
   const { data: result, error } = await supabase
     .from('po_amazon_readiness')
@@ -1373,7 +1429,7 @@ export const upsertPoAmazonReadiness = async (purchaseOrderId, projectId, readin
       onConflict: 'user_id,purchase_order_id'
     })
     .select()
-    .single()
+    .maybeSingle()
   if (error) throw error
   return result
 }
@@ -1384,6 +1440,9 @@ export const updatePoAmazonReadinessLabels = async (purchaseOrderId, labelsData)
     return null
   }
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   const { data, error } = await supabase
     .from('po_amazon_readiness')
     .update({
@@ -1395,7 +1454,7 @@ export const updatePoAmazonReadinessLabels = async (purchaseOrderId, labelsData)
     .eq('purchase_order_id', purchaseOrderId)
     .eq('user_id', userId)
     .select()
-    .single()
+    .maybeSingle()
   if (error) throw error
   return data
 }
@@ -1406,6 +1465,9 @@ export const updateManufacturerPackGenerated = async (purchaseOrderId, version) 
     return null
   }
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   
   // Buscar o crear readiness record
   const existing = await getPoAmazonReadiness(purchaseOrderId)
@@ -1423,7 +1485,7 @@ export const updateManufacturerPackGenerated = async (purchaseOrderId, version) 
       .eq('id', purchaseOrderId)
       .eq('user_id', userId)
       .eq('is_demo', demoMode) // Filter by demo mode
-      .single()
+      .maybeSingle()
     if (poData) projectId = poData.project_id
   } else {
     projectId = existing.project_id
@@ -1447,7 +1509,7 @@ export const updateManufacturerPackGenerated = async (purchaseOrderId, version) 
       ignoreDuplicates: false
     })
     .select()
-    .single()
+    .maybeSingle()
   if (error) throw error
   return data
 }
@@ -1467,7 +1529,7 @@ export const markManufacturerPackAsSent = async (purchaseOrderId) => {
     .eq('purchase_order_id', purchaseOrderId)
     .eq('user_id', userId)
     .select()
-    .single()
+    .maybeSingle()
   if (error) throw error
   return data
 }
@@ -1755,7 +1817,7 @@ export const getPoShipment = async (poId) => {
     .select('*')
     .eq('user_id', userId)
     .eq('purchase_order_id', poId)
-    .single()
+    .maybeSingle()
   
   if (error && error.code !== 'PGRST116') throw error
   return data
@@ -1763,6 +1825,9 @@ export const getPoShipment = async (poId) => {
 
 export const upsertPoShipment = async (poId, payload) => {
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   
   // Strip user_id si ve en payload
   const { user_id, ...cleanPayload } = payload
@@ -1783,7 +1848,7 @@ export const upsertPoShipment = async (poId, payload) => {
       .eq('id', existing.id)
       .eq('user_id', userId)
       .select()
-      .single()
+      .maybeSingle()
     
     if (error) throw error
     return data
@@ -1793,7 +1858,7 @@ export const upsertPoShipment = async (poId, payload) => {
     .from('po_shipments')
     .insert([shipmentData])
     .select()
-    .single()
+    .maybeSingle()
   
   if (error) throw error
   return data
@@ -1801,6 +1866,9 @@ export const upsertPoShipment = async (poId, payload) => {
 
 export const setShipmentStatus = async (poId, status) => {
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   
   const validStatuses = ['planned', 'booked', 'picked_up', 'in_transit', 'delivered']
   if (!validStatuses.includes(status)) {
@@ -1820,7 +1888,7 @@ export const setShipmentStatus = async (poId, status) => {
     .eq('id', existing.id)
     .eq('user_id', userId)
     .select()
-    .single()
+    .maybeSingle()
   
   if (error) throw error
   return data
@@ -1858,7 +1926,7 @@ export const getWarehouse = async (id) => {
     .from('warehouses')
     .select('*')
     .eq('id', id)
-    .single()
+    .maybeSingle()
   if (error) throw error
   return data
 }
@@ -1870,7 +1938,7 @@ export const createWarehouse = async (warehouse) => {
     .from('warehouses')
     .insert([warehouseData])
     .select()
-    .single()
+    .maybeSingle()
   if (error) throw error
   return data
 }
@@ -1883,7 +1951,7 @@ export const updateWarehouse = async (id, updates) => {
     .update({ ...updateData, updated_at: new Date().toISOString() })
     .eq('id', id)
     .select()
-    .single()
+    .maybeSingle()
   if (error) throw error
   return data
 }
@@ -1894,6 +1962,9 @@ export const deleteWarehouse = async (id) => {
   const demoMode = await getDemoMode()
   
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   
   // Use getSupabaseClient directly to avoid Proxy issues in production
   const client = getSupabaseClient()
@@ -1919,12 +1990,13 @@ export const getCompanySettings = async () => {
     return { demo_mode: false }
   }
   const userId = await getCurrentUserId()
+  if (!userId) return null
   const { data, error } = await supabase
     .from('company_settings')
     .select('*')
     .eq('user_id', userId)
     .limit(1)
-    .single()
+    .maybeSingle()
   if (error && error.code !== 'PGRST116') throw error
   return data
 }
@@ -1933,6 +2005,9 @@ export const updateCompanySettings = async (settings) => {
   // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
   const { user_id, ...settingsData } = settings
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   const existing = await getCompanySettings()
 
   if (existing) {
@@ -1942,7 +2017,7 @@ export const updateCompanySettings = async (settings) => {
       .eq('id', existing.id)
       .eq('user_id', userId)
       .select()
-      .single()
+      .maybeSingle()
     if (error) throw error
     return data
   }
@@ -1951,7 +2026,7 @@ export const updateCompanySettings = async (settings) => {
     .from('company_settings')
     .insert([{ ...settingsData, user_id: userId }])
     .select()
-    .single()
+    .maybeSingle()
   if (error) throw error
   return data
 }
@@ -1959,6 +2034,9 @@ export const updateCompanySettings = async (settings) => {
 // Language settings
 export const updateLanguage = async (language) => {
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   
   // Guardar a localStorage immediatament
   localStorage.setItem('freedolia_language', language)
@@ -1986,7 +2064,7 @@ export const getDashboardPreferences = async () => {
     .select('*')
     .eq('user_id', userId)
     .limit(1)
-    .single()
+    .maybeSingle()
   if (error && error.code !== 'PGRST116') throw error
   return data
 }
@@ -2154,6 +2232,9 @@ export const getAlerts = async (thresholds = {}) => {
 export const updateDashboardPreferences = async (preferences) => {
   const { user_id, ...prefsData } = preferences
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   const existing = await getDashboardPreferences()
 
   // Widgets default si no existeix configuració
@@ -2243,7 +2324,7 @@ export const updateDashboardPreferences = async (preferences) => {
       .eq('id', existing.id)
       .eq('user_id', userId)
       .select()
-      .single()
+      .maybeSingle()
     if (error) throw error
     return data
   }
@@ -2255,7 +2336,7 @@ export const updateDashboardPreferences = async (preferences) => {
       user_id: userId
     }])
     .select()
-    .single()
+    .maybeSingle()
   if (error) throw error
   return data
 }
@@ -2297,7 +2378,7 @@ export const getProjectProfitability = async (projectId) => {
     .select('*')
     .eq('project_id', projectId)
     .eq('user_id', userId)
-    .single()
+    .maybeSingle()
   if (error && error.code !== 'PGRST116') throw error // PGRST116 = no rows found
   return data
 }
@@ -2306,6 +2387,9 @@ export const upsertProjectProfitability = async (projectId, profitabilityData) =
   // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
   const { user_id, ...data } = profitabilityData
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   
   // Assegurar que tots els camps numèrics estan definits amb defaults
   const profitabilityRecord = {
@@ -2327,7 +2411,7 @@ export const upsertProjectProfitability = async (projectId, profitabilityData) =
       onConflict: 'user_id,project_id'
     })
     .select()
-    .single()
+    .maybeSingle()
   if (error) throw error
   return result
 }
@@ -2407,6 +2491,9 @@ export const createTask = async (task) => {
   
   const { user_id, ...taskData } = task
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   
   const { data, error } = await supabase
     .from('tasks')
@@ -2416,7 +2503,7 @@ export const createTask = async (task) => {
       is_demo: demoMode // Mark with current demo mode
     }])
     .select()
-    .single()
+    .maybeSingle()
   
   if (error) throw error
   return data
@@ -2424,6 +2511,9 @@ export const createTask = async (task) => {
 
 export const updateTask = async (id, updates) => {
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   const { user_id, ...updateData } = updates
   
   const { data, error } = await supabase
@@ -2432,7 +2522,7 @@ export const updateTask = async (id, updates) => {
     .eq('id', id)
     .eq('user_id', userId)
     .select()
-    .single()
+    .maybeSingle()
   
   if (error) throw error
   return data
@@ -2440,6 +2530,9 @@ export const updateTask = async (id, updates) => {
 
 export const deleteTask = async (id) => {
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   const { error } = await supabase
     .from('tasks')
     .delete()
@@ -2455,12 +2548,15 @@ export const markTaskDone = async (id) => {
 
 export const snoozeTask = async (id, days = 3) => {
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   const { data: task } = await supabase
     .from('tasks')
     .select('due_date')
     .eq('id', id)
     .eq('user_id', userId)
-    .single()
+    .maybeSingle()
   
   if (!task) throw new Error('Task not found')
   
@@ -2477,6 +2573,9 @@ export const snoozeTask = async (id, days = 3) => {
 // Bulk actions for tasks
 export const bulkMarkTasksDone = async (taskIds) => {
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   const { data, error } = await supabase
     .from('tasks')
     .update({ status: 'done', updated_at: new Date().toISOString() })
@@ -2490,6 +2589,9 @@ export const bulkMarkTasksDone = async (taskIds) => {
 
 export const bulkSnoozeTasks = async (taskIds, days = 3) => {
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   
   // Get current due dates
   const { data: tasks, error: fetchError } = await supabase
@@ -2527,6 +2629,9 @@ export const bulkSnoozeTasks = async (taskIds, days = 3) => {
 // Bulk actions for purchase orders
 export const bulkMarkPacksAsSent = async (poIds) => {
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   
   // Get readiness records
   const { data: readinessRecords, error: fetchError } = await supabase
@@ -2561,6 +2666,9 @@ export const bulkMarkPacksAsSent = async (poIds) => {
 
 export const bulkMarkShipmentsDelivered = async (poIds) => {
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   
   // Check if po_shipments table exists and get shipments
   try {
@@ -2924,7 +3032,7 @@ export const getSupplierQuote = async (quoteId) => {
     `)
     .eq('id', quoteId)
     .eq('user_id', userId)
-    .single()
+    .maybeSingle()
   
   if (error) throw error
   return data
@@ -2933,6 +3041,9 @@ export const getSupplierQuote = async (quoteId) => {
 export const createSupplierQuote = async (quote) => {
   const { user_id, price_breaks, ...quoteData } = quote
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   
   // Insert quote
   const { data: quoteResult, error: quoteError } = await supabase
@@ -2942,7 +3053,7 @@ export const createSupplierQuote = async (quote) => {
       user_id: userId
     }])
     .select()
-    .single()
+    .maybeSingle()
   
   if (quoteError) throw quoteError
   
@@ -2968,6 +3079,9 @@ export const createSupplierQuote = async (quote) => {
 export const updateSupplierQuote = async (quoteId, updates) => {
   const { user_id, price_breaks, ...updateData } = updates
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   
   // Update quote
   const { error: quoteError } = await supabase
@@ -3009,6 +3123,9 @@ export const updateSupplierQuote = async (quoteId, updates) => {
 
 export const deleteSupplierQuote = async (quoteId) => {
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   const { error } = await supabase
     .from('supplier_quotes')
     .delete()
@@ -3038,6 +3155,9 @@ export const getDecisionLog = async (entityType, entityId) => {
 export const createDecisionLog = async (decision) => {
   const { user_id, ...decisionData } = decision
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   
   // Check if decision already exists for this entity (1 decisión activa por entidad)
   const existing = await getDecisionLog(decisionData.entity_type, decisionData.entity_id)
@@ -3059,7 +3179,7 @@ export const createDecisionLog = async (decision) => {
       user_id: userId
     }])
     .select()
-    .single()
+    .maybeSingle()
   
   if (error) throw error
   return data
@@ -3067,6 +3187,9 @@ export const createDecisionLog = async (decision) => {
 
 export const updateDecisionLog = async (id, updates) => {
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   const { user_id, ...updateData } = updates
   
   const { data, error } = await supabase
@@ -3075,7 +3198,7 @@ export const updateDecisionLog = async (id, updates) => {
     .eq('id', id)
     .eq('user_id', userId)
     .select()
-    .single()
+    .maybeSingle()
   
   if (error) throw error
   return data
@@ -3091,7 +3214,7 @@ export const getPoForQuote = async (quoteId) => {
     .select('supplier_id, project_id')
     .eq('id', quoteId)
     .eq('user_id', userId)
-    .single()
+    .maybeSingle()
   
   if (quoteError || !quote) return null
   
@@ -3120,7 +3243,7 @@ export const getQuoteForPo = async (poId) => {
     .select('supplier_id, project_id')
     .eq('id', poId)
     .eq('user_id', userId)
-    .single()
+    .maybeSingle()
   
   if (poError || !po) return null
   
@@ -3155,7 +3278,7 @@ export const getShipmentForPo = async (poId) => {
       .select('*')
       .eq('purchase_order_id', poId)
       .eq('user_id', userId)
-      .single()
+      .maybeSingle()
     
     if (error && error.code !== 'PGRST116') throw error
     return data || null
@@ -3168,6 +3291,9 @@ export const getShipmentForPo = async (poId) => {
 // Quick action: Mark Manufacturer Pack as Sent
 export const quickMarkPackAsSent = async (poId) => {
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   const readiness = await getPoAmazonReadiness(poId)
   
   if (!readiness) {
@@ -3183,7 +3309,7 @@ export const quickMarkPackAsSent = async (poId) => {
     .eq('id', readiness.id)
     .eq('user_id', userId)
     .select()
-    .single()
+    .maybeSingle()
   
   if (error) throw error
   
@@ -3226,6 +3352,7 @@ export const getStickyNotes = async (filters = {}) => {
   }
   
   const userId = await getCurrentUserId()
+  if (!userId) return []
   let query = supabase
     .from('sticky_notes')
     .select(`
@@ -3265,6 +3392,9 @@ export const createStickyNote = async (note) => {
   
   const { user_id, ...noteData } = note
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   
   const { data, error } = await supabase
     .from('sticky_notes')
@@ -3274,7 +3404,7 @@ export const createStickyNote = async (note) => {
       is_demo: demoMode // Mark with current demo mode
     }])
     .select()
-    .single()
+    .maybeSingle()
   
   if (error) throw error
   return data
@@ -3286,6 +3416,9 @@ export const updateStickyNote = async (id, updates) => {
     return { id, ...updates }
   }
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   
   const { data, error } = await supabase
     .from('sticky_notes')
@@ -3293,7 +3426,7 @@ export const updateStickyNote = async (id, updates) => {
     .eq('id', id)
     .eq('user_id', userId)
     .select()
-    .single()
+    .maybeSingle()
   
   if (error) throw error
   return data
@@ -3305,6 +3438,9 @@ export const deleteStickyNote = async (id) => {
     return true
   }
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   
   const { data, error } = await supabase
     .from('sticky_notes')
@@ -3312,7 +3448,7 @@ export const deleteStickyNote = async (id) => {
     .eq('id', id)
     .eq('user_id', userId)
     .select()
-    .single()
+    .maybeSingle()
   
   if (error) throw error
   return data
@@ -3329,6 +3465,9 @@ export const convertStickyNoteToTask = async (stickyNoteId, options = {}) => {
     return null
   }
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   
   // Get sticky note
   const { data: stickyNote, error: stickyError } = await supabase
@@ -3336,7 +3475,7 @@ export const convertStickyNoteToTask = async (stickyNoteId, options = {}) => {
     .select('*')
     .eq('id', stickyNoteId)
     .eq('user_id', userId)
-    .single()
+    .maybeSingle()
   
   if (stickyError) throw stickyError
   if (!stickyNote) throw new Error('Sticky note not found')
@@ -3377,7 +3516,7 @@ export const convertStickyNoteToTask = async (stickyNoteId, options = {}) => {
       entity_id: entityId
     }])
     .select()
-    .single()
+    .maybeSingle()
   
   if (taskError) throw taskError
   
@@ -3393,7 +3532,7 @@ export const convertStickyNoteToTask = async (stickyNoteId, options = {}) => {
     .eq('id', stickyNoteId)
     .eq('user_id', userId)
     .select()
-    .single()
+    .maybeSingle()
   
   if (updateError) throw updateError
   
@@ -3403,6 +3542,9 @@ export const convertStickyNoteToTask = async (stickyNoteId, options = {}) => {
 // Unlink task from sticky note
 export const unlinkStickyNoteTask = async (stickyNoteId) => {
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   
   const { data, error } = await supabase
     .from('sticky_notes')
@@ -3413,7 +3555,7 @@ export const unlinkStickyNoteTask = async (stickyNoteId) => {
     .eq('id', stickyNoteId)
     .eq('user_id', userId)
     .select()
-    .single()
+    .maybeSingle()
   
   if (error) throw error
   return data
@@ -3438,7 +3580,7 @@ export const getStickyNoteWithTask = async (id) => {
     `)
     .eq('id', id)
     .eq('user_id', userId)
-    .single()
+    .maybeSingle()
   
   if (error) throw error
   return data
@@ -3673,7 +3815,9 @@ export const uploadReceipt = async (file, expenseId) => {
   }
 
   const userId = await getCurrentUserId()
-  if (!userId) throw new Error('User not authenticated')
+  if (!userId) {
+    return authRequired()
+  }
 
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
@@ -3711,7 +3855,7 @@ export const uploadReceipt = async (file, expenseId) => {
         is_demo: demoMode
       }])
       .select()
-      .single()
+      .maybeSingle()
 
     if (dbError) {
       // ROLLBACK: Delete uploaded file if DB insert fails
@@ -3753,7 +3897,9 @@ export const uploadReceipt = async (file, expenseId) => {
  */
 export const deleteReceipt = async (attachmentId) => {
   const userId = await getCurrentUserId()
-  if (!userId) throw new Error('User not authenticated')
+  if (!userId) {
+    return authRequired()
+  }
 
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
@@ -3773,7 +3919,7 @@ export const deleteReceipt = async (attachmentId) => {
       .eq('id', attachmentId)
       .eq('user_id', userId)
       .eq('is_demo', demoMode)
-      .single()
+      .maybeSingle()
 
     if (fetchError) throw fetchError
     if (!attachment) throw new Error('Attachment not found')
@@ -3833,7 +3979,9 @@ export const updateAttachmentName = async (attachmentId, newFileName) => {
   }
 
   const userId = await getCurrentUserId()
-  if (!userId) throw new Error('User not authenticated')
+  if (!userId) {
+    return authRequired()
+  }
 
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
@@ -3857,7 +4005,7 @@ export const updateAttachmentName = async (attachmentId, newFileName) => {
       .eq('user_id', userId)
       .eq('is_demo', demoMode)
       .select()
-      .single()
+      .maybeSingle()
 
     if (error) throw error
     if (!data) throw new Error('Attachment not found')
@@ -3882,7 +4030,9 @@ export const replaceExpenseAttachmentFile = async ({ attachment, userId, file, i
     throw new Error('Attachment ID is required to replace receipt')
   }
 
-  if (!userId) throw new Error('User not authenticated')
+  if (!userId) {
+    return authRequired()
+  }
 
   // BLOCK in demo mode (no Storage writes, no DB updates)
   if (isDemo) {
@@ -3924,7 +4074,7 @@ export const replaceExpenseAttachmentFile = async ({ attachment, userId, file, i
       .eq('user_id', userId)
       .eq('is_demo', isDemo)
       .select()
-      .single()
+      .maybeSingle()
 
     if (updateError) {
       // ROLLBACK: Delete newly uploaded file if DB update fails
@@ -3983,7 +4133,9 @@ export const replaceExpenseAttachmentFile = async ({ attachment, userId, file, i
  */
 export const replaceReceipt = async (file, attachmentId) => {
   const userId = await getCurrentUserId()
-  if (!userId) throw new Error('User not authenticated')
+  if (!userId) {
+    return authRequired()
+  }
 
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
@@ -4011,7 +4163,7 @@ export const replaceReceipt = async (file, attachmentId) => {
     .eq('id', attachmentId)
     .eq('user_id', userId)
     .eq('is_demo', demoMode)
-    .single()
+    .maybeSingle()
 
   if (fetchError) throw fetchError
   if (!existingAttachment) throw new Error('Attachment not found')
@@ -4087,6 +4239,9 @@ export const createRecurringExpense = async (recurringExpense) => {
   const demoMode = await getDemoMode()
   
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   const { user_id, category, project, supplier, ...data } = recurringExpense
   
   // Filter only valid columns for recurring_expenses table
@@ -4126,7 +4281,7 @@ export const createRecurringExpense = async (recurringExpense) => {
       next_generation_date: targetDate.toISOString().split('T')[0]
     }])
     .select()
-    .single()
+    .maybeSingle()
   if (error) throw error
   return result
 }
@@ -4160,7 +4315,7 @@ export const updateRecurringExpense = async (id, updates) => {
     .update(validData)
     .eq('id', id)
     .select()
-    .single()
+    .maybeSingle()
   if (error) throw error
   return result
 }
@@ -4198,7 +4353,7 @@ export const markRecurringExpenseAsPaid = async (expenseId) => {
     })
     .eq('id', expenseId)
     .select()
-    .single()
+    .maybeSingle()
   if (error) throw error
   return data
 }
@@ -4246,6 +4401,9 @@ export const generateOccurrenceForMonth = async (recurringExpenseId, targetMonth
   const demoMode = await getDemoMode()
   
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   
   // Get recurring expense details
   const { data: recurring, error: fetchError } = await supabase
@@ -4254,7 +4412,7 @@ export const generateOccurrenceForMonth = async (recurringExpenseId, targetMonth
     .eq('id', recurringExpenseId)
     .eq('user_id', userId)
     .eq('is_demo', demoMode)
-    .single()
+    .maybeSingle()
   
   if (fetchError || !recurring) {
     throw new Error('Recurring expense not found or access denied')
@@ -4305,7 +4463,7 @@ export const generateOccurrenceForMonth = async (recurringExpenseId, targetMonth
       is_demo: demoMode
     }])
     .select()
-    .single()
+    .maybeSingle()
   
   // If conflict (already exists), return existing occurrence
   if (insertError) {
@@ -4317,7 +4475,7 @@ export const generateOccurrenceForMonth = async (recurringExpenseId, targetMonth
         .eq('recurring_expense_id', recurringExpenseId)
         .eq('month', monthStr)
         .eq('is_demo', demoMode)
-        .single()
+        .maybeSingle()
       if (existing) {
         return existing
       }
@@ -4340,6 +4498,9 @@ export const generateRecurringExpenseOccurrence = async (recurringExpenseId) => 
  */
 export const updateRecurringExpenseOccurrence = async (id, updates) => {
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   const { user_id, ...data } = updates
   const { data: result, error } = await supabase
     .from('recurring_expense_occurrences')
@@ -4347,7 +4508,7 @@ export const updateRecurringExpenseOccurrence = async (id, updates) => {
     .eq('id', id)
     .eq('user_id', userId)
     .select()
-    .single()
+    .maybeSingle()
   if (error) throw error
   return result
 }
@@ -4357,6 +4518,9 @@ export const updateRecurringExpenseOccurrence = async (id, updates) => {
  */
 export const markOccurrenceAsPaid = async (id, paidDate = null) => {
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   const { data, error } = await supabase
     .from('recurring_expense_occurrences')
     .update({
@@ -4366,7 +4530,7 @@ export const markOccurrenceAsPaid = async (id, paidDate = null) => {
     .eq('id', id)
     .eq('user_id', userId)
     .select()
-    .single()
+    .maybeSingle()
   if (error) throw error
   return data
 }
@@ -4378,6 +4542,9 @@ export const getOrCreateGlobalProject = async () => {
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   
   // Buscar proyecto global
   const { data: existing } = await supabase
@@ -4405,7 +4572,7 @@ export const getOrCreateGlobalProject = async () => {
       is_demo: demoMode
     }])
     .select()
-    .single()
+    .maybeSingle()
   
   if (error) throw error
   return newProject
@@ -4422,6 +4589,9 @@ export const ensureExpenseForOccurrence = async (occurrence) => {
   const demoMode = await getDemoMode()
   
   const userId = await getCurrentUserId()
+  if (!userId) {
+    return authRequired()
+  }
   
   // If expense_id already exists, verify and return it
   if (occurrence.expense_id) {
@@ -4456,7 +4626,7 @@ export const ensureExpenseForOccurrence = async (occurrence) => {
     .eq('id', occurrence.recurring_expense_id)
     .eq('user_id', userId)
     .eq('is_demo', demoMode)
-    .single()
+    .maybeSingle()
   
   if (fetchError || !recurring) {
     throw new Error('Recurring expense not found or access denied')
@@ -4472,7 +4642,7 @@ export const ensureExpenseForOccurrence = async (occurrence) => {
       .from('finance_categories')
       .select('name')
       .eq('id', recurring.category_id)
-      .single()
+      .maybeSingle()
     if (category) {
       categoryName = category.name
     }
@@ -4502,7 +4672,7 @@ export const ensureExpenseForOccurrence = async (occurrence) => {
     .from('expenses')
     .insert([expenseData])
     .select()
-    .single()
+    .maybeSingle()
   
   if (createError) {
     throw new Error(`Error creating expense: ${createError.message}`)
