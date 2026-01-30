@@ -363,10 +363,11 @@ class GoogleDriveService {
             }
             console.log('Restored saved token')
           } else {
-            localStorage.removeItem(LS_TOKEN)
-            localStorage.removeItem(LS_EXPIRES_AT)
-            localStorage.removeItem(LS_TOKEN_TIME)
-            console.log('Saved token expired, cleared')
+            this.accessToken = savedToken
+            if (window.gapi?.client) {
+              window.gapi.client.setToken({ access_token: savedToken })
+            }
+            console.log('Saved token expired, will attempt silent refresh on verifyToken')
           }
         } else if (savedToken) {
           this.accessToken = savedToken
