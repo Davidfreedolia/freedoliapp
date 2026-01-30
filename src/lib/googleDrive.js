@@ -18,7 +18,19 @@ async function getAuditLog() {
 // Scopes necessaris
 const SCOPES = 'https://www.googleapis.com/auth/drive.file'
 
+const LS_TOKEN = 'gdrive_token'
+const LS_EXPIRES_AT = 'gdrive_token_expires_at'
+const LS_TOKEN_TIME = 'gdrive_token_time'
+const SKEW_MS = 120000
+
 // ==================== HELPERS ====================
+
+function makeDriveError(code, message) {
+  const error = new Error(message)
+  error.name = 'DriveError'
+  error.code = code
+  return error
+}
 
 /**
  * Helper per registrar errors de Drive de forma estructurada
@@ -72,8 +84,9 @@ function handleAuthError(context, error) {
   const service = driveServiceInstance || (typeof driveService !== 'undefined' ? driveService : null)
   if (service) {
     service.accessToken = null
-    localStorage.removeItem('gdrive_token')
-    localStorage.removeItem('gdrive_token_time')
+    localStorage.removeItem(LS_TOKEN)
+    localStorage.removeItem(LS_EXPIRES_AT)
+    localStorage.removeItem(LS_TOKEN_TIME)
     if (window.gapi?.client) {
       window.gapi.client.setToken(null)
     }
@@ -84,8 +97,9 @@ function handleAuthError(context, error) {
     }
   } else {
     // Si el servei encara no existeix, només netejar localStorage
-    localStorage.removeItem('gdrive_token')
-    localStorage.removeItem('gdrive_token_time')
+    localStorage.removeItem(LS_TOKEN)
+    localStorage.removeItem(LS_EXPIRES_AT)
+    localStorage.removeItem(LS_TOKEN_TIME)
     if (window.gapi?.client) {
       window.gapi.client.setToken(null)
     }
@@ -162,6 +176,7 @@ class GoogleDriveService {
     this.retryCount = 0
     this.maxRetries = 0 // No retries automàtics per defecte
     this.isRetrying = false
+    this.refreshPromise = null
   }
 
   // Carregar GAPI script
@@ -336,24 +351,29 @@ class GoogleDriveService {
         console.log('Google Drive service initialized successfully')
 
         // Intentar recuperar token guardat
-        const savedToken = localStorage.getItem('gdrive_token')
-        const savedTime = localStorage.getItem('gdrive_token_time')
-        
-        if (savedToken && savedTime) {
-          // Tokens duren 1 hora (3600000 ms)
-          const tokenAge = Date.now() - parseInt(savedTime)
-          if (tokenAge < 3500000) { // 58 minuts
+        const savedToken = localStorage.getItem(LS_TOKEN)
+        const savedExpiresAt = localStorage.getItem(LS_EXPIRES_AT)
+
+        if (savedToken && savedExpiresAt) {
+          const expiresAt = Number(savedExpiresAt)
+          if (Date.now() < expiresAt - SKEW_MS) {
             this.accessToken = savedToken
             if (window.gapi?.client) {
               window.gapi.client.setToken({ access_token: savedToken })
             }
             console.log('Restored saved token')
           } else {
-            // Token expirat, netejar
-            localStorage.removeItem('gdrive_token')
-            localStorage.removeItem('gdrive_token_time')
+            localStorage.removeItem(LS_TOKEN)
+            localStorage.removeItem(LS_EXPIRES_AT)
+            localStorage.removeItem(LS_TOKEN_TIME)
             console.log('Saved token expired, cleared')
           }
+        } else if (savedToken) {
+          this.accessToken = savedToken
+          if (window.gapi?.client) {
+            window.gapi.client.setToken({ access_token: savedToken })
+          }
+          console.log('Restored saved token (legacy)')
         }
 
         return true
@@ -394,8 +414,12 @@ class GoogleDriveService {
             if (window.gapi?.client) {
               window.gapi.client.setToken({ access_token: response.access_token })
             }
-            localStorage.setItem('gdrive_token', response.access_token)
-            localStorage.setItem('gdrive_token_time', Date.now().toString())
+            localStorage.setItem(LS_TOKEN, response.access_token)
+            localStorage.setItem(
+              LS_EXPIRES_AT,
+              (Date.now() + (Number(response.expires_in || 3600) * 1000)).toString()
+            )
+            localStorage.setItem(LS_TOKEN_TIME, Date.now().toString())
             if (this.onAuthChange) this.onAuthChange(true)
             console.log('Successfully authenticated with Google Drive')
             resolve(true)
@@ -426,8 +450,9 @@ class GoogleDriveService {
         console.warn('Error revocant token:', e)
       }
       this.accessToken = null
-      localStorage.removeItem('gdrive_token')
-      localStorage.removeItem('gdrive_token_time')
+      localStorage.removeItem(LS_TOKEN)
+      localStorage.removeItem(LS_EXPIRES_AT)
+      localStorage.removeItem(LS_TOKEN_TIME)
       if (window.gapi?.client) {
         window.gapi.client.setToken(null)
       }
@@ -441,18 +466,76 @@ class GoogleDriveService {
     return !!this.accessToken
   }
 
+  async refreshAccessTokenSilent() {
+    if (!this.tokenClient) {
+      throw makeDriveError('DRIVE_AUTH_REFRESH_FAILED', 'Token client not available')
+    }
+
+    if (this.refreshPromise) {
+      return this.refreshPromise
+    }
+
+    this.refreshPromise = new Promise((resolve, reject) => {
+      try {
+        const prevCallback = this.tokenClient.callback
+        const prevErrorCallback = this.tokenClient.error_callback
+        const restoreCallbacks = () => {
+          this.tokenClient.callback = prevCallback
+          this.tokenClient.error_callback = prevErrorCallback
+        }
+
+        this.tokenClient.callback = (response) => {
+          if (response?.error) {
+            restoreCallbacks()
+            reject(response)
+            return
+          }
+          if (!response?.access_token) {
+            restoreCallbacks()
+            reject(makeDriveError('DRIVE_AUTH_REFRESH_FAILED', 'No access token received'))
+            return
+          }
+
+          this.accessToken = response.access_token
+          if (window.gapi?.client) {
+            window.gapi.client.setToken({ access_token: response.access_token })
+          }
+          localStorage.setItem(LS_TOKEN, response.access_token)
+          localStorage.setItem(
+            LS_EXPIRES_AT,
+            (Date.now() + (Number(response.expires_in || 3600) * 1000)).toString()
+          )
+          localStorage.setItem(LS_TOKEN_TIME, Date.now().toString())
+          if (this.onAuthChange) this.onAuthChange(true)
+          restoreCallbacks()
+          resolve(true)
+        }
+
+        this.tokenClient.error_callback = (err) => {
+          restoreCallbacks()
+          reject(err)
+        }
+        this.tokenClient.requestAccessToken({ prompt: '' })
+      } catch (err) {
+        reject(err)
+      }
+    }).finally(() => {
+      this.refreshPromise = null
+    })
+
+    return this.refreshPromise
+  }
+
   // Verificar si el token és vàlid i refrescar si cal
   async verifyToken() {
     if (!this.accessToken) return false
-    
-    // Comprovar si el token ha expirat segons localStorage
-    const savedTime = localStorage.getItem('gdrive_token_time')
-    if (savedTime) {
-      const tokenAge = Date.now() - parseInt(savedTime)
-      // Tokens duren ~1 hora (3600000 ms), refrescar als 55 minuts
-      if (tokenAge > 3300000) {
-        // Token expirat per timestamp
-        handleAuthError('verifyToken', { status: 401, reason: 'expired_by_timestamp', tokenAge })
+
+    const savedExpiresAt = localStorage.getItem(LS_EXPIRES_AT)
+    if (savedExpiresAt && Date.now() >= Number(savedExpiresAt) - SKEW_MS) {
+      try {
+        await this.refreshAccessTokenSilent()
+      } catch (e) {
+        handleAuthError('verifyToken_refresh', { status: 401, reason: 'refresh_failed', raw: e })
         return false
       }
     }
@@ -472,8 +555,20 @@ class GoogleDriveService {
     } catch (err) {
       // Error 401 = token expirat o invàlid
       if (err.status === 401 || err.code === 401) {
-        handleAuthError('verifyToken', err)
-        return false
+        try {
+          await this.refreshAccessTokenSilent()
+          try {
+            await window.gapi.client.drive.about.get({ fields: 'user' })
+            this.retryCount = 0
+            return true
+          } catch (retryErr) {
+            handleAuthError('verifyToken_401', retryErr)
+            return false
+          }
+        } catch (refreshErr) {
+          handleAuthError('verifyToken_401', refreshErr)
+          return false
+        }
       }
       
       // Altres errors (no mostrem stack per errors de xarxa menors)
