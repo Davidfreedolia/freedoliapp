@@ -34,6 +34,9 @@ import { getModalStyles } from '../utils/responsiveStyles'
 import SupplierMemory from '../components/SupplierMemory'
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal'
 import { showToast } from '../components/Toast'
+import Button from '../components/Button'
+import LayoutSwitcher from '../components/LayoutSwitcher'
+import { useLayoutPreference } from '../hooks/useLayoutPreference'
 
 // Tipus de proveïdors
 const SUPPLIER_TYPES = [
@@ -87,6 +90,8 @@ export default function Suppliers() {
   const [showModal, setShowModal] = useState(false)
   const [editingSupplier, setEditingSupplier] = useState(null)
   const [saving, setSaving] = useState(false)
+  const [layout, setLayout] = useLayoutPreference('layout:suppliers', 'grid')
+  const [selectedSupplierId, setSelectedSupplierId] = useState(null)
   
   // Delete confirmation
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, supplier: null, isDeleting: false })
@@ -274,6 +279,19 @@ export default function Suppliers() {
     return matchesSearch && matchesType && matchesCountry
   })
 
+  useEffect(() => {
+    if (!filteredSuppliers.length) {
+      setSelectedSupplierId(null)
+      return
+    }
+    if (!selectedSupplierId || !filteredSuppliers.some(s => s.id === selectedSupplierId)) {
+      setSelectedSupplierId(filteredSuppliers[0].id)
+    }
+  }, [filteredSuppliers, selectedSupplierId])
+
+  const effectiveLayout = isMobile ? 'list' : layout
+  const selectedSupplier = filteredSuppliers.find(s => s.id === selectedSupplierId)
+
   // Stats
   const stats = {
     total: filteredSuppliers.length,
@@ -284,6 +302,144 @@ export default function Suppliers() {
   }
 
   const getTypeInfo = (type) => SUPPLIER_TYPES.find(t => t.id === type) || SUPPLIER_TYPES[0]
+
+  const renderSupplierCard = (supplier, { isPreview = false, enablePreviewSelect = false } = {}) => {
+    const typeInfo = getTypeInfo(supplier.type)
+    const TypeIcon = typeInfo.icon
+
+    return (
+      <div
+        key={supplier.id}
+        style={{
+          ...styles.supplierCard,
+          ...(isPreview ? styles.supplierCardPreview : null),
+          backgroundColor: darkMode ? '#15151f' : '#ffffff'
+        }}
+        onMouseEnter={enablePreviewSelect ? () => setSelectedSupplierId(supplier.id) : undefined}
+      >
+        {/* Header */}
+        <div style={styles.cardHeader}>
+          <div style={{ ...styles.typeIcon, backgroundColor: `${typeInfo.color}15` }}>
+            <TypeIcon size={20} color={typeInfo.color} />
+          </div>
+          <div style={styles.cardTitleArea}>
+            <h3 style={{ ...styles.cardTitle, color: darkMode ? '#ffffff' : '#111827' }}>
+              {supplier.name}
+            </h3>
+            <span style={{ ...styles.typeBadge, backgroundColor: `${typeInfo.color}15`, color: typeInfo.color }}>
+              {typeInfo.name}
+            </span>
+          </div>
+          {!isPreview && (
+            <div 
+              style={{ position: 'relative' }} 
+              data-menu-container
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setMenuOpen(menuOpen === supplier.id ? null : supplier.id)
+                }} 
+                style={styles.menuButton}
+              >
+                <MoreVertical size={18} />
+              </button>
+              {menuOpen === supplier.id && (
+                <div 
+                  style={{ 
+                    ...styles.menu, 
+                    backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
+                    zIndex: 1000
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setEditingSupplier(supplier)
+                      setShowModal(true)
+                      setMenuOpen(null)
+                    }} 
+                    style={styles.menuItem}
+                  >
+                    <Edit size={14} /> Editar
+                  </button>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleDelete(supplier)
+                    }} 
+                    style={{ ...styles.menuItem, color: '#F26C63' }}
+                  >
+                    <Trash2 size={14} /> Eliminar
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Location */}
+        <div style={styles.cardRow}>
+          <MapPin size={14} color="#6b7280" />
+          <span style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
+            {supplier.city}, {supplier.country}
+          </span>
+        </div>
+
+        {/* Contact */}
+        {supplier.contact_name && (
+          <div style={styles.cardRow}>
+            <Users size={14} color="#6b7280" />
+            <span style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>{supplier.contact_name}</span>
+          </div>
+        )}
+
+        {/* Phone/WhatsApp */}
+        {(supplier.phone || supplier.whatsapp) && (
+          <div style={styles.cardRow}>
+            <Phone size={14} color="#6b7280" />
+            <span style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
+              {supplier.phone || supplier.whatsapp}
+            </span>
+          </div>
+        )}
+
+        {/* Payment Terms */}
+        {supplier.payment_terms && (
+          <div style={styles.cardRow}>
+            <CreditCard size={14} color="#6b7280" />
+            <span style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '12px' }}>
+              {supplier.payment_terms}
+            </span>
+          </div>
+        )}
+
+        {/* Incoterm */}
+        {supplier.incoterm && (
+          <div style={styles.cardRow}>
+            <Package size={14} color="#6b7280" />
+            <span style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
+              {supplier.incoterm} {supplier.incoterm_location}
+            </span>
+          </div>
+        )}
+
+        {/* Rating */}
+        {supplier.rating > 0 && (
+          <div style={styles.ratingRow}>
+            {[1, 2, 3, 4, 5].map(i => (
+              <Star key={i} size={14} fill={i <= supplier.rating ? '#F2E27D' : 'none'} color={i <= supplier.rating ? '#F2E27D' : '#d1d5db'} />
+            ))}
+          </div>
+        )}
+
+        {/* Supplier Memory */}
+        <SupplierMemory supplierId={supplier.id} darkMode={darkMode} />
+      </div>
+    )
+  }
 
   return (
     <div style={styles.container}>
@@ -299,18 +455,24 @@ export default function Suppliers() {
           flexDirection: isMobile ? 'column' : 'row',
           gap: isMobile ? '12px' : '16px'
         }}>
-          <div style={{
-            ...styles.searchContainer,
-            backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
-          }}>
-            <Search size={18} color="#9ca3af" />
-            <input
-              type="text"
-              placeholder="Buscar proveïdors..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              style={{ ...styles.searchInput, color: darkMode ? '#ffffff' : '#111827' }}
-            />
+          <div style={styles.searchGroup}>
+            <div style={{
+              ...styles.searchContainer,
+              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
+            }}>
+              <Search size={18} color="#9ca3af" />
+              <input
+                type="text"
+                placeholder="Buscar proveïdors..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                style={{ ...styles.searchInput, color: darkMode ? '#ffffff' : '#111827' }}
+              />
+            </div>
+            <Button variant="secondary" size="sm" style={styles.filterButton}>
+              <Filter size={14} />
+              Filtres
+            </Button>
           </div>
 
           <select
@@ -343,44 +505,51 @@ export default function Suppliers() {
             ))}
           </select>
 
-          <button 
-            onClick={handleNewSupplier} 
-            disabled={!driveConnected}
-            title={!driveConnected ? "Connecta Google Drive per crear" : ""}
-            style={{
-              ...styles.newButton,
-              opacity: !driveConnected ? 0.5 : 1,
-              cursor: !driveConnected ? 'not-allowed' : 'pointer'
-            }}>
-            <Plus size={18} /> Nou Proveïdor
-          </button>
+          <div style={styles.toolbarRight}>
+            <LayoutSwitcher
+              value={effectiveLayout}
+              onChange={setLayout}
+              compact={isMobile}
+            />
+            <Button 
+              onClick={handleNewSupplier} 
+              disabled={!driveConnected}
+              title={!driveConnected ? "Connecta Google Drive per crear" : ""}
+              style={{
+                opacity: !driveConnected ? 0.5 : 1,
+                cursor: !driveConnected ? 'not-allowed' : 'pointer'
+              }}
+            >
+              <Plus size={18} /> Nou Proveïdor
+            </Button>
+          </div>
         </div>
 
         {/* Stats */}
         <div style={styles.statsRow}>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <Users size={24} color="#4f46e5" />
+            <Users size={24} color="#1F4E5F" />
             <div>
               <span style={styles.statValue}>{stats.total}</span>
               <span style={styles.statLabel}>Total Proveïdors</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <Building2 size={24} color="#4f46e5" />
+            <Building2 size={24} color="#6BC7B5" />
             <div>
               <span style={styles.statValue}>{stats.manufacturers}</span>
               <span style={styles.statLabel}>Fabricants</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <Package size={24} color="#8b5cf6" />
+            <Package size={24} color="#F26C63" />
             <div>
               <span style={styles.statValue}>{stats.trading}</span>
               <span style={styles.statLabel}>Trading</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <Star size={24} color="#f59e0b" />
+            <Star size={24} color="#F2E27D" />
             <div>
               <span style={styles.statValue}>{stats.topRated}</span>
               <span style={styles.statLabel}>Top Rated (4+⭐)</span>
@@ -397,147 +566,41 @@ export default function Suppliers() {
             <p style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
               No hi ha proveïdors. Crea el primer!
             </p>
-            <button onClick={handleNewSupplier} style={styles.newButton}>
+            <Button onClick={handleNewSupplier}>
               <Plus size={18} /> Afegir Proveïdor
-            </button>
+            </Button>
           </div>
         ) : (
-          <div style={{
-            ...styles.suppliersGrid,
-            gridTemplateColumns: isMobile ? '1fr' : (isTablet ? 'repeat(auto-fill, minmax(280px, 1fr))' : 'repeat(auto-fill, minmax(320px, 1fr))'),
-            gap: isMobile ? '12px' : '20px'
-          }}>
-            {filteredSuppliers.map(supplier => {
-              const typeInfo = getTypeInfo(supplier.type)
-              const TypeIcon = typeInfo.icon
-
-              return (
-                <div key={supplier.id} style={{
-                  ...styles.supplierCard,
-                  backgroundColor: darkMode ? '#15151f' : '#ffffff'
-                }}>
-                  {/* Header */}
-                  <div style={styles.cardHeader}>
-                    <div style={{ ...styles.typeIcon, backgroundColor: `${typeInfo.color}15` }}>
-                      <TypeIcon size={20} color={typeInfo.color} />
-                    </div>
-                    <div style={styles.cardTitleArea}>
-                      <h3 style={{ ...styles.cardTitle, color: darkMode ? '#ffffff' : '#111827' }}>
-                        {supplier.name}
-                      </h3>
-                      <span style={{ ...styles.typeBadge, backgroundColor: `${typeInfo.color}15`, color: typeInfo.color }}>
-                        {typeInfo.name}
-                      </span>
-                    </div>
-                    <div 
-                      style={{ position: 'relative' }} 
-                      data-menu-container
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setMenuOpen(menuOpen === supplier.id ? null : supplier.id)
-                        }} 
-                        style={styles.menuButton}
-                      >
-                        <MoreVertical size={18} />
-                      </button>
-                      {menuOpen === supplier.id && (
-                        <div 
-                          style={{ 
-                            ...styles.menu, 
-                            backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
-                            zIndex: 1000
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setEditingSupplier(supplier)
-                              setShowModal(true)
-                              setMenuOpen(null)
-                            }} 
-                            style={styles.menuItem}
-                          >
-                            <Edit size={14} /> Editar
-                          </button>
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleDelete(supplier)
-                            }} 
-                            style={{ ...styles.menuItem, color: '#ef4444' }}
-                          >
-                            <Trash2 size={14} /> Eliminar
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Location */}
-                  <div style={styles.cardRow}>
-                    <MapPin size={14} color="#6b7280" />
-                    <span style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
-                      {supplier.city}, {supplier.country}
-                    </span>
-                  </div>
-
-                  {/* Contact */}
-                  {supplier.contact_name && (
-                    <div style={styles.cardRow}>
-                      <Users size={14} color="#6b7280" />
-                      <span style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>{supplier.contact_name}</span>
-                    </div>
-                  )}
-
-                  {/* Phone/WhatsApp */}
-                  {(supplier.phone || supplier.whatsapp) && (
-                    <div style={styles.cardRow}>
-                      <Phone size={14} color="#6b7280" />
-                      <span style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
-                        {supplier.phone || supplier.whatsapp}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Payment Terms */}
-                  {supplier.payment_terms && (
-                    <div style={styles.cardRow}>
-                      <CreditCard size={14} color="#6b7280" />
-                      <span style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '12px' }}>
-                        {supplier.payment_terms}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Incoterm */}
-                  {supplier.incoterm && (
-                    <div style={styles.cardRow}>
-                      <Package size={14} color="#6b7280" />
-                      <span style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
-                        {supplier.incoterm} {supplier.incoterm_location}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Rating */}
-                  {supplier.rating > 0 && (
-                    <div style={styles.ratingRow}>
-                      {[1, 2, 3, 4, 5].map(i => (
-                        <Star key={i} size={14} fill={i <= supplier.rating ? '#f59e0b' : 'none'} color={i <= supplier.rating ? '#f59e0b' : '#d1d5db'} />
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Supplier Memory */}
-                  <SupplierMemory supplierId={supplier.id} darkMode={darkMode} />
+          <>
+            {effectiveLayout === 'grid' && (
+              <div style={{
+                ...styles.suppliersGrid,
+                gridTemplateColumns: isMobile ? '1fr' : (isTablet ? 'repeat(auto-fill, minmax(280px, 1fr))' : 'repeat(auto-fill, minmax(320px, 1fr))'),
+                gap: isMobile ? '12px' : '20px'
+              }}>
+                {filteredSuppliers.map(supplier => renderSupplierCard(supplier))}
+              </div>
+            )}
+            {effectiveLayout === 'list' && (
+              <div style={styles.suppliersList}>
+                {filteredSuppliers.map(supplier => renderSupplierCard(supplier))}
+              </div>
+            )}
+            {effectiveLayout === 'split' && (
+              <div style={styles.splitLayout}>
+                <div style={styles.splitList}>
+                  {filteredSuppliers.map(supplier => renderSupplierCard(supplier, { enablePreviewSelect: true }))}
                 </div>
-              )
-            })}
-          </div>
+                <div style={styles.splitPreview}>
+                  {selectedSupplier ? (
+                    renderSupplierCard(selectedSupplier, { isPreview: true })
+                  ) : (
+                    <div style={styles.splitEmpty}>Selecciona un proveïdor</div>
+                  )}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -819,18 +882,27 @@ const styles = {
   container: { flex: 1, display: 'flex', flexDirection: 'column' },
   content: { padding: '32px', overflowY: 'auto' },
   toolbar: { display: 'flex', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' },
-  searchContainer: { flex: 1, minWidth: '200px', display: 'flex', alignItems: 'center', gap: '10px', padding: '0 16px', borderRadius: '10px', border: '1px solid var(--border-color)' },
+  searchGroup: { display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' },
+  searchContainer: { flex: '0 1 360px', maxWidth: '360px', width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '0 16px', borderRadius: '10px', border: '1px solid var(--border-color)' },
   searchInput: { flex: 1, padding: '12px 0', border: 'none', outline: 'none', fontSize: '14px', background: 'transparent' },
   filterSelect: { padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--border-color)', fontSize: '14px', outline: 'none', cursor: 'pointer' },
-  newButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', backgroundColor: '#4f46e5', color: '#ffffff', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
+  filterButton: { height: '36px' },
+  toolbarRight: { display: 'flex', alignItems: 'center', gap: '12px', marginLeft: 'auto' },
+  newButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', backgroundColor: '#1F4E5F', color: '#F4F7F3', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
   statsRow: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '24px' },
-  statCard: { display: 'flex', alignItems: 'center', gap: '16px', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-color)' },
-  statValue: { display: 'block', fontSize: '24px', fontWeight: '700', color: '#4f46e5' },
+  statCard: { display: 'flex', alignItems: 'center', gap: '16px', padding: '20px', borderRadius: '12px', border: 'none', boxShadow: 'var(--shadow-soft)' },
+  statValue: { display: 'block', fontSize: '24px', fontWeight: '600', color: '#1F4E5F' },
   statLabel: { fontSize: '12px', color: '#6b7280' },
   loading: { padding: '64px', textAlign: 'center', color: '#6b7280' },
-  empty: { padding: '64px', textAlign: 'center', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' },
+  empty: { padding: '64px', textAlign: 'center', borderRadius: '16px', border: 'none', boxShadow: 'var(--shadow-soft)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' },
   suppliersGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' },
-  supplierCard: { padding: '20px', borderRadius: '16px', border: '1px solid var(--border-color)' },
+  suppliersList: { display: 'flex', flexDirection: 'column', gap: '12px' },
+  splitLayout: { display: 'grid', gridTemplateColumns: 'minmax(280px, 360px) 1fr', gap: '20px' },
+  splitList: { display: 'flex', flexDirection: 'column', gap: '12px' },
+  splitPreview: { position: 'sticky', top: '96px', alignSelf: 'flex-start' },
+  splitEmpty: { padding: '24px', borderRadius: '16px', backgroundColor: 'var(--surface-bg)', boxShadow: 'var(--shadow-soft)', color: 'var(--muted)' },
+  supplierCard: { padding: '20px', borderRadius: '16px', border: 'none', boxShadow: 'var(--shadow-soft)' },
+  supplierCardPreview: { cursor: 'default' },
   cardHeader: { display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '16px' },
   typeIcon: { width: '44px', height: '44px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' },
   cardTitleArea: { flex: 1 },
@@ -839,7 +911,7 @@ const styles = {
   cardRow: { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontSize: '13px' },
   ratingRow: { display: 'flex', gap: '2px', marginTop: '12px' },
   menuButton: { background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#9ca3af' },
-  menu: { position: 'absolute', right: 0, top: '100%', minWidth: '120px', borderRadius: '10px', border: '1px solid var(--border-color)', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', zIndex: 10 },
+  menu: { position: 'absolute', right: 0, top: '100%', minWidth: '120px', borderRadius: '10px', border: '1px solid rgba(31, 78, 95, 0.12)', boxShadow: 'var(--shadow-soft-hover)', zIndex: 10 },
   menuItem: { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '10px 14px', border: 'none', background: 'none', fontSize: '13px', cursor: 'pointer', color: 'inherit' },
   // Modal
   modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' },
@@ -854,12 +926,12 @@ const styles = {
   label: { fontSize: '12px', fontWeight: '500', color: '#6b7280' },
   input: { padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '14px', outline: 'none' },
   textarea: { resize: 'vertical', minHeight: '80px' },
-  cancelButton: { padding: '10px 20px', backgroundColor: 'transparent', color: '#6b7280', border: '1px solid var(--border-color)', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' },
-  saveButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: '#4f46e5', color: '#ffffff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
+  cancelButton: { padding: '10px 20px', backgroundColor: 'transparent', color: 'var(--text)', border: '1px solid rgba(31, 78, 95, 0.18)', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' },
+  saveButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: '#1F4E5F', color: '#F4F7F3', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
   ratingInput: { display: 'flex', gap: '4px' },
   starButton: { background: 'none', border: 'none', cursor: 'pointer', padding: '2px' },
   cityInputGroup: { display: 'flex', gap: '8px' },
   customCityRow: { display: 'flex', gap: '8px', marginTop: '8px' },
-  addCityBtn: { padding: '8px 12px', backgroundColor: '#22c55e', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '12px', cursor: 'pointer' },
-  cancelCityBtn: { padding: '8px 12px', backgroundColor: '#ef4444', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '12px', cursor: 'pointer' }
+  addCityBtn: { padding: '8px 12px', backgroundColor: '#6BC7B5', color: '#1F4E5F', border: 'none', borderRadius: '6px', fontSize: '12px', cursor: 'pointer' },
+  cancelCityBtn: { padding: '8px 12px', backgroundColor: '#F26C63', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '12px', cursor: 'pointer' }
 }

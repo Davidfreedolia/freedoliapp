@@ -22,6 +22,9 @@ import { supabase, getCurrentUserId, getProjects } from '../lib/supabase'
 import Header from '../components/Header'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
+import Button from '../components/Button'
+import LayoutSwitcher from '../components/LayoutSwitcher'
+import { useLayoutPreference } from '../hooks/useLayoutPreference'
 
 // Tipus de moviment
 const MOVEMENT_TYPES = {
@@ -49,6 +52,8 @@ export default function Inventory() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterProject, setFilterProject] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
+  const [layout, setLayout] = useLayoutPreference('layout:inventory', 'grid')
+  const [selectedInventoryId, setSelectedInventoryId] = useState(null)
   const [showMovementModal, setShowMovementModal] = useState(false)
   const [showHistoryModal, setShowHistoryModal] = useState(false)
   const [selectedItem, setSelectedItem] = useState(null)
@@ -121,6 +126,19 @@ export default function Inventory() {
       (filterStatus === 'ok' && (item.units_amazon_fba || 0) > (item.reorder_point || 10))
     return matchesSearch && matchesProject && matchesStatus
   })
+
+  useEffect(() => {
+    if (!filteredInventory.length) {
+      setSelectedInventoryId(null)
+      return
+    }
+    if (!selectedInventoryId || !filteredInventory.some(i => i.id === selectedInventoryId)) {
+      setSelectedInventoryId(filteredInventory[0].id)
+    }
+  }, [filteredInventory, selectedInventoryId])
+
+  const effectiveLayout = isMobile ? 'list' : layout
+  const selectedInventoryItem = filteredInventory.find(i => i.id === selectedInventoryId)
 
   const handleNewItem = () => {
     setSelectedItem({
@@ -241,6 +259,62 @@ export default function Inventory() {
     return { status: 'ok', color: '#22c55e', label: 'OK' }
   }
 
+  const renderInventoryCard = (item, { isPreview = false, enablePreviewSelect = false } = {}) => {
+    const stockStatus = getStockStatus(item)
+    return (
+      <div
+        key={item.id}
+        style={{
+          ...styles.inventoryCard,
+          backgroundColor: darkMode ? '#15151f' : '#ffffff'
+        }}
+        onMouseEnter={enablePreviewSelect ? () => setSelectedInventoryId(item.id) : undefined}
+      >
+        <div style={{ marginBottom: '12px' }}>
+          <div style={{ fontWeight: '600', color: darkMode ? '#ffffff' : '#111827', marginBottom: '4px' }}>
+            {item.sku}
+          </div>
+          <div style={{ fontSize: '13px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
+            {item.product_name}
+          </div>
+          {item.project && (
+            <span style={styles.projectBadge}>{item.project.name}</span>
+          )}
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', marginBottom: '12px', fontSize: '13px' }}>
+          <div>🏭 Prod: {item.units_in_production || 0}</div>
+          <div>🚢 Trànsit: {item.units_in_transit || 0}</div>
+          <div>🏢 Transit: {item.units_in_forwarder || 0}</div>
+          <div style={{ fontWeight: '600', color: '#ff9900' }}>📦 FBA: {item.units_amazon_fba || 0}</div>
+          <div>🏠 FBM: {item.units_amazon_fbm || 0}</div>
+          <div style={{ fontWeight: '600', color: darkMode ? '#ffffff' : '#111827' }}>Total: {item.total_units || 0}</div>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{
+            padding: '4px 10px',
+            borderRadius: '6px',
+            fontSize: '12px',
+            fontWeight: '500',
+            backgroundColor: `${stockStatus.color}15`,
+            color: stockStatus.color
+          }}>
+            {stockStatus.label}
+          </span>
+          {!isPreview && (
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={() => { setSelectedItem(item); setShowMovementModal(true) }} style={styles.actionButton}>
+                <Plus size={14} />
+              </button>
+              <button onClick={() => showHistory(item)} style={styles.actionButton}>
+                <History size={14} />
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div style={styles.container}>
       <Header title="Inventari" />
@@ -293,43 +367,58 @@ export default function Inventory() {
 
         {/* Toolbar */}
         <div style={styles.toolbar}>
-          <div style={{
-            ...styles.searchContainer,
-            backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
-          }}>
-            <Search size={18} color="#9ca3af" />
-            <input
-              type="text"
-              placeholder="Buscar SKU o producte..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              style={{ ...styles.searchInput, color: darkMode ? '#ffffff' : '#111827' }}
-            />
+          <div style={styles.searchGroup}>
+            <div style={{
+              ...styles.searchContainer,
+              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
+            }}>
+              <Search size={18} color="#9ca3af" />
+              <input
+                type="text"
+                placeholder="Buscar SKU o producte..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                style={{ ...styles.searchInput, color: darkMode ? '#ffffff' : '#111827' }}
+              />
+            </div>
+            <Button variant="secondary" size="sm" style={styles.filterButton}>
+              <Filter size={14} />
+              Filtres
+            </Button>
           </div>
-          <select
-            value={filterProject}
-            onChange={e => setFilterProject(e.target.value)}
-            style={{ ...styles.filterSelect, backgroundColor: darkMode ? '#1f1f2e' : '#ffffff', color: darkMode ? '#ffffff' : '#111827' }}
-          >
-            <option value="">Tots els projectes</option>
-            {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
-          <select
-            value={filterStatus}
-            onChange={e => setFilterStatus(e.target.value)}
-            style={{ ...styles.filterSelect, backgroundColor: darkMode ? '#1f1f2e' : '#ffffff', color: darkMode ? '#ffffff' : '#111827' }}
-          >
-            <option value="">Tots els estats</option>
-            <option value="low_stock">⚠️ Stock baix</option>
-            <option value="in_transit">🚢 En trànsit</option>
-            <option value="ok">✅ OK</option>
-          </select>
-          <button onClick={loadData} style={styles.refreshBtn}>
-            <RefreshCw size={18} />
-          </button>
-          <button onClick={handleNewItem} style={styles.newButton}>
-            <Plus size={18} /> Nou Producte
-          </button>
+          <div style={styles.filters}>
+            <select
+              value={filterProject}
+              onChange={e => setFilterProject(e.target.value)}
+              style={{ ...styles.filterSelect, backgroundColor: darkMode ? '#1f1f2e' : '#ffffff', color: darkMode ? '#ffffff' : '#111827' }}
+            >
+              <option value="">Tots els projectes</option>
+              {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+            <select
+              value={filterStatus}
+              onChange={e => setFilterStatus(e.target.value)}
+              style={{ ...styles.filterSelect, backgroundColor: darkMode ? '#1f1f2e' : '#ffffff', color: darkMode ? '#ffffff' : '#111827' }}
+            >
+              <option value="">Tots els estats</option>
+              <option value="low_stock">⚠️ Stock baix</option>
+              <option value="in_transit">🚢 En trànsit</option>
+              <option value="ok">✅ OK</option>
+            </select>
+            <button onClick={loadData} style={styles.refreshBtn}>
+              <RefreshCw size={18} />
+            </button>
+          </div>
+          <div style={styles.toolbarRight}>
+            <LayoutSwitcher
+              value={effectiveLayout}
+              onChange={setLayout}
+              compact={isMobile}
+            />
+            <Button onClick={handleNewItem}>
+              <Plus size={18} /> Nou Producte
+            </Button>
+          </div>
         </div>
 
         {/* Inventory Table */}
@@ -349,136 +438,37 @@ export default function Inventory() {
           <div style={{ ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
             <Package size={48} color="#d1d5db" />
             <p style={{ color: '#6b7280' }}>No hi ha productes a l'inventari</p>
-            <button onClick={handleNewItem} style={styles.newButton}>
+            <Button onClick={handleNewItem}>
               <Plus size={18} /> Afegir Producte
-            </button>
-          </div>
-        ) : isMobile ? (
-          // Mobile: Cards
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {filteredInventory.map(item => {
-              const stockStatus = getStockStatus(item)
-              return (
-                <div
-                  key={item.id}
-                  style={{
-                    padding: '16px',
-                    borderRadius: '12px',
-                    border: '1px solid var(--border-color)',
-                    backgroundColor: darkMode ? '#15151f' : '#ffffff'
-                  }}
-                >
-                  <div style={{ marginBottom: '12px' }}>
-                    <div style={{ fontWeight: '600', color: darkMode ? '#ffffff' : '#111827', marginBottom: '4px' }}>
-                      {item.sku}
-                    </div>
-                    <div style={{ fontSize: '13px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
-                      {item.product_name}
-                    </div>
-                    {item.project && (
-                      <span style={styles.projectBadge}>{item.project.name}</span>
-                    )}
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', marginBottom: '12px', fontSize: '13px' }}>
-                    <div>🏭 Prod: {item.units_in_production || 0}</div>
-                    <div>🚢 Trànsit: {item.units_in_transit || 0}</div>
-                    <div>🏢 Transit: {item.units_in_forwarder || 0}</div>
-                    <div style={{ fontWeight: '600', color: '#ff9900' }}>📦 FBA: {item.units_amazon_fba || 0}</div>
-                    <div>🏠 FBM: {item.units_amazon_fbm || 0}</div>
-                    <div style={{ fontWeight: '700' }}>Total: {item.total_units || 0}</div>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{
-                      padding: '4px 10px',
-                      borderRadius: '6px',
-                      fontSize: '12px',
-                      fontWeight: '500',
-                      backgroundColor: `${stockStatus.color}15`,
-                      color: stockStatus.color
-                    }}>
-                      {stockStatus.label}
-                    </span>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button onClick={() => { setSelectedItem(item); setShowMovementModal(true) }} style={styles.actionButton}>
-                        <Plus size={14} />
-                      </button>
-                      <button onClick={() => showHistory(item)} style={styles.actionButton}>
-                        <History size={14} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
+            </Button>
           </div>
         ) : (
-          <div style={{ 
-            ...styles.tableContainer, 
-            backgroundColor: darkMode ? '#15151f' : '#ffffff',
-            overflowX: isMobile ? 'visible' : 'auto'
-          }}>
-            <table style={{
-              ...styles.table,
-              minWidth: isMobile ? 'auto' : '800px'
-            }}>
-              <thead>
-                <tr style={{ backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb' }}>
-                  <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>Producte</th>
-                  <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>🏭 Prod.</th>
-                  {!isTablet && <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>🚢 Trànsit</th>}
-                  {!isTablet && <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>🏢 Transit.</th>}
-                  <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>📦 FBA</th>
-                  {!isTablet && <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>🏠 FBM</th>}
-                  <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>Total</th>
-                  <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>Estat</th>
-                  <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>Accions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredInventory.map(item => {
-                  const stockStatus = getStockStatus(item)
-                  return (
-                    <tr key={item.id} style={styles.tr}>
-                      <td style={styles.td}>
-                        <div>
-                          <strong style={{ color: darkMode ? '#ffffff' : '#111827' }}>{item.sku}</strong>
-                          <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#6b7280' }}>{item.product_name}</p>
-                          {item.project && (
-                            <span style={styles.projectBadge}>{item.project.name}</span>
-                          )}
-                        </div>
-                      </td>
-                      <td style={{ ...styles.td, textAlign: 'center' }}>{item.units_in_production || 0}</td>
-                      {!isTablet && <td style={{ ...styles.td, textAlign: 'center' }}>{item.units_in_transit || 0}</td>}
-                      {!isTablet && <td style={{ ...styles.td, textAlign: 'center' }}>{item.units_in_forwarder || 0}</td>}
-                      <td style={{ ...styles.td, textAlign: 'center', fontWeight: '600', color: '#ff9900' }}>{item.units_amazon_fba || 0}</td>
-                      {!isTablet && <td style={{ ...styles.td, textAlign: 'center' }}>{item.units_amazon_fbm || 0}</td>}
-                      <td style={{ ...styles.td, textAlign: 'center', fontWeight: '700', color: darkMode ? '#ffffff' : '#111827' }}>{item.total_units || 0}</td>
-                      <td style={styles.td}>
-                        <span style={{
-                          ...styles.statusBadge,
-                          backgroundColor: `${stockStatus.color}15`,
-                          color: stockStatus.color
-                        }}>
-                          {stockStatus.label}
-                        </span>
-                      </td>
-                      <td style={styles.td}>
-                        <div style={{ display: 'flex', gap: '4px' }}>
-                          <button onClick={() => showHistory(item)} style={styles.iconBtn} title="Historial">
-                            <History size={16} />
-                          </button>
-                          <button onClick={() => handleEditItem(item)} style={styles.iconBtn} title="Editar">
-                            <Edit size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+          <>
+            {effectiveLayout === 'grid' && (
+              <div style={styles.inventoryGrid}>
+                {filteredInventory.map(item => renderInventoryCard(item))}
+              </div>
+            )}
+            {effectiveLayout === 'list' && (
+              <div style={styles.inventoryList}>
+                {filteredInventory.map(item => renderInventoryCard(item))}
+              </div>
+            )}
+            {effectiveLayout === 'split' && (
+              <div style={styles.splitLayout}>
+                <div style={styles.splitList}>
+                  {filteredInventory.map(item => renderInventoryCard(item, { enablePreviewSelect: true }))}
+                </div>
+                <div style={styles.splitPreview}>
+                  {selectedInventoryItem ? (
+                    renderInventoryCard(selectedInventoryItem, { isPreview: true })
+                  ) : (
+                    <div style={styles.splitEmpty}>Selecciona un producte</div>
+                  )}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -688,25 +678,32 @@ const styles = {
   container: { flex: 1, display: 'flex', flexDirection: 'column' },
   content: { padding: '32px', overflowY: 'auto' },
   statsRow: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px', marginBottom: '24px' },
-  statCard: { display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)' },
-  statValue: { display: 'block', fontSize: '20px', fontWeight: '700' },
+  statCard: { display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', borderRadius: '12px', border: 'none', boxShadow: 'var(--shadow-soft)' },
+  statValue: { display: 'block', fontSize: '20px', fontWeight: '600' },
   statLabel: { fontSize: '11px', color: '#6b7280' },
   toolbar: { display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' },
-  searchContainer: { flex: 1, minWidth: '200px', display: 'flex', alignItems: 'center', gap: '10px', padding: '0 16px', borderRadius: '10px', border: '1px solid var(--border-color)' },
+  searchGroup: { display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' },
+  searchContainer: { flex: '0 1 360px', maxWidth: '360px', width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '0 16px', borderRadius: '10px', border: '1px solid var(--border-color)' },
   searchInput: { flex: 1, padding: '12px 0', border: 'none', outline: 'none', fontSize: '14px', background: 'transparent' },
   filterSelect: { padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--border-color)', fontSize: '14px', outline: 'none' },
   refreshBtn: { padding: '12px', backgroundColor: 'transparent', border: '1px solid var(--border-color)', borderRadius: '10px', cursor: 'pointer', color: '#6b7280' },
-  newButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', backgroundColor: '#4f46e5', color: '#ffffff', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
+  filters: { display: 'flex', alignItems: 'center', gap: '12px' },
+  filterButton: { height: '36px' },
+  toolbarRight: { display: 'flex', alignItems: 'center', gap: '12px', marginLeft: 'auto' },
+  newButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', backgroundColor: '#1F4E5F', color: '#F4F7F3', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
   loading: { padding: '64px', textAlign: 'center', color: '#6b7280' },
-  empty: { padding: '64px', textAlign: 'center', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' },
-  tableContainer: { borderRadius: '16px', border: '1px solid var(--border-color)', overflow: 'auto' },
-  table: { width: '100%', borderCollapse: 'collapse' },
-  th: { padding: '14px 12px', textAlign: 'left', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', borderBottom: '1px solid var(--border-color)' },
-  tr: { borderBottom: '1px solid var(--border-color)' },
-  td: { padding: '12px', fontSize: '14px', color: '#6b7280' },
+  empty: { padding: '64px', textAlign: 'center', borderRadius: '16px', border: 'none', boxShadow: 'var(--shadow-soft)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' },
+  inventoryGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' },
+  inventoryList: { display: 'flex', flexDirection: 'column', gap: '12px' },
+  splitLayout: { display: 'grid', gridTemplateColumns: 'minmax(280px, 360px) 1fr', gap: '20px' },
+  splitList: { display: 'flex', flexDirection: 'column', gap: '12px' },
+  splitPreview: { position: 'sticky', top: '96px', alignSelf: 'flex-start' },
+  splitEmpty: { padding: '24px', borderRadius: '16px', backgroundColor: 'var(--surface-bg)', boxShadow: 'var(--shadow-soft)', color: 'var(--muted)' },
+  inventoryCard: { padding: '16px', borderRadius: '16px', border: 'none', boxShadow: 'var(--shadow-soft)' },
   projectBadge: { display: 'inline-block', marginTop: '4px', padding: '2px 8px', backgroundColor: '#4f46e510', color: '#4f46e5', borderRadius: '4px', fontSize: '11px' },
   statusBadge: { padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '500' },
   iconBtn: { padding: '6px', background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', borderRadius: '6px' },
+  actionButton: { padding: '6px', background: 'none', border: '1px solid rgba(31, 78, 95, 0.16)', cursor: 'pointer', color: '#6b7280', borderRadius: '6px' },
   // Modal
   modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' },
   modal: { width: '100%', maxWidth: '600px', maxHeight: '90vh', borderRadius: '16px', border: '1px solid var(--border-color)', overflow: 'hidden', display: 'flex', flexDirection: 'column' },

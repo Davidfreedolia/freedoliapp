@@ -1,6 +1,6 @@
 import { useApp } from '../context/AppContext'
 
-export default function Header({ title }) {
+export default function Header({ title, rightSlot }) {
   const { darkMode } = useApp()
 
   // Header simplificat: només títol, sense actions (TopNavbar s'encarrega)
@@ -18,6 +18,11 @@ export default function Header({ title }) {
       }}>
         {title}
       </h1>
+      {rightSlot && (
+        <div style={styles.rightSlot}>
+          {rightSlot}
+        </div>
+      )}
     </div>
   )
 }
@@ -26,11 +31,17 @@ const styles = {
   header: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'flex-start'
+    justifyContent: 'space-between',
+    gap: '16px'
   },
   title: {
     margin: 0,
     fontSize: '24px',
     fontWeight: '600'
+  },
+  rightSlot: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px'
   }
 }

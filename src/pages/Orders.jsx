@@ -22,7 +22,8 @@ import {
   Loader,
   X,
   Ship,
-  RefreshCw
+  RefreshCw,
+  Filter
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { 
@@ -50,6 +51,9 @@ import NewPOModal from '../components/NewPOModal'
 import LogisticsFlow from '../components/LogisticsFlow'
 import AmazonReadySection from '../components/AmazonReadySection'
 import ManufacturerPackModal from '../components/ManufacturerPackModal'
+import Button from '../components/Button'
+import LayoutSwitcher from '../components/LayoutSwitcher'
+import { useLayoutPreference } from '../hooks/useLayoutPreference'
 import { generatePOPdf } from '../lib/generatePOPdf'
 import { generateFnskuLabelsPdf } from '../lib/generateFnskuLabelsPdf'
 import { computePoAmazonReady } from '../lib/amazonReady'
@@ -92,6 +96,8 @@ export default function Orders() {
   const [filterStatus, setFilterStatus] = useState(null)
   const [filterProject, setFilterProject] = useState(searchParams.get('project') || null)
   const [menuOpen, setMenuOpen] = useState(null)
+  const [layout, setLayout] = useLayoutPreference('layout:orders', 'grid')
+  const [selectedOrderId, setSelectedOrderId] = useState(null)
   const [showModal, setShowModal] = useState(false)
   const [editingOrder, setEditingOrder] = useState(null)
   const [downloadingPdf, setDownloadingPdf] = useState(null)
@@ -123,6 +129,16 @@ export default function Orders() {
   useEffect(() => {
     loadData()
   }, [])
+
+  useEffect(() => {
+    if (!filteredOrders.length) {
+      setSelectedOrderId(null)
+      return
+    }
+    if (!selectedOrderId || !filteredOrders.some(o => o.id === selectedOrderId)) {
+      setSelectedOrderId(filteredOrders[0].id)
+    }
+  }, [filteredOrders, selectedOrderId])
 
   // Abrir modal automáticamente si action=create en URL
   useEffect(() => {
@@ -589,6 +605,9 @@ export default function Orders() {
     }
   })
 
+  const effectiveLayout = isMobile ? 'list' : layout
+  const selectedOrderCard = filteredOrders.find(o => o.id === selectedOrderId)
+
   // Estadístiques (con manejo de errores)
   const ordersArray = safeArray(orders)
   const stats = {
@@ -646,12 +665,115 @@ export default function Orders() {
     }
   }
 
+  const renderOrderCard = (order, { isPreview = false, enablePreviewSelect = false } = {}) => {
+    const status = PO_STATUSES[order.status] || PO_STATUSES.draft
+    const StatusIcon = status.icon
+
+    return (
+      <div
+        key={order.id}
+        style={{
+          ...styles.orderCard,
+          backgroundColor: darkMode ? '#15151f' : '#ffffff'
+        }}
+        onMouseEnter={enablePreviewSelect ? () => setSelectedOrderId(order.id) : undefined}
+      >
+        <div style={styles.orderCardHeader}>
+          <div>
+            <div style={{ fontWeight: '600', color: darkMode ? '#ffffff' : '#111827', marginBottom: '4px' }}>
+              {order.po_number}
+            </div>
+            <div style={{ fontSize: '14px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
+              {order.project?.name || '-'}
+            </div>
+          </div>
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '4px 10px',
+            borderRadius: '6px',
+            fontSize: '12px',
+            fontWeight: '500',
+            backgroundColor: `${status.color}15`,
+            color: status.color
+          }}>
+            <StatusIcon size={14} />
+            {status.name}
+          </span>
+        </div>
+        <div style={styles.orderCardBody}>
+          <div>Proveïdor: {order.supplier?.name || '-'}</div>
+          <div>Data: {formatDate(order.order_date)}</div>
+          <div style={{ fontWeight: '600', color: darkMode ? '#ffffff' : '#111827' }}>
+            {formatCurrency(order.total_amount, order.currency)}
+          </div>
+        </div>
+        {!isPreview && (
+          <div style={styles.orderCardActions}>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => handleViewOrder(order)}
+            >
+              <Eye size={14} />
+              Veure
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleDownloadPdf(order)}
+              disabled={downloadingPdf === order.id}
+            >
+              {downloadingPdf === order.id ? <Loader size={14} className="spin" /> : <Download size={14} />}
+              PDF
+            </Button>
+            {order.manufacturerPackStatus === 'generated' && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={async () => {
+                  try {
+                    const { quickMarkPackAsSent } = await import('../lib/supabase')
+                    const { showToast } = await import('../components/Toast')
+                    await quickMarkPackAsSent(order.id)
+                    showToast('Pack marked as sent', 'success')
+                    await loadData()
+                  } catch (err) {
+                    const { showToast } = await import('../components/Toast')
+                    showToast('Error: ' + (err.message || 'Unknown error'), 'error')
+                  }
+                }}
+              >
+                ✓ Sent
+              </Button>
+            )}
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={() => setMenuOpen(menuOpen === order.id ? null : order.id)}
+                style={styles.iconButton}
+              >
+                <MoreVertical size={18} color="#9ca3af" />
+              </button>
+              {menuOpen === order.id && (
+                <div style={{ ...styles.menu, backgroundColor: darkMode ? '#1f1f2e' : '#ffffff' }}>
+                  <button onClick={() => { setEditingOrder(order); setShowModal(true); setMenuOpen(null) }} style={styles.menuItem}>
+                    <Edit size={14} /> Editar
+                  </button>
+                  <button onClick={() => handleDeleteOrder(order)} style={{ ...styles.menuItem, color: '#F26C63' }}>
+                    <Trash2 size={14} /> Eliminar
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
   return (
-    <div style={{
-      ...styles.container,
-      backgroundColor: darkMode ? '#0a0a0f' : '#f8f9fc',
-      minHeight: '100vh'
-    }}>
+    <div style={styles.container}>
       <Header title="Comandes (PO)" />
 
       <div style={{
@@ -664,66 +786,81 @@ export default function Orders() {
           flexDirection: isMobile ? 'column' : 'row',
           gap: isMobile ? '12px' : '16px'
         }}>
-          <div style={{
-            ...styles.searchContainer,
-            backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
-          }}>
-            <Search size={18} color="#9ca3af" />
-            <input
-              type="text"
-              placeholder="Buscar comandes..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              style={{ ...styles.searchInput, color: darkMode ? '#ffffff' : '#111827' }}
-            />
+          <div style={styles.searchGroup}>
+            <div style={{
+              ...styles.searchContainer,
+              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
+            }}>
+              <Search size={18} color="#9ca3af" />
+              <input
+                type="text"
+                placeholder="Buscar comandes..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                style={{ ...styles.searchInput, color: darkMode ? '#ffffff' : '#111827' }}
+              />
+            </div>
+            <Button variant="secondary" size="sm" style={styles.filterButton}>
+              <Filter size={14} />
+              Filtres
+            </Button>
           </div>
 
-          <select
-            value={filterStatus || ''}
-            onChange={e => setFilterStatus(e.target.value || null)}
-            style={{
-              ...styles.filterSelect,
-              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-              color: darkMode ? '#ffffff' : '#111827'
-            }}
-          >
-            <option value="">Tots els estats</option>
-            {Object.entries(PO_STATUSES).map(([key, val]) => (
-              <option key={key} value={key}>{val.name}</option>
-            ))}
-          </select>
+          <div style={styles.filters}>
+            <select
+              value={filterStatus || ''}
+              onChange={e => setFilterStatus(e.target.value || null)}
+              style={{
+                ...styles.filterSelect,
+                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                color: darkMode ? '#ffffff' : '#111827'
+              }}
+            >
+              <option value="">Tots els estats</option>
+              {Object.entries(PO_STATUSES).map(([key, val]) => (
+                <option key={key} value={key}>{val.name}</option>
+              ))}
+            </select>
 
-          <select
-            value={filterProject || ''}
-            onChange={e => setFilterProject(e.target.value || null)}
-            style={{
-              ...styles.filterSelect,
-              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-              color: darkMode ? '#ffffff' : '#111827'
-            }}
-          >
-            <option value="">Tots els projectes</option>
-            {projects.map(p => (
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
-          </select>
+            <select
+              value={filterProject || ''}
+              onChange={e => setFilterProject(e.target.value || null)}
+              style={{
+                ...styles.filterSelect,
+                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                color: darkMode ? '#ffffff' : '#111827'
+              }}
+            >
+              <option value="">Tots els projectes</option>
+              {projects.map(p => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          </div>
 
-          <button 
-            onClick={() => {
-              if (!driveConnected) return
-              setEditingOrder(null)
-              setShowModal(true)
-            }} 
-            disabled={!driveConnected}
-            title={!driveConnected ? "Connecta Google Drive per crear" : ""}
-            style={{
-              ...styles.newButton,
-              opacity: !driveConnected ? 0.5 : 1,
-              cursor: !driveConnected ? 'not-allowed' : 'pointer'
-            }}>
-            <Plus size={18} />
-            Nova Comanda
-          </button>
+          <div style={styles.toolbarRight}>
+            <LayoutSwitcher
+              value={effectiveLayout}
+              onChange={setLayout}
+              compact={isMobile}
+            />
+            <Button 
+              onClick={() => {
+                if (!driveConnected) return
+                setEditingOrder(null)
+                setShowModal(true)
+              }} 
+              disabled={!driveConnected}
+              title={!driveConnected ? "Connecta Google Drive per crear" : ""}
+              style={{
+                opacity: !driveConnected ? 0.5 : 1,
+                cursor: !driveConnected ? 'not-allowed' : 'pointer'
+              }}
+            >
+              <Plus size={18} />
+              Nova Comanda
+            </Button>
+          </div>
         </div>
 
         {/* Stats */}
@@ -777,20 +914,10 @@ export default function Orders() {
             <p style={{ color: darkMode ? '#9ca3af' : '#6b7280', margin: '0 0 24px' }}>
               {error}
             </p>
-            <button 
-              onClick={loadData}
-              style={{
-                ...styles.createButton,
-                backgroundColor: '#4f46e5',
-                color: '#ffffff',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}
-            >
+            <Button onClick={loadData}>
               <RefreshCw size={18} />
               Reintentar
-            </button>
+            </Button>
           </div>
         ) : filteredOrders.length === 0 ? (
           <div style={{ ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
@@ -798,7 +925,7 @@ export default function Orders() {
             <p style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
               {searchTerm || filterStatus || filterProject ? 'No s\'han trobat comandes' : 'No hi ha comandes. Crea la primera!'}
             </p>
-            <button 
+            <Button 
               onClick={() => {
                 if (!driveConnected) return
                 setShowModal(true)
@@ -806,274 +933,41 @@ export default function Orders() {
               disabled={!driveConnected}
               title={!driveConnected ? "Connecta Google Drive per crear" : ""}
               style={{
-                ...styles.createButton,
                 opacity: !driveConnected ? 0.5 : 1,
                 cursor: !driveConnected ? 'not-allowed' : 'pointer'
-              }}>
+              }}
+            >
               <Plus size={18} />
               Nova Comanda
-            </button>
-          </div>
-        ) : isMobile ? (
-          // Mobile: Cards
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {filteredOrders.map(order => {
-              const status = PO_STATUSES[order.status] || PO_STATUSES.draft
-              const StatusIcon = status.icon
-              return (
-                <div
-                  key={order.id}
-                  style={{
-                    padding: '16px',
-                    borderRadius: '12px',
-                    border: '1px solid var(--border-color)',
-                    backgroundColor: darkMode ? '#15151f' : '#ffffff'
-                  }}
-                  onClick={() => handleViewOrder(order)}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
-                    <div>
-                      <div style={{ fontWeight: '600', color: darkMode ? '#ffffff' : '#111827', marginBottom: '4px' }}>
-                        {order.po_number}
-                      </div>
-                      <div style={{ fontSize: '14px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
-                        {order.project?.name || '-'}
-                      </div>
-                    </div>
-                    <span style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      padding: '4px 10px',
-                      borderRadius: '6px',
-                      fontSize: '12px',
-                      fontWeight: '500',
-                      backgroundColor: `${status.color}15`,
-                      color: status.color
-                    }}>
-                      <StatusIcon size={14} />
-                      {status.name}
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
-                    <div>Proveïdor: {order.supplier?.name || '-'}</div>
-                    <div>Data: {formatDate(order.order_date)}</div>
-                    <div style={{ fontWeight: '600', color: darkMode ? '#ffffff' : '#111827' }}>
-                      {formatCurrency(order.total_amount, order.currency)}
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleViewOrder(order)
-                      }}
-                      style={{
-                        flex: 1,
-                        padding: '8px 12px',
-                        backgroundColor: '#4f46e5',
-                        color: '#ffffff',
-                        border: 'none',
-                        borderRadius: '6px',
-                        fontSize: '12px',
-                        fontWeight: '500',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      Open
-                    </button>
-                    {order.manufacturerPackStatus === 'generated' && (
-                      <button
-                        onClick={async (e) => {
-                          e.stopPropagation()
-                          try {
-                            const { quickMarkPackAsSent } = await import('../lib/supabase')
-                            const { showToast } = await import('../components/Toast')
-                            await quickMarkPackAsSent(order.id)
-                            showToast('Pack marked as sent', 'success')
-                            await loadData()
-                          } catch (err) {
-                            const { showToast } = await import('../components/Toast')
-                            showToast('Error: ' + (err.message || 'Unknown error'), 'error')
-                          }
-                        }}
-                        style={{
-                          padding: '8px 12px',
-                          backgroundColor: '#10b981',
-                          color: '#ffffff',
-                          border: 'none',
-                          borderRadius: '6px',
-                          fontSize: '12px',
-                          fontWeight: '500',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        ✓ Sent
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
+            </Button>
           </div>
         ) : (
-          <div style={{ 
-            ...styles.tableContainer, 
-            backgroundColor: darkMode ? '#15151f' : '#ffffff',
-            overflowX: isMobile ? 'visible' : 'auto'
-          }}>
-            <table style={{
-              ...styles.table,
-              minWidth: isMobile ? 'auto' : '800px'
-            }}>
-              <thead>
-                <tr>
-                  <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>PO #</th>
-                  <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>Projecte</th>
-                  {!isTablet && <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>Proveïdor</th>}
-                  <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>Data</th>
-                  <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>Import</th>
-                  <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>Estat</th>
-                  <th style={{ ...styles.th, color: darkMode ? '#9ca3af' : '#6b7280' }}>Accions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredOrders.map(order => {
-                  const status = PO_STATUSES[order.status] || PO_STATUSES.draft
-                  const StatusIcon = status.icon
-
-                  return (
-                    <tr 
-                      key={order.id} 
-                      style={{
-                        ...styles.tr,
-                        backgroundColor: selectedOrders.has(order.id) 
-                          ? (darkMode ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.05)')
-                          : 'transparent'
-                      }}
-                    >
-                      <td style={styles.td}>
-                        {/* Bulk selection temporarily disabled */}
-                        <input
-                          type="checkbox"
-                          checked={false}
-                          disabled
-                          style={{ cursor: 'not-allowed', width: '18px', height: '18px', opacity: 0.5 }}
-                        />
-                      </td>
-                      <td style={{ ...styles.td, color: darkMode ? '#ffffff' : '#111827' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={styles.poNumber}>{order.po_number}</span>
-                          {order.amazonReadyStatus && (
-                            <span style={{
-                              padding: '2px 8px',
-                              borderRadius: '4px',
-                              fontSize: '11px',
-                              fontWeight: '500',
-                              backgroundColor: order.amazonReadyStatus.ready ? '#10b98115' : '#f59e0b15',
-                              color: order.amazonReadyStatus.ready ? '#10b981' : '#f59e0b'
-                            }}>
-                              {order.amazonReadyStatus.ready ? 'Ready' : `Missing ${order.amazonReadyStatus.missing.length}`}
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td style={{ ...styles.td, color: darkMode ? '#ffffff' : '#111827' }}>
-                        {order.project?.name || '-'}
-                      </td>
-                      {!isTablet && (
-                        <td style={{ ...styles.td, color: darkMode ? '#9ca3af' : '#6b7280' }}>
-                          {order.supplier?.name || '-'}
-                        </td>
-                      )}
-                      <td style={{ ...styles.td, color: darkMode ? '#9ca3af' : '#6b7280' }}>
-                        {formatDate(order.order_date)}
-                      </td>
-                      <td style={{ ...styles.td, color: darkMode ? '#ffffff' : '#111827', fontWeight: '600' }}>
-                        {formatCurrency(order.total_amount, order.currency)}
-                      </td>
-                      <td style={styles.td}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
-                          <span style={{
-                            ...styles.statusBadge,
-                            backgroundColor: `${status.color}15`,
-                            color: status.color
-                          }}>
-                            <StatusIcon size={14} />
-                            {status.name}
-                          </span>
-                          {/* Manufacturer Pack Badge */}
-                          {order.manufacturerPackStatus && (
-                            <span style={{
-                              ...styles.statusBadge,
-                              fontSize: '11px',
-                              padding: '2px 6px',
-                              backgroundColor: 
-                                order.manufacturerPackStatus === 'sent' ? '#d1fae515' :
-                                order.manufacturerPackStatus === 'generated' ? '#fef3c715' : '#e5e7eb15',
-                              color: 
-                                order.manufacturerPackStatus === 'sent' ? '#10b981' :
-                                order.manufacturerPackStatus === 'generated' ? '#f59e0b' : '#6b7280'
-                            }}>
-                              {order.manufacturerPackStatus === 'sent' && '✓ Pack Sent'}
-                              {order.manufacturerPackStatus === 'generated' && '📦 Pack Generated'}
-                              {order.manufacturerPackVersion > 1 && ` (v${order.manufacturerPackVersion})`}
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td style={styles.td}>
-                        <div style={styles.actionsCell}>
-                          {/* Botó Veure */}
-                          <button
-                            onClick={() => handleViewOrder(order)}
-                            style={styles.iconButton}
-                            title="Veure detall"
-                          >
-                            <Eye size={18} color="#4f46e5" />
-                          </button>
-                          
-                          {/* Botó PDF */}
-                          <button
-                            onClick={() => handleDownloadPdf(order)}
-                            disabled={downloadingPdf === order.id}
-                            style={styles.iconButton}
-                            title="Descarregar PDF"
-                          >
-                            {downloadingPdf === order.id ? (
-                              <Loader size={18} color="#22c55e" className="spin" />
-                            ) : (
-                              <Download size={18} color="#22c55e" />
-                            )}
-                          </button>
-
-                          {/* Menú més opcions */}
-                          <div style={{ position: 'relative' }}>
-                            <button
-                              onClick={() => setMenuOpen(menuOpen === order.id ? null : order.id)}
-                              style={styles.iconButton}
-                            >
-                              <MoreVertical size={18} color="#9ca3af" />
-                            </button>
-                            {menuOpen === order.id && (
-                              <div style={{ ...styles.menu, backgroundColor: darkMode ? '#1f1f2e' : '#ffffff' }}>
-                                <button onClick={() => { setEditingOrder(order); setShowModal(true); setMenuOpen(null) }} style={styles.menuItem}>
-                                  <Edit size={14} /> Editar
-                                </button>
-                                <button onClick={() => handleDeleteOrder(order)} style={{ ...styles.menuItem, color: '#ef4444' }}>
-                                  <Trash2 size={14} /> Eliminar
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+          <>
+            {effectiveLayout === 'grid' && (
+              <div style={styles.ordersGrid}>
+                {filteredOrders.map(order => renderOrderCard(order))}
+              </div>
+            )}
+            {effectiveLayout === 'list' && (
+              <div style={styles.ordersList}>
+                {filteredOrders.map(order => renderOrderCard(order))}
+              </div>
+            )}
+            {effectiveLayout === 'split' && (
+              <div style={styles.splitLayout}>
+                <div style={styles.splitList}>
+                  {filteredOrders.map(order => renderOrderCard(order, { enablePreviewSelect: true }))}
+                </div>
+                <div style={styles.splitPreview}>
+                  {selectedOrderCard ? (
+                    renderOrderCard(selectedOrderCard, { isPreview: true })
+                  ) : (
+                    <div style={styles.splitEmpty}>Selecciona una comanda</div>
+                  )}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -1729,27 +1623,33 @@ const styles = {
   container: { flex: 1, display: 'flex', flexDirection: 'column' },
   content: { padding: '32px', overflowY: 'auto' },
   toolbar: { display: 'flex', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' },
-  searchContainer: { flex: 1, minWidth: '200px', display: 'flex', alignItems: 'center', gap: '10px', padding: '0 16px', borderRadius: '10px', border: '1px solid var(--border-color)' },
+  searchGroup: { display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' },
+  searchContainer: { flex: '0 1 360px', maxWidth: '360px', width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '0 16px', borderRadius: '10px', border: '1px solid var(--border-color)' },
   searchInput: { flex: 1, padding: '12px 0', border: 'none', outline: 'none', fontSize: '14px', background: 'transparent' },
   filterSelect: { padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--border-color)', fontSize: '14px', outline: 'none', cursor: 'pointer' },
-  newButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', backgroundColor: '#4f46e5', color: '#ffffff', border: '1px solid #3730a3', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
+  filters: { display: 'flex', alignItems: 'center', gap: '12px' },
+  filterButton: { height: '36px' },
+  toolbarRight: { display: 'flex', alignItems: 'center', gap: '12px', marginLeft: 'auto' },
+  newButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', backgroundColor: '#1F4E5F', color: '#F4F7F3', border: '1px solid #1F4E5F', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
   statsRow: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px', marginBottom: '24px' },
-  statCard: { display: 'flex', alignItems: 'center', gap: '16px', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-color)' },
-  statValue: { display: 'block', fontSize: '20px', fontWeight: '700', color: '#4f46e5' },
+  statCard: { display: 'flex', alignItems: 'center', gap: '16px', padding: '20px', borderRadius: '12px', border: 'none', boxShadow: 'var(--shadow-soft)' },
+  statValue: { display: 'block', fontSize: '20px', fontWeight: '600', color: '#1F4E5F' },
   statLabel: { fontSize: '12px', color: '#6b7280' },
   loading: { padding: '64px', textAlign: 'center', color: '#6b7280' },
-  empty: { padding: '64px', textAlign: 'center', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' },
-  createButton: { display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', backgroundColor: '#4f46e5', color: '#ffffff', border: '1px solid #3730a3', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
-  tableContainer: { borderRadius: '16px', border: '1px solid var(--border-color)', overflow: 'hidden' },
-  table: { width: '100%', borderCollapse: 'collapse', tableLayout: 'auto' },
-  th: { padding: '14px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', borderBottom: '1px solid var(--border-color)' },
-  tr: { borderBottom: '1px solid var(--border-color)' },
-  td: { padding: '14px 16px', fontSize: '14px' },
-  poNumber: { fontWeight: '600', color: '#4f46e5' },
-  statusBadge: { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '500' },
-  actionsCell: { display: 'flex', alignItems: 'center', gap: '4px' },
+  empty: { padding: '64px', textAlign: 'center', borderRadius: '16px', border: 'none', boxShadow: 'var(--shadow-soft)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' },
+  createButton: { display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', backgroundColor: '#1F4E5F', color: '#F4F7F3', border: '1px solid #1F4E5F', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
+  ordersGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' },
+  ordersList: { display: 'flex', flexDirection: 'column', gap: '12px' },
+  splitLayout: { display: 'grid', gridTemplateColumns: 'minmax(280px, 360px) 1fr', gap: '20px' },
+  splitList: { display: 'flex', flexDirection: 'column', gap: '12px' },
+  splitPreview: { position: 'sticky', top: '96px', alignSelf: 'flex-start' },
+  splitEmpty: { padding: '24px', borderRadius: '16px', backgroundColor: 'var(--surface-bg)', boxShadow: 'var(--shadow-soft)', color: 'var(--muted)' },
+  orderCard: { padding: '16px', borderRadius: '16px', border: 'none', boxShadow: 'var(--shadow-soft)' },
+  orderCardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' },
+  orderCardBody: { display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: '#6b7280' },
+  orderCardActions: { display: 'flex', gap: '8px', marginTop: '12px', alignItems: 'center', flexWrap: 'wrap' },
   iconButton: { background: 'none', border: '1px solid var(--border-color, #e5e7eb)', padding: '8px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  menu: { position: 'absolute', right: 0, top: '100%', minWidth: '140px', borderRadius: '10px', border: '1px solid var(--border-color)', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', zIndex: 10 },
+  menu: { position: 'absolute', right: 0, top: '100%', minWidth: '140px', borderRadius: '10px', border: '1px solid rgba(31, 78, 95, 0.12)', boxShadow: 'var(--shadow-soft-hover)', zIndex: 10 },
   menuItem: { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '10px 14px', border: 'none', background: 'none', fontSize: '13px', cursor: 'pointer', color: 'inherit' },
   // Modal Detall
   modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' },

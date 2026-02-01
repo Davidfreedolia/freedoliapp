@@ -171,28 +171,33 @@ export default function Sidebar() {
             }}
             style={({ isActive }) => ({
               ...styles.navItem,
-              backgroundColor: isActive 
-                ? (darkMode ? 'rgba(99, 102, 241, 0.2)' : 'rgba(79, 70, 229, 0.1)')
-                : 'transparent',
-              color: isActive
-                ? '#4f46e5'
-                : (darkMode ? '#9ca3af' : '#6b7280'),
+              backgroundColor: isActive ? 'rgba(107, 199, 181, 0.16)' : 'transparent',
+              color: isActive ? '#F4F7F3' : 'rgba(244, 247, 243, 0.8)',
+              borderLeft: shouldCollapse ? '0' : (isActive ? '3px solid var(--color-accent)' : '3px solid transparent'),
+              padding: shouldCollapse ? '12px 0' : '12px 16px',
+              borderRadius: shouldCollapse ? '12px' : '10px',
               justifyContent: shouldCollapse ? 'center' : 'flex-start'
             })}
           >
-            <item.icon size={20} />
+            <item.icon size={shouldCollapse ? 24 : 20} />
             {!shouldCollapse && <span>{t(item.labelKey)}</span>}
           </NavLink>
         ))}
       </nav>
 
-      {/* Toggle collapse (només desktop) */}
       {isDesktop && (
-        <button 
+        <button
+          type="button"
+          aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          title={sidebarCollapsed ? 'Expandir' : 'Col·lapsar'}
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          style={styles.collapseButton}
+          style={{
+            ...styles.centerToggle,
+            left: shouldCollapse ? '50%' : '100%',
+            transform: shouldCollapse ? 'translateX(-50%)' : 'translateX(-50%)'
+          }}
         >
-          {sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+          {sidebarCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
         </button>
       )}
     </>
@@ -204,11 +209,7 @@ export default function Sidebar() {
         {/* Botó menu mobile */}
         <button
           onClick={() => setMobileOpen(true)}
-          style={{
-            ...styles.mobileMenuButton,
-            backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-            color: darkMode ? '#ffffff' : '#111827'
-          }}
+          style={styles.mobileMenuButton}
         >
           <Menu size={24} />
         </button>
@@ -223,7 +224,7 @@ export default function Sidebar() {
               style={{
                 ...styles.sidebar,
                 ...styles.drawer,
-                backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
+                backgroundColor: '#1F4E5F',
                 transform: mobileOpen ? 'translateX(0)' : 'translateX(-100%)'
               }}
               onClick={(e) => e.stopPropagation()}
@@ -240,7 +241,7 @@ export default function Sidebar() {
     <aside style={{
       ...styles.sidebar,
       width: shouldCollapse ? '72px' : '260px',
-      backgroundColor: darkMode ? '#0a0a0f' : '#ffffff'
+      backgroundColor: '#1F4E5F'
     }}>
       {sidebarContent}
     </aside>
@@ -256,7 +257,8 @@ const styles = {
     left: 0,
     top: 0,
     transition: 'width 0.3s ease',
-    zIndex: 100
+    zIndex: 100,
+    color: '#F4F7F3'
   },
   logoContainer: {
     padding: '20px',
@@ -295,17 +297,22 @@ const styles = {
     fontWeight: '500',
     transition: 'all 0.2s ease'
   },
-  collapseButton: {
-    margin: '16px',
-    padding: '10px',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
+  centerToggle: {
+    position: 'absolute',
+    top: '50%',
+    zIndex: 200,
+    width: '36px',
+    height: '36px',
+    borderRadius: '999px',
+    border: '1px solid rgba(244, 247, 243, 0.22)',
+    backgroundColor: 'rgba(244, 247, 243, 0.10)',
+    color: '#F4F7F3',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'transparent',
-    color: '#6b7280'
+    cursor: 'pointer',
+    boxShadow: '0 6px 16px rgba(31, 78, 95, 0.20)',
+    backdropFilter: 'blur(6px)'
   },
   mobileMenuButton: {
     position: 'fixed',
@@ -313,13 +320,15 @@ const styles = {
     left: '16px',
     zIndex: 1000,
     padding: '10px',
-    border: '1px solid var(--border-color)',
+    border: '1px solid rgba(244, 247, 243, 0.2)',
     borderRadius: '8px',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+    boxShadow: '0 2px 6px rgba(31, 78, 95, 0.2)',
+    backgroundColor: '#1F4E5F',
+    color: '#F4F7F3'
   },
   drawerOverlay: {
     position: 'fixed',
@@ -343,7 +352,7 @@ const styles = {
     background: 'none',
     border: 'none',
     cursor: 'pointer',
-    color: '#6b7280',
+    color: '#F4F7F3',
     padding: '8px',
     borderRadius: '6px',
     display: 'flex',

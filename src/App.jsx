@@ -83,7 +83,7 @@ function AppContent() {
     <div style={{
       display: 'flex',
       minHeight: '100vh',
-      backgroundColor: darkMode ? '#0a0a0f' : '#f8f9fc'
+      backgroundColor: 'var(--page-bg)'
     }}>
       <DemoModeBanner darkMode={darkMode} />
       <DevBadge darkMode={darkMode} />

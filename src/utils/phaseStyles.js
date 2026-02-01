@@ -81,26 +81,27 @@ export const getPhaseSurfaceStyles = (phaseStyle, options = {}) => {
     return { hasPhaseStyle: false }
   }
 
-  const cardOverlay = darkMode ? 'rgba(0, 0, 0, 0.18)' : 'rgba(255, 255, 255, 0.6)'
-  const contentOverlay = darkMode ? 'rgba(0, 0, 0, 0.28)' : 'rgba(255, 255, 255, 0.78)'
+  const cardSurface = darkMode ? 'rgba(24, 54, 63, 0.92)' : 'var(--surface-bg)'
+  const contentSurface = darkMode ? 'rgba(18, 40, 47, 0.65)' : 'var(--surface-bg-2)'
   const headerHoverBg = hexToRgba(phaseStyle.accent, darkMode ? 0.16 : 0.1)
 
   return {
     hasPhaseStyle,
     headerHoverBg,
     wrapperStyle: {
-      backgroundColor: phaseStyle.bg,
-      borderLeft: `4px solid ${phaseStyle.accent}`
+      backgroundColor: 'var(--surface-bg)',
+      borderTop: `3px solid ${phaseStyle.accent}`
     },
     cardStyle: {
-      background: `linear-gradient(${cardOverlay}, ${cardOverlay}), ${phaseStyle.bg}`,
-      borderLeft: `${borderWidth}px solid ${phaseStyle.accent}`
+      background: cardSurface,
+      borderTop: `${borderWidth}px solid ${phaseStyle.accent}`,
+      boxShadow: 'var(--shadow-soft)'
     },
     contentStyle: {
-      background: `linear-gradient(${contentOverlay}, ${contentOverlay}), ${phaseStyle.bg}`
+      background: contentSurface
     },
     accentStyle: {
-      borderLeft: `${borderWidth}px solid ${phaseStyle.accent}`
+      borderTop: `${borderWidth}px solid ${phaseStyle.accent}`
     }
   }
 }

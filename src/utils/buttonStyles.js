@@ -50,44 +50,33 @@ export const getButtonStyles = ({ variant = 'primary', darkMode = false, disable
 
   const variants = {
     primary: {
-      backgroundColor: isHovered 
-        ? (darkMode ? '#4338ca' : '#4338ca')
-        : (darkMode ? '#4f46e5' : '#4f46e5'),
-      color: '#ffffff',
-      border: '1px solid #3730a3',
-      boxShadow: isHovered
-        ? (darkMode ? '0 4px 12px rgba(79, 70, 229, 0.4)' : '0 4px 8px rgba(0, 0, 0, 0.15)')
-        : (darkMode ? '0 2px 8px rgba(79, 70, 229, 0.3)' : '0 2px 4px rgba(0, 0, 0, 0.1)'),
-      filter: isHovered ? 'brightness(1.05)' : 'brightness(1)'
+      backgroundColor: isHovered
+        ? (darkMode ? '#184351' : '#184351')
+        : (darkMode ? '#1F4E5F' : '#1F4E5F'),
+      color: '#F4F7F3',
+      border: '1px solid #1F4E5F',
+      boxShadow: isHovered ? '0 6px 16px rgba(31, 78, 95, 0.18)' : '0 2px 6px rgba(31, 78, 95, 0.12)'
     },
     secondary: {
       backgroundColor: isHovered
-        ? (darkMode ? '#2a2a3a' : '#e5e7eb')
-        : (darkMode ? '#1f1f2e' : '#f3f4f6'),
-      color: darkMode ? '#e5e7eb' : '#374151',
-      border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`,
-      filter: isHovered ? 'brightness(1.1)' : 'brightness(1)'
+        ? (darkMode ? 'rgba(244, 247, 243, 0.08)' : 'rgba(31, 78, 95, 0.06)')
+        : (darkMode ? 'rgba(244, 247, 243, 0.04)' : '#FFFFFF'),
+      color: darkMode ? '#F4F7F3' : '#1F4E5F',
+      border: `1px solid ${darkMode ? 'rgba(244, 247, 243, 0.2)' : 'rgba(31, 78, 95, 0.2)'}`,
+      filter: isHovered ? 'brightness(1.02)' : 'brightness(1)'
     },
     danger: {
       backgroundColor: isHovered
-        ? (darkMode ? '#dc2626' : '#dc2626')
-        : (darkMode ? '#ef4444' : '#ef4444'),
+        ? (darkMode ? '#E85E56' : '#E85E56')
+        : (darkMode ? '#F26C63' : '#F26C63'),
       color: '#ffffff',
-      border: '1px solid #dc2626',
-      boxShadow: isHovered
-        ? (darkMode ? '0 4px 12px rgba(239, 68, 68, 0.4)' : '0 4px 8px rgba(239, 68, 68, 0.3)')
-        : (darkMode ? '0 2px 8px rgba(239, 68, 68, 0.3)' : '0 2px 4px rgba(239, 68, 68, 0.2)'),
-      filter: isHovered ? 'brightness(1.05)' : 'brightness(1)'
+      border: '1px solid #F26C63',
+      boxShadow: isHovered ? '0 6px 16px rgba(242, 108, 99, 0.25)' : '0 2px 6px rgba(242, 108, 99, 0.18)'
     },
-    success: {
-      backgroundColor: isHovered
-        ? (darkMode ? '#15803d' : '#16a34a')
-        : (darkMode ? '#16a34a' : '#22c55e'),
-      color: '#ffffff',
-      boxShadow: isHovered
-        ? (darkMode ? '0 4px 12px rgba(22, 163, 74, 0.4)' : '0 4px 8px rgba(34, 197, 94, 0.3)')
-        : (darkMode ? '0 2px 8px rgba(22, 163, 74, 0.3)' : '0 2px 4px rgba(34, 197, 94, 0.2)'),
-      filter: isHovered ? 'brightness(1.05)' : 'brightness(1)'
+    ghost: {
+      backgroundColor: 'transparent',
+      color: darkMode ? '#F4F7F3' : '#1F4E5F',
+      border: `1px solid ${darkMode ? 'rgba(244, 247, 243, 0.2)' : 'rgba(31, 78, 95, 0.2)'}`
     }
   }
 
@@ -140,14 +129,14 @@ export const getIconButtonStyles = ({ darkMode = false, variant = 'default', dis
 
   const variants = {
     default: {
-      backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6',
-      border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`,
-      color: darkMode ? '#9ca3af' : '#6b7280'
+      backgroundColor: darkMode ? 'rgba(244, 247, 243, 0.06)' : '#FFFFFF',
+      border: `1px solid ${darkMode ? 'rgba(244, 247, 243, 0.2)' : 'rgba(31, 78, 95, 0.2)'}`,
+      color: darkMode ? '#F4F7F3' : '#1F4E5F'
     },
     primary: {
-      backgroundColor: darkMode ? '#4f46e5' : '#4f46e5',
-      color: '#ffffff',
-      boxShadow: darkMode ? '0 2px 8px rgba(79, 70, 229, 0.3)' : '0 2px 4px rgba(0, 0, 0, 0.1)'
+      backgroundColor: darkMode ? '#1F4E5F' : '#1F4E5F',
+      color: '#F4F7F3',
+      boxShadow: '0 2px 6px rgba(31, 78, 95, 0.12)'
     }
   }
 

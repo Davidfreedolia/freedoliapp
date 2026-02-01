@@ -18,7 +18,8 @@ import {
   ChevronDown,
   ChevronUp,
   CreditCard,
-  Package
+  Package,
+  Filter
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { 
@@ -37,6 +38,9 @@ import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
 import { showToast } from '../components/Toast'
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal'
+import Button from '../components/Button'
+import LayoutSwitcher from '../components/LayoutSwitcher'
+import { useLayoutPreference } from '../hooks/useLayoutPreference'
 
 // Països i ciutats
 const COUNTRIES_CITIES = {
@@ -74,6 +78,8 @@ export default function Forwarders() {
   const [searchTerm, setSearchTerm] = useState('')
   const [expandedForwarder, setExpandedForwarder] = useState(null)
   const [menuOpen, setMenuOpen] = useState(null)
+  const [layout, setLayout] = useLayoutPreference('layout:forwarders', 'grid')
+  const [selectedForwarderId, setSelectedForwarderId] = useState(null)
   
   // Modals
   const [showForwarderModal, setShowForwarderModal] = useState(false)
@@ -210,6 +216,19 @@ export default function Forwarders() {
     f.city?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
+  useEffect(() => {
+    if (!filteredForwarders.length) {
+      setSelectedForwarderId(null)
+      return
+    }
+    if (!selectedForwarderId || !filteredForwarders.some(f => f.id === selectedForwarderId)) {
+      setSelectedForwarderId(filteredForwarders[0].id)
+    }
+  }, [filteredForwarders, selectedForwarderId])
+
+  const effectiveLayout = isMobile ? 'list' : layout
+  const selectedForwarder = filteredForwarders.find(f => f.id === selectedForwarderId)
+
   // Obtenir magatzems d'un transitari
   const getForwarderWarehouses = (forwarderId) => {
     return warehouses.filter(w => w.supplier_id === forwarderId)
@@ -235,6 +254,143 @@ export default function Forwarders() {
             <Star size={16} fill={i <= rating ? '#f59e0b' : 'none'} color={i <= rating ? '#f59e0b' : '#d1d5db'} />
           </button>
         ))}
+      </div>
+    )
+  }
+
+  const renderForwarderCard = (forwarder, { isPreview = false, enablePreviewSelect = false } = {}) => {
+    const forwarderWarehouses = getForwarderWarehouses(forwarder.id)
+    const isExpanded = isPreview ? true : expandedForwarder === forwarder.id
+
+    return (
+      <div key={forwarder.id} style={{
+        ...styles.forwarderCard,
+        backgroundColor: darkMode ? '#15151f' : '#ffffff'
+      }}
+      onMouseEnter={enablePreviewSelect ? () => setSelectedForwarderId(forwarder.id) : undefined}
+      >
+        {/* Header */}
+        <div
+          style={styles.forwarderHeader}
+          onClick={() => {
+            if (isPreview) return
+            setExpandedForwarder(isExpanded ? null : forwarder.id)
+          }}
+        >
+          <div style={styles.forwarderIcon}>
+            <Truck size={24} color="#1F4E5F" />
+          </div>
+          <div style={styles.forwarderInfo}>
+            <h3 style={{ ...styles.forwarderName, color: darkMode ? '#ffffff' : '#111827' }}>
+              {forwarder.name}
+            </h3>
+            <div style={styles.forwarderMeta}>
+              <span><MapPin size={12} /> {forwarder.city}, {forwarder.country}</span>
+              {forwarder.phone && <span><Phone size={12} /> {forwarder.phone}</span>}
+            </div>
+            {forwarder.payment_terms && (
+              <div style={styles.forwarderMeta}>
+                <span><CreditCard size={12} /> {forwarder.payment_terms}</span>
+                {forwarder.incoterm && <span><Package size={12} /> {forwarder.incoterm}</span>}
+              </div>
+            )}
+          </div>
+          <div style={styles.forwarderActions}>
+            <span style={styles.warehouseCount}>
+              {forwarderWarehouses.length} magatzems
+            </span>
+            {renderStars(forwarder.rating)}
+            {!isPreview && (isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />)}
+          </div>
+          {!isPreview && (
+            <div 
+              style={{ position: 'relative' }} 
+              data-menu-container
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setMenuOpen(menuOpen === forwarder.id ? null : forwarder.id)
+                }} 
+                style={styles.menuButton}
+              >
+                <MoreVertical size={18} />
+              </button>
+              {menuOpen === forwarder.id && (
+                <div 
+                  style={{ 
+                    ...styles.menu, 
+                    backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
+                    zIndex: 1000
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleEditForwarder(forwarder)
+                    }} 
+                    style={styles.menuItem}
+                  >
+                    <Edit size={14} /> Editar
+                  </button>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleDeleteForwarder(forwarder)
+                    }} 
+                    style={{ ...styles.menuItem, color: '#F26C63' }}
+                  >
+                    <Trash2 size={14} /> Eliminar
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Expanded - Warehouses */}
+        {isExpanded && (
+          <div style={styles.warehousesSection}>
+            <div style={styles.warehousesHeader}>
+              <h4 style={{ color: darkMode ? '#ffffff' : '#111827', margin: 0 }}>
+                Magatzems de {forwarder.name}
+              </h4>
+              <button onClick={() => handleNewWarehouse(forwarder.id)} style={styles.addWarehouseBtn}>
+                <Plus size={14} /> Afegir magatzem
+              </button>
+            </div>
+            
+            {forwarderWarehouses.length === 0 ? (
+              <p style={{ color: '#6b7280', fontSize: '14px' }}>No hi ha magatzems configurats</p>
+            ) : (
+              <div style={styles.warehousesList}>
+                {forwarderWarehouses.map(warehouse => (
+                  <div key={warehouse.id} style={{
+                    ...styles.warehouseItem,
+                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
+                  }}>
+                    <div>
+                      <strong style={{ color: darkMode ? '#ffffff' : '#111827' }}>{warehouse.name}</strong>
+                      <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#6b7280' }}>
+                        {warehouse.address}, {warehouse.city}, {warehouse.country}
+                      </p>
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button onClick={() => handleEditWarehouse(warehouse)} style={styles.iconBtn}>
+                        <Edit size={14} />
+                      </button>
+                      <button onClick={() => handleDeleteWarehouse(warehouse)} style={{ ...styles.iconBtn, color: '#F26C63' }}>
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     )
   }
@@ -433,30 +589,43 @@ export default function Forwarders() {
           flexDirection: isMobile ? 'column' : 'row',
           gap: isMobile ? '12px' : '16px'
         }}>
-          <div style={{
-            ...styles.searchContainer,
-            backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
-          }}>
-            <Search size={18} color="#9ca3af" />
-            <input
-              type="text"
-              placeholder="Buscar transitaris..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              style={{ ...styles.searchInput, color: darkMode ? '#ffffff' : '#111827' }}
-            />
-          </div>
-          <button 
-            onClick={handleNewForwarder} 
-            disabled={!driveConnected}
-            title={!driveConnected ? "Connecta Google Drive per crear" : ""}
-            style={{
-              ...styles.newButton,
-              opacity: !driveConnected ? 0.5 : 1,
-              cursor: !driveConnected ? 'not-allowed' : 'pointer'
+          <div style={styles.searchGroup}>
+            <div style={{
+              ...styles.searchContainer,
+              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
             }}>
-            <Plus size={18} /> Nou Transitari
-          </button>
+              <Search size={18} color="#9ca3af" />
+              <input
+                type="text"
+                placeholder="Buscar transitaris..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                style={{ ...styles.searchInput, color: darkMode ? '#ffffff' : '#111827' }}
+              />
+            </div>
+            <Button variant="secondary" size="sm" style={styles.filterButton}>
+              <Filter size={14} />
+              Filtres
+            </Button>
+          </div>
+          <div style={styles.toolbarRight}>
+            <LayoutSwitcher
+              value={effectiveLayout}
+              onChange={setLayout}
+              compact={isMobile}
+            />
+            <Button 
+              onClick={handleNewForwarder} 
+              disabled={!driveConnected}
+              title={!driveConnected ? "Connecta Google Drive per crear" : ""}
+              style={{
+                opacity: !driveConnected ? 0.5 : 1,
+                cursor: !driveConnected ? 'not-allowed' : 'pointer'
+              }}
+            >
+              <Plus size={18} /> Nou Transitari
+            </Button>
+          </div>
         </div>
 
         {/* Stats */}
@@ -484,139 +653,41 @@ export default function Forwarders() {
           <div style={{ ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
             <Truck size={48} color="#d1d5db" />
             <p style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>No hi ha transitaris. Crea el primer!</p>
-            <button onClick={handleNewForwarder} style={styles.newButton}>
+            <Button onClick={handleNewForwarder}>
               <Plus size={18} /> Afegir Transitari
-            </button>
+            </Button>
           </div>
         ) : (
-          <div style={styles.forwardersList}>
-            {filteredForwarders.map(forwarder => {
-              const forwarderWarehouses = getForwarderWarehouses(forwarder.id)
-              const isExpanded = expandedForwarder === forwarder.id
-              
-              return (
-                <div key={forwarder.id} style={{
-                  ...styles.forwarderCard,
-                  backgroundColor: darkMode ? '#15151f' : '#ffffff'
-                }}>
-                  {/* Header */}
-                  <div style={styles.forwarderHeader} onClick={() => setExpandedForwarder(isExpanded ? null : forwarder.id)}>
-                    <div style={styles.forwarderIcon}>
-                      <Truck size={24} color="#f59e0b" />
-                    </div>
-                    <div style={styles.forwarderInfo}>
-                      <h3 style={{ ...styles.forwarderName, color: darkMode ? '#ffffff' : '#111827' }}>
-                        {forwarder.name}
-                      </h3>
-                      <div style={styles.forwarderMeta}>
-                        <span><MapPin size={12} /> {forwarder.city}, {forwarder.country}</span>
-                        {forwarder.phone && <span><Phone size={12} /> {forwarder.phone}</span>}
-                      </div>
-                      {forwarder.payment_terms && (
-                        <div style={styles.forwarderMeta}>
-                          <span><CreditCard size={12} /> {forwarder.payment_terms}</span>
-                          {forwarder.incoterm && <span><Package size={12} /> {forwarder.incoterm}</span>}
-                        </div>
-                      )}
-                    </div>
-                    <div style={styles.forwarderActions}>
-                      <span style={styles.warehouseCount}>
-                        {forwarderWarehouses.length} magatzems
-                      </span>
-                      {renderStars(forwarder.rating)}
-                      {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                    </div>
-                    <div 
-                      style={{ position: 'relative' }} 
-                      data-menu-container
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setMenuOpen(menuOpen === forwarder.id ? null : forwarder.id)
-                        }} 
-                        style={styles.menuButton}
-                      >
-                        <MoreVertical size={18} />
-                      </button>
-                      {menuOpen === forwarder.id && (
-                        <div 
-                          style={{ 
-                            ...styles.menu, 
-                            backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
-                            zIndex: 1000
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleEditForwarder(forwarder)
-                            }} 
-                            style={styles.menuItem}
-                          >
-                            <Edit size={14} /> Editar
-                          </button>
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleDeleteForwarder(forwarder)
-                            }} 
-                            style={{ ...styles.menuItem, color: '#ef4444' }}
-                          >
-                            <Trash2 size={14} /> Eliminar
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Expanded - Warehouses */}
-                  {isExpanded && (
-                    <div style={styles.warehousesSection}>
-                      <div style={styles.warehousesHeader}>
-                        <h4 style={{ color: darkMode ? '#ffffff' : '#111827', margin: 0 }}>
-                          Magatzems de {forwarder.name}
-                        </h4>
-                        <button onClick={() => handleNewWarehouse(forwarder.id)} style={styles.addWarehouseBtn}>
-                          <Plus size={14} /> Afegir magatzem
-                        </button>
-                      </div>
-                      
-                      {forwarderWarehouses.length === 0 ? (
-                        <p style={{ color: '#6b7280', fontSize: '14px' }}>No hi ha magatzems configurats</p>
-                      ) : (
-                        <div style={styles.warehousesList}>
-                          {forwarderWarehouses.map(warehouse => (
-                            <div key={warehouse.id} style={{
-                              ...styles.warehouseItem,
-                              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
-                            }}>
-                              <div>
-                                <strong style={{ color: darkMode ? '#ffffff' : '#111827' }}>{warehouse.name}</strong>
-                                <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#6b7280' }}>
-                                  {warehouse.address}, {warehouse.city}, {warehouse.country}
-                                </p>
-                              </div>
-                              <div style={{ display: 'flex', gap: '8px' }}>
-                                <button onClick={() => handleEditWarehouse(warehouse)} style={styles.iconBtn}>
-                                  <Edit size={14} />
-                                </button>
-                                <button onClick={() => handleDeleteWarehouse(warehouse)} style={{ ...styles.iconBtn, color: '#ef4444' }}>
-                                  <Trash2 size={14} />
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+          <>
+            {effectiveLayout === 'grid' && (
+              <div style={{
+                ...styles.forwardersGrid,
+                gridTemplateColumns: isMobile ? '1fr' : (isTablet ? 'repeat(auto-fill, minmax(280px, 1fr))' : 'repeat(auto-fill, minmax(320px, 1fr))'),
+                gap: isMobile ? '12px' : '16px'
+              }}>
+                {filteredForwarders.map(forwarder => renderForwarderCard(forwarder))}
+              </div>
+            )}
+            {effectiveLayout === 'list' && (
+              <div style={styles.forwardersList}>
+                {filteredForwarders.map(forwarder => renderForwarderCard(forwarder))}
+              </div>
+            )}
+            {effectiveLayout === 'split' && (
+              <div style={styles.splitLayout}>
+                <div style={styles.splitList}>
+                  {filteredForwarders.map(forwarder => renderForwarderCard(forwarder, { enablePreviewSelect: true }))}
+                </div>
+                <div style={styles.splitPreview}>
+                  {selectedForwarder ? (
+                    renderForwarderCard(selectedForwarder, { isPreview: true })
+                  ) : (
+                    <div style={styles.splitEmpty}>Selecciona un transitari</div>
                   )}
                 </div>
-              )
-            })}
-          </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -866,29 +937,37 @@ export default function Forwarders() {
 const styles = {
   container: { flex: 1, display: 'flex', flexDirection: 'column' },
   content: { padding: '32px', overflowY: 'auto' },
-  toolbar: { display: 'flex', gap: '16px', marginBottom: '24px' },
-  searchContainer: { flex: 1, display: 'flex', alignItems: 'center', gap: '10px', padding: '0 16px', borderRadius: '10px', border: '1px solid var(--border-color)' },
+  toolbar: { display: 'flex', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' },
+  searchGroup: { display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' },
+  searchContainer: { flex: '0 1 360px', maxWidth: '360px', width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '0 16px', borderRadius: '10px', border: '1px solid var(--border-color)' },
   searchInput: { flex: 1, padding: '12px 0', border: 'none', outline: 'none', fontSize: '14px', background: 'transparent' },
-  newButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', backgroundColor: '#f59e0b', color: '#ffffff', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
+  filterButton: { height: '36px' },
+  toolbarRight: { display: 'flex', alignItems: 'center', gap: '12px', marginLeft: 'auto' },
+  newButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', backgroundColor: '#1F4E5F', color: '#F4F7F3', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
   statsRow: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '24px' },
-  statCard: { display: 'flex', alignItems: 'center', gap: '16px', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-color)' },
-  statValue: { display: 'block', fontSize: '24px', fontWeight: '700', color: '#f59e0b' },
+  statCard: { display: 'flex', alignItems: 'center', gap: '16px', padding: '20px', borderRadius: '12px', border: 'none', boxShadow: 'var(--shadow-soft)' },
+  statValue: { display: 'block', fontSize: '24px', fontWeight: '600', color: '#1F4E5F' },
   statLabel: { fontSize: '12px', color: '#6b7280' },
   loading: { padding: '64px', textAlign: 'center', color: '#6b7280' },
-  empty: { padding: '64px', textAlign: 'center', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' },
+  empty: { padding: '64px', textAlign: 'center', borderRadius: '16px', border: 'none', boxShadow: 'var(--shadow-soft)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' },
   forwardersList: { display: 'flex', flexDirection: 'column', gap: '16px' },
-  forwarderCard: { borderRadius: '16px', border: '1px solid var(--border-color)', overflow: 'hidden' },
+  forwardersGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' },
+  splitLayout: { display: 'grid', gridTemplateColumns: 'minmax(280px, 360px) 1fr', gap: '20px' },
+  splitList: { display: 'flex', flexDirection: 'column', gap: '16px' },
+  splitPreview: { position: 'sticky', top: '96px', alignSelf: 'flex-start' },
+  splitEmpty: { padding: '24px', borderRadius: '16px', backgroundColor: 'var(--surface-bg)', boxShadow: 'var(--shadow-soft)', color: 'var(--muted)' },
+  forwarderCard: { borderRadius: '16px', border: 'none', boxShadow: 'var(--shadow-soft)', overflow: 'hidden' },
   forwarderHeader: { display: 'flex', alignItems: 'center', gap: '16px', padding: '20px', cursor: 'pointer' },
-  forwarderIcon: { width: '48px', height: '48px', borderRadius: '12px', backgroundColor: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  forwarderIcon: { width: '48px', height: '48px', borderRadius: '12px', backgroundColor: 'rgba(31, 78, 95, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' },
   forwarderInfo: { flex: 1 },
   forwarderName: { margin: '0 0 4px', fontSize: '16px', fontWeight: '600' },
   forwarderMeta: { display: 'flex', gap: '16px', fontSize: '13px', color: '#6b7280', marginTop: '4px' },
   forwarderActions: { display: 'flex', alignItems: 'center', gap: '16px' },
-  warehouseCount: { padding: '4px 10px', backgroundColor: '#e0e7ff', color: '#4f46e5', borderRadius: '12px', fontSize: '12px', fontWeight: '500' },
+  warehouseCount: { padding: '4px 10px', backgroundColor: 'rgba(31, 78, 95, 0.08)', color: '#1F4E5F', borderRadius: '12px', fontSize: '12px', fontWeight: '500' },
   menuButton: { background: 'none', border: 'none', cursor: 'pointer', padding: '8px', color: '#9ca3af' },
-  menu: { position: 'absolute', right: 0, top: '100%', minWidth: '120px', borderRadius: '10px', border: '1px solid var(--border-color)', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', zIndex: 10 },
+  menu: { position: 'absolute', right: 0, top: '100%', minWidth: '120px', borderRadius: '10px', border: '1px solid rgba(31, 78, 95, 0.12)', boxShadow: 'var(--shadow-soft-hover)', zIndex: 10 },
   menuItem: { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '10px 14px', border: 'none', background: 'none', fontSize: '13px', cursor: 'pointer', color: 'inherit' },
-  warehousesSection: { padding: '0 20px 20px', borderTop: '1px solid var(--border-color)' },
+  warehousesSection: { padding: '0 20px 20px', borderTop: '1px solid rgba(31, 78, 95, 0.12)' },
   warehousesHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0' },
   addWarehouseBtn: { display: 'flex', alignItems: 'center', gap: '4px', padding: '8px 12px', backgroundColor: '#3b82f6', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '12px', cursor: 'pointer' },
   warehousesList: { display: 'flex', flexDirection: 'column', gap: '8px' },

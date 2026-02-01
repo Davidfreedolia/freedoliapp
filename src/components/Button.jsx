@@ -1,6 +1,6 @@
 /**
  * Unified Button Component
- * Uses Canadian Palette tokens for consistent styling across the app
+ * Uses Freedoliapp palette tokens for consistent styling across the app
  */
 
 import React from 'react'
@@ -8,7 +8,7 @@ import { TOKENS } from '../theme/tokens'
 
 /**
  * Button component with unified styling
- * @param {string} variant - 'primary' | 'success-soft' | 'warning-soft' | 'danger' | 'ghost'
+ * @param {string} variant - 'primary' | 'secondary' | 'danger' | 'ghost'
  * @param {string} size - 'sm' | 'md' | 'lg'
  * @param {boolean} disabled
  * @param {React.ReactNode} children
@@ -60,7 +60,7 @@ export default function Button({
     }
   }
 
-  // Color variants using Canadian Palette tokens
+  // Color variants using Freedoliapp palette tokens
   const variantStyles = {
     primary: {
       backgroundColor: TOKENS['button-primary-bg'], // #3498DB
@@ -70,22 +70,13 @@ export default function Button({
         backgroundColor: TOKENS['button-primary-hover'] // #2980B9
       }
     },
-    'success-soft': {
-      backgroundColor: TOKENS['button-success-soft-bg'], // rgba(46, 204, 113, 0.1)
-      color: TOKENS['button-success-soft-text'], // #27AE60
-      border: `1px solid ${TOKENS['button-success-soft-border']}`, // rgba(46, 204, 113, 0.2)
+    secondary: {
+      backgroundColor: TOKENS['button-secondary-bg'],
+      color: TOKENS['button-secondary-text'],
+      border: `1px solid ${TOKENS['button-secondary-border']}`,
       ':hover': {
-        backgroundColor: 'rgba(46, 204, 113, 0.15)',
-        borderColor: 'rgba(46, 204, 113, 0.3)'
-      }
-    },
-    'warning-soft': {
-      backgroundColor: TOKENS['button-warning-soft-bg'], // rgba(231, 76, 60, 0.08)
-      color: TOKENS['button-warning-soft-text'], // #C0392B
-      border: `1px solid ${TOKENS['button-warning-soft-border']}`, // rgba(231, 76, 60, 0.15)
-      ':hover': {
-        backgroundColor: 'rgba(231, 76, 60, 0.12)',
-        borderColor: 'rgba(231, 76, 60, 0.25)'
+        backgroundColor: TOKENS['button-secondary-hover'],
+        borderColor: TOKENS['button-secondary-border']
       }
     },
     danger: {
@@ -98,19 +89,23 @@ export default function Button({
     },
     ghost: {
       backgroundColor: 'transparent',
-      color: TOKENS.text,
+      color: TOKENS.primary,
       border: `1px solid ${TOKENS.border}`,
       ':hover': {
-        backgroundColor: TOKENS.bg,
-        borderColor: TOKENS.text
+        backgroundColor: 'rgba(31, 78, 95, 0.06)',
+        borderColor: TOKENS.primary
       }
     }
   }
 
+  const resolvedVariant = variantStyles[variant]
+    ? variant
+    : (variant === 'success-soft' || variant === 'warning-soft' ? 'secondary' : 'primary')
+
   const finalStyle = {
     ...baseStyle,
     ...sizeStyles[size],
-    ...variantStyles[variant],
+    ...variantStyles[resolvedVariant],
     ...(disabled && {
       cursor: 'not-allowed',
       opacity: 0.6
@@ -120,7 +115,7 @@ export default function Button({
   // Handle hover state (inline styles don't support :hover, so we use onMouseEnter/Leave)
   const [isHovered, setIsHovered] = React.useState(false)
   
-  const hoverStyle = variantStyles[variant][':hover'] || {}
+  const hoverStyle = variantStyles[resolvedVariant][':hover'] || {}
   const appliedStyle = {
     ...finalStyle,
     ...(isHovered && !disabled && hoverStyle)

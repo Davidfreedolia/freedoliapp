@@ -1,33 +1,17 @@
 /**
  * Design Tokens - Single Source of Truth
- * Canadian Palette (Flat UI Colors CA) + Semantic Tokens
- * https://flatuicolors.com/palette/ca
+ * Freedoliapp Palette + Semantic Tokens
  */
 
 // ============================================
-// CANADIAN PALETTE - Base Colors
+// FREEDOLIAPP PALETTE - Base Colors
 // ============================================
 export const PALETTE_CA = [
-  '#1ABC9C', // turquoise
-  '#2ECC71', // emerald
-  '#3498DB', // peter-river
-  '#9B59B6', // amethyst
-  '#34495E', // wet-asphalt
-  '#16A085', // green-sea
-  '#27AE60', // nephritis
-  '#2980B9', // belize-hole
-  '#8E44AD', // wisteria
-  '#2C3E50', // midnight-blue
-  '#F1C40F', // sun-flower
-  '#E67E22', // carrot
-  '#E74C3C', // alizarin
-  '#ECF0F1', // clouds
-  '#95A5A6', // concrete
-  '#F39C12', // orange
-  '#D35400', // pumpkin
-  '#C0392B', // pomegranate
-  '#BDC3C7', // silver
-  '#7F8C8D'  // asbestos
+  '#1F4E5F', // petrol
+  '#6BC7B5', // turquoise
+  '#F4F7F3', // offwhite
+  '#F26C63', // coral
+  '#F2E27D'  // soft yellow
 ]
 
 // Alias for backward compatibility (P0 fix)
@@ -38,51 +22,48 @@ export const CANADIAN_PALETTE_COLORS = PALETTE_CA
 // ============================================
 export const TOKENS = {
   // Primary colors
-  primary: '#3498DB',        // peter-river (blue)
-  secondary: '#34495E',      // wet-asphalt (dark gray)
-  accent: '#2980B9',         // belize-hole (darker blue)
+  primary: '#1F4E5F',        // petrol
+  secondary: '#6BC7B5',      // turquoise
+  accent: '#6BC7B5',         // turquoise
   
   // State colors
-  success: '#2ECC71',         // emerald (green)
-  warning: '#E67E22',         // carrot (orange)
-  danger: '#E74C3C',          // alizarin (red) - ONLY for destructive actions
+  success: '#6BC7B5',         // turquoise
+  warning: '#F2E27D',         // soft yellow
+  danger: '#F26C63',          // coral - ONLY for destructive actions
   
   // Background colors
-  bg: '#ECF0F1',              // clouds (light gray)
+  bg: '#F4F7F3',              // offwhite
   surface: '#FFFFFF',         // white
-  border: '#BDC3C7',          // silver
-  text: '#2C3E50',            // midnight-blue (dark)
-  muted: '#95A5A6',           // concrete (gray)
+  border: 'rgba(31, 78, 95, 0.18)',
+  text: '#1F4E5F',            // petrol
+  muted: 'rgba(31, 78, 95, 0.6)',
   
   // Soft variants (for non-destructive actions)
-  'primary-soft-bg': 'rgba(52, 152, 219, 0.1)',
-  'primary-soft-text': '#2980B9',      // belize-hole
-  'primary-soft-border': 'rgba(52, 152, 219, 0.2)',
+  'primary-soft-bg': 'rgba(31, 78, 95, 0.08)',
+  'primary-soft-text': '#1F4E5F',
+  'primary-soft-border': 'rgba(31, 78, 95, 0.16)',
   
-  'success-soft-bg': 'rgba(46, 204, 113, 0.1)',
-  'success-soft-text': '#27AE60',      // nephritis
-  'success-soft-border': 'rgba(46, 204, 113, 0.2)',
+  'success-soft-bg': 'rgba(107, 199, 181, 0.14)',
+  'success-soft-text': '#2C7A6A',
+  'success-soft-border': 'rgba(107, 199, 181, 0.22)',
   
-  'warning-soft-bg': 'rgba(231, 76, 60, 0.08)',
-  'warning-soft-text': '#C0392B',     // pomegranate
-  'warning-soft-border': 'rgba(231, 76, 60, 0.15)',
+  'warning-soft-bg': 'rgba(242, 226, 125, 0.2)',
+  'warning-soft-text': '#7A6A2C',
+  'warning-soft-border': 'rgba(242, 226, 125, 0.35)',
   
   // Button variants
-  'button-primary-bg': '#3498DB',      // peter-river
-  'button-primary-text': '#FFFFFF',
-  'button-primary-hover': '#2980B9',   // belize-hole
+  'button-primary-bg': '#1F4E5F',
+  'button-primary-text': '#F4F7F3',
+  'button-primary-hover': '#184351',
   
-  'button-success-soft-bg': 'rgba(46, 204, 113, 0.1)',
-  'button-success-soft-text': '#27AE60',
-  'button-success-soft-border': 'rgba(46, 204, 113, 0.2)',
+  'button-secondary-bg': '#FFFFFF',
+  'button-secondary-text': '#1F4E5F',
+  'button-secondary-border': 'rgba(31, 78, 95, 0.2)',
+  'button-secondary-hover': 'rgba(31, 78, 95, 0.06)',
   
-  'button-warning-soft-bg': 'rgba(231, 76, 60, 0.08)',
-  'button-warning-soft-text': '#C0392B',
-  'button-warning-soft-border': 'rgba(231, 76, 60, 0.15)',
-  
-  'button-danger-bg': '#E74C3C',       // alizarin - ONLY for delete
+  'button-danger-bg': '#F26C63',
   'button-danger-text': '#FFFFFF',
-  'button-danger-hover': '#C0392B'     // pomegranate
+  'button-danger-hover': '#E85E56'
 }
 
 // ============================================
@@ -123,15 +104,13 @@ export const getButtonVariant = (variant = 'primary') => {
         backgroundColor: TOKENS['button-primary-hover']
       }
     },
-    'success-soft': {
-      backgroundColor: TOKENS['button-success-soft-bg'],
-      color: TOKENS['button-success-soft-text'],
-      border: `1px solid ${TOKENS['button-success-soft-border']}`
-    },
-    'warning-soft': {
-      backgroundColor: TOKENS['button-warning-soft-bg'],
-      color: TOKENS['button-warning-soft-text'],
-      border: `1px solid ${TOKENS['button-warning-soft-border']}`
+    secondary: {
+      backgroundColor: TOKENS['button-secondary-bg'],
+      color: TOKENS['button-secondary-text'],
+      border: `1px solid ${TOKENS['button-secondary-border']}`,
+      ':hover': {
+        backgroundColor: TOKENS['button-secondary-hover']
+      }
     },
     danger: {
       backgroundColor: TOKENS['button-danger-bg'],

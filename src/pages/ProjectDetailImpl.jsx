@@ -33,6 +33,7 @@ import {
   StickyNote
 } from 'lucide-react'
 import Header from '../components/Header'
+import StatusBadge from '../components/StatusBadge'
 import FileUploader from '../components/FileUploader'
 import FileBrowser from '../components/FileBrowser'
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal'
@@ -44,6 +45,7 @@ import { useNotes } from '../hooks/useNotes'
 import { PHASE_STYLES, getPhaseStyle, getPhaseSurfaceStyles } from '../utils/phaseStyles'
 import { getModalStyles } from '../utils/responsiveStyles'
 import Button from '../components/Button'
+import { logEvent, mapError } from '../lib/observability'
 // Dynamic imports for components that import supabase statically to avoid circular dependencies during module initialization
 const IdentifiersSection = lazy(() => import('../components/IdentifiersSection'))
 const ProfitabilityCalculator = lazy(() => import('../components/ProfitabilityCalculator'))
@@ -855,18 +857,20 @@ function ProjectDetailInner({ useApp }) {
     display: 'flex',
     flexDirection: 'column',
     width: '100%',
-    minWidth: 0
+    minWidth: 0,
+    boxShadow: 'var(--shadow-soft)'
   }
   const phaseCardStyle = {
-    border: `1px solid var(--border-color)`,
+    border: 'none',
     borderRadius: 'var(--radius-base)',
+    boxShadow: 'var(--shadow-soft)',
     ...phaseSurface.cardStyle
   }
   const timelineCardBackground = phaseSurface?.hasPhaseStyle
     ? phaseSurface.cardStyle.background
     : (darkMode ? '#15151f' : '#ffffff')
-  const timelineCardBorderLeft = phaseSurface?.hasPhaseStyle
-    ? phaseSurface.cardStyle.borderLeft
+  const timelineCardBorderTop = phaseSurface?.hasPhaseStyle
+    ? `3px solid ${currentPhase.accent}`
     : undefined
   const timelineContentBackground = phaseSurface?.hasPhaseStyle
     ? phaseSurface.contentStyle.background
@@ -976,10 +980,32 @@ function ProjectDetailInner({ useApp }) {
       if (error) {
         if (error.code === 'PGRST116') {
           setGate({ gate_pass: false, blocking_total: 0, blocking_done: 0 })
+          logEvent({
+            event_name: 'gate.check',
+            domain: 'gate',
+            level: 'info',
+            ok: true,
+            context: {
+              projectId: id,
+              phase: phaseId,
+              gate_pass: false,
+              gateDone: 0,
+              gateTotal: 0
+            }
+          })
           setGateLoading(false)
           setGateError(null)
           return
         }
+        logEvent({
+          event_name: 'gate.check.fail',
+          domain: 'gate',
+          level: 'error',
+          ok: false,
+          error_code: 'GATE_QUERY_FAILED',
+          message: error?.message || null,
+          context: { projectId: id, phase: phaseId }
+        })
         setGate(null)
         setGateLoading(false)
         setGateError(error)
@@ -987,8 +1013,30 @@ function ProjectDetailInner({ useApp }) {
       }
 
       setGate(data)
+      logEvent({
+        event_name: 'gate.check',
+        domain: 'gate',
+        level: 'info',
+        ok: true,
+        context: {
+          projectId: id,
+          phase: phaseId,
+          gate_pass: data?.gate_pass === true,
+          gateDone: data?.blocking_done ?? 0,
+          gateTotal: data?.blocking_total ?? 0
+        }
+      })
       setGateLoading(false)
     } catch (err) {
+      logEvent({
+        event_name: 'gate.check.fail',
+        domain: 'gate',
+        level: 'error',
+        ok: false,
+        error_code: 'GATE_QUERY_FAILED',
+        message: err?.message || null,
+        context: { projectId: id, phase: phaseId }
+      })
       setGate(null)
       setGateLoading(false)
       setGateError(err)
@@ -1601,7 +1649,10 @@ function ProjectDetailInner({ useApp }) {
 
   return (
     <div style={styles.container}>
-      <Header title={project.name} />
+      <Header
+        title={project.name}
+        rightSlot={<StatusBadge status={project.status} decision={project.decision} />}
+      />
 
       <div style={{
         ...styles.content,
@@ -2298,9 +2349,10 @@ function ProjectDetailInner({ useApp }) {
           <div style={{
             marginBottom: '24px',
             borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--border-color)',
-            borderLeft: timelineCardBorderLeft,
+            border: 'none',
+            borderTop: timelineCardBorderTop,
             background: timelineCardBackground,
+            boxShadow: 'var(--shadow-soft)',
             overflow: 'visible',
             width: '100%',
             flex: '1 1 auto',
@@ -2412,8 +2464,35 @@ function ProjectDetailInner({ useApp }) {
                                   .from('project_tasks')
                                   .update({ status: nextStatus })
                                   .eq('id', task.id)
+                                logEvent({
+                                  event_name: 'task.system_done.ok',
+                                  domain: 'task',
+                                  level: 'info',
+                                  ok: true,
+                                  context: {
+                                    taskId: task.id,
+                                    projectId: id,
+                                    ruleKey: task.type || null
+                                  }
+                                })
                                 await Promise.all([refetchTasks(), refetchGate()])
-                              } catch (err) {}
+                              } catch (err) {
+                                const { error_code } = mapError(err, 'db')
+                                logEvent({
+                                  event_name: 'task.system_done.fail',
+                                  domain: 'task',
+                                  level: 'error',
+                                  ok: false,
+                                  error_code: 'TASK_SYSTEM_MARK_FAILED',
+                                  message: err?.message || null,
+                                  context: {
+                                    taskId: task.id,
+                                    projectId: id,
+                                    ruleKey: task.type || null,
+                                    db_error: error_code
+                                  }
+                                })
+                              }
                             }}
                           />
                           <span style={{ color: darkMode ? '#e5e7eb' : '#111827' }}>
@@ -2568,7 +2647,7 @@ const styles = {
   },
   phaseSectionTitle: {
     fontSize: '16px',
-    fontWeight: '700'
+    fontWeight: '600'
   },
   phaseSectionBody: {
     marginTop: '16px',
@@ -2738,7 +2817,7 @@ const styles = {
   },
   phaseStatusChip: {
     fontSize: '11px',
-    fontWeight: '700',
+    fontWeight: '600',
     letterSpacing: '0.08em',
     padding: '4px 10px',
     borderRadius: '999px',
@@ -2806,9 +2885,10 @@ const styles = {
     width: 'min(640px, 90vw)',
     maxHeight: '80vh',
     overflowY: 'auto',
-    backgroundColor: '#ffffff',
+    backgroundColor: 'var(--surface-bg)',
     borderRadius: '16px',
-    border: '1px solid #e5e7eb',
+    border: 'none',
+    boxShadow: 'var(--shadow-soft)',
     padding: '20px',
     display: 'flex',
     flexDirection: 'column',
@@ -2825,10 +2905,11 @@ const styles = {
     gap: '10px'
   },
   notesItem: {
-    border: '1px solid #e5e7eb',
+    border: 'none',
+    boxShadow: 'var(--shadow-soft)',
     borderRadius: '10px',
     padding: '12px',
-    backgroundColor: '#f9fafb'
+    backgroundColor: 'var(--surface-bg)'
   },
   loading: {
     padding: '64px',
@@ -2846,11 +2927,11 @@ const styles = {
     alignItems: 'center',
     gap: '8px',
     padding: '10px 16px',
-    backgroundColor: 'transparent',
-    border: '1px solid var(--border-color)',
+    backgroundColor: 'var(--surface-bg)',
+    border: '1px solid rgba(31, 78, 95, 0.16)',
     borderRadius: '10px',
     fontSize: '14px',
-    color: '#6b7280',
+    color: 'var(--text)',
     cursor: 'pointer'
   },
   notesButton: {
@@ -2858,11 +2939,11 @@ const styles = {
     alignItems: 'center',
     gap: '8px',
     padding: '10px 14px',
-    backgroundColor: 'transparent',
-    border: '1px solid var(--border-color)',
+    backgroundColor: 'var(--surface-bg)',
+    border: '1px solid rgba(31, 78, 95, 0.16)',
     borderRadius: '10px',
     fontSize: '13px',
-    color: '#6b7280',
+    color: 'var(--text)',
     cursor: 'pointer'
   },
   projectMeta: {
@@ -2885,7 +2966,9 @@ const styles = {
   timelineSection: {
     padding: '24px',
     borderRadius: '16px',
-    border: '1px solid var(--border-color)',
+    border: 'none',
+    boxShadow: 'var(--shadow-soft)',
+    backgroundColor: 'var(--surface-bg)',
     marginBottom: '24px',
     width: '100%',
     boxSizing: 'border-box'
@@ -2926,7 +3009,7 @@ const styles = {
   },
   phaseGroupLabel: {
     fontSize: '12px',
-    fontWeight: '700',
+    fontWeight: '600',
     letterSpacing: '0.08em'
   },
   sectionTitle: {
@@ -2974,7 +3057,7 @@ const styles = {
   },
   phaseGroupChip: {
     fontSize: '11px',
-    fontWeight: '700',
+    fontWeight: '600',
     letterSpacing: '0.08em',
     padding: '4px 10px',
     borderRadius: '999px',
@@ -3042,7 +3125,8 @@ const styles = {
   currentPhaseInfo: {
     padding: '16px 20px',
     borderRadius: '12px',
-    borderLeft: '4px solid'
+    borderTop: '3px solid',
+    boxShadow: 'var(--shadow-soft)'
   },
   currentPhaseHeader: {
     display: 'flex',
@@ -3053,7 +3137,9 @@ const styles = {
   foldersPanel: {
     padding: '20px',
     borderRadius: '16px',
-    border: '1px solid var(--border-color)'
+    border: 'none',
+    boxShadow: 'var(--shadow-soft)',
+    backgroundColor: 'var(--surface-bg)'
   },
   foldersList: {
     display: 'flex',
@@ -3089,7 +3175,9 @@ const styles = {
     gap: '12px',
     padding: '20px',
     borderRadius: '16px',
-    border: '1px solid var(--border-color)',
+    border: 'none',
+    boxShadow: 'var(--shadow-soft)',
+    backgroundColor: 'var(--surface-bg)',
     color: '#6b7280'
   },
   filesPanel: {
@@ -3100,7 +3188,9 @@ const styles = {
   actionsSection: {
     padding: '24px',
     borderRadius: '16px',
-    border: '1px solid var(--border-color)'
+    border: 'none',
+    boxShadow: 'var(--shadow-soft)',
+    backgroundColor: 'var(--surface-bg)'
   },
   
 }

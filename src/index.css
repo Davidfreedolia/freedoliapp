@@ -5,61 +5,47 @@
 }
 
 /* ============================================
-   CANADIAN PALETTE (Flat UI Colors CA)
+   PALETA OFICIAL FREEDOLIAPP
    ============================================
-   Official color palette for entire application
-   https://flatuicolors.com/palette/ca
+   Petrol, Turquesa, Offwhite, Corall, Groc suau
 */
 :root {
-  /* Canadian Palette - Base Colors */
-  --ca-turquoise: #1ABC9C;
-  --ca-emerald: #2ECC71;
-  --ca-peter-river: #3498DB;
-  --ca-amethyst: #9B59B6;
-  --ca-wet-asphalt: #34495E;
-  --ca-green-sea: #16A085;
-  --ca-nephritis: #27AE60;
-  --ca-belize-hole: #2980B9;
-  --ca-wisteria: #8E44AD;
-  --ca-midnight-blue: #2C3E50;
-  --ca-sun-flower: #F1C40F;
-  --ca-carrot: #E67E22;
-  --ca-alizarin: #E74C3C;
-  --ca-clouds: #ECF0F1;
-  --ca-concrete: #95A5A6;
-  --ca-orange: #F39C12;
-  --ca-pumpkin: #D35400;
-  --ca-pomegranate: #C0392B;
-  --ca-silver: #BDC3C7;
-  --ca-asbestos: #7F8C8D;
+  /* Freedoliapp Palette */
+  --fd-petrol: #1F4E5F;
+  --fd-turquoise: #6BC7B5;
+  --fd-offwhite: #F4F7F3;
+  --fd-coral: #F26C63;
+  --fd-yellow: #F2E27D;
+  --fd-border: rgba(31, 78, 95, 0.18);
+  --fd-muted: rgba(31, 78, 95, 0.6);
 
   /* Semantic Color Tokens - Light Mode */
-  --color-primary: var(--ca-peter-river);
-  --color-secondary: var(--ca-wet-asphalt);
-  --color-accent: var(--ca-belize-hole);
-  --color-success: var(--ca-emerald);
-  --color-warning: var(--ca-carrot);
-  --color-danger: var(--ca-alizarin);
-  --color-bg: var(--ca-clouds);
+  --color-primary: var(--fd-petrol);
+  --color-secondary: var(--fd-turquoise);
+  --color-accent: var(--fd-turquoise);
+  --color-success: var(--fd-turquoise);
+  --color-warning: var(--fd-yellow);
+  --color-danger: var(--fd-coral);
+  --color-bg: var(--fd-offwhite);
   --color-surface: #FFFFFF;
-  --color-border: var(--ca-silver);
-  --color-text: var(--ca-midnight-blue);
-  --color-muted: var(--ca-concrete);
+  --color-border: var(--fd-border);
+  --color-text: var(--fd-petrol);
+  --color-muted: var(--fd-muted);
   
   /* Soft Color Variants - For non-destructive actions */
-  --color-primary-soft-bg: rgba(52, 152, 219, 0.1); /* Peter River with opacity */
-  --color-primary-soft-text: var(--ca-belize-hole); /* Belize Hole (darker blue) */
-  --color-primary-soft-border: rgba(52, 152, 219, 0.2);
-  --color-success-soft-bg: rgba(46, 204, 113, 0.1); /* Emerald soft (for income) */
-  --color-success-soft-text: var(--ca-nephritis); /* Nephritis (darker green) */
-  --color-success-soft-border: rgba(46, 204, 113, 0.2);
-  --color-warning-soft-bg: rgba(231, 76, 60, 0.08); /* Alizarin soft (for expenses, NOT destructive) */
-  --color-warning-soft-text: #C0392B; /* Pomegranate (softer red) */
-  --color-warning-soft-border: rgba(231, 76, 60, 0.15);
+  --color-primary-soft-bg: rgba(31, 78, 95, 0.08);
+  --color-primary-soft-text: var(--fd-petrol);
+  --color-primary-soft-border: rgba(31, 78, 95, 0.16);
+  --color-success-soft-bg: rgba(107, 199, 181, 0.14);
+  --color-success-soft-text: #2C7A6A;
+  --color-success-soft-border: rgba(107, 199, 181, 0.22);
+  --color-warning-soft-bg: rgba(242, 226, 125, 0.2);
+  --color-warning-soft-text: #7A6A2C;
+  --color-warning-soft-border: rgba(242, 226, 125, 0.35);
 
-  /* Legacy compatibility - mapped to Canadian Palette */
+  /* Legacy compatibility - mapped to Freedoliapp Palette */
   --bg-primary: var(--color-bg);
-  --bg-secondary: #E8E9EA;
+  --bg-secondary: #EDF1EE;
   --bg-card: var(--color-surface);
   --text-primary: var(--color-text);
   --text-secondary: var(--color-muted);
@@ -91,16 +77,16 @@
   --spacing-xl: 32px;
   --spacing-2xl: 48px;
 
-  /* Shadows - Soft, Asana-like (for separation instead of borders) */
-  --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.05);
-  --shadow-soft-hover: 0 2px 6px rgba(0, 0, 0, 0.08);
+  /* Shadows - Subtils, flotants */
+  --shadow-soft: 0 2px 6px rgba(31, 78, 95, 0.08);
+  --shadow-soft-hover: 0 6px 16px rgba(31, 78, 95, 0.12);
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.1);
   --shadow-xl: 0 8px 16px rgba(0, 0, 0, 0.12);
   
   /* Input-specific: subtle outline for visibility (only for inputs) */
-  --input-border: 1px solid rgba(0, 0, 0, 0.08);
+  --input-border: 1px solid rgba(31, 78, 95, 0.18);
   --input-bg: var(--surface-bg);
 
   /* Focus Ring */
@@ -110,25 +96,25 @@
 
 body.dark {
   /* Semantic Color Tokens - Dark Mode */
-  --color-primary: var(--ca-belize-hole);
-  --color-secondary: var(--ca-wet-asphalt);
-  --color-accent: var(--ca-peter-river);
-  --color-success: var(--ca-nephritis);
-  --color-warning: var(--ca-orange);
-  --color-danger: var(--ca-pomegranate);
-  --color-bg: var(--ca-midnight-blue);
-  --color-surface: var(--ca-wet-asphalt);
-  --color-border: var(--ca-concrete);
-  --color-text: #FFFFFF;
-  --color-muted: var(--ca-silver);
+  --color-primary: #6AA7B7;
+  --color-secondary: #2C5C6A;
+  --color-accent: #6BC7B5;
+  --color-success: #6BC7B5;
+  --color-warning: #F2E27D;
+  --color-danger: #F26C63;
+  --color-bg: #12282F;
+  --color-surface: #18363F;
+  --color-border: rgba(244, 247, 243, 0.12);
+  --color-text: #F4F7F3;
+  --color-muted: rgba(244, 247, 243, 0.7);
   
   /* Soft Color Variants - Dark Mode */
-  --color-primary-soft-bg: rgba(52, 152, 219, 0.15);
-  --color-primary-soft-text: #5DADE2; /* Lighter blue for dark mode */
-  --color-primary-soft-border: rgba(52, 152, 219, 0.3);
-  --color-warning-soft-bg: rgba(231, 76, 60, 0.12);
-  --color-warning-soft-text: #E67E7E; /* Softer red for dark mode */
-  --color-warning-soft-border: rgba(231, 76, 60, 0.25);
+  --color-primary-soft-bg: rgba(107, 199, 181, 0.12);
+  --color-primary-soft-text: #A8E1D6;
+  --color-primary-soft-border: rgba(107, 199, 181, 0.3);
+  --color-warning-soft-bg: rgba(242, 226, 125, 0.14);
+  --color-warning-soft-text: #F8F1B3;
+  --color-warning-soft-border: rgba(242, 226, 125, 0.28);
 
   /* Background System - Dark Mode */
   --page-bg: var(--color-bg);
@@ -136,12 +122,12 @@ body.dark {
   --surface-bg-2: rgba(255, 255, 255, 0.02); /* Slightly different for subtle separation */
   
   /* Input-specific: subtle outline for visibility (only for inputs) */
-  --input-border: 1px solid rgba(255, 255, 255, 0.1);
+  --input-border: 1px solid rgba(244, 247, 243, 0.12);
   --input-bg: var(--surface-bg);
 
-  /* Legacy compatibility - mapped to Canadian Palette */
+  /* Legacy compatibility - mapped to Freedoliapp Palette */
   --bg-primary: var(--color-bg);
-  --bg-secondary: var(--ca-midnight-blue);
+  --bg-secondary: #10232A;
   --bg-card: var(--color-surface);
   --text-primary: var(--color-text);
   --text-secondary: var(--color-muted);
@@ -149,7 +135,7 @@ body.dark {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.5;
@@ -351,7 +337,7 @@ body.dark .fd-calendar-asana .rbc-today .rbc-day-bg {
 .fd-calendar-asana .rbc-today .rbc-date-cell > a {
   color: var(--color-accent);
   opacity: 1;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 /* Events - compact horizontal bars */

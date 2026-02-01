@@ -154,8 +154,9 @@ const styles = {
     position: 'sticky',
     top: 0,
     zIndex: 100,
-    backgroundColor: 'transparent', // No background - floating over page
-    // No border, no shadow - clean Asana-like aesthetic
+    backgroundColor: '#1F4E5F',
+    color: '#F4F7F3',
+    boxShadow: '0 2px 6px rgba(31, 78, 95, 0.12)'
   },
   leftSection: {
     display: 'flex',
@@ -177,12 +178,12 @@ const styles = {
     justifyContent: 'center',
     transition: 'all 0.15s ease',
     gap: '6px',
-    backgroundColor: '#FFE066',
-    color: '#5F4B00',
-    fontWeight: '600',
-    border: '1px solid #fbbf24',
+    backgroundColor: 'rgba(244, 247, 243, 0.1)',
+    color: '#F4F7F3',
+    fontWeight: '500',
+    border: '1px solid rgba(244, 247, 243, 0.2)',
     fontSize: '14px',
-    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+    boxShadow: '0 1px 2px rgba(31, 78, 95, 0.15)'
   },
   helpButton: {
     height: '36px',
@@ -194,9 +195,9 @@ const styles = {
     justifyContent: 'center',
     transition: 'all 0.15s ease',
     gap: '6px',
-    backgroundColor: 'var(--color-surface)',
-    color: 'var(--color-muted)',
-    border: '1px solid var(--color-border)',
+    backgroundColor: 'rgba(244, 247, 243, 0.08)',
+    color: '#F4F7F3',
+    border: '1px solid rgba(244, 247, 243, 0.2)',
     fontSize: '14px'
   }
 }

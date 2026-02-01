@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { 
@@ -17,6 +17,10 @@ import { useApp } from '../context/AppContext'
 import { deleteProject } from '../lib/supabase'
 import Header from '../components/Header'
 import NewProjectModal from '../components/NewProjectModal'
+import Button from '../components/Button'
+import LayoutSwitcher from '../components/LayoutSwitcher'
+import StatusBadge from '../components/StatusBadge'
+import { useLayoutPreference } from '../hooks/useLayoutPreference'
 
 export default function Projects() {
   const { projects, refreshProjects, darkMode, driveConnected } = useApp()
@@ -27,6 +31,8 @@ export default function Projects() {
   const [filterPhase, setFilterPhase] = useState(null)
   const [showDiscarded, setShowDiscarded] = useState(false)
   const [menuOpen, setMenuOpen] = useState(null)
+  const [layout, setLayout] = useLayoutPreference('layout:projects', 'grid')
+  const [selectedProjectId, setSelectedProjectId] = useState(null)
   const PHASES = PHASE_STYLES
 
   const filteredProjects = projects.filter(project => {
@@ -37,6 +43,19 @@ export default function Projects() {
     const matchesDiscarded = showDiscarded ? true : (project.decision !== 'DISCARDED')
     return matchesSearch && matchesPhase && matchesDiscarded
   })
+
+  useEffect(() => {
+    if (!filteredProjects.length) {
+      setSelectedProjectId(null)
+      return
+    }
+    if (!selectedProjectId || !filteredProjects.some(p => p.id === selectedProjectId)) {
+      setSelectedProjectId(filteredProjects[0].id)
+    }
+  }, [filteredProjects, selectedProjectId])
+
+  const effectiveLayout = isMobile ? 'list' : layout
+  const selectedProject = filteredProjects.find(project => project.id === selectedProjectId)
   
   const discardedCount = projects.filter(p => p.decision === 'DISCARDED').length
 
@@ -86,6 +105,158 @@ export default function Projects() {
     }
   }
 
+  const renderProjectCard = (project, { isPreview = false, enablePreviewSelect = false } = {}) => {
+    const phase = getPhaseStyle(project.current_phase)
+    const progress = ((project.current_phase) / 7) * 100
+    const PhaseIcon = phase.icon
+    const isSelected = project.id === selectedProjectId
+
+    // Compute canClose and canReopen based on status
+    const canClose = project.status && ['draft', 'active'].includes(project.status)
+    const canReopen = project.status && ['closed', 'archived'].includes(project.status)
+
+    return (
+      <div
+        key={project.id}
+        style={{
+          ...styles.projectCard,
+          ...(isSelected && !isPreview ? styles.projectCardSelected : null),
+          ...(isPreview ? styles.projectCardPreview : null),
+          backgroundColor: darkMode ? '#15151f' : '#ffffff'
+        }}
+        onClick={isPreview ? undefined : () => {
+          setSelectedProjectId(project.id)
+          navigate(`/projects/${project.id}`)
+        }}
+        onMouseEnter={enablePreviewSelect ? () => setSelectedProjectId(project.id) : undefined}
+      >
+        {/* Header */}
+        <div style={styles.cardHeader}>
+          <div style={styles.cardHeaderMeta}>
+            <span style={{
+              ...styles.projectCode,
+              color: darkMode ? '#6b7280' : '#9ca3af'
+            }}>
+              {project.project_code}
+            </span>
+            <StatusBadge status={project.status} decision={project.decision} />
+          </div>
+          {!isPreview && (
+            <div style={{ position: 'relative' }}>
+              <button 
+                onClick={e => { e.stopPropagation(); setMenuOpen(menuOpen === project.id ? null : project.id) }}
+                style={styles.menuButton}
+              >
+                <MoreVertical size={18} color="#9ca3af" />
+              </button>
+              {menuOpen === project.id && (
+                <div style={{
+                  ...styles.menu,
+                  backgroundColor: darkMode ? '#1f1f2e' : '#ffffff'
+                }}>
+                  <button 
+                    onClick={e => { e.stopPropagation(); navigate(`/projects/${project.id}/edit`) }}
+                    style={styles.menuItem}
+                  >
+                    <Edit size={14} /> Editar
+                  </button>
+                  {canClose && (
+                    <button 
+                      onClick={e => handleClose(e, project)}
+                      style={styles.menuItem}
+                    >
+                      <XCircle size={14} /> Tancar
+                    </button>
+                  )}
+                  {canReopen && (
+                    <button 
+                      onClick={e => handleReopen(e, project)}
+                      style={styles.menuItem}
+                    >
+                      <RotateCw size={14} /> Reobrir
+                    </button>
+                  )}
+                  <button 
+                    onClick={e => handleDelete(e, project)}
+                    style={{...styles.menuItem, color: '#F26C63'}}
+                  >
+                    <Trash2 size={14} /> Eliminar
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Name */}
+        <h3 style={{
+          ...styles.projectName,
+          color: darkMode ? '#ffffff' : '#111827'
+        }}>
+          {project.name}
+        </h3>
+
+        {/* SKU */}
+        {project.sku_internal && (
+          <span style={styles.sku}>SKU: {project.sku_internal}</span>
+        )}
+
+        {/* Progress bar */}
+        <div style={styles.progressContainer}>
+          <div style={styles.progressBar}>
+            <div style={{
+              ...styles.progressFill,
+              width: `${progress}%`,
+              backgroundColor: phase.accent
+            }} />
+          </div>
+          <span style={styles.progressText}>{Math.round(progress)}%</span>
+        </div>
+
+        {/* Phase badge */}
+        <div style={styles.cardFooter}>
+          <div style={{
+            ...styles.phaseBadge,
+            backgroundColor: phase.bg,
+            color: phase.accent,
+            border: `1px solid ${phase.accent}`
+          }}>
+            <PhaseIcon size={14} />
+            <span>{phase.name}</span>
+          </div>
+          {!isPreview && (
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              {project.decision === 'DISCARDED' && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={async (e) => {
+                    e.stopPropagation()
+                    try {
+                      const { updateProject } = await import('../lib/supabase')
+                      const { showToast } = await import('../components/Toast')
+                      await updateProject(project.id, { decision: 'HOLD' })
+                      showToast('Project restored', 'success')
+                      await refreshProjects()
+                    } catch (err) {
+                      const { showToast } = await import('../components/Toast')
+                      showToast('Error: ' + (err.message || 'Unknown error'), 'error')
+                    }
+                  }}
+                  style={{ height: '28px' }}
+                  title="Restore project"
+                >
+                  Restore
+                </Button>
+              )}
+              <ArrowRight size={18} color="#9ca3af" />
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div style={styles.container}>
       <Header title="Projectes" />
@@ -100,19 +271,29 @@ export default function Projects() {
           flexDirection: isMobile ? 'column' : 'row',
           gap: isMobile ? '12px' : '16px'
         }}>
-          <div style={styles.searchContainer}>
-            <Search size={18} color="#9ca3af" />
-            <input
-              type="text"
-              placeholder="Buscar projectes..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              style={{
-                ...styles.searchInput,
-                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                color: darkMode ? '#ffffff' : '#111827'
-              }}
-            />
+          <div style={styles.searchGroup}>
+            <div style={styles.searchContainer}>
+              <Search size={18} color="#9ca3af" />
+              <input
+                type="text"
+                placeholder="Buscar projectes..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                style={{
+                  ...styles.searchInput,
+                  backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                  color: darkMode ? '#ffffff' : '#111827'
+                }}
+              />
+            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              style={styles.filterButton}
+            >
+              <Filter size={14} />
+              Filtres
+            </Button>
           </div>
 
           <div style={{
@@ -162,22 +343,29 @@ export default function Projects() {
             )}
           </div>
 
-          <button 
-            onClick={() => {
-              if (!driveConnected) return
-              setShowModal(true)
-            }} 
-            disabled={!driveConnected}
-            title={!driveConnected ? "Connecta Google Drive per crear" : ""}
-            style={{
-              ...styles.newButton,
-              width: isMobile ? '100%' : 'auto',
-              opacity: !driveConnected ? 0.5 : 1,
-              cursor: !driveConnected ? 'not-allowed' : 'pointer'
-            }}>
-            <Plus size={18} />
-            Nou Projecte
-          </button>
+          <div style={styles.toolbarRight}>
+            <LayoutSwitcher
+              value={effectiveLayout}
+              onChange={setLayout}
+              compact={isMobile}
+            />
+            <Button 
+              onClick={() => {
+                if (!driveConnected) return
+                setShowModal(true)
+              }} 
+              disabled={!driveConnected}
+              title={!driveConnected ? "Connecta Google Drive per crear" : ""}
+              style={{
+                width: isMobile ? '100%' : 'auto',
+                opacity: !driveConnected ? 0.5 : 1,
+                cursor: !driveConnected ? 'not-allowed' : 'pointer'
+              }}
+            >
+              <Plus size={18} />
+              Nou Projecte
+            </Button>
+          </div>
         </div>
 
         {/* Projects Grid */}
@@ -193,7 +381,7 @@ export default function Projects() {
             </p>
             {!searchTerm && !filterPhase && (
               <>
-                <button 
+                <Button 
                   onClick={() => {
                     if (!driveConnected) return
                     setShowModal(true)
@@ -201,167 +389,47 @@ export default function Projects() {
                   disabled={!driveConnected}
                   title={!driveConnected ? "Connecta Google Drive per crear" : ""}
                   style={{
-                    ...styles.createButton,
                     opacity: !driveConnected ? 0.5 : 1,
                     cursor: !driveConnected ? 'not-allowed' : 'pointer'
-                  }}>
+                  }}
+                >
                   <Plus size={18} />
                   Crear Projecte
-                </button>
+                </Button>
               </>
             )}
           </div>
         ) : (
-          <div style={{
-            ...styles.projectsGrid,
-            gridTemplateColumns: isMobile ? '1fr' : (isTablet ? 'repeat(auto-fill, minmax(280px, 1fr))' : 'repeat(auto-fill, minmax(320px, 1fr))'),
-            gap: isMobile ? '12px' : '20px'
-          }}>
-            {filteredProjects.map(project => {
-              const phase = getPhaseStyle(project.current_phase)
-              const progress = ((project.current_phase) / 7) * 100
-              const PhaseIcon = phase.icon
-              
-              // Compute canClose and canReopen based on status
-              const canClose = project.status && ['draft', 'active'].includes(project.status)
-              const canReopen = project.status && ['closed', 'archived'].includes(project.status)
-              
-              return (
-                <div 
-                  key={project.id}
-                  style={{
-                    ...styles.projectCard,
-                    backgroundColor: darkMode ? '#15151f' : '#ffffff'
-                  }}
-                  onClick={() => navigate(`/projects/${project.id}`)}
-                >
-                  {/* Header */}
-                  <div style={styles.cardHeader}>
-                    <span style={{
-                      ...styles.projectCode,
-                      color: darkMode ? '#6b7280' : '#9ca3af'
-                    }}>
-                      {project.project_code}
-                    </span>
-                    <div style={{ position: 'relative' }}>
-                      <button 
-                        onClick={e => { e.stopPropagation(); setMenuOpen(menuOpen === project.id ? null : project.id) }}
-                        style={styles.menuButton}
-                      >
-                        <MoreVertical size={18} color="#9ca3af" />
-                      </button>
-                      {menuOpen === project.id && (
-                        <div style={{
-                          ...styles.menu,
-                          backgroundColor: darkMode ? '#1f1f2e' : '#ffffff'
-                        }}>
-                          <button 
-                            onClick={e => { e.stopPropagation(); navigate(`/projects/${project.id}/edit`) }}
-                            style={styles.menuItem}
-                          >
-                            <Edit size={14} /> Editar
-                          </button>
-                          {canClose && (
-                            <button 
-                              onClick={e => handleClose(e, project)}
-                              style={styles.menuItem}
-                            >
-                              <XCircle size={14} /> Tancar
-                            </button>
-                          )}
-                          {canReopen && (
-                            <button 
-                              onClick={e => handleReopen(e, project)}
-                              style={styles.menuItem}
-                            >
-                              <RotateCw size={14} /> Reobrir
-                            </button>
-                          )}
-                          <button 
-                            onClick={e => handleDelete(e, project)}
-                            style={{...styles.menuItem, color: '#ef4444'}}
-                          >
-                            <Trash2 size={14} /> Eliminar
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Name */}
-                  <h3 style={{
-                    ...styles.projectName,
-                    color: darkMode ? '#ffffff' : '#111827'
-                  }}>
-                    {project.name}
-                  </h3>
-
-                  {/* SKU */}
-                  {project.sku_internal && (
-                    <span style={styles.sku}>SKU: {project.sku_internal}</span>
-                  )}
-
-                  {/* Progress bar */}
-                  <div style={styles.progressContainer}>
-                    <div style={styles.progressBar}>
-                      <div style={{
-                        ...styles.progressFill,
-                        width: `${progress}%`,
-                        backgroundColor: phase.accent
-                      }} />
-                    </div>
-                    <span style={styles.progressText}>{Math.round(progress)}%</span>
-                  </div>
-
-                  {/* Phase badge */}
-                  <div style={styles.cardFooter}>
-                    <div style={{
-                      ...styles.phaseBadge,
-                      backgroundColor: phase.bg,
-                      color: phase.accent,
-                      border: `1px solid ${phase.accent}`
-                    }}>
-                      <PhaseIcon size={14} />
-                      <span>{phase.name}</span>
-                    </div>
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                      {project.decision === 'DISCARDED' && (
-                        <button
-                          onClick={async (e) => {
-                            e.stopPropagation()
-                            try {
-                              const { updateProject } = await import('../lib/supabase')
-                              const { showToast } = await import('../components/Toast')
-                              await updateProject(project.id, { decision: 'HOLD' })
-                              showToast('Project restored', 'success')
-                              await refreshProjects()
-                            } catch (err) {
-                              const { showToast } = await import('../components/Toast')
-                              showToast('Error: ' + (err.message || 'Unknown error'), 'error')
-                            }
-                          }}
-                          style={{
-                            padding: '4px 8px',
-                            backgroundColor: '#10b981',
-                            color: '#ffffff',
-                            border: 'none',
-                            borderRadius: '6px',
-                            fontSize: '11px',
-                            fontWeight: '500',
-                            cursor: 'pointer'
-                          }}
-                          title="Restore project"
-                        >
-                          Restore
-                        </button>
-                      )}
-                      <ArrowRight size={18} color="#9ca3af" />
-                    </div>
-                  </div>
+          <>
+            {effectiveLayout === 'grid' && (
+              <div style={{
+                ...styles.projectsGrid,
+                gridTemplateColumns: isMobile ? '1fr' : (isTablet ? 'repeat(auto-fill, minmax(280px, 1fr))' : 'repeat(auto-fill, minmax(320px, 1fr))'),
+                gap: isMobile ? '12px' : '20px'
+              }}>
+                {filteredProjects.map(project => renderProjectCard(project))}
+              </div>
+            )}
+            {effectiveLayout === 'list' && (
+              <div style={styles.projectsList}>
+                {filteredProjects.map(project => renderProjectCard(project))}
+              </div>
+            )}
+            {effectiveLayout === 'split' && (
+              <div style={styles.splitLayout}>
+                <div style={styles.splitList}>
+                  {filteredProjects.map(project => renderProjectCard(project, { enablePreviewSelect: true }))}
                 </div>
-              )
-            })}
-          </div>
+                <div style={styles.splitPreview}>
+                  {selectedProject ? (
+                    renderProjectCard(selectedProject, { isPreview: true })
+                  ) : (
+                    <div style={styles.splitEmpty}>Selecciona un projecte</div>
+                  )}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -389,9 +457,16 @@ const styles = {
     marginBottom: '24px',
     flexWrap: 'wrap'
   },
+  searchGroup: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    flexWrap: 'wrap'
+  },
   searchContainer: {
-    flex: 1,
-    minWidth: '250px',
+    flex: '0 1 360px',
+    maxWidth: '360px',
+    width: '100%',
     display: 'flex',
     alignItems: 'center',
     gap: '10px',
@@ -410,6 +485,15 @@ const styles = {
   filters: {
     display: 'flex',
     gap: '12px'
+  },
+  filterButton: {
+    height: '36px'
+  },
+  toolbarRight: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    marginLeft: 'auto'
   },
   filterSelect: {
     padding: '12px 16px',
@@ -436,7 +520,8 @@ const styles = {
     padding: '64px',
     textAlign: 'center',
     borderRadius: '16px',
-    border: '1px solid var(--border-color)'
+    border: 'none',
+    boxShadow: 'var(--shadow-soft)'
   },
   createButton: {
     display: 'inline-flex',
@@ -457,18 +542,58 @@ const styles = {
     gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
     gap: '20px'
   },
+  projectsList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px'
+  },
+  splitLayout: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(280px, 360px) 1fr',
+    gap: '20px'
+  },
+  splitList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px'
+  },
+  splitPreview: {
+    position: 'sticky',
+    top: '96px',
+    alignSelf: 'flex-start'
+  },
+  splitEmpty: {
+    padding: '24px',
+    borderRadius: '16px',
+    backgroundColor: 'var(--surface-bg)',
+    boxShadow: 'var(--shadow-soft)',
+    color: 'var(--muted)'
+  },
   projectCard: {
     padding: '20px',
     borderRadius: '16px',
-    border: '1px solid var(--border-color)',
+    border: 'none',
     cursor: 'pointer',
-    transition: 'all 0.2s'
+    transition: 'all 0.2s',
+    boxShadow: 'var(--shadow-soft)'
+  },
+  projectCardSelected: {
+    boxShadow: 'var(--shadow-soft-hover)',
+    transform: 'translateY(-1px)'
+  },
+  projectCardPreview: {
+    cursor: 'default'
   },
   cardHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: '12px'
+  },
+  cardHeaderMeta: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px'
   },
   projectCode: {
     fontSize: '12px',
@@ -487,8 +612,8 @@ const styles = {
     top: '100%',
     minWidth: '140px',
     borderRadius: '10px',
-    border: '1px solid var(--border-color)',
-    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+    border: '1px solid rgba(31, 78, 95, 0.12)',
+    boxShadow: 'var(--shadow-soft-hover)',
     zIndex: 10
   },
   menuItem: {

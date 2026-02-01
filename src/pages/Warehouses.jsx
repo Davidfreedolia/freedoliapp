@@ -12,7 +12,8 @@ import {
   Mail,
   X,
   Save,
-  Globe
+  Globe,
+  Filter
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { 
@@ -28,6 +29,9 @@ import { getButtonStyles, useButtonState } from '../utils/buttonStyles'
 import { useTranslation } from 'react-i18next'
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal'
 import { showToast } from '../components/Toast'
+import Button from '../components/Button'
+import LayoutSwitcher from '../components/LayoutSwitcher'
+import { useLayoutPreference } from '../hooks/useLayoutPreference'
 
 // Magatzems Amazon FBA pre-definits
 const AMAZON_FBA_WAREHOUSES = [
@@ -81,6 +85,8 @@ export default function Warehouses() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterType, setFilterType] = useState(null)
   const [menuOpen, setMenuOpen] = useState(null)
+  const [layout, setLayout] = useLayoutPreference('layout:warehouses', 'grid')
+  const [selectedWarehouseId, setSelectedWarehouseId] = useState(null)
   
   // Modal
   const [showModal, setShowModal] = useState(false)
@@ -133,9 +139,110 @@ export default function Warehouses() {
     return matchesSearch && matchesType
   })
 
+  useEffect(() => {
+    if (!filteredWarehouses.length) {
+      setSelectedWarehouseId(null)
+      return
+    }
+    if (!selectedWarehouseId || !filteredWarehouses.some(w => w.id === selectedWarehouseId)) {
+      setSelectedWarehouseId(filteredWarehouses[0].id)
+    }
+  }, [filteredWarehouses, selectedWarehouseId])
+
+  const effectiveLayout = isMobile ? 'list' : layout
+  const selectedWarehouse = filteredWarehouses.find(w => w.id === selectedWarehouseId)
+
   // Obtenir info del tipus
   const getTypeInfo = (typeId) => {
     return WAREHOUSE_TYPES.find(t => t.id === typeId) || WAREHOUSE_TYPES[2]
+  }
+
+  const renderWarehouseCard = (warehouse, { isPreview = false, enablePreviewSelect = false } = {}) => {
+    const typeInfo = getTypeInfo(warehouse.type)
+
+    return (
+      <div 
+        key={warehouse.id}
+        style={{ ...styles.warehouseCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}
+        onMouseEnter={enablePreviewSelect ? () => setSelectedWarehouseId(warehouse.id) : undefined}
+      >
+        <div style={styles.cardHeader}>
+          <span style={{
+            ...styles.typeBadge,
+            backgroundColor: `${typeInfo.color}15`,
+            color: typeInfo.color
+          }}>
+            {typeInfo.icon} {typeInfo.name}
+          </span>
+          {!isPreview && (
+            <div 
+              style={{ position: 'relative' }} 
+              data-menu-container
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setMenuOpen(menuOpen === warehouse.id ? null : warehouse.id)
+                }} 
+                style={styles.menuButton}
+              >
+                <MoreVertical size={18} color="#9ca3af" />
+              </button>
+              {menuOpen === warehouse.id && (
+                <div 
+                  style={{ 
+                    ...styles.menu, 
+                    backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
+                    zIndex: 1000
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleEditWarehouse(warehouse)
+                    }} 
+                    style={styles.menuItem}
+                  >
+                    <Edit size={14} /> Editar
+                  </button>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleDeleteWarehouse(warehouse)
+                    }} 
+                    style={{ ...styles.menuItem, color: '#F26C63' }}
+                  >
+                    <Trash2 size={14} /> Eliminar
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <h3 style={{ ...styles.warehouseName, color: darkMode ? '#ffffff' : '#111827' }}>
+          {warehouse.name}
+        </h3>
+
+        <div style={styles.warehouseDetails}>
+          <p style={styles.detailRow}>
+            <MapPin size={14} />
+            {warehouse.city}, {warehouse.country}
+          </p>
+          {warehouse.address && (
+            <p style={styles.addressRow}>{warehouse.address}</p>
+          )}
+          {warehouse.contact_name && warehouse.contact_name !== 'Amazon FBA' && (
+            <p style={styles.detailRow}>👤 {warehouse.contact_name}</p>
+          )}
+          {warehouse.contact_phone && (
+            <p style={styles.detailRow}><Phone size={14} /> {warehouse.contact_phone}</p>
+          )}
+        </div>
+      </div>
+    )
   }
 
   // CRUD
@@ -304,18 +411,24 @@ export default function Warehouses() {
           flexDirection: isMobile ? 'column' : 'row',
           gap: isMobile ? '12px' : '16px'
         }}>
-          <div style={{
-            ...styles.searchContainer,
-            backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
-          }}>
-            <Search size={18} color="#9ca3af" />
-            <input
-              type="text"
-              placeholder="Buscar magatzems..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              style={{ ...styles.searchInput, color: darkMode ? '#ffffff' : '#111827' }}
-            />
+          <div style={styles.searchGroup}>
+            <div style={{
+              ...styles.searchContainer,
+              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
+            }}>
+              <Search size={18} color="#9ca3af" />
+              <input
+                type="text"
+                placeholder="Buscar magatzems..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                style={{ ...styles.searchInput, color: darkMode ? '#ffffff' : '#111827' }}
+              />
+            </div>
+            <Button variant="secondary" size="sm" style={styles.filterButton}>
+              <Filter size={14} />
+              Filtres
+            </Button>
           </div>
 
           <select
@@ -333,23 +446,29 @@ export default function Warehouses() {
             ))}
           </select>
 
-          <button onClick={handleOpenAmazonModal} style={styles.amazonButton}>
-            <Package size={18} />
-            Afegir Amazon FBA
-          </button>
-
-          <button 
-            onClick={handleNewWarehouse} 
-            disabled={!driveConnected}
-            title={!driveConnected ? "Connecta Google Drive per crear" : ""}
-            style={{
-              ...styles.newButton,
-              opacity: !driveConnected ? 0.5 : 1,
-              cursor: !driveConnected ? 'not-allowed' : 'pointer'
-            }}>
-            <Plus size={18} />
-            Nou Magatzem
-          </button>
+          <div style={styles.toolbarRight}>
+            <LayoutSwitcher
+              value={effectiveLayout}
+              onChange={setLayout}
+              compact={isMobile}
+            />
+            <Button onClick={handleOpenAmazonModal} style={styles.amazonButton}>
+              <Package size={18} />
+              Afegir Amazon FBA
+            </Button>
+            <Button 
+              onClick={handleNewWarehouse} 
+              disabled={!driveConnected}
+              title={!driveConnected ? "Connecta Google Drive per crear" : ""}
+              style={{
+                opacity: !driveConnected ? 0.5 : 1,
+                cursor: !driveConnected ? 'not-allowed' : 'pointer'
+              }}
+            >
+              <Plus size={18} />
+              Nou Magatzem
+            </Button>
+          </div>
         </div>
 
         {/* Stats */}
@@ -380,115 +499,55 @@ export default function Warehouses() {
               {searchTerm || filterType ? 'No s\'han trobat magatzems' : 'No hi ha magatzems. Afegeix els d\'Amazon o crea un personalitzat!'}
             </p>
             <div style={{ display: 'flex', gap: '12px' }}>
-              <button onClick={handleOpenAmazonModal} style={styles.amazonButton}>
+              <Button onClick={handleOpenAmazonModal} style={styles.amazonButton}>
                 <Package size={18} />
                 Afegir Amazon FBA
-              </button>
-              <button 
+              </Button>
+              <Button 
                 onClick={handleNewWarehouse} 
                 disabled={!driveConnected}
                 title={!driveConnected ? "Connecta Google Drive per crear" : ""}
                 style={{
-                  ...styles.createButton,
                   opacity: !driveConnected ? 0.5 : 1,
                   cursor: !driveConnected ? 'not-allowed' : 'pointer'
-                }}>
+                }}
+              >
                 <Plus size={18} />
                 Crear Magatzem
-              </button>
+              </Button>
             </div>
           </div>
         ) : (
-          <div style={{
-            ...styles.warehousesGrid,
-            gridTemplateColumns: isMobile ? '1fr' : (isTablet ? 'repeat(auto-fill, minmax(280px, 1fr))' : 'repeat(auto-fill, minmax(300px, 1fr))'),
-            gap: isMobile ? '12px' : '16px'
-          }}>
-            {filteredWarehouses.map(warehouse => {
-              const typeInfo = getTypeInfo(warehouse.type)
-              
-              return (
-                <div 
-                  key={warehouse.id}
-                  style={{ ...styles.warehouseCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}
-                >
-                  <div style={styles.cardHeader}>
-                    <span style={{
-                      ...styles.typeBadge,
-                      backgroundColor: `${typeInfo.color}15`,
-                      color: typeInfo.color
-                    }}>
-                      {typeInfo.icon} {typeInfo.name}
-                    </span>
-                    <div 
-                      style={{ position: 'relative' }} 
-                      data-menu-container
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setMenuOpen(menuOpen === warehouse.id ? null : warehouse.id)
-                        }} 
-                        style={styles.menuButton}
-                      >
-                        <MoreVertical size={18} color="#9ca3af" />
-                      </button>
-                      {menuOpen === warehouse.id && (
-                        <div 
-                          style={{ 
-                            ...styles.menu, 
-                            backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
-                            zIndex: 1000
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleEditWarehouse(warehouse)
-                            }} 
-                            style={styles.menuItem}
-                          >
-                            <Edit size={14} /> Editar
-                          </button>
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleDeleteWarehouse(warehouse)
-                            }} 
-                            style={{ ...styles.menuItem, color: '#ef4444' }}
-                          >
-                            <Trash2 size={14} /> Eliminar
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <h3 style={{ ...styles.warehouseName, color: darkMode ? '#ffffff' : '#111827' }}>
-                    {warehouse.name}
-                  </h3>
-
-                  <div style={styles.warehouseDetails}>
-                    <p style={styles.detailRow}>
-                      <MapPin size={14} />
-                      {warehouse.city}, {warehouse.country}
-                    </p>
-                    {warehouse.address && (
-                      <p style={styles.addressRow}>{warehouse.address}</p>
-                    )}
-                    {warehouse.contact_name && warehouse.contact_name !== 'Amazon FBA' && (
-                      <p style={styles.detailRow}>👤 {warehouse.contact_name}</p>
-                    )}
-                    {warehouse.contact_phone && (
-                      <p style={styles.detailRow}><Phone size={14} /> {warehouse.contact_phone}</p>
-                    )}
-                  </div>
+          <>
+            {effectiveLayout === 'grid' && (
+              <div style={{
+                ...styles.warehousesGrid,
+                gridTemplateColumns: isMobile ? '1fr' : (isTablet ? 'repeat(auto-fill, minmax(280px, 1fr))' : 'repeat(auto-fill, minmax(300px, 1fr))'),
+                gap: isMobile ? '12px' : '16px'
+              }}>
+                {filteredWarehouses.map(warehouse => renderWarehouseCard(warehouse))}
+              </div>
+            )}
+            {effectiveLayout === 'list' && (
+              <div style={styles.warehousesList}>
+                {filteredWarehouses.map(warehouse => renderWarehouseCard(warehouse))}
+              </div>
+            )}
+            {effectiveLayout === 'split' && (
+              <div style={styles.splitLayout}>
+                <div style={styles.splitList}>
+                  {filteredWarehouses.map(warehouse => renderWarehouseCard(warehouse, { enablePreviewSelect: true }))}
                 </div>
-              )
-            })}
-          </div>
+                <div style={styles.splitPreview}>
+                  {selectedWarehouse ? (
+                    renderWarehouseCard(selectedWarehouse, { isPreview: true })
+                  ) : (
+                    <div style={styles.splitEmpty}>Selecciona un magatzem</div>
+                  )}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -685,24 +744,32 @@ const styles = {
   container: { flex: 1, display: 'flex', flexDirection: 'column' },
   content: { padding: '32px', overflowY: 'auto' },
   toolbar: { display: 'flex', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' },
-  searchContainer: { flex: 1, minWidth: '200px', display: 'flex', alignItems: 'center', gap: '10px', padding: '0 16px', borderRadius: '10px', border: '1px solid var(--border-color)' },
+  searchGroup: { display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' },
+  searchContainer: { flex: '0 1 360px', maxWidth: '360px', width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '0 16px', borderRadius: '10px', border: '1px solid var(--border-color)' },
   searchInput: { flex: 1, padding: '12px 0', border: 'none', outline: 'none', fontSize: '14px', background: 'transparent' },
   filterSelect: { padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--border-color)', fontSize: '14px', outline: 'none', cursor: 'pointer' },
-  amazonButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', backgroundColor: '#ff9900', color: '#ffffff', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
-  newButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', backgroundColor: '#4f46e5', color: '#ffffff', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
+  filterButton: { height: '36px' },
+  toolbarRight: { display: 'flex', alignItems: 'center', gap: '12px', marginLeft: 'auto', flexWrap: 'wrap' },
+  amazonButton: { backgroundColor: '#ff9900', color: '#ffffff', border: 'none' },
+  newButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', backgroundColor: '#1F4E5F', color: '#F4F7F3', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
   statsRow: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' },
-  statCard: { display: 'flex', alignItems: 'center', gap: '16px', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-color)' },
-  statValue: { display: 'block', fontSize: '24px', fontWeight: '700', color: '#4f46e5' },
+  statCard: { display: 'flex', alignItems: 'center', gap: '16px', padding: '20px', borderRadius: '12px', border: 'none', boxShadow: 'var(--shadow-soft)' },
+  statValue: { display: 'block', fontSize: '24px', fontWeight: '600', color: '#1F4E5F' },
   statLabel: { fontSize: '13px', color: '#6b7280' },
   loading: { padding: '64px', textAlign: 'center', color: '#6b7280' },
-  empty: { padding: '64px', textAlign: 'center', borderRadius: '16px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' },
-  createButton: { display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', backgroundColor: '#4f46e5', color: '#ffffff', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
+  empty: { padding: '64px', textAlign: 'center', borderRadius: '16px', border: 'none', boxShadow: 'var(--shadow-soft)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' },
+  createButton: { display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', backgroundColor: '#1F4E5F', color: '#F4F7F3', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
   warehousesGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' },
-  warehouseCard: { padding: '20px', borderRadius: '16px', border: '1px solid var(--border-color)' },
+  warehousesList: { display: 'flex', flexDirection: 'column', gap: '12px' },
+  splitLayout: { display: 'grid', gridTemplateColumns: 'minmax(280px, 360px) 1fr', gap: '20px' },
+  splitList: { display: 'flex', flexDirection: 'column', gap: '12px' },
+  splitPreview: { position: 'sticky', top: '96px', alignSelf: 'flex-start' },
+  splitEmpty: { padding: '24px', borderRadius: '16px', backgroundColor: 'var(--surface-bg)', boxShadow: 'var(--shadow-soft)', color: 'var(--muted)' },
+  warehouseCard: { padding: '20px', borderRadius: '16px', border: 'none', boxShadow: 'var(--shadow-soft)' },
   cardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' },
   typeBadge: { padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '500' },
   menuButton: { background: 'none', border: 'none', cursor: 'pointer', padding: '4px' },
-  menu: { position: 'absolute', right: 0, top: '100%', minWidth: '140px', borderRadius: '10px', border: '1px solid var(--border-color)', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', zIndex: 10 },
+  menu: { position: 'absolute', right: 0, top: '100%', minWidth: '140px', borderRadius: '10px', border: '1px solid rgba(31, 78, 95, 0.12)', boxShadow: 'var(--shadow-soft-hover)', zIndex: 10 },
   menuItem: { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '10px 14px', border: 'none', background: 'none', fontSize: '13px', cursor: 'pointer', color: 'inherit' },
   warehouseName: { margin: '0 0 12px 0', fontSize: '16px', fontWeight: '600' },
   warehouseDetails: { display: 'flex', flexDirection: 'column', gap: '6px' },
