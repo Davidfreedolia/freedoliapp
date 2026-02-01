@@ -18,7 +18,8 @@ import {
   MessageCircle,
   CreditCard,
   Clock,
-  Package
+  Package,
+  Filter
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { 
