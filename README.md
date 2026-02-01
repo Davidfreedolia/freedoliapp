@@ -27,10 +27,7 @@ npm run dev
 Veure `ENV_SETUP.md` per detalls.
 
 ## 🚀 Deploy a Vercel
-
-```bash
-npx vercel
-```
+📦 Deploy: veure `docs/DEPLOY.md`
 
 ## 📋 Configuració Supabase
 
