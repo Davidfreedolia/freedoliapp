@@ -45,7 +45,6 @@ import { useNotes } from '../hooks/useNotes'
 import { PHASE_STYLES, getPhaseStyle, getPhaseSurfaceStyles } from '../utils/phaseStyles'
 import { getModalStyles } from '../utils/responsiveStyles'
 import Button from '../components/Button'
-import { logEvent, mapError } from '../lib/observability'
 // Dynamic imports for components that import supabase statically to avoid circular dependencies during module initialization
 const IdentifiersSection = lazy(() => import('../components/IdentifiersSection'))
 const ProfitabilityCalculator = lazy(() => import('../components/ProfitabilityCalculator'))
@@ -980,32 +979,10 @@ function ProjectDetailInner({ useApp }) {
       if (error) {
         if (error.code === 'PGRST116') {
           setGate({ gate_pass: false, blocking_total: 0, blocking_done: 0 })
-          logEvent({
-            event_name: 'gate.check',
-            domain: 'gate',
-            level: 'info',
-            ok: true,
-            context: {
-              projectId: id,
-              phase: phaseId,
-              gate_pass: false,
-              gateDone: 0,
-              gateTotal: 0
-            }
-          })
           setGateLoading(false)
           setGateError(null)
           return
         }
-        logEvent({
-          event_name: 'gate.check.fail',
-          domain: 'gate',
-          level: 'error',
-          ok: false,
-          error_code: 'GATE_QUERY_FAILED',
-          message: error?.message || null,
-          context: { projectId: id, phase: phaseId }
-        })
         setGate(null)
         setGateLoading(false)
         setGateError(error)
@@ -1013,30 +990,8 @@ function ProjectDetailInner({ useApp }) {
       }
 
       setGate(data)
-      logEvent({
-        event_name: 'gate.check',
-        domain: 'gate',
-        level: 'info',
-        ok: true,
-        context: {
-          projectId: id,
-          phase: phaseId,
-          gate_pass: data?.gate_pass === true,
-          gateDone: data?.blocking_done ?? 0,
-          gateTotal: data?.blocking_total ?? 0
-        }
-      })
       setGateLoading(false)
     } catch (err) {
-      logEvent({
-        event_name: 'gate.check.fail',
-        domain: 'gate',
-        level: 'error',
-        ok: false,
-        error_code: 'GATE_QUERY_FAILED',
-        message: err?.message || null,
-        context: { projectId: id, phase: phaseId }
-      })
       setGate(null)
       setGateLoading(false)
       setGateError(err)
@@ -2464,34 +2419,8 @@ function ProjectDetailInner({ useApp }) {
                                   .from('project_tasks')
                                   .update({ status: nextStatus })
                                   .eq('id', task.id)
-                                logEvent({
-                                  event_name: 'task.system_done.ok',
-                                  domain: 'task',
-                                  level: 'info',
-                                  ok: true,
-                                  context: {
-                                    taskId: task.id,
-                                    projectId: id,
-                                    ruleKey: task.type || null
-                                  }
-                                })
                                 await Promise.all([refetchTasks(), refetchGate()])
                               } catch (err) {
-                                const { error_code } = mapError(err, 'db')
-                                logEvent({
-                                  event_name: 'task.system_done.fail',
-                                  domain: 'task',
-                                  level: 'error',
-                                  ok: false,
-                                  error_code: 'TASK_SYSTEM_MARK_FAILED',
-                                  message: err?.message || null,
-                                  context: {
-                                    taskId: task.id,
-                                    projectId: id,
-                                    ruleKey: task.type || null,
-                                    db_error: error_code
-                                  }
-                                })
                               }
                             }}
                           />

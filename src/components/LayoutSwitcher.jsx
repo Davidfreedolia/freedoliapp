@@ -1,8 +1,8 @@
-import { List, Columns2, Grid2X2 } from 'lucide-react'
+import { List, Columns, Grid2X2 } from 'lucide-react'
 
 const options = [
   { id: 'list', label: 'Llista', Icon: List },
-  { id: 'split', label: 'Split', Icon: Columns2 },
+  { id: 'split', label: 'Split', Icon: Columns },
   { id: 'grid', label: 'Grid', Icon: Grid2X2 }
 ]
 
