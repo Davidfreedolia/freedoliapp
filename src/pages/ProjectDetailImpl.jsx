@@ -850,15 +850,16 @@ function ProjectDetailInner({ useApp }) {
   const phaseSurface = getPhaseSurfaceStyles(currentPhase, { darkMode, borderWidth: 2 })
   const timelinePhases = PHASES.map(normalizePhaseStyle)
   const phaseWrapperStyle = {
-    ...phaseSurface.wrapperStyle,
-    borderRadius: '16px',
+    backgroundColor: 'transparent',
+    border: 'none',
+    borderRadius: '0',
     padding: isMobile ? '16px' : '24px',
     marginTop: '12px',
     display: 'flex',
     flexDirection: 'column',
     width: '100%',
     minWidth: 0,
-    boxShadow: 'var(--shadow-soft)'
+    boxShadow: 'none'
   }
   const phaseCardStyle = {
     border: 'none',
@@ -2280,8 +2281,9 @@ function ProjectDetailInner({ useApp }) {
             aria-hidden={phaseBlockVisible ? 'false' : 'true'}
             style={{
               ...styles.phaseGateBanner,
-              borderColor: currentPhase.accent,
-              backgroundColor: currentPhase.bg,
+              borderColor: 'var(--border-color)',
+              borderLeft: `3px solid ${currentPhase.accent}`,
+              backgroundColor: darkMode ? '#111827' : '#ffffff',
               color: darkMode ? '#ffffff' : '#111827',
               display: phaseBlockVisible ? 'flex' : 'none'
             }}
