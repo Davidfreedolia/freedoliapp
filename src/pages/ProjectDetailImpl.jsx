@@ -172,7 +172,7 @@ function PhaseSection({ phaseId, currentPhaseId, phaseStyle, darkMode, children 
   const isCurrent = phaseId === currentPhaseId
   const isPast = phaseId < currentPhaseId
   const isFuture = phaseId > currentPhaseId
-  const sectionBorder = isCurrent ? phaseStyle.accent : (darkMode ? '#2a2a3a' : '#e5e7eb')
+  const sectionBorder = darkMode ? 'rgba(148, 163, 184, 0.24)' : 'rgba(15, 23, 42, 0.08)'
   const sectionBg = darkMode ? '#111827' : '#ffffff'
 
   useEffect(() => {
@@ -185,6 +185,7 @@ function PhaseSection({ phaseId, currentPhaseId, phaseStyle, darkMode, children 
     <section style={{
       ...styles.phaseSection,
       borderColor: sectionBorder,
+      borderTopColor: phaseStyle.accent,
       backgroundColor: sectionBg
     }}>
       <button
@@ -2548,8 +2549,10 @@ const styles = {
   phaseSection: {
     borderRadius: '16px',
     border: '1px solid',
+    borderTopWidth: '3px',
     padding: '12px 16px',
-    marginBottom: '20px'
+    marginBottom: '20px',
+    boxShadow: 'var(--shadow-soft)'
   },
   phaseSectionHeader: {
     width: '100%',
@@ -2622,7 +2625,7 @@ const styles = {
     padding: '12px 16px',
     borderRadius: '14px',
     border: '1px solid',
-    boxShadow: '0 10px 24px rgba(15, 23, 42, 0.12)',
+    boxShadow: 'var(--shadow-soft)',
     marginBottom: '24px'
   },
   phaseTimelineSticky: {
