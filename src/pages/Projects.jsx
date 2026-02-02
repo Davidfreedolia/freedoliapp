@@ -276,26 +276,21 @@ export default function Projects() {
         padding: isMobile ? '16px' : '32px'
       }}>
         {/* Toolbar */}
-        <div style={{
-          ...styles.toolbar,
-          flexDirection: isMobile ? 'column' : 'row',
-          gap: isMobile ? '12px' : '16px'
-        }}>
+        <div style={styles.toolbar} className="toolbar-row">
           <div style={styles.searchGroup}>
-            <div style={styles.searchContainer}>
+            <div style={styles.searchContainer} className="toolbar-search">
               <Search size={18} color="#9ca3af" />
               <input
                 type="text"
                 placeholder="Buscar projectes..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                style={{
-                  ...styles.searchInput,
-                  backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                  color: darkMode ? '#ffffff' : '#111827'
-                }}
+                style={styles.searchInput}
               />
             </div>
+          </div>
+
+          <div style={styles.filters}>
             <Button
               variant="secondary"
               size="sm"
@@ -304,23 +299,10 @@ export default function Projects() {
               <Filter size={14} />
               Filtres
             </Button>
-          </div>
-
-          <div style={{
-            ...styles.filters,
-            width: isMobile ? '100%' : 'auto',
-            flexDirection: isMobile ? 'column' : 'row',
-            gap: isMobile ? '8px' : '12px'
-          }}>
             <select
               value={filterPhase || ''}
               onChange={e => setFilterPhase(e.target.value ? parseInt(e.target.value) : null)}
-              style={{
-                ...styles.filterSelect,
-                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                color: darkMode ? '#ffffff' : '#111827',
-                width: isMobile ? '100%' : 'auto'
-              }}
+              style={styles.filterSelect}
             >
               <option value="">Totes les fases</option>
               {Object.entries(PHASES).map(([key, phase]) => (
@@ -330,18 +312,7 @@ export default function Projects() {
               ))}
             </select>
             {discardedCount > 0 && (
-              <label style={{
-                display: 'flex',
-                alignItems: 'center',
-                fontSize: '13px',
-                cursor: 'pointer',
-                padding: '12px 16px',
-                borderRadius: '10px',
-                border: '1px solid var(--border-color)',
-                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                color: darkMode ? '#9ca3af' : '#6b7280',
-                width: isMobile ? '100%' : 'auto'
-              }}>
+              <label style={styles.filterToggle}>
                 <input
                   type="checkbox"
                   checked={showDiscarded}
@@ -359,7 +330,8 @@ export default function Projects() {
               onChange={setLayout}
               compact={isMobile}
             />
-            <Button 
+            <Button
+              size="sm"
               onClick={() => {
                 if (!driveConnected) return
                 setShowModal(true)
@@ -463,55 +435,65 @@ const styles = {
   },
   toolbar: {
     display: 'flex',
-    gap: '16px',
-    marginBottom: '24px',
-    flexWrap: 'wrap'
+    marginBottom: '24px'
   },
   searchGroup: {
-    display: 'flex',
+    display: 'inline-flex',
     alignItems: 'center',
-    gap: '10px',
-    flexWrap: 'wrap'
+    gap: '12px',
+    flexWrap: 'nowrap'
   },
   searchContainer: {
-    flex: '0 1 360px',
-    maxWidth: '360px',
-    width: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    padding: '0 16px',
-    borderRadius: '10px',
-    border: '1px solid var(--border-color)'
+    flex: '0 0 auto',
+    width: '320px',
+    minWidth: '240px'
   },
   searchInput: {
     flex: 1,
-    padding: '12px 0',
-    border: 'none',
-    outline: 'none',
-    fontSize: '14px',
-    background: 'transparent'
+    minWidth: 0
   },
   filters: {
-    display: 'flex',
-    gap: '12px'
-  },
-  filterButton: {
-    height: '36px'
-  },
-  toolbarRight: {
-    display: 'flex',
+    display: 'inline-flex',
     alignItems: 'center',
     gap: '12px',
-    marginLeft: 'auto'
+    flexWrap: 'nowrap'
+  },
+  filterButton: {
+    height: 'var(--btn-h-sm)'
+  },
+  toolbarRight: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '12px',
+    marginLeft: 'auto',
+    flexWrap: 'nowrap'
   },
   filterSelect: {
-    padding: '12px 16px',
-    borderRadius: '10px',
-    border: '1px solid var(--border-color)',
+    height: 'var(--btn-h-sm)',
+    padding: '0 12px',
+    borderRadius: 'var(--btn-radius)',
+    border: '1px solid var(--btn-secondary-border)',
+    backgroundColor: 'var(--btn-ghost-bg)',
+    color: 'var(--btn-secondary-fg)',
     fontSize: '14px',
     outline: 'none',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    boxShadow: 'var(--btn-shadow)'
+  },
+  filterToggle: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '8px',
+    height: 'var(--btn-h-sm)',
+    padding: '0 var(--btn-pad-x)',
+    borderRadius: 'var(--btn-radius)',
+    border: '1px solid var(--btn-secondary-border)',
+    backgroundColor: 'var(--btn-ghost-bg)',
+    color: 'var(--btn-secondary-fg)',
+    boxShadow: 'var(--btn-shadow)',
+    fontSize: '13px',
+    cursor: 'pointer',
+    whiteSpace: 'nowrap'
   },
   newButton: {
     display: 'flex',

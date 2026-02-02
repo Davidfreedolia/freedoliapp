@@ -24,6 +24,7 @@ import {
   supabase
 } from '../lib/supabase'
 import Header from '../components/Header'
+import Button from '../components/Button'
 import { generateBriefingPdf } from '../lib/generateBriefingPdf'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { safeJsonArray } from '../lib/safeJson'
@@ -275,19 +276,19 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
 
       <div style={styles.content}>
         {/* Toolbar */}
-        <div style={styles.toolbar}>
-          <button onClick={() => navigate(-1)} style={styles.backButton}>
+        <div style={styles.toolbar} className="toolbar-row">
+          <Button variant="secondary" size="sm" onClick={() => navigate(-1)} style={styles.backButton}>
             <ArrowLeft size={18} />
             Tornar
-          </button>
+          </Button>
           
           <div style={styles.toolbarRight}>
-            <button onClick={handleSave} disabled={saving} style={styles.saveButton}>
+            <Button variant="primary" size="sm" onClick={handleSave} disabled={saving} style={styles.saveButton}>
               {saving ? 'Guardant...' : <><Save size={18} /> Guardar</>}
-            </button>
-            <button onClick={handleGeneratePdf} disabled={generating} style={styles.pdfButton}>
+            </Button>
+            <Button variant="secondary" size="sm" onClick={handleGeneratePdf} disabled={generating} style={styles.pdfButton}>
               {generating ? 'Generant...' : <><Download size={18} /> Descarregar PDF</>}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -669,12 +670,14 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
                       alt={img.title || `Image ${index + 1}`}
                       style={styles.imageThumb}
                     />
-                    <button
+                    <Button
+                      variant="danger"
+                      size="sm"
                       onClick={() => removeImage(img.id)}
                       style={styles.removeImageButton}
                     >
                       <X size={14} />
-                    </button>
+                    </Button>
                   </div>
                   <input
                     type="text"
@@ -702,10 +705,10 @@ const styles = {
   content: { padding: '32px', overflowY: 'auto', maxWidth: '1200px', margin: '0 auto', width: '100%' },
   loading: { padding: '64px', textAlign: 'center', color: '#6b7280' },
   toolbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' },
-  toolbarRight: { display: 'flex', gap: '12px' },
-  backButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', backgroundColor: 'transparent', color: '#6b7280', border: '1px solid var(--border-color)', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' },
-  saveButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: '#4f46e5', color: '#ffffff', border: '1px solid #3730a3', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
-  pdfButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: '#22c55e', color: '#ffffff', border: '1px solid #16a34a', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
+  toolbarRight: { display: 'inline-flex', gap: '12px', flexWrap: 'nowrap' },
+  backButton: { minWidth: '120px' },
+  saveButton: { minWidth: '120px' },
+  pdfButton: { minWidth: '160px' },
   section: { padding: '24px', borderRadius: '16px', border: '1px solid var(--border-color)', marginBottom: '20px' },
   sectionHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' },
   sectionTitle: { margin: 0, fontSize: '16px', fontWeight: '600' },

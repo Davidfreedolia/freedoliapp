@@ -45,6 +45,7 @@ import {
 import TasksWidget from '../components/TasksWidget'
 import AlertsBadge from '../components/AlertsBadge'
 import SafeWidget from '../components/SafeWidget'
+import Button from '../components/Button'
 import { safeArray } from '../lib/safeArray'
 import { 
   generateLayoutFromEnabled, 
@@ -443,44 +444,39 @@ export default function Dashboard() {
           backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
           borderBottom: `1px solid ${darkMode ? '#1f1f2e' : '#e5e7eb'}`
         }}>
-          <button 
+          <Button
+            variant="primary"
+            size="sm"
             onClick={handleToggleEditMode}
-            style={{
-              ...styles.iconButton,
-              backgroundColor: '#4f46e5',
-              color: '#ffffff'
-            }}
+            style={styles.iconButton}
             title={t('dashboard.done')}
           >
             <Check size={20} />
-          </button>
+          </Button>
           
           {/* Reset Layout */}
           {editLayout && !isMobile && (
-            <button 
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={handleResetLayout}
-              style={{
-                ...styles.iconButton,
-                backgroundColor: '#f59e0b',
-                color: '#ffffff'
-              }}
+              style={styles.iconButton}
               title="Restaurar layout per defecte"
             >
               <X size={20} color="#ffffff" />
-            </button>
+            </Button>
           )}
           
           {/* Personalitzar Dashboard - Using Sliders icon to avoid duplicate Settings */}
-          <button 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => setShowCustomizeModal(true)}
-            style={{
-              ...styles.iconButton,
-              backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6'
-            }}
+            style={styles.iconButton}
             title="Personalitzar Dashboard"
           >
             <Sliders size={20} color={darkMode ? '#9ca3af' : '#6b7280'} />
-          </button>
+          </Button>
         </div>
       )}
 
@@ -548,7 +544,9 @@ export default function Dashboard() {
             }}>
               Projectes descartats: {discardedCount}
             </span>
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => navigate('/projects?showDiscarded=true')}
               style={{
                 ...styles.discardedLink,
@@ -556,7 +554,7 @@ export default function Dashboard() {
               }}
             >
               Veure →
-            </button>
+            </Button>
           </div>
         )}
 
@@ -674,12 +672,14 @@ export default function Dashboard() {
               <Package size={20} />
               {t('dashboard.ordersInProgress.title')}
             </h2>
-            <button 
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => navigate('/orders')}
               style={styles.viewAllButton}
             >
               {t('dashboard.ordersInProgress.viewAll')} <ArrowRight size={16} />
-            </button>
+            </Button>
           </div>
 
           {loadingOrders ? (
@@ -743,12 +743,14 @@ export default function Dashboard() {
               <AlertTriangle size={20} />
               {t('dashboard.posNotReady.title')}
             </h2>
-            <button 
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => navigate('/orders')}
               style={styles.viewAllButton}
             >
               {t('dashboard.posNotReady.viewAll')} <ArrowRight size={16} />
-            </button>
+            </Button>
           </div>
 
           {loadingPosNotReady ? (

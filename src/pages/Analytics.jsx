@@ -23,6 +23,7 @@ import { isDemoMode } from '../demo/demoMode'
 import { mockGetExpenses, mockGetIncomes, mockGetPurchaseOrders } from '../demo/demoMode'
 import Header from '../components/Header'
 import { useBreakpoint } from '../hooks/useBreakpoint'
+import Button from '../components/Button'
 
 // Colors per categories
 const CATEGORY_COLORS = {
@@ -246,11 +247,11 @@ export default function Analytics() {
 
       <div style={styles.content}>
         {/* Toolbar */}
-        <div style={styles.toolbar}>
+        <div style={styles.toolbar} className="toolbar-row">
           <select
             value={dateRange}
             onChange={e => setDateRange(e.target.value)}
-            style={{ ...styles.filterSelect, backgroundColor: darkMode ? '#1f1f2e' : '#ffffff', color: darkMode ? '#ffffff' : '#111827' }}
+            style={styles.filterSelect}
           >
             <option value="7">Últims 7 dies</option>
             <option value="30">Últims 30 dies</option>
@@ -260,14 +261,14 @@ export default function Analytics() {
           <select
             value={filterProject}
             onChange={e => setFilterProject(e.target.value)}
-            style={{ ...styles.filterSelect, backgroundColor: darkMode ? '#1f1f2e' : '#ffffff', color: darkMode ? '#ffffff' : '#111827' }}
+            style={styles.filterSelect}
           >
             <option value="">Tots els projectes</option>
             {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
-          <button onClick={loadData} style={styles.refreshBtn}>
+          <Button variant="secondary" size="sm" onClick={loadData} style={styles.refreshBtn}>
             <RefreshCw size={18} />
-          </button>
+          </Button>
         </div>
 
         {loading ? (
@@ -277,10 +278,10 @@ export default function Analytics() {
             <AlertCircle size={24} color="#ef4444" />
             <h3 style={{ color: darkMode ? '#ffffff' : '#111827', margin: '8px 0' }}>Error carregant dades</h3>
             <p style={{ color: '#6b7280', marginBottom: '16px' }}>{error}</p>
-            <button onClick={loadData} style={styles.retryButton}>
+            <Button variant="primary" size="sm" onClick={loadData} style={styles.retryButton}>
               <RefreshCw size={16} />
               Tornar a intentar
-            </button>
+            </Button>
           </div>
         ) : (
           <>
@@ -592,12 +593,12 @@ export default function Analytics() {
 const styles = {
   container: { flex: 1, display: 'flex', flexDirection: 'column' },
   content: { padding: '32px', overflowY: 'auto' },
-  toolbar: { display: 'flex', gap: '12px', marginBottom: '24px' },
-  filterSelect: { padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--border-color)', fontSize: '14px', outline: 'none' },
-  refreshBtn: { padding: '12px', backgroundColor: 'transparent', border: '1px solid var(--border-color)', borderRadius: '10px', cursor: 'pointer', color: '#6b7280' },
+  toolbar: { display: 'flex', marginBottom: '24px' },
+  filterSelect: { height: 'var(--btn-h-sm)', padding: '0 12px', borderRadius: 'var(--btn-radius)', border: '1px solid var(--btn-secondary-border)', backgroundColor: 'var(--btn-ghost-bg)', color: 'var(--btn-secondary-fg)', fontSize: '14px', outline: 'none', cursor: 'pointer', boxShadow: 'var(--btn-shadow)' },
+  refreshBtn: { padding: '0', width: 'var(--btn-h-sm)', minWidth: 'var(--btn-h-sm)' },
   loading: { padding: '64px', textAlign: 'center', color: '#6b7280' },
   errorContainer: { padding: '64px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' },
-  retryButton: { padding: '12px 24px', backgroundColor: '#4f46e5', color: '#ffffff', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '500' },
+  retryButton: { minWidth: '160px' },
   // KPIs
   kpiGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '24px' },
   kpiCard: { padding: '20px', borderRadius: '16px', border: '1px solid var(--border-color)' },

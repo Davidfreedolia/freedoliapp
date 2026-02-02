@@ -5,6 +5,7 @@ import { useApp } from '../context/AppContext'
 import { supabase, getCurrentUserId, upsertProjectProfitability } from '../lib/supabase'
 import { showToast } from '../components/Toast'
 import { AlertTriangle, Database, Trash2, CheckCircle2, RefreshCw } from 'lucide-react'
+import Button from '../components/Button'
 
 export default function DevSeed() {
   const { darkMode } = useApp()
@@ -1194,19 +1195,19 @@ export default function DevSeed() {
           disabled={loading}
         />
         <div style={styles.buttonGroup}>
-          <button
+          <Button
+            variant="primary"
+            size="sm"
             onClick={generateDemoData}
             disabled={loading || confirmText !== 'DEMO'}
             style={{
-              ...styles.button,
-              ...styles.primaryButton,
               opacity: (loading || confirmText !== 'DEMO') ? 0.6 : 1,
               cursor: (loading || confirmText !== 'DEMO') ? 'not-allowed' : 'pointer'
             }}
           >
             <Database size={18} />
             Generate Demo Data
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -1224,38 +1225,38 @@ export default function DevSeed() {
           disabled={loading}
         />
         <div style={styles.buttonGroup}>
-          <button
+          <Button
+            variant="danger"
+            size="sm"
             onClick={clearDemoData}
             disabled={loading || clearConfirmText !== 'CLEAR'}
             style={{
-              ...styles.button,
-              ...styles.dangerButton,
               opacity: (loading || clearConfirmText !== 'CLEAR') ? 0.6 : 1,
               cursor: (loading || clearConfirmText !== 'CLEAR') ? 'not-allowed' : 'pointer'
             }}
           >
             <Trash2 size={18} />
             Clear Demo Data
-          </button>
+          </Button>
         </div>
       </div>
 
       <div style={styles.card}>
         <h3 style={styles.cardTitle}>Quick Actions</h3>
         <div style={styles.buttonGroup}>
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={clearAndRegenerate}
             disabled={loading}
             style={{
-              ...styles.button,
-              ...styles.primaryButton,
               opacity: loading ? 0.6 : 1,
               cursor: loading ? 'not-allowed' : 'pointer'
             }}
           >
             <RefreshCw size={18} />
             Clear & Regenerate
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -1350,15 +1351,13 @@ export default function DevSeed() {
             <span><strong>DEMO READY</strong> - All checks passed!</span>
           </div>
           <div style={{ ...styles.buttonGroup, marginTop: '16px' }}>
-            <button
+            <Button
+              variant="primary"
+              size="sm"
               onClick={() => navigate('/dashboard')}
-              style={{
-                ...styles.button,
-                ...styles.primaryButton
-              }}
             >
               Go to Dashboard
-            </button>
+            </Button>
           </div>
         </div>
       )}

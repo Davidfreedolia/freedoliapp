@@ -188,7 +188,9 @@ function PhaseSection({ phaseId, currentPhaseId, phaseStyle, darkMode, children 
       borderTopColor: phaseStyle.accent,
       backgroundColor: sectionBg
     }}>
-      <button
+      <Button
+        variant="ghost"
+        size="sm"
         type="button"
         onClick={() => setIsOpen(prev => !prev)}
         style={styles.phaseSectionHeader}
@@ -219,7 +221,7 @@ function PhaseSection({ phaseId, currentPhaseId, phaseStyle, darkMode, children 
           )}
           {isOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
         </div>
-      </button>
+      </Button>
       {isOpen && (
         <div style={{
           ...styles.phaseSectionBody,
@@ -1083,36 +1085,12 @@ function ProjectDetailInner({ useApp }) {
             {error}
           </p>
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-            <button
-              onClick={loadProject}
-              style={{
-                padding: '12px 24px',
-                backgroundColor: '#4f46e5',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '14px',
-                fontWeight: '500',
-                cursor: 'pointer'
-              }}
-            >
+            <Button variant="primary" size="sm" onClick={loadProject}>
               Reintentar
-            </button>
-            <button
-              onClick={() => navigate('/projects')}
-              style={{
-                padding: '12px 24px',
-                backgroundColor: 'transparent',
-                color: darkMode ? '#9ca3af' : '#6b7280',
-                border: `1px solid ${darkMode ? '#2a2a3a' : '#e5e7eb'}`,
-                borderRadius: '8px',
-                fontSize: '14px',
-                fontWeight: '500',
-                cursor: 'pointer'
-              }}
-            >
+            </Button>
+            <Button variant="secondary" size="sm" onClick={() => navigate('/projects')}>
               Tornar a Projectes
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -1147,21 +1125,9 @@ function ProjectDetailInner({ useApp }) {
           }}>
             El projecte que busques no existeix o no tens accés.
           </p>
-          <button
-            onClick={() => navigate('/projects')}
-            style={{
-              padding: '12px 24px',
-              backgroundColor: '#4f46e5',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '14px',
-              fontWeight: '500',
-              cursor: 'pointer'
-            }}
-          >
+          <Button variant="primary" size="sm" onClick={() => navigate('/projects')}>
             Tornar a Projectes
-          </button>
+          </Button>
         </div>
       </div>
     )
@@ -1248,16 +1214,20 @@ function ProjectDetailInner({ useApp }) {
                 </h4>
                 <div style={styles.actionsGrid}>
                   {phaseId >= 3 && (
-                    <button 
+                    <Button
+                      variant="secondary"
+                      size="sm"
                       style={{...styles.actionButton, backgroundColor: '#8b5cf6'}} 
                       onClick={() => navigate(`/projects/${id}/briefing`)}
                     >
                       <ClipboardList size={18} />
                       Briefing del Producte
-                    </button>
+                    </Button>
                   )}
                   {phaseId >= 3 && (
-                    <button 
+                    <Button
+                      variant="primary"
+                      size="sm"
                       style={{
                         ...styles.actionButton, 
                         backgroundColor: '#4f46e5',
@@ -1273,16 +1243,18 @@ function ProjectDetailInner({ useApp }) {
                     >
                       <ShoppingCart size={18} />
                       Crear Comanda (PO)
-                    </button>
+                    </Button>
                   )}
                   {phaseId === 7 && (
-                    <button 
+                    <Button
+                      variant="primary"
+                      size="sm"
                       style={{...styles.actionButton, backgroundColor: '#4f46e5', border: '1px solid #4338ca'}} 
                       onClick={() => navigate(`/inventory?project=${id}`)}
                     >
                       <Package size={18} />
                       Gestionar Stock
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
@@ -1364,7 +1336,9 @@ function ProjectDetailInner({ useApp }) {
                 }}>
                   Gestiona les comandes de compra d'aquest projecte
                 </p>
-                <button
+                <Button
+                  variant="primary"
+                  size="sm"
                   onClick={() => navigate(`/orders?project=${id}`)}
                   style={{
                     ...styles.actionButton,
@@ -1374,7 +1348,7 @@ function ProjectDetailInner({ useApp }) {
                 >
                   <ShoppingCart size={18} />
                   Veure Comandes
-                </button>
+                </Button>
               </div>
             </CollapsibleSection>
 
@@ -1391,7 +1365,9 @@ function ProjectDetailInner({ useApp }) {
                   <div style={{ flex: 1 }}>
                     Connecta Google Drive per gestionar els documents del projecte.
                   </div>
-                  <button
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     onClick={() => navigate('/settings')}
                     style={{
                       ...styles.actionButton,
@@ -1400,7 +1376,7 @@ function ProjectDetailInner({ useApp }) {
                     }}
                   >
                     Connectar
-                  </button>
+                  </Button>
                 </div>
               )}
               {driveConnected && projectFolders && (
@@ -1431,7 +1407,9 @@ function ProjectDetailInner({ useApp }) {
                         const isSelected = selectedFolder?.name === folderName
                         
                         return (
-                          <button
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             key={folderName}
                             onClick={() => folder && setSelectedFolder(folder)}
                             disabled={!folder}
@@ -1448,7 +1426,7 @@ function ProjectDetailInner({ useApp }) {
                             }}>
                               {folderName.replace(/^\d+_/, '')}
                             </span>
-                          </button>
+                          </Button>
                         )
                       })}
                     </div>
@@ -1516,7 +1494,9 @@ function ProjectDetailInner({ useApp }) {
                 }}>
                   Gestiona les despeses i ingressos d'aquest projecte
                 </p>
-                <button
+                <Button
+                  variant="primary"
+                  size="sm"
                   onClick={() => navigate(`/finances?project=${id}`)}
                   style={{
                     ...styles.actionButton,
@@ -1526,7 +1506,7 @@ function ProjectDetailInner({ useApp }) {
                 >
                   <DollarSign size={18} />
                   Veure Finances
-                </button>
+                </Button>
               </div>
             </CollapsibleSection>
           </>
@@ -1636,7 +1616,9 @@ function ProjectDetailInner({ useApp }) {
 
                 return (
                   <div key={phase.id} style={styles.timelineItem}>
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => handlePhaseChange(phase.id)}
                       style={{
                         ...styles.phaseButton,
@@ -1653,7 +1635,7 @@ function ProjectDetailInner({ useApp }) {
                       ) : (
                         <PhaseIcon size={20} color={isFuture ? '#9ca3af' : phase.accent} />
                       )}
-                    </button>
+                    </Button>
                     <span style={{
                       ...styles.phaseName,
                       color: isActive ? phase.accent : (darkMode ? '#9ca3af' : '#6b7280'),
@@ -1755,7 +1737,9 @@ function ProjectDetailInner({ useApp }) {
                           {missingPreview}
                           {nextMissing.length > 3 ? '…' : ''}
                         </div>
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => {
                             const checklist = document.getElementById('phase-checklist')
                             if (checklist) {
@@ -1765,7 +1749,7 @@ function ProjectDetailInner({ useApp }) {
                           style={styles.phaseStatusAction}
                         >
                           Veure pendents
-                        </button>
+                        </Button>
                       </>
                     )}
                     {hasViabilitySummary && (
@@ -1847,7 +1831,9 @@ function ProjectDetailInner({ useApp }) {
                     backgroundColor: darkMode ? '#111827' : '#ffffff',
                     borderColor: darkMode ? '#1f2937' : '#e5e7eb'
                   }}>
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       style={{
                         ...styles.createMenuItem,
                         color: darkMode ? '#e5e7eb' : '#374151'
@@ -1858,8 +1844,10 @@ function ProjectDetailInner({ useApp }) {
                       }}
                     >
                       + Proveïdor
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       style={{
                         ...styles.createMenuItem,
                         color: darkMode ? '#e5e7eb' : '#374151'
@@ -1870,8 +1858,10 @@ function ProjectDetailInner({ useApp }) {
                       }}
                     >
                       + Magatzem
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       style={{
                         ...styles.createMenuItem,
                         color: darkMode ? '#e5e7eb' : '#374151'
@@ -1882,8 +1872,10 @@ function ProjectDetailInner({ useApp }) {
                       }}
                     >
                       + Transitari
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       style={{
                         ...styles.createMenuItem,
                         color: darkMode ? '#e5e7eb' : '#374151'
@@ -1894,7 +1886,7 @@ function ProjectDetailInner({ useApp }) {
                       }}
                     >
                       + Despesa
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>
@@ -1922,34 +1914,38 @@ function ProjectDetailInner({ useApp }) {
                 )}
               </span>
             </div>
-            <button
+            <Button
+              variant="primary"
+              size="sm"
               onClick={handleRestoreProject}
               style={styles.restoreButton}
             >
               {t('common.restore')} Projecte
-            </button>
+            </Button>
           </div>
         )}
 
         {/* Back button & Project info */}
         <div style={styles.topBar}>
-          <button onClick={() => navigate('/projects')} style={styles.backButton}>
+          <Button variant="ghost" size="sm" onClick={() => navigate('/projects')} style={styles.backButton}>
             <ArrowLeft size={18} />
             Tornar
-          </button>
+          </Button>
           <div style={styles.projectMeta}>
             <span style={styles.projectCode}>{project.project_code}</span>
             {project.sku && (
               <span style={styles.sku}>Codi intern del projecte: {project.sku}</span>
             )}
           </div>
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             style={styles.notesButton}
             onClick={() => setShowNotesPanel(true)}
           >
             <StickyNote size={16} />
             Notes
-          </button>
+          </Button>
         </div>
 
         {showNotesPanel && (
@@ -1965,19 +1961,15 @@ function ProjectDetailInner({ useApp }) {
             >
               <div style={styles.notesHeader}>
                 <h3 style={{ margin: 0, fontSize: '16px' }}>Notes</h3>
-                    <button
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setShowNotesPanel(false)}
-                      style={{
-                    background: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: darkMode ? '#e5e7eb' : '#6b7280',
-                    fontSize: '18px'
-                  }}
+                  style={{ padding: '4px', minWidth: 'unset' }}
                   aria-label="Tancar"
                 >
                   ×
-                    </button>
+                </Button>
               </div>
               {notesLoading && (
                 <div style={{ fontSize: '13px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
@@ -2032,13 +2024,15 @@ function ProjectDetailInner({ useApp }) {
                   {createModalType === 'forwarder' && 'Crear Transitari'}
                   {createModalType === 'expense' && 'Crear Despesa'}
                 </h3>
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setCreateModalType(null)}
                   style={modalStyles.closeButton || styles.createModalClose}
                   aria-label="Tancar"
                 >
                   ×
-                    </button>
+                </Button>
               </div>
               <div style={modalStyles.body || styles.createModalBody}>
                 {createModalType === 'supplier' && (
@@ -2255,19 +2249,23 @@ function ProjectDetailInner({ useApp }) {
                 )}
 
                 <div style={styles.createModalFooter}>
-                  <button
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     onClick={() => setCreateModalType(null)}
                     style={styles.createCancel}
                   >
                     Cancel·lar
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="primary"
+                    size="sm"
                     onClick={handleCreateSave}
                     style={styles.createSubmit}
                     disabled={createSaving}
                   >
                     {createSaving ? 'Guardant...' : 'Crear'}
-                  </button>
+                  </Button>
               </div>
             </div>
             </div>
@@ -2292,7 +2290,9 @@ function ProjectDetailInner({ useApp }) {
               <AlertTriangle size={18} color={currentPhase.accent} />
               <span style={{ fontSize: '14px', lineHeight: '1.4' }}>{phaseBlockMessage}</span>
             </div>
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => {
                 setPhaseBlockMessage(null)
                 setPhaseBlockVisible(false)
@@ -2301,7 +2301,7 @@ function ProjectDetailInner({ useApp }) {
               aria-label="Tancar"
             >
               ×
-            </button>
+            </Button>
           </div>
 
           <div style={{
@@ -2380,12 +2380,14 @@ function ProjectDetailInner({ useApp }) {
                   </div>
                 )}
                 {gatePass && nextPhaseId && (
-                  <button
+                  <Button
+                    variant="primary"
+                    size="sm"
                     style={styles.phaseCta}
                     onClick={() => handlePhaseChange(nextPhaseId)}
                   >
                     Avançar fase
-                  </button>
+                  </Button>
                 )}
                 <div style={{ marginTop: '16px' }}>
                   <div style={{

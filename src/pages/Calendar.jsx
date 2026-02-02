@@ -8,6 +8,7 @@ import { useBreakpoint } from '../hooks/useBreakpoint'
 import { useApp } from '../context/AppContext'
 import { getCalendarEvents, getProjects, getDashboardPreferences, updateDashboardPreferences, updateTask } from '../lib/supabase'
 import { Filter, X } from 'lucide-react'
+import Button from '../components/Button'
 import QuickCreateTaskModal from '../components/QuickCreateTaskModal'
 import { showToast } from '../components/Toast'
 
@@ -254,9 +255,7 @@ export default function CalendarPage() {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: '24px',
-      flexDirection: isMobile ? 'column' : 'row',
-      gap: isMobile ? '12px' : '0'
+      marginBottom: '24px'
     },
     title: {
       fontSize: isMobile ? '24px' : '32px',
@@ -265,17 +264,12 @@ export default function CalendarPage() {
       margin: 0
     },
     filterButton: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      padding: '8px 16px',
-      backgroundColor: darkMode ? '#15151f' : '#ffffff',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
-      borderRadius: '8px',
-      color: darkMode ? '#ffffff' : '#111827',
-      cursor: 'pointer',
-      fontSize: '14px',
-      fontWeight: '500'
+      minWidth: '140px'
+    },
+    closeButton: {
+      padding: '0',
+      width: 'var(--btn-h-sm)',
+      minWidth: 'var(--btn-h-sm)'
     },
     filterPanel: {
       position: isMobile ? 'relative' : 'absolute',
@@ -349,16 +343,18 @@ export default function CalendarPage() {
 
   return (
     <div style={styles.container}>
-      <div style={styles.header}>
+      <div style={styles.header} className="toolbar-row">
         <h1 style={styles.title}>{t('calendar.title', 'Calendari')}</h1>
         <div style={{ position: 'relative' }}>
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() => setShowFilters(!showFilters)}
             style={styles.filterButton}
           >
             <Filter size={18} />
             {t('calendar.filters', 'Filtres')}
-          </button>
+          </Button>
           
           {showFilters && (
             <div style={styles.filterPanel}>
@@ -366,18 +362,14 @@ export default function CalendarPage() {
                 <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: darkMode ? '#ffffff' : '#111827' }}>
                   {t('calendar.filters', 'Filtres')}
                 </h3>
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setShowFilters(false)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: darkMode ? '#9ca3af' : '#6b7280',
-                    padding: '4px'
-                  }}
+                  style={styles.closeButton}
                 >
                   <X size={18} />
-                </button>
+                </Button>
               </div>
               
               {/* Project Filter */}

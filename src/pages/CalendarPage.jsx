@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { useApp } from '../context/AppContext'
 import Header from '../components/Header'
+import Button from '../components/Button'
 import { useProjectCalendarEvents } from '../features/calendar/useProjectCalendarEvents'
 import { getProjects } from '../lib/supabase'
 import { Calendar as CalendarIcon, Filter, X } from 'lucide-react'
@@ -391,14 +392,16 @@ export default function CalendarPage() {
           </div>
           
           <div style={styles.headerRight}>
-            <button
+            <Button
+              variant="secondary"
+              size="sm"
               data-filter-button
               onClick={() => setShowFilters(!showFilters)}
               style={styles.filterButton}
             >
               <Filter size={18} />
               Filtres
-            </button>
+            </Button>
             
             {showFilters && (
               <div data-filter-panel style={styles.filterPanel}>
@@ -406,18 +409,14 @@ export default function CalendarPage() {
                   <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: darkMode ? '#ffffff' : '#111827' }}>
                     Filtres
                   </h3>
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setShowFilters(false)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      color: darkMode ? '#9ca3af' : '#6b7280',
-                      padding: '4px'
-                    }}
+                    style={{ padding: '4px', minWidth: 'unset' }}
                   >
                     <X size={18} />
-                  </button>
+                  </Button>
                 </div>
                 
                 {/* Project Filter */}

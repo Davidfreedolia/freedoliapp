@@ -27,6 +27,7 @@ import { useApp } from '../context/AppContext'
 import { getCompanySettings, updateCompanySettings, supabase, getAuditLogs, updateLanguage, getCurrentUserId } from '../lib/supabase'
 import { clearDemoData, generateDemoData, checkDemoExists } from '../lib/demoSeed'
 import Header from '../components/Header'
+import Button from '../components/Button'
 import GTINPoolSection from '../components/GTINPoolSection'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
@@ -264,46 +265,50 @@ export default function Settings() {
       }}>
         {/* Tabs */}
         <div style={styles.tabs}>
-          <button
+          <Button
+            variant={activeTab === 'company' ? 'primary' : 'ghost'}
+            size="sm"
             onClick={() => setActiveTab('company')}
             style={{
               ...styles.tab,
-              backgroundColor: activeTab === 'company' ? '#4f46e5' : 'transparent',
               color: activeTab === 'company' ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280')
             }}
           >
             <Building2 size={18} /> Dades Empresa
-          </button>
-          <button
+          </Button>
+          <Button
+            variant={activeTab === 'signatures' ? 'primary' : 'ghost'}
+            size="sm"
             onClick={() => setActiveTab('signatures')}
             style={{
               ...styles.tab,
-              backgroundColor: activeTab === 'signatures' ? '#4f46e5' : 'transparent',
               color: activeTab === 'signatures' ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280')
             }}
           >
             <PenTool size={18} /> Signatures
-          </button>
-          <button
+          </Button>
+          <Button
+            variant={activeTab === 'gtin' ? 'primary' : 'ghost'}
+            size="sm"
             onClick={() => setActiveTab('gtin')}
             style={{
               ...styles.tab,
-              backgroundColor: activeTab === 'gtin' ? '#4f46e5' : 'transparent',
               color: activeTab === 'gtin' ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280')
             }}
           >
             <Barcode size={18} /> GTIN Pool
-          </button>
-          <button
+          </Button>
+          <Button
+            variant={activeTab === 'audit' ? 'primary' : 'ghost'}
+            size="sm"
             onClick={() => setActiveTab('audit')}
             style={{
               ...styles.tab,
-              backgroundColor: activeTab === 'audit' ? '#4f46e5' : 'transparent',
               color: activeTab === 'audit' ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280')
             }}
           >
             <FileText size={18} /> Audit Log
-          </button>
+          </Button>
         </div>
 
         {/* Company Tab */}
@@ -313,9 +318,15 @@ export default function Settings() {
               <h2 style={{...styles.sectionTitle, color: darkMode ? '#ffffff' : '#111827'}}>
                 <Building2 size={20} /> Dades de l'Empresa
               </h2>
-              <button onClick={handleSave} disabled={saving} style={{...styles.saveButton, backgroundColor: saved ? '#22c55e' : '#4f46e5'}}>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleSave}
+                disabled={saving}
+                style={styles.saveButton}
+              >
                 {saved ? <><Check size={16} /> {t('settings.saved')}</> : saving ? t('settings.saving') : <><Save size={16} /> {t('settings.save')}</>}
-              </button>
+              </Button>
             </div>
 
             {/* Language Selector */}
@@ -389,33 +400,15 @@ export default function Settings() {
               }}>
                 Consulta el manual complet amb informació detallada sobre totes les funcionalitats de Freedoliapp.
               </p>
-              <button
+              <Button
+                variant="primary"
+                size="sm"
                 onClick={() => navigate('/help')}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '10px 18px',
-                  backgroundColor: '#4f46e5',
-                  color: '#ffffff',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = '#4338ca'
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = '#4f46e5'
-                }}
               >
                 <BookOpen size={16} />
                 {t('settings.openManual')}
                 <ExternalLink size={14} />
-              </button>
+              </Button>
             </div>
 
             {/* Demo Mode Section */}
@@ -469,7 +462,9 @@ export default function Settings() {
                 </label>
               </div>
               <div style={{ marginTop: '16px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                <button
+                <Button
+                  variant="primary"
+                  size="sm"
                   onClick={async () => {
                     if (!confirm('Vols generar dades demo? Això crearà 10 projectes, POs, quotes, GTINs, finances, tasks i notes.')) return
                     setResettingDemo(true)
@@ -513,25 +508,13 @@ export default function Settings() {
                     }
                   }}
                   disabled={resettingDemo}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '10px 18px',
-                    backgroundColor: '#10b981',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    cursor: resettingDemo ? 'not-allowed' : 'pointer',
-                    opacity: resettingDemo ? 0.6 : 1
-                  }}
                 >
                   <Database size={16} style={{ animation: resettingDemo ? 'spin 1s linear infinite' : 'none' }} />
                   {resettingDemo ? 'Generant...' : 'Generar Dades Demo'}
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={async () => {
                     if (!confirm('Vols regenerar les dades demo? Això eliminarà les dades demo existents i crearà noves.')) return
                     setResettingDemo(true)
@@ -558,24 +541,10 @@ export default function Settings() {
                     }
                   }}
                   disabled={resettingDemo}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '10px 18px',
-                    backgroundColor: '#4f46e5',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    cursor: resettingDemo ? 'not-allowed' : 'pointer',
-                    opacity: resettingDemo ? 0.6 : 1
-                  }}
                 >
                   <RefreshCw size={16} style={{ animation: resettingDemo ? 'spin 1s linear infinite' : 'none' }} />
                   {resettingDemo ? 'Regenerant...' : 'Regenerar Dades Demo'}
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -677,9 +646,9 @@ export default function Settings() {
                 </h2>
                 <p style={styles.sectionDescription}>Gestiona les signatures per als PDFs</p>
               </div>
-              <button onClick={handleNewSignature} style={styles.addButton}>
+              <Button variant="primary" size="sm" onClick={handleNewSignature} style={styles.addButton}>
                 <Plus size={18} /> Nova Signatura
-              </button>
+              </Button>
             </div>
 
             <div style={styles.signaturesGrid}>
@@ -687,9 +656,9 @@ export default function Settings() {
                 <div style={styles.emptySignatures}>
                   <PenTool size={48} color="#d1d5db" />
                   <p>No hi ha signatures configurades</p>
-                  <button onClick={handleNewSignature} style={styles.addButton}>
+                  <Button variant="primary" size="sm" onClick={handleNewSignature} style={styles.addButton}>
                     <Plus size={18} /> Afegir Signatura
-                  </button>
+                  </Button>
                 </div>
               ) : (
                 signatures.map(sig => (
@@ -718,16 +687,34 @@ export default function Settings() {
                     
                     <div style={styles.signatureActions}>
                       {!sig.is_default && (
-                        <button onClick={() => handleSetDefault(sig)} style={styles.signatureActionBtn} title="Fer per defecte">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleSetDefault(sig)}
+                          style={styles.signatureActionBtn}
+                          title="Fer per defecte"
+                        >
                           <Star size={16} />
-                        </button>
+                        </Button>
                       )}
-                      <button onClick={() => { setEditingSignature(sig); setShowSignatureModal(true) }} style={styles.signatureActionBtn} title="Editar">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => { setEditingSignature(sig); setShowSignatureModal(true) }}
+                        style={styles.signatureActionBtn}
+                        title="Editar"
+                      >
                         <PenTool size={16} />
-                      </button>
-                      <button onClick={() => handleDeleteSignature(sig)} style={{...styles.signatureActionBtn, color: '#ef4444'}} title="Eliminar">
+                      </Button>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => handleDeleteSignature(sig)}
+                        style={styles.signatureActionBtn}
+                        title="Eliminar"
+                      >
                         <Trash2 size={16} />
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ))
@@ -749,39 +736,42 @@ export default function Settings() {
                 <FileText size={20} /> Audit Log
               </h2>
               <div style={{ display: 'flex', gap: '8px' }}>
-                <button
+                <Button
+                  variant={statusFilter === null ? 'primary' : 'ghost'}
+                  size="sm"
                   onClick={() => setStatusFilter(null)}
                   style={{
                     ...styles.filterButton,
-                    backgroundColor: statusFilter === null ? '#4f46e5' : 'transparent',
                     color: statusFilter === null ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280'),
                     borderColor: darkMode ? '#374151' : '#d1d5db'
                   }}
                 >
                   Tots
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant={statusFilter === 'success' ? 'primary' : 'ghost'}
+                  size="sm"
                   onClick={() => setStatusFilter('success')}
                   style={{
                     ...styles.filterButton,
-                    backgroundColor: statusFilter === 'success' ? '#22c55e' : 'transparent',
                     color: statusFilter === 'success' ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280'),
                     borderColor: darkMode ? '#374151' : '#d1d5db'
                   }}
                 >
                   <CheckCircle2 size={14} /> Èxits
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant={statusFilter === 'error' ? 'danger' : 'ghost'}
+                  size="sm"
                   onClick={() => setStatusFilter('error')}
                   style={{
                     ...styles.filterButton,
-                    backgroundColor: statusFilter === 'error' ? '#ef4444' : 'transparent',
                     color: statusFilter === 'error' ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280'),
                     borderColor: darkMode ? '#374151' : '#d1d5db'
                   }}
                 >
                   <AlertCircle size={14} /> Errors
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -859,7 +849,9 @@ export default function Settings() {
               <h3 style={{...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827'}}>
                 {editingSignature.id ? 'Editar Signatura' : 'Nova Signatura'}
               </h3>
-              <button onClick={() => setShowSignatureModal(false)} style={styles.closeButton}><X size={20} /></button>
+              <Button variant="ghost" size="sm" onClick={() => setShowSignatureModal(false)} style={styles.closeButton}>
+                <X size={20} />
+              </Button>
             </div>
             
             <div style={styles.modalBody}>
@@ -917,10 +909,12 @@ export default function Settings() {
             </div>
 
             <div style={styles.modalFooter}>
-              <button onClick={() => setShowSignatureModal(false)} style={styles.cancelButton}>Cancel·lar</button>
-              <button onClick={handleSaveSignature} disabled={saving} style={styles.saveButton}>
+              <Button variant="secondary" size="sm" onClick={() => setShowSignatureModal(false)} style={styles.cancelButton}>
+                Cancel·lar
+              </Button>
+              <Button variant="primary" size="sm" onClick={handleSaveSignature} disabled={saving} style={styles.saveButton}>
                 {saving ? 'Guardant...' : <><Save size={16} /> Guardar</>}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

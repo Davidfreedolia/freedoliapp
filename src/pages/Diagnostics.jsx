@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useApp } from '../context/AppContext'
+import Button from '../components/Button'
 import { 
   supabase, 
   getCurrentUserId,
@@ -695,28 +696,29 @@ export default function Diagnostics() {
       </div>
 
       <div style={styles.actions}>
-        <button
+        <Button
+          variant="primary"
+          size="sm"
           onClick={runAllChecks}
           disabled={running}
           style={{
-            ...styles.button,
-            ...styles.primaryButton,
             opacity: running ? 0.6 : 1,
             cursor: running ? 'not-allowed' : 'pointer'
           }}
         >
           <Play size={18} />
           Run All Checks
-        </button>
-        <button
+        </Button>
+        <Button
+          variant="secondary"
+          size="sm"
           onClick={() => setLogs([])}
           style={{
-            ...styles.button,
             ...styles.secondaryButton
           }}
         >
           Clear Logs
-        </button>
+        </Button>
       </div>
 
       <div style={styles.checksGrid}>
@@ -753,11 +755,12 @@ export default function Diagnostics() {
               )}
 
               <div style={styles.checkActions}>
-                <button
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={() => runCheck(check.id)}
                   disabled={running}
                   style={{
-                    ...styles.button,
                     ...styles.secondaryButton,
                     padding: '8px 16px',
                     fontSize: '13px',
@@ -767,12 +770,13 @@ export default function Diagnostics() {
                 >
                   <RefreshCw size={14} />
                   Run Check
-                </button>
+                </Button>
                 {checkData.fixPath && (
-                  <button
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     onClick={() => navigate(checkData.fixPath)}
                     style={{
-                      ...styles.button,
                       ...styles.secondaryButton,
                       padding: '8px 16px',
                       fontSize: '13px'
@@ -780,7 +784,7 @@ export default function Diagnostics() {
                   >
                     <ExternalLink size={14} />
                     Fix
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>

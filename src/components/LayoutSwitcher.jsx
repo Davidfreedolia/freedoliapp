@@ -1,4 +1,5 @@
 import { List, Columns, Grid2X2 } from 'lucide-react'
+import Button from './Button'
 
 const options = [
   { id: 'list', label: 'Llista', Icon: List },
@@ -12,20 +13,18 @@ export default function LayoutSwitcher({ value, onChange, compact = false }) {
       {options.map(option => {
         const isActive = option.id === value
         return (
-          <button
+          <Button
             key={option.id}
             type="button"
             onClick={() => onChange(option.id)}
             title={option.label}
-            style={{
-              ...styles.button,
-              ...(isActive ? styles.buttonActive : null),
-              ...(compact ? styles.buttonCompact : null)
-            }}
+            variant={isActive ? 'secondary' : 'ghost'}
+            size="sm"
+            style={compact ? styles.buttonCompact : null}
           >
             <option.Icon size={compact ? 16 : 18} />
             {!compact && <span>{option.label}</span>}
-          </button>
+          </Button>
         )
       })}
     </div>
@@ -36,35 +35,13 @@ const styles = {
   container: {
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '6px',
-    padding: '4px',
-    borderRadius: 'var(--btn-radius)',
-    border: '1px solid var(--btn-secondary-border)',
-    backgroundColor: 'var(--btn-ghost-bg)'
-  },
-  button: {
-    height: 'var(--btn-h-sm)',
-    border: '1px solid var(--btn-ghost-border)',
-    background: 'var(--btn-ghost-bg)',
-    color: 'var(--btn-ghost-fg)',
-    boxShadow: 'var(--btn-shadow)',
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '6px',
-    padding: '0 var(--btn-pad-x)',
-    borderRadius: 'var(--btn-radius)',
-    cursor: 'pointer',
-    fontSize: '13px',
-    fontWeight: '600',
-    transition: 'all 0.15s ease'
+    gap: '8px',
+    padding: 0,
+    border: 'none',
+    backgroundColor: 'transparent'
   },
   buttonCompact: {
+    minWidth: 'var(--btn-h-sm)',
     padding: '0 10px'
-  },
-  buttonActive: {
-    backgroundColor: 'var(--btn-secondary-bg)',
-    color: 'var(--btn-secondary-fg)',
-    border: '1px solid var(--btn-secondary-border)',
-    boxShadow: 'var(--btn-shadow)'
   }
 }

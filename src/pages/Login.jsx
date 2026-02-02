@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { Mail, Lock, Send } from 'lucide-react'
 import { logSuccess, logError } from '../lib/auditLog'
 import { isDemoMode } from '../demo/demoMode'
+import Button from '../components/Button'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -117,7 +118,9 @@ export default function Login() {
             <p style={styles.successSubtext}>
               Revisa el teu correu i clica l'enllaç per iniciar sessió.
             </p>
-            <button
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => {
                 setMagicLinkSent(false)
                 setEmail('')
@@ -125,31 +128,33 @@ export default function Login() {
               style={styles.backButton}
             >
               Tornar
-            </button>
+            </Button>
           </div>
         ) : (
           <>
             <div style={styles.toggleContainer}>
-              <button
+              <Button
+                variant={!useMagicLink ? 'primary' : 'ghost'}
+                size="sm"
                 onClick={() => setUseMagicLink(false)}
                 style={{
                   ...styles.toggleButton,
-                  backgroundColor: !useMagicLink ? '#4f46e5' : 'transparent',
                   color: !useMagicLink ? '#ffffff' : '#6b7280',
                 }}
               >
                 Contrasenya
-              </button>
-              <button
+              </Button>
+              <Button
+                variant={useMagicLink ? 'primary' : 'ghost'}
+                size="sm"
                 onClick={() => setUseMagicLink(true)}
                 style={{
                   ...styles.toggleButton,
-                  backgroundColor: useMagicLink ? '#4f46e5' : 'transparent',
                   color: useMagicLink ? '#ffffff' : '#6b7280',
                 }}
               >
                 Enllaç màgic
-              </button>
+              </Button>
             </div>
 
             <form
@@ -194,7 +199,9 @@ export default function Login() {
                 </div>
               )}
 
-              <button
+              <Button
+                variant="primary"
+                size="sm"
                 type="submit"
                 disabled={loading}
                 style={styles.submitButton}
@@ -209,7 +216,7 @@ export default function Login() {
                 ) : (
                   'Iniciar sessió'
                 )}
-              </button>
+              </Button>
             </form>
           </>
         )}

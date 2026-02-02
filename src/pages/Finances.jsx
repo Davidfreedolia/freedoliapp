@@ -1052,18 +1052,19 @@ export default function Finances() {
 
   // Base filter/input styles using design tokens
   const baseFilterStyle = {
-    backgroundColor: 'var(--color-surface)',
-    color: 'var(--color-text)',
-    border: '1px solid var(--color-border)',
-    borderRadius: 'var(--radius-ui)',
-    padding: '10px 16px',
+    height: 'var(--btn-h-sm)',
+    minWidth: '160px',
+    padding: '0 12px',
+    borderRadius: 'var(--btn-radius)',
+    border: '1px solid var(--btn-secondary-border)',
+    backgroundColor: 'var(--btn-ghost-bg)',
+    color: 'var(--btn-secondary-fg)',
     fontSize: '14px',
-    height: '40px',
-    minWidth: '140px',
-    width: '100%',
+    boxShadow: 'var(--btn-shadow)',
     boxSizing: 'border-box',
     outline: 'none',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    whiteSpace: 'nowrap'
   }
   
   const baseInputStyle = {
@@ -1071,15 +1072,7 @@ export default function Finances() {
     cursor: 'text'
   }
 
-  // Dynamic toolbar row style - single line on desktop
-  const toolbarRowStyle = {
-    ...styles.toolbarRow,
-    gridTemplateColumns: isMobile
-      ? '1fr' // Mobile: stack
-      : isTablet
-        ? 'auto auto auto auto auto 1fr auto' // Tablet: View, Project, Category, From, To, Search, Actions
-        : 'auto auto auto auto auto 320px auto' // Desktop: View, Project, Category, From, To, Search (fixed 320px), Actions
-  }
+  const toolbarRowStyle = styles.toolbarRow
 
   return (
     <div style={styles.container}>
@@ -1088,8 +1081,63 @@ export default function Finances() {
       <div style={styles.content}>
         {/* Toolbar - 1 línea en desktop, responsive */}
         <div style={styles.toolbarContainer}>
-          <div style={toolbarRowStyle}>
-            {/* Vista */}
+          <div style={toolbarRowStyle} className="toolbar-row">
+            {/* Search */}
+            <div style={styles.searchGroup}>
+              <div style={styles.searchContainer} className="toolbar-search">
+                <Search size={18} color="var(--color-muted)" />
+                <input
+                  type="text"
+                  placeholder="Buscar..."
+                  value={draftFilters.search}
+                  onChange={e => setDraftFilters({...draftFilters, search: e.target.value})}
+                  style={styles.searchInput}
+                />
+              </div>
+            </div>
+
+            {/* Filters / Selects */}
+            <div style={styles.filtersGroup}>
+              <select
+                value={draftFilters.project_id || ''}
+                onChange={e => setDraftFilters({...draftFilters, project_id: e.target.value || null})}
+                style={baseFilterStyle}
+              >
+                <option value="">Tots els projectes</option>
+                {projects.map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+
+              <select
+                value={draftFilters.category_id || ''}
+                onChange={e => setDraftFilters({...draftFilters, category_id: e.target.value || null})}
+                style={baseFilterStyle}
+              >
+                <option value="">Totes les categories</option>
+                {[...categories.income, ...categories.expense].map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+
+              <input
+                type="date"
+                value={draftFilters.date_from || ''}
+                onChange={e => setDraftFilters({...draftFilters, date_from: e.target.value || null})}
+                placeholder="Des de"
+                style={baseInputStyle}
+              />
+
+              <input
+                type="date"
+                value={draftFilters.date_to || ''}
+                onChange={e => setDraftFilters({...draftFilters, date_to: e.target.value || null})}
+                placeholder="Fins a"
+                style={baseInputStyle}
+              />
+            </div>
+
+            {/* View controls */}
             <div style={styles.viewsSection}>
               <select
                 value={activeView?.id || ''}
@@ -1104,7 +1152,9 @@ export default function Finances() {
                   <option key={view.id} value={view.id}>{view.name}</option>
                 ))}
               </select>
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => {
                   setEditingView({ name: '', filters: appliedFilters, columns: visibleColumns, is_default: false })
                   setShowViewModal(true)
@@ -1113,9 +1163,11 @@ export default function Finances() {
                 title="Guardar vista"
               >
                 <Save size={18} />
-              </button>
+              </Button>
               {activeView && (
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => {
                     setEditingView(activeView)
                     setShowViewModal(true)
@@ -1124,72 +1176,19 @@ export default function Finances() {
                   title="Editar vista"
                 >
                   <Edit size={18} />
-                </button>
+                </Button>
               )}
             </div>
 
-            {/* Projecte */}
-            <select
-              value={draftFilters.project_id || ''}
-              onChange={e => setDraftFilters({...draftFilters, project_id: e.target.value || null})}
-              style={baseFilterStyle}
-            >
-              <option value="">Tots els projectes</option>
-              {projects.map(p => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
-
-            {/* Categoria */}
-            <select
-              value={draftFilters.category_id || ''}
-              onChange={e => setDraftFilters({...draftFilters, category_id: e.target.value || null})}
-              style={baseFilterStyle}
-            >
-              <option value="">Totes les categories</option>
-              {[...categories.income, ...categories.expense].map(c => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-
-            {/* Date From */}
-            <input
-              type="date"
-              value={draftFilters.date_from || ''}
-              onChange={e => setDraftFilters({...draftFilters, date_from: e.target.value || null})}
-              placeholder="Des de"
-              style={baseInputStyle}
-            />
-
-            {/* Date To */}
-            <input
-              type="date"
-              value={draftFilters.date_to || ''}
-              onChange={e => setDraftFilters({...draftFilters, date_to: e.target.value || null})}
-              placeholder="Fins a"
-              style={baseInputStyle}
-            />
-
-            {/* Cercador - Max width 320px */}
-            <div style={styles.searchContainer}>
-              <Search size={18} color="var(--color-muted)" />
-              <input
-                type="text"
-                placeholder="Buscar..."
-                value={draftFilters.search}
-                onChange={e => setDraftFilters({...draftFilters, search: e.target.value})}
-                style={styles.searchInput}
-              />
-            </div>
-
-            {/* Accions (dreta) */}
+            {/* CTA */}
             <div style={styles.actionsSection}>
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => {
-                  // Initialize editingCategory if it doesn't exist when opening modal
                   if (!editingCategory) {
                     const defaultType = 'expense'
-                    const defaultColor = PALETTE_CA[7] // Alizarin for expense
+                    const defaultColor = PALETTE_CA[7]
                     setEditingCategory({
                       id: null,
                       name: '',
@@ -1207,38 +1206,43 @@ export default function Finances() {
                 title="Gestionar categories"
               >
                 <Tag size={18} />
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={handleExportCSV}
                 style={styles.iconButton}
                 title="Exportar a CSV"
               >
                 <FileSpreadsheet size={18} />
-              </button>
+              </Button>
               <Button
-                variant="success-soft"
+                variant="primary"
+                size="sm"
                 onClick={() => handleNewTransaction('income')}
               >
                 <Plus size={18} /> Ingrés
               </Button>
               <Button
-                variant="warning-soft"
+                variant="secondary"
+                size="sm"
                 onClick={() => handleNewTransaction('expense')}
               >
                 <Plus size={18} /> Despesa
               </Button>
-              {/* Apply Filters Button - inline with actions */}
               {hasPendingFilters && (
-                <button
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={handleApplyFilters}
                   data-testid="apply-filters"
                   aria-label="Aplicar filtres"
                   title="Aplicar filtres"
                   style={styles.applyButton}
                 >
-                  <Filter size={16} style={{ marginRight: '6px' }} />
+                  <Filter size={16} />
                   Aplicar
-                </button>
+                </Button>
               )}
             </div>
           </div>
@@ -1315,22 +1319,14 @@ export default function Finances() {
             }}>
               {error}
             </p>
-            <button
+            <Button
+              variant="primary"
+              size="sm"
               onClick={loadData}
-              style={{
-                padding: '12px 24px',
-                backgroundColor: '#4f46e5',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: 'var(--radius-ui)',
-                fontSize: '14px',
-                fontWeight: '500',
-                cursor: 'pointer'
-              }}
             >
               <RefreshCw size={16} style={{ marginRight: '8px', display: 'inline' }} />
               Reintentar
-            </button>
+            </Button>
                         </div>
         ) : (
               <div style={{...styles.tableContainer, backgroundColor: darkMode ? '#15151f' : '#ffffff'}}>
@@ -1464,7 +1460,9 @@ export default function Finances() {
                               data-menu-container
                               onClick={(e) => e.stopPropagation()}
                             >
-                            <button
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               onClick={(e) => {
                                 e.stopPropagation()
                                 // Toggle menu state
@@ -1473,7 +1471,7 @@ export default function Finances() {
                               style={styles.menuButton}
                             >
                                 <MoreVertical size={18} />
-                              </button>
+                              </Button>
                             {menuOpen === item.id && (
                                 <div 
                                   style={{
@@ -1486,7 +1484,9 @@ export default function Finances() {
                                     e.preventDefault()
                                   }}
                                 >
-                                <button
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
                                   onClick={(e) => {
                                     e.stopPropagation()
                                     handleEditTransaction(item)
@@ -1494,9 +1494,11 @@ export default function Finances() {
                                   style={styles.menuItem}
                                 >
                                   <Edit size={14} /> Editar
-                                </button>
+                                </Button>
                                 {item.type === 'expense' && item.is_recurring && item.recurring_status === 'expected' && (
-                                  <button
+                                  <Button
+                                    variant="secondary"
+                                    size="sm"
                                     onClick={async (e) => {
                                       e.stopPropagation()
                                       try {
@@ -1508,10 +1510,10 @@ export default function Finances() {
                                         notifyError(err, { context: 'Finances:markAsPaid' })
                                       }
                                     }}
-                                    style={{...styles.menuItem, color: '#22c55e'}}
+                                    style={styles.menuItem}
                                   >
                                     <CheckCircle2 size={14} /> Marcar com pagada
-                                  </button>
+                                  </Button>
                                 )}
                                 <Button
                                   variant="danger"
@@ -1546,14 +1548,16 @@ export default function Finances() {
               <h3 style={{...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827'}}>
                 Gestionar Categories
               </h3>
-              <button onClick={() => setShowCategoryModal(false)} style={styles.closeButton}>
+              <Button variant="ghost" size="sm" onClick={() => setShowCategoryModal(false)} style={styles.closeButton}>
                 <X size={20} />
-              </button>
+              </Button>
             </div>
             
             <div style={styles.modalBody}>
               <div style={styles.categoryTabs}>
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => {
                     const newType = 'income'
                     const defaultColor = PALETTE_CA[1] // Emerald for income
@@ -1577,8 +1581,10 @@ export default function Finances() {
                   }}
                 >
                   Ingressos
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => {
                     const newType = 'expense'
                     const defaultColor = PALETTE_CA[7] // Alizarin for expense
@@ -1602,7 +1608,7 @@ export default function Finances() {
                   }}
                 >
                   Despeses
-                </button>
+                </Button>
                   </div>
 
               <div style={styles.categoriesList}>
@@ -1627,7 +1633,9 @@ export default function Finances() {
                     </div>
                     {!cat.is_system && (
                       <div style={styles.categoryActions}>
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => {
                             setEditingCategory(cat)
                             setShowCategoryModal(true)
@@ -1635,7 +1643,7 @@ export default function Finances() {
                           style={styles.smallButton}
                         >
                           <Edit size={14} />
-                        </button>
+                        </Button>
                         <Button
                           variant="danger"
                           size="sm"
@@ -1707,7 +1715,9 @@ export default function Finances() {
                         const currentColor = editingCategory?.color?.toUpperCase() || ''
                         const isSelected = currentColor === color.toUpperCase()
                         return (
-                          <button
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             key={color}
                             type="button"
                             onClick={() => {
@@ -1738,7 +1748,7 @@ export default function Finances() {
                             {isSelected && (
                               <Check size={16} color="#FFFFFF" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))' }} />
                             )}
-                          </button>
+                          </Button>
                         )
                       })}
                     </div>
@@ -1755,7 +1765,9 @@ export default function Finances() {
                 </div>
 
                 <div style={styles.formActions}>
-                  <button
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     onClick={() => {
                       setEditingCategory(null)
                       setShowCategoryModal(false)
@@ -1763,7 +1775,7 @@ export default function Finances() {
                     style={styles.cancelButton}
                   >
                     Cancel·lar
-                  </button>
+                  </Button>
                   <Button
                     variant="primary"
                     onClick={handleSaveCategory}
@@ -1793,9 +1805,9 @@ export default function Finances() {
               <h3 style={{...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827'}}>
                 {editingView.id ? 'Editar Vista' : 'Nova Vista'}
               </h3>
-              <button onClick={() => setShowViewModal(false)} style={styles.closeButton}>
+              <Button variant="ghost" size="sm" onClick={() => setShowViewModal(false)} style={styles.closeButton}>
                 <X size={20} />
-              </button>
+              </Button>
                 </div>
 
             <div style={styles.modalBody}>
@@ -1868,7 +1880,9 @@ export default function Finances() {
                   ? `Editar ${editingTransaction.type === 'income' ? 'Ingrés' : 'Despesa'}` 
                   : `Nova ${editingTransaction.type === 'income' ? 'Ingrés' : 'Despesa'}`}
               </h3>
-              <button 
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => {
                   setShowTransactionModal(false)
                   setEditingTransaction(null)
@@ -1876,7 +1890,7 @@ export default function Finances() {
                 style={styles.closeButton}
               >
                 <X size={20} />
-              </button>
+              </Button>
             </div>
             
             <div style={styles.modalBody}>
@@ -2132,7 +2146,9 @@ export default function Finances() {
             </div>
 
             <div style={styles.modalFooter}>
-              <button 
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={() => {
                   setShowTransactionModal(false)
                   setEditingTransaction(null)
@@ -2140,9 +2156,9 @@ export default function Finances() {
                 style={styles.cancelButton}
               >
                 Tancar
-              </button>
+              </Button>
               <Button
-                variant={editingTransaction.type === 'income' ? 'success-soft' : 'warning-soft'}
+                variant={editingTransaction.type === 'income' ? 'primary' : 'secondary'}
                 onClick={handleSaveTransaction}
                 disabled={saving}
               >
@@ -2174,7 +2190,9 @@ export default function Finances() {
               <h3 style={{...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827'}}>
                 Crear nova categoria
               </h3>
-              <button 
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => {
                   setShowInlineCategoryModal(false)
                   setInlineCategoryName('')
@@ -2182,7 +2200,7 @@ export default function Finances() {
                 style={styles.closeButton}
               >
                 <X size={20} />
-              </button>
+              </Button>
             </div>
             
             <div style={styles.modalBody}>
@@ -2218,7 +2236,9 @@ export default function Finances() {
             </div>
 
             <div style={styles.modalFooter}>
-              <button 
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={() => {
                   setShowInlineCategoryModal(false)
                   setInlineCategoryName('')
@@ -2226,7 +2246,7 @@ export default function Finances() {
                 style={styles.cancelButton}
               >
                 Cancel·lar
-              </button>
+              </Button>
               <Button
                 variant="primary"
                 onClick={handleCreateInlineCategory}
@@ -2316,7 +2336,7 @@ function QAPanel({ darkMode, onDebugReceiptsChange }) {
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <Button
             size="sm"
-            variant={debugErrorsEnabled ? 'success-soft' : 'warning-soft'}
+            variant={debugErrorsEnabled ? 'primary' : 'secondary'}
             onClick={() => {
               writeLocalFlag('debugErrors', true)
               setDebugErrorsEnabled(true)
@@ -2326,7 +2346,7 @@ function QAPanel({ darkMode, onDebugReceiptsChange }) {
           </Button>
           <Button
             size="sm"
-            variant={debugReceiptsDisabled ? 'success-soft' : 'warning-soft'}
+            variant={debugReceiptsDisabled ? 'primary' : 'secondary'}
             onClick={() => {
               writeLocalFlag('debugDisableReceipts', true)
               setDebugReceiptsDisabled(true)
@@ -2380,7 +2400,7 @@ function QAPanel({ darkMode, onDebugReceiptsChange }) {
             <div style={{ display: 'flex', gap: '8px' }}>
               <Button
                 size="sm"
-                variant="success-soft"
+                variant="primary"
                 onClick={() => {
                   setQaResults(prev => ({
                     ...prev,
@@ -2516,58 +2536,51 @@ const styles = {
     marginBottom: 'var(--spacing-lg)'
   },
   toolbarRow: {
-    display: 'grid',
-    gap: 'var(--spacing-sm)',
+    display: 'flex',
+    gap: '12px',
     alignItems: 'center',
-    minHeight: '40px',
-    width: '100%'
+    width: '100%',
+    flexWrap: 'nowrap'
+  },
+  searchGroup: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '12px',
+    flexWrap: 'nowrap'
+  },
+  filtersGroup: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '12px',
+    flexWrap: 'nowrap'
   },
   viewsSection: {
-    display: 'flex',
+    display: 'inline-flex',
     gap: '8px',
-    alignItems: 'center'
+    alignItems: 'center',
+    flexWrap: 'nowrap'
   },
   searchContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    padding: '0 16px',
-    backgroundColor: 'var(--color-surface)',
-    border: '1px solid var(--color-border)',
-    borderRadius: 'var(--radius-ui)',
-    height: '40px',
-    maxWidth: '320px',
-    width: '100%',
-    boxSizing: 'border-box'
+    flex: '0 0 auto',
+    width: '320px',
+    minWidth: '240px'
   },
   searchInput: {
     flex: 1,
-    padding: '10px 0',
-    border: 'none',
-    outline: 'none',
-    fontSize: '14px',
-    background: 'transparent',
-    color: 'var(--color-text)'
+    minWidth: 0
   },
   actionsSection: {
-    display: 'flex',
+    display: 'inline-flex',
     gap: '8px',
     alignItems: 'center',
-    justifyContent: 'flex-end'
+    justifyContent: 'flex-end',
+    flexWrap: 'nowrap',
+    marginLeft: 'auto'
   },
   iconButton: {
-    width: '40px',
-    height: '40px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'var(--surface-bg)',
-    border: 'none', // No border - use shadow
-    borderRadius: 'var(--radius-ui)',
-    cursor: 'pointer',
-    color: 'var(--text)',
-    transition: 'all 0.15s ease',
-    boxShadow: 'var(--shadow-soft)'
+    width: 'var(--btn-h-sm)',
+    minWidth: 'var(--btn-h-sm)',
+    padding: '0'
   },
   incomeButton: {
     display: 'flex',
@@ -2600,21 +2613,7 @@ const styles = {
     whiteSpace: 'nowrap'
   },
   applyButton: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '10px 20px',
-    backgroundColor: 'var(--color-primary)',
-    color: '#FFFFFF',
-    border: '1px solid var(--color-primary)',
-    borderRadius: 'var(--radius-ui)',
-    fontSize: '14px',
-    fontWeight: '500',
-    cursor: 'pointer',
-    transition: 'all 0.15s ease',
-    whiteSpace: 'nowrap',
-    height: '40px',
-    boxSizing: 'border-box'
+    minWidth: '120px'
   },
   statsRow: {
     display: 'grid',

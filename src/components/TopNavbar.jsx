@@ -14,6 +14,7 @@ import HeaderPreferencesWidget from './HeaderPreferencesWidget'
 import HeaderUserWidget from './HeaderUserWidget'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { showToast } from './Toast'
+import Button from './Button'
 
 export default function TopNavbar({ sidebarWidth = 0 }) {
   const { darkMode, setDarkMode } = useApp()
@@ -81,7 +82,9 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
     <>
       <nav style={navStyle} className="topbar">
         <div style={styles.leftSection}>
-          <button 
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() => setShowNoteModal(true)}
             style={styles.notesButton}
             className="topbar-button"
@@ -90,9 +93,11 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
           >
             <StickyNote size={18} />
             {!isMobile && <span style={{ marginLeft: '6px', fontSize: '14px' }}>+ {t('navbar.notes')}</span>}
-          </button>
+          </Button>
 
-          <button 
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() => setShowHelpModal(true)}
             style={styles.helpButton}
             className="topbar-button"
@@ -101,7 +106,7 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
           >
             <HelpCircle size={18} />
             {!isMobile && <span style={{ marginLeft: '6px', fontSize: '14px' }}>{t('navbar.help')}</span>}
-          </button>
+          </Button>
         </div>
 
         <div style={styles.centerSection}>

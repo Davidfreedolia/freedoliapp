@@ -366,31 +366,28 @@ export default function Inventory() {
         </div>
 
         {/* Toolbar */}
-        <div style={styles.toolbar}>
+        <div style={styles.toolbar} className="toolbar-row">
           <div style={styles.searchGroup}>
-            <div style={{
-              ...styles.searchContainer,
-              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
-            }}>
+            <div style={styles.searchContainer} className="toolbar-search">
               <Search size={18} color="#9ca3af" />
               <input
                 type="text"
                 placeholder="Buscar SKU o producte..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                style={{ ...styles.searchInput, color: darkMode ? '#ffffff' : '#111827' }}
+                style={styles.searchInput}
               />
             </div>
+          </div>
+          <div style={styles.filters}>
             <Button variant="secondary" size="sm" style={styles.filterButton}>
               <Filter size={14} />
               Filtres
             </Button>
-          </div>
-          <div style={styles.filters}>
             <select
               value={filterProject}
               onChange={e => setFilterProject(e.target.value)}
-              style={{ ...styles.filterSelect, backgroundColor: darkMode ? '#1f1f2e' : '#ffffff', color: darkMode ? '#ffffff' : '#111827' }}
+              style={styles.filterSelect}
             >
               <option value="">Tots els projectes</option>
               {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -398,7 +395,7 @@ export default function Inventory() {
             <select
               value={filterStatus}
               onChange={e => setFilterStatus(e.target.value)}
-              style={{ ...styles.filterSelect, backgroundColor: darkMode ? '#1f1f2e' : '#ffffff', color: darkMode ? '#ffffff' : '#111827' }}
+              style={styles.filterSelect}
             >
               <option value="">Tots els estats</option>
               <option value="low_stock">⚠️ Stock baix</option>
@@ -415,7 +412,7 @@ export default function Inventory() {
               onChange={setLayout}
               compact={isMobile}
             />
-            <Button onClick={handleNewItem}>
+            <Button size="sm" onClick={handleNewItem}>
               <Plus size={18} /> Nou Producte
             </Button>
           </div>
@@ -683,15 +680,15 @@ const styles = {
   statCard: { display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', borderRadius: '12px', border: 'none', boxShadow: 'var(--shadow-soft)' },
   statValue: { display: 'block', fontSize: '20px', fontWeight: '600' },
   statLabel: { fontSize: '11px', color: '#6b7280' },
-  toolbar: { display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' },
-  searchGroup: { display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' },
-  searchContainer: { flex: '0 1 360px', maxWidth: '360px', width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '0 16px', borderRadius: '10px', border: '1px solid var(--border-color)' },
-  searchInput: { flex: 1, padding: '12px 0', border: 'none', outline: 'none', fontSize: '14px', background: 'transparent' },
-  filterSelect: { padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--border-color)', fontSize: '14px', outline: 'none' },
+  toolbar: { display: 'flex', marginBottom: '24px' },
+  searchGroup: { display: 'inline-flex', alignItems: 'center', gap: '12px', flexWrap: 'nowrap' },
+  searchContainer: { flex: '0 0 auto', width: '320px', minWidth: '240px' },
+  searchInput: { flex: 1, minWidth: 0 },
+  filterSelect: { height: 'var(--btn-h-sm)', padding: '0 12px', borderRadius: 'var(--btn-radius)', border: '1px solid var(--btn-secondary-border)', backgroundColor: 'var(--btn-ghost-bg)', color: 'var(--btn-secondary-fg)', fontSize: '14px', outline: 'none', cursor: 'pointer', boxShadow: 'var(--btn-shadow)' },
   refreshBtn: { padding: '0', width: 'var(--btn-h-sm)', minWidth: 'var(--btn-h-sm)' },
-  filters: { display: 'flex', alignItems: 'center', gap: '12px' },
-  filterButton: { height: '36px' },
-  toolbarRight: { display: 'flex', alignItems: 'center', gap: '12px', marginLeft: 'auto' },
+  filters: { display: 'inline-flex', alignItems: 'center', gap: '12px', flexWrap: 'nowrap' },
+  filterButton: { height: 'var(--btn-h-sm)' },
+  toolbarRight: { display: 'inline-flex', alignItems: 'center', gap: '12px', marginLeft: 'auto', flexWrap: 'nowrap' },
   newButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', backgroundColor: '#1F4E5F', color: '#F4F7F3', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
   loading: { padding: '64px', textAlign: 'center', color: '#6b7280' },
   empty: { padding: '64px', textAlign: 'center', borderRadius: '16px', border: 'none', boxShadow: 'var(--shadow-soft)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' },
