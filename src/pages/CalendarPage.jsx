@@ -242,8 +242,8 @@ export default function CalendarPage() {
       justifyContent: 'space-between',
       alignItems: 'center',
       marginBottom: '24px',
-      flexDirection: isMobile ? 'column' : 'row',
-      gap: isMobile ? '12px' : '0'
+      flexDirection: 'row',
+      flexWrap: 'nowrap'
     },
     headerLeft: {
       display: 'flex',
@@ -258,27 +258,19 @@ export default function CalendarPage() {
       position: 'relative'
     },
     viewSelector: {
-      padding: '8px 12px',
-      borderRadius: '8px',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
-      backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
-      color: darkMode ? '#ffffff' : '#111827',
+      height: 'var(--btn-h-sm)',
+      padding: '0 12px',
+      borderRadius: 'var(--btn-radius)',
+      border: '1px solid var(--btn-ghost-border)',
+      backgroundColor: 'var(--btn-ghost-bg)',
+      color: 'var(--btn-ghost-fg)',
       fontSize: '14px',
       cursor: 'pointer',
-      outline: 'none'
+      outline: 'none',
+      boxShadow: 'var(--btn-shadow)'
     },
     filterButton: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      padding: '8px 16px',
-      backgroundColor: darkMode ? '#15151f' : '#ffffff',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
-      borderRadius: '8px',
-      color: darkMode ? '#ffffff' : '#111827',
-      cursor: 'pointer',
-      fontSize: '14px',
-      fontWeight: '500'
+      minWidth: '120px'
     },
     filterPanel: {
       position: 'absolute',
@@ -377,8 +369,8 @@ export default function CalendarPage() {
       <Header title="Calendari" />
       
       <div style={styles.content}>
-        <div style={styles.header}>
-          <div style={styles.headerLeft}>
+        <div style={styles.header} className="toolbar-row">
+          <div style={styles.headerLeft} className="toolbar-group">
             <select
               value={view}
               onChange={(e) => handleViewChange(e.target.value)}
@@ -391,7 +383,7 @@ export default function CalendarPage() {
             </select>
           </div>
           
-          <div style={styles.headerRight}>
+          <div style={styles.headerRight} className="toolbar-group">
             <Button
               variant="secondary"
               size="sm"

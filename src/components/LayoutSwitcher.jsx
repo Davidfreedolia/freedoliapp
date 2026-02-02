@@ -18,7 +18,7 @@ export default function LayoutSwitcher({ value, onChange, compact = false }) {
             type="button"
             onClick={() => onChange(option.id)}
             title={option.label}
-            variant={isActive ? 'secondary' : 'ghost'}
+            variant={isActive ? 'primary' : 'ghost'}
             size="sm"
             style={compact ? styles.buttonCompact : null}
           >

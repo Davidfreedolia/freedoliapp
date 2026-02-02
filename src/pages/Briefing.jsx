@@ -277,12 +277,14 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
       <div style={styles.content}>
         {/* Toolbar */}
         <div style={styles.toolbar} className="toolbar-row">
-          <Button variant="secondary" size="sm" onClick={() => navigate(-1)} style={styles.backButton}>
-            <ArrowLeft size={18} />
-            Tornar
-          </Button>
+          <div className="toolbar-group">
+            <Button variant="secondary" size="sm" onClick={() => navigate(-1)} style={styles.backButton}>
+              <ArrowLeft size={18} />
+              Tornar
+            </Button>
+          </div>
           
-          <div style={styles.toolbarRight}>
+          <div style={styles.toolbarRight} className="toolbar-group">
             <Button variant="primary" size="sm" onClick={handleSave} disabled={saving} style={styles.saveButton}>
               {saving ? 'Guardant...' : <><Save size={18} /> Guardar</>}
             </Button>

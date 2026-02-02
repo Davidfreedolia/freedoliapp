@@ -1083,7 +1083,7 @@ export default function Finances() {
         <div style={styles.toolbarContainer}>
           <div style={toolbarRowStyle} className="toolbar-row">
             {/* Search */}
-            <div style={styles.searchGroup}>
+            <div style={styles.searchGroup} className="toolbar-group">
               <div style={styles.searchContainer} className="toolbar-search">
                 <Search size={18} color="var(--color-muted)" />
                 <input
@@ -1097,7 +1097,7 @@ export default function Finances() {
             </div>
 
             {/* Filters / Selects */}
-            <div style={styles.filtersGroup}>
+            <div style={styles.filtersGroup} className="toolbar-group">
               <select
                 value={draftFilters.project_id || ''}
                 onChange={e => setDraftFilters({...draftFilters, project_id: e.target.value || null})}
@@ -1138,7 +1138,7 @@ export default function Finances() {
             </div>
 
             {/* View controls */}
-            <div style={styles.viewsSection}>
+            <div style={styles.viewsSection} className="toolbar-group view-controls">
               <select
                 value={activeView?.id || ''}
                 onChange={(e) => {
@@ -1181,7 +1181,7 @@ export default function Finances() {
             </div>
 
             {/* CTA */}
-            <div style={styles.actionsSection}>
+            <div style={styles.actionsSection} className="toolbar-group">
               <Button
                 variant="ghost"
                 size="sm"

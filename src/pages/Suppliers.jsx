@@ -458,7 +458,7 @@ export default function Suppliers() {
       }}>
         {/* Toolbar */}
         <div style={styles.toolbar} className="toolbar-row">
-          <div style={styles.searchGroup}>
+          <div style={styles.searchGroup} className="toolbar-group">
             <div style={styles.searchContainer} className="toolbar-search">
               <Search size={18} color="#9ca3af" />
               <input
@@ -471,7 +471,7 @@ export default function Suppliers() {
             </div>
           </div>
 
-          <div style={styles.filters}>
+          <div style={styles.filters} className="toolbar-group">
             <Button variant="secondary" size="sm" style={styles.filterButton}>
               <Filter size={14} />
               Filtres
@@ -499,12 +499,14 @@ export default function Suppliers() {
             </select>
           </div>
 
-          <div style={styles.toolbarRight}>
+          <div className="toolbar-group view-controls">
             <LayoutSwitcher
               value={effectiveLayout}
               onChange={setLayout}
               compact={isMobile}
             />
+          </div>
+          <div style={styles.toolbarRight} className="toolbar-group">
             <Button
               size="sm"
               onClick={handleNewSupplier} 

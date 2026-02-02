@@ -303,6 +303,7 @@ main {
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
   white-space: nowrap;
+  min-height: var(--btn-h-sm);
 }
 
 .toolbar-row {
@@ -322,9 +323,9 @@ main {
 .toolbar-search {
   display: inline-flex;
   align-items: center;
-  gap: var(--btn-gap);
+  gap: 10px;
   height: var(--btn-h-sm);
-  padding: 0 var(--btn-pad-x);
+  padding: 0 14px;
   border-radius: var(--btn-radius);
   border: 1px solid var(--btn-ghost-border);
   background: var(--btn-ghost-bg);
@@ -352,7 +353,7 @@ main {
 .toolbar-group {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: nowrap;
 }
 

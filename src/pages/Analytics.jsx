@@ -248,27 +248,31 @@ export default function Analytics() {
       <div style={styles.content}>
         {/* Toolbar */}
         <div style={styles.toolbar} className="toolbar-row">
-          <select
-            value={dateRange}
-            onChange={e => setDateRange(e.target.value)}
-            style={styles.filterSelect}
-          >
-            <option value="7">Últims 7 dies</option>
-            <option value="30">Últims 30 dies</option>
-            <option value="90">Últims 90 dies</option>
-            <option value="365">Últim any</option>
-          </select>
-          <select
-            value={filterProject}
-            onChange={e => setFilterProject(e.target.value)}
-            style={styles.filterSelect}
-          >
-            <option value="">Tots els projectes</option>
-            {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
-          <Button variant="secondary" size="sm" onClick={loadData} style={styles.refreshBtn}>
-            <RefreshCw size={18} />
-          </Button>
+          <div className="toolbar-group">
+            <select
+              value={dateRange}
+              onChange={e => setDateRange(e.target.value)}
+              style={styles.filterSelect}
+            >
+              <option value="7">Últims 7 dies</option>
+              <option value="30">Últims 30 dies</option>
+              <option value="90">Últims 90 dies</option>
+              <option value="365">Últim any</option>
+            </select>
+            <select
+              value={filterProject}
+              onChange={e => setFilterProject(e.target.value)}
+              style={styles.filterSelect}
+            >
+              <option value="">Tots els projectes</option>
+              {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+          </div>
+          <div className="toolbar-group">
+            <Button variant="secondary" size="sm" onClick={loadData} style={styles.refreshBtn}>
+              <RefreshCw size={18} />
+            </Button>
+          </div>
         </div>
 
         {loading ? (

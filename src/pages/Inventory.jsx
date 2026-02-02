@@ -367,7 +367,7 @@ export default function Inventory() {
 
         {/* Toolbar */}
         <div style={styles.toolbar} className="toolbar-row">
-          <div style={styles.searchGroup}>
+          <div style={styles.searchGroup} className="toolbar-group">
             <div style={styles.searchContainer} className="toolbar-search">
               <Search size={18} color="#9ca3af" />
               <input
@@ -379,7 +379,7 @@ export default function Inventory() {
               />
             </div>
           </div>
-          <div style={styles.filters}>
+          <div style={styles.filters} className="toolbar-group">
             <Button variant="secondary" size="sm" style={styles.filterButton}>
               <Filter size={14} />
               Filtres
@@ -406,12 +406,14 @@ export default function Inventory() {
               <RefreshCw size={18} />
             </Button>
           </div>
-          <div style={styles.toolbarRight}>
+          <div className="toolbar-group view-controls">
             <LayoutSwitcher
               value={effectiveLayout}
               onChange={setLayout}
               compact={isMobile}
             />
+          </div>
+          <div style={styles.toolbarRight} className="toolbar-group">
             <Button size="sm" onClick={handleNewItem}>
               <Plus size={18} /> Nou Producte
             </Button>

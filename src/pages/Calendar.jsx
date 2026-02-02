@@ -344,8 +344,8 @@ export default function CalendarPage() {
   return (
     <div style={styles.container}>
       <div style={styles.header} className="toolbar-row">
-        <h1 style={styles.title}>{t('calendar.title', 'Calendari')}</h1>
-        <div style={{ position: 'relative' }}>
+        <h1 style={styles.title} className="toolbar-group">{t('calendar.title', 'Calendari')}</h1>
+        <div style={{ position: 'relative' }} className="toolbar-group">
           <Button
             variant="secondary"
             size="sm"
