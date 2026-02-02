@@ -72,18 +72,19 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
 
   const navStyle = {
     ...styles.navbar,
-    left: isMobile ? 0 : sidebarWidth,
-    width: isMobile ? '100%' : `calc(100% - ${sidebarWidth}px)`
+    left: isMobile ? 0 : 'var(--sidebar-w)',
+    right: 0,
+    width: isMobile ? '100%' : 'calc(100% - var(--sidebar-w))'
   }
 
   return (
     <>
-      <nav style={navStyle}>
-        {/* Left Section: Notes + Help grouped */}
+      <nav style={navStyle} className="topbar">
         <div style={styles.leftSection}>
           <button 
             onClick={() => setShowNoteModal(true)}
             style={styles.notesButton}
+            className="topbar-button"
             title={t('navbar.addNote')}
             aria-label={t('navbar.addNote')}
           >
@@ -94,6 +95,7 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
           <button 
             onClick={() => setShowHelpModal(true)}
             style={styles.helpButton}
+            className="topbar-button"
             title={t('navbar.help')}
             aria-label={t('navbar.help')}
           >
@@ -102,15 +104,14 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
           </button>
         </div>
 
-        {/* Right Section: 3 grouped widgets */}
+        <div style={styles.centerSection}>
+          <div style={styles.centerGroup}>
+            <HeaderTimeWidget />
+          </div>
+        </div>
+
         <div style={styles.rightSection}>
-          {/* Time Widget */}
-          <HeaderTimeWidget />
-
-          {/* Preferences Widget */}
           <HeaderPreferencesWidget />
-
-          {/* User Widget */}
           <HeaderUserWidget
             userEmail={userEmail}
             userName={userName}
@@ -152,29 +153,39 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
 
 const styles = {
   navbar: {
-    height: '64px',
+    height: 'var(--topbar-h)',
     padding: '0 24px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    position: 'sticky',
+    position: 'fixed',
     top: 0,
-    zIndex: 300,
+    zIndex: 900,
     backgroundColor: 'transparent',
     color: 'var(--nav-fg)',
-    backdropFilter: 'blur(6px)',
+    backdropFilter: 'blur(8px)',
     borderBottom: '1px solid rgba(15, 23, 42, 0.06)',
     boxShadow: 'none'
   },
   leftSection: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px' // Consistent spacing between Notes and Help
+    gap: '8px'
+  },
+  centerSection: {
+    flex: 1,
+    display: 'flex',
+    justifyContent: 'center'
+  },
+  centerGroup: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px'
   },
   rightSection: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px' // Consistent spacing between widgets
+    gap: '8px'
   },
   notesButton: {
     height: '36px',
@@ -186,12 +197,12 @@ const styles = {
     justifyContent: 'center',
     transition: 'all 0.15s ease',
     gap: '6px',
-    backgroundColor: 'rgba(244, 247, 243, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
     color: 'var(--nav-fg)',
     fontWeight: '500',
-    border: '1px solid rgba(244, 247, 243, 0.2)',
+    border: '1px solid rgba(15, 23, 42, 0.08)',
     fontSize: '14px',
-    boxShadow: '0 1px 2px rgba(31, 78, 95, 0.15)'
+    boxShadow: 'none'
   },
   helpButton: {
     height: '36px',
@@ -203,9 +214,9 @@ const styles = {
     justifyContent: 'center',
     transition: 'all 0.15s ease',
     gap: '6px',
-    backgroundColor: 'rgba(244, 247, 243, 0.08)',
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
     color: 'var(--nav-fg)',
-    border: '1px solid rgba(244, 247, 243, 0.2)',
+    border: '1px solid rgba(15, 23, 42, 0.08)',
     fontSize: '14px'
   }
 }

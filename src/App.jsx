@@ -72,14 +72,14 @@ function AppContent() {
   const location = useLocation()
   const isProjectDetail = location.pathname.startsWith('/projects/') && location.pathname.split('/').length >= 3
 
-  const topbarHeight = 64
   const sidebarWidth = isMobile ? 0 : (isTablet ? 72 : (sidebarCollapsed ? 72 : 260))
 
   return (
     <div style={{
       display: 'flex',
       minHeight: '100vh',
-      backgroundColor: 'var(--page-bg)'
+      backgroundColor: 'var(--page-bg)',
+      '--sidebar-w': `${sidebarWidth}px`
     }}>
       <DemoModeBanner darkMode={darkMode} />
       <DevBadge darkMode={darkMode} />
@@ -91,7 +91,7 @@ function AppContent() {
         display: 'flex',
         flexDirection: 'column',
         width: isMobile ? '100%' : 'auto',
-        paddingTop: `${topbarHeight}px`
+        paddingTop: 'var(--topbar-h)'
       }}>
         <TopNavbar sidebarWidth={sidebarWidth} />
         <ErrorBoundary context="app:main" darkMode={darkMode}>

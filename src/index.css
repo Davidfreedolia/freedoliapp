@@ -43,6 +43,7 @@
   /* Layout surfaces */
   --topbar-bg: transparent;
   --topbar-text: var(--nav-fg);
+  --topbar-h: 64px;
   --sidebar-bg: var(--nav-bg);
   --sidebar-text: var(--nav-fg);
   --sidebar-text-muted: var(--nav-fg-muted);
@@ -163,6 +164,7 @@ body.dark {
   /* Layout surfaces - Dark Mode */
   --topbar-bg: transparent;
   --topbar-text: var(--nav-fg);
+  --topbar-h: 64px;
   --sidebar-bg: var(--nav-bg);
   --sidebar-text: var(--nav-fg);
   --sidebar-text-muted: var(--nav-fg-muted);
@@ -225,7 +227,19 @@ a, button {
 }
 
 main {
-  padding-top: 64px;
+  padding-top: var(--topbar-h);
+}
+
+.topbar button {
+  height: 36px;
+  border-radius: var(--radius-ui);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.6);
+  transition: opacity 0.15s ease;
+}
+
+.topbar button:hover {
+  opacity: 0.9;
 }
 
 /* Selection */
