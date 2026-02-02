@@ -22,7 +22,7 @@
   /* Semantic Color Tokens - Light Mode */
   --color-primary: var(--fd-petrol);
   --color-secondary: var(--fd-turquoise);
-  --color-accent: var(--fd-turquoise);
+  --color-accent: #ECA269;
   --color-success: var(--fd-turquoise);
   --color-warning: var(--fd-yellow);
   --color-danger: var(--fd-coral);
@@ -33,7 +33,7 @@
   --color-muted: var(--fd-muted);
 
   /* Nav palette */
-  --nav-bg: #141414;
+  --nav-bg: #121212;
   --nav-fg: rgba(244, 244, 245, 0.82);
   --nav-fg-muted: rgba(244, 244, 245, 0.60);
   --nav-icon: #ECA269;
@@ -144,7 +144,7 @@ body.dark {
   /* Semantic Color Tokens - Dark Mode */
   --color-primary: #6AA7B7;
   --color-secondary: #2C5C6A;
-  --color-accent: #6BC7B5;
+  --color-accent: #ECA269;
   --color-success: #6BC7B5;
   --color-warning: #F2E27D;
   --color-danger: #F26C63;
@@ -180,7 +180,7 @@ body.dark {
   --accent: var(--color-accent);
 
   /* Nav palette - Dark Mode */
-  --nav-bg: #141414;
+  --nav-bg: #121212;
   --nav-fg: rgba(244, 244, 245, 0.82);
   --nav-fg-muted: rgba(244, 244, 245, 0.60);
   --nav-icon: #ECA269;
@@ -326,7 +326,7 @@ main {
   height: var(--btn-h-sm);
   padding: 0 var(--btn-pad-x);
   border-radius: var(--btn-radius);
-  border: 1px solid var(--btn-secondary-border);
+  border: 1px solid var(--btn-ghost-border);
   background: var(--btn-ghost-bg);
   box-shadow: var(--btn-shadow);
 }
