@@ -10,6 +10,15 @@
    Petrol, Turquesa, Offwhite, Corall, Groc suau
 */
 :root {
+  /* System typography */
+  --font-sans: 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --text-base-color: rgba(15, 23, 42, 0.82);
+  --text-muted-color: rgba(15, 23, 42, 0.62);
+  --text-size-base: 14px;
+  --text-weight-regular: 400;
+  --text-weight-medium: 500;
+  --text-weight-semibold: 600;
+
   /* Freedoliapp Palette */
   --fd-petrol: #1F4E5F;
   --fd-turquoise: #6BC7B5;
@@ -93,6 +102,10 @@
   --text: var(--color-text);
   --muted: var(--color-muted);
 
+  /* Button typography */
+  --btn-font-size: var(--text-size-base);
+  --btn-font-size-sm: var(--text-size-base);
+
   /* Spacing System - 8px grid */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
@@ -153,6 +166,8 @@ body.dark {
   --color-border: rgba(244, 247, 243, 0.12);
   --color-text: #F4F7F3;
   --color-muted: rgba(244, 247, 243, 0.7);
+  --text-base-color: rgba(244, 244, 245, 0.82);
+  --text-muted-color: rgba(244, 244, 245, 0.60);
   
   /* Soft Color Variants - Dark Mode */
   --color-primary-soft-bg: rgba(107, 199, 181, 0.12);
@@ -213,12 +228,28 @@ body.dark {
 }
 
 body {
-  font-family: 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: var(--font-sans);
   background-color: var(--bg-primary);
-  color: var(--text-primary);
+  color: var(--text-base-color);
   line-height: 1.5;
+  font-size: var(--text-size-base);
+  font-weight: var(--text-weight-regular);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input,
+select,
+textarea,
+a {
+  font-family: var(--font-sans);
+  font-size: var(--text-size-base);
+  color: var(--text-base-color);
+}
+
+button {
+  font-weight: var(--text-weight-semibold);
 }
 
 /* Scrollbar styles */

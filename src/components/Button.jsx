@@ -35,11 +35,11 @@ export default function Button({
   const sizeStyles = {
     sm: {
       height: 'var(--btn-h-sm)',
-      fontSize: '13px'
+      fontSize: 'var(--btn-font-size-sm)'
     },
     md: {
       height: 'var(--btn-h)',
-      fontSize: '14px'
+      fontSize: 'var(--btn-font-size)'
     }
   }
 
@@ -93,7 +93,7 @@ export default function Button({
     justifyContent: 'center',
     gap: 'var(--btn-gap)',
     padding: '0 var(--btn-pad-x)',
-    fontWeight: 600,
+    fontWeight: 'var(--text-weight-semibold)',
     outline: 'none',
     boxShadow: baseShadow,
     opacity: isDisabled ? 'var(--btn-disabled-opacity)' : 1,

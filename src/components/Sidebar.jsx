@@ -17,6 +17,7 @@ import {
   X,
   Menu
 } from 'lucide-react'
+import Button from './Button'
 import { useApp } from '../context/AppContext'
 import DriveStatus from './DriveStatus'
 import { useBreakpoint } from '../hooks/useBreakpoint'
@@ -191,8 +192,10 @@ export default function Sidebar() {
       </nav>
 
       {isDesktop && (
-        <button
+        <Button
           type="button"
+          variant="primary"
+          size="sm"
           aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           title={sidebarCollapsed ? 'Expandir' : 'Col·lapsar'}
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -200,15 +203,18 @@ export default function Sidebar() {
           onMouseLeave={() => setToggleHover(false)}
           style={{
             ...styles.centerToggle,
-            opacity: toggleHover ? 1 : 0.7
+            opacity: toggleHover ? 1 : 0.9,
+            backgroundColor: 'var(--color-accent)',
+            color: '#ffffff'
           }}
         >
           <ChevronsRight
-            size={32}
+            size={22}
             strokeWidth={3.0}
+            color="#ffffff"
             style={{ transform: sidebarCollapsed ? 'none' : 'rotate(180deg)' }}
           />
-        </button>
+        </Button>
       )}
     </>
   )
@@ -217,12 +223,14 @@ export default function Sidebar() {
     return (
       <>
         {/* Botó menu mobile */}
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => setMobileOpen(true)}
           style={styles.mobileMenuButton}
         >
-          <Menu size={24} />
-        </button>
+          <Menu size={22} />
+        </Button>
 
         {/* Drawer overlay */}
         {mobileOpen && (
@@ -328,15 +336,17 @@ const styles = {
     zIndex: 900,
     width: '40px',
     height: '40px',
-    borderRadius: '10px',
+    borderRadius: '999px',
     border: 'none',
-    backgroundColor: 'transparent',
-    color: 'var(--nav-icon)',
+    backgroundColor: 'var(--color-accent)',
+    color: '#ffffff',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     cursor: 'pointer',
-    transition: 'opacity 0.15s ease'
+    transition: 'opacity 0.15s ease',
+    boxShadow: 'var(--btn-shadow)',
+    padding: 0
   },
   mobileMenuButton: {
     position: 'fixed',
