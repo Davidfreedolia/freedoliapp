@@ -162,7 +162,7 @@ const styles = {
     top: 0,
     zIndex: 900,
     backgroundColor: 'transparent',
-    color: 'var(--nav-fg)',
+    color: 'var(--topbar-fg)',
     backdropFilter: 'blur(8px)',
     borderBottom: '1px solid rgba(15, 23, 42, 0.06)',
     boxShadow: 'none'
@@ -197,10 +197,10 @@ const styles = {
     justifyContent: 'center',
     transition: 'all 0.15s ease',
     gap: '6px',
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
-    color: 'var(--nav-fg)',
+    backgroundColor: 'transparent',
+    color: 'inherit',
     fontWeight: '500',
-    border: '1px solid rgba(15, 23, 42, 0.08)',
+    border: '1px solid transparent',
     fontSize: '14px',
     boxShadow: 'none'
   },
@@ -214,9 +214,9 @@ const styles = {
     justifyContent: 'center',
     transition: 'all 0.15s ease',
     gap: '6px',
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
-    color: 'var(--nav-fg)',
-    border: '1px solid rgba(15, 23, 42, 0.08)',
+    backgroundColor: 'transparent',
+    color: 'inherit',
+    border: '1px solid transparent',
     fontSize: '14px'
   }
 }

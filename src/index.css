@@ -44,6 +44,11 @@
   --topbar-bg: transparent;
   --topbar-text: var(--nav-fg);
   --topbar-h: 64px;
+  --topbar-fg: rgba(15, 23, 42, 0.82);
+  --topbar-fg-muted: rgba(15, 23, 42, 0.62);
+  --topbar-btn-bg: rgba(255, 255, 255, 0.72);
+  --topbar-btn-border: rgba(15, 23, 42, 0.10);
+  --topbar-btn-hover: rgba(255, 255, 255, 0.90);
   --sidebar-bg: var(--nav-bg);
   --sidebar-text: var(--nav-fg);
   --sidebar-text-muted: var(--nav-fg-muted);
@@ -165,6 +170,11 @@ body.dark {
   --topbar-bg: transparent;
   --topbar-text: var(--nav-fg);
   --topbar-h: 64px;
+  --topbar-fg: rgba(244, 244, 245, 0.86);
+  --topbar-fg-muted: rgba(244, 244, 245, 0.66);
+  --topbar-btn-bg: rgba(17, 17, 17, 0.55);
+  --topbar-btn-border: rgba(255, 255, 255, 0.10);
+  --topbar-btn-hover: rgba(17, 17, 17, 0.75);
   --sidebar-bg: var(--nav-bg);
   --sidebar-text: var(--nav-fg);
   --sidebar-text-muted: var(--nav-fg-muted);
@@ -230,16 +240,21 @@ main {
   padding-top: var(--topbar-h);
 }
 
-.topbar button {
-  height: 36px;
-  border-radius: var(--radius-ui);
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: rgba(255, 255, 255, 0.6);
-  transition: opacity 0.15s ease;
+.topbar {
+  color: var(--topbar-fg);
 }
 
-.topbar button:hover {
-  opacity: 0.9;
+.topbar .topbar-button {
+  height: 36px;
+  border-radius: var(--radius-ui);
+  border: 1px solid var(--topbar-btn-border);
+  background: var(--topbar-btn-bg);
+  color: var(--topbar-fg);
+  opacity: 1;
+}
+
+.topbar .topbar-button:hover {
+  background: var(--topbar-btn-hover);
 }
 
 /* Selection */

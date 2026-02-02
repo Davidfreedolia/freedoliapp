@@ -13,7 +13,7 @@ import {
   TrendingUp,
   Settings,
   Calendar as CalendarIcon,
-  ChevronRight,
+  ChevronsRight,
   X,
   Menu
 } from 'lucide-react'
@@ -203,9 +203,9 @@ export default function Sidebar() {
             opacity: toggleHover ? 1 : 0.7
           }}
         >
-          <ChevronRight
-            size={26}
-            strokeWidth={2.7}
+          <ChevronsRight
+            size={32}
+            strokeWidth={3.0}
             style={{ transform: sidebarCollapsed ? 'none' : 'rotate(180deg)' }}
           />
         </button>
@@ -323,12 +323,12 @@ const styles = {
   centerToggle: {
     position: 'absolute',
     top: '50%',
-    right: '-18px',
+    right: '-22px',
     transform: 'translateY(-50%)',
-    zIndex: 800,
-    width: '36px',
-    height: '36px',
-    borderRadius: '8px',
+    zIndex: 900,
+    width: '40px',
+    height: '40px',
+    borderRadius: '10px',
     border: 'none',
     backgroundColor: 'transparent',
     color: 'var(--nav-icon)',
