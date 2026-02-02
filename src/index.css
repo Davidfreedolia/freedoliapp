@@ -32,14 +32,20 @@
   --color-text: var(--fd-petrol);
   --color-muted: var(--fd-muted);
 
+  /* Nav palette */
+  --nav-bg: #ECA269;
+  --nav-fg: #245158;
+  --nav-highlight: rgba(36, 81, 88, 0.12);
+  --nav-highlight-strong: rgba(36, 81, 88, 0.18);
+
   /* Layout surfaces */
-  --topbar-bg: #1F4E5F;
-  --topbar-text: #F4F7F3;
-  --sidebar-bg: #183E4B;
-  --sidebar-text: #F4F7F3;
-  --sidebar-text-muted: rgba(244, 247, 243, 0.8);
-  --sidebar-border: rgba(31, 78, 95, 0.22);
-  --sidebar-shadow: 4px 0 12px rgba(31, 78, 95, 0.12);
+  --topbar-bg: transparent;
+  --topbar-text: var(--nav-fg);
+  --sidebar-bg: var(--nav-bg);
+  --sidebar-text: var(--nav-fg);
+  --sidebar-text-muted: var(--nav-fg);
+  --sidebar-border: rgba(36, 81, 88, 0.10);
+  --sidebar-shadow: 6px 0 18px rgba(15, 23, 42, 0.10);
   
   /* Soft Color Variants - For non-destructive actions */
   --color-primary-soft-bg: rgba(31, 78, 95, 0.08);
@@ -62,7 +68,7 @@
   --accent: var(--color-accent);
 
   /* Single UI Radius - UNIFIED ACROSS ENTIRE APP */
-  --radius-ui: 10px;
+  --radius-ui: 12px;
   /* Legacy compatibility */
   --radius-base: var(--radius-ui);
   --radius-sm: var(--radius-ui);
@@ -87,8 +93,9 @@
   --spacing-2xl: 48px;
 
   /* Shadows - Subtils, flotants */
-  --shadow-soft: 0 2px 6px rgba(31, 78, 95, 0.08);
+  --shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.08);
   --shadow-soft-hover: 0 6px 16px rgba(31, 78, 95, 0.12);
+  --border-soft: 1px solid rgba(36, 81, 88, 0.10);
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -142,14 +149,20 @@ body.dark {
   --text-secondary: var(--color-muted);
   --accent: var(--color-accent);
 
+  /* Nav palette - Dark Mode */
+  --nav-bg: #ECA269;
+  --nav-fg: #245158;
+  --nav-highlight: rgba(36, 81, 88, 0.12);
+  --nav-highlight-strong: rgba(36, 81, 88, 0.18);
+
   /* Layout surfaces - Dark Mode */
-  --topbar-bg: #0f1d23;
-  --topbar-text: #F4F7F3;
-  --sidebar-bg: #0c1c22;
-  --sidebar-text: #F4F7F3;
-  --sidebar-text-muted: rgba(244, 247, 243, 0.7);
-  --sidebar-border: rgba(244, 247, 243, 0.08);
-  --sidebar-shadow: 4px 0 14px rgba(0, 0, 0, 0.35);
+  --topbar-bg: transparent;
+  --topbar-text: var(--nav-fg);
+  --sidebar-bg: var(--nav-bg);
+  --sidebar-text: var(--nav-fg);
+  --sidebar-text-muted: var(--nav-fg);
+  --sidebar-border: rgba(36, 81, 88, 0.10);
+  --sidebar-shadow: 6px 0 18px rgba(15, 23, 42, 0.10);
 }
 
 body {
@@ -205,6 +218,10 @@ a, button {
   transition: all 0.2s ease;
 }
 
+main {
+  padding-top: 64px;
+}
+
 /* Selection */
 ::selection {
   background-color: var(--accent);
@@ -220,11 +237,20 @@ a, button {
 /* Card - Surface with shadow (no border) */
 .ui-card {
   background-color: var(--surface-bg);
-  border: none; /* No borders - use surface color + shadow */
+  border: var(--border-soft);
   border-radius: var(--radius-ui);
   padding: var(--spacing-md);
   box-shadow: var(--shadow-soft);
   transition: all 0.15s ease;
+}
+
+.sidebar-scroll {
+  scrollbar-width: none;
+}
+
+.sidebar-scroll::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 .ui-card:hover {

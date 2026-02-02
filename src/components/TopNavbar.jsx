@@ -157,12 +157,14 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    position: 'fixed',
+    position: 'sticky',
     top: 0,
     zIndex: 300,
-    backgroundColor: 'var(--topbar-bg)',
-    color: 'var(--topbar-text)',
-    boxShadow: 'var(--shadow-soft)'
+    backgroundColor: 'transparent',
+    color: 'var(--nav-fg)',
+    backdropFilter: 'blur(6px)',
+    borderBottom: '1px solid rgba(15, 23, 42, 0.06)',
+    boxShadow: 'none'
   },
   leftSection: {
     display: 'flex',
@@ -185,7 +187,7 @@ const styles = {
     transition: 'all 0.15s ease',
     gap: '6px',
     backgroundColor: 'rgba(244, 247, 243, 0.1)',
-    color: 'var(--topbar-text)',
+    color: 'var(--nav-fg)',
     fontWeight: '500',
     border: '1px solid rgba(244, 247, 243, 0.2)',
     fontSize: '14px',
@@ -202,7 +204,7 @@ const styles = {
     transition: 'all 0.15s ease',
     gap: '6px',
     backgroundColor: 'rgba(244, 247, 243, 0.08)',
-    color: 'var(--topbar-text)',
+    color: 'var(--nav-fg)',
     border: '1px solid rgba(244, 247, 243, 0.2)',
     fontSize: '14px'
   }

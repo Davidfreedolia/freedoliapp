@@ -13,7 +13,6 @@ import {
   TrendingUp,
   Settings,
   Calendar as CalendarIcon,
-  ChevronLeft,
   ChevronRight,
   X,
   Menu
@@ -88,6 +87,7 @@ export default function Sidebar() {
   const [logoError, setLogoError] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [toggleHover, setToggleHover] = useState(false)
+  const [hoveredPath, setHoveredPath] = useState(null)
 
   // En mobile, sidebar sempre col·lapsat (drawer)
   // En tablet, sempre icon-only
@@ -152,7 +152,7 @@ export default function Sidebar() {
       )}
 
       {/* Menú */}
-      <nav style={styles.nav}>
+      <nav style={styles.nav} className="sidebar-scroll">
         {menuItems.map(item => (
           <NavLink
             key={item.path}
@@ -169,12 +169,16 @@ export default function Sidebar() {
                 prefetchedRoutes.add(item.path)
                 prefetchRoute(item.path)
               }
+              setHoveredPath(item.path)
             }}
+            onMouseLeave={() => setHoveredPath(null)}
             style={({ isActive }) => ({
               ...styles.navItem,
-              backgroundColor: isActive ? 'rgba(107, 199, 181, 0.16)' : 'transparent',
-              color: isActive ? 'var(--sidebar-text)' : 'var(--sidebar-text-muted)',
-              borderLeft: shouldCollapse ? '0' : (isActive ? '3px solid var(--color-accent)' : '3px solid transparent'),
+              backgroundColor: isActive
+                ? 'var(--nav-highlight-strong)'
+                : (hoveredPath === item.path ? 'var(--nav-highlight)' : 'transparent'),
+              color: 'var(--nav-fg)',
+              borderLeft: 'none',
               padding: shouldCollapse ? '12px 0' : '12px 16px',
               borderRadius: shouldCollapse ? '12px' : '10px',
               justifyContent: shouldCollapse ? 'center' : 'flex-start'
@@ -197,13 +201,13 @@ export default function Sidebar() {
           style={{
             ...styles.centerToggle,
             left: '100%',
-            transform: 'translate(50%, -50%)',
+            transform: 'translate(-50%, -50%)',
             opacity: toggleHover ? 1 : 0.7
           }}
         >
           <ChevronRight
-            size={22}
-            strokeWidth={2.5}
+            size={26}
+            strokeWidth={2.7}
             style={{ transform: sidebarCollapsed ? 'none' : 'rotate(180deg)' }}
           />
         </button>
@@ -232,7 +236,7 @@ export default function Sidebar() {
               style={{
                 ...styles.sidebar,
                 ...styles.drawer,
-                backgroundColor: 'var(--sidebar-bg)',
+                backgroundColor: 'var(--nav-bg)',
                 transform: mobileOpen ? 'translateX(0)' : 'translateX(-100%)'
               }}
               onClick={(e) => e.stopPropagation()}
@@ -265,10 +269,10 @@ const styles = {
     top: 0,
     transition: 'width 0.3s ease',
     zIndex: 100,
-    color: 'var(--sidebar-text)',
-    backgroundColor: 'var(--sidebar-bg)',
-    borderRight: '1px solid var(--sidebar-border)',
-    boxShadow: 'var(--sidebar-shadow)'
+    color: 'var(--nav-fg)',
+    backgroundColor: 'var(--nav-bg)',
+    borderRight: '1px solid rgba(36, 81, 88, 0.10)',
+    boxShadow: '6px 0 18px rgba(15, 23, 42, 0.10)'
   },
   logoContainer: {
     padding: '20px',
@@ -294,7 +298,9 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: '4px',
-    overflowY: 'auto'
+    overflowY: 'auto',
+    scrollbarWidth: 'none',
+    msOverflowStyle: 'none'
   },
   navItem: {
     display: 'flex',
@@ -302,6 +308,8 @@ const styles = {
     gap: '12px',
     padding: '12px 16px',
     borderRadius: '10px',
+    border: 'none',
+    outline: 'none',
     textDecoration: 'none',
     fontSize: '14px',
     fontWeight: '500',
@@ -310,13 +318,13 @@ const styles = {
   centerToggle: {
     position: 'absolute',
     top: '50%',
-    zIndex: 200,
-    width: '32px',
-    height: '32px',
+    zIndex: 500,
+    width: '36px',
+    height: '36px',
     borderRadius: '8px',
     border: 'none',
     backgroundColor: 'transparent',
-    color: 'var(--sidebar-text)',
+    color: 'var(--nav-fg)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -329,15 +337,15 @@ const styles = {
     left: '16px',
     zIndex: 1000,
     padding: '10px',
-    border: '1px solid var(--sidebar-border)',
+    border: '1px solid rgba(36, 81, 88, 0.10)',
     borderRadius: '8px',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     boxShadow: 'var(--shadow-soft)',
-    backgroundColor: 'var(--sidebar-bg)',
-    color: 'var(--sidebar-text)'
+    backgroundColor: 'var(--nav-bg)',
+    color: 'var(--nav-fg)'
   },
   drawerOverlay: {
     position: 'fixed',
@@ -361,7 +369,7 @@ const styles = {
     background: 'none',
     border: 'none',
     cursor: 'pointer',
-    color: 'var(--sidebar-text)',
+    color: 'var(--nav-fg)',
     padding: '8px',
     borderRadius: '6px',
     display: 'flex',
