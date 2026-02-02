@@ -121,7 +121,7 @@ export default function Sidebar() {
         position: 'relative'
       }}>
         <img 
-          src={darkMode && !logoError ? "/logo-dark.png" : "/logo.png"} 
+          src={logoError ? "/logo.png" : "/logo-dark.png"} 
           alt="Freedolia" 
           onError={handleLogoError}
           style={{
