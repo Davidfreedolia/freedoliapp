@@ -200,8 +200,6 @@ export default function Sidebar() {
           onMouseLeave={() => setToggleHover(false)}
           style={{
             ...styles.centerToggle,
-            left: shouldCollapse ? '50%' : '100%',
-            transform: 'translate(-50%, -50%)',
             opacity: toggleHover ? 1 : 0.7
           }}
         >
@@ -272,7 +270,8 @@ const styles = {
     color: 'var(--nav-fg)',
     backgroundColor: 'var(--nav-bg)',
     borderRight: 'var(--sidebar-edge)',
-    boxShadow: 'var(--sidebar-shadow)'
+    boxShadow: 'var(--sidebar-shadow)',
+    overflow: 'visible'
   },
   sidebarInner: {
     position: 'relative',
@@ -324,7 +323,9 @@ const styles = {
   centerToggle: {
     position: 'absolute',
     top: '50%',
-    zIndex: 500,
+    right: '-18px',
+    transform: 'translateY(-50%)',
+    zIndex: 800,
     width: '36px',
     height: '36px',
     borderRadius: '8px',
