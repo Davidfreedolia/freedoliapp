@@ -72,12 +72,8 @@ function AppContent() {
   const location = useLocation()
   const isProjectDetail = location.pathname.startsWith('/projects/') && location.pathname.split('/').length >= 3
 
-  // Calcular margin-left segons breakpoint
-  const getMarginLeft = () => {
-    if (isMobile) return '0' // Mobile: sidebar és drawer, no ocupa espai
-    if (isTablet) return '72px' // Tablet: icon-only
-    return sidebarCollapsed ? '72px' : '260px' // Desktop: controlat per sidebarCollapsed
-  }
+  const topbarHeight = 64
+  const sidebarWidth = isMobile ? 0 : (isTablet ? 72 : (sidebarCollapsed ? 72 : 260))
 
   return (
     <div style={{
@@ -90,13 +86,14 @@ function AppContent() {
       <Sidebar />
       <main style={{
         flex: 1,
-        marginLeft: getMarginLeft(),
+        marginLeft: isMobile ? '0' : `${sidebarWidth}px`,
         transition: 'margin-left 0.3s ease',
         display: 'flex',
         flexDirection: 'column',
-        width: isMobile ? '100%' : 'auto'
+        width: isMobile ? '100%' : 'auto',
+        paddingTop: `${topbarHeight}px`
       }}>
-        <TopNavbar />
+        <TopNavbar sidebarWidth={sidebarWidth} />
         <ErrorBoundary context="app:main" darkMode={darkMode}>
           <Suspense fallback={<PageLoader darkMode={darkMode} />}>
             <Routes>

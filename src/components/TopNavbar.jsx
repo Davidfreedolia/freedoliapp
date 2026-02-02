@@ -15,7 +15,7 @@ import HeaderUserWidget from './HeaderUserWidget'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { showToast } from './Toast'
 
-export default function TopNavbar() {
+export default function TopNavbar({ sidebarWidth = 0 }) {
   const { darkMode, setDarkMode } = useApp()
   const navigate = useNavigate()
   const location = useLocation()
@@ -70,9 +70,15 @@ export default function TopNavbar() {
     }
   }
 
+  const navStyle = {
+    ...styles.navbar,
+    left: isMobile ? 0 : sidebarWidth,
+    width: isMobile ? '100%' : `calc(100% - ${sidebarWidth}px)`
+  }
+
   return (
     <>
-      <nav style={styles.navbar}>
+      <nav style={navStyle}>
         {/* Left Section: Notes + Help grouped */}
         <div style={styles.leftSection}>
           <button 
@@ -151,12 +157,12 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    position: 'sticky',
+    position: 'fixed',
     top: 0,
-    zIndex: 100,
-    backgroundColor: '#1F4E5F',
-    color: '#F4F7F3',
-    boxShadow: '0 2px 6px rgba(31, 78, 95, 0.12)'
+    zIndex: 300,
+    backgroundColor: 'var(--topbar-bg)',
+    color: 'var(--topbar-text)',
+    boxShadow: 'var(--shadow-soft)'
   },
   leftSection: {
     display: 'flex',
@@ -179,7 +185,7 @@ const styles = {
     transition: 'all 0.15s ease',
     gap: '6px',
     backgroundColor: 'rgba(244, 247, 243, 0.1)',
-    color: '#F4F7F3',
+    color: 'var(--topbar-text)',
     fontWeight: '500',
     border: '1px solid rgba(244, 247, 243, 0.2)',
     fontSize: '14px',
@@ -196,7 +202,7 @@ const styles = {
     transition: 'all 0.15s ease',
     gap: '6px',
     backgroundColor: 'rgba(244, 247, 243, 0.08)',
-    color: '#F4F7F3',
+    color: 'var(--topbar-text)',
     border: '1px solid rgba(244, 247, 243, 0.2)',
     fontSize: '14px'
   }

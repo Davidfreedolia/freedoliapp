@@ -87,6 +87,7 @@ export default function Sidebar() {
   const { t } = useTranslation()
   const [logoError, setLogoError] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [toggleHover, setToggleHover] = useState(false)
 
   // En mobile, sidebar sempre col·lapsat (drawer)
   // En tablet, sempre icon-only
@@ -172,7 +173,7 @@ export default function Sidebar() {
             style={({ isActive }) => ({
               ...styles.navItem,
               backgroundColor: isActive ? 'rgba(107, 199, 181, 0.16)' : 'transparent',
-              color: isActive ? '#F4F7F3' : 'rgba(244, 247, 243, 0.8)',
+              color: isActive ? 'var(--sidebar-text)' : 'var(--sidebar-text-muted)',
               borderLeft: shouldCollapse ? '0' : (isActive ? '3px solid var(--color-accent)' : '3px solid transparent'),
               padding: shouldCollapse ? '12px 0' : '12px 16px',
               borderRadius: shouldCollapse ? '12px' : '10px',
@@ -191,13 +192,20 @@ export default function Sidebar() {
           aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           title={sidebarCollapsed ? 'Expandir' : 'Col·lapsar'}
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          onMouseEnter={() => setToggleHover(true)}
+          onMouseLeave={() => setToggleHover(false)}
           style={{
             ...styles.centerToggle,
-            left: shouldCollapse ? '50%' : '100%',
-            transform: shouldCollapse ? 'translateX(-50%)' : 'translateX(-50%)'
+            left: '100%',
+            transform: 'translate(50%, -50%)',
+            opacity: toggleHover ? 1 : 0.7
           }}
         >
-          {sidebarCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+          <ChevronRight
+            size={22}
+            strokeWidth={2.5}
+            style={{ transform: sidebarCollapsed ? 'none' : 'rotate(180deg)' }}
+          />
         </button>
       )}
     </>
@@ -224,7 +232,7 @@ export default function Sidebar() {
               style={{
                 ...styles.sidebar,
                 ...styles.drawer,
-                backgroundColor: '#1F4E5F',
+                backgroundColor: 'var(--sidebar-bg)',
                 transform: mobileOpen ? 'translateX(0)' : 'translateX(-100%)'
               }}
               onClick={(e) => e.stopPropagation()}
@@ -240,8 +248,7 @@ export default function Sidebar() {
   return (
     <aside style={{
       ...styles.sidebar,
-      width: shouldCollapse ? '72px' : '260px',
-      backgroundColor: '#1F4E5F'
+      width: shouldCollapse ? '72px' : '260px'
     }}>
       {sidebarContent}
     </aside>
@@ -258,7 +265,10 @@ const styles = {
     top: 0,
     transition: 'width 0.3s ease',
     zIndex: 100,
-    color: '#F4F7F3'
+    color: 'var(--sidebar-text)',
+    backgroundColor: 'var(--sidebar-bg)',
+    borderRight: '1px solid var(--sidebar-border)',
+    boxShadow: 'var(--sidebar-shadow)'
   },
   logoContainer: {
     padding: '20px',
@@ -301,18 +311,17 @@ const styles = {
     position: 'absolute',
     top: '50%',
     zIndex: 200,
-    width: '36px',
-    height: '36px',
-    borderRadius: '999px',
-    border: '1px solid rgba(244, 247, 243, 0.22)',
-    backgroundColor: 'rgba(244, 247, 243, 0.10)',
-    color: '#F4F7F3',
+    width: '32px',
+    height: '32px',
+    borderRadius: '8px',
+    border: 'none',
+    backgroundColor: 'transparent',
+    color: 'var(--sidebar-text)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     cursor: 'pointer',
-    boxShadow: '0 6px 16px rgba(31, 78, 95, 0.20)',
-    backdropFilter: 'blur(6px)'
+    transition: 'opacity 0.15s ease'
   },
   mobileMenuButton: {
     position: 'fixed',
@@ -320,15 +329,15 @@ const styles = {
     left: '16px',
     zIndex: 1000,
     padding: '10px',
-    border: '1px solid rgba(244, 247, 243, 0.2)',
+    border: '1px solid var(--sidebar-border)',
     borderRadius: '8px',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    boxShadow: '0 2px 6px rgba(31, 78, 95, 0.2)',
-    backgroundColor: '#1F4E5F',
-    color: '#F4F7F3'
+    boxShadow: 'var(--shadow-soft)',
+    backgroundColor: 'var(--sidebar-bg)',
+    color: 'var(--sidebar-text)'
   },
   drawerOverlay: {
     position: 'fixed',
@@ -352,7 +361,7 @@ const styles = {
     background: 'none',
     border: 'none',
     cursor: 'pointer',
-    color: '#F4F7F3',
+    color: 'var(--sidebar-text)',
     padding: '8px',
     borderRadius: '6px',
     display: 'flex',

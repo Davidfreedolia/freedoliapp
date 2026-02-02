@@ -31,6 +31,15 @@
   --color-border: var(--fd-border);
   --color-text: var(--fd-petrol);
   --color-muted: var(--fd-muted);
+
+  /* Layout surfaces */
+  --topbar-bg: #1F4E5F;
+  --topbar-text: #F4F7F3;
+  --sidebar-bg: #183E4B;
+  --sidebar-text: #F4F7F3;
+  --sidebar-text-muted: rgba(244, 247, 243, 0.8);
+  --sidebar-border: rgba(31, 78, 95, 0.22);
+  --sidebar-shadow: 4px 0 12px rgba(31, 78, 95, 0.12);
   
   /* Soft Color Variants - For non-destructive actions */
   --color-primary-soft-bg: rgba(31, 78, 95, 0.08);
@@ -132,6 +141,15 @@ body.dark {
   --text-primary: var(--color-text);
   --text-secondary: var(--color-muted);
   --accent: var(--color-accent);
+
+  /* Layout surfaces - Dark Mode */
+  --topbar-bg: #0f1d23;
+  --topbar-text: #F4F7F3;
+  --sidebar-bg: #0c1c22;
+  --sidebar-text: #F4F7F3;
+  --sidebar-text-muted: rgba(244, 247, 243, 0.7);
+  --sidebar-border: rgba(244, 247, 243, 0.08);
+  --sidebar-shadow: 4px 0 14px rgba(0, 0, 0, 0.35);
 }
 
 body {
