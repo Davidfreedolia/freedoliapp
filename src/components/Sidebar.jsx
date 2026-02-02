@@ -177,14 +177,14 @@ export default function Sidebar() {
               backgroundColor: isActive
                 ? 'var(--nav-highlight-strong)'
                 : (hoveredPath === item.path ? 'var(--nav-highlight)' : 'transparent'),
-              color: 'var(--nav-fg)',
+              color: isActive ? 'var(--nav-fg)' : 'var(--nav-fg-muted)',
               borderLeft: 'none',
               padding: shouldCollapse ? '12px 0' : '12px 16px',
               borderRadius: shouldCollapse ? '12px' : '10px',
               justifyContent: shouldCollapse ? 'center' : 'flex-start'
             })}
           >
-            <item.icon size={shouldCollapse ? 24 : 20} />
+            <item.icon size={shouldCollapse ? 24 : 20} color="var(--nav-icon)" />
             {!shouldCollapse && <span>{t(item.labelKey)}</span>}
           </NavLink>
         ))}
@@ -200,7 +200,7 @@ export default function Sidebar() {
           onMouseLeave={() => setToggleHover(false)}
           style={{
             ...styles.centerToggle,
-            left: '100%',
+            left: shouldCollapse ? '50%' : '100%',
             transform: 'translate(-50%, -50%)',
             opacity: toggleHover ? 1 : 0.7
           }}
@@ -241,7 +241,7 @@ export default function Sidebar() {
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              {sidebarContent}
+              <div style={styles.sidebarInner}>{sidebarContent}</div>
             </aside>
           </div>
         )}
@@ -254,7 +254,7 @@ export default function Sidebar() {
       ...styles.sidebar,
       width: shouldCollapse ? '72px' : '260px'
     }}>
-      {sidebarContent}
+      <div style={styles.sidebarInner}>{sidebarContent}</div>
     </aside>
   )
 }
@@ -271,8 +271,14 @@ const styles = {
     zIndex: 100,
     color: 'var(--nav-fg)',
     backgroundColor: 'var(--nav-bg)',
-    borderRight: '1px solid rgba(36, 81, 88, 0.10)',
-    boxShadow: '6px 0 18px rgba(15, 23, 42, 0.10)'
+    borderRight: 'var(--sidebar-edge)',
+    boxShadow: 'var(--sidebar-shadow)'
+  },
+  sidebarInner: {
+    position: 'relative',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column'
   },
   logoContainer: {
     padding: '20px',
@@ -324,7 +330,7 @@ const styles = {
     borderRadius: '8px',
     border: 'none',
     backgroundColor: 'transparent',
-    color: 'var(--nav-fg)',
+    color: 'var(--nav-icon)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -337,7 +343,7 @@ const styles = {
     left: '16px',
     zIndex: 1000,
     padding: '10px',
-    border: '1px solid rgba(36, 81, 88, 0.10)',
+    border: 'var(--sidebar-edge)',
     borderRadius: '8px',
     cursor: 'pointer',
     display: 'flex',
@@ -345,7 +351,7 @@ const styles = {
     justifyContent: 'center',
     boxShadow: 'var(--shadow-soft)',
     backgroundColor: 'var(--nav-bg)',
-    color: 'var(--nav-fg)'
+    color: 'var(--nav-icon)'
   },
   drawerOverlay: {
     position: 'fixed',
@@ -369,7 +375,7 @@ const styles = {
     background: 'none',
     border: 'none',
     cursor: 'pointer',
-    color: 'var(--nav-fg)',
+    color: 'var(--nav-icon)',
     padding: '8px',
     borderRadius: '6px',
     display: 'flex',

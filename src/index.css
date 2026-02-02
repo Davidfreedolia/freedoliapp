@@ -33,19 +33,22 @@
   --color-muted: var(--fd-muted);
 
   /* Nav palette */
-  --nav-bg: #ECA269;
-  --nav-fg: #245158;
-  --nav-highlight: rgba(36, 81, 88, 0.12);
-  --nav-highlight-strong: rgba(36, 81, 88, 0.18);
+  --nav-bg: #121212;
+  --nav-fg: rgba(244, 244, 245, 0.82);
+  --nav-fg-muted: rgba(244, 244, 245, 0.60);
+  --nav-icon: #ECA269;
+  --nav-highlight: rgba(255, 255, 255, 0.06);
+  --nav-highlight-strong: rgba(255, 255, 255, 0.10);
 
   /* Layout surfaces */
   --topbar-bg: transparent;
   --topbar-text: var(--nav-fg);
   --sidebar-bg: var(--nav-bg);
   --sidebar-text: var(--nav-fg);
-  --sidebar-text-muted: var(--nav-fg);
-  --sidebar-border: rgba(36, 81, 88, 0.10);
-  --sidebar-shadow: 6px 0 18px rgba(15, 23, 42, 0.10);
+  --sidebar-text-muted: var(--nav-fg-muted);
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --sidebar-shadow: 10px 0 28px rgba(0, 0, 0, 0.35);
+  --sidebar-edge: 1px solid rgba(255, 255, 255, 0.06);
   
   /* Soft Color Variants - For non-destructive actions */
   --color-primary-soft-bg: rgba(31, 78, 95, 0.08);
@@ -150,19 +153,22 @@ body.dark {
   --accent: var(--color-accent);
 
   /* Nav palette - Dark Mode */
-  --nav-bg: #ECA269;
-  --nav-fg: #245158;
-  --nav-highlight: rgba(36, 81, 88, 0.12);
-  --nav-highlight-strong: rgba(36, 81, 88, 0.18);
+  --nav-bg: #121212;
+  --nav-fg: rgba(244, 244, 245, 0.82);
+  --nav-fg-muted: rgba(244, 244, 245, 0.60);
+  --nav-icon: #ECA269;
+  --nav-highlight: rgba(255, 255, 255, 0.06);
+  --nav-highlight-strong: rgba(255, 255, 255, 0.10);
 
   /* Layout surfaces - Dark Mode */
   --topbar-bg: transparent;
   --topbar-text: var(--nav-fg);
   --sidebar-bg: var(--nav-bg);
   --sidebar-text: var(--nav-fg);
-  --sidebar-text-muted: var(--nav-fg);
-  --sidebar-border: rgba(36, 81, 88, 0.10);
-  --sidebar-shadow: 6px 0 18px rgba(15, 23, 42, 0.10);
+  --sidebar-text-muted: var(--nav-fg-muted);
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --sidebar-shadow: 10px 0 28px rgba(0, 0, 0, 0.35);
+  --sidebar-edge: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 body {
