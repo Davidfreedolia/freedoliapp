@@ -302,12 +302,12 @@ export default function Inventory() {
           </span>
           {!isPreview && (
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => { setSelectedItem(item); setShowMovementModal(true) }} style={styles.actionButton}>
+              <Button variant="ghost" size="sm" onClick={() => { setSelectedItem(item); setShowMovementModal(true) }} style={styles.actionButton}>
                 <Plus size={14} />
-              </button>
-              <button onClick={() => showHistory(item)} style={styles.actionButton}>
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => showHistory(item)} style={styles.actionButton}>
                 <History size={14} />
-              </button>
+              </Button>
             </div>
           )}
         </div>
@@ -405,9 +405,9 @@ export default function Inventory() {
               <option value="in_transit">🚢 En trànsit</option>
               <option value="ok">✅ OK</option>
             </select>
-            <button onClick={loadData} style={styles.refreshBtn}>
+            <Button variant="secondary" size="sm" onClick={loadData} style={styles.refreshBtn}>
               <RefreshCw size={18} />
-            </button>
+            </Button>
           </div>
           <div style={styles.toolbarRight}>
             <LayoutSwitcher
@@ -429,10 +429,10 @@ export default function Inventory() {
             <AlertTriangle size={32} color="#ef4444" />
             <h3 style={{ color: darkMode ? '#ffffff' : '#111827', margin: 0 }}>Error carregant dades</h3>
             <p style={{ color: '#6b7280', margin: 0 }}>{error}</p>
-            <button onClick={loadData} style={{ padding: '12px 24px', backgroundColor: '#4f46e5', color: '#ffffff', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '500' }}>
+            <Button variant="primary" onClick={loadData}>
               <RefreshCw size={16} />
               Tornar a intentar
-            </button>
+            </Button>
           </div>
         ) : filteredInventory.length === 0 ? (
           <div style={{ ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
@@ -480,9 +480,9 @@ export default function Inventory() {
               <h3 style={{ ...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827' }}>
                 {selectedItem.id ? 'Editar Producte' : 'Nou Producte'}
               </h3>
-              <button onClick={() => { setShowMovementModal(false); setSelectedItem(null) }} style={styles.closeButton}>
+              <Button variant="ghost" size="sm" onClick={() => { setShowMovementModal(false); setSelectedItem(null) }} style={styles.closeButton}>
                 <X size={20} />
-              </button>
+              </Button>
             </div>
 
             <div style={styles.modalBody}>
@@ -579,10 +579,12 @@ export default function Inventory() {
             </div>
 
             <div style={styles.modalFooter}>
-              <button onClick={() => { setShowMovementModal(false); setSelectedItem(null) }} style={styles.cancelButton}>Cancel·lar</button>
-              <button onClick={handleSaveItem} disabled={saving} style={styles.saveButton}>
+              <Button variant="secondary" onClick={() => { setShowMovementModal(false); setSelectedItem(null) }} style={styles.cancelButton}>
+                Cancel·lar
+              </Button>
+              <Button variant="primary" onClick={handleSaveItem} disabled={saving} style={styles.saveButton}>
                 {saving ? 'Guardant...' : <><Save size={16} /> Guardar</>}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -596,9 +598,9 @@ export default function Inventory() {
               <h3 style={{ ...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827' }}>
                 📦 {selectedItem.sku} - Moviments
               </h3>
-              <button onClick={() => { setShowHistoryModal(false); setSelectedItem(null) }} style={styles.closeButton}>
+              <Button variant="ghost" size="sm" onClick={() => { setShowHistoryModal(false); setSelectedItem(null) }} style={styles.closeButton}>
                 <X size={20} />
-              </button>
+              </Button>
             </div>
 
             <div style={styles.modalBody}>
@@ -629,9 +631,9 @@ export default function Inventory() {
                     placeholder="Notes..."
                     style={{ ...styles.input, flex: 2, minWidth: '150px', backgroundColor: darkMode ? '#15151f' : '#ffffff', color: darkMode ? '#ffffff' : '#111827' }}
                   />
-                  <button onClick={handleAddMovement} disabled={saving || newMovement.quantity === 0} style={styles.addBtn}>
+                  <Button variant="primary" size="sm" onClick={handleAddMovement} disabled={saving || newMovement.quantity === 0} style={styles.addBtn}>
                     <Plus size={16} /> Afegir
-                  </button>
+                  </Button>
                 </div>
               </div>
 
@@ -686,7 +688,7 @@ const styles = {
   searchContainer: { flex: '0 1 360px', maxWidth: '360px', width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '0 16px', borderRadius: '10px', border: '1px solid var(--border-color)' },
   searchInput: { flex: 1, padding: '12px 0', border: 'none', outline: 'none', fontSize: '14px', background: 'transparent' },
   filterSelect: { padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--border-color)', fontSize: '14px', outline: 'none' },
-  refreshBtn: { padding: '12px', backgroundColor: 'transparent', border: '1px solid var(--border-color)', borderRadius: '10px', cursor: 'pointer', color: '#6b7280' },
+  refreshBtn: { padding: '0', width: 'var(--btn-h-sm)', minWidth: 'var(--btn-h-sm)' },
   filters: { display: 'flex', alignItems: 'center', gap: '12px' },
   filterButton: { height: '36px' },
   toolbarRight: { display: 'flex', alignItems: 'center', gap: '12px', marginLeft: 'auto' },
@@ -703,23 +705,23 @@ const styles = {
   projectBadge: { display: 'inline-block', marginTop: '4px', padding: '2px 8px', backgroundColor: '#4f46e510', color: '#4f46e5', borderRadius: '4px', fontSize: '11px' },
   statusBadge: { padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '500' },
   iconBtn: { padding: '6px', background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', borderRadius: '6px' },
-  actionButton: { padding: '6px', background: 'none', border: '1px solid rgba(31, 78, 95, 0.16)', cursor: 'pointer', color: '#6b7280', borderRadius: '6px' },
+  actionButton: { padding: '0', width: 'var(--btn-h-sm)', minWidth: 'var(--btn-h-sm)' },
   // Modal
   modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' },
   modal: { width: '100%', maxWidth: '600px', maxHeight: '90vh', borderRadius: '16px', border: '1px solid var(--border-color)', overflow: 'hidden', display: 'flex', flexDirection: 'column' },
   modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid var(--border-color)' },
   modalTitle: { margin: 0, fontSize: '18px', fontWeight: '600' },
-  closeButton: { background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280' },
+  closeButton: { padding: '0', width: 'var(--btn-h-sm)', minWidth: 'var(--btn-h-sm)' },
   modalBody: { padding: '24px', overflowY: 'auto', flex: 1 },
   modalFooter: { display: 'flex', justifyContent: 'flex-end', gap: '12px', padding: '20px 24px', borderTop: '1px solid var(--border-color)' },
   formGrid: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' },
   formGroup: { display: 'flex', flexDirection: 'column', gap: '6px' },
   label: { fontSize: '12px', fontWeight: '500', color: '#6b7280' },
   input: { padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '14px', outline: 'none' },
-  cancelButton: { padding: '10px 20px', backgroundColor: 'transparent', color: '#6b7280', border: '1px solid var(--border-color)', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' },
-  saveButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: '#4f46e5', color: '#ffffff', border: '1px solid #3730a3', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
+  cancelButton: { minWidth: '120px' },
+  saveButton: { minWidth: '140px' },
   addMovementSection: { padding: '16px', borderRadius: '12px' },
-  addBtn: { display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 16px', backgroundColor: '#22c55e', color: '#ffffff', border: '1px solid #16a34a', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' },
+  addBtn: { minWidth: '120px' },
   movementsList: { display: 'flex', flexDirection: 'column', gap: '8px' },
   movementItem: { display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px' }
 }

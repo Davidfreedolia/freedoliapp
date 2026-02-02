@@ -143,45 +143,55 @@ export default function Projects() {
           </div>
           {!isPreview && (
             <div style={{ position: 'relative' }}>
-              <button 
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={e => { e.stopPropagation(); setMenuOpen(menuOpen === project.id ? null : project.id) }}
                 style={styles.menuButton}
               >
                 <MoreVertical size={18} color="#9ca3af" />
-              </button>
+              </Button>
               {menuOpen === project.id && (
                 <div style={{
                   ...styles.menu,
                   backgroundColor: darkMode ? '#1f1f2e' : '#ffffff'
                 }}>
-                  <button 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={e => { e.stopPropagation(); navigate(`/projects/${project.id}/edit`) }}
                     style={styles.menuItem}
                   >
                     <Edit size={14} /> Editar
-                  </button>
+                  </Button>
                   {canClose && (
-                    <button 
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={e => handleClose(e, project)}
                       style={styles.menuItem}
                     >
                       <XCircle size={14} /> Tancar
-                    </button>
+                    </Button>
                   )}
                   {canReopen && (
-                    <button 
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={e => handleReopen(e, project)}
                       style={styles.menuItem}
                     >
                       <RotateCw size={14} /> Reobrir
-                    </button>
+                    </Button>
                   )}
-                  <button 
+                  <Button
+                    variant="danger"
+                    size="sm"
                     onClick={e => handleDelete(e, project)}
-                    style={{...styles.menuItem, color: '#F26C63'}}
+                    style={styles.menuItemDanger}
                   >
                     <Trash2 size={14} /> Eliminar
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
@@ -601,10 +611,9 @@ const styles = {
     letterSpacing: '0.5px'
   },
   menuButton: {
-    background: 'none',
-    border: 'none',
-    cursor: 'pointer',
-    padding: '4px'
+    padding: '0',
+    width: 'var(--btn-h-sm)',
+    minWidth: 'var(--btn-h-sm)'
   },
   menu: {
     position: 'absolute',
@@ -621,12 +630,18 @@ const styles = {
     alignItems: 'center',
     gap: '8px',
     width: '100%',
-    padding: '10px 14px',
-    border: 'none',
-    background: 'none',
-    fontSize: '13px',
-    cursor: 'pointer',
-    color: 'inherit'
+    justifyContent: 'flex-start',
+    padding: '0 var(--btn-pad-x)',
+    fontSize: '13px'
+  },
+  menuItemDanger: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    width: '100%',
+    justifyContent: 'flex-start',
+    padding: '0 var(--btn-pad-x)',
+    fontSize: '13px'
   },
   projectName: {
     margin: '0 0 8px 0',

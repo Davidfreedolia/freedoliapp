@@ -8,23 +8,23 @@ import { useState } from 'react'
 export const getButtonStyles = ({ variant = 'primary', darkMode = false, disabled = false, isHovered = false, isActive = false, size = 'md' }) => {
   const sizeStyles = {
     md: {
-      height: '40px',
+      height: 'var(--btn-h)',
       minWidth: '140px',
-      padding: '12px 24px',
+      padding: '0 var(--btn-pad-x)',
       fontSize: '14px',
-      fontWeight: '500'
+      fontWeight: '600'
     },
     sm: {
-      height: '32px',
+      height: 'var(--btn-h-sm)',
       minWidth: '100px',
-      padding: '8px 16px',
+      padding: '0 var(--btn-pad-x)',
       fontSize: '13px',
-      fontWeight: '500'
+      fontWeight: '600'
     },
     lg: {
       height: '48px',
       minWidth: '160px',
-      padding: '14px 28px',
+      padding: '0 20px',
       fontSize: '15px',
       fontWeight: '600'
     }
@@ -34,49 +34,46 @@ export const getButtonStyles = ({ variant = 'primary', darkMode = false, disable
 
   const baseStyles = {
     ...sizeStyle,
-    borderRadius: '10px',
+    borderRadius: 'var(--btn-radius)',
     cursor: disabled ? 'not-allowed' : 'pointer',
     border: 'none',
     transition: 'all 0.2s ease',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '8px',
-    opacity: disabled ? 0.6 : 1,
+    gap: 'var(--btn-gap)',
+    opacity: disabled ? 'var(--btn-disabled-opacity)' : 1,
     transform: isActive ? 'scale(0.99)' : 'scale(1)',
     outline: 'none',
-    boxSizing: 'border-box'
+    boxSizing: 'border-box',
+    boxShadow: disabled ? 'none' : 'var(--btn-shadow)'
   }
 
   const variants = {
     primary: {
-      backgroundColor: isHovered
-        ? (darkMode ? '#184351' : '#184351')
-        : (darkMode ? '#1F4E5F' : '#1F4E5F'),
-      color: '#F4F7F3',
-      border: '1px solid #1F4E5F',
-      boxShadow: isHovered ? '0 6px 16px rgba(31, 78, 95, 0.18)' : '0 2px 6px rgba(31, 78, 95, 0.12)'
+      backgroundColor: 'var(--btn-primary-bg)',
+      color: 'var(--btn-primary-fg)',
+      border: '1px solid var(--btn-primary-bg)',
+      boxShadow: isHovered
+        ? 'var(--btn-shadow), inset 0 0 0 999px var(--btn-primary-hover)'
+        : 'var(--btn-shadow)'
     },
     secondary: {
-      backgroundColor: isHovered
-        ? (darkMode ? 'rgba(244, 247, 243, 0.08)' : 'rgba(31, 78, 95, 0.06)')
-        : (darkMode ? 'rgba(244, 247, 243, 0.04)' : '#FFFFFF'),
-      color: darkMode ? '#F4F7F3' : '#1F4E5F',
-      border: `1px solid ${darkMode ? 'rgba(244, 247, 243, 0.2)' : 'rgba(31, 78, 95, 0.2)'}`,
-      filter: isHovered ? 'brightness(1.02)' : 'brightness(1)'
+      backgroundColor: 'var(--btn-secondary-bg)',
+      color: 'var(--btn-secondary-fg)',
+      border: '1px solid var(--btn-secondary-border)',
+      filter: isHovered ? 'brightness(1.03)' : 'brightness(1)'
     },
     danger: {
-      backgroundColor: isHovered
-        ? (darkMode ? '#E85E56' : '#E85E56')
-        : (darkMode ? '#F26C63' : '#F26C63'),
-      color: '#ffffff',
-      border: '1px solid #F26C63',
-      boxShadow: isHovered ? '0 6px 16px rgba(242, 108, 99, 0.25)' : '0 2px 6px rgba(242, 108, 99, 0.18)'
+      backgroundColor: 'var(--btn-danger-bg)',
+      color: 'var(--btn-danger-fg)',
+      border: '1px solid var(--btn-danger-border)',
+      filter: isHovered ? 'brightness(0.98)' : 'brightness(1)'
     },
     ghost: {
-      backgroundColor: 'transparent',
-      color: darkMode ? '#F4F7F3' : '#1F4E5F',
-      border: `1px solid ${darkMode ? 'rgba(244, 247, 243, 0.2)' : 'rgba(31, 78, 95, 0.2)'}`
+      backgroundColor: 'var(--btn-ghost-bg)',
+      color: 'var(--btn-ghost-fg)',
+      border: '1px solid var(--btn-ghost-border)'
     }
   }
 
@@ -115,28 +112,29 @@ export const useButtonState = () => {
  */
 export const getIconButtonStyles = ({ darkMode = false, variant = 'default', disabled = false }) => {
   const baseStyles = {
-    width: '40px',
-    height: '40px',
-    borderRadius: '10px',
+    width: 'var(--btn-h)',
+    height: 'var(--btn-h)',
+    borderRadius: 'var(--btn-radius)',
     cursor: disabled ? 'not-allowed' : 'pointer',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     transition: 'all 0.2s ease',
     border: 'none',
-    opacity: disabled ? 0.5 : 1
+    opacity: disabled ? 'var(--btn-disabled-opacity)' : 1,
+    boxShadow: disabled ? 'none' : 'var(--btn-shadow)'
   }
 
   const variants = {
     default: {
-      backgroundColor: darkMode ? 'rgba(244, 247, 243, 0.06)' : '#FFFFFF',
-      border: `1px solid ${darkMode ? 'rgba(244, 247, 243, 0.2)' : 'rgba(31, 78, 95, 0.2)'}`,
-      color: darkMode ? '#F4F7F3' : '#1F4E5F'
+      backgroundColor: 'var(--btn-secondary-bg)',
+      border: '1px solid var(--btn-secondary-border)',
+      color: 'var(--btn-secondary-fg)'
     },
     primary: {
-      backgroundColor: darkMode ? '#1F4E5F' : '#1F4E5F',
-      color: '#F4F7F3',
-      boxShadow: '0 2px 6px rgba(31, 78, 95, 0.12)'
+      backgroundColor: 'var(--btn-primary-bg)',
+      color: 'var(--btn-primary-fg)',
+      boxShadow: 'var(--btn-shadow)'
     }
   }
 

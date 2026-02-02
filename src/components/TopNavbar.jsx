@@ -188,36 +188,18 @@ const styles = {
     gap: '8px'
   },
   notesButton: {
-    height: '36px',
-    padding: '0 12px',
-    borderRadius: 'var(--radius-ui)',
     cursor: 'pointer',
-    display: 'flex',
+    display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    transition: 'all 0.15s ease',
-    gap: '6px',
-    backgroundColor: 'transparent',
-    color: 'inherit',
-    fontWeight: '500',
-    border: '1px solid transparent',
-    fontSize: '14px',
-    boxShadow: 'none'
+    gap: 'var(--btn-gap)'
   },
   helpButton: {
-    height: '36px',
-    padding: '0 12px',
-    borderRadius: 'var(--radius-ui)',
     cursor: 'pointer',
-    display: 'flex',
+    display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    transition: 'all 0.15s ease',
-    gap: '6px',
-    backgroundColor: 'transparent',
-    color: 'inherit',
-    border: '1px solid transparent',
-    fontSize: '14px'
+    gap: 'var(--btn-gap)'
   }
 }
 

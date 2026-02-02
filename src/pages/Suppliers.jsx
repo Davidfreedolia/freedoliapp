@@ -337,15 +337,17 @@ export default function Suppliers() {
               data-menu-container
               onClick={(e) => e.stopPropagation()}
             >
-              <button 
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={(e) => {
                   e.stopPropagation()
                   setMenuOpen(menuOpen === supplier.id ? null : supplier.id)
-                }} 
+                }}
                 style={styles.menuButton}
               >
                 <MoreVertical size={18} />
-              </button>
+              </Button>
               {menuOpen === supplier.id && (
                 <div 
                   style={{ 
@@ -355,26 +357,30 @@ export default function Suppliers() {
                   }}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <button 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={(e) => {
                       e.stopPropagation()
                       setEditingSupplier(supplier)
                       setShowModal(true)
                       setMenuOpen(null)
-                    }} 
+                    }}
                     style={styles.menuItem}
                   >
                     <Edit size={14} /> Editar
-                  </button>
-                  <button 
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
                     onClick={(e) => {
                       e.stopPropagation()
                       handleDelete(supplier)
-                    }} 
-                    style={{ ...styles.menuItem, color: '#F26C63' }}
+                    }}
+                    style={styles.menuItemDanger}
                   >
                     <Trash2 size={14} /> Eliminar
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
@@ -613,9 +619,14 @@ export default function Suppliers() {
               <h3 style={{ ...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827' }}>
                 {editingSupplier.id ? 'Editar Proveïdor' : 'Nou Proveïdor'}
               </h3>
-              <button onClick={() => { setShowModal(false); setEditingSupplier(null) }} style={styles.closeButton}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => { setShowModal(false); setEditingSupplier(null) }}
+                style={styles.closeButton}
+              >
                 <X size={20} />
-              </button>
+              </Button>
             </div>
 
             <div style={styles.modalBody}>
@@ -703,8 +714,8 @@ export default function Suppliers() {
                         placeholder="Nom de la ciutat"
                         style={{ ...styles.input, flex: 1, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }}
                       />
-                      <button onClick={handleAddCustomCity} style={styles.addCityBtn}>Afegir</button>
-                      <button onClick={() => { setShowCustomCityInput(false); setNewCityName('') }} style={styles.cancelCityBtn}>✕</button>
+                      <Button variant="secondary" size="sm" onClick={handleAddCustomCity} style={styles.addCityBtn}>Afegir</Button>
+                      <Button variant="ghost" size="sm" onClick={() => { setShowCustomCityInput(false); setNewCityName('') }} style={styles.cancelCityBtn}>✕</Button>
                     </div>
                   )}
                 </div>
@@ -814,14 +825,16 @@ export default function Suppliers() {
                   <label style={styles.label}>Valoració</label>
                   <div style={styles.ratingInput}>
                     {[1, 2, 3, 4, 5].map(i => (
-                      <button
+                      <Button
                         key={i}
                         type="button"
+                        variant="ghost"
+                        size="sm"
                         onClick={() => setEditingSupplier({ ...editingSupplier, rating: i })}
                         style={styles.starButton}
                       >
                         <Star size={20} fill={i <= editingSupplier.rating ? '#f59e0b' : 'none'} color={i <= editingSupplier.rating ? '#f59e0b' : '#d1d5db'} />
-                      </button>
+                      </Button>
                     ))}
                   </div>
                 </div>
@@ -853,12 +866,21 @@ export default function Suppliers() {
             </div>
 
             <div style={styles.modalFooter}>
-              <button onClick={() => { setShowModal(false); setEditingSupplier(null) }} style={styles.cancelButton}>
+              <Button
+                variant="secondary"
+                onClick={() => { setShowModal(false); setEditingSupplier(null) }}
+                style={styles.cancelButton}
+              >
                 Cancel·lar
-              </button>
-              <button onClick={handleSave} disabled={saving} style={styles.saveButton}>
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleSave}
+                disabled={saving}
+                style={styles.saveButton}
+              >
                 {saving ? 'Guardant...' : <><Save size={16} /> Guardar</>}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -911,15 +933,16 @@ const styles = {
   typeBadge: { display: 'inline-block', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '500' },
   cardRow: { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontSize: '13px' },
   ratingRow: { display: 'flex', gap: '2px', marginTop: '12px' },
-  menuButton: { background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#9ca3af' },
+  menuButton: { padding: '0', width: 'var(--btn-h-sm)', minWidth: 'var(--btn-h-sm)', color: '#9ca3af' },
   menu: { position: 'absolute', right: 0, top: '100%', minWidth: '120px', borderRadius: '10px', border: '1px solid rgba(31, 78, 95, 0.12)', boxShadow: 'var(--shadow-soft-hover)', zIndex: 10 },
-  menuItem: { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '10px 14px', border: 'none', background: 'none', fontSize: '13px', cursor: 'pointer', color: 'inherit' },
+  menuItem: { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', justifyContent: 'flex-start', padding: '0 var(--btn-pad-x)', fontSize: '13px' },
+  menuItemDanger: { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', justifyContent: 'flex-start', padding: '0 var(--btn-pad-x)', fontSize: '13px' },
   // Modal
   modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' },
   modal: { width: '100%', maxWidth: '700px', maxHeight: '90vh', borderRadius: '16px', border: '1px solid var(--border-color)', overflow: 'hidden', display: 'flex', flexDirection: 'column' },
   modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid var(--border-color)' },
   modalTitle: { margin: 0, fontSize: '18px', fontWeight: '600' },
-  closeButton: { background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280' },
+  closeButton: { padding: '0', width: 'var(--btn-h-sm)', minWidth: 'var(--btn-h-sm)' },
   modalBody: { padding: '24px', overflowY: 'auto', flex: 1 },
   modalFooter: { display: 'flex', justifyContent: 'flex-end', gap: '12px', padding: '20px 24px', borderTop: '1px solid var(--border-color)' },
   formGrid: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' },
@@ -927,12 +950,12 @@ const styles = {
   label: { fontSize: '12px', fontWeight: '500', color: '#6b7280' },
   input: { padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '14px', outline: 'none' },
   textarea: { resize: 'vertical', minHeight: '80px' },
-  cancelButton: { padding: '10px 20px', backgroundColor: 'transparent', color: 'var(--text)', border: '1px solid rgba(31, 78, 95, 0.18)', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' },
-  saveButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: '#1F4E5F', color: '#F4F7F3', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
+  cancelButton: { minWidth: '120px' },
+  saveButton: { minWidth: '140px' },
   ratingInput: { display: 'flex', gap: '4px' },
-  starButton: { background: 'none', border: 'none', cursor: 'pointer', padding: '2px' },
+  starButton: { padding: '0', width: 'var(--btn-h-sm)', minWidth: 'var(--btn-h-sm)' },
   cityInputGroup: { display: 'flex', gap: '8px' },
   customCityRow: { display: 'flex', gap: '8px', marginTop: '8px' },
-  addCityBtn: { padding: '8px 12px', backgroundColor: '#6BC7B5', color: '#1F4E5F', border: 'none', borderRadius: '6px', fontSize: '12px', cursor: 'pointer' },
-  cancelCityBtn: { padding: '8px 12px', backgroundColor: '#F26C63', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '12px', cursor: 'pointer' }
+  addCityBtn: { minWidth: '96px' },
+  cancelCityBtn: { minWidth: '56px' }
 }

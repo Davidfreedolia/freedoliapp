@@ -245,14 +245,17 @@ export default function Forwarders() {
     return (
       <div style={{ display: 'flex', gap: '4px' }}>
         {[1, 2, 3, 4, 5].map(i => (
-          <button
+          <Button
             key={i}
             type="button"
+            variant="ghost"
+            size="sm"
             onClick={() => editable && onChange && onChange(i)}
-            style={{ background: 'none', border: 'none', cursor: editable ? 'pointer' : 'default', padding: '2px' }}
+            disabled={!editable}
+            style={styles.starButton}
           >
             <Star size={16} fill={i <= rating ? '#f59e0b' : 'none'} color={i <= rating ? '#f59e0b' : '#d1d5db'} />
-          </button>
+          </Button>
         ))}
       </div>
     )
@@ -308,15 +311,17 @@ export default function Forwarders() {
               data-menu-container
               onClick={(e) => e.stopPropagation()}
             >
-              <button 
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={(e) => {
                   e.stopPropagation()
                   setMenuOpen(menuOpen === forwarder.id ? null : forwarder.id)
-                }} 
+                }}
                 style={styles.menuButton}
               >
                 <MoreVertical size={18} />
-              </button>
+              </Button>
               {menuOpen === forwarder.id && (
                 <div 
                   style={{ 
@@ -326,24 +331,28 @@ export default function Forwarders() {
                   }}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <button 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={(e) => {
                       e.stopPropagation()
                       handleEditForwarder(forwarder)
-                    }} 
+                    }}
                     style={styles.menuItem}
                   >
                     <Edit size={14} /> Editar
-                  </button>
-                  <button 
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
                     onClick={(e) => {
                       e.stopPropagation()
                       handleDeleteForwarder(forwarder)
-                    }} 
-                    style={{ ...styles.menuItem, color: '#F26C63' }}
+                    }}
+                    style={styles.menuItemDanger}
                   >
                     <Trash2 size={14} /> Eliminar
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
@@ -357,9 +366,9 @@ export default function Forwarders() {
               <h4 style={{ color: darkMode ? '#ffffff' : '#111827', margin: 0 }}>
                 Magatzems de {forwarder.name}
               </h4>
-              <button onClick={() => handleNewWarehouse(forwarder.id)} style={styles.addWarehouseBtn}>
+              <Button variant="secondary" size="sm" onClick={() => handleNewWarehouse(forwarder.id)} style={styles.addWarehouseBtn}>
                 <Plus size={14} /> Afegir magatzem
-              </button>
+              </Button>
             </div>
             
             {forwarderWarehouses.length === 0 ? (
@@ -378,12 +387,12 @@ export default function Forwarders() {
                       </p>
                     </div>
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      <button onClick={() => handleEditWarehouse(warehouse)} style={styles.iconBtn}>
+                      <Button variant="ghost" size="sm" onClick={() => handleEditWarehouse(warehouse)} style={styles.iconBtn}>
                         <Edit size={14} />
-                      </button>
-                      <button onClick={() => handleDeleteWarehouse(warehouse)} style={{ ...styles.iconBtn, color: '#F26C63' }}>
+                      </Button>
+                      <Button variant="danger" size="sm" onClick={() => handleDeleteWarehouse(warehouse)} style={styles.iconBtn}>
                         <Trash2 size={14} />
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -699,7 +708,9 @@ export default function Forwarders() {
               <h3 style={{ ...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827' }}>
                 {editingForwarder.id ? 'Editar Transitari' : 'Nou Transitari'}
               </h3>
-              <button onClick={() => { setShowForwarderModal(false); setEditingForwarder(null); setShowCustomCityInput(false) }} style={styles.closeButton}><X size={20} /></button>
+              <Button variant="ghost" size="sm" onClick={() => { setShowForwarderModal(false); setEditingForwarder(null); setShowCustomCityInput(false) }} style={styles.closeButton}>
+                <X size={20} />
+              </Button>
             </div>
 
             <div style={styles.modalBody}>
@@ -786,8 +797,8 @@ export default function Forwarders() {
                         placeholder="Nom de la ciutat"
                         style={{ ...styles.input, flex: 1, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }}
                       />
-                      <button onClick={handleAddCustomCity} style={styles.addCityBtn}>Afegir</button>
-                      <button onClick={() => { setShowCustomCityInput(false); setNewCityName('') }} style={styles.cancelCityBtn}>✕</button>
+                      <Button variant="secondary" size="sm" onClick={handleAddCustomCity} style={styles.addCityBtn}>Afegir</Button>
+                      <Button variant="ghost" size="sm" onClick={() => { setShowCustomCityInput(false); setNewCityName('') }} style={styles.cancelCityBtn}>✕</Button>
                     </div>
                   )}
                 </div>
@@ -844,10 +855,12 @@ export default function Forwarders() {
             </div>
 
             <div style={styles.modalFooter}>
-              <button onClick={() => { setShowForwarderModal(false); setEditingForwarder(null); setShowCustomCityInput(false) }} style={styles.cancelButton}>Cancel·lar</button>
-              <button onClick={handleSaveForwarder} disabled={saving} style={styles.saveButton}>
+              <Button variant="secondary" onClick={() => { setShowForwarderModal(false); setEditingForwarder(null); setShowCustomCityInput(false) }} style={styles.cancelButton}>
+                Cancel·lar
+              </Button>
+              <Button variant="primary" onClick={handleSaveForwarder} disabled={saving} style={styles.saveButton}>
                 {saving ? 'Guardant...' : <><Save size={16} /> {editingForwarder.id ? 'Actualitzar' : 'Crear'}</>}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -861,7 +874,9 @@ export default function Forwarders() {
               <h3 style={{ ...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827' }}>
                 {editingWarehouse.id ? 'Editar Magatzem' : 'Nou Magatzem'}
               </h3>
-              <button onClick={() => { setShowWarehouseModal(false); setEditingWarehouse(null) }} style={styles.closeButton}><X size={20} /></button>
+              <Button variant="ghost" size="sm" onClick={() => { setShowWarehouseModal(false); setEditingWarehouse(null) }} style={styles.closeButton}>
+                <X size={20} />
+              </Button>
             </div>
 
             <div style={styles.modalBody}>
@@ -910,10 +925,12 @@ export default function Forwarders() {
             </div>
 
             <div style={styles.modalFooter}>
-              <button onClick={() => { setShowWarehouseModal(false); setEditingWarehouse(null) }} style={styles.cancelButton}>Cancel·lar</button>
-              <button onClick={handleSaveWarehouse} disabled={saving} style={styles.saveButton}>
+              <Button variant="secondary" onClick={() => { setShowWarehouseModal(false); setEditingWarehouse(null) }} style={styles.cancelButton}>
+                Cancel·lar
+              </Button>
+              <Button variant="primary" onClick={handleSaveWarehouse} disabled={saving} style={styles.saveButton}>
                 {saving ? 'Guardant...' : <><Save size={16} /> Guardar</>}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -964,20 +981,21 @@ const styles = {
   forwarderMeta: { display: 'flex', gap: '16px', fontSize: '13px', color: '#6b7280', marginTop: '4px' },
   forwarderActions: { display: 'flex', alignItems: 'center', gap: '16px' },
   warehouseCount: { padding: '4px 10px', backgroundColor: 'rgba(31, 78, 95, 0.08)', color: '#1F4E5F', borderRadius: '12px', fontSize: '12px', fontWeight: '500' },
-  menuButton: { background: 'none', border: 'none', cursor: 'pointer', padding: '8px', color: '#9ca3af' },
+  menuButton: { padding: '0', width: 'var(--btn-h-sm)', minWidth: 'var(--btn-h-sm)', color: '#9ca3af' },
   menu: { position: 'absolute', right: 0, top: '100%', minWidth: '120px', borderRadius: '10px', border: '1px solid rgba(31, 78, 95, 0.12)', boxShadow: 'var(--shadow-soft-hover)', zIndex: 10 },
-  menuItem: { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '10px 14px', border: 'none', background: 'none', fontSize: '13px', cursor: 'pointer', color: 'inherit' },
+  menuItem: { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', justifyContent: 'flex-start', padding: '0 var(--btn-pad-x)', fontSize: '13px' },
+  menuItemDanger: { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', justifyContent: 'flex-start', padding: '0 var(--btn-pad-x)', fontSize: '13px' },
   warehousesSection: { padding: '0 20px 20px', borderTop: '1px solid rgba(31, 78, 95, 0.12)' },
   warehousesHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0' },
-  addWarehouseBtn: { display: 'flex', alignItems: 'center', gap: '4px', padding: '8px 12px', backgroundColor: '#3b82f6', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '12px', cursor: 'pointer' },
+  addWarehouseBtn: { minWidth: '150px' },
   warehousesList: { display: 'flex', flexDirection: 'column', gap: '8px' },
   warehouseItem: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', borderRadius: '8px' },
-  iconBtn: { background: 'none', border: 'none', padding: '6px', cursor: 'pointer', color: '#6b7280' },
+  iconBtn: { padding: '0', width: 'var(--btn-h-sm)', minWidth: 'var(--btn-h-sm)' },
   modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' },
   modal: { width: '100%', maxWidth: '650px', maxHeight: '90vh', borderRadius: '16px', border: '1px solid var(--border-color)', overflow: 'hidden', display: 'flex', flexDirection: 'column' },
   modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid var(--border-color)' },
   modalTitle: { margin: 0, fontSize: '18px', fontWeight: '600' },
-  closeButton: { background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280' },
+  closeButton: { padding: '0', width: 'var(--btn-h-sm)', minWidth: 'var(--btn-h-sm)' },
   modalBody: { padding: '24px', overflowY: 'auto', flex: 1 },
   modalFooter: { display: 'flex', justifyContent: 'flex-end', gap: '12px', padding: '20px 24px', borderTop: '1px solid var(--border-color)' },
   formGrid: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' },
@@ -985,9 +1003,10 @@ const styles = {
   label: { fontSize: '12px', fontWeight: '500', color: '#6b7280' },
   input: { padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '14px', outline: 'none' },
   textarea: { resize: 'vertical', minHeight: '60px' },
-  cancelButton: { padding: '10px 20px', backgroundColor: 'transparent', color: '#6b7280', border: '1px solid var(--border-color)', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' },
-  saveButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: '#f59e0b', color: '#ffffff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
+  cancelButton: { minWidth: '120px' },
+  saveButton: { minWidth: '140px' },
   customCityRow: { display: 'flex', gap: '8px', marginTop: '8px' },
-  addCityBtn: { padding: '8px 12px', backgroundColor: '#22c55e', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '12px', cursor: 'pointer' },
-  cancelCityBtn: { padding: '8px 12px', backgroundColor: '#ef4444', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '12px', cursor: 'pointer' }
+  addCityBtn: { minWidth: '96px' },
+  cancelCityBtn: { minWidth: '56px' },
+  starButton: { padding: '0', width: 'var(--btn-h-sm)', minWidth: 'var(--btn-h-sm)' }
 }

@@ -38,29 +38,33 @@ const styles = {
     alignItems: 'center',
     gap: '6px',
     padding: '4px',
-    borderRadius: '12px',
-    border: '1px solid var(--border-color)',
-    backgroundColor: 'var(--surface-bg)'
+    borderRadius: 'var(--btn-radius)',
+    border: '1px solid var(--btn-secondary-border)',
+    backgroundColor: 'var(--btn-ghost-bg)'
   },
   button: {
-    border: 'none',
-    background: 'transparent',
-    color: 'var(--text)',
+    height: 'var(--btn-h-sm)',
+    border: '1px solid var(--btn-ghost-border)',
+    background: 'var(--btn-ghost-bg)',
+    color: 'var(--btn-ghost-fg)',
+    boxShadow: 'var(--btn-shadow)',
     display: 'inline-flex',
     alignItems: 'center',
     gap: '6px',
-    padding: '6px 10px',
-    borderRadius: '8px',
+    padding: '0 var(--btn-pad-x)',
+    borderRadius: 'var(--btn-radius)',
     cursor: 'pointer',
-    fontSize: '12px',
-    fontWeight: '500'
+    fontSize: '13px',
+    fontWeight: '600',
+    transition: 'all 0.15s ease'
   },
   buttonCompact: {
-    padding: '6px'
+    padding: '0 10px'
   },
   buttonActive: {
-    backgroundColor: 'rgba(31, 78, 95, 0.08)',
-    color: 'var(--color-primary)',
-    boxShadow: 'var(--shadow-soft)'
+    backgroundColor: 'var(--btn-secondary-bg)',
+    color: 'var(--btn-secondary-fg)',
+    border: '1px solid var(--btn-secondary-border)',
+    boxShadow: 'var(--btn-shadow)'
   }
 }

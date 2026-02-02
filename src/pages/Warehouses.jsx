@@ -25,7 +25,6 @@ import {
 import Header from '../components/Header'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
-import { getButtonStyles, useButtonState } from '../utils/buttonStyles'
 import { useTranslation } from 'react-i18next'
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal'
 import { showToast } from '../components/Toast'
@@ -75,10 +74,6 @@ export default function Warehouses() {
   const { t } = useTranslation()
   const { isMobile, isTablet } = useBreakpoint()
   const modalStyles = getModalStyles(isMobile, darkMode)
-  const cancelButtonState = useButtonState()
-  const saveButtonState = useButtonState()
-  const amazonCancelButtonState = useButtonState()
-  const amazonSaveButtonState = useButtonState()
   
   const [warehouses, setWarehouses] = useState([])
   const [loading, setLoading] = useState(true)
@@ -180,15 +175,17 @@ export default function Warehouses() {
               data-menu-container
               onClick={(e) => e.stopPropagation()}
             >
-              <button 
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={(e) => {
                   e.stopPropagation()
                   setMenuOpen(menuOpen === warehouse.id ? null : warehouse.id)
-                }} 
+                }}
                 style={styles.menuButton}
               >
                 <MoreVertical size={18} color="#9ca3af" />
-              </button>
+              </Button>
               {menuOpen === warehouse.id && (
                 <div 
                   style={{ 
@@ -198,24 +195,28 @@ export default function Warehouses() {
                   }}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <button 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={(e) => {
                       e.stopPropagation()
                       handleEditWarehouse(warehouse)
-                    }} 
+                    }}
                     style={styles.menuItem}
                   >
                     <Edit size={14} /> Editar
-                  </button>
-                  <button 
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
                     onClick={(e) => {
                       e.stopPropagation()
                       handleDeleteWarehouse(warehouse)
-                    }} 
-                    style={{ ...styles.menuItem, color: '#F26C63' }}
+                    }}
+                    style={styles.menuItemDanger}
                   >
                     <Trash2 size={14} /> Eliminar
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
@@ -559,7 +560,9 @@ export default function Warehouses() {
               <h3 style={{ ...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827' }}>
                 {editingWarehouse.id ? 'Editar Magatzem' : 'Nou Magatzem'}
               </h3>
-              <button onClick={() => setShowModal(false)} style={styles.closeButton}><X size={20} /></button>
+              <Button variant="ghost" size="sm" onClick={() => setShowModal(false)} style={styles.closeButton}>
+                <X size={20} />
+              </Button>
             </div>
 
             <div style={styles.modalBody}>
@@ -610,33 +613,19 @@ export default function Warehouses() {
             </div>
 
             <div style={styles.modalFooter}>
-              <button 
+              <Button
+                variant="secondary"
                 onClick={() => setShowModal(false)}
-                {...cancelButtonState}
-                style={getButtonStyles({ 
-                  variant: 'danger', 
-                  darkMode, 
-                  disabled: false,
-                  isHovered: cancelButtonState.isHovered,
-                  isActive: cancelButtonState.isActive
-                })}
               >
                 {t('common.cancel', 'Cancel·lar')}
-              </button>
-              <button 
-                onClick={handleSaveWarehouse} 
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleSaveWarehouse}
                 disabled={saving}
-                {...saveButtonState}
-                style={getButtonStyles({ 
-                  variant: 'primary', 
-                  darkMode, 
-                  disabled: saving,
-                  isHovered: saveButtonState.isHovered,
-                  isActive: saveButtonState.isActive
-                })}
               >
                 {saving ? 'Guardant...' : <><Save size={16} /> {editingWarehouse.id ? 'Actualitzar' : 'Crear'}</>}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -650,7 +639,9 @@ export default function Warehouses() {
               <h3 style={{ ...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827' }}>
                 📦 Afegir Magatzems Amazon FBA
               </h3>
-              <button onClick={() => setShowAmazonModal(false)} style={styles.closeButton}><X size={20} /></button>
+              <Button variant="ghost" size="sm" onClick={() => setShowAmazonModal(false)} style={styles.closeButton}>
+                <X size={20} />
+              </Button>
             </div>
 
             <div style={{ ...styles.modalBody, maxHeight: '60vh', overflowY: 'auto' }}>
@@ -688,37 +679,19 @@ export default function Warehouses() {
                 {selectedAmazonWarehouses.length} seleccionats
               </span>
               <div style={{ display: 'flex', gap: '12px' }}>
-                <button 
+                <Button
+                  variant="secondary"
                   onClick={() => setShowAmazonModal(false)}
-                  {...amazonCancelButtonState}
-                  style={getButtonStyles({ 
-                    variant: 'danger', 
-                    darkMode, 
-                    disabled: false,
-                    isHovered: amazonCancelButtonState.isHovered,
-                    isActive: amazonCancelButtonState.isActive
-                  })}
                 >
                   {t('common.cancel', 'Cancel·lar')}
-                </button>
-                <button 
-                  onClick={handleSaveAmazonWarehouses} 
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={handleSaveAmazonWarehouses}
                   disabled={saving}
-                  {...amazonSaveButtonState}
-                  style={{
-                    ...getButtonStyles({ 
-                      variant: 'primary', 
-                      darkMode, 
-                      disabled: saving,
-                      isHovered: amazonSaveButtonState.isHovered,
-                      isActive: amazonSaveButtonState.isActive
-                    }),
-                    backgroundColor: '#ff9900',
-                    border: '1px solid #e68900'
-                  }}
                 >
                   {saving ? 'Guardant...' : <><Save size={16} /> Afegir seleccionats</>}
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -750,7 +723,7 @@ const styles = {
   filterSelect: { padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--border-color)', fontSize: '14px', outline: 'none', cursor: 'pointer' },
   filterButton: { height: '36px' },
   toolbarRight: { display: 'flex', alignItems: 'center', gap: '12px', marginLeft: 'auto', flexWrap: 'wrap' },
-  amazonButton: { backgroundColor: '#ff9900', color: '#ffffff', border: 'none' },
+  amazonButton: { minWidth: '160px' },
   newButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', backgroundColor: '#1F4E5F', color: '#F4F7F3', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
   statsRow: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' },
   statCard: { display: 'flex', alignItems: 'center', gap: '16px', padding: '20px', borderRadius: '12px', border: 'none', boxShadow: 'var(--shadow-soft)' },
@@ -768,9 +741,10 @@ const styles = {
   warehouseCard: { padding: '20px', borderRadius: '16px', border: 'none', boxShadow: 'var(--shadow-soft)' },
   cardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' },
   typeBadge: { padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '500' },
-  menuButton: { background: 'none', border: 'none', cursor: 'pointer', padding: '4px' },
+  menuButton: { padding: '0', width: 'var(--btn-h-sm)', minWidth: 'var(--btn-h-sm)' },
   menu: { position: 'absolute', right: 0, top: '100%', minWidth: '140px', borderRadius: '10px', border: '1px solid rgba(31, 78, 95, 0.12)', boxShadow: 'var(--shadow-soft-hover)', zIndex: 10 },
-  menuItem: { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '10px 14px', border: 'none', background: 'none', fontSize: '13px', cursor: 'pointer', color: 'inherit' },
+  menuItem: { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', justifyContent: 'flex-start', padding: '0 var(--btn-pad-x)', fontSize: '13px' },
+  menuItemDanger: { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', justifyContent: 'flex-start', padding: '0 var(--btn-pad-x)', fontSize: '13px' },
   warehouseName: { margin: '0 0 12px 0', fontSize: '16px', fontWeight: '600' },
   warehouseDetails: { display: 'flex', flexDirection: 'column', gap: '6px' },
   detailRow: { margin: 0, display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#6b7280' },
@@ -781,7 +755,7 @@ const styles = {
   amazonModal: { maxWidth: '700px' },
   modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid var(--border-color)' },
   modalTitle: { margin: 0, fontSize: '18px', fontWeight: '600' },
-  closeButton: { background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280' },
+  closeButton: { padding: '0', width: 'var(--btn-h-sm)', minWidth: 'var(--btn-h-sm)' },
   modalBody: { padding: '24px', overflowY: 'auto' },
   modalFooter: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', padding: '20px 24px', borderTop: '1px solid var(--border-color)' },
   formGrid: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' },

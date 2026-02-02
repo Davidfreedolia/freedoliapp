@@ -749,20 +749,32 @@ export default function Orders() {
               </Button>
             )}
             <div style={{ position: 'relative' }}>
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setMenuOpen(menuOpen === order.id ? null : order.id)}
                 style={styles.iconButton}
               >
                 <MoreVertical size={18} color="#9ca3af" />
-              </button>
+              </Button>
               {menuOpen === order.id && (
                 <div style={{ ...styles.menu, backgroundColor: darkMode ? '#1f1f2e' : '#ffffff' }}>
-                  <button onClick={() => { setEditingOrder(order); setShowModal(true); setMenuOpen(null) }} style={styles.menuItem}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => { setEditingOrder(order); setShowModal(true); setMenuOpen(null) }}
+                    style={styles.menuItem}
+                  >
                     <Edit size={14} /> Editar
-                  </button>
-                  <button onClick={() => handleDeleteOrder(order)} style={{ ...styles.menuItem, color: '#F26C63' }}>
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => handleDeleteOrder(order)}
+                    style={styles.menuItemDanger}
+                  >
                     <Trash2 size={14} /> Eliminar
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
@@ -1032,12 +1044,22 @@ export default function Orders() {
                         <option key={key} value={key}>{val.name}</option>
                       ))}
                     </select>
-                    <button onClick={() => handleDownloadPdf(selectedOrder)} style={styles.pdfButton}>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => handleDownloadPdf(selectedOrder)}
+                      style={styles.pdfButton}
+                    >
                       <Download size={16} /> PDF
-                    </button>
-                    <button onClick={() => setShowDetailModal(false)} style={styles.closeButton}>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowDetailModal(false)}
+                      style={styles.closeButton}
+                    >
                       <X size={20} />
-                    </button>
+                    </Button>
                   </div>
                 </div>
 
@@ -1181,21 +1203,13 @@ export default function Orders() {
                   <div style={styles.detailSection}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                       <h4 style={styles.detailSectionTitle}>📦 Amazon Ready</h4>
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => setShowAmazonReadySection(!showAmazonReadySection)}
-                        style={{
-                          padding: '6px 12px',
-                          backgroundColor: 'transparent',
-                          color: darkMode ? '#ffffff' : '#111827',
-                          border: '1px solid',
-                          borderColor: darkMode ? '#374151' : '#d1d5db',
-                          borderRadius: '6px',
-                          fontSize: '12px',
-                          cursor: 'pointer'
-                        }}
                       >
                         {showAmazonReadySection ? 'Ocultar' : 'Mostrar'}
-                      </button>
+                      </Button>
                     </div>
                     
                     {showAmazonReadySection && (
@@ -1242,25 +1256,13 @@ export default function Orders() {
                     }}>
                       Generate all documents needed to send to the manufacturer (PO, labels, packing list, carton labels)
                     </p>
-                    <button
+                    <Button
+                      variant="primary"
                       onClick={() => setShowManufacturerPackModal(true)}
-                      style={{
-                        padding: '10px 20px',
-                        backgroundColor: '#22c55e',
-                        color: '#ffffff',
-                        border: 'none',
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px'
-                      }}
                     >
                       <Package size={18} />
                       Generate Manufacturer Pack
-                    </button>
+                    </Button>
                   </div>
 
                   {/* Manufacturer Pack */}
@@ -1273,7 +1275,8 @@ export default function Orders() {
                     }}>
                       Generate a complete pack with PO, labels, packing list and carton labels for the manufacturer
                     </p>
-                    <button
+                    <Button
+                      variant="primary"
                       onClick={async () => {
                         // Carregar identifiers per al pack
                         if (selectedOrder?.project_id) {
@@ -1286,43 +1289,21 @@ export default function Orders() {
                         }
                         setShowManufacturerPackModal(true)
                       }}
-                      style={{
-                        padding: '10px 20px',
-                        backgroundColor: '#8b5cf6',
-                        color: '#ffffff',
-                        border: 'none',
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px'
-                      }}
                     >
                       <Package size={16} />
                       Generate Manufacturer Pack
-                    </button>
+                    </Button>
                   </div>
 
                   {/* Generar Etiquetes FNSKU */}
                   <div style={styles.detailSection}>
                     <h4 style={styles.detailSectionTitle}>🏷️ Etiquetes FNSKU</h4>
-                    <button
+                    <Button
+                      variant="primary"
                       onClick={() => setShowLabelsModal(true)}
-                      style={{
-                        padding: '10px 20px',
-                        backgroundColor: '#4f46e5',
-                        color: '#ffffff',
-                        border: 'none',
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        cursor: 'pointer'
-                      }}
                     >
                       Generar Etiquetes FNSKU
-                    </button>
+                    </Button>
                   </div>
 
                   {/* Shipment Tracking Section */}
@@ -1423,12 +1404,14 @@ export default function Orders() {
               }}>
                 Generar Etiquetes FNSKU
               </h3>
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setShowLabelsModal(false)}
                 style={styles.closeButton}
               >
                 <X size={20} />
-              </button>
+              </Button>
             </div>
             <div style={styles.detailBody}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -1584,22 +1567,13 @@ export default function Orders() {
                     />
                   </div>
                 </div>
-                <button
+                <Button
+                  variant="primary"
                   onClick={handleGenerateLabels}
-                  style={{
-                    padding: '12px 24px',
-                    backgroundColor: '#4f46e5',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    cursor: 'pointer',
-                    marginTop: '12px'
-                  }}
+                  style={{ marginTop: '12px' }}
                 >
                   Generar i Descarregar PDF
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -1648,9 +1622,10 @@ const styles = {
   orderCardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' },
   orderCardBody: { display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: '#6b7280' },
   orderCardActions: { display: 'flex', gap: '8px', marginTop: '12px', alignItems: 'center', flexWrap: 'wrap' },
-  iconButton: { background: 'none', border: '1px solid var(--border-color, #e5e7eb)', padding: '8px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  iconButton: { padding: '0', width: 'var(--btn-h-sm)', minWidth: 'var(--btn-h-sm)' },
   menu: { position: 'absolute', right: 0, top: '100%', minWidth: '140px', borderRadius: '10px', border: '1px solid rgba(31, 78, 95, 0.12)', boxShadow: 'var(--shadow-soft-hover)', zIndex: 10 },
-  menuItem: { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '10px 14px', border: 'none', background: 'none', fontSize: '13px', cursor: 'pointer', color: 'inherit' },
+  menuItem: { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', justifyContent: 'flex-start', padding: '0 var(--btn-pad-x)', fontSize: '13px' },
+  menuItemDanger: { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', justifyContent: 'flex-start', padding: '0 var(--btn-pad-x)', fontSize: '13px' },
   // Modal Detall
   modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' },
   detailModal: { width: '100%', maxWidth: '900px', maxHeight: '90vh', borderRadius: '16px', border: '1px solid var(--border-color)', overflow: 'hidden', display: 'flex', flexDirection: 'column' },
@@ -1659,8 +1634,8 @@ const styles = {
   detailTitle: { margin: 0, fontSize: '20px', fontWeight: '600' },
   detailHeaderRight: { display: 'flex', alignItems: 'center', gap: '12px' },
   statusSelect: { padding: '8px 12px', borderRadius: '8px', border: 'none', fontSize: '13px', fontWeight: '500', cursor: 'pointer', outline: 'none' },
-  pdfButton: { display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', backgroundColor: '#22c55e', color: '#ffffff', border: '1px solid #16a34a', borderRadius: '8px', fontSize: '13px', fontWeight: '500', cursor: 'pointer' },
-  closeButton: { background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', padding: '4px' },
+  pdfButton: { minWidth: '86px' },
+  closeButton: { padding: '0', width: 'var(--btn-h-sm)', minWidth: 'var(--btn-h-sm)' },
   detailBody: { padding: '24px', overflowY: 'auto', flex: 1 },
   detailGrid: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '24px', marginBottom: '24px' },
   detailSection: { marginBottom: '24px' },
