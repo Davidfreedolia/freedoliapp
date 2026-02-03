@@ -10,6 +10,7 @@ export default function Avatar({
   avatarColor = null, 
   size = 36, 
   onClick = null,
+  className = '',
   style = {} 
 }) {
   // Get initials from email or name
@@ -27,36 +28,12 @@ export default function Avatar({
     return '?'
   }
 
-  // Get color from localStorage or use provided color or default
-  const getAvatarColor = () => {
-    if (avatarColor) return avatarColor
-    const stored = localStorage.getItem('user_avatar_color')
-    if (stored) return stored
-    // Default: use first letter hash to pick from Canadian Palette
-    const initials = getInitials()
-    const colors = [
-      '#3498DB', // peter-river
-      '#2ECC71', // emerald
-      '#9B59B6', // amethyst
-      '#E67E22', // carrot
-      '#1ABC9C', // turquoise
-      '#E74C3C', // alizarin
-      '#F39C12', // orange
-      '#16A085', // green-sea
-    ]
-    const index = initials.charCodeAt(0) % colors.length
-    return colors[index]
-  }
-
-  const color = getAvatarColor()
   const initials = getInitials()
 
   const avatarStyle = {
     width: `${size}px`,
     height: `${size}px`,
     borderRadius: '50%',
-    backgroundColor: color,
-    color: '#FFFFFF',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -65,6 +42,7 @@ export default function Avatar({
     cursor: onClick ? 'pointer' : 'default',
     transition: 'all 0.2s ease',
     flexShrink: 0,
+    ...(avatarColor ? { backgroundColor: avatarColor, color: '#ffffff' } : null),
     ...style
   }
 
@@ -89,6 +67,7 @@ export default function Avatar({
   return (
     <div
       style={avatarStyle}
+      className={`avatar ${className}`.trim()}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}

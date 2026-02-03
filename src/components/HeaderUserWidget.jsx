@@ -47,8 +47,9 @@ export default function HeaderUserWidget({
       <Avatar
         userEmail={userEmail}
         userName={userName}
-        size={32}
+        size={28}
         onClick={onAvatarClick}
+        className="topbar-avatar"
       />
 
       {/* Logout */}

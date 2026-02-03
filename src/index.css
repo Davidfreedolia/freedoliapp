@@ -338,6 +338,12 @@ main {
   filter: brightness(1.03);
 }
 
+.avatar.topbar-avatar {
+  background: var(--surface-bg-2);
+  border: 1px solid var(--border-color);
+  color: var(--color-primary);
+}
+
 /* Toolbar controls */
 .toolbar-row {
   display: flex;
