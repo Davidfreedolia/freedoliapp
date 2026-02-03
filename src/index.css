@@ -31,6 +31,9 @@
   /* Brand palette mapping */
   --brand-primary: #f28b74;
   --brand-note: #f6d78b;
+  --brand-amber: #f2e27d;
+  --brand-green: #6bc7b5;
+  --brand-ink: #1f4e5f;
   --surface-1: #ffffff;
   --surface-2: #f6f7f4;
   --text-1: #111827;
@@ -190,6 +193,9 @@ body.dark {
   --text-1: #ffffff;
   --muted-1: #9ca3af;
   --border-1: #2a2f3a;
+  --brand-amber: #f2e27d;
+  --brand-green: #6bc7b5;
+  --brand-ink: #f4f7f3;
   --text-base-color: rgba(244, 244, 245, 0.82);
   --text-muted-color: rgba(244, 244, 245, 0.60);
   
@@ -1092,6 +1098,26 @@ body.dark .fd-calendar-asana .rbc-day-slot .rbc-time-slot:hover {
   color: var(--brand-primary);
 }
 
+.dash-stat-icon--projects svg {
+  color: var(--brand-primary);
+}
+
+.dash-stat-icon--active svg {
+  color: var(--brand-amber);
+}
+
+.dash-stat-icon--done svg {
+  color: var(--brand-green);
+}
+
+.dash-stat-icon--money svg {
+  color: var(--brand-ink);
+}
+
+.dash-stat-icon--gtin svg {
+  color: var(--brand-amber);
+}
+
 .dash-stat-value {
   font-size: 22px;
   font-weight: 700;
@@ -1103,21 +1129,26 @@ body.dark .fd-calendar-asana .rbc-day-slot .rbc-time-slot:hover {
   color: var(--color-muted);
 }
 
-.dash-gtin-metrics {
+.dash-gtin {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.dash-gtin-line {
+.dash-gtin-row {
   display: flex;
   justify-content: space-between;
   font-size: 12px;
   color: var(--muted-1);
 }
 
-.dash-gtin-value {
-  font-size: 16px;
+.dash-gtin-label {
+  font-size: 12px;
+  color: var(--muted-1);
+}
+
+.dash-gtin-val {
+  font-size: 14px;
   font-weight: 700;
   color: var(--text-1);
 }

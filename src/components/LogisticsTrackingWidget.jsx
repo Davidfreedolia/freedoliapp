@@ -17,12 +17,12 @@ import Button from './Button'
 
 // Estats del flux logístic (simplificat per dashboard)
 const LOGISTICS_STAGES = [
-  { id: 'production', name: 'Producció', icon: Factory, color: '#8b5cf6' },
-  { id: 'pickup', name: 'Recollida', icon: Truck, color: '#f59e0b' },
-  { id: 'in_transit', name: 'En trànsit', icon: Ship, color: '#06b6d4' },
-  { id: 'customs', name: 'Duanes', icon: Package, color: '#ec4899' },
-  { id: 'amazon_fba', name: 'Amazon FBA', icon: Warehouse, color: '#ff9900' },
-  { id: 'delivered', name: 'Lliurat', icon: CheckCircle2, color: '#22c55e' }
+  { id: 'production', name: 'Producció', icon: Factory, color: '#F26C63' },
+  { id: 'pickup', name: 'Recollida', icon: Truck, color: '#F2E27D' },
+  { id: 'in_transit', name: 'En trànsit', icon: Ship, color: '#F2E27D' },
+  { id: 'customs', name: 'Duanes', icon: Package, color: '#F2E27D' },
+  { id: 'amazon_fba', name: 'Amazon FBA', icon: Warehouse, color: '#6BC7B5' },
+  { id: 'delivered', name: 'Lliurat', icon: CheckCircle2, color: '#6BC7B5' }
 ]
 
 const LOGISTICS_STATUS_LABELS = {

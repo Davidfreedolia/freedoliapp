@@ -385,22 +385,26 @@ export default function Dashboard() {
     {
       label: 'Total Projectes',
       value: stats.totalProjects,
-      icon: FolderKanban
+      icon: FolderKanban,
+      iconClass: 'dash-stat-icon--projects'
     },
     {
       label: 'Actius',
       value: stats.activeProjects,
-      icon: PlayCircle
+      icon: PlayCircle,
+      iconClass: 'dash-stat-icon--active'
     },
     {
       label: 'Completats',
       value: stats.completedProjects,
-      icon: CheckCircle2
+      icon: CheckCircle2,
+      iconClass: 'dash-stat-icon--done'
     },
     {
       label: 'Invertit',
       value: `${stats.totalInvested.toLocaleString('ca-ES', { minimumFractionDigits: 2 })} €`,
-      icon: Wallet
+      icon: Wallet,
+      iconClass: 'dash-stat-icon--money'
     }
   ]
   
@@ -500,7 +504,7 @@ export default function Dashboard() {
               key={index}
               className={`dash-stat-card ${darkMode ? 'dash-stat-card--dark' : 'dash-stat-card--light'}`}
             >
-              <div className="dash-stat-icon">
+              <div className={`dash-stat-icon ${stat.iconClass || ''}`.trim()}>
                 <stat.icon size={20} />
               </div>
               <div style={styles.statInfo}>
@@ -511,18 +515,18 @@ export default function Dashboard() {
           ))}
           {!loadingGtinCoverage && (
             <div className={`dash-stat-card ${darkMode ? 'dash-stat-card--dark' : 'dash-stat-card--light'}`}>
-              <div className="dash-stat-icon">
+              <div className="dash-stat-icon dash-stat-icon--gtin">
                 <Barcode size={20} />
               </div>
-              <div className="dash-gtin-metrics">
+              <div className="dash-gtin">
                 <span className="dash-stat-label">GTIN Coverage</span>
-                <div className="dash-gtin-line">
-                  <span>SKUs sense GTIN</span>
-                  <span className="dash-gtin-value">{gtinCoverage.missingGtin}</span>
+                <div className="dash-gtin-row">
+                  <span className="dash-gtin-label">SKUs sense GTIN</span>
+                  <span className="dash-gtin-val">{gtinCoverage.missingGtin}</span>
                 </div>
-                <div className="dash-gtin-line">
-                  <span>Codis al pool</span>
-                  <span className="dash-gtin-value">{gtinCoverage.availableCodes}</span>
+                <div className="dash-gtin-row">
+                  <span className="dash-gtin-label">Codis al pool</span>
+                  <span className="dash-gtin-val">{gtinCoverage.availableCodes}</span>
                 </div>
               </div>
             </div>
@@ -557,9 +561,9 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Tracking Logístic + Comandes en curs */}
-        {dashboardWidgets.logistics_tracking && !loadingPreferences && (
-          <SafeWidget widgetName="Logistics Tracking" darkMode={darkMode}>
+        {/* Comandes en curs + Tracking Logístic */}
+        {dashboardWidgets.orders_in_progress && (
+          <SafeWidget widgetName="Orders In Progress" darkMode={darkMode}>
             <div
               className="dash-merged-widget"
               style={{
@@ -567,71 +571,71 @@ export default function Dashboard() {
                 backgroundColor: darkMode ? '#15151f' : '#ffffff'
               }}
             >
-              <LogisticsTrackingWidget darkMode={darkMode} embedded />
+              <div style={styles.sectionHeader}>
+                <h2 style={{
+                  ...styles.sectionTitle,
+                  color: darkMode ? '#ffffff' : '#111827'
+                }}>
+                  <Package size={20} />
+                  {t('dashboard.ordersInProgress.title')}
+                </h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate('/orders')}
+                  style={styles.viewAllButton}
+                >
+                  {t('dashboard.ordersInProgress.viewAll')} <ArrowRight size={16} />
+                </Button>
+              </div>
 
-              {dashboardWidgets.orders_in_progress && (
+              {loadingOrders ? (
+                <div style={styles.loading}>{t('dashboard.ordersInProgress.loading')}</div>
+              ) : ordersInProgress.length === 0 ? (
+                <div style={styles.empty}>
+                  <p>{t('dashboard.ordersInProgress.empty')}</p>
+                </div>
+              ) : (
+                <div style={styles.ordersList}>
+                  {ordersInProgress.map(order => {
+                    const statusInfo = getOrderStatusInfo(order.status)
+                    return (
+                      <div
+                        key={order.id}
+                        style={styles.orderItem}
+                        onClick={() => navigate(`/orders`)}
+                      >
+                        <div style={styles.orderInfo}>
+                          <span style={{
+                            ...styles.orderNumber,
+                            color: darkMode ? '#ffffff' : '#111827'
+                          }}>
+                            {order.po_number}
+                          </span>
+                          <span style={{
+                            ...styles.orderProject,
+                            color: darkMode ? '#6b7280' : '#9ca3af'
+                          }}>
+                            {order.project?.name || t('dashboard.noProject')}
+                          </span>
+                        </div>
+                        <div style={{
+                          ...styles.statusBadge,
+                          backgroundColor: `${statusInfo.color}15`,
+                          color: statusInfo.color
+                        }}>
+                          {statusInfo.name}
+                        </div>
+                        <ArrowRight size={18} color="#9ca3af" />
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+
+              {dashboardWidgets.logistics_tracking && (
                 <div className="dash-merged-subsection">
-                  <div style={styles.sectionHeader}>
-                    <h2 style={{
-                      ...styles.sectionTitle,
-                      color: darkMode ? '#ffffff' : '#111827'
-                    }}>
-                      <Package size={20} />
-                      {t('dashboard.ordersInProgress.title')}
-                    </h2>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => navigate('/orders')}
-                      style={styles.viewAllButton}
-                    >
-                      {t('dashboard.ordersInProgress.viewAll')} <ArrowRight size={16} />
-                    </Button>
-                  </div>
-
-                  {loadingOrders ? (
-                    <div style={styles.loading}>{t('dashboard.ordersInProgress.loading')}</div>
-                  ) : ordersInProgress.length === 0 ? (
-                    <div style={styles.empty}>
-                      <p>{t('dashboard.ordersInProgress.empty')}</p>
-                    </div>
-                  ) : (
-                    <div style={styles.ordersList}>
-                      {ordersInProgress.map(order => {
-                        const statusInfo = getOrderStatusInfo(order.status)
-                        return (
-                          <div
-                            key={order.id}
-                            style={styles.orderItem}
-                            onClick={() => navigate(`/orders`)}
-                          >
-                            <div style={styles.orderInfo}>
-                              <span style={{
-                                ...styles.orderNumber,
-                                color: darkMode ? '#ffffff' : '#111827'
-                              }}>
-                                {order.po_number}
-                              </span>
-                              <span style={{
-                                ...styles.orderProject,
-                                color: darkMode ? '#6b7280' : '#9ca3af'
-                              }}>
-                                {order.project?.name || t('dashboard.noProject')}
-                              </span>
-                            </div>
-                            <div style={{
-                              ...styles.statusBadge,
-                              backgroundColor: `${statusInfo.color}15`,
-                              color: statusInfo.color
-                            }}>
-                              {statusInfo.name}
-                            </div>
-                            <ArrowRight size={18} color="#9ca3af" />
-                          </div>
-                        )
-                      })}
-                    </div>
-                  )}
+                  <LogisticsTrackingWidget darkMode={darkMode} embedded />
                 </div>
               )}
             </div>
