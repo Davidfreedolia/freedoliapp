@@ -355,10 +355,11 @@ main {
 .avatar.topbar-avatar {
   width: 28px !important;
   height: 28px !important;
-  background: var(--surface-2);
-  border: 1px solid var(--border-1);
-  color: var(--brand-primary);
+  background: var(--surface-1) !important;
+  border: 1px solid var(--border-1) !important;
+  color: var(--brand-primary) !important;
   font-weight: 700;
+  box-shadow: none !important;
 }
 
 /* Toolbar controls */
@@ -1018,16 +1019,18 @@ body.dark .fd-calendar-asana .rbc-day-slot .rbc-time-slot:hover {
   overflow: visible !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  background: var(--surface-bg) !important;
-  background-color: var(--surface-bg) !important;
+  background: var(--surface-2) !important;
+  background-color: var(--surface-2) !important;
   border-bottom: none !important;
   box-shadow: none !important;
+  filter: none !important;
 }
 
 .topbar::before,
 .topbar::after {
   content: none !important;
   background: none !important;
+  box-shadow: none !important;
   filter: none !important;
 }
 
