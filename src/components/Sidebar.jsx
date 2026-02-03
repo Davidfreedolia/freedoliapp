@@ -202,7 +202,7 @@ export default function Sidebar() {
             className="sidebar-toggle__button"
           >
             <ChevronsRight
-              size={22}
+              size={24}
               strokeWidth={3.0}
               className={`sidebar-toggle__icon ${sidebarCollapsed ? 'is-collapsed' : ''}`}
             />

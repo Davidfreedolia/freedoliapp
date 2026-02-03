@@ -1,6 +1,6 @@
 // Component per mostrar i gestionar connexió amb Google Drive
 import { useState, useEffect, useCallback } from 'react'
-import { LogIn, LogOut, RefreshCw, AlertCircle } from 'lucide-react'
+import { RefreshCw, AlertCircle } from 'lucide-react'
 import driveIcon from '../assets/google-drive.svg'
 import Button from './Button'
 import { driveService } from '../lib/googleDrive'
@@ -115,6 +115,10 @@ export default function DriveStatus({ compact = false }) {
     initDrive()
   }
 
+  const driveButtonClass = `drive-btn ${isConnected ? 'drive--on' : 'drive--off'}`
+  const driveStatusText = isConnected ? (userName || 'Connectat') : 'Desconnectat'
+  const driveActionText = isConnected ? 'Desconnectar' : 'Connectar'
+
   // Versió compacta (només icona)
   if (compact) {
     if (isLoading) {
@@ -142,24 +146,27 @@ export default function DriveStatus({ compact = false }) {
     }
 
     return (
-      <div 
-        style={{
-          ...styles.compactContainer,
-          backgroundColor: isConnected ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-          cursor: 'pointer'
-        }}
-        className={isConnected ? 'drive--on' : 'drive--off'}
+      <Button
+        variant="secondary"
         onClick={isConnected ? handleDisconnect : handleConnect}
+        className={driveButtonClass}
         title={isConnected ? `Connectat com ${userName}. Clica per desconnectar.` : 'Clica per connectar amb Google Drive'}
       >
-        <img
-          src={driveIcon}
-          alt="Google Drive"
-          width={18}
-          height={18}
-          style={{ display: 'block' }}
-        />
-      </div>
+        <span className="drive-btn__left">
+          <img
+            src={driveIcon}
+            alt="Google Drive"
+            width={18}
+            height={18}
+            className="drive-btn__icon"
+          />
+          <span className="drive-btn__text">
+            <span className="drive-btn__title">Drive</span>
+            <span className="drive-btn__sub">{driveStatusText}</span>
+          </span>
+        </span>
+        <span className="drive-btn__cta">{driveActionText}</span>
+      </Button>
     )
   }
 
@@ -180,42 +187,29 @@ export default function DriveStatus({ compact = false }) {
             Reintentar
           </Button>
         </div>
-      ) : isConnected ? (
-        <div style={styles.container}>
-          <img
-            src={driveIcon}
-            alt="Google Drive"
-            width={18}
-            height={18}
-            style={{ display: 'block' }}
-          />
-          <div style={styles.info}>
-            <span style={styles.statusText}>Google Drive</span>
-            <span style={styles.userName}>{userName || 'Connectat'}</span>
-          </div>
-          <Button variant="ghost" onClick={handleDisconnect} title="Desconnectar" className="drive--on">
-            <LogOut size={14} />
-          </Button>
-        </div>
       ) : (
-        <div style={styles.container}>
-          <img
-            src={driveIcon}
-            alt="Google Drive"
-            width={18}
-            height={18}
-            style={{ display: 'block' }}
-          />
-          <span style={styles.statusText}>Drive desconnectat</span>
-          <Button variant="secondary"
-            onClick={handleConnect} 
-            disabled={isLoading}
-            className="drive--off"
-          >
-            <LogIn size={14} />
-            {isLoading ? 'Connectant...' : 'Reconnectar'}
-          </Button>
-        </div>
+        <Button
+          variant="secondary"
+          onClick={isConnected ? handleDisconnect : handleConnect}
+          disabled={!isConnected && isLoading}
+          className={driveButtonClass}
+          title={isConnected ? `Connectat com ${userName}. Clica per desconnectar.` : 'Clica per connectar amb Google Drive'}
+        >
+          <span className="drive-btn__left">
+            <img
+              src={driveIcon}
+              alt="Google Drive"
+              width={18}
+              height={18}
+              className="drive-btn__icon"
+            />
+            <span className="drive-btn__text">
+              <span className="drive-btn__title">Drive</span>
+              <span className="drive-btn__sub">{driveStatusText}</span>
+            </span>
+          </span>
+          <span className="drive-btn__cta">{driveActionText}</span>
+        </Button>
       )}
       {error && (
         <div style={styles.error}>

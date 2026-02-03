@@ -409,37 +409,108 @@ main {
   border-radius: var(--btn-radius);
 }
 
+/* Drive status button */
+.drive-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-radius: 999px;
+  box-shadow: var(--btn-shadow);
+  padding: 0 12px;
+  white-space: nowrap;
+}
+
+.drive-btn__left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.drive-btn__icon {
+  display: block;
+  flex: 0 0 auto;
+}
+
+.drive-btn__text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  line-height: 1.1;
+  overflow: hidden;
+}
+
+.drive-btn__title {
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.drive-btn__sub {
+  font-size: 12px;
+  opacity: 0.8;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.drive-btn__cta {
+  flex: 0 0 auto;
+  font-weight: 600;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: inherit;
+}
+
+.drive-btn__cta {
+  opacity: 0.9;
+}
+
+.drive-btn__cta:hover {
+  opacity: 1;
+}
+
+.drive-btn.drive--off,
+.drive-btn.drive--on {
+  background: var(--btn-secondary-bg) !important;
+}
+
+@media (max-width: 480px) {
+  .drive-btn {
+    padding: 0 10px;
+    gap: 8px;
+  }
+
+  .drive-btn__cta {
+    display: none;
+  }
+}
+
 /* Drive state accents */
 .drive--off {
-  border-color: rgba(242, 108, 99, 0.6);
-}
-
-.drive--off:hover {
-  background-color: rgba(242, 108, 99, 0.12);
-}
-
-.drive--off:focus-visible {
-  box-shadow: var(--btn-shadow), 0 0 0 2px rgba(242, 108, 99, 0.6);
-}
-
-.drive--on {
-  border-color: rgba(107, 199, 181, 0.6);
-}
-
-.drive--on:hover {
-  background-color: rgba(107, 199, 181, 0.12);
-}
-
-.drive--on {
-  --btn-secondary-border: rgba(107, 199, 181, 0.75);
-  --btn-secondary-hover-bg: rgba(107, 199, 181, 0.14);
-  --focus-ring: 0 0 0 2px rgba(107, 199, 181, 0.55);
-}
-
-.drive--off {
-  --btn-secondary-border: rgba(242, 108, 99, 0.75);
-  --btn-secondary-hover-bg: rgba(242, 108, 99, 0.14);
+  --btn-secondary-bg: rgba(242, 108, 99, 0.18);
+  --btn-secondary-border: transparent;
+  --btn-secondary-fg: var(--text-base-color);
+  --btn-secondary-hover-bg: rgba(242, 108, 99, 0.24);
   --focus-ring: 0 0 0 2px rgba(242, 108, 99, 0.55);
+}
+
+.drive--on {
+  --btn-secondary-bg: rgba(107, 199, 181, 0.18);
+  --btn-secondary-border: transparent;
+  --btn-secondary-fg: var(--text-base-color);
+  --btn-secondary-hover-bg: rgba(107, 199, 181, 0.24);
+  --focus-ring: 0 0 0 2px rgba(107, 199, 181, 0.55);
 }
 
 /* Selection */
@@ -486,11 +557,14 @@ main {
 }
 
 .sidebar-toggle__button {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
   border-radius: 50%;
   padding: 0;
-  background-color: #ECA269;
+  background-color: #ECA269 !important;
+  border: none !important;
   color: #ffffff;
   box-shadow: var(--btn-shadow);
   display: flex;
@@ -508,12 +582,29 @@ main {
 
 .sidebar-toggle__icon {
   color: #ffffff;
+  stroke-width: 3.2;
   transform: rotate(180deg);
   transition: transform 0.2s ease;
 }
 
+@media (max-width: 480px) {
+  .sidebar-toggle__button {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
 .sidebar-toggle__icon.is-collapsed {
   transform: rotate(0deg);
+}
+
+@media (max-width: 480px) {
+  .sidebar-toggle__button {
+    width: 40px;
+    height: 40px;
+  }
 }
 
 .ui-card:hover {

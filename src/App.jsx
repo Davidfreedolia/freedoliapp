@@ -6,7 +6,6 @@ import ProtectedRoute from './components/ProtectedRoute'
 import PageLoader from './components/PageLoader'
 import ToastContainer from './components/Toast'
 import DemoModeBanner from './components/DemoModeBanner'
-import DevBadge from './components/DevBadge'
 import ErrorBoundary from './components/ErrorBoundary'
 import FloatingNotesLayer from './components/FloatingNotesLayer'
 import TopNavbar from './components/TopNavbar'
@@ -82,7 +81,6 @@ function AppContent() {
       '--sidebar-w': `${sidebarWidth}px`
     }}>
       <DemoModeBanner darkMode={darkMode} />
-      <DevBadge darkMode={darkMode} />
       <Sidebar />
       <main style={{
         flex: 1,
