@@ -28,8 +28,17 @@
   --fd-border: rgba(31, 78, 95, 0.18);
   --fd-muted: rgba(31, 78, 95, 0.6);
 
+  /* Brand palette mapping */
+  --brand-primary: #f28b74;
+  --brand-note: #f6d78b;
+  --surface-1: #ffffff;
+  --surface-2: #f6f7f4;
+  --text-1: #111827;
+  --muted-1: #6b7280;
+  --border-1: #e5e7eb;
+
   /* Semantic Color Tokens - Light Mode */
-  --color-primary: var(--fd-petrol);
+  --color-primary: var(--brand-primary);
   --color-secondary: var(--fd-turquoise);
   --color-accent: #ECA269;
   --color-success: var(--fd-turquoise);
@@ -37,9 +46,9 @@
   --color-danger: var(--fd-coral);
   --color-bg: var(--fd-offwhite);
   --color-surface: #FFFFFF;
-  --color-border: var(--fd-border);
-  --color-text: var(--fd-petrol);
-  --color-muted: var(--fd-muted);
+  --color-border: var(--border-1);
+  --color-text: var(--text-1);
+  --color-muted: var(--muted-1);
 
   /* Nav palette */
   --nav-bg: #121212;
@@ -165,7 +174,7 @@
 
 body.dark {
   /* Semantic Color Tokens - Dark Mode */
-  --color-primary: #6AA7B7;
+  --color-primary: var(--brand-primary);
   --color-secondary: #2C5C6A;
   --color-accent: #ECA269;
   --color-success: #6BC7B5;
@@ -173,9 +182,14 @@ body.dark {
   --color-danger: #F26C63;
   --color-bg: #12282F;
   --color-surface: #18363F;
-  --color-border: rgba(244, 247, 243, 0.12);
-  --color-text: #F4F7F3;
-  --color-muted: rgba(244, 247, 243, 0.7);
+  --color-border: var(--border-1);
+  --color-text: var(--text-1);
+  --color-muted: var(--muted-1);
+  --surface-1: #15151f;
+  --surface-2: #0f1118;
+  --text-1: #ffffff;
+  --muted-1: #9ca3af;
+  --border-1: #2a2f3a;
   --text-base-color: rgba(244, 244, 245, 0.82);
   --text-muted-color: rgba(244, 244, 245, 0.60);
   
@@ -339,9 +353,12 @@ main {
 }
 
 .avatar.topbar-avatar {
-  background: var(--surface-bg-2);
-  border: 1px solid var(--border-color);
-  color: var(--color-primary);
+  width: 28px !important;
+  height: 28px !important;
+  background: var(--surface-2);
+  border: 1px solid var(--border-1);
+  color: var(--brand-primary);
+  font-weight: 700;
 }
 
 /* Toolbar controls */
@@ -1045,7 +1062,7 @@ body.dark .fd-calendar-asana .rbc-day-slot .rbc-time-slot:hover {
 .dash-stat-icon svg {
   width: 20px;
   height: 20px;
-  color: var(--color-primary);
+  color: var(--brand-primary);
 }
 
 .dash-stat-value {
