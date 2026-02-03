@@ -551,7 +551,7 @@ main {
   background: transparent;
 }
 
-.sidebar-toggle {
+.sidebar-edge-toggle {
   position: absolute;
   top: 50%;
   right: -18px;
@@ -564,10 +564,10 @@ main {
 }
 
 .sidebar-toggle__button {
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
-  min-height: 40px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: 999px;
   padding: 0;
   background: #ECA269 !important;
@@ -590,40 +590,31 @@ main {
 .sidebar-toggle__icon {
   color: #fff;
   stroke: #fff;
-  stroke-width: 2.8;
+  stroke-width: 3;
   transition: transform 0.2s ease;
-  transform: rotate(0deg);
+  transform: rotate(180deg);
 }
 
 @media (max-width: 768px) {
-  .sidebar-toggle {
+  .sidebar-edge-toggle {
     position: static;
-    transform: none;
     margin-top: auto;
     padding: 12px 0 16px;
     display: flex;
     justify-content: center;
+    transform: none;
   }
 
   .sidebar-toggle__button {
-    width: 44px;
-    height: 44px;
-    min-width: 44px;
-    min-height: 44px;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
   }
 }
 
 .sidebar-toggle__icon.is-collapsed {
-  transform: rotate(180deg);
-}
-
-@media (max-width: 480px) {
-  .sidebar-toggle__button {
-    width: 44px;
-    height: 44px;
-    min-width: 44px;
-    min-height: 44px;
-  }
+  transform: rotate(0deg);
 }
 
 .ui-card:hover {

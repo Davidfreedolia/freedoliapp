@@ -130,7 +130,7 @@ export default function Sidebar() {
           }}
         />
         {isDesktop && (
-          <div className="sidebar-toggle">
+          <div className="sidebar-toggle sidebar-edge-toggle">
             <Button
               type="button"
               variant="secondary"
