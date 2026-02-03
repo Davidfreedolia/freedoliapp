@@ -17,12 +17,12 @@ import Button from './Button'
 
 // Estats del flux logístic (simplificat per dashboard)
 const LOGISTICS_STAGES = [
-  { id: 'production', name: 'Producció', icon: Factory, color: 'var(--brand-primary)' },
-  { id: 'pickup', name: 'Recollida', icon: Truck, color: 'var(--brand-amber)' },
-  { id: 'in_transit', name: 'En trànsit', icon: Ship, color: 'var(--brand-amber)' },
-  { id: 'customs', name: 'Duanes', icon: Package, color: 'var(--brand-amber)' },
-  { id: 'amazon_fba', name: 'Amazon FBA', icon: Warehouse, color: 'var(--brand-green)' },
-  { id: 'delivered', name: 'Lliurat', icon: CheckCircle2, color: 'var(--brand-green)' }
+  { id: 'production', name: 'Producció', icon: Factory, color: 'var(--brand-primary)', colorSoft: 'var(--brand-primary-soft)' },
+  { id: 'pickup', name: 'Recollida', icon: Truck, color: 'var(--brand-amber)', colorSoft: 'var(--brand-amber-soft)' },
+  { id: 'in_transit', name: 'En trànsit', icon: Ship, color: 'var(--brand-amber)', colorSoft: 'var(--brand-amber-soft)' },
+  { id: 'customs', name: 'Duanes', icon: Package, color: 'var(--brand-amber)', colorSoft: 'var(--brand-amber-soft)' },
+  { id: 'amazon_fba', name: 'Amazon FBA', icon: Warehouse, color: 'var(--brand-green)', colorSoft: 'var(--brand-green-soft)' },
+  { id: 'delivered', name: 'Lliurat', icon: CheckCircle2, color: 'var(--brand-green)', colorSoft: 'var(--brand-green-soft)' }
 ]
 
 const LOGISTICS_STATUS_LABELS = {
@@ -81,7 +81,7 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false }) 
   const getStatusInfo = (status) => {
     const stage = LOGISTICS_STAGES.find(s => s.id === status)
     if (!stage) {
-      return { name: status || 'Pendent', color: '#9ca3af', icon: Clock }
+      return { name: status || 'Pendent', color: 'var(--muted-1)', colorSoft: 'var(--surface-2)', icon: Clock }
     }
     return stage
   }
@@ -274,7 +274,7 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false }) 
                 </div>
                 <div style={{
                   ...styles.statusBadge,
-                  backgroundColor: `${statusInfo.color}15`,
+                  backgroundColor: statusInfo.colorSoft || 'var(--surface-2)',
                   color: statusInfo.color
                 }}>
                   <StatusIcon size={14} />
@@ -301,7 +301,7 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false }) 
                       <div key={stage.id} style={styles.stageDot}>
                         <div style={{
                           ...styles.stageIcon,
-                          backgroundColor: isCompleted || isCurrent ? `${stage.color}20` : (darkMode ? '#1f1f2e' : '#f3f4f6'),
+                          backgroundColor: isCompleted || isCurrent ? stage.colorSoft : (darkMode ? '#1f1f2e' : '#f3f4f6'),
                           borderColor: isCompleted || isCurrent ? stage.color : (darkMode ? '#374151' : '#e5e7eb')
                         }}>
                           <StageIcon size={10} color={isCompleted || isCurrent ? stage.color : '#9ca3af'} />

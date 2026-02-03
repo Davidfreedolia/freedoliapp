@@ -34,6 +34,10 @@
   --brand-amber: #f2e27d;
   --brand-green: #6bc7b5;
   --brand-ink: #1f4e5f;
+  --brand-primary-soft: rgba(242, 108, 99, 0.18);
+  --brand-amber-soft: rgba(242, 226, 125, 0.20);
+  --brand-green-soft: rgba(107, 199, 181, 0.20);
+  --brand-ink-soft: rgba(31, 78, 95, 0.14);
   --surface-1: #ffffff;
   --surface-2: #f6f7f4;
   --text-1: #111827;
@@ -196,6 +200,10 @@ body.dark {
   --brand-amber: #f2e27d;
   --brand-green: #6bc7b5;
   --brand-ink: #f4f7f3;
+  --brand-primary-soft: rgba(242, 108, 99, 0.22);
+  --brand-amber-soft: rgba(242, 226, 125, 0.22);
+  --brand-green-soft: rgba(107, 199, 181, 0.22);
+  --brand-ink-soft: rgba(244, 247, 243, 0.18);
   --text-base-color: rgba(244, 244, 245, 0.82);
   --text-muted-color: rgba(244, 244, 245, 0.60);
   
