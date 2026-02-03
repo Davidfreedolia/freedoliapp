@@ -445,7 +445,7 @@ main {
 
 .drive-btn__title {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -453,8 +453,8 @@ main {
 }
 
 .drive-btn__sub {
-  font-size: 12px;
-  opacity: 0.8;
+  font-size: 11px;
+  opacity: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -470,19 +470,21 @@ main {
   border-radius: 0 !important;
   box-shadow: none !important;
   color: inherit;
-}
-
-.drive-btn__cta {
-  opacity: 0.9;
-}
-
-.drive-btn__cta:hover {
   opacity: 1;
 }
 
 .drive-btn.drive--off,
 .drive-btn.drive--on {
+  background-color: var(--btn-secondary-bg) !important;
   background: var(--btn-secondary-bg) !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  color: var(--nav-fg) !important;
+}
+
+.drive-btn__title,
+.drive-btn__sub,
+.drive-btn__cta {
+  color: var(--nav-fg) !important;
 }
 
 @media (max-width: 480px) {
@@ -498,18 +500,18 @@ main {
 
 /* Drive state accents */
 .drive--off {
-  --btn-secondary-bg: rgba(242, 108, 99, 0.18);
+  --btn-secondary-bg: var(--fd-coral);
   --btn-secondary-border: transparent;
-  --btn-secondary-fg: var(--text-base-color);
-  --btn-secondary-hover-bg: rgba(242, 108, 99, 0.24);
+  --btn-secondary-fg: var(--nav-fg);
+  --btn-secondary-hover-bg: var(--fd-coral);
   --focus-ring: 0 0 0 2px rgba(242, 108, 99, 0.55);
 }
 
 .drive--on {
-  --btn-secondary-bg: rgba(107, 199, 181, 0.18);
+  --btn-secondary-bg: var(--fd-turquoise);
   --btn-secondary-border: transparent;
-  --btn-secondary-fg: var(--text-base-color);
-  --btn-secondary-hover-bg: rgba(107, 199, 181, 0.24);
+  --btn-secondary-fg: var(--nav-fg);
+  --btn-secondary-hover-bg: var(--fd-turquoise);
   --focus-ring: 0 0 0 2px rgba(107, 199, 181, 0.55);
 }
 
@@ -550,8 +552,12 @@ main {
 }
 
 .sidebar-toggle {
-  margin-top: auto;
-  padding: 12px 0 16px;
+  position: absolute;
+  right: -20px;
+  top: var(--sidebar-toggle-top, 140px);
+  z-index: 999;
+  margin: 0;
+  padding: 0;
   display: flex;
   justify-content: center;
 }
@@ -561,9 +567,9 @@ main {
   height: 40px;
   min-width: 40px;
   min-height: 40px;
-  border-radius: 50%;
+  border-radius: 999px;
   padding: 0;
-  background-color: #ECA269 !important;
+  background: #ECA269 !important;
   border: none !important;
   color: #ffffff;
   box-shadow: var(--btn-shadow);
@@ -581,13 +587,21 @@ main {
 }
 
 .sidebar-toggle__icon {
-  color: #ffffff;
+  color: #fff;
   stroke-width: 3.2;
   transform: rotate(180deg);
   transition: transform 0.2s ease;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
+  .sidebar-toggle {
+    position: static;
+    margin-top: 12px;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+  }
+
   .sidebar-toggle__button {
     width: 44px;
     height: 44px;

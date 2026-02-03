@@ -129,6 +129,25 @@ export default function Sidebar() {
             width: shouldCollapse ? '40px' : '140px'
           }}
         />
+        {isDesktop && (
+          <div className="sidebar-toggle">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              title={sidebarCollapsed ? 'Expandir' : 'Col·lapsar'}
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className="sidebar-toggle__button"
+            >
+              <ChevronsRight
+                size={24}
+                strokeWidth={3.0}
+                className={`sidebar-toggle__icon ${sidebarCollapsed ? 'is-collapsed' : ''}`}
+              />
+            </Button>
+          </div>
+        )}
         {isMobile && (
           <button
             onClick={handleCloseDrawer}
@@ -190,25 +209,6 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {isDesktop && (
-        <div className="sidebar-toggle">
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            title={sidebarCollapsed ? 'Expandir' : 'Col·lapsar'}
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="sidebar-toggle__button"
-          >
-            <ChevronsRight
-              size={24}
-              strokeWidth={3.0}
-              className={`sidebar-toggle__icon ${sidebarCollapsed ? 'is-collapsed' : ''}`}
-            />
-          </Button>
-        </div>
-      )}
     </>
   )
 
