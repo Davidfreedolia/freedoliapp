@@ -617,6 +617,43 @@ main {
   transform: rotate(0deg);
 }
 
+/* TOPBAR — treure línia/separador */
+.topbar,
+.topbar * {
+  border-bottom: none !important;
+}
+
+.topbar {
+  box-shadow: none !important;
+}
+
+.topbar::after {
+  content: none !important;
+}
+
+/* DRIVE — compact de topbar: petit i discret */
+.drive-btn--compact {
+  width: auto !important;
+  min-width: 0 !important;
+  padding: 0 10px !important;
+  gap: 8px !important;
+}
+
+.drive-btn--compact .drive-btn__title {
+  display: none !important;
+}
+
+.drive-btn--compact .drive-btn__cta {
+  display: none !important;
+}
+
+.drive-btn--compact .drive-btn__sub {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  opacity: 1 !important;
+  max-width: 160px;
+}
+
 .ui-card:hover {
   box-shadow: var(--shadow-soft-hover);
 }

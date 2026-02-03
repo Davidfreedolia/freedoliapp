@@ -115,7 +115,7 @@ export default function DriveStatus({ compact = false }) {
     initDrive()
   }
 
-  const driveButtonClass = `drive-btn ${isConnected ? 'drive--on' : 'drive--off'}`
+  const driveButtonClass = `drive-btn ${compact ? 'drive-btn--compact' : ''} ${isConnected ? 'drive--on' : 'drive--off'}`
   const driveStatusText = isConnected ? (userName || 'Connectat') : 'Desconnectat'
   const driveActionText = isConnected ? 'Desconnectar' : 'Connectar'
 
