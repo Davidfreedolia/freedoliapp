@@ -500,25 +500,16 @@ export default function Dashboard() {
           gap: isMobile ? '12px' : '20px'
         }}>
           {statCards.map((stat, index) => (
-            <div 
+            <div
               key={index}
-              className="dash-stat-card"
-              style={{
-                ...styles.statCard,
-                backgroundColor: darkMode ? '#15151f' : '#ffffff'
-              }}
+              className={`dash-stat-card ${darkMode ? 'dash-stat-card--dark' : 'dash-stat-card--light'}`}
             >
-              <div className="dash-stat-icon" style={styles.statIcon}>
+              <div className="dash-stat-icon">
                 <stat.icon size={20} />
               </div>
               <div style={styles.statInfo}>
-                <span style={{
-                  ...styles.statValue,
-                  color: darkMode ? '#ffffff' : '#111827'
-                }}>
-                  {stat.value}
-                </span>
-                <span style={styles.statLabel}>{stat.label}</span>
+                <span className="dash-stat-value">{stat.value}</span>
+                <span className="dash-stat-label">{stat.label}</span>
               </div>
             </div>
           ))}
@@ -1106,34 +1097,9 @@ const styles = {
     gap: '20px',
     marginBottom: '32px'
   },
-  statCard: {
-    padding: '16px',
-    borderRadius: '12px',
-    border: '1px solid var(--border-color)',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    minHeight: '72px'
-  },
-  statIcon: {
-    width: '40px',
-    height: '40px',
-    borderRadius: '10px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
   statInfo: {
     display: 'flex',
     flexDirection: 'column'
-  },
-  statValue: {
-    fontSize: '22px',
-    fontWeight: '700'
-  },
-  statLabel: {
-    fontSize: '12px',
-    color: '#6b7280'
   },
   editModeBadge: {
     display: 'inline-flex',

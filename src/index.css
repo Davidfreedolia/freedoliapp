@@ -1004,15 +1004,49 @@ body.dark .fd-calendar-asana .rbc-day-slot .rbc-time-slot:hover {
 
 /* DASHBOARD — stats cards coherència */
 .dash-stat-card {
-  padding: 16px !important;
-  min-height: 72px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+}
+
+.dash-stat-card--light {
+  background: var(--surface-1);
+}
+
+.dash-stat-card--dark {
+  background: #15151f;
 }
 
 .dash-stat-icon {
-  background: none !important;
-  padding: 0 !important;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: none;
 }
 
 .dash-stat-icon svg {
+  width: 20px;
+  height: 20px;
   color: var(--color-primary);
+}
+
+.dash-stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.dash-stat-label {
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+body.dark .dash-stat-value {
+  color: #ffffff;
 }
