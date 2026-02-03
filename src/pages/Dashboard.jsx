@@ -385,26 +385,22 @@ export default function Dashboard() {
     {
       label: 'Total Projectes',
       value: stats.totalProjects,
-      icon: FolderKanban,
-      color: '#4f46e5'
+      icon: FolderKanban
     },
     {
       label: 'Actius',
       value: stats.activeProjects,
-      icon: PlayCircle,
-      color: '#22c55e'
+      icon: PlayCircle
     },
     {
       label: 'Completats',
       value: stats.completedProjects,
-      icon: CheckCircle2,
-      color: '#8b5cf6'
+      icon: CheckCircle2
     },
     {
       label: 'Invertit',
       value: `${stats.totalInvested.toLocaleString('ca-ES', { minimumFractionDigits: 2 })} €`,
-      icon: Wallet,
-      color: '#f59e0b'
+      icon: Wallet
     }
   ]
   
@@ -506,16 +502,14 @@ export default function Dashboard() {
           {statCards.map((stat, index) => (
             <div 
               key={index}
+              className="dash-stat-card"
               style={{
                 ...styles.statCard,
                 backgroundColor: darkMode ? '#15151f' : '#ffffff'
               }}
             >
-              <div style={{
-                ...styles.statIcon,
-                backgroundColor: `${stat.color}15`
-              }}>
-                <stat.icon size={24} color={stat.color} />
+              <div className="dash-stat-icon" style={styles.statIcon}>
+                <stat.icon size={20} />
               </div>
               <div style={styles.statInfo}>
                 <span style={{
@@ -1113,17 +1107,18 @@ const styles = {
     marginBottom: '32px'
   },
   statCard: {
-    padding: '24px',
-    borderRadius: '16px',
+    padding: '16px',
+    borderRadius: '12px',
     border: '1px solid var(--border-color)',
     display: 'flex',
     alignItems: 'center',
-    gap: '16px'
+    gap: '12px',
+    minHeight: '72px'
   },
   statIcon: {
-    width: '56px',
-    height: '56px',
-    borderRadius: '14px',
+    width: '40px',
+    height: '40px',
+    borderRadius: '10px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center'
@@ -1133,11 +1128,11 @@ const styles = {
     flexDirection: 'column'
   },
   statValue: {
-    fontSize: '28px',
+    fontSize: '22px',
     fontWeight: '700'
   },
   statLabel: {
-    fontSize: '14px',
+    fontSize: '12px',
     color: '#6b7280'
   },
   editModeBadge: {

@@ -1001,3 +1001,18 @@ body.dark .fd-calendar-asana .rbc-day-slot .rbc-time-slot:hover {
   background: none !important;
   filter: none !important;
 }
+
+/* DASHBOARD — stats cards coherència */
+.dash-stat-card {
+  padding: 16px !important;
+  min-height: 72px;
+}
+
+.dash-stat-icon {
+  background: none !important;
+  padding: 0 !important;
+}
+
+.dash-stat-icon svg {
+  color: var(--color-primary);
+}
