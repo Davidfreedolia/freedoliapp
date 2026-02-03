@@ -87,7 +87,6 @@ export default function Sidebar() {
   const { t } = useTranslation()
   const [logoError, setLogoError] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [toggleHover, setToggleHover] = useState(false)
   const [hoveredPath, setHoveredPath] = useState(null)
 
   // En mobile, sidebar sempre col·lapsat (drawer)
@@ -192,29 +191,23 @@ export default function Sidebar() {
       </nav>
 
       {isDesktop && (
-        <Button
-          type="button"
-          variant="primary"
-          size="sm"
-          aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          title={sidebarCollapsed ? 'Expandir' : 'Col·lapsar'}
-          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          onMouseEnter={() => setToggleHover(true)}
-          onMouseLeave={() => setToggleHover(false)}
-          style={{
-            ...styles.centerToggle,
-            opacity: toggleHover ? 1 : 0.9,
-            backgroundColor: 'var(--color-accent)',
-            color: '#ffffff'
-          }}
-        >
-          <ChevronsRight
-            size={22}
-            strokeWidth={3.0}
-            color="#ffffff"
-            style={{ transform: sidebarCollapsed ? 'none' : 'rotate(180deg)' }}
-          />
-        </Button>
+        <div className="sidebar-toggle">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            title={sidebarCollapsed ? 'Expandir' : 'Col·lapsar'}
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="sidebar-toggle__button"
+          >
+            <ChevronsRight
+              size={22}
+              strokeWidth={3.0}
+              className={`sidebar-toggle__icon ${sidebarCollapsed ? 'is-collapsed' : ''}`}
+            />
+          </Button>
+        </div>
       )}
     </>
   )
@@ -327,26 +320,6 @@ const styles = {
     fontSize: '14px',
     fontWeight: '500',
     transition: 'all 0.2s ease'
-  },
-  centerToggle: {
-    position: 'absolute',
-    top: '50%',
-    right: '-22px',
-    transform: 'translateY(-50%)',
-    zIndex: 900,
-    width: '40px',
-    height: '40px',
-    borderRadius: '999px',
-    border: 'none',
-    backgroundColor: 'var(--color-accent)',
-    color: '#ffffff',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    transition: 'opacity 0.15s ease',
-    boxShadow: 'var(--btn-shadow)',
-    padding: 0
   },
   mobileMenuButton: {
     position: 'fixed',

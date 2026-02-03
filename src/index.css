@@ -11,7 +11,7 @@
 */
 :root {
   /* System typography */
-  --font-sans: 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-sans: 'Roboto', system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
   --text-base-color: rgba(15, 23, 42, 0.82);
   --text-muted-color: rgba(15, 23, 42, 0.62);
   --text-size-base: 14px;
@@ -106,6 +106,12 @@
   --btn-font-size: var(--text-size-base);
   --btn-font-size-sm: var(--text-size-base);
 
+  /* Action semantics */
+  --action-create: var(--fd-turquoise);
+  --action-success: var(--fd-turquoise);
+  --action-danger: var(--fd-coral);
+  --action-accent: #ECA269;
+
   /* Spacing System - 8px grid */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
@@ -130,16 +136,17 @@
   --btn-gap: 8px;
   --btn-radius: var(--radius-ui);
   --btn-shadow: var(--shadow-soft);
-  --btn-primary-bg: var(--color-accent);
+  --btn-primary-bg: var(--action-create);
   --btn-primary-fg: #0B0F14;
   --btn-primary-hover: rgba(0, 0, 0, 0.06);
   --btn-secondary-bg: rgba(15, 23, 42, 0.06);
   --btn-secondary-fg: rgba(15, 23, 42, 0.82);
-  --btn-secondary-border: rgba(15, 23, 42, 0.10);
-  --btn-ghost-bg: rgba(15, 23, 42, 0.04);
+  --btn-secondary-border: rgba(236, 162, 105, 0.55);
+  --btn-secondary-hover-bg: rgba(236, 162, 105, 0.10);
+  --btn-ghost-bg: transparent;
   --btn-ghost-fg: rgba(15, 23, 42, 0.82);
   --btn-ghost-border: rgba(15, 23, 42, 0.08);
-  --btn-danger-bg: rgba(231, 76, 60, 0.95);
+  --btn-danger-bg: var(--action-danger);
   --btn-danger-fg: #fff;
   --btn-danger-border: rgba(231, 76, 60, 0.35);
   --btn-disabled-opacity: 0.45;
@@ -221,8 +228,9 @@ body.dark {
   /* Button system - Dark Mode */
   --btn-secondary-bg: rgba(255, 255, 255, 0.08);
   --btn-secondary-fg: rgba(244, 244, 245, 0.86);
-  --btn-secondary-border: rgba(255, 255, 255, 0.10);
-  --btn-ghost-bg: rgba(255, 255, 255, 0.06);
+  --btn-secondary-border: rgba(236, 162, 105, 0.65);
+  --btn-secondary-hover-bg: rgba(236, 162, 105, 0.14);
+  --btn-ghost-bg: transparent;
   --btn-ghost-fg: rgba(244, 244, 245, 0.86);
   --btn-ghost-border: rgba(255, 255, 255, 0.10);
 }
@@ -401,6 +409,39 @@ main {
   border-radius: var(--btn-radius);
 }
 
+/* Drive state accents */
+.drive--off {
+  border-color: rgba(242, 108, 99, 0.6);
+}
+
+.drive--off:hover {
+  background-color: rgba(242, 108, 99, 0.12);
+}
+
+.drive--off:focus-visible {
+  box-shadow: var(--btn-shadow), 0 0 0 2px rgba(242, 108, 99, 0.6);
+}
+
+.drive--on {
+  border-color: rgba(107, 199, 181, 0.6);
+}
+
+.drive--on:hover {
+  background-color: rgba(107, 199, 181, 0.12);
+}
+
+.drive--on {
+  --btn-secondary-border: rgba(107, 199, 181, 0.75);
+  --btn-secondary-hover-bg: rgba(107, 199, 181, 0.14);
+  --focus-ring: 0 0 0 2px rgba(107, 199, 181, 0.55);
+}
+
+.drive--off {
+  --btn-secondary-border: rgba(242, 108, 99, 0.75);
+  --btn-secondary-hover-bg: rgba(242, 108, 99, 0.14);
+  --focus-ring: 0 0 0 2px rgba(242, 108, 99, 0.55);
+}
+
 /* Selection */
 ::selection {
   background-color: var(--accent);
@@ -435,6 +476,44 @@ main {
 
 .sidebar-scroll::-webkit-scrollbar-thumb {
   background: transparent;
+}
+
+.sidebar-toggle {
+  margin-top: auto;
+  padding: 12px 0 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.sidebar-toggle__button {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  padding: 0;
+  background-color: #ECA269;
+  color: #ffffff;
+  box-shadow: var(--btn-shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-toggle__button:focus-visible {
+  box-shadow: var(--btn-shadow), var(--focus-ring-offset);
+}
+
+.sidebar-toggle__button:hover {
+  filter: brightness(1.03);
+}
+
+.sidebar-toggle__icon {
+  color: #ffffff;
+  transform: rotate(180deg);
+  transition: transform 0.2s ease;
+}
+
+.sidebar-toggle__icon.is-collapsed {
+  transform: rotate(0deg);
 }
 
 .ui-card:hover {

@@ -5,6 +5,7 @@ import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
 import { createTask } from '../lib/supabase'
 import { showToast } from './Toast'
+import Button from './Button'
 import { useTranslation } from 'react-i18next'
 import { getButtonStyles, useButtonState } from '../utils/buttonStyles'
 
@@ -163,9 +164,9 @@ export default function QuickCreateTaskModal({ isOpen, onClose, onSave, defaultD
       <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div style={styles.header}>
           <h3 style={styles.title}>{t('calendar.newTask', 'Nova Tasca')}</h3>
-          <button onClick={onClose} style={styles.closeButton}>
+          <Button variant="ghost" onClick={onClose} aria-label="Tancar">
             <X size={20} />
-          </button>
+          </Button>
         </div>
         
         <form onSubmit={handleSubmit} style={styles.form}>

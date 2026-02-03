@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Calculator, Save } from 'lucide-react'
+import Button from '../Button'
 import { getPhaseSurfaceStyles } from '../../utils/phaseStyles'
 
 const DEFAULT_VALUES = {
@@ -137,10 +138,10 @@ export default function ViabilityCalculator({ projectId, darkMode, phaseStyle, o
       </div>
 
       <div style={styles.footerRow}>
-        <button style={styles.saveButton} onClick={handleSave}>
+        <Button variant="primary" onClick={handleSave}>
           <Save size={14} />
           Guardar
-        </button>
+        </Button>
         {savedAt && (
           <span style={styles.savedText}>
             Guardat

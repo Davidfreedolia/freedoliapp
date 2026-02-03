@@ -1,4 +1,5 @@
 import { X, AlertTriangle } from 'lucide-react'
+import Button from './Button'
 
 export default function DeleteConfirmationModal({
   isOpen,
@@ -135,9 +136,9 @@ export default function DeleteConfirmationModal({
             <AlertTriangle size={20} color="#ef4444" />
             Eliminar {entityType}
           </h3>
-          <button onClick={onClose} style={styles.closeButton} disabled={isDeleting}>
+          <Button variant="ghost" onClick={onClose} disabled={isDeleting} aria-label="Tancar">
             <X size={20} />
-          </button>
+          </Button>
         </div>
 
         <div style={styles.body}>

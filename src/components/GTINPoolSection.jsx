@@ -24,6 +24,7 @@ import {
 } from '../lib/supabase'
 import { getDemoMode } from '../lib/demoModeFilter'
 import { showToast } from './Toast'
+import Button from './Button'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
 import { getButtonStyles, useButtonState } from '../utils/buttonStyles'
@@ -520,12 +521,9 @@ export default function GTINPoolSection({ darkMode }) {
               {t('settings.gtinPool.assigned')}
             </button>
           </div>
-          <button onClick={loadGtins} style={{
-            ...styles.refreshButton,
-            width: isMobile ? '100%' : 'auto'
-          }}>
+          <Button variant="secondary" onClick={loadGtins}>
             <RefreshCw size={18} />
-          </button>
+          </Button>
         </div>
       </div>
 

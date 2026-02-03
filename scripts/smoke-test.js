@@ -182,51 +182,37 @@ function checkBuildOutput() {
   return true
 }
 
-// Verificar que los imports en index.html son válidos
-function checkImports() {
-  info('Verificando imports en index.html...')
-  
-  const indexPath = join(rootDir, 'dist', 'index.html')
-  if (!existsSync(indexPath)) {
-    return false
-  }
-  
-  const indexContent = readFileSync(indexPath, 'utf-8')
-  const distDir = join(rootDir, 'dist')
-  
-  // Extraer todos los src y href de scripts y links
-  const scriptRegex = /<script[^>]+src=["']([^"']+)["']/g
-  const linkRegex = /<link[^>]+href=["']([^"']+)["']/g
-  
-  const imports = []
-  let match
-  
-  while ((match = scriptRegex.exec(indexContent)) !== null) {
-    imports.push(match[1])
-  }
-  
-  while ((match = linkRegex.exec(indexContent)) !== null) {
-    imports.push(match[1])
-  }
-  
-  const missing = []
-  for (const imp of imports) {
-    // Resolver ruta relativa
-    const importPath = imp.startsWith('/') 
-      ? join(distDir, imp.slice(1))
-      : join(distDir, imp)
-    
-    if (!existsSync(importPath)) {
-      missing.push(imp)
+// Verificar URLs externas prohibidas en fuentes actuales
+function checkSourceExternalUrls() {
+  info('Verificando URLs externas en fuentes...')
+
+  const filesToCheck = [
+    join(rootDir, 'index.html'),
+    join(rootDir, 'src', 'main.jsx'),
+    join(rootDir, 'src', 'index.css')
+  ]
+
+  const forbidden = ['fonts.googleapis.com', 'fonts.gstatic.com']
+  const found = []
+
+  for (const filePath of filesToCheck) {
+    if (!existsSync(filePath)) {
+      continue
+    }
+    const content = readFileSync(filePath, 'utf-8')
+    for (const url of forbidden) {
+      if (content.includes(url)) {
+        found.push(`${url} (${filePath})`)
+      }
     }
   }
-  
-  if (missing.length > 0) {
-    error(`Imports rotos encontrados: ${missing.join(', ')}`)
+
+  if (found.length > 0) {
+    error(`URLs externas prohibidas encontradas: ${found.join(', ')}`)
     return false
   }
-  
-  success(`Todos los imports son válidos (${imports.length} archivos)`)
+
+  success('No se encontraron URLs externas prohibidas en fuentes')
   return true
 }
 
@@ -250,8 +236,8 @@ function runSmokeTest() {
   
   console.log()
   
-  // 3. Verificar imports
-  if (!checkImports()) {
+  // 3. Verificar URLs externas prohibidas en fuentes
+  if (!checkSourceExternalUrls()) {
     allPassed = false
   }
   

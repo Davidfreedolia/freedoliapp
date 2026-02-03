@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { supabase } from '../lib/supabase'
+import Button from './Button'
 
 // Estats del flux
 const FLOW_STATES = {
@@ -221,9 +222,9 @@ export default function LogisticsFlow({ orderId, projectId, compact = false }) {
             <button onClick={() => { setEditing(false); setEditData(flowData?.stages || {}) }} style={styles.cancelBtn}>
               <X size={14} /> Cancel·lar
             </button>
-            <button onClick={handleSave} style={styles.saveBtn}>
+            <Button variant="primary" onClick={handleSave}>
               <Save size={14} /> Guardar
-            </button>
+            </Button>
           </div>
         )}
       </div>

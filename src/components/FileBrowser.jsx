@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { FileText, Image, File, Download, Trash2, RefreshCw, ExternalLink, FolderOpen } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { driveService } from '../lib/googleDrive'
+import Button from './Button'
 
 // Icones per tipus de fitxer
 const getFileIcon = (mimeType, name) => {
@@ -102,9 +103,9 @@ export default function FileBrowser({ folderId, folderName = 'Carpeta', allowDel
         <h4 style={{ ...styles.title, color: darkMode ? '#ffffff' : '#111827' }}>
           {folderName}
         </h4>
-        <button onClick={handleRefresh} style={styles.refreshBtn}>
+        <Button variant="secondary" onClick={handleRefresh}>
           <RefreshCw size={14} />
-        </button>
+        </Button>
       </div>
 
       {/* Files list */}

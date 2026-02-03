@@ -20,6 +20,7 @@ import {
   getWarehouses,
   getCompanySettings
 } from '../lib/supabase'
+import Button from './Button'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
 import { getButtonStyles, useButtonState } from '../utils/buttonStyles'
@@ -375,9 +376,9 @@ export default function NewPOModal({
               <span style={styles.poNumberBadge}>{formData.po_number}</span>
             )}
           </div>
-          <button onClick={onClose} style={styles.closeButton}>
+          <Button variant="ghost" onClick={onClose} aria-label="Tancar">
             <X size={20} />
-          </button>
+          </Button>
         </div>
 
         {/* Body */}
@@ -702,10 +703,10 @@ export default function NewPOModal({
                 <Package size={18} />
                 Detall de Productes
               </h3>
-              <button onClick={addItem} style={styles.addButton}>
+              <Button variant="primary" onClick={addItem}>
                 <Plus size={16} />
                 Afegir línia
-              </button>
+              </Button>
             </div>
             
             <div style={styles.itemsTableWrapper}>

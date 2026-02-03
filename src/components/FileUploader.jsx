@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import { Upload, X, Check, Loader, FileText } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { driveService } from '../lib/googleDrive'
+import Button from './Button'
 
 export default function FileUploader({ folderId, onUploadComplete, label = 'Arrossega arxius aquí' }) {
   const { darkMode } = useApp()
@@ -151,9 +152,9 @@ export default function FileUploader({ folderId, onUploadComplete, label = 'Arro
               <span style={{ color: '#22c55e', fontSize: '12px' }}>Completat</span>
             </div>
           ))}
-          <button onClick={clearCompleted} style={styles.clearBtn}>
+          <Button variant="danger" onClick={clearCompleted}>
             Netejar completats
-          </button>
+          </Button>
         </div>
       )}
 

@@ -1,6 +1,8 @@
 // Component per mostrar i gestionar connexió amb Google Drive
 import { useState, useEffect, useCallback } from 'react'
-import { Cloud, CloudOff, LogIn, LogOut, RefreshCw, AlertCircle } from 'lucide-react'
+import { LogIn, LogOut, RefreshCw, AlertCircle } from 'lucide-react'
+import driveIcon from '../assets/google-drive.svg'
+import Button from './Button'
 import { driveService } from '../lib/googleDrive'
 
 export default function DriveStatus({ compact = false }) {
@@ -146,14 +148,17 @@ export default function DriveStatus({ compact = false }) {
           backgroundColor: isConnected ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
           cursor: 'pointer'
         }}
+        className={isConnected ? 'drive--on' : 'drive--off'}
         onClick={isConnected ? handleDisconnect : handleConnect}
         title={isConnected ? `Connectat com ${userName}. Clica per desconnectar.` : 'Clica per connectar amb Google Drive'}
       >
-        {isConnected ? (
-          <Cloud size={18} color="#22c55e" />
-        ) : (
-          <CloudOff size={18} color="#ef4444" />
-        )}
+        <img
+          src={driveIcon}
+          alt="Google Drive"
+          width={18}
+          height={18}
+          style={{ display: 'block' }}
+        />
       </div>
     )
   }
@@ -170,34 +175,46 @@ export default function DriveStatus({ compact = false }) {
         <div style={styles.container}>
           <AlertCircle size={18} color="#f59e0b" />
           <span style={styles.statusText}>Error d'inicialització</span>
-          <button onClick={handleRetry} style={styles.buttonRetry}>
+          <Button variant="secondary" onClick={handleRetry}>
             <RefreshCw size={14} />
             Reintentar
-          </button>
+          </Button>
         </div>
       ) : isConnected ? (
         <div style={styles.container}>
-          <Cloud size={18} color="#22c55e" />
+          <img
+            src={driveIcon}
+            alt="Google Drive"
+            width={18}
+            height={18}
+            style={{ display: 'block' }}
+          />
           <div style={styles.info}>
             <span style={styles.statusText}>Google Drive</span>
             <span style={styles.userName}>{userName || 'Connectat'}</span>
           </div>
-          <button onClick={handleDisconnect} style={styles.buttonSmall} title="Desconnectar">
+          <Button variant="ghost" onClick={handleDisconnect} title="Desconnectar" className="drive--on">
             <LogOut size={14} />
-          </button>
+          </Button>
         </div>
       ) : (
         <div style={styles.container}>
-          <CloudOff size={18} color="#ef4444" />
+          <img
+            src={driveIcon}
+            alt="Google Drive"
+            width={18}
+            height={18}
+            style={{ display: 'block' }}
+          />
           <span style={styles.statusText}>Drive desconnectat</span>
-          <button 
+          <Button variant="secondary"
             onClick={handleConnect} 
-            style={isLoading ? styles.buttonConnectDisabled : styles.buttonConnect} 
             disabled={isLoading}
+            className="drive--off"
           >
             <LogIn size={14} />
             {isLoading ? 'Connectant...' : 'Reconnectar'}
-          </button>
+          </Button>
         </div>
       )}
       {error && (

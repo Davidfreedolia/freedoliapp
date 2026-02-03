@@ -3,6 +3,7 @@ import { X, StickyNote } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { createStickyNote } from '../lib/supabase'
 import { showToast } from './Toast'
+import Button from './Button'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
 
@@ -71,9 +72,9 @@ export default function AddStickyNoteModal({ isOpen, onClose, onSuccess, darkMod
               {t('stickyNotes.add', 'Afegir nota')}
             </h2>
           </div>
-          <button onClick={onClose} style={styles.closeButton}>
+          <Button variant="ghost" onClick={onClose} aria-label="Tancar">
             <X size={20} />
-          </button>
+          </Button>
         </div>
 
         <form onSubmit={handleSubmit} style={styles.form}>

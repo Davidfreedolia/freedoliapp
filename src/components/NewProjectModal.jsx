@@ -10,6 +10,7 @@ import { handleError } from '../lib/errorHandling'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
 import { showToast } from './Toast'
+import Button from './Button'
 import { getButtonStyles, useButtonState } from '../utils/buttonStyles'
 
 const PHASES = [
@@ -154,9 +155,9 @@ export default function NewProjectModal({ isOpen, onClose }) {
           }}>
             {t('projects.newProject')}
           </h2>
-          <button onClick={handleClose} style={styles.closeButton}>
+          <Button variant="ghost" onClick={handleClose} aria-label="Tancar">
             <X size={20} />
-          </button>
+          </Button>
         </div>
 
         {/* Form */}

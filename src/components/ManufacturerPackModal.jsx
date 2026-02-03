@@ -5,6 +5,7 @@ import { generateManufacturerPack } from '../lib/generateManufacturerPack'
 import { getCompanySettings, updateManufacturerPackGenerated, markManufacturerPackAsSent } from '../lib/supabase'
 import { driveService } from '../lib/googleDrive'
 import { logAudit } from '../lib/auditLog'
+import Button from './Button'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
 
@@ -374,9 +375,9 @@ export default function ManufacturerPackModal({
             <Package size={20} style={{ verticalAlign: 'middle', marginRight: '8px' }} />
             Generate Manufacturer Pack
           </h2>
-          <button onClick={onClose} style={styles.closeButton}>
+          <Button variant="ghost" onClick={onClose} aria-label="Tancar">
             <X size={20} />
-          </button>
+          </Button>
         </div>
 
         {/* Validation Errors */}

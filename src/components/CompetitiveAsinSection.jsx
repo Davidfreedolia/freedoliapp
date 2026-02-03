@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Barcode, ExternalLink, Save } from 'lucide-react'
+import Button from './Button'
 import { getProductIdentifiers, upsertProductIdentifiers } from '../lib/supabase'
 import { getPhaseSurfaceStyles } from '../utils/phaseStyles'
 import { getButtonStyles, useButtonState } from '../utils/buttonStyles'
@@ -427,9 +428,9 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
                 <span style={styles.marketplace}>({marketplace.toUpperCase()})</span>
               )}
             </div>
-            <button onClick={handleClearAsin} style={styles.replaceButton}>
+            <Button variant="secondary" onClick={handleClearAsin}>
               Canviar
-            </button>
+            </Button>
           </div>
         )}
         {asinError && (
