@@ -84,10 +84,9 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
       <nav style={navStyle} className="topbar">
         <div style={styles.leftSection}>
           <Button
-            variant="secondary"
+            variant="note"
             size="sm"
             onClick={() => setShowNoteModal(true)}
-            style={styles.notesButton}
             className="topbar-button"
             title={t('navbar.addNote')}
             aria-label={t('navbar.addNote')}
@@ -97,10 +96,9 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
           </Button>
 
           <Button
-            variant="secondary"
+            variant="ghost"
             size="sm"
             onClick={() => setShowHelpModal(true)}
-            style={styles.helpButton}
             className="topbar-button"
             title={t('navbar.help')}
             aria-label={t('navbar.help')}
@@ -194,19 +192,6 @@ const styles = {
     alignItems: 'center',
     gap: '8px'
   },
-  notesButton: {
-    cursor: 'pointer',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 'var(--btn-gap)'
-  },
-  helpButton: {
-    cursor: 'pointer',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 'var(--btn-gap)'
-  }
+  
 }
 

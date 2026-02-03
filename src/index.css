@@ -149,6 +149,9 @@
   --btn-danger-bg: var(--action-danger);
   --btn-danger-fg: #fff;
   --btn-danger-border: rgba(231, 76, 60, 0.35);
+  --btn-note-bg: rgba(242, 226, 125, 0.55);
+  --btn-note-fg: var(--fd-petrol);
+  --btn-note-border: rgba(242, 226, 125, 0.75);
   --btn-disabled-opacity: 0.45;
   
   /* Input-specific: subtle outline for visibility (only for inputs) */
@@ -233,6 +236,9 @@ body.dark {
   --btn-ghost-bg: transparent;
   --btn-ghost-fg: rgba(244, 244, 245, 0.86);
   --btn-ghost-border: rgba(255, 255, 255, 0.10);
+  --btn-note-bg: rgba(242, 226, 125, 0.18);
+  --btn-note-fg: #F8F1B3;
+  --btn-note-border: rgba(242, 226, 125, 0.35);
 }
 
 body {

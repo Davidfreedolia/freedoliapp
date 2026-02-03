@@ -7,7 +7,7 @@ import React from 'react'
 
 /**
  * Button component with unified styling
- * @param {string} variant - 'primary' | 'secondary' | 'danger' | 'ghost'
+ * @param {string} variant - 'primary' | 'secondary' | 'danger' | 'ghost' | 'note'
  * @param {string} size - 'sm' | 'md'
  * @param {boolean} disabled
  * @param {React.ReactNode} children
@@ -74,6 +74,14 @@ export default function Button({
       border: '1px solid var(--btn-danger-border)',
       hover: {
         filter: 'brightness(0.98)'
+      }
+    },
+    note: {
+      backgroundColor: 'var(--btn-note-bg)',
+      color: 'var(--btn-note-fg)',
+      border: '1px solid var(--btn-note-border)',
+      hover: {
+        filter: 'brightness(1.02)'
       }
     }
   }
