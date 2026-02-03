@@ -1128,6 +1128,12 @@ body.dark .dash-stat-value {
   overflow: auto;
 }
 
+.tracking-filter-button.is-active {
+  background: var(--color-warning-soft-bg);
+  border-color: var(--color-warning-soft-border);
+  color: var(--color-warning-soft-text);
+}
+
 .dash-merged-subsection {
   padding-bottom: 12px;
 }

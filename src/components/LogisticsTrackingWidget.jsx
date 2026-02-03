@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { getProjects, getPurchaseOrders } from '../lib/supabase'
+import Button from './Button'
 
 // Estats del flux logístic (simplificat per dashboard)
 const LOGISTICS_STAGES = [
@@ -159,12 +160,14 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false }) 
             <Truck size={20} />
             Tracking Logístic
           </h2>
-          <button 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => navigate('/orders')}
-            style={styles.viewAllButton}
+            className="tracking-view-all"
           >
             Veure totes <ArrowRight size={16} />
-          </button>
+          </Button>
         </div>
         <div style={styles.empty}>
           <p>{showOnlyStale ? 'No hi ha comandes pendents d\'actualització' : 'No hi ha comandes amb tracking actiu'}</p>
@@ -187,24 +190,23 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false }) 
           Tracking Logístic
         </h2>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() => setShowOnlyStale(!showOnlyStale)}
-            style={{
-              ...styles.filterButton,
-              backgroundColor: showOnlyStale ? (darkMode ? '#ef4444' : '#fee2e2') : 'transparent',
-              color: showOnlyStale ? (darkMode ? '#ffffff' : '#991b1b') : (darkMode ? '#9ca3af' : '#6b7280'),
-              borderColor: showOnlyStale ? (darkMode ? '#ef4444' : '#fca5a5') : (darkMode ? '#374151' : '#d1d5db')
-            }}
+            className={`tracking-filter-button ${showOnlyStale ? 'is-active' : ''}`}
           >
             <AlertTriangle size={14} />
             Només pendents
-          </button>
-          <button 
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => navigate('/orders')}
-            style={styles.viewAllButton}
+            className="tracking-view-all"
           >
             Veure totes <ArrowRight size={16} />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -364,17 +366,6 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '10px'
-  },
-  viewAllButton: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    background: 'none',
-    border: 'none',
-    color: '#4f46e5',
-    fontSize: '14px',
-    fontWeight: '500',
-    cursor: 'pointer'
   },
   loading: {
     padding: '48px',
