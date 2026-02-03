@@ -13,7 +13,7 @@ import {
   TrendingUp,
   Settings,
   Calendar as CalendarIcon,
-  ChevronsRight,
+  ChevronLeft,
   X,
   Menu
 } from 'lucide-react'
@@ -140,9 +140,8 @@ export default function Sidebar() {
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
               className="sidebar-toggle__button"
             >
-              <ChevronsRight
-                size={24}
-                strokeWidth={3.0}
+              <ChevronLeft
+                size={18}
                 className={`sidebar-toggle__icon ${sidebarCollapsed ? 'is-collapsed' : ''}`}
               />
             </Button>

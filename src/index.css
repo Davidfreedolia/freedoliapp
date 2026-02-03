@@ -553,8 +553,9 @@ main {
 
 .sidebar-toggle {
   position: absolute;
-  right: -20px;
-  top: var(--sidebar-toggle-top, 140px);
+  top: 50%;
+  right: -18px;
+  transform: translateY(-50%);
   z-index: 999;
   margin: 0;
   padding: 0;
@@ -588,16 +589,18 @@ main {
 
 .sidebar-toggle__icon {
   color: #fff;
-  stroke-width: 3.2;
-  transform: rotate(180deg);
+  stroke: #fff;
+  stroke-width: 2.8;
   transition: transform 0.2s ease;
+  transform: rotate(0deg);
 }
 
 @media (max-width: 768px) {
   .sidebar-toggle {
     position: static;
-    margin-top: 12px;
-    padding: 0;
+    transform: none;
+    margin-top: auto;
+    padding: 12px 0 16px;
     display: flex;
     justify-content: center;
   }
@@ -611,13 +614,15 @@ main {
 }
 
 .sidebar-toggle__icon.is-collapsed {
-  transform: rotate(0deg);
+  transform: rotate(180deg);
 }
 
 @media (max-width: 480px) {
   .sidebar-toggle__button {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
   }
 }
 
