@@ -12,6 +12,7 @@ import AvatarSelector from './AvatarSelector'
 import HeaderTimeWidget from './HeaderTimeWidget'
 import HeaderPreferencesWidget from './HeaderPreferencesWidget'
 import HeaderUserWidget from './HeaderUserWidget'
+import DriveStatus from './DriveStatus'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { showToast } from './Toast'
 import Button from './Button'
@@ -117,6 +118,7 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
 
         <div style={styles.rightSection}>
           <HeaderPreferencesWidget />
+          <DriveStatus compact={true} />
           <HeaderUserWidget
             userEmail={userEmail}
             userName={userName}

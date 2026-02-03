@@ -11,7 +11,6 @@ import {
   Receipt,
   Package,
   TrendingUp,
-  Settings,
   Calendar as CalendarIcon,
   ChevronLeft,
   X,
@@ -19,7 +18,6 @@ import {
 } from 'lucide-react'
 import Button from './Button'
 import { useApp } from '../context/AppContext'
-import DriveStatus from './DriveStatus'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 
 // Prefetch functions per rutes probables
@@ -78,7 +76,6 @@ const menuItems = [
   { path: '/inventory', icon: Package, labelKey: 'sidebar.inventory' },
   { path: '/calendar', icon: CalendarIcon, labelKey: 'sidebar.calendar' },
   { path: '/analytics', icon: TrendingUp, labelKey: 'sidebar.analytics' },
-  { path: '/settings', icon: Settings, labelKey: 'sidebar.settings' },
 ]
 
 export default function Sidebar() {
@@ -129,24 +126,6 @@ export default function Sidebar() {
             width: shouldCollapse ? '40px' : '140px'
           }}
         />
-        {isDesktop && (
-          <div className="sidebar-toggle sidebar-edge-toggle">
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-              title={sidebarCollapsed ? 'Expandir' : 'Col·lapsar'}
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="sidebar-toggle__button"
-            >
-              <ChevronLeft
-                size={18}
-                className={`sidebar-toggle__icon ${sidebarCollapsed ? 'is-collapsed' : ''}`}
-              />
-            </Button>
-          </div>
-        )}
         {isMobile && (
           <button
             onClick={handleCloseDrawer}
@@ -156,18 +135,6 @@ export default function Sidebar() {
           </button>
         )}
       </div>
-
-      {/* Estat Google Drive */}
-      {!shouldCollapse && (
-        <div style={styles.driveContainer}>
-          <DriveStatus compact={false} />
-        </div>
-      )}
-      {shouldCollapse && (
-        <div style={styles.driveContainerCompact}>
-          <DriveStatus compact={true} />
-        </div>
-      )}
 
       {/* Menú */}
       <nav style={styles.nav} className="sidebar-scroll">
@@ -206,6 +173,24 @@ export default function Sidebar() {
             {!shouldCollapse && <span>{t(item.labelKey)}</span>}
           </NavLink>
         ))}
+        {isDesktop && (
+          <div className="sidebar-toggle sidebar-edge-toggle">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              title={sidebarCollapsed ? 'Expandir' : 'Col·lapsar'}
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className="sidebar-toggle__button"
+            >
+              <ChevronLeft
+                size={18}
+                className={`sidebar-toggle__icon ${sidebarCollapsed ? 'is-collapsed' : ''}`}
+              />
+            </Button>
+          </div>
+        )}
       </nav>
 
     </>
