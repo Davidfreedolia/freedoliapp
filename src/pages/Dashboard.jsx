@@ -557,83 +557,85 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Tracking Logístic Widget */}
+        {/* Tracking Logístic + Comandes en curs */}
         {dashboardWidgets.logistics_tracking && !loadingPreferences && (
           <SafeWidget widgetName="Logistics Tracking" darkMode={darkMode}>
-            <LogisticsTrackingWidget darkMode={darkMode} />
-          </SafeWidget>
-        )}
-
-        {/* Comandes en curs */}
-        {dashboardWidgets.orders_in_progress && (
-        <SafeWidget widgetName="Orders In Progress" darkMode={darkMode}>
-        <div style={{
-          ...styles.section,
-          backgroundColor: darkMode ? '#15151f' : '#ffffff'
-        }}>
-          <div style={styles.sectionHeader}>
-            <h2 style={{
-              ...styles.sectionTitle,
-              color: darkMode ? '#ffffff' : '#111827'
-            }}>
-              <Package size={20} />
-              {t('dashboard.ordersInProgress.title')}
-            </h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/orders')}
-              style={styles.viewAllButton}
+            <div
+              className="dash-merged-widget"
+              style={{
+                ...styles.section,
+                backgroundColor: darkMode ? '#15151f' : '#ffffff'
+              }}
             >
-              {t('dashboard.ordersInProgress.viewAll')} <ArrowRight size={16} />
-            </Button>
-          </div>
+              <LogisticsTrackingWidget darkMode={darkMode} embedded />
 
-          {loadingOrders ? (
-            <div style={styles.loading}>{t('dashboard.ordersInProgress.loading')}</div>
-          ) : ordersInProgress.length === 0 ? (
-            <div style={styles.empty}>
-              <p>{t('dashboard.ordersInProgress.empty')}</p>
-            </div>
-          ) : (
-            <div style={styles.ordersList}>
-              {ordersInProgress.map(order => {
-                const statusInfo = getOrderStatusInfo(order.status)
-                return (
-                  <div 
-                    key={order.id}
-                    style={styles.orderItem}
-                    onClick={() => navigate(`/orders`)}
-                  >
-                    <div style={styles.orderInfo}>
-                      <span style={{
-                        ...styles.orderNumber,
-                        color: darkMode ? '#ffffff' : '#111827'
-                      }}>
-                        {order.po_number}
-                      </span>
-                      <span style={{
-                        ...styles.orderProject,
-                        color: darkMode ? '#6b7280' : '#9ca3af'
-                      }}>
-                        {order.project?.name || t('dashboard.noProject')}
-                      </span>
-                    </div>
-                    <div style={{
-                      ...styles.statusBadge,
-                      backgroundColor: `${statusInfo.color}15`,
-                      color: statusInfo.color
+              {dashboardWidgets.orders_in_progress && (
+                <div className="dash-merged-subsection">
+                  <div style={styles.sectionHeader}>
+                    <h2 style={{
+                      ...styles.sectionTitle,
+                      color: darkMode ? '#ffffff' : '#111827'
                     }}>
-                      {statusInfo.name}
-                    </div>
-                    <ArrowRight size={18} color="#9ca3af" />
+                      <Package size={20} />
+                      {t('dashboard.ordersInProgress.title')}
+                    </h2>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate('/orders')}
+                      style={styles.viewAllButton}
+                    >
+                      {t('dashboard.ordersInProgress.viewAll')} <ArrowRight size={16} />
+                    </Button>
                   </div>
-                )
-              })}
+
+                  {loadingOrders ? (
+                    <div style={styles.loading}>{t('dashboard.ordersInProgress.loading')}</div>
+                  ) : ordersInProgress.length === 0 ? (
+                    <div style={styles.empty}>
+                      <p>{t('dashboard.ordersInProgress.empty')}</p>
+                    </div>
+                  ) : (
+                    <div style={styles.ordersList}>
+                      {ordersInProgress.map(order => {
+                        const statusInfo = getOrderStatusInfo(order.status)
+                        return (
+                          <div
+                            key={order.id}
+                            style={styles.orderItem}
+                            onClick={() => navigate(`/orders`)}
+                          >
+                            <div style={styles.orderInfo}>
+                              <span style={{
+                                ...styles.orderNumber,
+                                color: darkMode ? '#ffffff' : '#111827'
+                              }}>
+                                {order.po_number}
+                              </span>
+                              <span style={{
+                                ...styles.orderProject,
+                                color: darkMode ? '#6b7280' : '#9ca3af'
+                              }}>
+                                {order.project?.name || t('dashboard.noProject')}
+                              </span>
+                            </div>
+                            <div style={{
+                              ...styles.statusBadge,
+                              backgroundColor: `${statusInfo.color}15`,
+                              color: statusInfo.color
+                            }}>
+                              {statusInfo.name}
+                            </div>
+                            <ArrowRight size={18} color="#9ca3af" />
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        </SafeWidget>
+          </SafeWidget>
         )}
 
         {/* POs not ready */}

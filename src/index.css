@@ -1122,3 +1122,12 @@ body.dark .fd-calendar-asana .rbc-day-slot .rbc-time-slot:hover {
 body.dark .dash-stat-value {
   color: #ffffff;
 }
+
+.tracking-list {
+  max-height: 220px;
+  overflow: auto;
+}
+
+.dash-merged-subsection {
+  padding-bottom: 12px;
+}

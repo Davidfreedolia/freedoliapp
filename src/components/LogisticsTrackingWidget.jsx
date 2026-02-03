@@ -33,7 +33,7 @@ const LOGISTICS_STATUS_LABELS = {
   delivered: 'Lliurat'
 }
 
-export default function LogisticsTrackingWidget({ darkMode }) {
+export default function LogisticsTrackingWidget({ darkMode, embedded = false }) {
   const navigate = useNavigate()
   const [projects, setProjects] = useState([])
   const [ordersByProject, setOrdersByProject] = useState({})
@@ -126,8 +126,8 @@ export default function LogisticsTrackingWidget({ darkMode }) {
   if (loading) {
     return (
       <div style={{
-        ...styles.section,
-        backgroundColor: darkMode ? '#15151f' : '#ffffff'
+        ...(embedded ? styles.sectionEmbedded : styles.section),
+        ...(embedded ? null : { backgroundColor: darkMode ? '#15151f' : '#ffffff' })
       }}>
         <div style={styles.sectionHeader}>
           <h2 style={{
@@ -148,8 +148,8 @@ export default function LogisticsTrackingWidget({ darkMode }) {
   if (filteredProjects.length === 0 && !showOnlyStale) {
     return (
       <div style={{
-        ...styles.section,
-        backgroundColor: darkMode ? '#15151f' : '#ffffff'
+        ...(embedded ? styles.sectionEmbedded : styles.section),
+        ...(embedded ? null : { backgroundColor: darkMode ? '#15151f' : '#ffffff' })
       }}>
         <div style={styles.sectionHeader}>
           <h2 style={{
@@ -175,8 +175,8 @@ export default function LogisticsTrackingWidget({ darkMode }) {
 
   return (
     <div style={{
-      ...styles.section,
-      backgroundColor: darkMode ? '#15151f' : '#ffffff'
+      ...(embedded ? styles.sectionEmbedded : styles.section),
+      ...(embedded ? null : { backgroundColor: darkMode ? '#15151f' : '#ffffff' })
     }}>
       <div style={styles.sectionHeader}>
         <h2 style={{
@@ -208,7 +208,7 @@ export default function LogisticsTrackingWidget({ darkMode }) {
         </div>
       </div>
 
-      <div style={styles.projectsList}>
+      <div style={styles.projectsList} className="tracking-list">
         {filteredProjects.map(project => {
           const order = ordersByProject[project.id]
           const statusInfo = getStatusInfo(order.logistics_status)
@@ -345,12 +345,17 @@ const styles = {
     overflow: 'hidden',
     marginBottom: '32px'
   },
+  sectionEmbedded: {
+    borderRadius: 0,
+    border: 'none',
+    overflow: 'visible',
+    marginBottom: 0
+  },
   sectionHeader: {
     padding: '20px 24px',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    borderBottom: '1px solid var(--border-color)'
+    justifyContent: 'space-between'
   },
   sectionTitle: {
     margin: 0,
