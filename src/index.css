@@ -1042,6 +1042,30 @@ body.dark .fd-calendar-asana .rbc-day-slot .rbc-time-slot:hover {
   min-height: 64px;
 }
 
+.dash-top-row {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+@media (max-width: 1100px) {
+  .dash-top-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 820px) {
+  .dash-top-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .dash-top-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 .dash-stat-card--light {
   background: var(--surface-1);
 }
@@ -1074,6 +1098,25 @@ body.dark .fd-calendar-asana .rbc-day-slot .rbc-time-slot:hover {
 .dash-stat-label {
   font-size: 12px;
   color: var(--color-muted);
+}
+
+.dash-gtin-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dash-gtin-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted-1);
+}
+
+.dash-gtin-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-1);
 }
 
 body.dark .dash-stat-value {

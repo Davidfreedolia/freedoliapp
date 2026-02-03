@@ -494,11 +494,7 @@ export default function Dashboard() {
         )}
         
         {/* Stats Grid */}
-        <div style={{
-          ...styles.statsGrid,
-          gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(240px, 1fr))',
-          gap: isMobile ? '12px' : '20px'
-        }}>
+        <div className="dash-top-row" style={styles.statsGrid}>
           {statCards.map((stat, index) => (
             <div
               key={index}
@@ -513,6 +509,24 @@ export default function Dashboard() {
               </div>
             </div>
           ))}
+          {!loadingGtinCoverage && (
+            <div className={`dash-stat-card ${darkMode ? 'dash-stat-card--dark' : 'dash-stat-card--light'}`}>
+              <div className="dash-stat-icon">
+                <Barcode size={20} />
+              </div>
+              <div className="dash-gtin-metrics">
+                <span className="dash-stat-label">GTIN Coverage</span>
+                <div className="dash-gtin-line">
+                  <span>SKUs sense GTIN</span>
+                  <span className="dash-gtin-value">{gtinCoverage.missingGtin}</span>
+                </div>
+                <div className="dash-gtin-line">
+                  <span>Codis al pool</span>
+                  <span className="dash-gtin-value">{gtinCoverage.availableCodes}</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Discarded Projects Counter */}
@@ -540,98 +554,6 @@ export default function Dashboard() {
             >
               Veure →
             </Button>
-          </div>
-        )}
-
-        {/* GTIN Coverage KPI */}
-        {!loadingGtinCoverage && (
-          <div style={{
-            ...styles.section,
-            backgroundColor: darkMode ? '#15151f' : '#ffffff'
-          }}>
-            <div style={styles.sectionHeader}>
-              <h2 style={{
-                ...styles.sectionTitle,
-                color: darkMode ? '#ffffff' : '#111827'
-              }}>
-                <Barcode size={20} />
-                GTIN Coverage
-              </h2>
-            </div>
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(200px, 1fr))', 
-              gap: '16px', 
-              padding: '20px',
-              overflowX: 'visible'
-            }}>
-              <div style={{
-                padding: '16px',
-                borderRadius: '12px',
-                border: '1px solid',
-                borderColor: gtinCoverage.missingGtin > 0 ? '#f59e0b' : (darkMode ? '#374151' : '#e5e7eb'),
-                backgroundColor: gtinCoverage.missingGtin > 0 ? '#fef3c7' : (darkMode ? '#1f1f2e' : '#f9fafb')
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                  <AlertTriangle size={18} color={gtinCoverage.missingGtin > 0 ? '#f59e0b' : '#6b7280'} />
-                  <span style={{
-                    fontSize: '13px',
-                    fontWeight: '500',
-                    color: darkMode ? '#9ca3af' : '#6b7280'
-                  }}>
-                    SKUs sense GTIN
-                  </span>
-                </div>
-                <span style={{
-                  fontSize: '28px',
-                  fontWeight: '700',
-                  color: gtinCoverage.missingGtin > 0 ? '#f59e0b' : (darkMode ? '#ffffff' : '#111827')
-                }}>
-                  {gtinCoverage.missingGtin}
-                </span>
-              </div>
-              <div style={{
-                padding: '16px',
-                borderRadius: '12px',
-                border: '1px solid',
-                borderColor: gtinCoverage.availableCodes < gtinCoverage.missingGtin ? '#ef4444' : (darkMode ? '#374151' : '#e5e7eb'),
-                backgroundColor: gtinCoverage.availableCodes < gtinCoverage.missingGtin ? '#fee2e2' : (darkMode ? '#1f1f2e' : '#f9fafb')
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                  <Barcode size={18} color={gtinCoverage.availableCodes < gtinCoverage.missingGtin ? '#ef4444' : '#22c55e'} />
-                  <span style={{
-                    fontSize: '13px',
-                    fontWeight: '500',
-                    color: darkMode ? '#9ca3af' : '#6b7280'
-                  }}>
-                    Codis disponibles al pool
-                  </span>
-                </div>
-                <span style={{
-                  fontSize: '28px',
-                  fontWeight: '700',
-                  color: gtinCoverage.availableCodes < gtinCoverage.missingGtin ? '#ef4444' : (darkMode ? '#ffffff' : '#111827')
-                }}>
-                  {gtinCoverage.availableCodes}
-                </span>
-              </div>
-              {gtinCoverage.availableCodes < gtinCoverage.missingGtin && (
-                <div style={{
-                  gridColumn: isMobile ? 'span 1' : 'span 2',
-                  padding: '12px',
-                  borderRadius: '8px',
-                  backgroundColor: '#fee2e2',
-                  border: '1px solid #fca5a5'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <AlertTriangle size={16} color="#991b1b" />
-                    <span style={{ fontSize: '13px', color: '#991b1b', fontWeight: '500' }}>
-                      ⚠️ Alerta: Hi ha menys codis disponibles ({gtinCoverage.availableCodes}) que SKUs pendents ({gtinCoverage.missingGtin})
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
         )}
 
