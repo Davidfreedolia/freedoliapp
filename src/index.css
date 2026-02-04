@@ -1404,9 +1404,9 @@ body.dark .dashboard-page .fd-badge--neutral {
 :not(.page-dashboard) .card,
 :not(.page-dashboard) .widget,
 :not(.page-dashboard) .panel {
-  background: var(--surface-1);
-  box-shadow: var(--shadow-1);
-  border: 1px solid var(--border-1);
+  background: var(--surface-bg);
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--border-soft);
 }
 
 .fd-switch {
