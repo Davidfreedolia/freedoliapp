@@ -633,38 +633,32 @@ export default function Dashboard() {
                 </div>
               ) : (
                 <div style={styles.ordersList}>
-                  {ordersInProgress.map(order => {
-                    const statusInfo = getOrderStatusInfo(order.status)
-                    return (
-                      <div
-                        key={order.id}
-                        style={styles.orderItem}
-                        onClick={() => navigate(`/orders`)}
-                      >
-                        <div style={styles.orderInfo}>
-                          <span style={{
-                            ...styles.orderNumber,
-                            color: darkMode ? '#ffffff' : '#111827'
-                          }}>
+                  {ordersInProgress.map(order => (
+                    <div
+                      key={order.id}
+                      style={styles.orderItem}
+                    >
+                      <div style={styles.orderInfo}>
+                        <div className="dashboard-order-row">
+                          <button
+                            type="button"
+                            className="dashboard-link"
+                            onClick={() => navigate(`/projects/${order.project_id}`)}
+                          >
+                            [{order.project?.project_code || 'PR'}] {order.project?.name || t('dashboard.noProject')}
+                          </button>
+                          <button
+                            type="button"
+                            className="dashboard-link"
+                            onClick={() => navigate(`/orders/${order.id}`)}
+                          >
                             {order.po_number}
-                          </span>
-                          <span style={{
-                            ...styles.orderProject,
-                            color: 'var(--muted-1)'
-                          }}>
-                            {order.project?.name || t('dashboard.noProject')}
-                          </span>
+                          </button>
                         </div>
-                        <div
-                          className={`status-pill ${statusInfo.pillClass}`}
-                          style={styles.statusBadge}
-                        >
-                          {statusInfo.name}
-                        </div>
-                        <ArrowRight size={18} color="var(--muted-1)" />
                       </div>
-                    )
-                  })}
+                      <ArrowRight size={18} color="var(--muted-1)" />
+                    </div>
+                  ))}
                 </div>
               )}
 

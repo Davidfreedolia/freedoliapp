@@ -34,6 +34,7 @@
   --brand-amber: #f2e27d;
   --brand-green: #6bc7b5;
   --brand-ink: #1f4e5f;
+  --brand-blue: #3b82f6;
   --brand-primary-soft: rgba(242, 108, 99, 0.18);
   --brand-amber-soft: rgba(242, 226, 125, 0.20);
   --brand-green-soft: rgba(107, 199, 181, 0.20);
@@ -202,6 +203,7 @@ body.dark {
   --brand-amber: #f2e27d;
   --brand-green: #6bc7b5;
   --brand-ink: #f4f7f3;
+  --brand-blue: #60a5fa;
   --brand-primary-soft: rgba(242, 108, 99, 0.22);
   --brand-amber-soft: rgba(242, 226, 125, 0.22);
   --brand-green-soft: rgba(107, 199, 181, 0.22);
@@ -1230,6 +1232,36 @@ body.dark .dash-stat-value {
 
 .dashboard-page {
   background: linear-gradient(135deg, var(--dash-bg-1), var(--dash-bg-2));
+}
+
+.dashboard-view-all {
+  background: var(--brand-blue) !important;
+  color: #fff !important;
+  border: none !important;
+}
+
+.dashboard-view-all:hover {
+  filter: brightness(1.03);
+}
+
+.dashboard-order-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dashboard-link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--text-1);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dashboard-link:hover {
+  text-decoration: underline;
 }
 
 .status-pill {

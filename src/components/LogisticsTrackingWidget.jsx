@@ -280,13 +280,6 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false, hi
 
               {/* Barra de progrés */}
               <div style={styles.progressContainer}>
-                <div style={styles.progressBar}>
-                  <div style={{
-                    ...styles.progressFill,
-                    width: `${progress}%`,
-                    backgroundColor: statusInfo.color
-                  }} />
-                </div>
                 <div style={styles.stagesIndicator}>
                   {LOGISTICS_STAGES.map((stage, idx) => {
                     const StageIcon = stage.icon
