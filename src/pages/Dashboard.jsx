@@ -413,15 +413,15 @@ export default function Dashboard() {
 
   const getOrderStatusInfo = (status) => {
     const statuses = {
-      draft: { name: 'Esborrany', color: '#6b7280' },
-      sent: { name: 'Enviat', color: '#3b82f6' },
-      confirmed: { name: 'Confirmat', color: '#8b5cf6' },
-      partial_paid: { name: t('dashboard.partialPaid'), color: '#f59e0b' },
-      paid: { name: 'Pagat', color: '#22c55e' },
-      in_production: { name: 'En producció', color: '#ec4899' },
-      shipped: { name: 'Enviat', color: '#06b6d4' },
-      received: { name: 'Rebut', color: '#10b981' },
-      cancelled: { name: 'Cancel·lat', color: '#ef4444' }
+      draft: { name: 'Esborrany', pillClass: 'pill--warn' },
+      sent: { name: 'Enviat', pillClass: 'pill--warn' },
+      confirmed: { name: 'Confirmat', pillClass: 'pill--warn' },
+      partial_paid: { name: t('dashboard.partialPaid'), pillClass: 'pill--warn' },
+      paid: { name: 'Pagat', pillClass: 'pill--ok' },
+      in_production: { name: 'En producció', pillClass: 'pill--warn' },
+      shipped: { name: 'Enviat', pillClass: 'pill--ok' },
+      received: { name: 'Rebut', pillClass: 'pill--ok' },
+      cancelled: { name: 'Cancel·lat', pillClass: 'pill--danger' }
     }
     return statuses[status] || statuses.draft
   }
@@ -433,7 +433,7 @@ export default function Dashboard() {
     : 1
 
   return (
-    <div style={styles.container}>
+    <div style={styles.container} className="dashboard-page">
       {/* Edit Layout Controls - Only visible when editing, no duplicate topbar */}
       {editLayout && !isMobile && (
         <div style={{
@@ -469,13 +469,13 @@ export default function Dashboard() {
           
           {/* Personalitzar Dashboard - Using Sliders icon to avoid duplicate Settings */}
           <Button
-            variant="ghost"
+            variant="secondary"
             size="sm"
             onClick={() => setShowCustomizeModal(true)}
             style={styles.iconButton}
             title="Personalitzar Dashboard"
           >
-            <Sliders size={20} color={darkMode ? '#9ca3af' : '#6b7280'} />
+            <Sliders size={20} color="var(--text-1)" />
           </Button>
         </div>
       )}
@@ -489,10 +489,10 @@ export default function Dashboard() {
           <div style={{
             ...styles.editModeBadge,
             backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6',
-            borderColor: '#4f46e5',
+            borderColor: 'var(--brand-primary)',
             color: darkMode ? '#ffffff' : '#111827'
           }}>
-            <Sliders size={14} color="#4f46e5" />
+            <Sliders size={14} color="var(--brand-primary)" />
             <span>{t('dashboard.editMode')}</span>
           </div>
         )}
@@ -540,21 +540,18 @@ export default function Dashboard() {
             backgroundColor: darkMode ? '#15151f' : '#ffffff',
             borderColor: darkMode ? '#374151' : '#e5e7eb'
           }}>
-            <AlertTriangle size={16} color="#6b7280" />
+            <AlertTriangle size={16} color="var(--muted-1)" />
             <span style={{
               fontSize: '13px',
-              color: darkMode ? '#9ca3af' : '#6b7280'
+              color: 'var(--muted-1)'
             }}>
               Projectes descartats: {discardedCount}
             </span>
             <Button
-              variant="ghost"
+              variant="secondary"
               size="sm"
               onClick={() => navigate('/projects?showDiscarded=true')}
-              style={{
-                ...styles.discardedLink,
-                color: '#4f46e5'
-              }}
+              className="dashboard-view-all"
             >
               Veure →
             </Button>
@@ -579,11 +576,11 @@ export default function Dashboard() {
                   <Package size={20} />
                   {t('dashboard.ordersInProgress.title')}
                 </h2>
-                <Button
-                  variant="ghost"
+            <Button
+              variant="secondary"
                   size="sm"
                   onClick={() => navigate('/orders')}
-                  style={styles.viewAllButton}
+              className="dashboard-view-all"
                 >
                   {t('dashboard.ordersInProgress.viewAll')} <ArrowRight size={16} />
                 </Button>
@@ -614,19 +611,18 @@ export default function Dashboard() {
                           </span>
                           <span style={{
                             ...styles.orderProject,
-                            color: darkMode ? '#6b7280' : '#9ca3af'
+                            color: 'var(--muted-1)'
                           }}>
                             {order.project?.name || t('dashboard.noProject')}
                           </span>
                         </div>
-                        <div style={{
-                          ...styles.statusBadge,
-                          backgroundColor: `${statusInfo.color}15`,
-                          color: statusInfo.color
-                        }}>
+                        <div
+                          className={`status-pill ${statusInfo.pillClass}`}
+                          style={styles.statusBadge}
+                        >
                           {statusInfo.name}
                         </div>
-                        <ArrowRight size={18} color="#9ca3af" />
+                        <ArrowRight size={18} color="var(--muted-1)" />
                       </div>
                     )
                   })}
@@ -657,10 +653,10 @@ export default function Dashboard() {
               {t('dashboard.posNotReady.title')}
             </h2>
             <Button
-              variant="ghost"
+              variant="secondary"
               size="sm"
               onClick={() => navigate('/orders')}
-              style={styles.viewAllButton}
+              className="dashboard-view-all"
             >
               {t('dashboard.posNotReady.viewAll')} <ArrowRight size={16} />
             </Button>
@@ -687,21 +683,17 @@ export default function Dashboard() {
                     }}>
                       {po.po_number}
                     </span>
-                    <span style={{
-                      ...styles.orderProject,
-                      color: darkMode ? '#6b7280' : '#9ca3af'
-                    }}>
+                      <span style={{
+                        ...styles.orderProject,
+                        color: 'var(--muted-1)'
+                      }}>
                       {po.projects?.name || t('dashboard.noProject')}
                     </span>
                   </div>
-                  <div style={{
-                    ...styles.statusBadge,
-                    backgroundColor: '#f59e0b15',
-                    color: '#f59e0b'
-                  }}>
+                  <div className="status-pill pill--warn" style={styles.statusBadge}>
                     {t('dashboard.posNotReady.missing')} {po.missingCount}
                   </div>
-                  <ArrowRight size={18} color="#9ca3af" />
+                  <ArrowRight size={18} color="var(--muted-1)" />
                 </div>
               ))}
             </div>
@@ -740,12 +732,12 @@ export default function Dashboard() {
                       <div style={{
                         ...styles.bar,
                         height: `${(data.income / maxValue) * 100}%`,
-                        backgroundColor: '#22c55e'
+                        backgroundColor: 'var(--brand-green)'
                       }} />
                       <div style={{
                         ...styles.bar,
                         height: `${(data.expenses / maxValue) * 100}%`,
-                        backgroundColor: '#ef4444',
+                        backgroundColor: 'var(--brand-primary)',
                         marginTop: '4px'
                       }} />
                     </div>
@@ -753,10 +745,10 @@ export default function Dashboard() {
                       {new Date(data.month + '-01').toLocaleDateString('ca-ES', { month: 'short', year: '2-digit' })}
                     </div>
                     <div style={styles.barValues}>
-                      <span style={{ color: '#22c55e', fontSize: '11px' }}>
+                      <span style={{ color: 'var(--brand-green)', fontSize: '11px' }}>
                         +{data.income.toLocaleString('ca-ES', { maximumFractionDigits: 0 })}€
                       </span>
-                      <span style={{ color: '#ef4444', fontSize: '11px' }}>
+                      <span style={{ color: 'var(--brand-primary)', fontSize: '11px' }}>
                         -{data.expenses.toLocaleString('ca-ES', { maximumFractionDigits: 0 })}€
                       </span>
                     </div>
@@ -765,11 +757,11 @@ export default function Dashboard() {
               </div>
               <div style={styles.chartLegend}>
                 <div style={styles.legendItem}>
-                  <div style={{ ...styles.legendColor, backgroundColor: '#22c55e' }} />
+                  <div style={{ ...styles.legendColor, backgroundColor: 'var(--brand-green)' }} />
                   <span>Ingressos</span>
                 </div>
                 <div style={styles.legendItem}>
-                  <div style={{ ...styles.legendColor, backgroundColor: '#ef4444' }} />
+                  <div style={{ ...styles.legendColor, backgroundColor: 'var(--brand-primary)' }} />
                   <span>Despeses</span>
                 </div>
               </div>
@@ -871,8 +863,8 @@ export default function Dashboard() {
                     backgroundColor: darkMode ? '#15151f' : '#ffffff',
                     borderRadius: '8px',
                     padding: '16px',
-                    border: editLayout ? '2px dashed #4f46e5' : '1px solid',
-                    borderColor: editLayout ? '#4f46e5' : (darkMode ? '#374151' : '#e5e7eb'),
+                    border: editLayout ? '2px dashed var(--brand-primary)' : '1px solid',
+                    borderColor: editLayout ? 'var(--brand-primary)' : (darkMode ? '#374151' : '#e5e7eb'),
                     height: '100%',
                     overflow: 'auto',
                     boxSizing: 'border-box',
@@ -888,7 +880,7 @@ export default function Dashboard() {
                           right: '8px',
                           width: '24px',
                           height: '24px',
-                          backgroundColor: '#4f46e5',
+                          backgroundColor: 'var(--brand-primary)',
                           borderRadius: '4px',
                           display: 'flex',
                           alignItems: 'center',
@@ -898,7 +890,7 @@ export default function Dashboard() {
                         }}
                         title={t('dashboard.dragToMove')}
                       >
-                        <Sliders size={14} color="#ffffff" />
+                        <Sliders size={14} color="var(--surface-1)" />
                       </div>
                     )}
                     <SafeWidget widgetName={widgetName} darkMode={darkMode}>
@@ -1050,14 +1042,6 @@ const styles = {
     border: '1px solid',
     marginBottom: '24px'
   },
-  discardedLink: {
-    background: 'none',
-    border: 'none',
-    fontSize: '13px',
-    fontWeight: '500',
-    cursor: 'pointer',
-    textDecoration: 'underline'
-  },
   section: {
     borderRadius: '16px',
     border: '1px solid var(--border-color)',
@@ -1078,28 +1062,15 @@ const styles = {
     alignItems: 'center',
     gap: '10px'
   },
-  viewAllButton: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    background: 'none',
-    border: '1px solid var(--border-color, #e5e7eb)',
-    borderRadius: '6px',
-    padding: '6px 12px',
-    color: '#4f46e5',
-    fontSize: '14px',
-    fontWeight: '500',
-    cursor: 'pointer'
-  },
   loading: {
     padding: '48px',
     textAlign: 'center',
-    color: '#6b7280'
+    color: 'var(--muted-1)'
   },
   empty: {
     padding: '48px',
     textAlign: 'center',
-    color: '#6b7280'
+    color: 'var(--muted-1)'
   },
   ordersList: {
     display: 'flex',
@@ -1166,7 +1137,7 @@ const styles = {
   },
   barLabel: {
     fontSize: '11px',
-    color: '#6b7280',
+    color: 'var(--muted-1)',
     textAlign: 'center',
     fontWeight: '500'
   },
@@ -1188,7 +1159,7 @@ const styles = {
     alignItems: 'center',
     gap: '8px',
     fontSize: '14px',
-    color: '#6b7280'
+    color: 'var(--muted-1)'
   },
   legendColor: {
     width: '12px',

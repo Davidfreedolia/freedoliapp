@@ -38,6 +38,8 @@
   --brand-amber-soft: rgba(242, 226, 125, 0.20);
   --brand-green-soft: rgba(107, 199, 181, 0.20);
   --brand-ink-soft: rgba(31, 78, 95, 0.14);
+  --dash-bg-1: var(--surface-1);
+  --dash-bg-2: var(--surface-2);
   --surface-1: #ffffff;
   --surface-2: #f6f7f4;
   --text-1: #111827;
@@ -204,6 +206,8 @@ body.dark {
   --brand-amber-soft: rgba(242, 226, 125, 0.22);
   --brand-green-soft: rgba(107, 199, 181, 0.22);
   --brand-ink-soft: rgba(244, 247, 243, 0.18);
+  --dash-bg-1: var(--surface-1);
+  --dash-bg-2: var(--surface-2);
   --text-base-color: rgba(244, 244, 245, 0.82);
   --text-muted-color: rgba(244, 244, 245, 0.60);
   
@@ -1174,6 +1178,34 @@ body.dark .dash-stat-value {
   background: var(--color-warning-soft-bg);
   border-color: var(--color-warning-soft-border);
   color: var(--color-warning-soft-text);
+}
+
+.dashboard-page {
+  background: linear-gradient(135deg, var(--dash-bg-1), var(--dash-bg-2));
+}
+
+.status-pill {
+  background: var(--surface-2);
+  color: var(--text-1);
+  border: 1px solid var(--border-1);
+}
+
+.pill--danger {
+  background: color-mix(in srgb, var(--brand-primary) 18%, transparent);
+  color: var(--brand-primary);
+  border: 1px solid color-mix(in srgb, var(--brand-primary) 35%, transparent);
+}
+
+.pill--warn {
+  background: color-mix(in srgb, var(--brand-amber) 22%, transparent);
+  color: var(--brand-ink);
+  border: 1px solid color-mix(in srgb, var(--brand-amber) 40%, transparent);
+}
+
+.pill--ok {
+  background: color-mix(in srgb, var(--brand-green) 18%, transparent);
+  color: var(--brand-green);
+  border: 1px solid color-mix(in srgb, var(--brand-green) 35%, transparent);
 }
 
 .dash-merged-subsection {
