@@ -1078,7 +1078,7 @@ body.dark .fd-calendar-asana .rbc-day-slot .rbc-time-slot:hover {
 .dash-top-row {
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
 @media (max-width: 1100px) {
@@ -1160,10 +1160,21 @@ body.dark .dash-stat-icon--barcode svg {
   height: 34px;
   border-radius: 999px;
   flex: 0 0 auto;
-  background: conic-gradient(var(--ring-color) 0 100%, rgba(0, 0, 0, 0.06) 0);
+  background: conic-gradient(
+    var(--ring-color) 0 var(--p),
+    var(--ring-track) var(--p) 1turn
+  );
   -webkit-mask: radial-gradient(farthest-side, transparent 62%, #000 63%);
   mask: radial-gradient(farthest-side, transparent 62%, #000 63%);
   opacity: 0.95;
+}
+
+.dash-ring--total {
+  background: conic-gradient(
+    var(--brand-amber) 0 var(--a),
+    var(--brand-green) var(--a) calc(var(--a) + var(--d)),
+    var(--ring-track) calc(var(--a) + var(--d)) 1turn
+  );
 }
 
 .dash-ring--projects {
@@ -1182,6 +1193,14 @@ body.dark .dash-stat-icon--barcode svg {
   --ring-color: var(--brand-ink);
 }
 
+.dash-ring {
+  --ring-track: rgba(0, 0, 0, 0.06);
+}
+
+body.dark .dash-ring {
+  --ring-track: rgba(255, 255, 255, 0.12);
+}
+
 .dash-stat-value {
   font-size: 22px;
   font-weight: 700;
@@ -1193,27 +1212,6 @@ body.dark .dash-stat-icon--barcode svg {
   color: var(--color-muted);
 }
 
-.dash-gtin-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  align-items: center;
-}
-
-.dash-gtin-metric {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  align-items: flex-start;
-}
-
-.dash-gtin-metric .dash-stat-value {
-  font-size: 22px;
-}
-
-.dash-gtin-metric .dash-stat-label {
-  font-size: 12px;
-}
 
 body.dark .dash-stat-value {
   color: #ffffff;

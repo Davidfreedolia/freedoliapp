@@ -381,34 +381,44 @@ export default function Dashboard() {
 
   // Removed unused recentProjects
 
+  const totalProjects = stats.totalProjects || 0
+  const activeProjects = stats.activeProjects || 0
+  const completedProjects = stats.completedProjects || 0
+  const pendingProjects = Math.max(totalProjects - completedProjects - activeProjects, 0)
+  const safeTotal = totalProjects > 0 ? totalProjects : 1
+
   const statCards = [
     {
       label: 'Total Projectes',
-      value: stats.totalProjects,
+      value: totalProjects,
       icon: FolderKanban,
       iconClass: 'dash-stat-icon--projects',
-      ringClass: 'dash-ring--projects'
+      ringClass: 'dash-ring--projects',
+      ringType: 'total'
     },
     {
       label: 'Actius',
-      value: stats.activeProjects,
+      value: activeProjects,
       icon: PlayCircle,
       iconClass: 'dash-stat-icon--active',
-      ringClass: 'dash-ring--active'
+      ringClass: 'dash-ring--active',
+      ringType: 'active'
     },
     {
       label: 'Completats',
-      value: stats.completedProjects,
+      value: completedProjects,
       icon: CheckCircle2,
       iconClass: 'dash-stat-icon--done',
-      ringClass: 'dash-ring--done'
+      ringClass: 'dash-ring--done',
+      ringType: 'done'
     },
     {
       label: 'Invertit',
       value: `${stats.totalInvested.toLocaleString('ca-ES', { minimumFractionDigits: 2 })} €`,
       icon: Wallet,
       iconClass: 'dash-stat-icon--money',
-      ringClass: 'dash-ring--money'
+      ringClass: 'dash-ring--money',
+      ringType: 'money'
     }
   ]
   
@@ -503,38 +513,62 @@ export default function Dashboard() {
         
         {/* Stats Grid */}
         <div className="dash-top-row" style={styles.statsGrid}>
-          {statCards.map((stat, index) => (
-            <div
-              key={index}
-              className={`dash-stat-card ${darkMode ? 'dash-stat-card--dark' : 'dash-stat-card--light'}`}
-            >
-              <div className={`dash-stat-icon ${stat.iconClass || ''}`.trim()}>
-                <stat.icon size={18} />
+          {statCards.map((stat, index) => {
+            const ringStyle = stat.ringType === 'total'
+              ? {
+                  '--a': `${activeProjects / safeTotal}turn`,
+                  '--d': `${completedProjects / safeTotal}turn`,
+                  '--p': `${pendingProjects / safeTotal}turn`
+                }
+              : {
+                  '--p': `${stat.ringType === 'active'
+                    ? activeProjects / safeTotal
+                    : stat.ringType === 'done'
+                      ? completedProjects / safeTotal
+                      : 0.6}turn`
+                }
+
+            return (
+              <div
+                key={index}
+                className={`dash-stat-card ${darkMode ? 'dash-stat-card--dark' : 'dash-stat-card--light'}`}
+              >
+                <div className={`dash-stat-icon ${stat.iconClass || ''}`.trim()}>
+                  <stat.icon size={18} />
+                </div>
+                <div className="dash-stat-info" style={styles.statInfo}>
+                  <span className="dash-stat-value">{stat.value}</span>
+                  <span className="dash-stat-label">{stat.label}</span>
+                </div>
+                <div
+                  className={`dash-ring ${stat.ringClass || ''} ${stat.ringType === 'total' ? 'dash-ring--total' : ''}`.trim()}
+                  style={ringStyle}
+                  aria-hidden="true"
+                />
               </div>
-              <div className="dash-stat-info" style={styles.statInfo}>
-                <span className="dash-stat-value">{stat.value}</span>
-                <span className="dash-stat-label">{stat.label}</span>
-              </div>
-              <div className={`dash-ring ${stat.ringClass || ''}`.trim()} aria-hidden="true" />
-            </div>
-          ))}
+            )
+          })}
           {!loadingGtinCoverage && (
-            <div className={`dash-stat-card ${darkMode ? 'dash-stat-card--dark' : 'dash-stat-card--light'}`}>
-              <div className="dash-dot dash-dot--gtin" />
-              <div className="dash-stat-icon dash-stat-icon--barcode">
-                <Barcode size={18} />
-              </div>
-              <div className="dash-gtin-grid">
-                <div className="dash-gtin-metric">
-                  <div className="dash-stat-value">{gtinCoverage.missingGtin}</div>
-                  <div className="dash-stat-label">SKUs sense GTIN</div>
+            <>
+              <div className={`dash-stat-card ${darkMode ? 'dash-stat-card--dark' : 'dash-stat-card--light'}`}>
+                <div className="dash-stat-icon dash-stat-icon--barcode">
+                  <Barcode size={18} />
                 </div>
-                <div className="dash-gtin-metric">
-                  <div className="dash-stat-value">{gtinCoverage.availableCodes}</div>
-                  <div className="dash-stat-label">Codis al pool</div>
+                <div className="dash-stat-info" style={styles.statInfo}>
+                  <span className="dash-stat-value">{gtinCoverage.missingGtin}</span>
+                  <span className="dash-stat-label">SKUs sense GTIN</span>
                 </div>
               </div>
-            </div>
+              <div className={`dash-stat-card ${darkMode ? 'dash-stat-card--dark' : 'dash-stat-card--light'}`}>
+                <div className="dash-stat-icon dash-stat-icon--barcode">
+                  <Barcode size={18} />
+                </div>
+                <div className="dash-stat-info" style={styles.statInfo}>
+                  <span className="dash-stat-value">{gtinCoverage.availableCodes}</span>
+                  <span className="dash-stat-label">Codis al pool</span>
+                </div>
+              </div>
+            </>
           )}
         </div>
 
