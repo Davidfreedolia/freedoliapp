@@ -231,7 +231,7 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false, hi
               style={styles.projectCard}
               onClick={() => navigate(`/projects/${project.id}`)}
             >
-              <div style={styles.projectHeader}>
+                <div style={styles.projectHeader}>
                 <div style={styles.projectInfo}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{
@@ -240,18 +240,18 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false, hi
                     }}>
                       {project.name}
                     </span>
-                    {updateStatus === 'stale' && (
-                      <span className="status-pill pill--danger" style={styles.updateBadge}>
-                        <AlertTriangle size={12} />
-                        Stale
-                      </span>
-                    )}
-                    {updateStatus === 'needs_update' && (
-                      <span className="status-pill pill--warn" style={styles.updateBadge}>
-                        <AlertTriangle size={12} />
-                        Needs update
-                      </span>
-                    )}
+                      {!embedded && updateStatus === 'stale' && (
+                        <span className="status-pill pill--danger" style={styles.updateBadge}>
+                          <AlertTriangle size={12} />
+                          Stale
+                        </span>
+                      )}
+                      {!embedded && updateStatus === 'needs_update' && (
+                        <span className="status-pill pill--warn" style={styles.updateBadge}>
+                          <AlertTriangle size={12} />
+                          Needs update
+                        </span>
+                      )}
                   </div>
                   <span style={{
                     ...styles.projectCode,
@@ -268,19 +268,21 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false, hi
                     </span>
                   )}
                 </div>
-                <div style={{
-                  ...styles.statusBadge,
-                  backgroundColor: statusInfo.colorSoft || 'var(--surface-2)',
-                  color: statusInfo.color
-                }}>
-                  <StatusIcon size={14} />
-                  {statusInfo.name}
-                </div>
+                {!embedded && (
+                  <div style={{
+                    ...styles.statusBadge,
+                    backgroundColor: statusInfo.colorSoft || 'var(--surface-2)',
+                    color: statusInfo.color
+                  }}>
+                    <StatusIcon size={14} />
+                    {statusInfo.name}
+                  </div>
+                )}
               </div>
 
               {/* Barra de progrés */}
-              <div style={styles.progressContainer}>
-                <div style={styles.stagesIndicator}>
+              <div style={styles.progressContainer} className="tracking-timeline">
+                <div style={styles.stagesIndicator} className="tracking-stages">
                   {LOGISTICS_STAGES.map((stage, idx) => {
                     const StageIcon = stage.icon
                     const isCompleted = idx < LOGISTICS_STAGES.findIndex(s => s.id === order.logistics_status)
