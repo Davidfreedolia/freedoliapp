@@ -6,7 +6,6 @@ import {
   Ship, 
   Warehouse, 
   Package,
-  CheckCircle2,
   Clock,
   ArrowRight,
   AlertTriangle
@@ -21,8 +20,7 @@ const LOGISTICS_STAGES = [
   { id: 'pickup', name: 'Recollida', icon: Truck, color: 'var(--brand-amber)', colorSoft: 'var(--brand-amber-soft)' },
   { id: 'in_transit', name: 'En trànsit', icon: Ship, color: 'var(--brand-amber)', colorSoft: 'var(--brand-amber-soft)' },
   { id: 'customs', name: 'Duanes', icon: Package, color: 'var(--brand-amber)', colorSoft: 'var(--brand-amber-soft)' },
-  { id: 'amazon_fba', name: 'Amazon FBA', icon: Warehouse, color: 'var(--brand-green)', colorSoft: 'var(--brand-green-soft)' },
-  { id: 'delivered', name: 'Lliurat', icon: CheckCircle2, color: 'var(--brand-green)', colorSoft: 'var(--brand-green-soft)' }
+  { id: 'amazon_fba', name: 'Amazon FBA', icon: Warehouse, color: 'var(--brand-green)', colorSoft: 'var(--brand-green-soft)' }
 ]
 
 const LOGISTICS_STATUS_LABELS = {
@@ -30,8 +28,7 @@ const LOGISTICS_STATUS_LABELS = {
   pickup: 'Recollida',
   in_transit: 'En trànsit',
   customs: 'Duanes',
-  amazon_fba: 'Amazon FBA',
-  delivered: 'Lliurat'
+  amazon_fba: 'Amazon FBA'
 }
 
 export default function LogisticsTrackingWidget({ darkMode, embedded = false, hideHeader = false }) {
@@ -322,7 +319,9 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false, hi
                 </div>
               )}
 
-              <ArrowRight size={18} color="var(--muted-1)" style={styles.arrowIcon} />
+              {!embedded && (
+                <ArrowRight size={18} color="var(--muted-1)" style={styles.arrowIcon} />
+              )}
             </div>
           )
         })}

@@ -660,7 +660,6 @@ export default function Dashboard() {
                           </button>
                         </div>
                       </div>
-                      <ArrowRight size={18} color="var(--muted-1)" />
                     </div>
                   ))}
                 </div>
