@@ -1406,7 +1406,7 @@ main > :not(.page-dashboard) .widget,
 main > :not(.page-dashboard) .panel {
   background: var(--surface-bg);
   box-shadow: var(--shadow-soft);
-  border: 1px solid var(--border-soft);
+  border: none;
 }
 
 .fd-switch {
