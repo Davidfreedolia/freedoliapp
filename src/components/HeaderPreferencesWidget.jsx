@@ -67,11 +67,15 @@ export default function HeaderPreferencesWidget({ onLanguageClick }) {
       {/* Day/Night Toggle */}
       <button
         onClick={() => setDarkMode(!darkMode)}
-        className={`fd-switch ${darkMode ? 'is-on' : ''}`}
+        className={`fd-theme-switch ${darkMode ? 'is-dark' : 'is-light'}`}
         title={darkMode ? t('navbar.lightMode') : t('navbar.darkMode')}
         aria-label={darkMode ? t('navbar.lightMode') : t('navbar.darkMode')}
       >
-        <span className="fd-switch__thumb" />
+        <span className="fd-theme-switch__icons" aria-hidden="true">
+          <Sun className="fd-theme-switch__sun" size={14} />
+          <Moon className="fd-theme-switch__moon" size={14} />
+        </span>
+        <span className="fd-theme-switch__thumb" />
       </button>
 
       {/* Settings */}
