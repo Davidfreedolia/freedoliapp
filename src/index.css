@@ -275,6 +275,11 @@ body.dark {
   --btn-note-bg: rgba(242, 226, 125, 0.18);
   --btn-note-fg: #F8F1B3;
   --btn-note-border: rgba(242, 226, 125, 0.35);
+
+  /* Shadows adaptats per dark (mateix estil, més contrast) */
+  --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.35);
+  --shadow-soft-hover: 0 2px 8px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.45);
 }
 
 body {
@@ -618,6 +623,137 @@ body.dark .avatar-circle {
   padding: var(--spacing-md);
   box-shadow: var(--shadow-soft);
   transition: all 0.15s ease;
+}
+
+.ui-card--interactive {
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.ui-card--interactive:hover {
+  box-shadow: var(--shadow-soft-hover);
+  transform: translateY(-1px);
+}
+
+.ui-popover {
+  background: var(--surface-bg);
+  border-radius: var(--radius-ui);
+  box-shadow: var(--shadow-md);
+  border: none;
+  overflow: hidden;
+}
+
+.projects-card__card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.projects-card__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.projects-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+
+.projects-card__headerMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.projects-card__id {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.projects-card__title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.projects-card__meta {
+  color: var(--muted-1);
+  font-size: 12px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.projects-card__meta span {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.projects-card__progress {
+  display: flex;
+  align-items: center;
+}
+
+.projects-card__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.projects-card__thumbWrap {
+  flex: 0 0 64px;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.projects-card__thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-ui);
+  object-fit: cover;
+  background: var(--surface-bg-2);
+  border: 1px solid var(--border-1);
+  box-shadow: var(--shadow-soft);
+  display: block;
+}
+
+.projects-card__thumbFallback {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-ui);
+  background: var(--surface-bg-2);
+  border: 1px solid var(--border-1);
+  box-shadow: var(--shadow-soft);
+  color: var(--muted-1);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sidebar-scroll {

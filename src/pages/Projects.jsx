@@ -23,7 +23,7 @@ import StatusBadge from '../components/StatusBadge'
 import { useLayoutPreference } from '../hooks/useLayoutPreference'
 
 export default function Projects() {
-  const { projects, refreshProjects, darkMode, driveConnected } = useApp()
+  const { projects, refreshProjects, driveConnected } = useApp()
   const navigate = useNavigate()
   const { isMobile, isTablet } = useBreakpoint()
   const [showModal, setShowModal] = useState(false)
@@ -114,15 +114,20 @@ export default function Projects() {
     // Compute canClose and canReopen based on status
     const canClose = project.status && ['draft', 'active'].includes(project.status)
     const canReopen = project.status && ['closed', 'archived'].includes(project.status)
+    const thumbnailUrl = project?.main_image_url || project?.asin_image_url || project?.asin_image || project?.image_url || project?.image
 
     return (
       <div
         key={project.id}
+        className="ui-card ui-card--interactive projects-card__card"
         style={{
           ...styles.projectCard,
           ...(isSelected && !isPreview ? styles.projectCardSelected : null),
           ...(isPreview ? styles.projectCardPreview : null),
-          backgroundColor: darkMode ? '#15151f' : '#ffffff'
+          backgroundColor: 'var(--surface-bg)',
+          border: 'none',
+          boxShadow: 'var(--shadow-soft)',
+          borderRadius: 'var(--radius-ui)'
         }}
         onClick={isPreview ? undefined : () => {
           setSelectedProjectId(project.id)
@@ -130,137 +135,139 @@ export default function Projects() {
         }}
         onMouseEnter={enablePreviewSelect ? () => setSelectedProjectId(project.id) : undefined}
       >
-        {/* Header */}
-        <div style={styles.cardHeader}>
-          <div style={styles.cardHeaderMeta}>
-            <span style={{
-              ...styles.projectCode,
-              color: darkMode ? '#6b7280' : '#9ca3af'
-            }}>
-              {project.project_code}
-            </span>
-            <StatusBadge status={project.status} decision={project.decision} />
-          </div>
-          {!isPreview && (
-            <div style={{ position: 'relative' }}>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={e => { e.stopPropagation(); setMenuOpen(menuOpen === project.id ? null : project.id) }}
-                style={styles.menuButton}
-              >
-                <MoreVertical size={18} color="#9ca3af" />
-              </Button>
-              {menuOpen === project.id && (
-                <div style={{
-                  ...styles.menu,
-                  backgroundColor: darkMode ? '#1f1f2e' : '#ffffff'
-                }}>
+        <div className="projects-card__body">
+          <div className="projects-card__header">
+            <div className="projects-card__headerMeta">
+              <span className="projects-card__id">{project.project_code}</span>
+              <StatusBadge status={project.status} decision={project.decision} />
+            </div>
+            {!isPreview && (
+              <div className="projects-card__actions">
+                <div style={{ position: 'relative' }}>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={e => { e.stopPropagation(); navigate(`/projects/${project.id}/edit`) }}
-                    style={styles.menuItem}
+                    onClick={e => { e.stopPropagation(); setMenuOpen(menuOpen === project.id ? null : project.id) }}
+                    style={styles.menuButton}
                   >
-                    <Edit size={14} /> Editar
+                    <MoreVertical size={18} color="var(--muted-1)" />
                   </Button>
-                  {canClose && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={e => handleClose(e, project)}
-                      style={styles.menuItem}
-                    >
-                      <XCircle size={14} /> Tancar
-                    </Button>
+                  {menuOpen === project.id && (
+                    <div className="ui-popover" style={styles.menu}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={e => { e.stopPropagation(); navigate(`/projects/${project.id}/edit`) }}
+                        style={styles.menuItem}
+                      >
+                        <Edit size={14} /> Editar
+                      </Button>
+                      {canClose && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={e => handleClose(e, project)}
+                          style={styles.menuItem}
+                        >
+                          <XCircle size={14} /> Tancar
+                        </Button>
+                      )}
+                      {canReopen && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={e => handleReopen(e, project)}
+                          style={styles.menuItem}
+                        >
+                          <RotateCw size={14} /> Reobrir
+                        </Button>
+                      )}
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={e => handleDelete(e, project)}
+                        style={styles.menuItemDanger}
+                      >
+                        <Trash2 size={14} /> Eliminar
+                      </Button>
+                    </div>
                   )}
-                  {canReopen && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={e => handleReopen(e, project)}
-                      style={styles.menuItem}
-                    >
-                      <RotateCw size={14} /> Reobrir
-                    </Button>
-                  )}
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={e => handleDelete(e, project)}
-                    style={styles.menuItemDanger}
-                  >
-                    <Trash2 size={14} /> Eliminar
-                  </Button>
                 </div>
-              )}
+              </div>
+            )}
+          </div>
+
+          <h3 className="projects-card__title">{project.name}</h3>
+
+          <div className="projects-card__meta">
+            {project.sku_internal && <span>SKU: {project.sku_internal}</span>}
+            {project.fnsku && <span>FNSKU: {project.fnsku}</span>}
+            {project.asin && <span>ASIN: {project.asin}</span>}
+          </div>
+
+          <div className="projects-card__progress">
+            <div style={styles.progressContainer}>
+              <div style={styles.progressBar}>
+                <div style={{
+                  ...styles.progressFill,
+                  width: `${progress}%`,
+                  backgroundColor: phase.accent
+                }} />
+              </div>
+              <span style={styles.progressText}>{Math.round(progress)}%</span>
             </div>
-          )}
-        </div>
+          </div>
 
-        {/* Name */}
-        <h3 style={{
-          ...styles.projectName,
-          color: darkMode ? '#ffffff' : '#111827'
-        }}>
-          {project.name}
-        </h3>
-
-        {/* SKU */}
-        {project.sku_internal && (
-          <span style={styles.sku}>SKU: {project.sku_internal}</span>
-        )}
-
-        {/* Progress bar */}
-        <div style={styles.progressContainer}>
-          <div style={styles.progressBar}>
+          <div className="projects-card__actions">
             <div style={{
-              ...styles.progressFill,
-              width: `${progress}%`,
-              backgroundColor: phase.accent
-            }} />
+              ...styles.phaseBadge,
+              backgroundColor: phase.bg,
+              color: phase.accent,
+              border: `1px solid ${phase.accent}`
+            }}>
+              <PhaseIcon size={14} />
+              <span>{phase.name}</span>
+            </div>
+            {!isPreview && (
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                {project.decision === 'DISCARDED' && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={async (e) => {
+                      e.stopPropagation()
+                      try {
+                        const { updateProject } = await import('../lib/supabase')
+                        const { showToast } = await import('../components/Toast')
+                        await updateProject(project.id, { decision: 'HOLD' })
+                        showToast('Project restored', 'success')
+                        await refreshProjects()
+                      } catch (err) {
+                        const { showToast } = await import('../components/Toast')
+                        showToast('Error: ' + (err.message || 'Unknown error'), 'error')
+                      }
+                    }}
+                    style={{ height: '28px' }}
+                    title="Restore project"
+                  >
+                    Restore
+                  </Button>
+                )}
+                <ArrowRight size={18} color="var(--muted-1)" />
+              </div>
+            )}
           </div>
-          <span style={styles.progressText}>{Math.round(progress)}%</span>
         </div>
 
-        {/* Phase badge */}
-        <div style={styles.cardFooter}>
-          <div style={{
-            ...styles.phaseBadge,
-            backgroundColor: phase.bg,
-            color: phase.accent,
-            border: `1px solid ${phase.accent}`
-          }}>
-            <PhaseIcon size={14} />
-            <span>{phase.name}</span>
-          </div>
-          {!isPreview && (
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              {project.decision === 'DISCARDED' && (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={async (e) => {
-                    e.stopPropagation()
-                    try {
-                      const { updateProject } = await import('../lib/supabase')
-                      const { showToast } = await import('../components/Toast')
-                      await updateProject(project.id, { decision: 'HOLD' })
-                      showToast('Project restored', 'success')
-                      await refreshProjects()
-                    } catch (err) {
-                      const { showToast } = await import('../components/Toast')
-                      showToast('Error: ' + (err.message || 'Unknown error'), 'error')
-                    }
-                  }}
-                  style={{ height: '28px' }}
-                  title="Restore project"
-                >
-                  Restore
-                </Button>
-              )}
-              <ArrowRight size={18} color="#9ca3af" />
-            </div>
+        <div className="projects-card__thumbWrap">
+          {thumbnailUrl ? (
+            <img
+              className="projects-card__thumb"
+              src={thumbnailUrl}
+              alt={project.asin ? `ASIN ${project.asin}` : 'ASIN'}
+            />
+          ) : (
+            <div className="projects-card__thumbFallback">ASIN</div>
           )}
         </div>
       </div>
@@ -279,7 +286,7 @@ export default function Projects() {
         <div style={styles.toolbar} className="toolbar-row">
           <div style={styles.searchGroup} className="toolbar-group">
             <div style={styles.searchContainer} className="toolbar-search">
-              <Search size={18} color="#9ca3af" />
+              <Search size={18} color="var(--muted-1)" />
               <input
                 type="text"
                 placeholder="Buscar projectes..."
@@ -333,18 +340,15 @@ export default function Projects() {
           </div>
           <div style={styles.toolbarRight} className="toolbar-group">
             <Button
-              size="sm"
+              variant="primary"
+              size="md"
               onClick={() => {
                 if (!driveConnected) return
                 setShowModal(true)
               }} 
               disabled={!driveConnected}
               title={!driveConnected ? "Connecta Google Drive per crear" : ""}
-              style={{
-                width: isMobile ? '100%' : 'auto',
-                opacity: !driveConnected ? 0.5 : 1,
-                cursor: !driveConnected ? 'not-allowed' : 'pointer'
-              }}
+              style={{ width: isMobile ? '100%' : 'auto' }}
             >
               <Plus size={18} />
               Nou Projecte
@@ -356,9 +360,9 @@ export default function Projects() {
         {filteredProjects.length === 0 ? (
           <div style={{
             ...styles.empty,
-            backgroundColor: darkMode ? '#15151f' : '#ffffff'
+            backgroundColor: 'var(--surface-bg)'
           }}>
-            <p style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
+            <p style={{ color: 'var(--muted-1)' }}>
               {searchTerm || filterPhase 
                 ? 'No s\'han trobat projectes amb aquests filtres'
                 : 'No hi ha projectes. Crea el primer!'}
@@ -502,8 +506,8 @@ const styles = {
     alignItems: 'center',
     gap: '8px',
     padding: '12px 20px',
-    backgroundColor: '#4f46e5',
-    color: '#ffffff',
+    backgroundColor: 'var(--btn-primary-bg)',
+    color: 'var(--btn-primary-fg)',
     border: 'none',
     borderRadius: '10px',
     fontSize: '14px',
@@ -523,8 +527,8 @@ const styles = {
     gap: '8px',
     marginTop: '16px',
     padding: '12px 24px',
-    backgroundColor: '#4f46e5',
-    color: '#ffffff',
+    backgroundColor: 'var(--btn-primary-bg)',
+    color: 'var(--btn-primary-fg)',
     border: 'none',
     borderRadius: '10px',
     fontSize: '14px',
@@ -565,11 +569,8 @@ const styles = {
   },
   projectCard: {
     padding: '20px',
-    borderRadius: '16px',
-    border: 'none',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    boxShadow: 'var(--shadow-soft)'
+    borderRadius: 'var(--radius-ui)',
+    border: 'none'
   },
   projectCardSelected: {
     boxShadow: 'var(--shadow-soft-hover)',
@@ -603,10 +604,7 @@ const styles = {
     position: 'absolute',
     right: 0,
     top: '100%',
-    minWidth: '140px',
-    borderRadius: '10px',
-    border: '1px solid rgba(31, 78, 95, 0.12)',
-    boxShadow: 'var(--shadow-soft-hover)',
+    minWidth: '160px',
     zIndex: 10
   },
   menuItem: {
@@ -638,7 +636,7 @@ const styles = {
     backgroundColor: 'var(--bg-secondary)',
     borderRadius: '6px',
     fontSize: '12px',
-    color: '#6b7280',
+    color: 'var(--muted-1)',
     marginBottom: '16px'
   },
   progressContainer: {
@@ -662,7 +660,7 @@ const styles = {
   progressText: {
     fontSize: '12px',
     fontWeight: '600',
-    color: '#6b7280',
+    color: 'var(--muted-1)',
     minWidth: '36px'
   },
   cardFooter: {
