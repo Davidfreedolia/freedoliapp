@@ -387,28 +387,28 @@ export default function Dashboard() {
       value: stats.totalProjects,
       icon: FolderKanban,
       iconClass: 'dash-stat-icon--projects',
-      dotClass: 'dash-dot--projects'
+      ringClass: 'dash-ring--projects'
     },
     {
       label: 'Actius',
       value: stats.activeProjects,
       icon: PlayCircle,
       iconClass: 'dash-stat-icon--active',
-      dotClass: 'dash-dot--active'
+      ringClass: 'dash-ring--active'
     },
     {
       label: 'Completats',
       value: stats.completedProjects,
       icon: CheckCircle2,
       iconClass: 'dash-stat-icon--done',
-      dotClass: 'dash-dot--done'
+      ringClass: 'dash-ring--done'
     },
     {
       label: 'Invertit',
       value: `${stats.totalInvested.toLocaleString('ca-ES', { minimumFractionDigits: 2 })} €`,
       icon: Wallet,
       iconClass: 'dash-stat-icon--money',
-      dotClass: 'dash-dot--money'
+      ringClass: 'dash-ring--money'
     }
   ]
   
@@ -508,14 +508,14 @@ export default function Dashboard() {
               key={index}
               className={`dash-stat-card ${darkMode ? 'dash-stat-card--dark' : 'dash-stat-card--light'}`}
             >
-              <div className={`dash-dot ${stat.dotClass || ''}`.trim()} />
               <div className={`dash-stat-icon ${stat.iconClass || ''}`.trim()}>
                 <stat.icon size={18} />
               </div>
-              <div style={styles.statInfo}>
+              <div className="dash-stat-info" style={styles.statInfo}>
                 <span className="dash-stat-value">{stat.value}</span>
                 <span className="dash-stat-label">{stat.label}</span>
               </div>
+              <div className={`dash-ring ${stat.ringClass || ''}`.trim()} aria-hidden="true" />
             </div>
           ))}
           {!loadingGtinCoverage && (

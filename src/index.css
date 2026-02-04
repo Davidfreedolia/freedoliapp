@@ -1070,7 +1070,8 @@ body.dark .fd-calendar-asana .rbc-day-slot .rbc-time-slot:hover {
   border: 1px solid var(--border-color);
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
+  gap: 12px;
   min-height: 64px;
 }
 
@@ -1121,31 +1122,9 @@ body.dark .fd-calendar-asana .rbc-day-slot .rbc-time-slot:hover {
   color: var(--brand-primary);
 }
 
-.dash-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  flex: 0 0 auto;
-}
-
-.dash-dot--projects {
-  background: var(--brand-primary);
-}
-
-.dash-dot--active {
-  background: var(--brand-amber);
-}
-
-.dash-dot--done {
-  background: var(--brand-green);
-}
-
-.dash-dot--money {
-  background: var(--brand-ink);
-}
-
-.dash-dot--gtin {
-  background: var(--brand-amber);
+.dash-stat-info {
+  display: flex;
+  flex-direction: column;
 }
 
 .dash-stat-icon--projects svg {
@@ -1174,6 +1153,33 @@ body.dark .fd-calendar-asana .rbc-day-slot .rbc-time-slot:hover {
 
 body.dark .dash-stat-icon--barcode svg {
   color: #fff;
+}
+
+.dash-ring {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  flex: 0 0 auto;
+  background: conic-gradient(var(--ring-color) 0 100%, rgba(0, 0, 0, 0.06) 0);
+  -webkit-mask: radial-gradient(farthest-side, transparent 62%, #000 63%);
+  mask: radial-gradient(farthest-side, transparent 62%, #000 63%);
+  opacity: 0.95;
+}
+
+.dash-ring--projects {
+  --ring-color: var(--brand-primary);
+}
+
+.dash-ring--active {
+  --ring-color: var(--brand-amber);
+}
+
+.dash-ring--done {
+  --ring-color: var(--brand-green);
+}
+
+.dash-ring--money {
+  --ring-color: var(--brand-ink);
 }
 
 .dash-stat-value {
