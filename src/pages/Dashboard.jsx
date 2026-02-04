@@ -515,18 +515,17 @@ export default function Dashboard() {
           ))}
           {!loadingGtinCoverage && (
             <div className={`dash-stat-card ${darkMode ? 'dash-stat-card--dark' : 'dash-stat-card--light'}`}>
-              <div className="dash-stat-icon dash-stat-icon--gtin">
+              <div className="dash-stat-icon dash-stat-icon--barcode">
                 <Barcode size={20} />
               </div>
-              <div className="dash-gtin">
-                <span className="dash-stat-label">GTIN Coverage</span>
-                <div className="dash-gtin-row">
-                  <span className="dash-gtin-label">SKUs sense GTIN</span>
-                  <span className="dash-gtin-val">{gtinCoverage.missingGtin}</span>
+              <div className="dash-gtin-grid">
+                <div className="dash-gtin-metric">
+                  <div className="dash-stat-value">{gtinCoverage.missingGtin}</div>
+                  <div className="dash-stat-label">SKUs sense GTIN</div>
                 </div>
-                <div className="dash-gtin-row">
-                  <span className="dash-gtin-label">Codis al pool</span>
-                  <span className="dash-gtin-val">{gtinCoverage.availableCodes}</span>
+                <div className="dash-gtin-metric">
+                  <div className="dash-stat-value">{gtinCoverage.availableCodes}</div>
+                  <div className="dash-stat-label">Codis al pool</div>
                 </div>
               </div>
             </div>
@@ -631,7 +630,7 @@ export default function Dashboard() {
 
               {dashboardWidgets.logistics_tracking && (
                 <div className="dash-merged-subsection">
-                  <LogisticsTrackingWidget darkMode={darkMode} embedded />
+                  <LogisticsTrackingWidget darkMode={darkMode} embedded hideHeader />
                 </div>
               )}
             </div>

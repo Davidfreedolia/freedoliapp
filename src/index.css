@@ -370,6 +370,17 @@ main {
   filter: brightness(1.03);
 }
 
+.topbar .topbar-button,
+.topbar button {
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+.topbar .topbar-button:focus,
+.topbar .topbar-button:active {
+  box-shadow: none !important;
+}
+
 .avatar.topbar-avatar {
   width: 28px !important;
   height: 28px !important;
@@ -1130,6 +1141,14 @@ body.dark .fd-calendar-asana .rbc-day-slot .rbc-time-slot:hover {
   color: var(--brand-amber);
 }
 
+.dash-stat-icon--barcode svg {
+  color: var(--text-1);
+}
+
+body.dark .dash-stat-icon--barcode svg {
+  color: #fff;
+}
+
 .dash-stat-value {
   font-size: 22px;
   font-weight: 700;
@@ -1141,28 +1160,24 @@ body.dark .fd-calendar-asana .rbc-day-slot .rbc-time-slot:hover {
   color: var(--color-muted);
 }
 
-.dash-gtin {
+.dash-gtin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.dash-gtin-metric {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 2px;
 }
 
-.dash-gtin-row {
-  display: flex;
-  justify-content: space-between;
+.dash-gtin-metric .dash-stat-value {
+  font-size: 22px;
+}
+
+.dash-gtin-metric .dash-stat-label {
   font-size: 12px;
-  color: var(--muted-1);
-}
-
-.dash-gtin-label {
-  font-size: 12px;
-  color: var(--muted-1);
-}
-
-.dash-gtin-val {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-1);
 }
 
 body.dark .dash-stat-value {

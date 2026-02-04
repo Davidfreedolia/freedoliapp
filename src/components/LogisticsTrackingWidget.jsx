@@ -34,7 +34,7 @@ const LOGISTICS_STATUS_LABELS = {
   delivered: 'Lliurat'
 }
 
-export default function LogisticsTrackingWidget({ darkMode, embedded = false }) {
+export default function LogisticsTrackingWidget({ darkMode, embedded = false, hideHeader = false }) {
   const navigate = useNavigate()
   const [projects, setProjects] = useState([])
   const [ordersByProject, setOrdersByProject] = useState({})
@@ -128,17 +128,19 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false }) 
     return (
       <div style={{
         ...(embedded ? styles.sectionEmbedded : styles.section),
-        ...(embedded ? null : { backgroundColor: darkMode ? '#15151f' : '#ffffff' })
+        ...(embedded ? null : { backgroundColor: 'var(--surface-1)' })
       }}>
-        <div style={styles.sectionHeader}>
+        {!hideHeader && (
+          <div style={styles.sectionHeader}>
           <h2 style={{
             ...styles.sectionTitle,
-            color: darkMode ? '#ffffff' : '#111827'
+            color: 'var(--text-1)'
           }}>
             <Truck size={20} />
             Tracking Logístic
           </h2>
-        </div>
+          </div>
+        )}
         <div style={styles.loading}>Carregant...</div>
       </div>
     )
@@ -150,25 +152,27 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false }) 
     return (
       <div style={{
         ...(embedded ? styles.sectionEmbedded : styles.section),
-        ...(embedded ? null : { backgroundColor: darkMode ? '#15151f' : '#ffffff' })
+        ...(embedded ? null : { backgroundColor: 'var(--surface-1)' })
       }}>
-        <div style={styles.sectionHeader}>
+        {!hideHeader && (
+          <div style={styles.sectionHeader}>
           <h2 style={{
             ...styles.sectionTitle,
-            color: darkMode ? '#ffffff' : '#111827'
+            color: 'var(--text-1)'
           }}>
             <Truck size={20} />
             Tracking Logístic
           </h2>
           <Button
-            variant="ghost"
+            variant="secondary"
             size="sm"
             onClick={() => navigate('/orders')}
             className="tracking-view-all"
           >
             Veure totes <ArrowRight size={16} />
           </Button>
-        </div>
+          </div>
+        )}
         <div style={styles.empty}>
           <p>{showOnlyStale ? 'No hi ha comandes pendents d\'actualització' : 'No hi ha comandes amb tracking actiu'}</p>
         </div>
@@ -179,12 +183,13 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false }) 
   return (
     <div style={{
       ...(embedded ? styles.sectionEmbedded : styles.section),
-      ...(embedded ? null : { backgroundColor: darkMode ? '#15151f' : '#ffffff' })
+      ...(embedded ? null : { backgroundColor: 'var(--surface-1)' })
     }}>
-      <div style={styles.sectionHeader}>
+      {!hideHeader && (
+        <div style={styles.sectionHeader}>
         <h2 style={{
           ...styles.sectionTitle,
-          color: darkMode ? '#ffffff' : '#111827'
+          color: 'var(--text-1)'
         }}>
           <Truck size={20} />
           Tracking Logístic
@@ -200,7 +205,7 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false }) 
             Només pendents
           </Button>
           <Button
-            variant="ghost"
+            variant="secondary"
             size="sm"
             onClick={() => navigate('/orders')}
             className="tracking-view-all"
@@ -208,7 +213,8 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false }) 
             Veure totes <ArrowRight size={16} />
           </Button>
         </div>
-      </div>
+        </div>
+      )}
 
       <div style={styles.projectsList} className="tracking-list">
         {filteredProjects.map(project => {
@@ -230,28 +236,18 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false }) 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{
                       ...styles.projectName,
-                      color: darkMode ? '#ffffff' : '#111827'
+                      color: 'var(--text-1)'
                     }}>
                       {project.name}
                     </span>
                     {updateStatus === 'stale' && (
-                      <span style={{
-                        ...styles.updateBadge,
-                        backgroundColor: '#fee2e2',
-                        color: '#991b1b',
-                        borderColor: '#fca5a5'
-                      }}>
+                      <span className="status-pill pill--danger" style={styles.updateBadge}>
                         <AlertTriangle size={12} />
                         Stale
                       </span>
                     )}
                     {updateStatus === 'needs_update' && (
-                      <span style={{
-                        ...styles.updateBadge,
-                        backgroundColor: '#fef3c7',
-                        color: '#92400e',
-                        borderColor: '#fcd34d'
-                      }}>
+                      <span className="status-pill pill--warn" style={styles.updateBadge}>
                         <AlertTriangle size={12} />
                         Needs update
                       </span>
@@ -259,14 +255,14 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false }) 
                   </div>
                   <span style={{
                     ...styles.projectCode,
-                    color: darkMode ? '#6b7280' : '#9ca3af'
+                    color: 'var(--muted-1)'
                   }}>
                     {project.project_code}
                   </span>
                   {daysSinceUpdate !== null && (
                     <span style={{
                       ...styles.lastUpdateText,
-                      color: darkMode ? '#9ca3af' : '#6b7280'
+                      color: 'var(--muted-1)'
                     }}>
                       Última actualització: fa {daysSinceUpdate} {daysSinceUpdate === 1 ? 'dia' : 'dies'}
                     </span>
@@ -301,15 +297,15 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false }) 
                       <div key={stage.id} style={styles.stageDot}>
                         <div style={{
                           ...styles.stageIcon,
-                          backgroundColor: isCompleted || isCurrent ? stage.colorSoft : (darkMode ? '#1f1f2e' : '#f3f4f6'),
-                          borderColor: isCompleted || isCurrent ? stage.color : (darkMode ? '#374151' : '#e5e7eb')
+                          backgroundColor: isCompleted || isCurrent ? stage.colorSoft : 'var(--surface-2)',
+                          borderColor: isCompleted || isCurrent ? stage.color : 'var(--border-1)'
                         }}>
-                          <StageIcon size={10} color={isCompleted || isCurrent ? stage.color : '#9ca3af'} />
+                          <StageIcon size={10} color={isCompleted || isCurrent ? stage.color : 'var(--muted-1)'} />
                         </div>
                         {idx < LOGISTICS_STAGES.length - 1 && (
                           <div style={{
                             ...styles.stageConnector,
-                            backgroundColor: isCompleted ? stage.color : (darkMode ? '#374151' : '#e5e7eb')
+                            backgroundColor: isCompleted ? stage.color : 'var(--border-1)'
                           }} />
                         )}
                       </div>
@@ -324,14 +320,14 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false }) 
                   <span style={styles.trackingLabel}>Tracking:</span>
                   <span style={{
                     ...styles.trackingNumber,
-                    color: darkMode ? '#9ca3af' : '#6b7280'
+                    color: 'var(--muted-1)'
                   }}>
                     {order.tracking_number}
                   </span>
                 </div>
               )}
 
-              <ArrowRight size={18} color="#9ca3af" style={styles.arrowIcon} />
+              <ArrowRight size={18} color="var(--muted-1)" style={styles.arrowIcon} />
             </div>
           )
         })}
@@ -370,12 +366,12 @@ const styles = {
   loading: {
     padding: '48px',
     textAlign: 'center',
-    color: '#6b7280'
+    color: 'var(--muted-1)'
   },
   empty: {
     padding: '48px',
     textAlign: 'center',
-    color: '#6b7280'
+    color: 'var(--muted-1)'
   },
   projectsList: {
     display: 'flex',
@@ -443,7 +439,7 @@ const styles = {
   progressBar: {
     width: '100%',
     height: '6px',
-    backgroundColor: '#e5e7eb',
+    backgroundColor: 'var(--border-1)',
     borderRadius: '3px',
     overflow: 'hidden'
   },
@@ -486,7 +482,7 @@ const styles = {
   },
   trackingLabel: {
     fontWeight: '500',
-    color: '#6b7280'
+    color: 'var(--muted-1)'
   },
   trackingNumber: {
     fontFamily: 'monospace',
