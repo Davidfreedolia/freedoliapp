@@ -31,7 +31,7 @@ export default function Projects() {
   const [filterPhase, setFilterPhase] = useState(null)
   const [showDiscarded, setShowDiscarded] = useState(false)
   const [menuOpen, setMenuOpen] = useState(null)
-  const [layout, setLayout] = useLayoutPreference('layout:projects', 'grid')
+  const [viewMode, setViewMode] = useLayoutPreference('layout:projects', 'grid')
   const [selectedProjectId, setSelectedProjectId] = useState(null)
   const PHASES = PHASE_STYLES
 
@@ -54,7 +54,7 @@ export default function Projects() {
     }
   }, [filteredProjects, selectedProjectId])
 
-  const effectiveLayout = isMobile ? 'list' : layout
+  const effectiveViewMode = isMobile ? 'list' : viewMode
   const selectedProject = filteredProjects.find(project => project.id === selectedProjectId)
   
   const discardedCount = projects.filter(p => p.decision === 'DISCARDED').length
@@ -142,7 +142,7 @@ export default function Projects() {
               <StatusBadge status={project.status} decision={project.decision} />
             </div>
             {!isPreview && (
-              <div className="projects-card__actions">
+              <div className="projects-card__menu">
                 <div style={{ position: 'relative' }}>
                   <Button
                     variant="ghost"
@@ -200,9 +200,11 @@ export default function Projects() {
           <h3 className="projects-card__title">{project.name}</h3>
 
           <div className="projects-card__meta">
-            {project.sku_internal && <span>SKU: {project.sku_internal}</span>}
-            {project.fnsku && <span>FNSKU: {project.fnsku}</span>}
-            {project.asin && <span>ASIN: {project.asin}</span>}
+            {[
+              project.sku_internal ? `SKU: ${project.sku_internal}` : null,
+              project.fnsku ? `FNSKU: ${project.fnsku}` : null,
+              project.asin ? `ASIN: ${project.asin}` : null,
+            ].filter(Boolean).join(' · ')}
           </div>
 
           <div className="projects-card__progress">
@@ -240,17 +242,17 @@ export default function Projects() {
                         const { updateProject } = await import('../lib/supabase')
                         const { showToast } = await import('../components/Toast')
                         await updateProject(project.id, { decision: 'HOLD' })
-                        showToast('Project restored', 'success')
+                        showToast('Projecte restaurat', 'success')
                         await refreshProjects()
                       } catch (err) {
                         const { showToast } = await import('../components/Toast')
-                        showToast('Error: ' + (err.message || 'Unknown error'), 'error')
+                        showToast('Error: ' + (err.message || 'Error desconegut'), 'error')
                       }
                     }}
                     style={{ height: '28px' }}
-                    title="Restore project"
+                    title="Restaurar projecte"
                   >
-                    Restore
+                    Restaura
                   </Button>
                 )}
                 <ArrowRight size={18} color="var(--muted-1)" />
@@ -333,8 +335,8 @@ export default function Projects() {
 
           <div className="toolbar-group view-controls">
             <LayoutSwitcher
-              value={effectiveLayout}
-              onChange={setLayout}
+              value={effectiveViewMode}
+              onChange={setViewMode}
               compact={isMobile}
             />
           </div>
@@ -389,7 +391,7 @@ export default function Projects() {
           </div>
         ) : (
           <>
-            {effectiveLayout === 'grid' && (
+            {effectiveViewMode === 'grid' && (
               <div style={{
                 ...styles.projectsGrid,
                 gridTemplateColumns: isMobile ? '1fr' : (isTablet ? 'repeat(auto-fill, minmax(280px, 1fr))' : 'repeat(auto-fill, minmax(320px, 1fr))'),
@@ -398,21 +400,107 @@ export default function Projects() {
                 {filteredProjects.map(project => renderProjectCard(project))}
               </div>
             )}
-            {effectiveLayout === 'list' && (
+            {effectiveViewMode === 'list' && (
               <div style={styles.projectsList}>
                 {filteredProjects.map(project => renderProjectCard(project))}
               </div>
             )}
-            {effectiveLayout === 'split' && (
-              <div style={styles.splitLayout}>
-                <div style={styles.splitList}>
+            {effectiveViewMode === 'split' && (
+              <div className="projects-split__layout">
+                <div className="projects-split__left">
                   {filteredProjects.map(project => renderProjectCard(project, { enablePreviewSelect: true }))}
                 </div>
-                <div style={styles.splitPreview}>
+                <div className="projects-split__right">
                   {selectedProject ? (
-                    renderProjectCard(selectedProject, { isPreview: true })
+                    <div className="projects-split__panel">
+                      <div className="projects-split__panelHeader">
+                        <div className="projects-split__panelTitle">Drive del projecte</div>
+                        <div className="projects-split__panelSubtitle">{selectedProject.name}</div>
+                      </div>
+
+                      <div className="projects-drive__grid">
+                        <div className="projects-drive__box">
+                          <div className="projects-drive__boxHeader">
+                            <div className="projects-drive__boxTitle">Carpetes</div>
+                          </div>
+                          <div className="projects-drive__list">
+                            {['General', 'Listing', 'Factures', 'Fotos', 'Proveïdors', 'Altres'].map((label, idx) => (
+                              <button
+                                key={label}
+                                type="button"
+                                className={`projects-drive__row ${idx === 0 ? 'is-active' : ''}`}
+                                onClick={(e) => e.preventDefault()}
+                              >
+                                <span className="projects-drive__rowMain">{label}</span>
+                                <span className="projects-drive__rowSub">{idx === 0 ? 'Seleccionada' : ''}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="projects-drive__box">
+                          <div className="projects-drive__boxHeader">
+                            <div className="projects-drive__boxTitle">Fitxers</div>
+                          </div>
+
+                          <div className="projects-drive__files">
+                            {[
+                              { name: 'Factura_01.pdf', type: 'PDF', date: '02/02/2026', size: '220 KB' },
+                              { name: 'Foto_listing_01.jpg', type: 'JPG', date: '01/02/2026', size: '1.8 MB' },
+                              { name: 'Specs.xlsx', type: 'XLSX', date: '30/01/2026', size: '96 KB' },
+                              { name: 'Manual.docx', type: 'DOC', date: '28/01/2026', size: '410 KB' },
+                              { name: 'Foto_listing_02.jpg', type: 'JPG', date: '27/01/2026', size: '2.1 MB' },
+                              { name: 'Certificat.pdf', type: 'PDF', date: '25/01/2026', size: '340 KB' },
+                              { name: 'Packaging.ai', type: 'AI', date: '20/01/2026', size: '6.2 MB' },
+                              { name: 'Notes.txt', type: 'TXT', date: '18/01/2026', size: '4 KB' },
+                            ].map((f, idx) => (
+                              <button
+                                key={f.name}
+                                type="button"
+                                className={`projects-drive__fileRow ${idx === 1 ? 'is-active' : ''}`}
+                                onClick={(e) => e.preventDefault()}
+                              >
+                                <div className="projects-drive__fileMain">
+                                  <div className="projects-drive__fileName">{f.name}</div>
+                                  <div className="projects-drive__fileMeta">{f.date} · {f.size}</div>
+                                </div>
+                                <div className="projects-drive__fileTag">{f.type}</div>
+                              </button>
+                            ))}
+                          </div>
+
+                          <div className="projects-drive__dropzone">
+                            <div className="projects-drive__dropTitle">Arrossega fitxers aquí</div>
+                            <div className="projects-drive__dropNote">Funcionalitat pendent</div>
+                          </div>
+                        </div>
+
+                        <div className="projects-drive__previewBox">
+                          <div className="projects-drive__previewHeader">
+                            <div className="projects-drive__previewTitle">Foto_listing_01.jpg</div>
+                            <div className="projects-drive__previewActions">
+                              <Button variant="secondary" size="sm" disabled onClick={(e) => e.preventDefault()}>
+                                Convertir a PDF
+                              </Button>
+                              <Button variant="ghost" size="sm" disabled onClick={(e) => e.preventDefault()}>
+                                Descarregar
+                              </Button>
+                              <Button variant="ghost" size="sm" disabled onClick={(e) => e.preventDefault()}>
+                                Pantalla completa
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="projects-drive__previewBody">Previsualització</div>
+                        </div>
+                      </div>
+                    </div>
                   ) : (
-                    <div style={styles.splitEmpty}>Selecciona un projecte</div>
+                    <div className="projects-split__panel">
+                      <div className="projects-split__panelHeader">
+                        <div className="projects-split__panelTitle">Drive del projecte</div>
+                        <div className="projects-split__panelSubtitle">Selecciona un projecte</div>
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
