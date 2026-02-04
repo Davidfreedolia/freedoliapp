@@ -1401,9 +1401,9 @@ body.dark .page-dashboard .fd-badge--neutral {
 }
 
 /* GLOBAL — restore widgets look (non-dashboard) */
-:not(.page-dashboard) .card,
-:not(.page-dashboard) .widget,
-:not(.page-dashboard) .panel {
+main > :not(.page-dashboard) .card,
+main > :not(.page-dashboard) .widget,
+main > :not(.page-dashboard) .panel {
   background: var(--surface-bg);
   box-shadow: var(--shadow-soft);
   border: 1px solid var(--border-soft);
