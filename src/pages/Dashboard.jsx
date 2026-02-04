@@ -386,25 +386,29 @@ export default function Dashboard() {
       label: 'Total Projectes',
       value: stats.totalProjects,
       icon: FolderKanban,
-      iconClass: 'dash-stat-icon--projects'
+      iconClass: 'dash-stat-icon--projects',
+      dotClass: 'dash-dot--projects'
     },
     {
       label: 'Actius',
       value: stats.activeProjects,
       icon: PlayCircle,
-      iconClass: 'dash-stat-icon--active'
+      iconClass: 'dash-stat-icon--active',
+      dotClass: 'dash-dot--active'
     },
     {
       label: 'Completats',
       value: stats.completedProjects,
       icon: CheckCircle2,
-      iconClass: 'dash-stat-icon--done'
+      iconClass: 'dash-stat-icon--done',
+      dotClass: 'dash-dot--done'
     },
     {
       label: 'Invertit',
       value: `${stats.totalInvested.toLocaleString('ca-ES', { minimumFractionDigits: 2 })} €`,
       icon: Wallet,
-      iconClass: 'dash-stat-icon--money'
+      iconClass: 'dash-stat-icon--money',
+      dotClass: 'dash-dot--money'
     }
   ]
   
@@ -504,8 +508,9 @@ export default function Dashboard() {
               key={index}
               className={`dash-stat-card ${darkMode ? 'dash-stat-card--dark' : 'dash-stat-card--light'}`}
             >
+              <div className={`dash-dot ${stat.dotClass || ''}`.trim()} />
               <div className={`dash-stat-icon ${stat.iconClass || ''}`.trim()}>
-                <stat.icon size={20} />
+                <stat.icon size={18} />
               </div>
               <div style={styles.statInfo}>
                 <span className="dash-stat-value">{stat.value}</span>
@@ -515,8 +520,9 @@ export default function Dashboard() {
           ))}
           {!loadingGtinCoverage && (
             <div className={`dash-stat-card ${darkMode ? 'dash-stat-card--dark' : 'dash-stat-card--light'}`}>
+              <div className="dash-dot dash-dot--gtin" />
               <div className="dash-stat-icon dash-stat-icon--barcode">
-                <Barcode size={20} />
+                <Barcode size={18} />
               </div>
               <div className="dash-gtin-grid">
                 <div className="dash-gtin-metric">

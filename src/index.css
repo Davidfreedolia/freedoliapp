@@ -1070,7 +1070,7 @@ body.dark .fd-calendar-asana .rbc-day-slot .rbc-time-slot:hover {
   border: 1px solid var(--border-color);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   min-height: 64px;
 }
 
@@ -1121,6 +1121,33 @@ body.dark .fd-calendar-asana .rbc-day-slot .rbc-time-slot:hover {
   color: var(--brand-primary);
 }
 
+.dash-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  flex: 0 0 auto;
+}
+
+.dash-dot--projects {
+  background: var(--brand-primary);
+}
+
+.dash-dot--active {
+  background: var(--brand-amber);
+}
+
+.dash-dot--done {
+  background: var(--brand-green);
+}
+
+.dash-dot--money {
+  background: var(--brand-ink);
+}
+
+.dash-dot--gtin {
+  background: var(--brand-amber);
+}
+
 .dash-stat-icon--projects svg {
   color: var(--brand-primary);
 }
@@ -1164,12 +1191,14 @@ body.dark .dash-stat-icon--barcode svg {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+  align-items: center;
 }
 
 .dash-gtin-metric {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  align-items: flex-start;
 }
 
 .dash-gtin-metric .dash-stat-value {
