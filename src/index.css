@@ -1289,6 +1289,19 @@ body.dark .dash-stat-value {
   filter: brightness(1.03);
 }
 
+.finance-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.finance-placeholder {
+  padding: 24px;
+  text-align: center;
+  color: var(--muted-1);
+  font-size: 13px;
+}
+
 .dashboard-order-row {
   display: flex;
   align-items: center;
@@ -1307,6 +1320,21 @@ body.dark .dash-stat-value {
 
 .dashboard-link:hover {
   text-decoration: underline;
+}
+
+.po-checklist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.po-check {
+  font-size: 12px;
+  color: var(--muted-1);
+  background: var(--surface-2);
+  border: 1px solid var(--border-1);
+  padding: 2px 6px;
+  border-radius: 999px;
 }
 
 .status-pill {

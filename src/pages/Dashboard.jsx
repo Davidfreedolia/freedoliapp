@@ -17,6 +17,9 @@ import {
   Plus,
   Package,
   TrendingUp,
+  LineChart,
+  BarChart3,
+  Table2,
   Sun,
   Moon,
   Bell,
@@ -98,6 +101,7 @@ export default function Dashboard() {
   const [editLayout, setEditLayout] = useState(false)
   const [layout, setLayout] = useState([])
   const [gridWidth, setGridWidth] = useState(1200)
+  const [financeView, setFinanceView] = useState('bar')
 
   useEffect(() => {
     loadDashboardPreferences()
@@ -704,29 +708,37 @@ export default function Dashboard() {
           ) : (
             <div style={styles.ordersList}>
               {posNotReady.map(po => (
-                <div 
+                <div
                   key={po.id}
-                  style={styles.orderItem}
-                  onClick={() => navigate(`/orders`)}
+                  style={{
+                    ...styles.orderItem,
+                    flexDirection: 'column',
+                    alignItems: 'stretch',
+                    gap: '8px'
+                  }}
                 >
-                  <div style={styles.orderInfo}>
-                    <span style={{
-                      ...styles.orderNumber,
-                      color: darkMode ? '#ffffff' : '#111827'
-                    }}>
+                  <div className="dashboard-order-row">
+                    <button
+                      type="button"
+                      className="dashboard-link"
+                      onClick={() => navigate(`/projects/${po.project_id || po.projects?.id || ''}`)}
+                    >
+                      [{po.projects?.project_code || 'PR'}] {po.projects?.name || t('dashboard.noProject')}
+                    </button>
+                    <button
+                      type="button"
+                      className="dashboard-link"
+                      onClick={() => navigate(`/orders/${po.id}`)}
+                    >
                       {po.po_number}
-                    </span>
-                      <span style={{
-                        ...styles.orderProject,
-                        color: 'var(--muted-1)'
-                      }}>
-                      {po.projects?.name || t('dashboard.noProject')}
-                    </span>
+                    </button>
                   </div>
-                  <div className="status-pill pill--warn" style={styles.statusBadge}>
-                    {t('dashboard.posNotReady.missing')} {po.missingCount}
+                  <div className="po-checklist">
+                    <span className="po-check">Etiquetatge</span>
+                    <span className="po-check">Packaging</span>
+                    <span className="po-check">FNSKU</span>
+                    <span className="po-check">Cartons</span>
                   </div>
-                  <ArrowRight size={18} color="var(--muted-1)" />
                 </div>
               ))}
             </div>
@@ -749,62 +761,89 @@ export default function Dashboard() {
                 <TrendingUp size={20} />
                 Analítica de Finances
               </h2>
+              <div className="finance-toggle">
+                <Button
+                  variant={financeView === 'line' ? 'secondary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setFinanceView('line')}
+                >
+                  <LineChart size={16} />
+                </Button>
+                <Button
+                  variant={financeView === 'bar' ? 'secondary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setFinanceView('bar')}
+                >
+                  <BarChart3 size={16} />
+                </Button>
+                <Button
+                  variant={financeView === 'table' ? 'secondary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setFinanceView('table')}
+                >
+                  <Table2 size={16} />
+                </Button>
+              </div>
             </div>
-            <div style={{
-              ...styles.chartContainer,
-              overflowX: isMobile ? 'auto' : 'visible',
-              width: '100%'
-            }}>
+            {financeView === 'bar' ? (
               <div style={{
-                ...styles.chartBars,
-                minWidth: isMobile ? '400px' : 'auto'
+                ...styles.chartContainer,
+                overflowX: isMobile ? 'auto' : 'visible',
+                width: '100%'
               }}>
-                {financialData.map((data, index) => (
-                  <div key={index} style={styles.chartBarGroup}>
-                    <div style={styles.barLabels}>
-                      <div style={{
-                        ...styles.bar,
-                        height: `${(data.income / maxValue) * 100}%`,
-                        backgroundColor: 'var(--brand-green)'
-                      }} />
-                      <div style={{
-                        ...styles.bar,
-                        height: `${(data.expenses / maxValue) * 100}%`,
-                        backgroundColor: 'var(--brand-primary)',
-                        marginTop: '4px'
-                      }} />
+                <div style={{
+                  ...styles.chartBars,
+                  minWidth: isMobile ? '400px' : 'auto'
+                }}>
+                  {financialData.map((data, index) => (
+                    <div key={index} style={styles.chartBarGroup}>
+                      <div style={styles.barLabels}>
+                        <div style={{
+                          ...styles.bar,
+                          height: `${(data.income / maxValue) * 100}%`,
+                          backgroundColor: 'var(--brand-green)'
+                        }} />
+                        <div style={{
+                          ...styles.bar,
+                          height: `${(data.expenses / maxValue) * 100}%`,
+                          backgroundColor: 'var(--brand-primary)',
+                          marginTop: '4px'
+                        }} />
+                      </div>
+                      <div style={styles.barLabel}>
+                        {new Date(data.month + '-01').toLocaleDateString('ca-ES', { month: 'short', year: '2-digit' })}
+                      </div>
+                      <div style={styles.barValues}>
+                        <span style={{ color: 'var(--brand-green)', fontSize: '11px' }}>
+                          +{data.income.toLocaleString('ca-ES', { maximumFractionDigits: 0 })}€
+                        </span>
+                        <span style={{ color: 'var(--brand-primary)', fontSize: '11px' }}>
+                          -{data.expenses.toLocaleString('ca-ES', { maximumFractionDigits: 0 })}€
+                        </span>
+                      </div>
                     </div>
-                    <div style={styles.barLabel}>
-                      {new Date(data.month + '-01').toLocaleDateString('ca-ES', { month: 'short', year: '2-digit' })}
-                    </div>
-                    <div style={styles.barValues}>
-                      <span style={{ color: 'var(--brand-green)', fontSize: '11px' }}>
-                        +{data.income.toLocaleString('ca-ES', { maximumFractionDigits: 0 })}€
-                      </span>
-                      <span style={{ color: 'var(--brand-primary)', fontSize: '11px' }}>
-                        -{data.expenses.toLocaleString('ca-ES', { maximumFractionDigits: 0 })}€
-                      </span>
-                    </div>
+                  ))}
+                </div>
+                <div style={styles.chartLegend}>
+                  <div style={styles.legendItem}>
+                    <div style={{ ...styles.legendColor, backgroundColor: 'var(--brand-green)' }} />
+                    <span>Ingressos</span>
                   </div>
-                ))}
-              </div>
-              <div style={styles.chartLegend}>
-                <div style={styles.legendItem}>
-                  <div style={{ ...styles.legendColor, backgroundColor: 'var(--brand-green)' }} />
-                  <span>Ingressos</span>
-                </div>
-                <div style={styles.legendItem}>
-                  <div style={{ ...styles.legendColor, backgroundColor: 'var(--brand-primary)' }} />
-                  <span>Despeses</span>
+                  <div style={styles.legendItem}>
+                    <div style={{ ...styles.legendColor, backgroundColor: 'var(--brand-primary)' }} />
+                    <span>Despeses</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="finance-placeholder">Coming soon</div>
+            )}
           </div>
           </SafeWidget>
         )}
 
         {/* Daily Ops Widgets with Grid Layout (Desktop/Tablet) */}
-        {!loadingPreferences && !isMobile && layout.length > 0 && (
+        {false && (
           <div style={{ marginTop: '32px' }}>
             <GridLayout
               className="layout"
@@ -937,7 +976,7 @@ export default function Dashboard() {
         )}
         
         {/* Mobile: Simple grid (no drag) */}
-        {!loadingPreferences && isMobile && (
+        {false && (
           <div style={{
             display: 'grid',
             gridTemplateColumns: '1fr',

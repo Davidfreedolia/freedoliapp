@@ -297,7 +297,7 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false, hi
                         }}>
                           <StageIcon size={10} color={isCompleted || isCurrent ? stage.color : 'var(--muted-1)'} />
                         </div>
-                        {idx < LOGISTICS_STAGES.length - 1 && (
+                        {!embedded && idx < LOGISTICS_STAGES.length - 1 && (
                           <div style={{
                             ...styles.stageConnector,
                             backgroundColor: isCompleted ? stage.color : 'var(--border-1)'
