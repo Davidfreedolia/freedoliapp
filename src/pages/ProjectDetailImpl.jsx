@@ -2272,7 +2272,9 @@ function ProjectDetailInner({ useApp }) {
           </div>
         )}
 
-        <div style={phaseWrapperStyle}>
+        <div className="project-split__layout">
+          <div className="project-split__left">
+            <div style={phaseWrapperStyle}>
           <div
             data-testid="phase-gate-block-banner"
             data-revealed={phaseBlockVisible ? 'true' : 'false'}
@@ -2514,6 +2516,97 @@ function ProjectDetailInner({ useApp }) {
         >
           {renderPhaseContent(7)}
         </PhaseSection>
+            </div>
+          </div>
+
+          <aside className="project-split__right">
+            <div className="project-split__sticky">
+              <div className="projects-split__panel">
+              <div className="projects-split__panelHeader">
+                <div className="projects-split__panelTitle">Drive del projecte</div>
+                <div className="projects-split__panelSubtitle">
+                  {project?.name || '—'}
+                </div>
+              </div>
+
+              <div className="projects-drive__grid">
+                <div className="projects-drive__box">
+                  <div className="projects-drive__boxHeader">
+                    <div className="projects-drive__boxTitle">Carpetes</div>
+                  </div>
+                  <div className="projects-drive__list">
+                    {['General', 'Listing', 'Factures', 'Fotos', 'Proveïdors', 'Altres'].map((label, idx) => (
+                      <button
+                        key={label}
+                        type="button"
+                        className={`projects-drive__row ${idx === 0 ? 'is-active' : ''}`}
+                        onClick={(event) => event.preventDefault()}
+                      >
+                        <span className="projects-drive__rowMain">{label}</span>
+                        <span className="projects-drive__rowSub">{idx === 0 ? 'Seleccionada' : ''}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="projects-drive__box">
+                  <div className="projects-drive__boxHeader">
+                    <div className="projects-drive__boxTitle">Fitxers</div>
+                  </div>
+
+                  <div className="projects-drive__files">
+                    {[
+                      { name: 'Factura_01.pdf', type: 'PDF', date: '02/02/2026', size: '220 KB' },
+                      { name: 'Foto_listing_01.jpg', type: 'JPG', date: '01/02/2026', size: '1.8 MB' },
+                      { name: 'Specs.xlsx', type: 'XLSX', date: '30/01/2026', size: '96 KB' },
+                      { name: 'Manual.docx', type: 'DOC', date: '28/01/2026', size: '410 KB' },
+                      { name: 'Foto_listing_02.jpg', type: 'JPG', date: '27/01/2026', size: '2.1 MB' },
+                      { name: 'Certificat.pdf', type: 'PDF', date: '25/01/2026', size: '340 KB' },
+                      { name: 'Packaging.ai', type: 'AI', date: '20/01/2026', size: '6.2 MB' },
+                      { name: 'Notes.txt', type: 'TXT', date: '18/01/2026', size: '4 KB' },
+                    ].map((file, idx) => (
+                      <button
+                        key={file.name}
+                        type="button"
+                        className={`projects-drive__fileRow ${idx === 1 ? 'is-active' : ''}`}
+                        onClick={(event) => event.preventDefault()}
+                      >
+                        <div className="projects-drive__fileMain">
+                          <div className="projects-drive__fileName">{file.name}</div>
+                          <div className="projects-drive__fileMeta">{file.date} · {file.size}</div>
+                        </div>
+                        <div className="projects-drive__fileTag">{file.type}</div>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="projects-drive__dropzone">
+                    <div className="projects-drive__dropTitle">Arrossega fitxers aquí</div>
+                    <div className="projects-drive__dropNote">Funcionalitat pendent</div>
+                  </div>
+                </div>
+
+                <div className="projects-drive__previewBox">
+                  <div className="projects-drive__previewHeader">
+                    <div className="projects-drive__previewTitle">Foto_listing_01.jpg</div>
+                    <div className="projects-drive__previewActions">
+                      <Button variant="secondary" size="sm" disabled onClick={(event) => event.preventDefault()}>
+                        Convertir a PDF
+                      </Button>
+                      <Button variant="ghost" size="sm" disabled onClick={(event) => event.preventDefault()}>
+                        Descarregar
+                      </Button>
+                      <Button variant="ghost" size="sm" disabled onClick={(event) => event.preventDefault()}>
+                        Pantalla completa
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="projects-drive__previewBody">Previsualització</div>
+                </div>
+              </div>
+            </div>
+            </div>
+          </aside>
         </div>
 
       </div>

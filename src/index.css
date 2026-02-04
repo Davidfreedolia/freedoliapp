@@ -1111,6 +1111,42 @@ body.dark .avatar-circle {
   outline-offset: 2px;
 }
 
+.project-split__layout {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 16px;
+  align-items: start;
+  margin-top: 16px;
+}
+
+@media (max-width: 980px) {
+  .project-split__layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.project-split__left {
+  min-width: 0;
+}
+
+.project-split__right {
+  min-width: 0;
+}
+
+@media (min-width: 981px) {
+  .project-split__sticky {
+    position: sticky;
+    top: 16px;
+  }
+}
+
+@media (min-width: 981px) {
+  .projects-split__panel {
+    max-height: calc(100vh - 32px);
+    overflow: auto;
+  }
+}
+
 .sidebar-scroll {
   scrollbar-width: none;
   -ms-overflow-style: none;
