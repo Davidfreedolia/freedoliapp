@@ -1110,7 +1110,7 @@ body.dark .topbar::after {
 }
 
 /* DASHBOARD — stats cards coherència */
-.dash-stat-card {
+.page-dashboard .dash-stat-card {
   padding: 12px;
   border-radius: 12px;
   border: 1px solid var(--border-color);
@@ -1121,39 +1121,39 @@ body.dark .topbar::after {
   min-height: 64px;
 }
 
-.dash-top-row {
+.page-dashboard .dash-top-row {
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
 @media (max-width: 1100px) {
-  .dash-top-row {
+  .page-dashboard .dash-top-row {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
 @media (max-width: 820px) {
-  .dash-top-row {
+  .page-dashboard .dash-top-row {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 520px) {
-  .dash-top-row {
+  .page-dashboard .dash-top-row {
     grid-template-columns: 1fr;
   }
 }
 
-.dash-stat-card--light {
+.page-dashboard .dash-stat-card--light {
   background: var(--surface-1);
 }
 
-.dash-stat-card--dark {
+.page-dashboard .dash-stat-card--dark {
   background: #15151f;
 }
 
-.dash-stat-icon {
+.page-dashboard .dash-stat-icon {
   width: 36px;
   height: 36px;
   border-radius: 10px;
@@ -1162,46 +1162,46 @@ body.dark .topbar::after {
   background: none;
 }
 
-.dash-stat-icon svg {
+.page-dashboard .dash-stat-icon svg {
   width: 20px;
   height: 20px;
   color: var(--brand-primary);
 }
 
-.dash-stat-info {
+.page-dashboard .dash-stat-info {
   display: flex;
   flex-direction: column;
 }
 
-.dash-stat-icon--projects svg {
+.page-dashboard .dash-stat-icon--projects svg {
   color: var(--brand-primary);
 }
 
-.dash-stat-icon--active svg {
+.page-dashboard .dash-stat-icon--active svg {
   color: var(--brand-amber);
 }
 
-.dash-stat-icon--done svg {
+.page-dashboard .dash-stat-icon--done svg {
   color: var(--brand-green);
 }
 
-.dash-stat-icon--money svg {
+.page-dashboard .dash-stat-icon--money svg {
   color: var(--brand-ink);
 }
 
-.dash-stat-icon--gtin svg {
+.page-dashboard .dash-stat-icon--gtin svg {
   color: var(--brand-amber);
 }
 
-.dash-stat-icon--barcode svg {
+.page-dashboard .dash-stat-icon--barcode svg {
   color: var(--text-1);
 }
 
-body.dark .dash-stat-icon--barcode svg {
+body.dark .page-dashboard .dash-stat-icon--barcode svg {
   color: #fff;
 }
 
-.dash-ring {
+.page-dashboard .dash-ring {
   width: 34px;
   height: 34px;
   border-radius: 999px;
@@ -1215,7 +1215,7 @@ body.dark .dash-stat-icon--barcode svg {
   opacity: 0.95;
 }
 
-.dash-ring--total {
+.page-dashboard .dash-ring--total {
   background: conic-gradient(
     var(--brand-amber) 0 var(--a),
     var(--brand-green) var(--a) calc(var(--a) + var(--d)),
@@ -1223,63 +1223,63 @@ body.dark .dash-stat-icon--barcode svg {
   );
 }
 
-.dash-ring--projects {
+.page-dashboard .dash-ring--projects {
   --ring-color: var(--brand-primary);
 }
 
-.dash-ring--active {
+.page-dashboard .dash-ring--active {
   --ring-color: var(--brand-amber);
 }
 
-.dash-ring--done {
+.page-dashboard .dash-ring--done {
   --ring-color: var(--brand-green);
 }
 
-.dash-ring--money {
+.page-dashboard .dash-ring--money {
   --ring-color: var(--brand-ink);
 }
 
-.dash-ring {
+.page-dashboard .dash-ring {
   --ring-track: rgba(0, 0, 0, 0.06);
 }
 
-body.dark .dash-ring {
+body.dark .page-dashboard .dash-ring {
   --ring-track: rgba(255, 255, 255, 0.12);
 }
 
-.dash-stat-value {
+.page-dashboard .dash-stat-value {
   font-size: 22px;
   font-weight: 700;
   color: var(--color-text);
 }
 
-.dash-stat-label {
+.page-dashboard .dash-stat-label {
   font-size: 12px;
   color: var(--color-muted);
 }
 
 
-body.dark .dash-stat-value {
+body.dark .page-dashboard .dash-stat-value {
   color: #ffffff;
 }
 
-.tracking-list {
+.page-dashboard .tracking-list {
   max-height: 220px;
   overflow: auto;
 }
 
-.tracking-filter-button.is-active {
+.page-dashboard .tracking-filter-button.is-active {
   background: var(--color-warning-soft-bg);
   border-color: var(--color-warning-soft-border);
   color: var(--color-warning-soft-text);
 }
 
-.dashboard-page .tracking-timeline {
+.page-dashboard .tracking-timeline {
   width: 100%;
   position: relative;
 }
 
-.dashboard-page .tracking-timeline::before {
+.page-dashboard .tracking-timeline::before {
   content: "";
   position: absolute;
   left: 10px;
@@ -1289,7 +1289,7 @@ body.dark .dash-stat-value {
   background: var(--border-1);
 }
 
-.dashboard-page .tracking-stages {
+.page-dashboard .tracking-stages {
   display: flex;
   justify-content: space-between;
   width: 100%;
@@ -1297,41 +1297,41 @@ body.dark .dash-stat-value {
   z-index: 1;
 }
 
-.dashboard-page {
+.page-dashboard {
   background: linear-gradient(135deg, var(--dash-bg-1), var(--dash-bg-2));
 }
 
-.dashboard-page .dashboard-view-all {
+.page-dashboard .dashboard-view-all {
   background: var(--brand-blue) !important;
   color: #fff !important;
   border: none !important;
 }
 
-.dashboard-page .dashboard-view-all:hover {
+.page-dashboard .dashboard-view-all:hover {
   filter: brightness(1.03);
 }
 
-.dashboard-page .finance-toggle {
+.page-dashboard .finance-toggle {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.dashboard-page .finance-placeholder {
+.page-dashboard .finance-placeholder {
   padding: 24px;
   text-align: center;
   color: var(--muted-1);
   font-size: 13px;
 }
 
-.dashboard-page .dashboard-order-row {
+.page-dashboard .dashboard-order-row {
   display: flex;
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
 }
 
-.dashboard-page .dashboard-link {
+.page-dashboard .dashboard-link {
   background: none;
   border: none;
   padding: 0;
@@ -1340,25 +1340,25 @@ body.dark .dash-stat-value {
   cursor: pointer;
 }
 
-.dashboard-page .dashboard-link:hover {
+.page-dashboard .dashboard-link:hover {
   text-decoration: underline;
 }
 
-.dashboard-page .po-checklist {
+.page-dashboard .po-checklist {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.dashboard-page .dash-widget-icon--orders {
+.page-dashboard .dash-widget-icon--orders {
   color: var(--brand-ink);
 }
 
-body.dark .dashboard-page .dash-widget-icon--orders {
+body.dark .page-dashboard .dash-widget-icon--orders {
   color: var(--brand-amber);
 }
 
-.dashboard-page .fd-badge {
+.page-dashboard .fd-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -1371,30 +1371,30 @@ body.dark .dashboard-page .dash-widget-icon--orders {
   pointer-events: none;
 }
 
-.dashboard-page .fd-badge--alert {
+.page-dashboard .fd-badge--alert {
   color: #fff;
   background: #ef4444;
 }
 
-.dashboard-page .fd-badge--done {
+.page-dashboard .fd-badge--done {
   color: #0f5132;
   background: rgba(107, 199, 181, 0.30);
   border-color: rgba(107, 199, 181, 0.55);
 }
 
-.dashboard-page .fd-badge--neutral {
+.page-dashboard .fd-badge--neutral {
   color: var(--muted-1);
   background: rgba(31, 78, 95, 0.08);
   border-color: rgba(31, 78, 95, 0.18);
 }
 
-body.dark .dashboard-page .fd-badge--done {
+body.dark .page-dashboard .fd-badge--done {
   color: #fff;
   background: rgba(107, 199, 181, 0.25);
   border-color: rgba(107, 199, 181, 0.45);
 }
 
-body.dark .dashboard-page .fd-badge--neutral {
+body.dark .page-dashboard .fd-badge--neutral {
   color: rgba(244, 247, 243, 0.75);
   background: rgba(244, 247, 243, 0.08);
   border-color: rgba(244, 247, 243, 0.12);
@@ -1520,30 +1520,30 @@ body.dark .fd-switch {
   transform: translateX(26px);
 }
 
-.dashboard-page .status-pill {
+.page-dashboard .status-pill {
   background: var(--surface-2);
   color: var(--text-1);
   border: 1px solid var(--border-1);
 }
 
-.dashboard-page .pill--danger {
+.page-dashboard .pill--danger {
   background: color-mix(in srgb, var(--brand-primary) 18%, transparent);
   color: var(--brand-primary);
   border: 1px solid color-mix(in srgb, var(--brand-primary) 35%, transparent);
 }
 
-.dashboard-page .pill--warn {
+.page-dashboard .pill--warn {
   background: color-mix(in srgb, var(--brand-amber) 22%, transparent);
   color: var(--brand-ink);
   border: 1px solid color-mix(in srgb, var(--brand-amber) 40%, transparent);
 }
 
-.dashboard-page .pill--ok {
+.page-dashboard .pill--ok {
   background: color-mix(in srgb, var(--brand-green) 18%, transparent);
   color: var(--brand-green);
   border: 1px solid color-mix(in srgb, var(--brand-green) 35%, transparent);
 }
 
-.dash-merged-subsection {
+.page-dashboard .dash-merged-subsection {
   padding-bottom: 12px;
 }

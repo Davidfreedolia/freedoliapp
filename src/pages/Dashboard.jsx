@@ -451,7 +451,7 @@ export default function Dashboard() {
     : 1
 
   return (
-    <div style={styles.container} className="dashboard-page page-dashboard">
+    <div style={styles.container} className="page-dashboard">
       {/* Edit Layout Controls - Only visible when editing, no duplicate topbar */}
       {editLayout && !isMobile && (
         <div style={{
