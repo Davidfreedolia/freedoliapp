@@ -383,6 +383,16 @@ main {
   box-shadow: none !important;
 }
 
+.topbar-help {
+  background: var(--brand-blue) !important;
+  color: #fff !important;
+  border: none !important;
+}
+
+.topbar-help svg {
+  color: #fff !important;
+}
+
 .avatar.topbar-avatar {
   width: 28px !important;
   height: 28px !important;
@@ -391,6 +401,16 @@ main {
   color: var(--brand-primary) !important;
   font-weight: 700;
   box-shadow: none !important;
+}
+
+.avatar-circle {
+  background: var(--brand-primary) !important;
+  color: #fff !important;
+}
+
+body.dark .avatar-circle {
+  background: var(--brand-amber) !important;
+  color: #111 !important;
 }
 
 /* Toolbar controls */
@@ -1328,13 +1348,90 @@ body.dark .dash-stat-value {
   gap: 8px;
 }
 
-.po-check {
-  font-size: 12px;
-  color: var(--muted-1);
-  background: var(--surface-2);
-  border: 1px solid var(--border-1);
-  padding: 2px 6px;
+.dash-widget-icon--orders {
+  color: var(--brand-ink);
+}
+
+body.dark .dash-widget-icon--orders {
+  color: var(--brand-amber);
+}
+
+.fd-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
   border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  user-select: none;
+  pointer-events: none;
+}
+
+.fd-badge--alert {
+  color: #fff;
+  background: #ef4444;
+}
+
+.fd-badge--done {
+  color: #0f5132;
+  background: rgba(107, 199, 181, 0.30);
+  border-color: rgba(107, 199, 181, 0.55);
+}
+
+.fd-badge--neutral {
+  color: var(--muted-1);
+  background: rgba(31, 78, 95, 0.08);
+  border-color: rgba(31, 78, 95, 0.18);
+}
+
+body.dark .fd-badge--done {
+  color: #fff;
+  background: rgba(107, 199, 181, 0.25);
+  border-color: rgba(107, 199, 181, 0.45);
+}
+
+body.dark .fd-badge--neutral {
+  color: rgba(244, 247, 243, 0.75);
+  background: rgba(244, 247, 243, 0.08);
+  border-color: rgba(244, 247, 243, 0.12);
+}
+
+.fd-switch {
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  background: rgba(31, 78, 95, 0.18);
+  border: 1px solid rgba(31, 78, 95, 0.22);
+  position: relative;
+  padding: 0;
+  cursor: pointer;
+}
+
+.fd-switch__thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #fff;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.18s ease;
+}
+
+.fd-switch.is-on {
+  background: rgba(107, 199, 181, 0.45);
+  border-color: rgba(107, 199, 181, 0.55);
+}
+
+.fd-switch.is-on .fd-switch__thumb {
+  transform: translateX(20px);
+}
+
+body.dark .fd-switch {
+  background: rgba(244, 247, 243, 0.10);
+  border-color: rgba(244, 247, 243, 0.14);
 }
 
 .status-pill {

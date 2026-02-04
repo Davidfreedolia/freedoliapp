@@ -99,7 +99,7 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
             variant="ghost"
             size="sm"
             onClick={() => setShowHelpModal(true)}
-            className="topbar-button"
+            className="topbar-button topbar-help"
             title={t('navbar.help')}
             aria-label={t('navbar.help')}
           >

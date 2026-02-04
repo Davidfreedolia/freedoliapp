@@ -616,7 +616,7 @@ export default function Dashboard() {
                   ...styles.sectionTitle,
                   color: darkMode ? '#ffffff' : '#111827'
                 }}>
-                  <Package size={20} />
+                  <Package size={20} className="dash-widget-icon--orders" />
                   {t('dashboard.ordersInProgress.title')}
                 </h2>
             <Button
@@ -734,10 +734,10 @@ export default function Dashboard() {
                     </button>
                   </div>
                   <div className="po-checklist">
-                    <span className="po-check">Etiquetatge</span>
-                    <span className="po-check">Packaging</span>
-                    <span className="po-check">FNSKU</span>
-                    <span className="po-check">Cartons</span>
+                    <span className="fd-badge fd-badge--neutral">Etiquetatge</span>
+                    <span className="fd-badge fd-badge--neutral">Packaging</span>
+                    <span className="fd-badge fd-badge--neutral">FNSKU</span>
+                    <span className="fd-badge fd-badge--neutral">Cartons</span>
                   </div>
                 </div>
               ))}

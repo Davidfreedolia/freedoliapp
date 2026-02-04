@@ -67,22 +67,11 @@ export default function HeaderPreferencesWidget({ onLanguageClick }) {
       {/* Day/Night Toggle */}
       <button
         onClick={() => setDarkMode(!darkMode)}
-        style={buttonStyle}
+        className={`fd-switch ${darkMode ? 'is-on' : ''}`}
         title={darkMode ? t('navbar.lightMode') : t('navbar.darkMode')}
         aria-label={darkMode ? t('navbar.lightMode') : t('navbar.darkMode')}
-        onMouseEnter={(e) => {
-          Object.assign(e.currentTarget.style, buttonHoverStyle)
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'transparent'
-          e.currentTarget.style.color = darkMode ? '#fbbf24' : 'var(--color-muted)'
-        }}
       >
-        {darkMode ? (
-          <Sun size={18} color="#fbbf24" />
-        ) : (
-          <Moon size={18} />
-        )}
+        <span className="fd-switch__thumb" />
       </button>
 
       {/* Settings */}
