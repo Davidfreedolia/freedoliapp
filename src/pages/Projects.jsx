@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { 
@@ -33,6 +33,8 @@ export default function Projects() {
   const [menuOpen, setMenuOpen] = useState(null)
   const [viewMode, setViewMode] = useLayoutPreference('layout:projects', 'grid')
   const [selectedProjectId, setSelectedProjectId] = useState(null)
+  const [isLoadingProjects, setIsLoadingProjects] = useState(true)
+  const didLoadRef = useRef(false)
   const PHASES = PHASE_STYLES
 
   const filteredProjects = projects.filter(project => {
@@ -53,6 +55,22 @@ export default function Projects() {
       setSelectedProjectId(filteredProjects[0].id)
     }
   }, [filteredProjects, selectedProjectId])
+
+  useEffect(() => {
+    if (didLoadRef.current) return
+    didLoadRef.current = true
+
+    let alive = true
+    ;(async () => {
+      try {
+        await refreshProjects()
+      } finally {
+        if (alive) setIsLoadingProjects(false)
+      }
+    })()
+
+    return () => { alive = false }
+  }, [refreshProjects])
 
   const effectiveViewMode = isMobile ? 'list' : viewMode
   const selectedProject = filteredProjects.find(project => project.id === selectedProjectId)
@@ -349,17 +367,24 @@ export default function Projects() {
                 setShowModal(true)
               }} 
               disabled={!driveConnected}
-              title={!driveConnected ? "Connecta Google Drive per crear" : ""}
+              title={!driveConnected ? 'Connecta Google Drive per crear' : ''}
               style={{ width: isMobile ? '100%' : 'auto' }}
             >
               <Plus size={18} />
-              Nou Projecte
+              Nou projecte
             </Button>
           </div>
         </div>
 
         {/* Projects Grid */}
-        {filteredProjects.length === 0 ? (
+        {isLoadingProjects ? (
+          <div style={{
+            ...styles.empty,
+            backgroundColor: 'var(--surface-bg)'
+          }}>
+            <p style={{ color: 'var(--muted-1)' }}>Carregant projectes…</p>
+          </div>
+        ) : filteredProjects.length === 0 ? (
           <div style={{
             ...styles.empty,
             backgroundColor: 'var(--surface-bg)'
@@ -377,14 +402,14 @@ export default function Projects() {
                     setShowModal(true)
                   }} 
                   disabled={!driveConnected}
-                  title={!driveConnected ? "Connecta Google Drive per crear" : ""}
+          title={!driveConnected ? 'Connecta Google Drive per crear' : ''}
                   style={{
                     opacity: !driveConnected ? 0.5 : 1,
                     cursor: !driveConnected ? 'not-allowed' : 'pointer'
                   }}
                 >
                   <Plus size={18} />
-                  Crear Projecte
+          Nou projecte
                 </Button>
               </>
             )}
@@ -397,12 +422,12 @@ export default function Projects() {
                 gridTemplateColumns: isMobile ? '1fr' : (isTablet ? 'repeat(auto-fill, minmax(280px, 1fr))' : 'repeat(auto-fill, minmax(320px, 1fr))'),
                 gap: isMobile ? '12px' : '20px'
               }}>
-                {filteredProjects.map(project => renderProjectCard(project))}
+        {filteredProjects.map(project => renderProjectCard(project, { enablePreviewSelect: false }))}
               </div>
             )}
             {effectiveViewMode === 'list' && (
               <div style={styles.projectsList}>
-                {filteredProjects.map(project => renderProjectCard(project))}
+        {filteredProjects.map(project => renderProjectCard(project, { enablePreviewSelect: false }))}
               </div>
             )}
             {effectiveViewMode === 'split' && (
