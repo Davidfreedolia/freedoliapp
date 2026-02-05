@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
+
+console.log('🔥🔥 PROJECTS PROD CHECK 🔥🔥', new Date().toISOString())
 import { useNavigate } from 'react-router-dom'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { 
@@ -45,6 +47,28 @@ export default function Projects() {
     const matchesDiscarded = showDiscarded ? true : (project.decision !== 'DISCARDED')
     return matchesSearch && matchesPhase && matchesDiscarded
   })
+  console.log('[Projects][FILTER]', {
+    inputLength: projects?.length,
+    outputLength: filteredProjects?.length,
+    filters: {
+      searchTerm,
+      filterPhase,
+      effectiveViewMode
+    }
+  })
+
+  useEffect(() => {
+    console.log('[Projects][MOUNT]')
+  }, [])
+
+  useEffect(() => {
+    console.log('[Projects][STATE]', {
+      projectsLength: projects?.length,
+      filteredLength: filteredProjects?.length,
+      isLoadingProjects,
+      effectiveViewMode
+    })
+  }, [projects, filteredProjects, isLoadingProjects, effectiveViewMode])
 
   useEffect(() => {
     if (!filteredProjects.length) {
@@ -293,6 +317,13 @@ export default function Projects() {
       </div>
     )
   }
+
+  console.log('[Projects][RENDER]', {
+    projectsLength: projects?.length,
+    filteredLength: filteredProjects?.length,
+    isLoadingProjects,
+    effectiveViewMode
+  })
 
   return (
     <div style={styles.container}>
