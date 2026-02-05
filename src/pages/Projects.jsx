@@ -1,6 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-
-console.log('🔥🔥 PROJECTS PROD CHECK 🔥🔥', new Date().toISOString())
 import { useNavigate } from 'react-router-dom'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { 
@@ -37,6 +35,8 @@ export default function Projects() {
   const [selectedProjectId, setSelectedProjectId] = useState(null)
   const [isLoadingProjects, setIsLoadingProjects] = useState(true)
   const didLoadRef = useRef(false)
+  const isMountedRef = useRef(false)
+  const refreshProjectsRef = useRef(null)
   const PHASES = PHASE_STYLES
 
   const effectiveViewMode = isMobile ? 'list' : viewMode
@@ -48,29 +48,6 @@ export default function Projects() {
     const matchesDiscarded = showDiscarded ? true : (project.decision !== 'DISCARDED')
     return matchesSearch && matchesPhase && matchesDiscarded
   })
-  console.log('[Projects][FILTER]', {
-    inputLength: projects?.length,
-    outputLength: filteredProjects?.length,
-    filters: {
-      searchTerm,
-      filterPhase,
-      effectiveViewMode
-    }
-  })
-
-  useEffect(() => {
-    console.log('[Projects][MOUNT]')
-  }, [])
-
-  useEffect(() => {
-    console.log('[Projects][STATE]', {
-      projectsLength: projects?.length,
-      filteredLength: filteredProjects?.length,
-      isLoadingProjects,
-      effectiveViewMode
-    })
-  }, [projects, filteredProjects, isLoadingProjects, effectiveViewMode])
-
   useEffect(() => {
     if (!filteredProjects.length) {
       setSelectedProjectId(null)
@@ -82,20 +59,26 @@ export default function Projects() {
   }, [filteredProjects, selectedProjectId])
 
   useEffect(() => {
+    refreshProjectsRef.current = refreshProjects
+  }, [refreshProjects])
+
+  useEffect(() => {
     if (didLoadRef.current) return
     didLoadRef.current = true
 
-    let alive = true
+    isMountedRef.current = true
     ;(async () => {
       try {
-        await refreshProjects()
+        await refreshProjectsRef.current?.()
       } finally {
-        if (alive) setIsLoadingProjects(false)
+        if (isMountedRef.current) setIsLoadingProjects(false)
       }
     })()
 
-    return () => { alive = false }
-  }, [refreshProjects])
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
 
   const selectedProject = filteredProjects.find(project => project.id === selectedProjectId)
   
@@ -317,13 +300,6 @@ export default function Projects() {
       </div>
     )
   }
-
-  console.log('[Projects][RENDER]', {
-    projectsLength: projects?.length,
-    filteredLength: filteredProjects?.length,
-    isLoadingProjects,
-    effectiveViewMode
-  })
 
   return (
     <div style={styles.container}>
