@@ -39,6 +39,7 @@ export default function Projects() {
   const didLoadRef = useRef(false)
   const PHASES = PHASE_STYLES
 
+  const effectiveViewMode = isMobile ? 'list' : viewMode
   const filteredProjects = projects.filter(project => {
     const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          project.project_code.toLowerCase().includes(searchTerm.toLowerCase())
@@ -96,7 +97,6 @@ export default function Projects() {
     return () => { alive = false }
   }, [refreshProjects])
 
-  const effectiveViewMode = isMobile ? 'list' : viewMode
   const selectedProject = filteredProjects.find(project => project.id === selectedProjectId)
   
   const discardedCount = projects.filter(p => p.decision === 'DISCARDED').length
