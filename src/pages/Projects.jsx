@@ -10,7 +10,8 @@ import {
   Trash2,
   Edit,
   XCircle,
-  RotateCw
+  RotateCw,
+  Package
 } from 'lucide-react'
 import { PHASE_STYLES, getPhaseStyle } from '../utils/phaseStyles'
 import { useApp } from '../context/AppContext'
@@ -130,11 +131,20 @@ export default function Projects() {
     }
   }
 
-  const renderProjectCard = (project, { isPreview = false, enablePreviewSelect = false } = {}) => {
+  const renderProjectCard = (project, { isPreview = false, enablePreviewSelect = false, disableNavigation = false } = {}) => {
     const phase = getPhaseStyle(project.current_phase)
     const progress = ((project.current_phase) / 7) * 100
+    const progressValue = Number.isFinite(progress) ? Math.min(100, Math.max(0, progress)) : 0
+    const progressColor = progressValue < 34
+      ? 'var(--color-danger)'
+      : progressValue < 67
+        ? 'var(--color-warning)'
+        : 'var(--color-success)'
     const PhaseIcon = phase.icon
     const isSelected = project.id === selectedProjectId
+    const skuValue = project.sku_internal || '—'
+    const fnskuValue = project.fnsku || '—'
+    const asinValue = project.asin || '—'
 
     // Compute canClose and canReopen based on status
     const canClose = project.status && ['draft', 'active'].includes(project.status)
@@ -156,6 +166,7 @@ export default function Projects() {
         }}
         onClick={isPreview ? undefined : () => {
           setSelectedProjectId(project.id)
+          if (disableNavigation) return
           navigate(`/projects/${project.id}`)
         }}
         onMouseEnter={enablePreviewSelect ? () => setSelectedProjectId(project.id) : undefined}
@@ -225,11 +236,7 @@ export default function Projects() {
           <h3 className="projects-card__title">{project.name}</h3>
 
           <div className="projects-card__meta">
-            {[
-              project.sku_internal ? `SKU: ${project.sku_internal}` : null,
-              project.fnsku ? `FNSKU: ${project.fnsku}` : null,
-              project.asin ? `ASIN: ${project.asin}` : null,
-            ].filter(Boolean).join(' · ')}
+            {`SKU ${skuValue} · FNSKU ${fnskuValue} · ASIN ${asinValue}`}
           </div>
 
           <div className="projects-card__progress">
@@ -237,11 +244,11 @@ export default function Projects() {
               <div style={styles.progressBar}>
                 <div style={{
                   ...styles.progressFill,
-                  width: `${progress}%`,
-                  backgroundColor: phase.accent
+                  width: `${progressValue}%`,
+                  backgroundColor: progressColor
                 }} />
               </div>
-              <span style={styles.progressText}>{Math.round(progress)}%</span>
+              <span style={styles.progressText}>{Math.round(progressValue)}%</span>
             </div>
           </div>
 
@@ -294,7 +301,10 @@ export default function Projects() {
               alt={project.asin ? `ASIN ${project.asin}` : 'ASIN'}
             />
           ) : (
-            <div className="projects-card__thumbFallback">ASIN</div>
+            <div className="projects-card__thumbFallback">
+              <Package size={20} />
+              <span>Sense imatge</span>
+            </div>
           )}
         </div>
       </div>
@@ -440,7 +450,7 @@ export default function Projects() {
             {effectiveViewMode === 'split' && (
               <div className="projects-split__layout">
                 <div className="projects-split__left">
-                  {filteredProjects.map(project => renderProjectCard(project, { enablePreviewSelect: true }))}
+                  {filteredProjects.map(project => renderProjectCard(project, { enablePreviewSelect: true, disableNavigation: true }))}
                 </div>
                 <div className="projects-split__right">
                   {selectedProject ? (

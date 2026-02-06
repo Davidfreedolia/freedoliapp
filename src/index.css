@@ -747,10 +747,12 @@ body.dark .avatar-circle {
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.4px;
-  text-transform: uppercase;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+  text-transform: none;
 }
 
 .projects-card__thumb,
@@ -786,7 +788,8 @@ body.dark .avatar-circle {
 @media (min-width: 981px) {
   .projects-split__right {
     position: sticky;
-    top: 16px;
+    top: calc(var(--topbar-h) + 16px);
+    align-self: flex-start;
   }
 }
 
@@ -796,7 +799,7 @@ body.dark .avatar-circle {
   border-radius: var(--radius-ui);
   box-shadow: var(--shadow-soft);
   padding: 16px;
-  max-height: calc(100vh - 32px);
+  max-height: calc(100vh - var(--topbar-h) - 32px);
   overflow: auto;
 }
 

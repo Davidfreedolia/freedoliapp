@@ -4,7 +4,7 @@ import Button from './Button'
 const options = [
   { id: 'list', label: 'Llista', Icon: List },
   { id: 'split', label: 'Split', Icon: Columns },
-  { id: 'grid', label: 'Grid', Icon: Grid2X2 }
+  { id: 'grid', label: 'Graella', Icon: Grid2X2 }
 ]
 
 export default function LayoutSwitcher({ value, onChange, compact = false }) {
