@@ -19,54 +19,63 @@
   --text-weight-medium: 500;
   --text-weight-semibold: 600;
 
-  /* Core palette tokens */
-  --c-brand-900: #1F5F63;
-  --c-brand-300: #6ECBC3;
-  --c-cta-600: #2FA4A9;
-  --c-cta-700: #1E8A8F;
-  --c-cta-400: #F47F7F;
-  --c-accent-400: #F2D94E;
-  --c-warn-500: #F0B429;
-  --c-err-500: #E55353;
-  --c-ok-500: #3FBF9A;
-  --c-bg-50: #F6F8F3;
+  /* core */
+  --c-teal-900: #1F5F63;
+  --c-teal-300: #6ECBC3;
+  --c-coral-500: #F26C6C;
+  --c-yellow-200: #F4E27A;
+  --c-white-warm: #F6F8F3;
+  --c-cta-500: #2FA4A9;
+  --c-cta-600: #1E8A8F;
+  --c-cta-secondary: #F47F7F;
+  --c-accent: #F2D94E;
+  --c-success: #3FBF9A;
+  --c-warning: #F0B429;
+  --c-error: #E55353;
   --c-text-900: #243333;
   --c-text-600: #5F7476;
-  --c-border-200: #D8E1DE;
-  --c-coral-500: #F26C6C;
-  --c-yellow-300: #F4E27A;
+  --c-border: #D8E1DE;
 
   /* Semantic UI tokens (Light) */
-  --bg-app: var(--c-bg-50);
-  --surface-1: #FFFFFF;
-  --surface-2: var(--c-bg-50);
+  --bg-app: var(--c-white-warm);
+  --surface-bg: #FFFFFF;
+  --surface-bg-2: var(--bg-secondary);
+  --surface-bg-3: color-mix(in srgb, var(--surface-bg) 88%, var(--c-yellow-200));
+  --border-1: var(--c-border);
+
   --text-1: var(--c-text-900);
   --text-2: var(--c-text-600);
-  --muted-1: var(--c-text-600);
-  --border-1: var(--c-border-200);
+  --muted-1: color-mix(in srgb, var(--c-text-600) 85%, transparent);
 
-  --brand-1: var(--c-brand-900);
-  --brand-2: var(--c-brand-300);
+  --brand-1: var(--c-teal-900);
+  --brand-2: var(--c-teal-300);
 
-  --cta-1: var(--c-cta-600);
-  --cta-1-hover: var(--c-cta-700);
-  --cta-2: var(--c-cta-400);
-  --cta-1-fg: #ffffff;
-  --cta-2-fg: #ffffff;
-  --cta-1-soft: rgba(47, 164, 169, 0.35);
-  --cta-1-soft-border: rgba(47, 164, 169, 0.55);
+  --cta-1: var(--c-cta-500);
+  --cta-1-hover: var(--c-cta-600);
+  --cta-2: var(--c-cta-secondary);
+  --cta-1-fg: var(--c-white-warm);
+  --cta-2-fg: var(--c-white-warm);
+  --cta-1-soft: color-mix(in srgb, var(--cta-1) 35%, transparent);
+  --cta-1-soft-border: color-mix(in srgb, var(--cta-1) 55%, transparent);
 
-  --success-1: var(--c-ok-500);
-  --warning-1: var(--c-warn-500);
-  --danger-1: var(--c-err-500);
+  --success: var(--c-success);
+  --warning: var(--c-warning);
+  --danger: var(--c-error);
+  --success-1: var(--success);
+  --warning-1: var(--warning);
+  --danger-1: var(--danger);
 
   --coral-1: var(--c-coral-500);
-  --soft-yellow: var(--c-yellow-300);
-  --accent-action: var(--c-accent-400);
+  --soft-yellow: var(--c-yellow-200);
+  --accent-1: var(--c-accent);
+  --accent-action: var(--accent-1);
 
-  --focus-ring-color: rgba(47, 164, 169, 0.45);
-  --shadow-soft: 0 10px 24px rgba(31, 95, 99, 0.12);
-  --switch-thumb-bg: #ffffff;
+  --focus-ring: color-mix(in srgb, var(--cta-1) 50%, transparent);
+  --focus-ring-shadow: 0 0 0 2px var(--focus-ring);
+  --focus-ring-offset: 0 0 0 2px var(--surface-bg), 0 0 0 4px var(--focus-ring);
+  --shadow-soft: 0 10px 30px rgba(31, 95, 99, 0.10);
+  --shadow-soft-2: 0 8px 20px rgba(31, 95, 99, 0.08);
+  --switch-thumb-bg: var(--c-white-warm);
 
   /* Freedoliapp Palette */
   --fd-petrol: var(--brand-1);
@@ -88,10 +97,10 @@
   --brand-amber-soft: rgba(242, 217, 78, 0.20);
   --brand-green-soft: rgba(63, 191, 154, 0.20);
   --brand-ink-soft: rgba(31, 95, 99, 0.14);
+  --surface-1: var(--surface-bg);
+  --surface-2: var(--surface-bg-2);
   --dash-bg-1: var(--surface-1);
   --dash-bg-2: var(--surface-2);
-  --surface-bg: var(--surface-1);
-  --surface-bg-2: var(--surface-2);
 
   /* Semantic Color Tokens - Light Mode */
   --color-primary: var(--brand-1);
@@ -127,7 +136,7 @@
   --sidebar-text: var(--nav-fg);
   --sidebar-text-muted: var(--nav-fg-muted);
   --sidebar-border: var(--border-1);
-  --sidebar-shadow: 10px 0 28px rgba(0, 0, 0, 0.35);
+  --sidebar-shadow: 10px 0 28px rgba(0, 0, 0, 0.35), 0 0 26px var(--brand-primary-soft), inset 0 1px 0 rgba(255, 255, 255, 0.04);
   --sidebar-edge: 1px solid var(--border-1);
   
   /* Soft Color Variants - For non-destructive actions */
@@ -203,18 +212,18 @@
   --btn-primary-bg: var(--cta-1);
   --btn-primary-fg: var(--cta-1-fg);
   --btn-primary-hover: var(--cta-1-hover);
-  --btn-secondary-bg: var(--surface-2);
+  --btn-secondary-bg: var(--surface-bg);
   --btn-secondary-fg: var(--text-1);
   --btn-secondary-border: var(--border-1);
-  --btn-secondary-hover-bg: rgba(110, 203, 195, 0.12);
+  --btn-secondary-hover-bg: var(--surface-bg-2);
   --btn-ghost-bg: transparent;
   --btn-ghost-fg: var(--text-1);
   --btn-ghost-border: var(--border-1);
-  --btn-ghost-hover-bg: rgba(31, 95, 99, 0.08);
+  --btn-ghost-hover-bg: var(--surface-bg-2);
   --btn-danger-bg: var(--danger-1);
   --btn-danger-fg: var(--cta-1-fg);
-  --btn-danger-border: rgba(229, 83, 83, 0.45);
-  --btn-danger-hover: #D94A4A;
+  --btn-danger-border: color-mix(in srgb, var(--danger) 45%, transparent);
+  --btn-danger-hover: color-mix(in srgb, var(--danger) 85%, var(--c-teal-900));
   --btn-note-bg: rgba(244, 226, 122, 0.55);
   --btn-note-fg: var(--brand-1);
   --btn-note-border: rgba(242, 217, 78, 0.75);
@@ -223,54 +232,39 @@
   /* Input-specific: subtle outline for visibility (only for inputs) */
   --input-border: 1px solid var(--border-1);
   --input-bg: var(--surface-bg);
-
-  /* Focus Ring */
-  --focus-ring: 0 0 0 2px var(--focus-ring-color);
-  --focus-ring-offset: 0 0 0 2px var(--surface-bg), 0 0 0 4px var(--focus-ring-color);
 }
 
 body.dark {
   /* Semantic UI tokens (Dark) */
-  --bg-app: #0F2F31;
-  --surface-1: #12383B;
-  --surface-2: #0F2F31;
-  --text-1: #F6F8F3;
-  --text-2: rgba(246, 248, 243, 0.72);
-  --muted-1: rgba(246, 248, 243, 0.62);
-  --border-1: rgba(216, 225, 222, 0.18);
-  --brand-1: #1F5F63;
-  --brand-2: #6ECBC3;
-  --cta-1: #2FA4A9;
-  --cta-1-hover: #1E8A8F;
-  --cta-2: #F47F7F;
-  --cta-1-fg: #F6F8F3;
-  --cta-2-fg: #F6F8F3;
-  --cta-1-soft: rgba(110, 203, 195, 0.32);
-  --cta-1-soft-border: rgba(110, 203, 195, 0.55);
-  --success-1: #3FBF9A;
-  --warning-1: #F0B429;
-  --danger-1: #E55353;
-  --coral-1: #F26C6C;
-  --soft-yellow: #F4E27A;
-  --accent-action: #F2D94E;
-  --focus-ring-color: rgba(110, 203, 195, 0.35);
-  --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.45);
-  --switch-thumb-bg: #F6F8F3;
+  --bg-app: #0F1F20;
+  --surface-bg: #15292A;
+  --surface-bg-2: rgba(255, 255, 255, 0.04);
+  --surface-bg-3: color-mix(in srgb, var(--surface-bg) 88%, var(--c-yellow-200));
+  --surface-1: var(--surface-bg);
+  --surface-2: var(--surface-bg-2);
+  --border-1: rgba(216, 225, 222, 0.16);
+  --text-1: #EAF2F1;
+  --text-2: rgba(234, 242, 241, 0.70);
+  --muted-1: rgba(234, 242, 241, 0.70);
+  --focus-ring: color-mix(in srgb, var(--c-teal-300) 45%, transparent);
+  --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --shadow-soft-2: 0 8px 20px rgba(0, 0, 0, 0.28);
+  --switch-thumb-bg: var(--c-white-warm);
 
   /* Semantic Color Tokens - Dark Mode */
   --color-primary: var(--brand-1);
   --color-secondary: var(--brand-2);
-  --color-accent: var(--accent-action);
-  --color-success: var(--success-1);
-  --color-warning: var(--warning-1);
-  --color-danger: var(--danger-1);
+  --color-accent: var(--c-accent);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
   --color-bg: var(--bg-app);
-  --color-surface: var(--surface-1);
+  --color-surface: var(--surface-bg);
   --color-border: var(--border-1);
   --color-text: var(--text-1);
   --color-muted: var(--muted-1);
-  --brand-amber: var(--accent-action);
-  --brand-green: var(--success-1);
+  --brand-amber: var(--c-accent);
+  --brand-green: var(--success);
   --brand-ink: var(--text-1);
   --brand-blue: var(--cta-1);
   --brand-primary-soft: rgba(79, 166, 169, 0.22);
@@ -309,8 +303,8 @@ body.dark {
 
   /* Nav palette - Dark Mode */
   --nav-bg: #121212;
-  --nav-fg: rgba(244, 244, 245, 0.82);
-  --nav-fg-muted: rgba(244, 244, 245, 0.60);
+  --nav-fg: var(--text-1);
+  --nav-fg-muted: var(--muted-1);
   --nav-icon: var(--coral-1);
   --nav-highlight: rgba(255, 255, 255, 0.06);
   --nav-highlight-strong: rgba(255, 255, 255, 0.10);
@@ -327,34 +321,32 @@ body.dark {
   --sidebar-bg: var(--nav-bg);
   --sidebar-text: var(--nav-fg);
   --sidebar-text-muted: var(--nav-fg-muted);
-  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --sidebar-border: var(--border-1);
   --sidebar-shadow: 10px 0 28px rgba(0, 0, 0, 0.35);
-  --sidebar-edge: 1px solid rgba(255, 255, 255, 0.06);
+  --sidebar-edge: 1px solid var(--border-1);
 
   /* Button system - Dark Mode */
-  --btn-secondary-bg: var(--surface-2);
+  --btn-secondary-bg: var(--surface-bg);
   --btn-secondary-fg: var(--text-1);
   --btn-secondary-border: var(--border-1);
-  --btn-secondary-hover-bg: rgba(110, 203, 195, 0.18);
+  --btn-secondary-hover-bg: var(--surface-bg-2);
   --btn-ghost-bg: transparent;
   --btn-ghost-fg: var(--text-1);
   --btn-ghost-border: var(--border-1);
-  --btn-ghost-hover-bg: rgba(110, 203, 195, 0.12);
+  --btn-ghost-hover-bg: var(--surface-bg-2);
   --btn-note-bg: rgba(244, 226, 122, 0.18);
   --btn-note-fg: var(--text-1);
   --btn-note-border: rgba(242, 217, 78, 0.35);
-  --btn-danger-hover: #D85F5F;
+  --btn-danger-hover: color-mix(in srgb, var(--danger) 85%, var(--c-teal-900));
 
   /* Shadows adaptats per dark (mateix estil, més contrast) */
-  --shadow-soft-hover: 0 2px 8px rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.5);
-  --focus-ring: 0 0 0 2px rgba(54, 180, 184, 0.45);
-  --focus-ring-offset: 0 0 0 2px var(--color-surface), 0 0 0 4px rgba(54, 180, 184, 0.45);
+  --shadow-soft-hover: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.28);
 }
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--bg-app);
+  background-color: var(--page-bg);
   color: var(--text-1);
   line-height: 1.5;
   font-size: var(--text-size-base);
@@ -375,6 +367,14 @@ a {
 
 button {
   font-weight: var(--text-weight-semibold);
+}
+
+a {
+  color: var(--cta-1);
+}
+
+a:hover {
+  color: var(--cta-1-hover);
 }
 
 /* Scrollbar styles */
@@ -412,9 +412,9 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid var(--focus-ring-color);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
-  box-shadow: var(--focus-ring);
+  box-shadow: var(--focus-ring-shadow);
 }
 
 /* Transitions */
@@ -531,7 +531,7 @@ body.dark .avatar-circle {
 }
 
 .toolbar-search:focus-within {
-  box-shadow: var(--btn-shadow), var(--focus-ring);
+  box-shadow: var(--btn-shadow), var(--focus-ring-shadow);
 }
 
 .toolbar-search input {
@@ -663,7 +663,7 @@ body.dark .avatar-circle {
   --btn-secondary-border: transparent;
   --btn-secondary-fg: var(--nav-fg);
   --btn-secondary-hover-bg: var(--danger-1);
-  --focus-ring-color: rgba(229, 83, 83, 0.45);
+  --focus-ring: color-mix(in srgb, var(--danger) 50%, transparent);
 }
 
 .drive--on {
@@ -671,13 +671,13 @@ body.dark .avatar-circle {
   --btn-secondary-border: transparent;
   --btn-secondary-fg: var(--nav-fg);
   --btn-secondary-hover-bg: var(--success-1);
-  --focus-ring-color: rgba(63, 191, 154, 0.45);
+  --focus-ring: color-mix(in srgb, var(--success) 50%, transparent);
 }
 
 /* Selection */
 ::selection {
   background-color: var(--brand-2);
-  color: white;
+  color: var(--c-white-warm);
 }
 
 /* ============================================
@@ -1379,8 +1379,8 @@ body.dark .avatar-circle {
 
 .ui-input:focus {
   outline: none;
-  box-shadow: var(--focus-ring);
-  border-color: var(--color-accent);
+  box-shadow: var(--focus-ring-shadow);
+  border-color: var(--cta-1);
 }
 
 /* Button variants already defined in Button.jsx component */
