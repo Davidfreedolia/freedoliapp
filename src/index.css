@@ -763,7 +763,7 @@ body.dark .avatar-circle {
 /* Layout Split */
 .projects-split__layout {
   display: grid;
-  grid-template-columns: 1.5fr 1fr;
+  grid-template-columns: 1.6fr 1fr;
   gap: 16px;
   align-items: start;
 }
@@ -786,10 +786,14 @@ body.dark .avatar-circle {
 }
 
 @media (min-width: 981px) {
-  .projects-split__right {
+  .projects-split__sticky {
     position: sticky;
     top: calc(var(--topbar-h) + 16px);
-    align-self: flex-start;
+  }
+
+  .projects-split__panel {
+    max-height: calc(100vh - (var(--topbar-h) + 32px));
+    overflow: auto;
   }
 }
 
@@ -799,8 +803,6 @@ body.dark .avatar-circle {
   border-radius: var(--radius-ui);
   box-shadow: var(--shadow-soft);
   padding: 16px;
-  max-height: calc(100vh - var(--topbar-h) - 32px);
-  overflow: auto;
 }
 
 .projects-split__panelHeader {
