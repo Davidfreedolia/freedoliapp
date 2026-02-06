@@ -1072,6 +1072,21 @@ body.dark .avatar-circle {
   gap: 8px;
 }
 
+@media (min-width: 1200px) {
+  .projects-drive__files {
+    max-height: calc(100vh - 260px);
+    overflow: auto;
+    min-height: 0;
+  }
+}
+
+@media (max-width: 1199px) {
+  .projects-drive__files {
+    max-height: none;
+    overflow: visible;
+  }
+}
+
 .projects-drive__fileRow {
   width: 100%;
   text-align: left;
