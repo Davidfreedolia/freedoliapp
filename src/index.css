@@ -762,8 +762,8 @@ body.dark .avatar-circle {
 
 /* Layout Split */
 .projects-split__layout {
-  display: grid;
-  grid-template-columns: 1.6fr 1fr;
+  display: grid !important;
+  grid-template-columns: 1.6fr 1fr !important;
   gap: 16px;
   align-items: start;
 }
@@ -788,11 +788,11 @@ body.dark .avatar-circle {
 @media (min-width: 981px) {
   .projects-split__sticky {
     position: sticky;
-    top: calc(var(--topbar-h) + 16px);
+    top: 16px;
   }
 
   .projects-split__panel {
-    max-height: calc(100vh - (var(--topbar-h) + 32px));
+    max-height: calc(100vh - 32px);
     overflow: auto;
   }
 }
@@ -803,6 +803,26 @@ body.dark .avatar-circle {
   border-radius: var(--radius-ui);
   box-shadow: var(--shadow-soft);
   padding: 16px;
+}
+
+.projects-card__progressWrap {
+  margin-top: 8px;
+}
+
+.projects-card__progressTrack {
+  height: 6px;
+  width: 100%;
+  border-radius: 999px;
+  background: var(--surface-bg-2);
+  border: 1px solid var(--border-1);
+  overflow: hidden;
+}
+
+.projects-card__progressFill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--brand, var(--brand-primary));
+  transition: width .25s ease;
 }
 
 .projects-split__panelHeader {
