@@ -5,7 +5,6 @@ import {
   Plus, 
   Search, 
   Filter,
-  ArrowRight,
   MoreVertical,
   Trash2,
   Edit,
@@ -20,7 +19,6 @@ import Header from '../components/Header'
 import NewProjectModal from '../components/NewProjectModal'
 import Button from '../components/Button'
 import LayoutSwitcher from '../components/LayoutSwitcher'
-import StatusBadge from '../components/StatusBadge'
 import { useLayoutPreference } from '../hooks/useLayoutPreference'
 
 export default function Projects() {
@@ -135,17 +133,23 @@ export default function Projects() {
     const phase = getPhaseStyle(project.current_phase)
     const progress = ((project.current_phase) / 7) * 100
     const progressValue = Number.isFinite(progress) ? Math.min(100, Math.max(0, progress)) : 0
-    const progressPct = progressValue
-    const progressColor = progressValue < 34
-      ? 'var(--color-danger, #ef4444)'
-      : progressValue < 67
-        ? 'var(--color-warning, #f59e0b)'
-        : 'var(--color-success, #22c55e)'
-    const PhaseIcon = phase.icon
     const isSelected = project.id === selectedProjectId
     const skuValue = project.sku_internal || '—'
-    const fnskuValue = project.fnsku || '—'
-    const asinValue = project.asin || '—'
+    const createdLabel = project?.created_at
+      ? new Date(project.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      : '—'
+    const docsCount = project?.docs_count ?? project?.documents_count ?? project?.files_count ?? project?.drive_files_count ?? 0
+    const metadataLine = `SKU: ${skuValue} · Created: ${createdLabel} · Docs: ${docsCount}`
+    const PHASE_LABELS = {
+      1: 'RESEARCH',
+      2: 'VIABILITY',
+      3: 'SUPPLIERS',
+      4: 'SAMPLES',
+      5: 'PRODUCTION',
+      6: 'LISTING',
+      7: 'LIVE'
+    }
+    const phaseLabel = PHASE_LABELS[project.current_phase] || (phase.name || '').toUpperCase()
 
     // Compute canClose and canReopen based on status
     const canClose = project.status && ['draft', 'active'].includes(project.status)
@@ -174,71 +178,112 @@ export default function Projects() {
         onMouseEnter={enablePreviewSelect ? () => setSelectedProjectId(project.id) : undefined}
       >
         <div className="projects-card__body">
-          <div className="projects-card__header">
-            <div className="projects-card__headerMeta">
-              <span className="projects-card__id">{project.project_code}</span>
-              <StatusBadge status={project.status} decision={project.decision} />
-            </div>
-            {!isPreview && (
-              <div className="projects-card__menu">
-                <div style={{ position: 'relative' }}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={e => { e.stopPropagation(); setMenuOpen(menuOpen === project.id ? null : project.id) }}
-                    style={styles.menuButton}
-                  >
-                    <MoreVertical size={18} color="var(--muted-1)" />
-                  </Button>
-                  {menuOpen === project.id && (
-                    <div className="ui-popover" style={styles.menu}>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={e => { e.stopPropagation(); navigate(`/projects/${project.id}/edit`) }}
-                        style={styles.menuItem}
-                      >
-                        <Edit size={14} /> Editar
-                      </Button>
-                      {canClose && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={e => handleClose(e, project)}
-                          style={styles.menuItem}
-                        >
-                          <XCircle size={14} /> Tancar
-                        </Button>
-                      )}
-                      {canReopen && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={e => handleReopen(e, project)}
-                          style={styles.menuItem}
-                        >
-                          <RotateCw size={14} /> Reobrir
-                        </Button>
-                      )}
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={e => handleDelete(e, project)}
-                        style={styles.menuItemDanger}
-                      >
-                        <Trash2 size={14} /> Eliminar
-                      </Button>
-                    </div>
-                  )}
+          <div className="projects-card__header" style={{ alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+              <div className="projects-card__thumbWrap" title={thumbnailUrl ? undefined : 'ASIN image not available yet'}>
+                {thumbnailUrl && (
+                  <img
+                    className="projects-card__thumb"
+                    src={thumbnailUrl}
+                    alt={project.asin ? `ASIN ${project.asin}` : 'ASIN'}
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none'
+                      const fallback = e.currentTarget.parentElement?.querySelector('.projects-card__thumbFallback')
+                      if (fallback) fallback.style.display = 'flex'
+                    }}
+                  />
+                )}
+                <div
+                  className="projects-card__thumbFallback"
+                  style={{ display: thumbnailUrl ? 'none' : 'flex' }}
+                  title="ASIN image not available yet"
+                >
+                  <Package size={18} />
                 </div>
               </div>
-            )}
-          </div>
-
-          <h3 className="projects-card__title">{project.name}</h3>
-
-          <div className="projects-card__meta">
-            {`SKU ${skuValue} · FNSKU ${fnskuValue} · ASIN ${asinValue}`}
+              <div style={{ minWidth: 0 }}>
+                <h3 className="projects-card__title">{project.name}</h3>
+                <div className="projects-card__meta">{metadataLine}</div>
+                <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
+                  {PHASES.map((p) => {
+                    const Icon = p.icon
+                    const isCurrent = p.id === project.current_phase
+                    return (
+                      <span
+                        key={p.id}
+                        title={isCurrent ? 'Current phase' : undefined}
+                        style={{ color: 'var(--muted-1)', opacity: isCurrent ? 1 : 0.45 }}
+                      >
+                        <Icon size={14} />
+                      </span>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+              <div style={{
+                ...styles.phaseBadge,
+                backgroundColor: phase.accent,
+                color: 'var(--c-white-warm)'
+              }}>
+                <span>{phaseLabel}</span>
+              </div>
+              {!isPreview && (
+                <div className="projects-card__menu">
+                  <div style={{ position: 'relative' }}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={e => { e.stopPropagation(); setMenuOpen(menuOpen === project.id ? null : project.id) }}
+                      style={styles.menuButton}
+                    >
+                      <MoreVertical size={18} color="var(--muted-1)" />
+                    </Button>
+                    {menuOpen === project.id && (
+                      <div className="ui-popover" style={styles.menu}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={e => { e.stopPropagation(); navigate(`/projects/${project.id}/edit`) }}
+                          style={styles.menuItem}
+                        >
+                          <Edit size={14} /> Editar
+                        </Button>
+                        {canClose && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={e => handleClose(e, project)}
+                            style={styles.menuItem}
+                          >
+                            <XCircle size={14} /> Tancar
+                          </Button>
+                        )}
+                        {canReopen && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={e => handleReopen(e, project)}
+                            style={styles.menuItem}
+                          >
+                            <RotateCw size={14} /> Reobrir
+                          </Button>
+                        )}
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={e => handleDelete(e, project)}
+                          style={styles.menuItemDanger}
+                        >
+                          <Trash2 size={14} /> Eliminar
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="projects-card__progress">
@@ -247,7 +292,7 @@ export default function Projects() {
                 <div style={{
                   ...styles.progressFill,
                   width: `${progressValue}%`,
-                  backgroundColor: progressColor
+                  backgroundColor: 'var(--muted-1)'
                 }} />
               </div>
               <span style={styles.progressText}>{Math.round(progressValue)}%</span>
@@ -256,73 +301,46 @@ export default function Projects() {
                   width: '100%',
                   height: 6,
                   borderRadius: 999,
-                  background: 'rgba(0,0,0,0.08)',
-                  border: '1px solid rgba(0,0,0,0.12)',
+                  background: 'var(--surface-bg-2)',
+                  border: '1px solid var(--border-1)',
                   overflow: 'hidden'
                 }}>
                   <div style={{
                     height: '100%',
                     width: `${progress || 0}%`,
                     borderRadius: 999,
-                    background: '#16a34a'
+                    background: 'var(--muted-1)'
                   }} />
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="projects-card__actions">
-            <div style={{
-              ...styles.phaseBadge,
-              backgroundColor: phase.bg,
-              color: phase.accent,
-              border: `1px solid ${phase.accent}`
-            }}>
-              <PhaseIcon size={14} />
-              <span>{phase.name}</span>
-            </div>
-            {!isPreview && (
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                {project.decision === 'DISCARDED' && (
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={async (e) => {
-                      e.stopPropagation()
-                      try {
-                        const { updateProject } = await import('../lib/supabase')
-                        const { showToast } = await import('../components/Toast')
-                        await updateProject(project.id, { decision: 'HOLD' })
-                        showToast('Projecte restaurat', 'success')
-                        await refreshProjects()
-                      } catch (err) {
-                        const { showToast } = await import('../components/Toast')
-                        showToast('Error: ' + (err.message || 'Error desconegut'), 'error')
-                      }
-                    }}
-                    style={{ height: '28px' }}
-                    title="Restaurar projecte"
-                  >
-                    Restaura
-                  </Button>
-                )}
-                <ArrowRight size={18} color="var(--muted-1)" />
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="projects-card__thumbWrap">
-          {thumbnailUrl ? (
-            <img
-              className="projects-card__thumb"
-              src={thumbnailUrl}
-              alt={project.asin ? `ASIN ${project.asin}` : 'ASIN'}
-            />
-          ) : (
-            <div className="projects-card__thumbFallback">
-              <Package size={20} />
-              <span>Sense imatge</span>
+          {!isPreview && (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
+              {project.decision === 'DISCARDED' && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={async (e) => {
+                    e.stopPropagation()
+                    try {
+                      const { updateProject } = await import('../lib/supabase')
+                      const { showToast } = await import('../components/Toast')
+                      await updateProject(project.id, { decision: 'HOLD' })
+                      showToast('Projecte restaurat', 'success')
+                      await refreshProjects()
+                    } catch (err) {
+                      const { showToast } = await import('../components/Toast')
+                      showToast('Error: ' + (err.message || 'Error desconegut'), 'error')
+                    }
+                  }}
+                  style={{ height: '28px' }}
+                  title="Restaurar projecte"
+                >
+                  Restaura
+                </Button>
+              )}
             </div>
           )}
         </div>
@@ -330,99 +348,6 @@ export default function Projects() {
     )
   }
 
-  const renderProjectDrivePanel = () => (
-    selectedProject ? (
-      <div className="projects-split__panel">
-        <div className="projects-split__panelHeader">
-          <div className="projects-split__panelTitle">Drive del projecte</div>
-          <div className="projects-split__panelSubtitle">{selectedProject.name}</div>
-        </div>
-
-        <div className="projects-drive__grid">
-          <div className="projects-drive__box">
-            <div className="projects-drive__boxHeader">
-              <div className="projects-drive__boxTitle">Carpetes</div>
-            </div>
-            <div className="projects-drive__list">
-              {['General', 'Listing', 'Factures', 'Fotos', 'Proveïdors', 'Altres'].map((label, idx) => (
-                <button
-                  key={label}
-                  type="button"
-                  className={`projects-drive__row ${idx === 0 ? 'is-active' : ''}`}
-                  onClick={(e) => e.preventDefault()}
-                >
-                  <span className="projects-drive__rowMain">{label}</span>
-                  <span className="projects-drive__rowSub">{idx === 0 ? 'Seleccionada' : ''}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="projects-drive__box">
-            <div className="projects-drive__boxHeader">
-              <div className="projects-drive__boxTitle">Fitxers</div>
-            </div>
-
-            <div className="projects-drive__files">
-              {[
-                { name: 'Factura_01.pdf', type: 'PDF', date: '02/02/2026', size: '220 KB' },
-                { name: 'Foto_listing_01.jpg', type: 'JPG', date: '01/02/2026', size: '1.8 MB' },
-                { name: 'Specs.xlsx', type: 'XLSX', date: '30/01/2026', size: '96 KB' },
-                { name: 'Manual.docx', type: 'DOC', date: '28/01/2026', size: '410 KB' },
-                { name: 'Foto_listing_02.jpg', type: 'JPG', date: '27/01/2026', size: '2.1 MB' },
-                { name: 'Certificat.pdf', type: 'PDF', date: '25/01/2026', size: '340 KB' },
-                { name: 'Packaging.ai', type: 'AI', date: '20/01/2026', size: '6.2 MB' },
-                { name: 'Notes.txt', type: 'TXT', date: '18/01/2026', size: '4 KB' },
-              ].map((f, idx) => (
-                <button
-                  key={f.name}
-                  type="button"
-                  className={`projects-drive__fileRow ${idx === 1 ? 'is-active' : ''}`}
-                  onClick={(e) => e.preventDefault()}
-                >
-                  <div className="projects-drive__fileMain">
-                    <div className="projects-drive__fileName">{f.name}</div>
-                    <div className="projects-drive__fileMeta">{f.date} · {f.size}</div>
-                  </div>
-                  <div className="projects-drive__fileTag">{f.type}</div>
-                </button>
-              ))}
-            </div>
-
-            <div className="projects-drive__dropzone">
-              <div className="projects-drive__dropTitle">Arrossega fitxers aquí</div>
-              <div className="projects-drive__dropNote">Funcionalitat pendent</div>
-            </div>
-          </div>
-
-          <div className="projects-drive__previewBox">
-            <div className="projects-drive__previewHeader">
-              <div className="projects-drive__previewTitle">Foto_listing_01.jpg</div>
-              <div className="projects-drive__previewActions">
-                <Button variant="secondary" size="sm" disabled onClick={(e) => e.preventDefault()}>
-                  Convertir a PDF
-                </Button>
-                <Button variant="ghost" size="sm" disabled onClick={(e) => e.preventDefault()}>
-                  Descarregar
-                </Button>
-                <Button variant="ghost" size="sm" disabled onClick={(e) => e.preventDefault()}>
-                  Pantalla completa
-                </Button>
-              </div>
-            </div>
-            <div className="projects-drive__previewBody">Previsualització</div>
-          </div>
-        </div>
-      </div>
-    ) : (
-      <div className="projects-split__panel">
-        <div className="projects-split__panelHeader">
-          <div className="projects-split__panelTitle">Drive del projecte</div>
-          <div className="projects-split__panelSubtitle">Selecciona un projecte</div>
-        </div>
-      </div>
-    )
-  )
 
   return (
     <div style={styles.container}>
@@ -568,7 +493,6 @@ export default function Projects() {
 
                 <aside className="projects-split__right">
                   <div className="projects-split__sticky">
-                    {renderProjectDrivePanel?.()}
                   </div>
                 </aside>
               </div>
@@ -724,7 +648,7 @@ const styles = {
     color: 'var(--muted)'
   },
   projectCard: {
-    padding: '20px',
+    padding: '16px',
     borderRadius: 'var(--radius-ui)',
     border: 'none'
   },
@@ -805,8 +729,8 @@ const styles = {
   progressBar: {
     flex: 1,
     height: '8px',
-    backgroundColor: 'var(--surface-bg-2, rgba(0,0,0,0.06))',
-    border: '1px solid var(--border-1, rgba(0,0,0,0.12))',
+    backgroundColor: 'var(--surface-bg-2)',
+    border: '1px solid var(--border-1)',
     borderRadius: '999px',
     overflow: 'hidden'
   },
@@ -830,10 +754,9 @@ const styles = {
   phaseBadge: {
     display: 'flex',
     alignItems: 'center',
-    gap: '6px',
     padding: '6px 12px',
-    borderRadius: '20px',
-    fontSize: '13px',
-    fontWeight: '500'
+    borderRadius: '16px',
+    fontSize: '12px',
+    fontWeight: '600'
   }
 }
