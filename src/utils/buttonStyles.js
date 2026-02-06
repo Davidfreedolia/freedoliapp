@@ -59,19 +59,17 @@ export const getButtonStyles = ({ variant = 'primary', darkMode = false, disable
         : 'var(--btn-shadow)'
     },
     secondary: {
-      backgroundColor: 'var(--btn-secondary-bg)',
+      backgroundColor: isHovered ? 'var(--btn-secondary-hover-bg)' : 'var(--btn-secondary-bg)',
       color: 'var(--btn-secondary-fg)',
-      border: '1px solid var(--btn-secondary-border)',
-      filter: isHovered ? 'brightness(1.03)' : 'brightness(1)'
+      border: '1px solid var(--btn-secondary-border)'
     },
     danger: {
-      backgroundColor: 'var(--btn-danger-bg)',
+      backgroundColor: isHovered ? 'var(--btn-danger-hover)' : 'var(--btn-danger-bg)',
       color: 'var(--btn-danger-fg)',
-      border: '1px solid var(--btn-danger-border)',
-      filter: isHovered ? 'brightness(0.98)' : 'brightness(1)'
+      border: '1px solid var(--btn-danger-border)'
     },
     ghost: {
-      backgroundColor: 'var(--btn-ghost-bg)',
+      backgroundColor: isHovered ? 'var(--btn-ghost-hover-bg)' : 'var(--btn-ghost-bg)',
       color: 'var(--btn-ghost-fg)',
       border: '1px solid var(--btn-ghost-border)'
     }

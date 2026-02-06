@@ -57,7 +57,7 @@ export default function Button({
       color: 'var(--btn-secondary-fg)',
       border: '1px solid var(--btn-secondary-border)',
       hover: {
-        filter: 'brightness(1.03)'
+        backgroundColor: 'var(--btn-secondary-hover-bg)'
       }
     },
     ghost: {
@@ -65,7 +65,7 @@ export default function Button({
       color: 'var(--btn-ghost-fg)',
       border: '1px solid var(--btn-ghost-border)',
       hover: {
-        filter: 'brightness(1.03)'
+        backgroundColor: 'var(--btn-ghost-hover-bg)'
       }
     },
     danger: {
@@ -73,7 +73,7 @@ export default function Button({
       color: 'var(--btn-danger-fg)',
       border: '1px solid var(--btn-danger-border)',
       hover: {
-        filter: 'brightness(0.98)'
+        backgroundColor: 'var(--btn-danger-hover)'
       }
     },
     note: {
