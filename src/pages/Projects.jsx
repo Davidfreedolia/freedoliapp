@@ -137,10 +137,10 @@ export default function Projects() {
     const progressValue = Number.isFinite(progress) ? Math.min(100, Math.max(0, progress)) : 0
     const progressPct = progressValue
     const progressColor = progressValue < 34
-      ? 'var(--color-danger)'
+      ? 'var(--color-danger, #ef4444)'
       : progressValue < 67
-        ? 'var(--color-warning)'
-        : 'var(--color-success)'
+        ? 'var(--color-warning, #f59e0b)'
+        : 'var(--color-success, #22c55e)'
     const PhaseIcon = phase.icon
     const isSelected = project.id === selectedProjectId
     const skuValue = project.sku_internal || '—'
@@ -799,19 +799,21 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
-    marginBottom: '16px'
+    marginBottom: '16px',
+    width: '100%'
   },
   progressBar: {
     flex: 1,
-    height: '6px',
-    backgroundColor: 'var(--surface-bg-2)',
-    border: '1px solid var(--border-1)',
+    height: '8px',
+    backgroundColor: 'var(--surface-bg-2, rgba(0,0,0,0.06))',
+    border: '1px solid var(--border-1, rgba(0,0,0,0.12))',
     borderRadius: '999px',
     overflow: 'hidden'
   },
   progressFill: {
     height: '100%',
     borderRadius: '999px',
+    minWidth: '2px',
     transition: 'width 0.3s ease'
   },
   progressText: {
