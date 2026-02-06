@@ -1215,7 +1215,7 @@ body.dark .avatar-circle {
   margin-top: 16px;
 }
 
-@media (max-width: 980px) {
+@media (max-width: 1199px) {
   .project-split__layout {
     grid-template-columns: 1fr;
   }
@@ -1233,6 +1233,22 @@ body.dark .avatar-circle {
   .project-split__sticky {
     position: sticky;
     top: 16px;
+  }
+}
+
+.project-split__right .projects-split__panel {
+  max-height: none;
+  overflow: visible;
+}
+
+@media (max-width: 1199px) {
+  .project-split__right {
+    width: 100%;
+  }
+
+  .project-split__sticky {
+    position: static;
+    top: auto;
   }
 }
 
