@@ -795,13 +795,14 @@ const styles = {
   progressBar: {
     flex: 1,
     height: '6px',
-    backgroundColor: 'var(--bg-secondary)',
-    borderRadius: '3px',
+    backgroundColor: 'var(--surface-bg-2)',
+    border: '1px solid var(--border-1)',
+    borderRadius: '999px',
     overflow: 'hidden'
   },
   progressFill: {
     height: '100%',
-    borderRadius: '3px',
+    borderRadius: '999px',
     transition: 'width 0.3s ease'
   },
   progressText: {
