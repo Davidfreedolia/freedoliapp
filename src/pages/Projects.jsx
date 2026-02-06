@@ -251,31 +251,22 @@ export default function Projects() {
                 }} />
               </div>
               <span style={styles.progressText}>{Math.round(progressValue)}%</span>
-            </div>
-            <div className="projects-card__progressBar">
-              <div className="projects-card__progressTrack">
-                <div
-                  className="projects-card__progressFill"
-                  style={{ width: `${progress || 0}%` }}
-                />
-              </div>
-            </div>
-            <div style={{ marginTop: 6 }}>
-              <div style={{
-                width: '100%',
-                height: 6,
-                borderRadius: 999,
-                background: 'var(--surface-bg-2)',
-                border: '1px solid var(--border-1)',
-                overflow: 'hidden'
-              }}>
+              <div style={{ marginTop: 6, width: '100%' }}>
                 <div style={{
-                  height: '100%',
-                  width: `${progress || 0}%`,
+                  width: '100%',
+                  height: 6,
                   borderRadius: 999,
-                  background: 'var(--brand)',
-                  transition: 'width .25s ease'
-                }} />
+                  background: 'rgba(0,0,0,0.08)',
+                  border: '1px solid rgba(0,0,0,0.12)',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{
+                    height: '100%',
+                    width: `${progress || 0}%`,
+                    borderRadius: 999,
+                    background: '#16a34a'
+                  }} />
+                </div>
               </div>
             </div>
           </div>
