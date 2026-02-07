@@ -786,7 +786,14 @@ export default function Orders() {
 
   return (
     <div style={styles.container}>
-      <Header title="Comandes (PO)" />
+      <Header
+        title={
+          <span className="page-title-with-icon">
+            <FileText size={22} />
+            Comandes (PO)
+          </span>
+        }
+      />
 
       <div style={{
         ...styles.content,
@@ -808,31 +815,35 @@ export default function Orders() {
           </div>
 
           <div style={styles.filters} className="toolbar-group">
-            <Button variant="secondary" size="sm" style={styles.filterButton}>
-              <Filter size={14} />
-              Filtres
-            </Button>
-            <select
-              value={filterStatus || ''}
-              onChange={e => setFilterStatus(e.target.value || null)}
-              style={styles.filterSelect}
-            >
-              <option value="">Tots els estats</option>
-              {Object.entries(PO_STATUSES).map(([key, val]) => (
-                <option key={key} value={key}>{val.name}</option>
-              ))}
-            </select>
+            <div className="toolbar-filterSelect" title="Filtre per estat">
+              <span className="toolbar-filterSelect__icon" aria-hidden="true">
+                <Filter size={16} />
+              </span>
+              <select
+                value={filterStatus || ''}
+                onChange={e => setFilterStatus(e.target.value || null)}
+              >
+                <option value="">Tots els estats</option>
+                {Object.entries(PO_STATUSES).map(([key, val]) => (
+                  <option key={key} value={key}>{val.name}</option>
+                ))}
+              </select>
+            </div>
 
-            <select
-              value={filterProject || ''}
-              onChange={e => setFilterProject(e.target.value || null)}
-              style={styles.filterSelect}
-            >
-              <option value="">Tots els projectes</option>
-              {projects.map(p => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
+            <div className="toolbar-filterSelect" title="Filtre per projecte">
+              <span className="toolbar-filterSelect__icon" aria-hidden="true">
+                <Filter size={16} />
+              </span>
+              <select
+                value={filterProject || ''}
+                onChange={e => setFilterProject(e.target.value || null)}
+              >
+                <option value="">Tots els projectes</option>
+                {projects.map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="toolbar-group view-controls">
@@ -856,6 +867,7 @@ export default function Orders() {
                 opacity: !driveConnected ? 0.5 : 1,
                 cursor: !driveConnected ? 'not-allowed' : 'pointer'
               }}
+              className="toolbar-cta"
             >
               <Plus size={18} />
               Nova Comanda

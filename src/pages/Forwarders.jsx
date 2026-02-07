@@ -18,8 +18,7 @@ import {
   ChevronDown,
   ChevronUp,
   CreditCard,
-  Package,
-  Filter
+  Package
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { 
@@ -586,7 +585,14 @@ export default function Forwarders() {
 
   return (
     <div style={styles.container}>
-      <Header title="Transitaris" />
+      <Header
+        title={
+          <span className="page-title-with-icon">
+            <Truck size={22} />
+            Transitaris
+          </span>
+        }
+      />
 
       <div style={{
         ...styles.content,
@@ -606,12 +612,6 @@ export default function Forwarders() {
               />
             </div>
           </div>
-          <div style={styles.filters} className="toolbar-group">
-            <Button variant="secondary" size="sm" style={styles.filterButton}>
-              <Filter size={14} />
-              Filtres
-            </Button>
-          </div>
           <div className="toolbar-group view-controls">
             <LayoutSwitcher
               value={effectiveLayout}
@@ -629,6 +629,7 @@ export default function Forwarders() {
                 opacity: !driveConnected ? 0.5 : 1,
                 cursor: !driveConnected ? 'not-allowed' : 'pointer'
               }}
+              className="toolbar-cta"
             >
               <Plus size={18} /> Nou Transitari
             </Button>

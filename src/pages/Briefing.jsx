@@ -264,7 +264,14 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
   if (loading) {
     return (
       <div style={styles.container}>
-        <Header title="Briefing" />
+        <Header
+          title={
+            <span className="page-title-with-icon">
+              <FileText size={22} />
+              Briefing
+            </span>
+          }
+        />
         <div style={styles.loading}>Carregant...</div>
       </div>
     )
@@ -272,7 +279,14 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
 
   return (
     <div style={styles.container}>
-      <Header title="Briefing del Producte" />
+      <Header
+        title={
+          <span className="page-title-with-icon">
+            <FileText size={22} />
+            Briefing del Producte
+          </span>
+        }
+      />
 
       <div style={styles.content}>
         {/* Toolbar */}

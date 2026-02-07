@@ -10,7 +10,8 @@ import {
   Edit,
   XCircle,
   RotateCw,
-  Package
+  Package,
+  FolderKanban
 } from 'lucide-react'
 import { PHASE_STYLES, getPhaseStyle } from '../utils/phaseStyles'
 import { useApp } from '../context/AppContext'
@@ -351,14 +352,21 @@ export default function Projects() {
 
   return (
     <div style={styles.container}>
-      <Header title="Projectes" />
+      <Header
+        title={
+          <span className="page-title-with-icon">
+            <FolderKanban size={22} />
+            Projectes
+          </span>
+        }
+      />
 
       <div style={{
         ...styles.content,
         padding: isMobile ? '16px' : '32px'
       }}>
         {/* Toolbar */}
-        <div style={styles.toolbar} className="toolbar-row">
+        <div style={styles.toolbar} className="toolbar-row projects-toolbar__row">
           <div style={styles.searchGroup} className="toolbar-group">
             <div style={styles.searchContainer} className="toolbar-search">
               <Search size={18} color="var(--muted-1)" />
@@ -372,27 +380,23 @@ export default function Projects() {
             </div>
           </div>
 
-          <div style={styles.filters} className="toolbar-group">
-            <Button
-              variant="secondary"
-              size="sm"
-              style={styles.filterButton}
-            >
-              <Filter size={14} />
-              Filtres
-            </Button>
-            <select
-              value={filterPhase || ''}
-              onChange={e => setFilterPhase(e.target.value ? parseInt(e.target.value) : null)}
-              style={styles.filterSelect}
-            >
-              <option value="">Totes les fases</option>
-              {Object.entries(PHASES).map(([key, phase]) => (
-                <option key={key} value={key}>
-                  {phase.name}
-                </option>
-              ))}
-            </select>
+          <div style={styles.filters} className="toolbar-group projects-toolbar__filters">
+            <div className="toolbar-filterSelect" title="Filtre per fase">
+              <span className="toolbar-filterSelect__icon" aria-hidden="true">
+                <Filter size={16} />
+              </span>
+              <select
+                value={filterPhase || ''}
+                onChange={e => setFilterPhase(e.target.value ? parseInt(e.target.value) : null)}
+              >
+                <option value="">Totes les fases</option>
+                {Object.entries(PHASES).map(([key, phase]) => (
+                  <option key={key} value={key}>
+                    {phase.name}
+                  </option>
+                ))}
+              </select>
+            </div>
             {discardedCount > 0 && (
               <label style={styles.filterToggle}>
                 <input
@@ -424,6 +428,7 @@ export default function Projects() {
               disabled={!driveConnected}
               title={!driveConnected ? 'Connecta Google Drive per crear' : ''}
               style={{ width: isMobile ? '100%' : 'auto' }}
+              className="projects-toolbar__new"
             >
               <Plus size={18} />
               Nou projecte

@@ -9,7 +9,7 @@ const options = [
 
 export default function LayoutSwitcher({ value, onChange, compact = false }) {
   return (
-    <div style={styles.container}>
+    <div style={styles.container} className="layout-switcher">
       {options.map(option => {
         const isActive = option.id === value
         return (
@@ -18,12 +18,13 @@ export default function LayoutSwitcher({ value, onChange, compact = false }) {
             type="button"
             onClick={() => onChange(option.id)}
             title={option.label}
-            variant={isActive ? 'primary' : 'ghost'}
+            aria-label={option.label}
+            variant="ghost"
             size="sm"
-            style={compact ? styles.buttonCompact : null}
+            style={compact ? styles.buttonCompact : styles.buttonBase}
+            className={`btn-icon btn-ghost view-btn layout-switcher__btn ${isActive ? 'is-active' : ''}`}
           >
             <option.Icon size={compact ? 16 : 18} />
-            {!compact && <span>{option.label}</span>}
           </Button>
         )
       })}
@@ -40,8 +41,17 @@ const styles = {
     border: 'none',
     backgroundColor: 'transparent'
   },
+  buttonBase: {
+    boxShadow: 'none',
+    backgroundColor: 'transparent',
+    border: 'none',
+    padding: 0
+  },
   buttonCompact: {
-    minWidth: 'var(--btn-h-sm)',
-    padding: '0 10px'
+    minWidth: 'var(--h-btn)',
+    padding: 0,
+    boxShadow: 'none',
+    backgroundColor: 'transparent',
+    border: 'none'
   }
 }

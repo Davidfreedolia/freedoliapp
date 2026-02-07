@@ -366,7 +366,14 @@ export default function CalendarPage() {
   
   return (
     <div style={styles.container}>
-      <Header title="Calendari" />
+      <Header
+        title={
+          <span className="page-title-with-icon">
+            <CalendarIcon size={22} />
+            Calendari
+          </span>
+        }
+      />
       
       <div style={styles.content}>
         <div style={styles.header} className="toolbar-row">

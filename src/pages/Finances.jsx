@@ -1076,7 +1076,14 @@ export default function Finances() {
 
   return (
     <div style={styles.container}>
-      <Header title="Finances" />
+      <Header
+        title={
+          <span className="page-title-with-icon">
+            <Receipt size={22} />
+            Finances
+          </span>
+        }
+      />
 
       <div style={styles.content}>
         {/* Toolbar - 1 línea en desktop, responsive */}

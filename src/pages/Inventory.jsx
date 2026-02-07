@@ -317,7 +317,14 @@ export default function Inventory() {
 
   return (
     <div style={styles.container}>
-      <Header title="Inventari" />
+      <Header
+        title={
+          <span className="page-title-with-icon">
+            <Package size={22} />
+            Inventari
+          </span>
+        }
+      />
 
       <div style={{
         ...styles.content,
@@ -380,28 +387,32 @@ export default function Inventory() {
             </div>
           </div>
           <div style={styles.filters} className="toolbar-group">
-            <Button variant="secondary" size="sm" style={styles.filterButton}>
-              <Filter size={14} />
-              Filtres
-            </Button>
-            <select
-              value={filterProject}
-              onChange={e => setFilterProject(e.target.value)}
-              style={styles.filterSelect}
-            >
-              <option value="">Tots els projectes</option>
-              {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
-            <select
-              value={filterStatus}
-              onChange={e => setFilterStatus(e.target.value)}
-              style={styles.filterSelect}
-            >
-              <option value="">Tots els estats</option>
-              <option value="low_stock">⚠️ Stock baix</option>
-              <option value="in_transit">🚢 En trànsit</option>
-              <option value="ok">✅ OK</option>
-            </select>
+            <div className="toolbar-filterSelect" title="Filtre per projecte">
+              <span className="toolbar-filterSelect__icon" aria-hidden="true">
+                <Filter size={16} />
+              </span>
+              <select
+                value={filterProject}
+                onChange={e => setFilterProject(e.target.value)}
+              >
+                <option value="">Tots els projectes</option>
+                {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
+            </div>
+            <div className="toolbar-filterSelect" title="Filtre per estat">
+              <span className="toolbar-filterSelect__icon" aria-hidden="true">
+                <Filter size={16} />
+              </span>
+              <select
+                value={filterStatus}
+                onChange={e => setFilterStatus(e.target.value)}
+              >
+                <option value="">Tots els estats</option>
+                <option value="low_stock">⚠️ Stock baix</option>
+                <option value="in_transit">🚢 En trànsit</option>
+                <option value="ok">✅ OK</option>
+              </select>
+            </div>
             <Button variant="secondary" size="sm" onClick={loadData} style={styles.refreshBtn}>
               <RefreshCw size={18} />
             </Button>
@@ -414,7 +425,7 @@ export default function Inventory() {
             />
           </div>
           <div style={styles.toolbarRight} className="toolbar-group">
-            <Button size="sm" onClick={handleNewItem}>
+            <Button size="sm" onClick={handleNewItem} className="toolbar-cta">
               <Plus size={18} /> Nou Producte
             </Button>
           </div>

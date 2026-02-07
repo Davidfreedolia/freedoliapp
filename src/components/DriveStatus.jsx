@@ -1,7 +1,6 @@
 // Component per mostrar i gestionar connexió amb Google Drive
 import { useState, useEffect, useCallback } from 'react'
-import { RefreshCw, AlertCircle } from 'lucide-react'
-import driveIcon from '../assets/google-drive.svg'
+import { RefreshCw, AlertCircle, Cloud } from 'lucide-react'
 import Button from './Button'
 import { driveService } from '../lib/googleDrive'
 
@@ -115,7 +114,8 @@ export default function DriveStatus({ compact = false }) {
     initDrive()
   }
 
-  const driveButtonClass = `drive-btn ${compact ? 'drive-btn--compact' : ''} ${isConnected ? 'drive--on' : 'drive--off'}`
+  const driveStateClass = initFailed ? 'drive--error' : (isConnected ? 'drive--on' : 'drive--off')
+  const driveButtonClass = `drive-btn ${compact ? 'drive-btn--compact' : ''} ${driveStateClass}`
   const driveStatusText = isConnected ? (userName || 'Connectat') : 'Desconnectat'
   const driveActionText = isConnected ? 'Desconnectar' : 'Connectar'
 
@@ -123,7 +123,7 @@ export default function DriveStatus({ compact = false }) {
   if (compact) {
     if (isLoading) {
       return (
-        <div style={styles.compactContainer}>
+        <div className="drive-btn drive-btn--compact drive--loading" style={styles.compactContainer}>
           <RefreshCw size={18} color="#9ca3af" className="animate-spin" />
         </div>
       )
@@ -131,42 +131,28 @@ export default function DriveStatus({ compact = false }) {
 
     if (initFailed) {
       return (
-        <div 
-          style={{
-            ...styles.compactContainer,
-            backgroundColor: 'rgba(251, 191, 36, 0.1)',
-            cursor: 'pointer'
-          }}
+        <button
+          type="button"
+          className="btn-icon btn-ghost drive-btn--compact drive--error"
           onClick={handleRetry}
           title="Error inicialitzant Drive. Clica per reintentar."
+          aria-label="Error inicialitzant Drive"
         >
-          <AlertCircle size={18} color="#f59e0b" />
-        </div>
+          <Cloud size={18} className="drive-cloud-icon" />
+        </button>
       )
     }
 
     return (
-      <Button
-        variant="secondary"
+      <button
+        type="button"
         onClick={isConnected ? handleDisconnect : handleConnect}
-        className={driveButtonClass}
+        className={`btn-icon btn-ghost ${driveButtonClass}`}
         title={isConnected ? `Connectat com ${userName}. Clica per desconnectar.` : 'Clica per connectar amb Google Drive'}
+        aria-label={isConnected ? 'Drive connectat' : 'Drive desconnectat'}
       >
-        <span className="drive-btn__left">
-          <img
-            src={driveIcon}
-            alt="Google Drive"
-            width={18}
-            height={18}
-            className="drive-btn__icon"
-          />
-          <span className="drive-btn__text">
-            <span className="drive-btn__title">Drive</span>
-            <span className="drive-btn__sub">{driveStatusText}</span>
-          </span>
-        </span>
-        <span className="drive-btn__cta">{driveActionText}</span>
-      </Button>
+        <Cloud size={18} className="drive-cloud-icon" />
+      </button>
     )
   }
 

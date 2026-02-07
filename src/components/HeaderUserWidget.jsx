@@ -19,19 +19,19 @@ export default function HeaderUserWidget({
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    padding: '6px 10px',
+    padding: '0 6px',
     borderRadius: 'var(--radius-ui)',
     backgroundColor: 'var(--color-surface)',
     border: '1px solid var(--color-border)',
-    height: '36px' // Consistent height with other widgets
+    height: 'var(--h-btn)'
   }
 
   const logoutButtonStyle = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    width: '32px',
-    height: '32px',
+    width: 'var(--h-btn)',
+    height: 'var(--h-btn)',
     padding: 0,
     borderRadius: 'var(--radius-ui)',
     backgroundColor: 'transparent',

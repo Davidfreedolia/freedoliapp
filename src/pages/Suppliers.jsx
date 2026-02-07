@@ -450,7 +450,14 @@ export default function Suppliers() {
 
   return (
     <div style={styles.container}>
-      <Header title="Proveïdors" />
+      <Header
+        title={
+          <span className="page-title-with-icon">
+            <Users size={22} />
+            Proveïdors
+          </span>
+        }
+      />
 
       <div style={{
         ...styles.content,
@@ -472,31 +479,35 @@ export default function Suppliers() {
           </div>
 
           <div style={styles.filters} className="toolbar-group">
-            <Button variant="secondary" size="sm" style={styles.filterButton}>
-              <Filter size={14} />
-              Filtres
-            </Button>
-            <select
-              value={filterType || ''}
-              onChange={e => setFilterType(e.target.value || null)}
-              style={styles.filterSelect}
-            >
-              <option value="">Tots els tipus</option>
-              {SUPPLIER_TYPES.filter(t => t.id !== 'freight').map(t => (
-                <option key={t.id} value={t.id}>{t.name}</option>
-              ))}
-            </select>
+            <div className="toolbar-filterSelect" title="Filtre per tipus">
+              <span className="toolbar-filterSelect__icon" aria-hidden="true">
+                <Filter size={16} />
+              </span>
+              <select
+                value={filterType || ''}
+                onChange={e => setFilterType(e.target.value || null)}
+              >
+                <option value="">Tots els tipus</option>
+                {SUPPLIER_TYPES.filter(t => t.id !== 'freight').map(t => (
+                  <option key={t.id} value={t.id}>{t.name}</option>
+                ))}
+              </select>
+            </div>
 
-            <select
-              value={filterCountry || ''}
-              onChange={e => setFilterCountry(e.target.value || null)}
-              style={styles.filterSelect}
-            >
-              <option value="">Tots els països</option>
-              {Object.keys(COUNTRIES_CITIES).map(c => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
+            <div className="toolbar-filterSelect" title="Filtre per país">
+              <span className="toolbar-filterSelect__icon" aria-hidden="true">
+                <Filter size={16} />
+              </span>
+              <select
+                value={filterCountry || ''}
+                onChange={e => setFilterCountry(e.target.value || null)}
+              >
+                <option value="">Tots els països</option>
+                {Object.keys(COUNTRIES_CITIES).map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="toolbar-group view-controls">
@@ -516,6 +527,7 @@ export default function Suppliers() {
                 opacity: !driveConnected ? 0.5 : 1,
                 cursor: !driveConnected ? 'not-allowed' : 'pointer'
               }}
+              className="toolbar-cta"
             >
               <Plus size={18} /> Nou Proveïdor
             </Button>

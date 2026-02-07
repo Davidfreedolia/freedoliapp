@@ -84,12 +84,13 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
       <nav style={navStyle} className="topbar">
         <div style={styles.leftSection}>
           <Button
+            type="button"
             variant="note"
             size="sm"
             onClick={() => setShowNoteModal(true)}
-            className="topbar-button"
-            title={t('navbar.addNote')}
-            aria-label={t('navbar.addNote')}
+            className="topbar-button topbar-notes"
+            title="Afegir nota"
+            aria-label="Afegir nota"
           >
             <StickyNote size={18} />
             {!isMobile && <span style={{ marginLeft: '6px', fontSize: '14px' }}>+ {t('navbar.notes')}</span>}

@@ -400,7 +400,14 @@ export default function Warehouses() {
 
   return (
     <div style={styles.container}>
-      <Header title="Magatzems" />
+      <Header
+        title={
+          <span className="page-title-with-icon">
+            <Warehouse size={22} />
+            Magatzems
+          </span>
+        }
+      />
 
       <div style={{
         ...styles.content,
@@ -422,20 +429,20 @@ export default function Warehouses() {
           </div>
 
           <div style={styles.filters} className="toolbar-group">
-            <Button variant="secondary" size="sm" style={styles.filterButton}>
-              <Filter size={14} />
-              Filtres
-            </Button>
-            <select
-              value={filterType || ''}
-              onChange={e => setFilterType(e.target.value || null)}
-              style={styles.filterSelect}
-            >
-              <option value="">Tots els tipus</option>
-              {WAREHOUSE_TYPES.map(type => (
-                <option key={type.id} value={type.id}>{type.icon} {type.name}</option>
-              ))}
-            </select>
+            <div className="toolbar-filterSelect" title="Filtre per tipus">
+              <span className="toolbar-filterSelect__icon" aria-hidden="true">
+                <Filter size={16} />
+              </span>
+              <select
+                value={filterType || ''}
+                onChange={e => setFilterType(e.target.value || null)}
+              >
+                <option value="">Tots els tipus</option>
+                {WAREHOUSE_TYPES.map(type => (
+                  <option key={type.id} value={type.id}>{type.icon} {type.name}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="toolbar-group view-controls">
@@ -459,6 +466,7 @@ export default function Warehouses() {
                 opacity: !driveConnected ? 0.5 : 1,
                 cursor: !driveConnected ? 'not-allowed' : 'pointer'
               }}
+              className="toolbar-cta"
             >
               <Plus size={18} />
               Nou Magatzem

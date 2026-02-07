@@ -18,19 +18,19 @@ export default function HeaderPreferencesWidget({ onLanguageClick }) {
     display: 'flex',
     alignItems: 'center',
     gap: '6px',
-    padding: '6px 8px',
+    padding: 0,
     borderRadius: 'var(--radius-ui)',
-    backgroundColor: 'var(--color-surface)',
-    border: '1px solid var(--color-border)',
-    height: '36px' // Consistent height with other widgets
+    backgroundColor: 'transparent',
+    border: 'none',
+    height: 'var(--h-btn)'
   }
 
   const buttonStyle = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    width: '32px',
-    height: '32px',
+    width: 'var(--h-btn)',
+    height: 'var(--h-btn)',
     padding: 0,
     borderRadius: 'var(--radius-ui)',
     backgroundColor: 'transparent',
@@ -66,22 +66,25 @@ export default function HeaderPreferencesWidget({ onLanguageClick }) {
 
       {/* Day/Night Toggle */}
       <button
+        type="button"
+        className={`theme-pill ${darkMode ? 'is-dark' : 'is-light'}`}
         onClick={() => setDarkMode(!darkMode)}
-        className={`fd-theme-switch ${darkMode ? 'is-dark' : 'is-light'}`}
-        title={darkMode ? t('navbar.lightMode') : t('navbar.darkMode')}
-        aria-label={darkMode ? t('navbar.lightMode') : t('navbar.darkMode')}
+        aria-label={darkMode ? 'Activar mode dia' : 'Activar mode nit'}
+        title={darkMode ? 'Mode dia' : 'Mode nit'}
       >
-        <span className="fd-theme-switch__icons" aria-hidden="true">
-          <Sun className="fd-theme-switch__sun" size={14} />
-          <Moon className="fd-theme-switch__moon" size={14} />
+        <span className="theme-pill__iconWrap" aria-hidden="true">
+          {darkMode ? <Moon size={16} /> : <Sun size={16} />}
         </span>
-        <span className="fd-theme-switch__thumb" />
+        <span className="theme-pill__label">
+          {darkMode ? 'NIT' : 'DIA'}
+        </span>
       </button>
 
       {/* Settings */}
       <button
         onClick={() => navigate('/settings')}
         style={buttonStyle}
+        className="btn-icon btn-ghost"
         title={t('navbar.settings')}
         aria-label={t('navbar.settings')}
         onMouseEnter={(e) => {

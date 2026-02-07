@@ -21,7 +21,8 @@ import {
   Database,
   RefreshCw,
   BookOpen,
-  ExternalLink
+  ExternalLink,
+  Settings as SettingsIcon
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { getCompanySettings, updateCompanySettings, supabase, getAuditLogs, updateLanguage, getCurrentUserId } from '../lib/supabase'
@@ -249,7 +250,14 @@ export default function Settings() {
   if (loading) {
     return (
       <div style={styles.container}>
-        <Header title="Configuració" />
+        <Header
+          title={
+            <span className="page-title-with-icon">
+              <SettingsIcon size={22} />
+              Configuració
+            </span>
+          }
+        />
         <div style={styles.loading}>{t('settings.loading')}</div>
       </div>
     )
@@ -257,7 +265,14 @@ export default function Settings() {
 
   return (
     <div style={styles.container}>
-      <Header title="Configuració" />
+      <Header
+        title={
+          <span className="page-title-with-icon">
+            <SettingsIcon size={22} />
+            Configuració
+          </span>
+        }
+      />
 
       <div style={{
         ...styles.content,

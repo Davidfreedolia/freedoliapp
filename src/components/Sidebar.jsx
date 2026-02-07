@@ -173,25 +173,28 @@ export default function Sidebar() {
             {!shouldCollapse && <span>{t(item.labelKey)}</span>}
           </NavLink>
         ))}
-        {isDesktop && (
-          <div className="sidebar-toggle sidebar-edge-toggle">
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-              title={sidebarCollapsed ? 'Expandir' : 'Col·lapsar'}
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="sidebar-toggle__button"
-            >
-              <ChevronLeft
-                size={18}
-                className={`sidebar-toggle__icon ${sidebarCollapsed ? 'is-collapsed' : ''}`}
-              />
-            </Button>
-          </div>
-        )}
       </nav>
+      {isDesktop && (
+        <div className="sidebar-toggle sidebar-collapse">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            title={sidebarCollapsed ? 'Expandir' : 'Col·lapsar'}
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="sidebar-toggle__button"
+          >
+            <ChevronLeft
+              size={18}
+              className={`sidebar-toggle__icon ${sidebarCollapsed ? 'is-collapsed' : ''}`}
+            />
+            <span className="sidebar-toggle__label">
+              {sidebarCollapsed ? 'Expand' : 'Collapse'}
+            </span>
+          </Button>
+        </div>
+      )}
 
     </>
   )
@@ -216,6 +219,7 @@ export default function Sidebar() {
             onClick={handleCloseDrawer}
           >
             <aside
+              className="sidebar"
               style={{
                 ...styles.sidebar,
                 ...styles.drawer,
@@ -233,7 +237,7 @@ export default function Sidebar() {
   }
 
   return (
-    <aside style={{
+    <aside className="sidebar" style={{
       ...styles.sidebar,
       width: shouldCollapse ? '72px' : '260px'
     }}>

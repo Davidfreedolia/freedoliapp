@@ -243,7 +243,14 @@ export default function Analytics() {
 
   return (
     <div style={styles.container}>
-      <Header title="Analytics" />
+      <Header
+        title={
+          <span className="page-title-with-icon">
+            <TrendingUp size={22} />
+            Analytics
+          </span>
+        }
+      />
 
       <div style={styles.content}>
         {/* Toolbar */}
