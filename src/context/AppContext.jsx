@@ -1,11 +1,18 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import { getProjects, getDashboardStats, getCompanySettings, updateCompanySettings } from '../lib/supabase'
+import { supabase, getProjects, getDashboardStats, getCompanySettings, updateCompanySettings } from '../lib/supabase'
 import { driveService } from '../lib/googleDrive'
 import { generateDemoData, checkDemoExists, checkRealDataExists } from '../lib/demoSeed'
 import { showToast } from '../components/Toast'
 import { safeJsonParse } from '../lib/safeJson'
 
 const AppContext = createContext()
+
+const EMPTY_STATS = {
+  totalProjects: 0,
+  activeProjects: 0,
+  completedProjects: 0,
+  totalInvested: 0
+}
 
 export function AppProvider({ children }) {
   const [darkMode, setDarkMode] = useState(() => {
@@ -14,15 +21,43 @@ export function AppProvider({ children }) {
   })
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [projects, setProjects] = useState([])
-  const [stats, setStats] = useState({
-    totalProjects: 0,
-    activeProjects: 0,
-    completedProjects: 0,
-    totalInvested: 0
-  })
+  const [stats, setStats] = useState(EMPTY_STATS)
   const [loading, setLoading] = useState(true)
   const [driveConnected, setDriveConnected] = useState(false)
   const [demoMode, setDemoMode] = useState(false)
+
+  const isInvalidRefreshTokenError = (err) => {
+    const message = err?.message || ''
+    const code = err?.code || err?.name || ''
+    return (
+      message.includes('Invalid Refresh Token') ||
+      message.includes('Refresh Token Not Found') ||
+      code === 'invalid_refresh_token'
+    )
+  }
+
+  const clearAuthSession = async () => {
+    try {
+      await supabase.auth.signOut()
+    } catch (err) {
+      console.warn('Error clearing auth session:', err)
+    }
+    try {
+      localStorage.removeItem('freedoliapp-auth')
+    } catch (err) {
+      console.warn('Error clearing auth storage:', err)
+    }
+  }
+
+  const handleAuthFailure = async (err) => {
+    if (!isInvalidRefreshTokenError(err)) return false
+    await clearAuthSession()
+    setDemoMode(false)
+    setProjects([])
+    setStats(EMPTY_STATS)
+    showToast('Sessió caducada. Torna a iniciar sessió.', 'error', 5000)
+    return true
+  }
 
   // Carregar dades inicials
   useEffect(() => {
@@ -50,6 +85,16 @@ export function AppProvider({ children }) {
   // Auto-seed demo data on app load (only in DEV environment)
   const autoSeedDemoData = async () => {
     try {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+      if (sessionError) {
+        const handled = await handleAuthFailure(sessionError)
+        if (handled) return
+      }
+      if (!session?.user) {
+        setDemoMode(false)
+        return
+      }
+
       // Safety check: Only seed in DEV, never in PROD
       const env = import.meta.env.VITE_ENV || 'dev'
       if (env === 'prod') {
@@ -112,8 +157,11 @@ export function AppProvider({ children }) {
         showToast('Demo failed to load', 'error', 5000)
       }
     } catch (err) {
-      console.error('Error in auto-seed:', err)
-      showToast('Demo failed to load', 'error', 5000)
+      const handled = await handleAuthFailure(err)
+      if (!handled) {
+        console.error('Error in auto-seed:', err)
+        showToast('Demo failed to load', 'error', 5000)
+      }
     }
   }
 
@@ -126,6 +174,18 @@ export function AppProvider({ children }) {
   const loadInitialData = async () => {
     setLoading(true)
     try {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+      if (sessionError) {
+        const handled = await handleAuthFailure(sessionError)
+        if (handled) return
+      }
+      if (!session?.user) {
+        setDemoMode(false)
+        setProjects([])
+        setStats(EMPTY_STATS)
+        return
+      }
+
       // Load demo mode first and clear cache
       const settings = await getCompanySettings()
       const currentDemoMode = settings?.demo_mode || false
@@ -142,9 +202,16 @@ export function AppProvider({ children }) {
       setProjects(projectsData || [])
       setStats(statsData)
     } catch (err) {
-      console.error('Error carregant dades:', err)
+      const handled = await handleAuthFailure(err)
+      if (!handled) {
+        console.error('Error carregant dades:', err)
+        setProjects([])
+        setStats(EMPTY_STATS)
+        showToast('Sessió caducada. Torna a iniciar sessió.', 'error', 5000)
+      }
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
   
   const toggleDemoMode = async (newValue) => {
@@ -194,10 +261,20 @@ export function AppProvider({ children }) {
   }
 
   const refreshProjects = async () => {
-    const data = await getProjects()
-    setProjects(data || [])
-    const statsData = await getDashboardStats()
-    setStats(statsData)
+    try {
+      const data = await getProjects()
+      setProjects(data || [])
+      const statsData = await getDashboardStats()
+      setStats(statsData)
+    } catch (err) {
+      const handled = await handleAuthFailure(err)
+      if (!handled) {
+        console.error('Error refrescant projectes:', err)
+        setProjects([])
+        setStats(EMPTY_STATS)
+        showToast('Sessió caducada. Torna a iniciar sessió.', 'error', 5000)
+      }
+    }
   }
 
   const value = {
