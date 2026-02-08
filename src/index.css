@@ -120,7 +120,7 @@
   --nav-bg: #121212;
   --nav-fg: var(--text-1);
   --nav-fg-muted: var(--muted-1);
-  --nav-icon: var(--nav-fg);
+  --nav-icon: var(--coral-1);
   --nav-highlight: rgba(255, 255, 255, 0.06);
   --nav-highlight-strong: rgba(255, 255, 255, 0.10);
 
@@ -309,7 +309,7 @@ body.dark {
   --nav-bg: #121212;
   --nav-fg: rgba(234, 242, 241, 0.92);
   --nav-fg-muted: var(--muted-1);
-  --nav-icon: var(--nav-fg);
+  --nav-icon: var(--coral-1);
   --nav-highlight: rgba(255, 255, 255, 0.06);
   --nav-highlight-strong: rgba(255, 255, 255, 0.10);
 
@@ -505,6 +505,9 @@ body.dark .topbar {
 .topbar .topbar-notes:hover,
 .topbar .topbar-notes:active {
   opacity: 1 !important;
+  border: none !important;
+  box-shadow: none !important;
+  filter: none !important;
 }
 
 /* Notes: solid i net, sense ghost */
@@ -1590,40 +1593,24 @@ body.dark .drive-btn--compact.drive--on {
   -ms-overflow-style: none;
 }
 
+/* Sidebar text: sempre llegible */
 .sidebar-scroll a,
-.sidebar-scroll a:hover,
-.sidebar-scroll a:active,
-.sidebar-scroll a[aria-current="page"],
-.sidebar-scroll a.is-active,
-.sidebar-scroll a.active {
+.sidebar-scroll a span {
+  opacity: 1 !important;
   color: var(--nav-fg) !important;
-  opacity: 1 !important;
-}
-
-.sidebar-scroll a span,
-.sidebar-scroll a:hover span,
-.sidebar-scroll a:active span,
-.sidebar-scroll a[aria-current="page"] span,
-.sidebar-scroll a.is-active span,
-.sidebar-scroll a.active span {
-  color: inherit !important;
-  opacity: 1 !important;
   font-weight: 500;
 }
 
-body.dark .sidebar-scroll a,
-body.dark .sidebar-scroll a:hover,
-body.dark .sidebar-scroll a:active,
-body.dark .sidebar-scroll a[aria-current="page"],
-body.dark .sidebar-scroll a.is-active,
-body.dark .sidebar-scroll a.active,
-body.dark .sidebar-scroll a span,
-body.dark .sidebar-scroll a:hover span,
-body.dark .sidebar-scroll a:active span,
-body.dark .sidebar-scroll a[aria-current="page"] span,
-body.dark .sidebar-scroll a.is-active span,
-body.dark .sidebar-scroll a.active span {
-  color: rgba(234, 242, 241, 0.92) !important;
+/* Icones sidebar: corporatives */
+.sidebar-scroll a svg {
+  color: var(--nav-icon) !important;
+  opacity: 1 !important;
+}
+
+/* Active/hover: una mica més de contrast */
+.sidebar-scroll a:hover,
+.sidebar-scroll a[aria-current="page"] {
+  background: var(--nav-highlight) !important;
 }
 
 .sidebar-scroll::-webkit-scrollbar {
@@ -2105,17 +2092,17 @@ body.dark .fd-calendar-asana .rbc-day-slot .rbc-time-slot:hover {
   top: 0 !important;
   z-index: 200 !important;
   overflow: visible !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
-  background: color-mix(in srgb, var(--surface-bg) 72%, transparent) !important;
-  background-color: color-mix(in srgb, var(--surface-bg) 72%, transparent) !important;
-  border-bottom: none !important;
-  box-shadow: none !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  background: color-mix(in srgb, var(--surface-bg) 92%, transparent) !important;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06) !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06) !important;
 }
 
 body.dark .topbar {
-  background: color-mix(in srgb, var(--surface-bg) 62%, transparent) !important;
-  background-color: color-mix(in srgb, var(--surface-bg) 62%, transparent) !important;
+  background: color-mix(in srgb, var(--surface-bg) 82%, transparent) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35) !important;
 }
 
 .topbar::before {

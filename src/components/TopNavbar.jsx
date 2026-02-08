@@ -159,8 +159,6 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
 
 const styles = {
   navbar: {
-    height: 'var(--topbar-h)',
-    padding: '0 24px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
