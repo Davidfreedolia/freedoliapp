@@ -120,7 +120,7 @@
   --nav-bg: #121212;
   --nav-fg: var(--text-1);
   --nav-fg-muted: var(--muted-1);
-  --nav-icon: var(--coral-1);
+  --nav-icon: var(--nav-fg);
   --nav-highlight: rgba(255, 255, 255, 0.06);
   --nav-highlight-strong: rgba(255, 255, 255, 0.10);
 
@@ -307,9 +307,9 @@ body.dark {
 
   /* Nav palette - Dark Mode */
   --nav-bg: #121212;
-  --nav-fg: var(--text-1);
+  --nav-fg: rgba(234, 242, 241, 0.92);
   --nav-fg-muted: var(--muted-1);
-  --nav-icon: var(--coral-1);
+  --nav-icon: var(--nav-fg);
   --nav-highlight: rgba(255, 255, 255, 0.06);
   --nav-highlight-strong: rgba(255, 255, 255, 0.10);
 
@@ -811,6 +811,10 @@ body.dark .layout-switcher__btn.is-active {
   display: inline-flex;
   align-items: center;
   gap: 10px;
+}
+
+.page-title-with-icon svg {
+  color: var(--nav-icon);
 }
 
 .toolbar-row select,
@@ -1586,19 +1590,39 @@ body.dark .drive-btn--compact.drive--on {
   -ms-overflow-style: none;
 }
 
-.sidebar-scroll a {
+.sidebar-scroll a,
+.sidebar-scroll a:hover,
+.sidebar-scroll a:active,
+.sidebar-scroll a[aria-current="page"],
+.sidebar-scroll a.is-active,
+.sidebar-scroll a.active {
   color: var(--nav-fg) !important;
   opacity: 1 !important;
 }
 
-.sidebar-scroll a span {
+.sidebar-scroll a span,
+.sidebar-scroll a:hover span,
+.sidebar-scroll a:active span,
+.sidebar-scroll a[aria-current="page"] span,
+.sidebar-scroll a.is-active span,
+.sidebar-scroll a.active span {
   color: inherit !important;
   opacity: 1 !important;
   font-weight: 500;
 }
 
 body.dark .sidebar-scroll a,
-body.dark .sidebar-scroll a span {
+body.dark .sidebar-scroll a:hover,
+body.dark .sidebar-scroll a:active,
+body.dark .sidebar-scroll a[aria-current="page"],
+body.dark .sidebar-scroll a.is-active,
+body.dark .sidebar-scroll a.active,
+body.dark .sidebar-scroll a span,
+body.dark .sidebar-scroll a:hover span,
+body.dark .sidebar-scroll a:active span,
+body.dark .sidebar-scroll a[aria-current="page"] span,
+body.dark .sidebar-scroll a.is-active span,
+body.dark .sidebar-scroll a.active span {
   color: rgba(234, 242, 241, 0.92) !important;
 }
 
@@ -2075,19 +2099,23 @@ body.dark .fd-calendar-asana .rbc-day-slot .rbc-time-slot:hover {
   background-color: rgba(255, 255, 255, 0.02);
 }
 
-/* TOPBAR — sólida, sin blur ni separador */
+/* TOPBAR — sticky glass */
 .topbar {
-  position: fixed !important;
+  position: sticky !important;
   top: 0 !important;
-  z-index: 50 !important;
+  z-index: 200 !important;
   overflow: visible !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  background: var(--surface-2) !important;
-  background-color: var(--surface-2) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  background: color-mix(in srgb, var(--surface-bg) 72%, transparent) !important;
+  background-color: color-mix(in srgb, var(--surface-bg) 72%, transparent) !important;
   border-bottom: none !important;
   box-shadow: none !important;
-  filter: none !important;
+}
+
+body.dark .topbar {
+  background: color-mix(in srgb, var(--surface-bg) 62%, transparent) !important;
+  background-color: color-mix(in srgb, var(--surface-bg) 62%, transparent) !important;
 }
 
 .topbar::before {

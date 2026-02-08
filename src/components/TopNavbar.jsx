@@ -164,13 +164,8 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    position: 'fixed',
-    top: 0,
-    zIndex: 900,
     backgroundColor: 'transparent',
     color: 'var(--topbar-fg)',
-    backdropFilter: 'blur(8px)',
-    borderBottom: '1px solid rgba(15, 23, 42, 0.06)',
     boxShadow: 'none'
   },
   leftSection: {
