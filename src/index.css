@@ -1717,6 +1717,15 @@ body.dark .drive-btn--compact.drive--on {
   background: transparent;
 }
 
+.sidebar-footer-sep {
+  height: 1px;
+  width: calc(100% - 24px);
+  margin: 12px auto 8px auto;
+  background: color-mix(in srgb, var(--coral-1) 70%, transparent);
+  border-radius: 999px;
+  opacity: 0.9;
+}
+
 .sidebar-edge-toggle {
   position: absolute;
   top: 50%;

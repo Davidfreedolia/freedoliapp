@@ -12,6 +12,7 @@ import {
   Package,
   TrendingUp,
   Calendar as CalendarIcon,
+  Settings,
   ChevronLeft,
   X,
   Menu
@@ -174,6 +175,39 @@ export default function Sidebar() {
           </NavLink>
         ))}
       </nav>
+
+      <div className="sidebar-footer-sep" />
+      <NavLink
+        to="/settings"
+        onClick={() => {
+          if (isMobile) {
+            setMobileOpen(false)
+          }
+        }}
+        onMouseEnter={() => {
+          if (!prefetchedRoutes.has('/settings')) {
+            prefetchedRoutes.add('/settings')
+            prefetchRoute('/settings')
+          }
+          setHoveredPath('/settings')
+        }}
+        onMouseLeave={() => setHoveredPath(null)}
+        style={({ isActive }) => ({
+          ...styles.navItem,
+          backgroundColor: isActive
+            ? 'var(--nav-highlight-strong)'
+            : (hoveredPath === '/settings' ? 'var(--nav-highlight)' : 'transparent'),
+          color: isActive ? 'var(--nav-fg)' : 'var(--nav-fg-muted)',
+          borderLeft: 'none',
+          padding: shouldCollapse ? '12px 0' : '12px 16px',
+          borderRadius: shouldCollapse ? '12px' : '10px',
+          justifyContent: shouldCollapse ? 'center' : 'flex-start'
+        })}
+      >
+        <Settings size={shouldCollapse ? 24 : 20} color="var(--nav-icon)" />
+        {!shouldCollapse && <span>{t('sidebar.settings')}</span>}
+      </NavLink>
+
       {isDesktop && (
         <div className="sidebar-toggle sidebar-collapse">
           <Button

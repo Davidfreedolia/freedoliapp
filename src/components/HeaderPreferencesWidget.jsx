@@ -1,8 +1,6 @@
 import React from 'react'
-import { Sun, Moon, Settings } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
+import { Sun, Moon } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { useNavigate } from 'react-router-dom'
 
 /**
  * HeaderPreferencesWidget - Preferences controls grouped together
@@ -11,8 +9,6 @@ import { useNavigate } from 'react-router-dom'
  */
 export default function HeaderPreferencesWidget({ onLanguageClick }) {
   const { darkMode, setDarkMode } = useApp()
-  const { t } = useTranslation()
-  const navigate = useNavigate()
 
   const widgetStyle = {
     display: 'flex',
@@ -23,26 +19,6 @@ export default function HeaderPreferencesWidget({ onLanguageClick }) {
     backgroundColor: 'transparent',
     border: 'none',
     height: 'var(--h-btn)'
-  }
-
-  const buttonStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 'var(--h-btn)',
-    height: 'var(--h-btn)',
-    padding: 0,
-    borderRadius: 'var(--radius-ui)',
-    backgroundColor: 'transparent',
-    border: 'none',
-    cursor: 'pointer',
-    color: 'var(--color-muted)',
-    transition: 'all 0.15s ease'
-  }
-
-  const buttonHoverStyle = {
-    backgroundColor: 'var(--color-bg)',
-    color: 'var(--color-text)'
   }
 
   return (
@@ -78,24 +54,6 @@ export default function HeaderPreferencesWidget({ onLanguageClick }) {
         <span className="theme-pill__label">
           {darkMode ? 'NIT' : 'DIA'}
         </span>
-      </button>
-
-      {/* Settings */}
-      <button
-        onClick={() => navigate('/settings')}
-        style={buttonStyle}
-        className="btn-icon btn-ghost"
-        title={t('navbar.settings')}
-        aria-label={t('navbar.settings')}
-        onMouseEnter={(e) => {
-          Object.assign(e.currentTarget.style, buttonHoverStyle)
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'transparent'
-          e.currentTarget.style.color = 'var(--color-muted)'
-        }}
-      >
-        <Settings size={18} />
       </button>
     </div>
   )
