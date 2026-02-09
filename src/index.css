@@ -542,7 +542,8 @@ body.dark .topbar {
   --btn-ghost-border: transparent;
   --btn-shadow: none;
   --btn-ghost-fg: var(--help-icon);
-  --btn-pad-x: 0px;
+  --btn-pad-x: 10px;
+  --btn-gap: 0px;
 }
 
 .topbar .topbar-help > span {
