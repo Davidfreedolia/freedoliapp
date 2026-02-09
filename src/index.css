@@ -799,6 +799,19 @@ body.dark .avatar-circle {
   border-color: color-mix(in srgb, var(--border-1) 70%, transparent);
 }
 
+/* Canonical radius */
+input,
+select,
+textarea,
+.button,
+.btn,
+.topbar-button,
+.toolbar-filterSelect,
+.toolbar-filterSelect input,
+.toolbar-filterSelect select {
+  border-radius: var(--radius-ui);
+}
+
 body.dark .toolbar-filterSelect {
   background: var(--surface-bg);
   border-color: var(--border-1);
