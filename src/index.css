@@ -2081,44 +2081,14 @@ body.dark .fd-calendar-asana .rbc-day-slot .rbc-time-slot:hover {
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
   background: color-mix(in srgb, var(--surface-bg) 92%, transparent) !important;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.06) !important;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06) !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
 }
 
 body.dark .topbar {
   background: color-mix(in srgb, var(--surface-bg) 82%, transparent) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35) !important;
-}
-
-.topbar::before {
-  content: "" !important;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.35);
-  pointer-events: none;
-}
-
-body.dark .topbar::before {
-  background: rgba(255, 255, 255, 0.10);
-}
-
-.topbar::after {
-  content: "" !important;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 18px;
-  background: rgba(255, 255, 255, 0.08);
-  pointer-events: none;
-}
-
-body.dark .topbar::after {
-  background: rgba(255, 255, 255, 0.05);
+  border-bottom: none !important;
+  box-shadow: none !important;
 }
 
 /* DASHBOARD — stats cards coherència */
