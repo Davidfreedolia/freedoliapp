@@ -116,10 +116,10 @@
   --color-text: var(--text-1);
   --color-muted: var(--muted-1);
 
-  /* Nav palette */
+  /* Nav palette (LIGHT) — sidebar dark needs light text */
   --nav-bg: #121212;
-  --nav-fg: var(--text-1);
-  --nav-fg-muted: var(--muted-1);
+  --nav-fg: rgba(234, 242, 241, 0.92);
+  --nav-fg-muted: rgba(234, 242, 241, 0.70);
   --nav-icon: var(--coral-1);
   --nav-highlight: rgba(255, 255, 255, 0.06);
   --nav-highlight-strong: rgba(255, 255, 255, 0.10);
