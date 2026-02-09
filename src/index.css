@@ -1719,7 +1719,8 @@ body.dark .drive-btn--compact.drive--on {
 
 .sidebar-footer-sep {
   height: 1px;
-  width: calc(100% - 24px);
+  width: 58%;
+  max-width: 180px;
   margin: 12px auto 8px auto;
   background: color-mix(in srgb, var(--coral-1) 70%, transparent);
   border-radius: 999px;
