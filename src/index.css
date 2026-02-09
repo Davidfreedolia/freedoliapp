@@ -125,7 +125,9 @@
   --nav-highlight-strong: rgba(255, 255, 255, 0.10);
 
   /* Layout surfaces */
-  --topbar-bg: transparent;
+  --topbar-bg: color-mix(in srgb, var(--surface-bg) 88%, transparent);
+  --topbar-border: none;
+  --topbar-shadow: none;
   --topbar-text: var(--nav-fg);
   --topbar-h: 64px;
   --topbar-fg: var(--text-1);
@@ -314,7 +316,9 @@ body.dark {
   --nav-highlight-strong: rgba(255, 255, 255, 0.10);
 
   /* Layout surfaces - Dark Mode */
-  --topbar-bg: transparent;
+  --topbar-bg: color-mix(in srgb, var(--surface-bg) 78%, transparent);
+  --topbar-border: none;
+  --topbar-shadow: none;
   --topbar-text: var(--nav-fg);
   --topbar-h: 64px;
   --topbar-fg: var(--text-1);
@@ -465,16 +469,6 @@ a, button {
 
 main {
   padding-top: var(--topbar-h);
-}
-
-.topbar {
-  color: var(--topbar-fg);
-  backdrop-filter: blur(10px);
-  background: color-mix(in srgb, var(--surface-bg) 78%, transparent);
-}
-
-body.dark .topbar {
-  background: color-mix(in srgb, var(--surface-bg) 65%, transparent);
 }
 
 .topbar .topbar-button {
@@ -2072,23 +2066,30 @@ body.dark .fd-calendar-asana .rbc-day-slot .rbc-time-slot:hover {
   background-color: rgba(255, 255, 255, 0.02);
 }
 
-/* TOPBAR — sticky glass */
+/* TOPBAR — canonical glass */
 .topbar {
-  position: sticky !important;
-  top: 0 !important;
-  z-index: 200 !important;
-  overflow: visible !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  background: color-mix(in srgb, var(--surface-bg) 92%, transparent) !important;
-  border-bottom: none !important;
-  box-shadow: none !important;
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 200;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  column-gap: 12px;
+  height: var(--topbar-h);
+  padding: 0 24px;
+  color: var(--topbar-fg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: var(--topbar-bg);
+  border: var(--topbar-border);
+  box-shadow: var(--topbar-shadow);
 }
 
 body.dark .topbar {
-  background: color-mix(in srgb, var(--surface-bg) 82%, transparent) !important;
-  border-bottom: none !important;
-  box-shadow: none !important;
+  background: var(--topbar-bg);
+  border: var(--topbar-border);
+  box-shadow: var(--topbar-shadow);
 }
 
 /* DASHBOARD — stats cards coherència */

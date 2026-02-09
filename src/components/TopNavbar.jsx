@@ -73,9 +73,7 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
   }
 
   const navStyle = {
-    ...styles.navbar,
     left: isMobile ? 0 : 'var(--sidebar-w)',
-    right: 0,
     width: isMobile ? '100%' : 'calc(100% - var(--sidebar-w))'
   }
 
@@ -158,14 +156,6 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
 }
 
 const styles = {
-  navbar: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'transparent',
-    color: 'var(--topbar-fg)',
-    boxShadow: 'none'
-  },
   leftSection: {
     display: 'flex',
     alignItems: 'center',
