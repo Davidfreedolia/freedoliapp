@@ -528,6 +528,22 @@ body.dark .topbar {
   transition: all 0.15s ease;
 }
 
+/* Topbar settings button: bordered */
+.topbar .btn-icon.btn-ghost[aria-label="Settings"],
+.topbar .btn-icon.btn-ghost[aria-label="Configuración"],
+.topbar .btn-icon.btn-ghost[aria-label="Configuració"] {
+  border: 1px solid var(--border-1);
+  background: var(--surface-bg-2);
+  border-radius: var(--radius-ui);
+  box-shadow: none;
+}
+
+.topbar .btn-icon.btn-ghost[aria-label="Settings"]:hover,
+.topbar .btn-icon.btn-ghost[aria-label="Configuración"]:hover,
+.topbar .btn-icon.btn-ghost[aria-label="Configuració"]:hover {
+  background: var(--surface-bg-3);
+}
+
 /* TOPBAR — Notes button: NO opacity games */
 .topbar .topbar-button,
 .topbar .topbar-button:hover,
