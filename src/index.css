@@ -575,8 +575,8 @@ body.dark .topbar {
 
 /* Topbar notes: compact post-it */
 .topbar .topbar-notes {
+  --btn-pad-x: 12px;
   height: 28px;
-  padding: 0 10px;
   background: var(--warning-1);
   color: #3a2f00;
   border: 1px solid color-mix(in srgb, var(--warning-1) 70%, black);
