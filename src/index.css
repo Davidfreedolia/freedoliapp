@@ -2272,6 +2272,18 @@ body.dark .fd-calendar-asana .rbc-day-slot .rbc-time-slot:hover {
   min-height: 64px;
 }
 
+/* Dashboard — Orders in progress icon (temporary coral) */
+.page-dashboard .dash-merged-widget h3 svg,
+.page-dashboard .dash-merged-widget h3 .lucide {
+  color: var(--coral-1);
+}
+
+/* Dashboard — Orders widget header icon (force coral) */
+.page-dashboard .dash-merged-widget > div:first-child > div:first-child svg {
+  color: var(--coral-1) !important;
+  stroke: currentColor !important;
+}
+
 /* DASHBOARD — Comandes en curs: jerarquia + timeline llegible */
 .widget-title svg,
 .card-title svg {
