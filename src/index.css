@@ -1722,20 +1722,6 @@ body.dark .sidebar-collapse .sidebar-toggle__button {
   transform: rotate(0deg);
 }
 
-/* TOPBAR — treure línia/separador */
-.topbar,
-.topbar * {
-  border-bottom: none !important;
-}
-
-.topbar {
-  box-shadow: none !important;
-}
-
-.topbar::after {
-  content: none !important;
-}
-
 /* DRIVE — compact de topbar: petit i discret */
 .drive-btn--compact {
   width: auto !important;
