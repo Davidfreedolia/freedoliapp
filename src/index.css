@@ -563,6 +563,12 @@ body.dark .topbar {
   fill: none;
 }
 
+.topbar .topbar-help svg,
+.topbar .topbar-help svg * {
+  stroke: currentColor !important;
+  fill: none !important;
+}
+
 .topbar .topbar-help:hover {
   opacity: 0.85;
 }
@@ -570,7 +576,7 @@ body.dark .topbar {
 /* Topbar notes: compact post-it */
 .topbar .topbar-notes {
   height: 28px;
-  padding: 0 8px;
+  padding: 0 10px;
   background: var(--warning-1);
   color: #3a2f00;
   border: 1px solid color-mix(in srgb, var(--warning-1) 70%, black);
