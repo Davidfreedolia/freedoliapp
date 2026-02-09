@@ -2624,6 +2624,22 @@ body.dark .page-dashboard .dash-stat-value {
   color: var(--muted-1);
 }
 
+.page-dashboard .order-content .dashboard-link {
+  color: var(--text-1);
+  font-weight: 600;
+}
+
+/* el 2n link (PO) en gris */
+.page-dashboard .order-content .dashboard-link + .dashboard-link {
+  color: var(--muted-1);
+  font-weight: 500;
+}
+
+/* hover: que es noti que és clicable, però discret */
+.page-dashboard .order-content .dashboard-link:hover {
+  text-decoration: underline;
+}
+
 .page-dashboard .dashboard-link {
   background: none;
   border: none;
