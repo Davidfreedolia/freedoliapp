@@ -591,6 +591,12 @@ body.dark .topbar {
   opacity: 1 !important;
 }
 
+.topbar .btn-icon.btn-ghost[aria-label="Configuració"],
+.topbar .btn-icon.btn-ghost[aria-label="Configuracion"],
+.topbar .btn-icon.btn-ghost[aria-label="Settings"]{
+  --color-muted: var(--topbar-fg);
+}
+
 /* Si el botó de Notes té una classe específica (millor) */
 .topbar .topbar-notes,
 .topbar .topbar-notes:hover,
