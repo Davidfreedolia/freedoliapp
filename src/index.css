@@ -9,6 +9,7 @@
    ============================================
    Petrol, Turquesa, Offwhite, Corall, Groc suau
 */
+/* === TOKENS :root === */
 :root {
   /* System typography */
   --font-sans: 'Roboto', system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
@@ -240,6 +241,7 @@
   --input-bg: var(--surface-bg);
 }
 
+/* === TOKENS body.dark === */
 body.dark {
   /* Semantic UI tokens (Dark) */
   --bg-app: #0F1F20;
@@ -352,6 +354,7 @@ body.dark {
   --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.28);
 }
 
+/* === BASE === */
 body {
   font-family: var(--font-sans);
   background-color: var(--page-bg);
@@ -469,6 +472,33 @@ a, button {
 
 main {
   padding-top: var(--topbar-h);
+}
+
+/* === COMPONENTS === */
+/* TOPBAR — canonical glass */
+.topbar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 200;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  column-gap: 12px;
+  height: var(--topbar-h);
+  padding: 0 24px;
+  color: var(--topbar-fg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: var(--topbar-bg);
+  border: var(--topbar-border);
+  box-shadow: var(--topbar-shadow);
+}
+
+body.dark .topbar {
+  background: var(--topbar-bg);
+  border: var(--topbar-border);
+  box-shadow: var(--topbar-shadow);
 }
 
 .topbar .topbar-button {
@@ -1761,13 +1791,14 @@ body.dark .sidebar-collapse .sidebar-toggle__button {
 
 /* Button variants already defined in Button.jsx component */
 
+/* === PAGES === */
 /* ============================================
-   CALENDAR - ASANA STYLE
-   ============================================
-   Clean, compact, readable calendar styling
-   Uses Canadian Palette and single radius token
-   FULL Catalan localization
-   All styles scoped under .fd-calendar-asana
+  CALENDAR - ASANA STYLE
+  ============================================
+  Clean, compact, readable calendar styling
+  Uses Canadian Palette and single radius token
+  FULL Catalan localization
+  All styles scoped under .fd-calendar-asana
 */
 
 .fd-calendar-asana {
@@ -2064,31 +2095,6 @@ body.dark .fd-calendar-asana .rbc-day-slot .rbc-time-slot:hover {
   background-color: rgba(255, 255, 255, 0.02);
 }
 
-/* TOPBAR — canonical glass */
-.topbar {
-  position: fixed;
-  top: 0;
-  right: 0;
-  z-index: 200;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  column-gap: 12px;
-  height: var(--topbar-h);
-  padding: 0 24px;
-  color: var(--topbar-fg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  background: var(--topbar-bg);
-  border: var(--topbar-border);
-  box-shadow: var(--topbar-shadow);
-}
-
-body.dark .topbar {
-  background: var(--topbar-bg);
-  border: var(--topbar-border);
-  box-shadow: var(--topbar-shadow);
-}
 
 /* DASHBOARD — stats cards coherència */
 .page-dashboard .dash-stat-card {
