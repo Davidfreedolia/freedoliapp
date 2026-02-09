@@ -1814,6 +1814,10 @@ body.dark .sidebar-collapse .sidebar-toggle__button {
   transform: rotate(180deg);
 }
 
+.sidebar-toggle__button[aria-label="Expand sidebar"] .sidebar-toggle__label {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .sidebar-edge-toggle {
     position: static;
