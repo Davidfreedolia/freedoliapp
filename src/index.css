@@ -528,6 +528,22 @@ body.dark .topbar {
   transition: all 0.15s ease;
 }
 
+/* Topbar help: icon only + blue */
+.topbar .topbar-help {
+  color: var(--brand-blue);
+}
+
+.topbar .topbar-help span {
+  display: none;
+}
+
+.topbar .topbar-help svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  stroke: currentColor;
+}
+
 /* Topbar settings button: bordered */
 .topbar .btn-icon.btn-ghost[aria-label="Settings"],
 .topbar .btn-icon.btn-ghost[aria-label="Configuración"],
