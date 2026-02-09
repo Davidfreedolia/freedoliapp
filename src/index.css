@@ -2628,3 +2628,12 @@ body.dark .theme-pill__iconWrap {
 .page-dashboard .dash-merged-subsection {
   padding-bottom: 12px;
 }
+
+/* L9 — Stars: ultra small + discreet (lucide-star) */
+svg.lucide.lucide-star,
+svg.lucide-star,
+svg[class*="lucide-star"] {
+  width: 10px !important;
+  height: 10px !important;
+  opacity: 0.55 !important;
+}
