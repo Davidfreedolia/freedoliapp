@@ -544,6 +544,28 @@ body.dark .topbar {
   stroke: currentColor;
 }
 
+/* Topbar notes: compact post-it */
+.topbar .topbar-notes {
+  height: 28px;
+  padding: 0 8px;
+  background: var(--warning-1);
+  color: #3a2f00;
+  border: 1px solid color-mix(in srgb, var(--warning-1) 70%, black);
+}
+
+.topbar .topbar-notes span {
+  display: none;
+}
+
+.topbar .topbar-notes svg {
+  width: 14px;
+  height: 14px;
+}
+
+.topbar .topbar-notes:hover {
+  background: color-mix(in srgb, var(--warning-1) 85%, white);
+}
+
 /* Topbar settings button: bordered */
 .topbar .btn-icon.btn-ghost[aria-label="Settings"],
 .topbar .btn-icon.btn-ghost[aria-label="Configuración"],
