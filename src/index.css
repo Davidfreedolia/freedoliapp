@@ -2576,11 +2576,25 @@ body.dark .page-dashboard .dash-stat-value {
 
 /* Dashboard — Order timeline (canonical) */
 .order-timeline {
+  position: relative;
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 0;
-  margin-top: 8px;
+  justify-content: space-between;
+  padding: 0 6px;
+  margin-top: 10px;
+}
+
+.order-timeline::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  background: var(--border-1);
+  opacity: 0.9;
+  transform: translateY(-50%);
 }
 
 .order-step {
@@ -2592,6 +2606,9 @@ body.dark .page-dashboard .dash-stat-value {
   height: 22px;
   color: var(--muted-1);
   flex: 0 0 auto;
+  z-index: 1;
+  background: var(--surface-bg);
+  border-radius: 999px;
 }
 
 .order-step__icon {
@@ -2602,16 +2619,7 @@ body.dark .page-dashboard .dash-stat-value {
 
 /* connector line */
 .order-step:not(:last-child)::after {
-  width: auto;
-  flex: 1 1 auto;
-  min-width: 28px;
-  margin: 0 10px;
-  position: static;
-  transform: none;
-  height: 2px;
-  content: '';
-  background: currentColor;
-  opacity: 0.35;
+  content: none !important;
 }
 
 /* states */
