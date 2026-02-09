@@ -380,6 +380,17 @@ button {
   font-weight: var(--fw-btn);
 }
 
+button,
+.btn,
+.button,
+.topbar-button,
+.sidebar-toggle__button,
+.drive-btn--compact {
+  height: var(--btn-h);
+  border-radius: var(--btn-radius);
+  line-height: normal;
+}
+
 .btn,
 button.btn,
 a.btn {
