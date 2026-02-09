@@ -740,11 +740,17 @@ body.dark .avatar-circle {
   align-items: center;
   height: var(--h-btn);
   padding: 0 14px;
-  padding-left: 34px;
+  padding-left: 14px;
   border-radius: var(--btn-radius);
   border: none;
   background: transparent;
   box-shadow: none;
+}
+
+/* TEMP — hide filter icon (funnel) */
+.toolbar-filterSelect__icon,
+.toolbar-filterSelect__icon svg {
+  display: none;
 }
 
 /* CANONICAL: Projects toolbar filter pill
