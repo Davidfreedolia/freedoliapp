@@ -1749,15 +1749,15 @@ body.dark .drive-btn--compact.drive--on {
 .sidebar-collapse .sidebar-toggle__button {
   width: calc(100% - 24px);
   margin: 0;
-  border-radius: 12px;
-  background: rgba(0, 0, 0, 0.04) !important;
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
-  color: var(--nav-fg) !important;
+  border-radius: var(--radius-ui);
+  background: transparent;
+  border: none;
+  color: var(--nav-fg);
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  box-shadow: none !important;
+  gap: var(--btn-gap);
+  padding: 0 var(--btn-pad-x);
+  box-shadow: none;
   justify-content: flex-start;
 }
 
@@ -1765,43 +1765,52 @@ body.dark .drive-btn--compact.drive--on {
   color: var(--collapse-icon) !important;
   stroke: currentColor !important;
   fill: none;
-  transform: rotate(180deg);
 }
 
 body.dark .sidebar-collapse .sidebar-toggle__button {
-  background: rgba(255, 255, 255, 0.06) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  color: var(--nav-fg) !important;
+  background: transparent;
+  border: none;
+  color: var(--nav-fg);
 }
 
 .sidebar-toggle__button {
-  width: 44px;
+  --btn-secondary-bg: transparent;
+  --btn-secondary-border: transparent;
+  --btn-secondary-fg: var(--nav-fg);
+  --btn-shadow: none;
+  --focus-ring: none;
+  --btn-pad-x: 10px;
+  --btn-gap: 8px;
+  width: 100%;
   height: 44px;
   min-width: 44px;
   min-height: 44px;
-  border-radius: 999px;
-  padding: 0;
-  background: var(--cta-2) !important;
-  border: none !important;
-  color: var(--cta-2-fg);
+  border-radius: var(--radius-ui);
+  padding: 0 var(--btn-pad-x);
+  background: transparent;
+  border: none;
+  color: var(--nav-fg);
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .sidebar-toggle__button:focus-visible {
 }
 
 .sidebar-toggle__button:hover {
-  filter: brightness(1.03);
+  background: var(--nav-highlight);
 }
 
 .sidebar-toggle__icon {
-  color: var(--collapse-icon);
+  color: var(--coral-1);
   stroke: currentColor;
   fill: none;
   stroke-width: 3;
-  transition: transform 0.2s ease;
+  transition: transform 0.15s ease;
+}
+
+.sidebar-toggle__button[aria-label="Expand sidebar"] .sidebar-toggle__icon {
   transform: rotate(180deg);
 }
 
