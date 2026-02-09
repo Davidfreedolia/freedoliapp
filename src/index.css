@@ -2640,6 +2640,16 @@ body.dark .page-dashboard .dash-stat-value {
   text-decoration: underline;
 }
 
+/* Dashboard orders — disable clickable wrapper chrome */
+.page-dashboard .tracking-list > div[style*="cursor: pointer"] {
+  cursor: default !important;
+}
+
+/* si també aplica hover background via inline/JS, neutralitza visual */
+.page-dashboard .tracking-list > div[style*="cursor: pointer"]:hover {
+  background: transparent !important;
+}
+
 .page-dashboard .dashboard-link {
   background: none;
   border: none;
