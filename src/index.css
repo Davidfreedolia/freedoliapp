@@ -799,17 +799,21 @@ body.dark .avatar-circle {
   border-color: color-mix(in srgb, var(--border-1) 70%, transparent);
 }
 
-/* Canonical radius */
-input,
-select,
-textarea,
-.button,
-.btn,
-.topbar-button,
+/* Canonical radius — FORMS + FILTERS only */
 .toolbar-filterSelect,
 .toolbar-filterSelect input,
-.toolbar-filterSelect select {
+.toolbar-filterSelect select,
+input[type="text"],
+input[type="search"],
+select,
+textarea {
   border-radius: var(--radius-ui);
+}
+
+.toolbar .btn-icon,
+.toolbar .icon-button,
+.toolbar [class*="icon"] button {
+  border-radius: 10px;
 }
 
 body.dark .toolbar-filterSelect {
