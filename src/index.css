@@ -2723,3 +2723,9 @@ svg[class*="lucide-star"] {
 .chip {
   border-radius: var(--radius-ui) !important;
 }
+
+.btn-icon.btn-ghost[aria-label="Configuració"],
+.btn-icon.btn-ghost[aria-label="Configuracion"],
+.btn-icon.btn-ghost[aria-label="Settings"]{
+  --color-muted: var(--topbar-fg);
+}
