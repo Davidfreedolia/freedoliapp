@@ -16,6 +16,8 @@ import {
   Warehouse,
   Plus,
   Package,
+  FileText,
+  Factory,
   TrendingUp,
   LineChart,
   BarChart3,
@@ -23,6 +25,7 @@ import {
   Sun,
   Moon,
   Bell,
+  Rocket,
   Settings,
   Barcode,
   AlertTriangle,
@@ -675,6 +678,32 @@ export default function Dashboard() {
                                 {order.po_number}
                               </button>
                             </div>
+                          </div>
+                          <div className="order-timeline">
+                            {[
+                              { key: 'project', Icon: Package },
+                              { key: 'po', Icon: FileText },
+                              { key: 'production', Icon: Factory },
+                              { key: 'shipping', Icon: Truck },
+                              { key: 'launch', Icon: Rocket },
+                            ].map((step, idx) => {
+                              const status =
+                                idx < order.current_step_index
+                                  ? 'is-done'
+                                  : idx === order.current_step_index
+                                  ? 'is-current'
+                                  : 'is-pending'
+
+                              return (
+                                <span
+                                  key={step.key}
+                                  className={`order-step ${status}`}
+                                  title={step.key}
+                                >
+                                  <step.Icon className="order-step__icon" />
+                                </span>
+                              )
+                            })}
                           </div>
                         </div>
                       </div>
