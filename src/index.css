@@ -740,9 +740,14 @@ body.dark .avatar-circle {
   height: var(--h-btn);
   padding: 0 14px;
   border-radius: var(--btn-radius);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background: #fff;
+  border: none;
+  background: transparent;
   box-shadow: none;
+}
+
+.toolbar-filterSelect::before,
+.toolbar-filterSelect::after {
+  content: none;
 }
 
 .toolbar-filterSelect__icon {
@@ -761,12 +766,37 @@ body.dark .avatar-circle {
 .toolbar-filterSelect select {
   height: 100%;
   padding-left: 36px;
-  border: none;
+  border: 1px solid var(--border-1);
   outline: none;
   background: transparent;
   color: var(--btn-secondary-fg);
   font-size: 14px;
   cursor: pointer;
+}
+
+.toolbar-filterSelect input {
+  border: 1px solid var(--border-1);
+  box-shadow: none;
+  outline: none;
+}
+
+.toolbar-filterSelect input:focus,
+.toolbar-filterSelect select:focus {
+  border-color: var(--border-1);
+  box-shadow: none;
+  outline: none;
+}
+
+.toolbar-filterSelect:focus,
+.toolbar-filterSelect:focus-within {
+  border-color: var(--border-1);
+  box-shadow: none;
+  outline: none;
+}
+
+.toolbar-filterSelect input:hover,
+.toolbar-filterSelect select:hover {
+  border-color: color-mix(in srgb, var(--border-1) 70%, transparent);
 }
 
 body.dark .toolbar-filterSelect {
