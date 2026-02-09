@@ -126,9 +126,13 @@
   --nav-highlight-strong: rgba(255, 255, 255, 0.10);
 
   /* Layout surfaces */
-  --topbar-bg: color-mix(in srgb, var(--surface-bg) 88%, transparent);
-  --topbar-border: none;
+  --topbar-bg: #ffffff;
+  --topbar-border: 1px solid var(--border-1);
   --topbar-shadow: none;
+  --topbar-blur: blur(12px);
+  --info-1: var(--cta-1);
+  --help-icon: var(--info-1);
+  --collapse-icon: var(--coral-1);
   --topbar-text: var(--nav-fg);
   --topbar-h: 64px;
   --topbar-fg: var(--text-1);
@@ -318,9 +322,13 @@ body.dark {
   --nav-highlight-strong: rgba(255, 255, 255, 0.10);
 
   /* Layout surfaces - Dark Mode */
-  --topbar-bg: color-mix(in srgb, var(--surface-bg) 78%, transparent);
-  --topbar-border: none;
+  --topbar-bg: #ffffff;
+  --topbar-border: 1px solid var(--border-1);
   --topbar-shadow: none;
+  --topbar-blur: blur(12px);
+  --info-1: var(--cta-1);
+  --help-icon: var(--info-1);
+  --collapse-icon: var(--coral-1);
   --topbar-text: var(--nav-fg);
   --topbar-h: 64px;
   --topbar-fg: var(--text-1);
@@ -499,8 +507,8 @@ main {
   height: var(--topbar-h);
   padding: 0 24px;
   color: var(--topbar-fg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: var(--topbar-blur);
+  -webkit-backdrop-filter: var(--topbar-blur);
   background: var(--topbar-bg);
   border: var(--topbar-border);
   box-shadow: var(--topbar-shadow);
@@ -530,7 +538,17 @@ body.dark .topbar {
 
 /* Topbar help: icon only + blue */
 .topbar .topbar-help {
-  color: var(--brand-blue);
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  height: auto;
+  min-height: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--help-icon) !important;
+  box-shadow: none !important;
 }
 
 .topbar .topbar-help span {
@@ -540,8 +558,12 @@ body.dark .topbar {
 .topbar .topbar-help svg {
   width: 18px;
   height: 18px;
-  fill: currentColor;
   stroke: currentColor;
+  fill: none;
+}
+
+.topbar .topbar-help:hover {
+  opacity: 0.85;
 }
 
 /* Topbar notes: compact post-it */
@@ -1744,8 +1766,9 @@ body.dark .drive-btn--compact.drive--on {
 }
 
 .sidebar-collapse .sidebar-toggle__icon {
-  color: var(--nav-fg) !important;
-  stroke: var(--nav-fg) !important;
+  color: var(--collapse-icon) !important;
+  stroke: currentColor !important;
+  fill: none;
   transform: rotate(180deg);
 }
 
@@ -1778,8 +1801,9 @@ body.dark .sidebar-collapse .sidebar-toggle__button {
 }
 
 .sidebar-toggle__icon {
-  color: var(--cta-2-fg);
-  stroke: var(--cta-2-fg);
+  color: var(--collapse-icon);
+  stroke: currentColor;
+  fill: none;
   stroke-width: 3;
   transition: transform 0.2s ease;
   transform: rotate(180deg);
