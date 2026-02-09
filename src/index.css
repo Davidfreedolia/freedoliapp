@@ -2637,3 +2637,11 @@ svg[class*="lucide-star"] {
   height: 10px !important;
   opacity: 0.55 !important;
 }
+
+/* L9 — Tags: square-ish with global radius */
+.badge,
+.tag,
+.pill,
+.chip {
+  border-radius: var(--radius-ui) !important;
+}
