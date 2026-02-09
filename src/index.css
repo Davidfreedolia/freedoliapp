@@ -2576,6 +2576,7 @@ body.dark .page-dashboard .dash-stat-value {
 
 /* Dashboard — Order timeline (canonical) */
 .order-timeline {
+  width: 100%;
   display: flex;
   align-items: center;
   gap: 0;
@@ -2590,6 +2591,7 @@ body.dark .page-dashboard .dash-stat-value {
   width: 22px;
   height: 22px;
   color: var(--muted-1);
+  flex: 0 0 auto;
 }
 
 .order-step__icon {
@@ -2600,15 +2602,16 @@ body.dark .page-dashboard .dash-stat-value {
 
 /* connector line */
 .order-step:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  left: 100%;
-  top: 50%;
-  width: 48px;
+  width: auto;
+  flex: 1 1 auto;
+  min-width: 28px;
+  margin: 0 10px;
+  position: static;
+  transform: none;
   height: 2px;
+  content: '';
   background: currentColor;
   opacity: 0.35;
-  transform: translateY(-50%);
 }
 
 /* states */
