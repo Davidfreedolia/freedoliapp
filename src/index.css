@@ -118,8 +118,8 @@
 
   /* Nav palette (LIGHT) — sidebar dark needs light text */
   --nav-bg: #121212;
-  --nav-fg: rgba(255,255,255,.92);
-  --nav-fg-muted: rgba(255,255,255,.65);
+  --nav-fg: #F6F8F3;
+  --nav-fg-muted: #C9D1D3;
   --nav-icon: var(--coral-1);
   --nav-highlight: rgba(255, 255, 255, 0.06);
   --nav-highlight-strong: rgba(255, 255, 255, 0.10);
@@ -309,8 +309,8 @@ body.dark {
 
   /* Nav palette - Dark Mode */
   --nav-bg: #121212;
-  --nav-fg: rgba(234, 242, 241, 0.92);
-  --nav-fg-muted: var(--muted-1);
+  --nav-fg: #EAF2F1;
+  --nav-fg-muted: #B6C1C1;
   --nav-icon: var(--coral-1);
   --nav-highlight: rgba(255, 255, 255, 0.06);
   --nav-highlight-strong: rgba(255, 255, 255, 0.10);
