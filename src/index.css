@@ -748,8 +748,7 @@ body.dark .avatar-circle {
 }
 
 /* TEMP — hide filter icon (funnel) */
-.toolbar-filterSelect__icon,
-.toolbar-filterSelect__icon svg {
+.toolbar-filterSelect__icon {
   display: none;
 }
 
