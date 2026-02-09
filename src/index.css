@@ -738,7 +738,8 @@ body.dark .avatar-circle {
   display: inline-flex;
   align-items: center;
   height: var(--h-btn);
-  padding: 0 14px;
+  padding-left: 34px;
+  padding-right: 14px;
   border-radius: var(--btn-radius);
   border: none;
   background: transparent;
@@ -758,7 +759,7 @@ body.dark .avatar-circle {
 
 .toolbar-filterSelect .toolbar-filterSelect__icon svg {
   position: absolute;
-  left: 10px;
+  left: 12px;
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
@@ -779,7 +780,7 @@ body.dark .avatar-circle {
 
 .toolbar-filterSelect svg + .toolbar-filterSelect select {
   height: 100%;
-  padding-left: 32px;
+  padding-left: 0;
   border: 1px solid var(--border-1);
   outline: none;
   background: transparent;
