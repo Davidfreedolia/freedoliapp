@@ -712,11 +712,6 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {dashboardWidgets.logistics_tracking && (
-                <div className="dash-merged-subsection">
-                  <LogisticsTrackingWidget darkMode={darkMode} embedded hideHeader />
-                </div>
-              )}
             </div>
           </SafeWidget>
         )}
