@@ -745,12 +745,18 @@ body.dark .avatar-circle {
   box-shadow: none;
 }
 
+/* CANONICAL: Projects toolbar filter pill
+   - icon INSIDE pill (absolute)
+   - select padding-left compensat
+   - si toques radius/padding globals, revisa aquest bloc
+   DO NOT refactor to generic selectors
+*/
 .toolbar-filterSelect::before,
 .toolbar-filterSelect::after {
   content: none;
 }
 
-.toolbar-filterSelect svg {
+.toolbar-filterSelect .toolbar-filterSelect__icon svg {
   position: absolute;
   left: 12px;
   top: 50%;
@@ -771,7 +777,7 @@ body.dark .avatar-circle {
   display: block;
 }
 
-.toolbar-filterSelect select {
+.toolbar-filterSelect svg + .toolbar-filterSelect select {
   height: 100%;
   padding-left: 40px;
   border: 1px solid var(--border-1);
