@@ -733,13 +733,14 @@ body.dark .avatar-circle {
   cursor: pointer;
 }
 
+/* CANONICAL — toolbar filter pill (wrapper owns spacing) */
 .toolbar-filterSelect {
   position: relative;
   display: inline-flex;
   align-items: center;
   height: var(--h-btn);
+  padding: 0 14px;
   padding-left: 34px;
-  padding-right: 14px;
   border-radius: var(--btn-radius);
   border: none;
   background: transparent;
