@@ -127,7 +127,7 @@
 
   /* Layout surfaces */
   --topbar-bg: #ffffff;
-  --topbar-border: 1px solid var(--border-1);
+  --topbar-border: none;
   --topbar-shadow: none;
   --topbar-blur: blur(12px);
   --info-1: var(--cta-1);
@@ -322,8 +322,8 @@ body.dark {
   --nav-highlight-strong: rgba(255, 255, 255, 0.10);
 
   /* Layout surfaces - Dark Mode */
-  --topbar-bg: #ffffff;
-  --topbar-border: 1px solid var(--border-1);
+  --topbar-bg: color-mix(in srgb, var(--surface-bg) 88%, transparent);
+  --topbar-border: none;
   --topbar-shadow: none;
   --topbar-blur: blur(12px);
   --info-1: var(--cta-1);
