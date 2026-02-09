@@ -140,7 +140,7 @@
   --sidebar-text: var(--nav-fg);
   --sidebar-text-muted: var(--nav-fg-muted);
   --sidebar-border: var(--border-1);
-  --sidebar-shadow: 10px 0 28px rgba(0, 0, 0, 0.35), 0 0 26px var(--brand-primary-soft), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --sidebar-shadow: none;
   --sidebar-edge: 1px solid var(--border-1);
   
   /* Soft Color Variants - For non-destructive actions */
@@ -332,7 +332,7 @@ body.dark {
   --sidebar-text: var(--nav-fg);
   --sidebar-text-muted: var(--nav-fg-muted);
   --sidebar-border: var(--border-1);
-  --sidebar-shadow: 10px 0 28px rgba(0, 0, 0, 0.35);
+  --sidebar-shadow: none;
   --sidebar-edge: 1px solid var(--border-1);
 
   /* Button system - Dark Mode */
@@ -1711,14 +1711,12 @@ body.dark .sidebar-collapse .sidebar-toggle__button {
   background: var(--cta-2) !important;
   border: none !important;
   color: var(--cta-2-fg);
-  box-shadow: var(--btn-shadow);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .sidebar-toggle__button:focus-visible {
-  box-shadow: var(--btn-shadow), var(--focus-ring-offset);
 }
 
 .sidebar-toggle__button:hover {
