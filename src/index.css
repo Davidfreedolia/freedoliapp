@@ -1590,7 +1590,6 @@ body.dark .drive-btn--compact.drive--on {
 /* Sidebar text: sempre llegible */
 .sidebar-scroll a,
 .sidebar-scroll a span {
-  opacity: 1 !important;
   color: var(--nav-fg) !important;
   font-weight: 500;
 }
@@ -1598,7 +1597,6 @@ body.dark .drive-btn--compact.drive--on {
 /* Icones sidebar: corporatives */
 .sidebar-scroll a svg {
   color: var(--nav-icon) !important;
-  opacity: 1 !important;
 }
 
 /* Active/hover: una mica més de contrast */
