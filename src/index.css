@@ -542,6 +542,7 @@ body.dark .topbar {
   border: none !important;
   padding: 0 !important;
   border-radius: 0 !important;
+  min-width: 0;
   height: auto;
   min-height: 0;
   display: inline-flex;
@@ -551,7 +552,7 @@ body.dark .topbar {
   box-shadow: none !important;
 }
 
-.topbar .topbar-help span {
+.topbar .topbar-help > span {
   display: none;
 }
 
