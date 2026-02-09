@@ -637,31 +637,49 @@ export default function Dashboard() {
                 </div>
               ) : (
                 <div style={styles.ordersList}>
-                  {ordersInProgress.map(order => (
-                    <div
-                      key={order.id}
-                      style={styles.orderItem}
-                    >
-                      <div style={styles.orderInfo}>
-                        <div className="dashboard-order-row">
-                          <button
-                            type="button"
-                            className="dashboard-link"
-                            onClick={() => navigate(`/projects/${order.project_id}`)}
-                          >
-                            [{order.project?.project_code || 'PR'}] {order.project?.name || t('dashboard.noProject')}
-                          </button>
-                          <button
-                            type="button"
-                            className="dashboard-link"
-                            onClick={() => navigate(`/orders/${order.id}`)}
-                          >
-                            {order.po_number}
-                          </button>
+                  {ordersInProgress.map(order => {
+                    const projectName = order.project?.name || order.project_name || t('dashboard.noProject')
+                    const thumbnailUrl = order.asin_image_url || order.image_url
+
+                    return (
+                      <div
+                        key={order.id}
+                        style={styles.orderItem}
+                      >
+                        <div style={styles.orderInfo}>
+                          <div className="dashboard-order-row">
+                            <div className="order-thumb">
+                              {thumbnailUrl ? (
+                                <img
+                                  src={thumbnailUrl}
+                                  alt={projectName}
+                                  loading="lazy"
+                                />
+                              ) : (
+                                <div className="order-thumb__placeholder" aria-hidden />
+                              )}
+                            </div>
+                            <div className="order-content">
+                              <button
+                                type="button"
+                                className="dashboard-link"
+                                onClick={() => navigate(`/projects/${order.project_id}`)}
+                              >
+                                [{order.project?.project_code || 'PR'}] {order.project?.name || t('dashboard.noProject')}
+                              </button>
+                              <button
+                                type="button"
+                                className="dashboard-link"
+                                onClick={() => navigate(`/orders/${order.id}`)}
+                              >
+                                {order.po_number}
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
 

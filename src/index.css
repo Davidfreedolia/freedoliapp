@@ -2543,6 +2543,37 @@ body.dark .page-dashboard .dash-stat-value {
   flex-wrap: wrap;
 }
 
+.page-dashboard .order-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Dashboard — order ASIN thumbnail */
+.order-thumb {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface-bg-2);
+  border: 1px solid var(--border-1);
+}
+
+.order-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.order-thumb__placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--surface-bg-2), var(--surface-bg));
+}
+
 .page-dashboard .dashboard-link {
   background: none;
   border: none;
