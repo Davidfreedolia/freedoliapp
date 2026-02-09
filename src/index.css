@@ -2284,9 +2284,10 @@ body.dark .fd-calendar-asana .rbc-day-slot .rbc-time-slot:hover {
   stroke: currentColor !important;
 }
 
-/* Dashboard — force Orders widget header icon coral (SVG uses currentColor from H2) */
-.page-dashboard h2:has(.dash-widget-icon--orders) {
+/* Dashboard — Orders widget header icon (icon only) */
+.page-dashboard .dash-widget-icon--orders {
   color: var(--coral-1) !important;
+  stroke: var(--coral-1) !important;
 }
 
 /* DASHBOARD — Comandes en curs: jerarquia + timeline llegible */
