@@ -957,7 +957,7 @@ body.dark .drive-btn--compact.drive--on {
 .drive-btn__title,
 .drive-btn__sub,
 .drive-btn__cta {
-  color: var(--nav-fg) !important;
+  color: inherit !important;
 }
 
 @media (max-width: 480px) {
