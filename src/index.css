@@ -538,18 +538,11 @@ body.dark .topbar {
 
 /* Topbar help: icon only + blue */
 .topbar .topbar-help {
-  background: transparent !important;
-  border: none !important;
-  padding: 0 !important;
-  border-radius: 0 !important;
-  min-width: 0;
-  height: auto;
-  min-height: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--help-icon) !important;
-  box-shadow: none !important;
+  --btn-ghost-bg: transparent;
+  --btn-ghost-border: transparent;
+  --btn-shadow: none;
+  --btn-ghost-fg: var(--help-icon);
+  --btn-pad-x: 0px;
 }
 
 .topbar .topbar-help > span {
@@ -561,12 +554,6 @@ body.dark .topbar {
   height: 18px;
   stroke: currentColor;
   fill: none;
-}
-
-.topbar .topbar-help svg,
-.topbar .topbar-help svg * {
-  stroke: currentColor !important;
-  fill: none !important;
 }
 
 .topbar .topbar-help:hover {
