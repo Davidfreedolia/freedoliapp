@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { X, Loader, FolderPlus, Hash, Tag } from 'lucide-react'
@@ -24,9 +24,14 @@ export default function NewProjectModal({ isOpen, onClose }) {
   const { refreshProjects, driveConnected } = useApp()
   const navigate = useNavigate()
   const { t } = useTranslation()
+  const reportInputRef = useRef(null)
   const [loading, setLoading] = useState(false)
   const [creatingFolders, setCreatingFolders] = useState(false)
   const [generatingCode, setGeneratingCode] = useState(false)
+  const [createMode, setCreateMode] = useState('asin')
+  const [asinOrUrl, setAsinOrUrl] = useState('')
+  const [reportFile, setReportFile] = useState(null)
+  const [reportParsed, setReportParsed] = useState({ asin: '', title: '', thumb_url: '' })
   const [projectCodes, setProjectCodes] = useState({ projectCode: '', sku: '' })
   const [formData, setFormData] = useState({
     name: '',
@@ -53,9 +58,46 @@ export default function NewProjectModal({ isOpen, onClose }) {
 
   if (!isOpen) return null
 
+  const extractAsin = (value) => {
+    const v = (value || '').trim()
+    if (!v) return ''
+    if (/^[A-Z0-9]{10}$/i.test(v)) return v.toUpperCase()
+    const m = v.match(/(?:\/dp\/|\/gp\/product\/)([A-Z0-9]{10})/i)
+    return m?.[1]?.toUpperCase() || ''
+  }
+
+  const parseReport = (text) => {
+    const getLine = (prefix) => {
+      const re = new RegExp(`^${prefix}\\s*:\\s*(.*)$`, 'mi')
+      const m = text.match(re)
+      return m ? (m[1] || '').trim() : ''
+    }
+    return {
+      asin: getLine('asin'),
+      title: getLine('title'),
+      thumb_url: getLine('thumb_url')
+    }
+  }
+
+  const handleReportFile = async (file) => {
+    try {
+      const text = await file.text()
+      const parsed = parseReport(text)
+      setReportParsed(parsed)
+      setReportFile(file)
+    } catch {
+      setReportParsed({ asin: '', title: '', thumb_url: '' })
+      setReportFile(null)
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!formData.name.trim()) return
+    const finalAsin = createMode === 'report' ? (reportParsed?.asin || '').trim() : extractAsin(asinOrUrl)
+    if (!finalAsin) return
+    const finalName = formData.name.trim()
+      || (createMode === 'report' ? (reportParsed?.title || '').trim() : '')
+      || finalAsin
     if (!projectCodes.projectCode) {
       showToast('Error: No s\'ha pogut generar el codi de projecte', 'error')
       return
@@ -67,7 +109,7 @@ export default function NewProjectModal({ isOpen, onClose }) {
       const newProject = await createProject({
         project_code: projectCodes.projectCode,  // PR-FRDL250001
         sku: projectCodes.sku,                    // FRDL250001
-        name: formData.name.trim(),
+        name: finalName,
         description: formData.description.trim() || null,
         current_phase: 1,
         status: 'active',
@@ -125,6 +167,10 @@ export default function NewProjectModal({ isOpen, onClose }) {
   const handleClose = () => {
     setFormData({ name: '', description: '' })
     setProjectCodes({ projectCode: '', sku: '' })
+    setCreateMode('asin')
+    setAsinOrUrl('')
+    setReportFile(null)
+    setReportParsed({ asin: '', title: '', thumb_url: '' })
     onClose()
   }
 
@@ -141,6 +187,86 @@ export default function NewProjectModal({ isOpen, onClose }) {
         </div>
 
         <form onSubmit={handleSubmit} className="fd-modal__body">
+          <div className="fd-modal__segment">
+            <button
+              type="button"
+              className={`fd-modal__segment-btn ${createMode === 'asin' ? 'is-active' : ''}`}
+              onClick={() => setCreateMode('asin')}
+            >
+              ASIN / URL
+            </button>
+            <button
+              type="button"
+              className={`fd-modal__segment-btn ${createMode === 'report' ? 'is-active' : ''}`}
+              onClick={() => setCreateMode('report')}
+            >
+              Informe .md
+            </button>
+          </div>
+
+          {createMode === 'asin' ? (
+            <div className="fd-modal__mode">
+              <div className="fd-field">
+                <label className="fd-field__label">ASIN o URL</label>
+                <input
+                  type="text"
+                  value={asinOrUrl}
+                  onChange={(e) => setAsinOrUrl(e.target.value)}
+                  placeholder="B0XXXXXXXX o https://www.amazon.../dp/B0XXXXXXXX"
+                  className="fd-field__input"
+                />
+              </div>
+              <div className="fd-field">
+                <label className="fd-field__label">{t('projects.projectName')}</label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={e => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="Nom del projecte (opcional)"
+                  className="fd-field__input"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="fd-modal__mode">
+              <input
+                ref={reportInputRef}
+                type="file"
+                accept=".md"
+                className="fd-modal__file"
+                onChange={(e) => {
+                  const f = e.target.files?.[0]
+                  if (f) handleReportFile(f)
+                  e.target.value = ''
+                }}
+              />
+              <button
+                type="button"
+                className="fd-modal__dropzone"
+                onClick={() => reportInputRef.current?.click()}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault()
+                  const f = e.dataTransfer.files?.[0]
+                  if (f) handleReportFile(f)
+                }}
+              >
+                <span>Arrossega l’informe .md aquí o fes clic</span>
+              </button>
+              {reportFile && reportParsed.asin && (
+                <div className="fd-modal__preview">
+                  <div className="fd-modal__preview-meta">
+                    <div className="fd-modal__preview-asin">{reportParsed.asin}</div>
+                    <div className="fd-modal__preview-title">{reportParsed.title || '—'}</div>
+                  </div>
+                  {reportParsed.thumb_url ? (
+                    <img className="fd-modal__preview-img" src={reportParsed.thumb_url} alt="" />
+                  ) : null}
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="fd-modal__codes">
             <div className="fd-modal__code-row">
               <div className="fd-modal__code-item">
@@ -173,21 +299,6 @@ export default function NewProjectModal({ isOpen, onClose }) {
             <p className="fd-modal__hint">
               ℹ️ {t('projects.codesAutoGenerated')}
             </p>
-          </div>
-
-          <div className="fd-field">
-            <label className="fd-field__label">
-              {t('projects.projectName')} *
-            </label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={e => setFormData({...formData, name: e.target.value})}
-              placeholder="Ex: Velvet Hangers Set"
-              className="fd-field__input"
-              required
-              autoFocus
-            />
           </div>
 
           <div className="fd-field">
@@ -242,7 +353,12 @@ export default function NewProjectModal({ isOpen, onClose }) {
               variant="primary"
               size="sm"
               type="submit"
-              disabled={loading || generatingCode || !projectCodes.projectCode}
+              disabled={
+                loading ||
+                generatingCode ||
+                !projectCodes.projectCode ||
+                (createMode === 'asin' ? !extractAsin(asinOrUrl) : !reportFile || !reportParsed.asin)
+              }
             >
               {loading ? (
                 <>
