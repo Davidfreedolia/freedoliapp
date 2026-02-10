@@ -25,7 +25,6 @@ import {
   Loader2,
   Image,
   Info,
-  Calendar,
   Receipt,
   DollarSign,
   FileImage,
@@ -54,15 +53,12 @@ import Button from '../components/Button'
 const IdentifiersSection = lazy(() => import('../components/IdentifiersSection'))
 const ProfitabilityCalculator = lazy(() => import('../components/ProfitabilityCalculator'))
 const QuickSupplierPriceEstimate = lazy(() => import('../components/QuickSupplierPriceEstimate'))
-const TasksSection = lazy(() => import('../components/TasksSection'))
 const QuotesSection = lazy(() => import('../components/QuotesSection'))
 const DecisionLog = lazy(() => import('../components/DecisionLog'))
 const AmazonReadinessBadge = lazy(() => import('../components/AmazonReadinessBadge'))
-const ProjectEventsTimeline = lazy(() => import('../components/ProjectEventsTimeline'))
 const CompetitiveAsinSection = lazy(() => import('../components/CompetitiveAsinSection'))
 const ViabilityCalculator = lazy(() => import('../components/projects/ViabilityCalculator'))
 
-const PHASES = Object.values(PHASE_STYLES)
 const PHASE_GROUPS = [
   { label: 'DISCOVERY', phases: [1, 2] },
   { label: 'SOURCING', phases: [3, 4, 5] },
@@ -327,7 +323,6 @@ function ProjectDetailInner({ useApp }) {
   const [phaseProgress, setPhaseProgress] = useState({ completed: 0, total: 0, allOk: false })
   const [phaseBlockMessage, setPhaseBlockMessage] = useState(null)
   const [phaseBlockVisible, setPhaseBlockVisible] = useState(false)
-  const [nextGateState, setNextGateState] = useState({ loading: false, missing: [] })
   const [viabilitySnapshot, setViabilitySnapshot] = useState(null)
   const [createMenuOpen, setCreateMenuOpen] = useState(false)
   const [createModalType, setCreateModalType] = useState(null)
@@ -336,11 +331,6 @@ function ProjectDetailInner({ useApp }) {
   const [expenseCategories, setExpenseCategories] = useState([])
   const [showNotesPanel, setShowNotesPanel] = useState(false)
   const { notes, loading: notesLoading } = useNotes()
-  const [gate, setGate] = useState(null)
-  const [gateLoading, setGateLoading] = useState(true)
-  const [gateError, setGateError] = useState(null)
-  const [projectTasks, setProjectTasks] = useState([])
-  const [tasksLoading, setTasksLoading] = useState(false)
   const loadSeqRef = useRef(0)
   const mountedRef = useRef(false)
 
@@ -979,7 +969,6 @@ function ProjectDetailInner({ useApp }) {
   const phaseId = getPhaseIdFromProject(project)
   const currentPhase = getPhaseStyleForUI(phaseId)
   const phaseSurface = getPhaseSurfaceStyles(currentPhase, { darkMode, borderWidth: 2 })
-  const timelinePhases = PHASES.map(normalizePhaseStyle)
   const phaseWrapperStyle = {
     backgroundColor: 'transparent',
     border: 'none',
@@ -998,15 +987,6 @@ function ProjectDetailInner({ useApp }) {
     boxShadow: 'var(--shadow-soft)',
     ...phaseSurface.cardStyle
   }
-  const timelineCardBackground = phaseSurface?.hasPhaseStyle
-    ? phaseSurface.cardStyle.background
-    : (darkMode ? '#15151f' : '#ffffff')
-  const timelineCardBorderTop = phaseSurface?.hasPhaseStyle
-    ? `3px solid ${currentPhase.accent}`
-    : undefined
-  const timelineContentBackground = phaseSurface?.hasPhaseStyle
-    ? phaseSurface.contentStyle.background
-    : (darkMode ? '#0f0f15' : '#fafafa')
   const currentGroup = PHASE_GROUPS.find(group => group.phases.includes(phaseId))
   const phaseSubtitle = PHASE_WORKFLOW_COPY[phaseId] || currentPhase.description
   const phaseGroupLabel = currentGroup?.label || 'PHASE'
@@ -1055,127 +1035,7 @@ function ProjectDetailInner({ useApp }) {
       // ignore
     }
   }, [id])
-  const nextMissing = Array.isArray(nextGateState.missing) ? nextGateState.missing : []
-  const hasNextMissing = !nextGateState.loading && nextMissing.length > 0
-  const missingPreview = hasNextMissing ? nextMissing.slice(0, 3).join(' · ') : ''
-  const gateDone = gate?.blocking_done ?? 0
-  const gateTotal = gate?.blocking_total ?? 0
-  const gatePass = gate?.gate_pass === true
 
-  const refetchTasks = async () => {
-    if (!id || !phaseId) {
-      setProjectTasks([])
-      return
-    }
-    setTasksLoading(true)
-    try {
-      const supabaseModule = await import('../lib/supabase')
-      const supabaseClient = supabaseModule.default
-      const { data, error } = await supabaseClient
-        .from('project_tasks')
-        .select('id, title, status, blocking, type, position')
-        .eq('project_id', id)
-        .eq('phase', phaseId)
-        .order('position', { ascending: true })
-
-      if (error) {
-        setProjectTasks([])
-        return
-      }
-      setProjectTasks(Array.isArray(data) ? data : [])
-    } catch (err) {
-      setProjectTasks([])
-    } finally {
-      setTasksLoading(false)
-    }
-  }
-
-  const refetchGate = async () => {
-    if (!id || !phaseId) {
-      setGate(null)
-      setGateLoading(false)
-      setGateError(null)
-      return
-    }
-    setGateLoading(true)
-    setGateError(null)
-    try {
-      const supabaseModule = await import('../lib/supabase')
-      const supabaseClient = supabaseModule.default
-      const { data, error } = await supabaseClient
-        .from('v_project_phase_gate')
-        .select('gate_pass, blocking_total, blocking_done')
-        .eq('project_id', id)
-        .eq('phase', phaseId)
-        .maybeSingle()
-
-      if (error) {
-        setGate(null)
-        setGateLoading(false)
-        setGateError(error)
-        return
-      }
-
-      if (!data) {
-        setGate({ gate_pass: false, blocking_total: 0, blocking_done: 0 })
-        setGateLoading(false)
-        setGateError(null)
-        return
-      }
-
-      setGate(data)
-      setGateLoading(false)
-    } catch (err) {
-      setGate(null)
-      setGateLoading(false)
-      setGateError(err)
-    }
-  }
-
-  useEffect(() => {
-    let isMounted = true
-    const loadNextGate = async () => {
-      if (!project || !nextPhaseId) {
-        if (isMounted) setNextGateState({ loading: false, missing: [] })
-        return
-      }
-      setNextGateState(prev => ({ ...prev, loading: true }))
-      try {
-        const gatesModule = await import('../modules/projects/phaseGates')
-        const supabaseModule = await import('../lib/supabase')
-        const { validatePhaseTransition } = gatesModule
-        const supabaseClient = supabaseModule.default
-        if (validatePhaseTransition) {
-          const { missing } = await validatePhaseTransition({
-            projectId: id,
-            fromPhase: phaseId,
-            toPhase: nextPhaseId,
-            project,
-            supabaseClient
-          })
-          if (isMounted) {
-            setNextGateState({ loading: false, missing: missing || [] })
-          }
-        } else if (isMounted) {
-          setNextGateState({ loading: false, missing: [] })
-        }
-      } catch (err) {
-        if (isMounted) setNextGateState({ loading: false, missing: [] })
-      }
-    }
-    loadNextGate()
-    return () => {
-      isMounted = false
-    }
-  }, [project, id, phaseId, nextPhaseId])
-
-  useEffect(() => {
-    refetchGate()
-  }, [id, phaseId])
-
-  useEffect(() => {
-    refetchTasks()
-  }, [id, phaseId])
 
   if (loading) {
     return (
@@ -1276,11 +1136,12 @@ function ProjectDetailInner({ useApp }) {
               phaseStyle={currentPhase}
             >
               <div style={{
-                ...styles.timelineSection,
                 backgroundColor: 'transparent',
                 border: 'none',
                 padding: 0,
-                marginBottom: '24px'
+                marginBottom: '24px',
+                width: '100%',
+                boxSizing: 'border-box'
               }}>
                 <PhaseChecklist
                   project={project}
@@ -1667,22 +1528,12 @@ function ProjectDetailInner({ useApp }) {
       case 7:
         return (
           <CollapsibleSection
-            id="tasks-section"
-            title="Tasques i Notes"
+            title="Decision"
             icon={StickyNote}
             defaultOpen={false}
             darkMode={darkMode}
             phaseStyle={currentPhase}
           >
-            <div style={{ marginBottom: '24px' }}>
-              <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
-                <TasksSection 
-                  entityType="project" 
-                  entityId={id} 
-                  darkMode={darkMode} 
-                />
-              </Suspense>
-            </div>
             <div style={{
               marginBottom: '24px',
               padding: '20px',
@@ -1697,9 +1548,9 @@ function ProjectDetailInner({ useApp }) {
                 Decision
               </h4>
               <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
-                <DecisionLog 
-                  entityType="project" 
-                  entityId={id} 
+                <DecisionLog
+                  entityType="project"
+                  entityId={id}
                   darkMode={darkMode}
                   allowedDecisions={[
                     { value: 'go', label: 'GO', icon: CheckCircle2, color: '#4f46e5' },
@@ -2002,22 +1853,6 @@ function ProjectDetailInner({ useApp }) {
             }}
           >
             + Document
-          </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => {
-              const target = document.getElementById('tasks-section')
-              if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' })
-            }}
-            style={{
-              flex: isNarrowMobile ? '1 1 100%' : isMobile ? '1 1 calc(50% - 6px)' : '1 1 180px',
-              minWidth: isNarrowMobile ? '100%' : isMobile ? 0 : 180,
-              height: 40,
-              justifyContent: 'center'
-            }}
-          >
-            + Task
           </Button>
         </div>
 
@@ -2411,153 +2246,6 @@ function ProjectDetailInner({ useApp }) {
             </Button>
           </div>
 
-          <div style={{
-            marginBottom: '24px',
-            borderRadius: 'var(--radius-md)',
-            border: 'none',
-            borderTop: timelineCardBorderTop,
-            background: timelineCardBackground,
-            boxShadow: 'var(--shadow-soft)',
-            overflow: 'visible',
-            width: '100%',
-            flex: '1 1 auto',
-            minWidth: 0
-          }}>
-            <div style={{
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '16px 20px',
-              backgroundColor: 'transparent',
-              border: 'none',
-              textAlign: 'left'
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                flex: 1
-              }}>
-                <Calendar 
-                  size={20} 
-                  color={darkMode ? '#9ca3af' : '#6b7280'}
-                  style={{ flexShrink: 0 }}
-                />
-                <h3 style={{
-                  margin: 0,
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  color: darkMode ? '#ffffff' : '#111827'
-                }}>
-                  Timeline
-                </h3>
-              </div>
-            </div>
-
-            <div style={{
-              padding: '20px',
-              borderTop: `1px solid var(--border-color)`,
-              background: timelineContentBackground,
-              width: '100%',
-              boxSizing: 'border-box',
-              minWidth: 0,
-              overflow: 'visible'
-            }}>
-              <div style={{ width: '100%', minWidth: 0, flex: '1 1 auto' }}>
-                <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
-                  <ProjectEventsTimeline 
-                    projectId={id}
-                    projectStatus={project?.status}
-                    darkMode={darkMode}
-                    phaseStyle={currentPhase}
-                  />
-                </Suspense>
-              </div>
-              <div style={{ marginTop: '12px' }}>
-                {gateLoading && (
-                  <div>Comprovant gate…</div>
-                )}
-                {gateError && (
-                  <div>Error comprovant gate</div>
-                )}
-                {!gateLoading && !gateError && !gatePass && (
-                  <div>
-                    ❌ No pots avançar: hi ha tasques obligatòries pendents. ({gateDone}/{gateTotal})
-                  </div>
-                )}
-                {gatePass && nextPhaseId && (
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    style={styles.phaseCta}
-                    onClick={() => handlePhaseChange(nextPhaseId)}
-                  >
-                    Avançar fase
-                  </Button>
-                )}
-                <div style={{ marginTop: '16px' }}>
-                  <div style={{
-                    margin: '0 0 12px 0',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: darkMode ? '#ffffff' : '#111827'
-                  }}>
-                    Tasks
-                  </div>
-                  {tasksLoading && (
-                    <div style={{ fontSize: '13px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
-                      Carregant tasks...
-                    </div>
-                  )}
-                  {!tasksLoading && projectTasks.length === 0 && (
-                    <div style={{ fontSize: '13px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
-                      No hi ha tasks.
-                    </div>
-                  )}
-                  {!tasksLoading && projectTasks.length > 0 && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      {projectTasks.map(task => (
-                        <label key={task.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
-                          <input
-                            type="checkbox"
-                            checked={task.status === 'done'}
-                            onChange={async () => {
-                              try {
-                                const supabaseModule = await import('../lib/supabase')
-                                const supabaseClient = supabaseModule.default
-                                const nextStatus = task.status === 'done' ? 'pending' : 'done'
-                                await supabaseClient
-                                  .from('project_tasks')
-                                  .update({ status: nextStatus })
-                                  .eq('id', task.id)
-                                await Promise.all([refetchTasks(), refetchGate()])
-                              } catch (err) {
-                              }
-                            }}
-                          />
-                          <span style={{ color: darkMode ? '#e5e7eb' : '#111827' }}>
-                            {task.title}
-                          </span>
-                          {task.blocking && (
-                            <span style={{
-                              fontSize: '11px',
-                              padding: '2px 6px',
-                              borderRadius: '999px',
-                              border: '1px solid #f59e0b',
-                              color: '#f59e0b'
-                            }}>
-                              Required
-                            </span>
-                          )}
-                        </label>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
 
         <PhaseSection
           phaseId={1}
@@ -2830,10 +2518,6 @@ const styles = {
     boxShadow: 'var(--shadow-soft)',
     marginBottom: '24px'
   },
-  phaseTimelineSticky: {
-    display: 'flex',
-    alignItems: 'center'
-  },
   phaseCurrentBar: {
     display: 'flex',
     flexDirection: 'column',
@@ -3097,16 +2781,6 @@ const styles = {
     borderRadius: '6px',
     color: '#6b7280'
   },
-  timelineSection: {
-    padding: '24px',
-    borderRadius: '16px',
-    border: 'none',
-    boxShadow: 'var(--shadow-soft)',
-    backgroundColor: 'var(--surface-bg)',
-    marginBottom: '24px',
-    width: '100%',
-    boxSizing: 'border-box'
-  },
   phaseWorkspaceHeader: {
     display: 'flex',
     justifyContent: 'space-between',
@@ -3153,13 +2827,6 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '10px'
-  },
-  timeline: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    position: 'relative',
-    marginBottom: '24px'
   },
   phaseGroupsWrapper: {
     display: 'flex',
@@ -3225,14 +2892,6 @@ const styles = {
     fontSize: '18px',
     lineHeight: 1
   },
-  timelineItem: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '8px',
-    position: 'relative',
-    flex: 1
-  },
   phaseButton: {
     width: '48px',
     height: '48px',
@@ -3248,13 +2907,6 @@ const styles = {
   phaseName: {
     fontSize: '12px',
     textAlign: 'center'
-  },
-  timelineConnector: {
-    position: 'absolute',
-    top: '24px',
-    left: '50%',
-    width: '100%',
-    height: '2px'
   },
   currentPhaseInfo: {
     padding: '16px 20px',
