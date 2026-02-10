@@ -447,6 +447,16 @@ function ProjectDetailInner({ useApp }) {
     return ['demand', 'competition', 'simple', 'improvable'].every((k) => hasEvidence(k))
   }, [researchEvidence])
 
+  const researchDriveFolderId = useMemo(() => {
+    if (!driveConnected || !projectFolders) return null
+    const folderKey = PHASE_FOLDER_MAP[1]
+    return (
+      projectFolders?.subfolders?.[folderKey]?.id ||
+      projectFolders?.main?.id ||
+      null
+    )
+  }, [driveConnected, projectFolders])
+
   const researchAllChecksOk = useMemo(() => {
     return !!(researchChecks.demand && researchChecks.competition && researchChecks.simple && researchChecks.improvable)
   }, [researchChecks])
@@ -1369,6 +1379,34 @@ function ProjectDetailInner({ useApp }) {
                   {researchMsg.text}
                 </div>
               )}
+
+              {/* Informe de recerca → Drive (drag & drop) */}
+              <div style={{ marginTop: 10 }}>
+                {!driveConnected ? (
+                  <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>
+                    Connecta Google Drive per pujar l’informe de recerca.
+                  </div>
+                ) : !researchDriveFolderId ? (
+                  <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>
+                    Carregant carpeta de recerca...
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      border: '1px dashed var(--border-1)',
+                      borderRadius: 14,
+                      padding: 12,
+                      background: 'transparent'
+                    }}
+                  >
+                    <FileUploader
+                      folderId={researchDriveFolderId}
+                      onUploadComplete={handleUploadComplete}
+                      label="Arrossega aquí l’informe de recerca (PDF, MD, TXT)"
+                    />
+                  </div>
+                )}
+              </div>
 
               {researchHasAsin ? (
                 <div style={{
