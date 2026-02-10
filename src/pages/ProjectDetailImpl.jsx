@@ -120,7 +120,6 @@ const loadAppContext = async () => {
     AppContextModule = await import('../context/AppContext')
     return AppContextModule
   } catch (err) {
-    console.error('Error loading AppContext:', err)
     return null
   }
 }
@@ -128,15 +127,34 @@ const loadAppContext = async () => {
 export default function ProjectDetail() {
   const [appContextModule, setAppContextModule] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(null)
+  const loadSeqRef = useRef(0)
+  const mountedRef = useRef(false)
   
   useEffect(() => {
+    mountedRef.current = true
+    const seq = ++loadSeqRef.current
+    setLoading(true)
+    setLoadError(null)
     loadAppContext().then((module) => {
-      setAppContextModule(module)
+      if (!mountedRef.current || seq !== loadSeqRef.current) return
+      if (!module) {
+        setLoadError('No s’ha pogut carregar el mòdul principal.')
+        setAppContextModule(null)
+      } else {
+        setAppContextModule(module)
+      }
+      setLoading(false)
+    }).catch(() => {
+      if (!mountedRef.current || seq !== loadSeqRef.current) return
+      setLoadError('No s’ha pogut carregar el mòdul principal.')
+      setAppContextModule(null)
       setLoading(false)
     })
+    return () => { mountedRef.current = false }
   }, [])
   
-  if (loading || !appContextModule) {
+  if (loading) {
     return (
       <div style={{
         minHeight: '100vh',
@@ -164,6 +182,51 @@ export default function ProjectDetail() {
               100% { transform: rotate(360deg); }
             }
           `}</style>
+        </div>
+      </div>
+    )
+  }
+
+  if (!appContextModule) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'var(--app-bg)'
+      }}>
+        <div style={{ textAlign: 'center', padding: 24 }}>
+          <p style={{ margin: 0, fontSize: 14, color: 'var(--muted-1)' }}>
+            {loadError || 'Error carregant.'}
+          </p>
+          <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center' }}>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                const seq = ++loadSeqRef.current
+                setLoading(true)
+                setLoadError(null)
+                loadAppContext().then((module) => {
+                  if (!mountedRef.current || seq !== loadSeqRef.current) return
+                  if (!module) {
+                    setLoadError('No s’ha pogut carregar el mòdul principal.')
+                    setAppContextModule(null)
+                  } else {
+                    setAppContextModule(module)
+                  }
+                  setLoading(false)
+                }).catch(() => {
+                  if (!mountedRef.current || seq !== loadSeqRef.current) return
+                  setLoadError('No s’ha pogut carregar el mòdul principal.')
+                  setAppContextModule(null)
+                  setLoading(false)
+                })
+              }}
+            >
+              Reintenta
+            </Button>
+          </div>
         </div>
       </div>
     )
@@ -278,17 +341,29 @@ function ProjectDetailInner({ useApp }) {
   const [gateError, setGateError] = useState(null)
   const [projectTasks, setProjectTasks] = useState([])
   const [tasksLoading, setTasksLoading] = useState(false)
+  const loadSeqRef = useRef(0)
+  const mountedRef = useRef(false)
+
+  useEffect(() => {
+    mountedRef.current = true
+    return () => { mountedRef.current = false }
+  }, [])
   
 
   const loadProject = async () => {
+    const seq = ++loadSeqRef.current
     if (!id) {
-      setError('ID de projecte no vàlid')
-      setLoading(false)
+      if (mountedRef.current && seq === loadSeqRef.current) {
+        setError('ID de projecte no vàlid')
+        setLoading(false)
+      }
       return
     }
 
-    setLoading(true)
-    setError(null)
+    if (mountedRef.current && seq === loadSeqRef.current) {
+      setLoading(true)
+      setError(null)
+    }
     try {
       // Import dinàmic de supabase per evitar cicles d'imports
       let getProject, getDocuments
@@ -306,14 +381,19 @@ function ProjectDetailInner({ useApp }) {
       
       const data = await getProject(id)
       if (!data) {
-        setError('Projecte no trobat')
-        setProject(null)
-        setDocuments([])
+        if (mountedRef.current && seq === loadSeqRef.current) {
+          setError('Projecte no trobat')
+          setProject(null)
+          setDocuments([])
+          setLoading(false)
+        }
         return
       }
-      setProject(data)
+      if (mountedRef.current && seq === loadSeqRef.current) setProject(data)
       const docs = await getDocuments(id)
-      setDocuments(Array.isArray(docs) ? docs : [])
+      if (mountedRef.current && seq === loadSeqRef.current) {
+        setDocuments(Array.isArray(docs) ? docs : [])
+      }
     } catch (err) {
       try {
         const { formatError, notifyError } = await import('../lib/errorHandling')
@@ -322,10 +402,12 @@ function ProjectDetailInner({ useApp }) {
       } catch (importErr) {
         setError('Error carregant mòduls')
       }
-      setProject(null)
-      setDocuments([])
+      if (mountedRef.current && seq === loadSeqRef.current) {
+        setProject(null)
+        setDocuments([])
+      }
     } finally {
-      setLoading(false)
+      if (mountedRef.current && seq === loadSeqRef.current) setLoading(false)
     }
   }
 
