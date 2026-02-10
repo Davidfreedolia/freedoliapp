@@ -7,11 +7,8 @@ import { createProject, updateProject, generateProjectCode } from '../lib/supaba
 import { driveService } from '../lib/googleDrive'
 import { logSuccess, logError } from '../lib/auditLog'
 import { handleError } from '../lib/errorHandling'
-import { useBreakpoint } from '../hooks/useBreakpoint'
-import { getModalStyles } from '../utils/responsiveStyles'
 import { showToast } from './Toast'
 import Button from './Button'
-import { getButtonStyles, useButtonState } from '../utils/buttonStyles'
 
 const PHASES = [
   { id: 1, name: 'Recerca', icon: '🔍' },
@@ -24,13 +21,9 @@ const PHASES = [
 ]
 
 export default function NewProjectModal({ isOpen, onClose }) {
-  const { refreshProjects, darkMode, driveConnected } = useApp()
+  const { refreshProjects, driveConnected } = useApp()
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const { isMobile } = useBreakpoint()
-  const modalStyles = getModalStyles(isMobile, darkMode)
-  const cancelButtonState = useButtonState()
-  const saveButtonState = useButtonState()
   const [loading, setLoading] = useState(false)
   const [creatingFolders, setCreatingFolders] = useState(false)
   const [generatingCode, setGeneratingCode] = useState(false)
@@ -136,84 +129,54 @@ export default function NewProjectModal({ isOpen, onClose }) {
   }
 
   return (
-    <div style={{
-      ...styles.overlay,
-      ...modalStyles.overlay
-    }} onClick={handleClose}>
-      <div 
-        style={{
-          ...styles.modal,
-          ...modalStyles.modal
-        }}
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div style={styles.header}>
-          <h2 style={{
-            ...styles.title,
-            color: darkMode ? '#ffffff' : '#111827'
-          }}>
+    <div className="fd-modal__overlay" onClick={handleClose}>
+      <div className="fd-modal" onClick={e => e.stopPropagation()}>
+        <div className="fd-modal__header">
+          <h2 className="fd-modal__title">
             {t('projects.newProject')}
           </h2>
-          <Button variant="ghost" onClick={handleClose} aria-label="Tancar">
+          <button type="button" className="fd-modal__close" onClick={handleClose} aria-label="Tancar">
             <X size={20} />
-          </Button>
+          </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} style={styles.form}>
-          
-          {/* Codis generats automàticament */}
-          <div style={{
-            ...styles.codesContainer,
-            backgroundColor: darkMode ? '#1f1f2e' : '#f0f9ff',
-            borderColor: darkMode ? '#2a2a3a' : '#bae6fd'
-          }}>
-            <div style={styles.codeRow}>
-              <div style={styles.codeItem}>
-                <div style={styles.codeLabel}>
-                  <Hash size={14} color="#4f46e5" />
-                  <span style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>{t('projects.projectCode')}</span>
+        <form onSubmit={handleSubmit} className="fd-modal__body">
+          <div className="fd-modal__codes">
+            <div className="fd-modal__code-row">
+              <div className="fd-modal__code-item">
+                <div className="fd-modal__code-label">
+                  <Hash size={14} color="var(--muted-1)" />
+                  <span>{t('projects.projectCode')}</span>
                 </div>
-                <span style={{
-                  ...styles.codeValue,
-                  color: darkMode ? '#ffffff' : '#111827'
-                }}>
+                <span className="fd-modal__code-value">
                   {generatingCode ? (
-                    <Loader size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                    <Loader size={16} className="fd-spin" />
                   ) : (
                     projectCodes.projectCode || '—'
                   )}
                 </span>
               </div>
-              <div style={styles.codeItem}>
-                <div style={styles.codeLabel}>
-                  <Tag size={14} color="#22c55e" />
-                  <span style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>{t('projects.productSku')}</span>
+              <div className="fd-modal__code-item">
+                <div className="fd-modal__code-label">
+                  <Tag size={14} color="var(--muted-1)" />
+                  <span>{t('projects.productSku')}</span>
                 </div>
-                <span style={{
-                  ...styles.codeValue,
-                  color: '#22c55e',
-                  fontWeight: '700'
-                }}>
+                <span className="fd-modal__code-value fd-modal__code-value--accent">
                   {generatingCode ? (
-                    <Loader size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                    <Loader size={16} className="fd-spin" />
                   ) : (
                     projectCodes.sku || '—'
                   )}
                 </span>
               </div>
             </div>
-            <p style={styles.codeHint}>
+            <p className="fd-modal__hint">
               ℹ️ {t('projects.codesAutoGenerated')}
             </p>
           </div>
 
-          <div style={styles.field}>
-            <label style={{
-              ...styles.label,
-              color: darkMode ? '#9ca3af' : '#374151'
-            }}>
+          <div className="fd-field">
+            <label className="fd-field__label">
               {t('projects.projectName')} *
             </label>
             <input
@@ -221,22 +184,14 @@ export default function NewProjectModal({ isOpen, onClose }) {
               value={formData.name}
               onChange={e => setFormData({...formData, name: e.target.value})}
               placeholder="Ex: Velvet Hangers Set"
-              style={{
-                ...styles.input,
-                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                color: darkMode ? '#ffffff' : '#111827',
-                borderColor: darkMode ? '#2a2a3a' : '#e5e7eb'
-              }}
+              className="fd-field__input"
               required
               autoFocus
             />
           </div>
 
-          <div style={styles.field}>
-            <label style={{
-              ...styles.label,
-              color: darkMode ? '#9ca3af' : '#374151'
-            }}>
+          <div className="fd-field">
+            <label className="fd-field__label">
               {t('projects.description')}
             </label>
             <textarea
@@ -244,91 +199,60 @@ export default function NewProjectModal({ isOpen, onClose }) {
               onChange={e => setFormData({...formData, description: e.target.value})}
               placeholder={t('projects.descriptionPlaceholder')}
               rows={3}
-              style={{
-                ...styles.input,
-                ...styles.textarea,
-                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                color: darkMode ? '#ffffff' : '#111827',
-                borderColor: darkMode ? '#2a2a3a' : '#e5e7eb'
-              }}
+              className="fd-field__input fd-field__textarea"
             />
           </div>
 
-          {/* Info Drive */}
-          <div style={{
-            ...styles.driveInfo,
-            backgroundColor: driveConnected 
-              ? (darkMode ? 'rgba(34, 197, 94, 0.1)' : 'rgba(34, 197, 94, 0.1)')
-              : (darkMode ? 'rgba(239, 68, 68, 0.1)' : 'rgba(239, 68, 68, 0.1)')
-          }}>
-            <FolderPlus size={18} color={driveConnected ? '#22c55e' : '#ef4444'} />
-            <span style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '13px' }}>
-              {driveConnected 
+          <div className="fd-modal__drive-info">
+            <FolderPlus size={18} color="var(--muted-1)" />
+            <span>
+              {driveConnected
                 ? t('projects.driveFolderWillBeCreated', { sku: projectCodes.sku || '...' })
                 : t('projects.connectDriveToCreateFolders')
               }
             </span>
           </div>
 
-          {/* Fases preview */}
-          <div style={styles.phasesPreview}>
-            <span style={{
-              fontSize: '12px',
-              color: darkMode ? '#6b7280' : '#9ca3af',
-              marginBottom: '8px',
-              display: 'block'
-            }}>
+          <div className="fd-modal__phases">
+            <span className="fd-modal__phases-label">
               {t('projects.projectPhases')}:
             </span>
-            <div style={styles.phasesRow}>
+            <div className="fd-modal__phases-row">
               {PHASES.map((phase, index) => (
-                <div key={phase.id} style={styles.phaseItem}>
-                  <span style={styles.phaseIcon}>{phase.icon}</span>
+                <div key={phase.id} className="fd-modal__phase-item">
+                  <span className="fd-modal__phase-icon">{phase.icon}</span>
                   {index < PHASES.length - 1 && (
-                    <div style={styles.phaseLine} />
+                    <div className="fd-modal__phase-line" />
                   )}
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Buttons */}
-          <div style={styles.buttons}>
-            <button 
-              type="button" 
+          <div className="fd-modal__footer">
+            <Button
+              variant="danger"
+              size="sm"
+              type="button"
               onClick={handleClose}
-              {...cancelButtonState}
-              style={getButtonStyles({ 
-                variant: 'danger', 
-                darkMode, 
-                disabled: false,
-                isHovered: cancelButtonState.isHovered,
-                isActive: cancelButtonState.isActive
-              })}
             >
-              {t('common.cancel')}
-            </button>
-            <button 
+              {t('common.cancel', 'Cancel·lar')}
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
               type="submit"
               disabled={loading || generatingCode || !projectCodes.projectCode}
-              {...saveButtonState}
-              style={getButtonStyles({ 
-                variant: 'primary', 
-                darkMode, 
-                disabled: loading || generatingCode || !projectCodes.projectCode,
-                isHovered: saveButtonState.isHovered,
-                isActive: saveButtonState.isActive
-              })}
             >
               {loading ? (
                 <>
-                  <Loader size={18} style={{ animation: 'spin 1s linear infinite' }} />
+                  <Loader size={18} className="fd-spin" />
                   {creatingFolders ? t('projects.creatingFolders') : t('common.creating')}
                 </>
               ) : (
                 t('projects.createProject')
               )}
-            </button>
+            </Button>
           </div>
         </form>
       </div>
@@ -336,156 +260,3 @@ export default function NewProjectModal({ isOpen, onClose }) {
   )
 }
 
-const styles = {
-  overlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1000
-  },
-  modal: {
-    width: '100%',
-    maxWidth: '520px',
-    borderRadius: '16px',
-    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-    overflow: 'hidden'
-  },
-  header: {
-    padding: '20px 24px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderBottom: 'none'
-  },
-  title: {
-    margin: 0,
-    fontSize: '18px',
-    fontWeight: '600'
-  },
-  closeButton: {
-    background: 'none',
-    border: 'none',
-    cursor: 'pointer',
-    color: '#6b7280'
-  },
-  form: {
-    padding: '24px'
-  },
-  codesContainer: {
-    padding: '16px',
-    borderRadius: '12px',
-    border: '1px solid',
-    marginBottom: '20px'
-  },
-  codeRow: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '16px'
-  },
-  codeItem: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px'
-  },
-  codeLabel: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    fontSize: '12px'
-  },
-  codeValue: {
-    fontSize: '18px',
-    fontWeight: '600',
-    fontFamily: 'monospace',
-    display: 'flex',
-    alignItems: 'center'
-  },
-  codeHint: {
-    margin: '12px 0 0 0',
-    fontSize: '11px',
-    color: '#6b7280',
-    lineHeight: '1.4'
-  },
-  field: {
-    marginBottom: '20px'
-  },
-  label: {
-    display: 'block',
-    fontSize: '14px',
-    fontWeight: '500',
-    marginBottom: '8px'
-  },
-  input: {
-    width: '100%',
-    padding: '12px 16px',
-    border: '1px solid',
-    borderRadius: '10px',
-    fontSize: '14px',
-    outline: 'none',
-    transition: 'border-color 0.2s',
-    boxSizing: 'border-box'
-  },
-  textarea: {
-    resize: 'vertical',
-    minHeight: '80px'
-  },
-  driveInfo: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    padding: '12px 16px',
-    borderRadius: '10px',
-    marginBottom: '20px'
-  },
-  phasesPreview: {
-    marginBottom: '24px'
-  },
-  phasesRow: {
-    display: 'flex',
-    alignItems: 'center'
-  },
-  phaseItem: {
-    display: 'flex',
-    alignItems: 'center'
-  },
-  phaseIcon: {
-    fontSize: '18px'
-  },
-  phaseLine: {
-    width: '20px',
-    height: '2px',
-    backgroundColor: '#e5e7eb',
-    margin: '0 4px'
-  },
-  buttons: {
-    display: 'flex',
-    gap: '12px',
-    justifyContent: 'flex-end'
-  },
-  button: {
-    padding: '12px 24px',
-    borderRadius: '10px',
-    fontSize: '14px',
-    fontWeight: '500',
-    cursor: 'pointer',
-    border: '1px solid var(--border-color, #e5e7eb)',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    transition: 'all 0.2s'
-  },
-  buttonSecondary: {
-    border: '1px solid var(--border-color, #e5e7eb)'
-  },
-  buttonPrimary: {
-    backgroundColor: '#4f46e5',
-    color: '#ffffff',
-    border: '1px solid #3730a3'
-  }
-}
