@@ -308,6 +308,7 @@ function ProjectDetailInner({ useApp }) {
   const { isMobile, isTablet } = useBreakpoint()
   const { t } = useTranslation()
   const identifiersSectionRef = useRef(null)
+  const researchFileInputRef = useRef(null)
   const modalStyles = getModalStyles(isMobile, darkMode)
   
   // Extreure UUID net del paràmetre de ruta (eliminar qualsevol sufix com "Fes:")
@@ -358,6 +359,7 @@ function ProjectDetailInner({ useApp }) {
   const [researchOverrideOpen, setResearchOverrideOpen] = useState(false)
   const [researchDecision, setResearchDecision] = useState(null)
   const [researchMsg, setResearchMsg] = useState(null)
+  const [researchImport, setResearchImport] = useState(null)
   const { notes, loading: notesLoading } = useNotes()
   const loadSeqRef = useRef(0)
   const mountedRef = useRef(false)
@@ -438,6 +440,44 @@ function ProjectDetailInner({ useApp }) {
   }
 
   const buildAmazonUrl = (asin) => asin ? `https://www.amazon.es/dp/${asin}` : ''
+
+  const parseResearchReport = (text) => {
+    const getLineValue = (prefix) => {
+      const re = new RegExp(`^${prefix}\\s*:\\s*(.*)$`, 'mi')
+      const m = text.match(re)
+      return m ? (m[1] || '').trim() : 'NOT_AVAILABLE'
+    }
+
+    const asin = getLineValue('asin')
+    const product_url = getLineValue('product_url')
+    const title = getLineValue('title')
+    const thumb_url = getLineValue('thumb_url')
+    const decision = getLineValue('decision')
+
+    const hasHeader = /^#\s*RESEARCH REPORT\s*—\s*ASIN\s+/mi.test(text)
+    const hasSnapshot = /^##\s*PRODUCT_SNAPSHOT/mi.test(text)
+    const hasFinal = /^##\s*FINAL_DECISION/mi.test(text)
+
+    const asinOk = /^[A-Z0-9]{10}$/.test(asin)
+    const urlOk = product_url && product_url !== 'NOT_AVAILABLE' && /^https?:\/\//i.test(product_url)
+    const decisionOk = ['PASS', 'PASS_WITH_IMPROVEMENTS', 'NO_PASS'].includes(decision)
+
+    const ok = hasHeader && hasSnapshot && hasFinal && asinOk && urlOk && decisionOk && title !== 'NOT_AVAILABLE'
+
+    return {
+      ok,
+      errors: [
+        !hasHeader ? 'Falta capçalera # RESEARCH REPORT — ASIN …' : null,
+        !hasSnapshot ? 'Falta secció PRODUCT_SNAPSHOT' : null,
+        !hasFinal ? 'Falta secció FINAL_DECISION' : null,
+        !asinOk ? 'ASIN invàlid' : null,
+        !urlOk ? 'URL invàlida' : null,
+        !decisionOk ? 'Decision invàlida' : null,
+        title === 'NOT_AVAILABLE' ? 'Title buit' : null
+      ].filter(Boolean),
+      data: { asin, product_url, title, thumb_url, decision, rawText: text }
+    }
+  }
 
   const hasEvidence = (key) => {
     const v = (researchEvidence?.[key] || '').trim()
@@ -594,6 +634,46 @@ function ProjectDetailInner({ useApp }) {
     setMsg('success', pass ? (forced ? 'PASSA (forçat)' : 'PASSA') : 'NO PASSA')
   }
 
+  const handleImportResearchFile = async (file) => {
+    const text = await file.text()
+    const parsed = parseResearchReport(text)
+
+    if (!parsed.ok) {
+      try {
+        const { showToast } = await import('../components/Toast')
+        showToast(`Informe invàlid: ${parsed.errors[0]}`, 'warning')
+      } catch {}
+      return
+    }
+
+    setResearchImport(parsed.data)
+
+    try {
+      localStorage.setItem(`research_import_${id}`, JSON.stringify(parsed.data))
+    } catch {}
+
+    try {
+      const { showToast } = await import('../components/Toast')
+      showToast('Informe importat correctament', 'success')
+    } catch {}
+  }
+
+  const copyResearchPayload = async () => {
+    if (!researchImport) return
+    const payload = {
+      asin: researchImport.asin,
+      product_url: researchImport.product_url,
+      title: researchImport.title,
+      thumb_url: researchImport.thumb_url,
+      decision: researchImport.decision
+    }
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(payload, null, 2))
+      const { showToast } = await import('../components/Toast')
+      showToast('Payload copiat', 'success')
+    } catch {}
+  }
+
   // Carregar PROJECT_SUBFOLDERS dinàmicament per evitar cicles d'imports
   useEffect(() => {
     import('../constants/projectDrive').then((mod) => {
@@ -616,6 +696,14 @@ function ProjectDetailInner({ useApp }) {
     if (!id) return
     loadResearch()
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id])
+
+  useEffect(() => {
+    if (!id) return
+    try {
+      const stored = localStorage.getItem(`research_import_${id}`)
+      if (stored) setResearchImport(JSON.parse(stored))
+    } catch {}
   }, [id])
 
   // M3 — fetch marketplace TAGS for this project (UI-only mapping, no new business logic)
@@ -2676,12 +2764,47 @@ function ProjectDetailInner({ useApp }) {
           <aside className="project-split__right">
             <div className="project-split__sticky">
               <div className="projects-split__panel">
-              <div className="projects-split__panelHeader">
-                <div className="projects-split__panelTitle">Drive del projecte</div>
-                <div className="projects-split__panelSubtitle">
-                  {project?.name || '—'}
+              <div className="projects-split__panelHeader" style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                <div>
+                  <div className="projects-split__panelTitle">Drive del projecte</div>
+                  <div className="projects-split__panelSubtitle">
+                    {project?.name || '—'}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <input
+                    ref={researchFileInputRef}
+                    type="file"
+                    accept=".md,.txt"
+                    style={{ display: 'none' }}
+                    onChange={(e) => {
+                      const f = e.target.files?.[0]
+                      if (f) handleImportResearchFile(f)
+                      e.target.value = ''
+                    }}
+                  />
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    disabled={!driveConnected}
+                    title={!driveConnected ? 'Connecta Google Drive' : 'Importa un RESEARCH_REPORT (.md)'}
+                    onClick={() => researchFileInputRef.current?.click()}
+                  >
+                    Importar informe
+                  </Button>
                 </div>
               </div>
+
+              {researchImport && (
+                <div style={{ padding: '10px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+                  <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>
+                    Informe: <strong style={{ color: 'var(--text-1)' }}>{researchImport.asin}</strong> · {researchImport.decision}
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={copyResearchPayload}>
+                    Copiar payload
+                  </Button>
+                </div>
+              )}
 
               <div className="projects-drive__grid">
                 <div className="projects-drive__box">
