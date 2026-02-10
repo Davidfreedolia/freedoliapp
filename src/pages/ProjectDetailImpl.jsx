@@ -1334,7 +1334,7 @@ function ProjectDetailInner({ useApp }) {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
                 <input
                   type="text"
                   value={researchAsinInput}
@@ -1351,21 +1351,24 @@ function ProjectDetailInner({ useApp }) {
                     outline: 'none'
                   }}
                 />
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={handleAsinLoad}
-                  disabled={!extractAsin(researchAsinInput)}
-                  title={!extractAsin(researchAsinInput) ? 'Introdueix un ASIN o URL vàlid' : 'Carregar'}
-                >
-                  Carregar producte
-                </Button>
-                <Button variant="ghost" size="sm" onClick={saveResearch} disabled={!researchTouched && !researchHasAsin}>
-                  Guardar
-                </Button>
-                <Button variant="ghost" size="sm" onClick={resetResearch} disabled={!researchTouched && !researchHasAsin && !researchDecision}>
-                  Reset
-                </Button>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center', justifyContent: 'flex-end' }}>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={saveResearch}
+                    disabled={!researchTouched && !researchHasAsin}
+                  >
+                    Guardar
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={resetResearch}
+                    disabled={!researchTouched && !researchHasAsin && !researchDecision}
+                  >
+                    Reset
+                  </Button>
+                </div>
               </div>
 
               {researchMsg && (
@@ -2570,7 +2573,8 @@ function ProjectDetailInner({ useApp }) {
 
         <div className="project-split__layout">
           <div className="project-split__left">
-            <div style={phaseWrapperStyle}>
+            <div className="projects-split__panel">
+              <div style={phaseWrapperStyle}>
           <div
             data-testid="phase-gate-block-banner"
             data-revealed={phaseBlockVisible ? 'true' : 'false'}
@@ -2665,6 +2669,7 @@ function ProjectDetailInner({ useApp }) {
         >
           {renderPhaseContent(7)}
         </PhaseSection>
+              </div>
             </div>
           </div>
 
