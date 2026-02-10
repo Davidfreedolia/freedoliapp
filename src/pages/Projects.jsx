@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { 
@@ -34,12 +34,35 @@ export default function Projects() {
   const [viewMode, setViewMode] = useLayoutPreference('layout:projects', 'grid')
   const [selectedProjectId, setSelectedProjectId] = useState(null)
   const [isLoadingProjects, setIsLoadingProjects] = useState(true)
-  const didLoadRef = useRef(false)
-  const isMountedRef = useRef(false)
-  const refreshProjectsRef = useRef(null)
-  const PHASES = PHASE_STYLES
+  const [loadError, setLoadError] = useState(null)
+
+  // Concurrency control: only latest load can commit state
+  const loadSeqRef = useRef(0)
+  const mountedRef = useRef(false)
+
+  // PHASE_STYLES is an object. We need a deterministic, always-iterable list.
+  const PHASES_LIST = useMemo(() => {
+    return Object.values(PHASE_STYLES).sort((a, b) => (a?.id ?? 0) - (b?.id ?? 0))
+  }, [])
 
   const effectiveViewMode = isMobile ? 'list' : viewMode
+  const loadProjects = async ({ showSpinner = true } = {}) => {
+    const seq = ++loadSeqRef.current
+    if (showSpinner) setIsLoadingProjects(true)
+    setLoadError(null)
+    try {
+      await refreshProjects()
+    } catch (err) {
+      if (mountedRef.current && seq === loadSeqRef.current) {
+        setLoadError(err?.message || 'Error carregant projectes')
+      }
+    } finally {
+      if (mountedRef.current && seq === loadSeqRef.current) {
+        setIsLoadingProjects(false)
+      }
+    }
+  }
+
   const filteredProjects = projects.filter(project => {
     const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          project.project_code.toLowerCase().includes(searchTerm.toLowerCase())
@@ -59,24 +82,10 @@ export default function Projects() {
   }, [filteredProjects, selectedProjectId])
 
   useEffect(() => {
-    refreshProjectsRef.current = refreshProjects
-  }, [refreshProjects])
-
-  useEffect(() => {
-    if (didLoadRef.current) return
-    didLoadRef.current = true
-
-    isMountedRef.current = true
-    ;(async () => {
-      try {
-        await refreshProjectsRef.current?.()
-      } finally {
-        if (isMountedRef.current) setIsLoadingProjects(false)
-      }
-    })()
-
+    mountedRef.current = true
+    loadProjects({ showSpinner: true })
     return () => {
-      isMountedRef.current = false
+      mountedRef.current = false
     }
   }, [])
 
@@ -206,7 +215,7 @@ export default function Projects() {
                 <h3 className="projects-card__title">{project.name}</h3>
                 <div className="projects-card__meta">{metadataLine}</div>
                 <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
-                  {PHASES.map((p) => {
+                  {PHASES_LIST.map((p) => {
                     const Icon = p.icon
                     const isCurrent = p.id === project.current_phase
                     return (
@@ -390,10 +399,8 @@ export default function Projects() {
                 onChange={e => setFilterPhase(e.target.value ? parseInt(e.target.value) : null)}
               >
                 <option value="">Totes les fases</option>
-                {Object.entries(PHASES).map(([key, phase]) => (
-                  <option key={key} value={key}>
-                    {phase.name}
-                  </option>
+                {PHASES_LIST.map(phase => (
+                  <option key={phase.id} value={phase.id}>{phase.name}</option>
                 ))}
               </select>
             </div>
@@ -443,6 +450,13 @@ export default function Projects() {
             backgroundColor: 'var(--surface-bg)'
           }}>
             <p style={{ color: 'var(--muted-1)' }}>Carregant projectes…</p>
+          </div>
+        ) : loadError ? (
+          <div style={{ ...styles.empty, backgroundColor: 'var(--surface-bg)' }}>
+            <p style={{ color: 'var(--muted-1)' }}>No s’han pogut carregar els projectes.</p>
+            <Button variant="secondary" onClick={() => loadProjects({ showSpinner: true })}>
+              Reintenta
+            </Button>
           </div>
         ) : filteredProjects.length === 0 ? (
           <div style={{
