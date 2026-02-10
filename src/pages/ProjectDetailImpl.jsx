@@ -1025,18 +1025,19 @@ function ProjectDetailInner({ useApp }) {
         .select('gate_pass, blocking_total, blocking_done')
         .eq('project_id', id)
         .eq('phase', phaseId)
-        .single()
+        .maybeSingle()
 
       if (error) {
-        if (error.code === 'PGRST116') {
-          setGate({ gate_pass: false, blocking_total: 0, blocking_done: 0 })
-          setGateLoading(false)
-          setGateError(null)
-          return
-        }
         setGate(null)
         setGateLoading(false)
         setGateError(error)
+        return
+      }
+
+      if (!data) {
+        setGate({ gate_pass: false, blocking_total: 0, blocking_done: 0 })
+        setGateLoading(false)
+        setGateError(null)
         return
       }
 
