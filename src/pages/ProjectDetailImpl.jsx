@@ -251,7 +251,8 @@ function PhaseSection({ phaseId, currentPhaseId, phaseStyle, darkMode, children 
       ...styles.phaseSection,
       borderColor: sectionBorder,
       borderTopColor: sectionBorder,
-      backgroundColor: sectionBg
+      backgroundColor: sectionBg,
+      boxShadow: 'none'
     }}>
       <Button
         variant="ghost"
