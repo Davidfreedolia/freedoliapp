@@ -1331,9 +1331,6 @@ function ProjectDetailInner({ useApp }) {
                 <div style={{ fontSize: 14, fontWeight: 700, color: currentPhase.accent }}>
                   RECERCA
                 </div>
-                <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>
-                  ASIN → evidència → decisió
-                </div>
               </div>
 
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -1384,10 +1381,10 @@ function ProjectDetailInner({ useApp }) {
               <div style={{ marginTop: 10 }}>
                 <div
                   style={{
-                    border: '1px dashed var(--border-1)',
+                    border: '2px dashed var(--border-1)',
                     borderRadius: 14,
-                    padding: 12,
-                    background: 'transparent'
+                    padding: 14,
+                    background: 'var(--surface-bg-2)'
                   }}
                 >
                   <div style={{ fontSize: 12, color: 'var(--muted-1)', marginBottom: 8 }}>
@@ -1396,17 +1393,17 @@ function ProjectDetailInner({ useApp }) {
 
                   {!driveConnected ? (
                     <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>
-                      Connecta Google Drive per pujar l’informe (PDF, MD, TXT).
+                      Connecta Google Drive per pujar-lo.
                     </div>
                   ) : !researchDriveFolderId ? (
                     <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>
-                      Carregant carpeta de recerca...
+                      Carregant carpeta...
                     </div>
                   ) : (
                     <FileUploader
                       folderId={researchDriveFolderId}
                       onUploadComplete={handleUploadComplete}
-                      label="Arrossega aquí l’informe de recerca (PDF, MD, TXT)"
+                      label="Arrossega aquí (PDF, MD, TXT)"
                     />
                   )}
                 </div>
