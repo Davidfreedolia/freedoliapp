@@ -1784,10 +1784,13 @@ function ProjectDetailInner({ useApp }) {
             onClick={guarded(true, () => openCreateModal('supplier'))}
             style={{
               ...actionButtonStyle,
+              backgroundColor: 'var(--surface-bg-2)',
+              color: 'var(--muted-1)',
+              opacity: 0.9,
               flex: isNarrowMobile ? '1 1 100%' : isMobile ? '1 1 calc(50% - 6px)' : '1 1 180px',
               minWidth: isNarrowMobile ? '100%' : isMobile ? 0 : 180,
               justifyContent: 'center',
-              opacity: !canUseDrive ? 0.55 : 1
+              opacity: !canUseDrive ? 0.9 : 1
             }}
           >
             Crear Proveïdor
@@ -1798,10 +1801,13 @@ function ProjectDetailInner({ useApp }) {
             onClick={guarded(true, () => openCreateModal('forwarder'))}
             style={{
               ...actionButtonStyle,
+              backgroundColor: 'var(--surface-bg-2)',
+              color: 'var(--muted-1)',
+              opacity: 0.9,
               flex: isNarrowMobile ? '1 1 100%' : isMobile ? '1 1 calc(50% - 6px)' : '1 1 180px',
               minWidth: isNarrowMobile ? '100%' : isMobile ? 0 : 180,
               justifyContent: 'center',
-              opacity: !canUseDrive ? 0.55 : 1
+              opacity: !canUseDrive ? 0.9 : 1
             }}
           >
             Crear Transitari
@@ -1812,24 +1818,29 @@ function ProjectDetailInner({ useApp }) {
             onClick={guarded(true, () => openCreateModal('warehouse'))}
             style={{
               ...actionButtonStyle,
+              backgroundColor: 'var(--surface-bg-2)',
+              color: 'var(--muted-1)',
+              opacity: 0.9,
               flex: isNarrowMobile ? '1 1 100%' : isMobile ? '1 1 calc(50% - 6px)' : '1 1 180px',
               minWidth: isNarrowMobile ? '100%' : isMobile ? 0 : 180,
               justifyContent: 'center',
-              opacity: !canUseDrive ? 0.55 : 1
+              opacity: !canUseDrive ? 0.9 : 1
             }}
           >
             Crear Magatzem
           </Button>
           <Button
-            variant="secondary"
+            variant="primary"
             size="sm"
             onClick={guarded(true, () => navigate(`/orders?project=${id}`))}
             style={{
               ...actionButtonStyle,
+              backgroundColor: 'var(--accent-1)',
+              color: '#fff',
               flex: isNarrowMobile ? '1 1 100%' : isMobile ? '1 1 calc(50% - 6px)' : '1 1 180px',
               minWidth: isNarrowMobile ? '100%' : isMobile ? 0 : 180,
               justifyContent: 'center',
-              opacity: !canUseDrive ? 0.55 : 1
+              opacity: !canUseDrive ? 0.9 : 1
             }}
           >
             Crear Comanda (PO)
@@ -1840,6 +1851,8 @@ function ProjectDetailInner({ useApp }) {
             onClick={guarded(false, () => openCreateModal('expense'))}
             style={{
               ...actionButtonStyle,
+              backgroundColor: 'var(--accent-1)',
+              color: '#fff',
               flex: isNarrowMobile ? '1 1 100%' : isMobile ? '1 1 calc(50% - 6px)' : '1 1 180px',
               minWidth: isNarrowMobile ? '100%' : isMobile ? 0 : 180,
               justifyContent: 'center'
@@ -1856,10 +1869,13 @@ function ProjectDetailInner({ useApp }) {
             })}
             style={{
               ...actionButtonStyle,
+              backgroundColor: 'var(--surface-bg-2)',
+              color: 'var(--muted-1)',
+              opacity: 0.9,
               flex: isNarrowMobile ? '1 1 100%' : isMobile ? '1 1 calc(50% - 6px)' : '1 1 180px',
               minWidth: isNarrowMobile ? '100%' : isMobile ? 0 : 180,
               justifyContent: 'center',
-              opacity: !canUseDrive ? 0.55 : 1
+              opacity: !canUseDrive ? 0.9 : 1
             }}
           >
             + Document
