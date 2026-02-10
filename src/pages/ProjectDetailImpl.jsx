@@ -1835,8 +1835,8 @@ function ProjectDetailInner({ useApp }) {
             onClick={guarded(true, () => navigate(`/orders?project=${id}`))}
             style={{
               ...actionButtonStyle,
-              backgroundColor: 'var(--accent-1)',
-              color: '#fff',
+              backgroundColor: 'var(--text-1)',
+              color: 'var(--surface-bg)',
               flex: isNarrowMobile ? '1 1 100%' : isMobile ? '1 1 calc(50% - 6px)' : '1 1 180px',
               minWidth: isNarrowMobile ? '100%' : isMobile ? 0 : 180,
               justifyContent: 'center',
@@ -1851,8 +1851,8 @@ function ProjectDetailInner({ useApp }) {
             onClick={guarded(false, () => openCreateModal('expense'))}
             style={{
               ...actionButtonStyle,
-              backgroundColor: 'var(--accent-1)',
-              color: '#fff',
+              backgroundColor: 'var(--text-1)',
+              color: 'var(--surface-bg)',
               flex: isNarrowMobile ? '1 1 100%' : isMobile ? '1 1 calc(50% - 6px)' : '1 1 180px',
               minWidth: isNarrowMobile ? '100%' : isMobile ? 0 : 180,
               justifyContent: 'center'
