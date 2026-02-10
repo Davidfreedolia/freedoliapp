@@ -1579,6 +1579,22 @@ function ProjectDetailInner({ useApp }) {
   const phaseLabel = PHASE_LABELS[project?.current_phase] || `PHASE ${project?.current_phase || '—'}`
   const thumbnailUrl = project?.asin_image_url || project?.main_image_url || project?.asin_image || project?.image_url || project?.image || null
   const isNarrowMobile = isMobile && typeof window !== 'undefined' && window.innerWidth < 420
+  const actionButtonStyle = {
+    height: 36,
+    padding: '0 14px',
+    borderRadius: 12,
+    fontSize: 14,
+    fontWeight: 600,
+    minWidth: 0
+  }
+  const canUseDrive = !!driveConnected
+  const toastDrive = () => {
+    alert('Connecta Google Drive per utilitzar aquesta acció.')
+  }
+  const guarded = (needsDrive, fn) => () => {
+    if (needsDrive && !canUseDrive) return toastDrive()
+    return fn?.()
+  }
 
   return (
     <div style={styles.container}>
@@ -1753,8 +1769,8 @@ function ProjectDetailInner({ useApp }) {
           display: 'flex',
           flexWrap: 'wrap',
           alignItems: 'stretch',
-          gap: 12,
-          padding: '20px 24px',
+          gap: 10,
+          padding: '16px 20px',
           marginBottom: 16,
           background: 'var(--surface-bg)',
           boxShadow: 'var(--shadow-soft)',
@@ -1765,15 +1781,13 @@ function ProjectDetailInner({ useApp }) {
           <Button
             variant="secondary"
             size="sm"
-            disabled={!driveConnected}
-            title={!driveConnected ? 'Connecta Google Drive per crear aquest element.' : undefined}
-            onClick={() => openCreateModal('supplier')}
+            onClick={guarded(true, () => openCreateModal('supplier'))}
             style={{
+              ...actionButtonStyle,
               flex: isNarrowMobile ? '1 1 100%' : isMobile ? '1 1 calc(50% - 6px)' : '1 1 180px',
               minWidth: isNarrowMobile ? '100%' : isMobile ? 0 : 180,
-              height: 40,
               justifyContent: 'center',
-              opacity: !driveConnected ? 0.55 : 1
+              opacity: !canUseDrive ? 0.55 : 1
             }}
           >
             Crear Proveïdor
@@ -1781,15 +1795,13 @@ function ProjectDetailInner({ useApp }) {
           <Button
             variant="secondary"
             size="sm"
-            disabled={!driveConnected}
-            title={!driveConnected ? 'Connecta Google Drive per crear aquest element.' : undefined}
-            onClick={() => openCreateModal('forwarder')}
+            onClick={guarded(true, () => openCreateModal('forwarder'))}
             style={{
+              ...actionButtonStyle,
               flex: isNarrowMobile ? '1 1 100%' : isMobile ? '1 1 calc(50% - 6px)' : '1 1 180px',
               minWidth: isNarrowMobile ? '100%' : isMobile ? 0 : 180,
-              height: 40,
               justifyContent: 'center',
-              opacity: !driveConnected ? 0.55 : 1
+              opacity: !canUseDrive ? 0.55 : 1
             }}
           >
             Crear Transitari
@@ -1797,43 +1809,39 @@ function ProjectDetailInner({ useApp }) {
           <Button
             variant="secondary"
             size="sm"
-            disabled={!driveConnected}
-            title={!driveConnected ? 'Connecta Google Drive per crear aquest element.' : undefined}
-            onClick={() => openCreateModal('warehouse')}
+            onClick={guarded(true, () => openCreateModal('warehouse'))}
             style={{
+              ...actionButtonStyle,
               flex: isNarrowMobile ? '1 1 100%' : isMobile ? '1 1 calc(50% - 6px)' : '1 1 180px',
               minWidth: isNarrowMobile ? '100%' : isMobile ? 0 : 180,
-              height: 40,
               justifyContent: 'center',
-              opacity: !driveConnected ? 0.55 : 1
+              opacity: !canUseDrive ? 0.55 : 1
             }}
           >
             Crear Magatzem
           </Button>
           <Button
-            variant="primary"
+            variant="secondary"
             size="sm"
-            disabled={!driveConnected}
-            title={!driveConnected ? 'Connecta Google Drive per crear aquest element.' : undefined}
-            onClick={() => navigate(`/orders?project=${id}`)}
+            onClick={guarded(true, () => navigate(`/orders?project=${id}`))}
             style={{
+              ...actionButtonStyle,
               flex: isNarrowMobile ? '1 1 100%' : isMobile ? '1 1 calc(50% - 6px)' : '1 1 180px',
               minWidth: isNarrowMobile ? '100%' : isMobile ? 0 : 180,
-              height: 40,
               justifyContent: 'center',
-              opacity: !driveConnected ? 0.55 : 1
+              opacity: !canUseDrive ? 0.55 : 1
             }}
           >
             Crear Comanda (PO)
           </Button>
           <Button
-            variant="secondary"
+            variant="primary"
             size="sm"
-            onClick={() => openCreateModal('expense')}
+            onClick={guarded(false, () => openCreateModal('expense'))}
             style={{
+              ...actionButtonStyle,
               flex: isNarrowMobile ? '1 1 100%' : isMobile ? '1 1 calc(50% - 6px)' : '1 1 180px',
               minWidth: isNarrowMobile ? '100%' : isMobile ? 0 : 180,
-              height: 40,
               justifyContent: 'center'
             }}
           >
@@ -1842,18 +1850,16 @@ function ProjectDetailInner({ useApp }) {
           <Button
             variant="secondary"
             size="sm"
-            disabled={!driveConnected}
-            title={!driveConnected ? 'Connecta Google Drive per crear aquest element.' : undefined}
-            onClick={() => {
+            onClick={guarded(true, () => {
               const target = document.getElementById('documents-section')
               if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' })
-            }}
+            })}
             style={{
+              ...actionButtonStyle,
               flex: isNarrowMobile ? '1 1 100%' : isMobile ? '1 1 calc(50% - 6px)' : '1 1 180px',
               minWidth: isNarrowMobile ? '100%' : isMobile ? 0 : 180,
-              height: 40,
               justifyContent: 'center',
-              opacity: !driveConnected ? 0.55 : 1
+              opacity: !canUseDrive ? 0.55 : 1
             }}
           >
             + Document
