@@ -361,7 +361,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderBottom: '1px solid var(--border-color)'
+    borderBottom: 'none'
   },
   title: {
     margin: 0,
