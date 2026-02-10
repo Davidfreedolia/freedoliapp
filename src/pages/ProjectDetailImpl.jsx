@@ -1578,22 +1578,19 @@ function ProjectDetailInner({ useApp }) {
   }
   const phaseLabel = PHASE_LABELS[project?.current_phase] || `PHASE ${project?.current_phase || '—'}`
   const thumbnailUrl = project?.asin_image_url || project?.main_image_url || project?.asin_image || project?.image_url || project?.image || null
-  const isNarrowMobile = isMobile && typeof window !== 'undefined' && window.innerWidth < 420
-  const actionButtonStyle = {
-    height: 36,
-    padding: '0 14px',
-    borderRadius: 12,
-    fontSize: 14,
-    fontWeight: 600,
-    minWidth: 0
+  const btnStateStyle = (state) => {
+    if (state === 'inactive') return { opacity: 0.45, cursor: 'not-allowed' }
+    if (state === 'drive') return { opacity: 0.65, cursor: 'pointer' }
+    return { opacity: 1, cursor: 'pointer' }
   }
-  const canUseDrive = !!driveConnected
-  const toastDrive = () => {
-    alert('Connecta Google Drive per utilitzar aquesta acció.')
-  }
-  const guarded = (needsDrive, fn) => () => {
-    if (needsDrive && !canUseDrive) return toastDrive()
-    return fn?.()
+
+  const driveAlert = () => alert('Cal connectar Google Drive')
+
+  const handleCreatePO = () => navigate(`/orders?project=${id}`)
+  const handleCreateExpense = () => openCreateModal('expense')
+  const handleAddDocument = () => {
+    const target = document.getElementById('documents-section')
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   return (
@@ -1779,104 +1776,50 @@ function ProjectDetailInner({ useApp }) {
           boxSizing: 'border-box'
         }}>
           <Button
-            variant="secondary"
+            variant="primary"
             size="sm"
-            onClick={guarded(true, () => openCreateModal('supplier'))}
-            style={{
-              ...actionButtonStyle,
-              backgroundColor: 'var(--surface-bg-2)',
-              color: 'var(--muted-1)',
-              opacity: 0.9,
-              flex: isNarrowMobile ? '1 1 100%' : isMobile ? '1 1 calc(50% - 6px)' : '1 1 180px',
-              minWidth: isNarrowMobile ? '100%' : isMobile ? 0 : 180,
-              justifyContent: 'center',
-              opacity: !canUseDrive ? 0.9 : 1
-            }}
+            disabled
+            style={btnStateStyle('inactive')}
           >
             Crear Proveïdor
           </Button>
           <Button
-            variant="secondary"
+            variant="primary"
             size="sm"
-            onClick={guarded(true, () => openCreateModal('forwarder'))}
-            style={{
-              ...actionButtonStyle,
-              backgroundColor: 'var(--surface-bg-2)',
-              color: 'var(--muted-1)',
-              opacity: 0.9,
-              flex: isNarrowMobile ? '1 1 100%' : isMobile ? '1 1 calc(50% - 6px)' : '1 1 180px',
-              minWidth: isNarrowMobile ? '100%' : isMobile ? 0 : 180,
-              justifyContent: 'center',
-              opacity: !canUseDrive ? 0.9 : 1
-            }}
+            disabled
+            style={btnStateStyle('inactive')}
           >
             Crear Transitari
           </Button>
           <Button
-            variant="secondary"
+            variant="primary"
             size="sm"
-            onClick={guarded(true, () => openCreateModal('warehouse'))}
-            style={{
-              ...actionButtonStyle,
-              backgroundColor: 'var(--surface-bg-2)',
-              color: 'var(--muted-1)',
-              opacity: 0.9,
-              flex: isNarrowMobile ? '1 1 100%' : isMobile ? '1 1 calc(50% - 6px)' : '1 1 180px',
-              minWidth: isNarrowMobile ? '100%' : isMobile ? 0 : 180,
-              justifyContent: 'center',
-              opacity: !canUseDrive ? 0.9 : 1
-            }}
+            disabled
+            style={btnStateStyle('inactive')}
           >
             Crear Magatzem
           </Button>
           <Button
             variant="primary"
             size="sm"
-            onClick={guarded(true, () => navigate(`/orders?project=${id}`))}
-            style={{
-              ...actionButtonStyle,
-              backgroundColor: 'var(--text-1)',
-              color: 'var(--surface-bg)',
-              flex: isNarrowMobile ? '1 1 100%' : isMobile ? '1 1 calc(50% - 6px)' : '1 1 180px',
-              minWidth: isNarrowMobile ? '100%' : isMobile ? 0 : 180,
-              justifyContent: 'center',
-              opacity: !canUseDrive ? 0.9 : 1
-            }}
+            style={btnStateStyle('active')}
+            onClick={handleCreatePO}
           >
             Crear Comanda (PO)
           </Button>
           <Button
             variant="primary"
             size="sm"
-            onClick={guarded(false, () => openCreateModal('expense'))}
-            style={{
-              ...actionButtonStyle,
-              backgroundColor: 'var(--text-1)',
-              color: 'var(--surface-bg)',
-              flex: isNarrowMobile ? '1 1 100%' : isMobile ? '1 1 calc(50% - 6px)' : '1 1 180px',
-              minWidth: isNarrowMobile ? '100%' : isMobile ? 0 : 180,
-              justifyContent: 'center'
-            }}
+            style={btnStateStyle('active')}
+            onClick={handleCreateExpense}
           >
             Crear Despesa
           </Button>
           <Button
-            variant="secondary"
+            variant="primary"
             size="sm"
-            onClick={guarded(true, () => {
-              const target = document.getElementById('documents-section')
-              if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' })
-            })}
-            style={{
-              ...actionButtonStyle,
-              backgroundColor: 'var(--surface-bg-2)',
-              color: 'var(--muted-1)',
-              opacity: 0.9,
-              flex: isNarrowMobile ? '1 1 100%' : isMobile ? '1 1 calc(50% - 6px)' : '1 1 180px',
-              minWidth: isNarrowMobile ? '100%' : isMobile ? 0 : 180,
-              justifyContent: 'center',
-              opacity: !canUseDrive ? 0.9 : 1
-            }}
+            style={btnStateStyle(driveConnected ? 'active' : 'drive')}
+            onClick={driveConnected ? handleAddDocument : driveAlert}
           >
             + Document
           </Button>
