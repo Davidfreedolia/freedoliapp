@@ -1601,27 +1601,31 @@ function ProjectDetailInner({ useApp }) {
           boxSizing: 'border-box'
         }}>
           {/* Left: Thumb + Title */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
-            {/* Thumb */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, minWidth: 0 }}>
             <div
-              className="project-header__thumb"
-              style={{ width: 48, height: 48, flex: '0 0 48px', borderRadius: 12, overflow: 'hidden' }}
-              title={thumbnailUrl ? undefined : 'ASIN image not available yet'}
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 12,
+                overflow: 'hidden',
+                flex: '0 0 auto',
+                background: 'var(--surface-bg-2)',
+                border: '1px solid var(--border-1)',
+                display: 'grid',
+                placeItems: 'center'
+              }}
+              aria-label="Project thumbnail"
             >
               {thumbnailUrl ? (
                 <img
                   src={thumbnailUrl}
-                  alt={project.asin ? `ASIN ${project.asin}` : 'ASIN'}
+                  alt=""
                   style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  loading="lazy"
+                  onError={(e) => { e.currentTarget.style.display = 'none' }}
                 />
               ) : (
-                <div style={{
-                  width: '100%', height: '100%', display: 'flex',
-                  alignItems: 'center', justifyContent: 'center',
-                  background: 'var(--surface-bg-2)'
-                }}>
-                  <Package size={18} />
-                </div>
+                <Package size={18} color="var(--muted-1)" />
               )}
             </div>
 
