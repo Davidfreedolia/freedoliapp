@@ -33,7 +33,8 @@ import {
   Search,
   Calculator,
   Factory,
-  Rocket
+  Rocket,
+  Lock
 } from 'lucide-react'
 import Header from '../components/Header'
 import MarketplaceTag, { MarketplaceTagGroup } from '../components/MarketplaceTag'
@@ -249,7 +250,7 @@ function PhaseSection({ phaseId, currentPhaseId, phaseStyle, darkMode, children 
     <section style={{
       ...styles.phaseSection,
       borderColor: sectionBorder,
-      borderTopColor: phaseStyle.accent,
+      borderTopColor: sectionBorder,
       backgroundColor: sectionBg
     }}>
       <Button
@@ -330,6 +331,26 @@ function ProjectDetailInner({ useApp }) {
   const [createSaving, setCreateSaving] = useState(false)
   const [expenseCategories, setExpenseCategories] = useState([])
   const [showNotesPanel, setShowNotesPanel] = useState(false)
+  const [researchAsinInput, setResearchAsinInput] = useState('')
+  const [researchSnapshot, setResearchSnapshot] = useState({
+    asin: '',
+    url: '',
+    title: '',
+    thumbUrl: '',
+    price: '',
+    weight: '',
+    dims: ''
+  })
+  const [researchChecks, setResearchChecks] = useState({
+    demand: false,
+    competition: false,
+    simple: false,
+    improvable: false
+  })
+  const [researchTouched, setResearchTouched] = useState(false)
+  const [researchOverrideOpen, setResearchOverrideOpen] = useState(false)
+  const [researchDecision, setResearchDecision] = useState(null)
+  const [researchMsg, setResearchMsg] = useState(null)
   const { notes, loading: notesLoading } = useNotes()
   const loadSeqRef = useRef(0)
   const mountedRef = useRef(false)
@@ -401,6 +422,115 @@ function ProjectDetailInner({ useApp }) {
     }
   }
 
+  const extractAsin = (value) => {
+    const v = (value || '').trim()
+    if (!v) return ''
+    if (/^[A-Z0-9]{10}$/i.test(v)) return v.toUpperCase()
+    const m = v.match(/(?:\/dp\/|\/gp\/product\/)([A-Z0-9]{10})/i)
+    return m?.[1]?.toUpperCase() || ''
+  }
+
+  const buildAmazonUrl = (asin) => asin ? `https://www.amazon.es/dp/${asin}` : ''
+
+  const researchAllChecksOk = useMemo(() => {
+    return !!(researchChecks.demand && researchChecks.competition && researchChecks.simple && researchChecks.improvable)
+  }, [researchChecks])
+
+  const researchHasAsin = useMemo(() => {
+    return !!(researchSnapshot.asin && /^[A-Z0-9]{10}$/.test(researchSnapshot.asin))
+  }, [researchSnapshot.asin])
+
+  const persistResearch = (next) => {
+    if (!id) return
+    try {
+      localStorage.setItem(`research_${id}`, JSON.stringify(next))
+    } catch (_) {}
+  }
+
+  const loadResearch = () => {
+    if (!id) return
+    try {
+      const raw = localStorage.getItem(`research_${id}`)
+      if (!raw) return
+      const parsed = JSON.parse(raw)
+      if (!parsed || typeof parsed !== 'object') return
+      if (parsed.snapshot) setResearchSnapshot(prev => ({ ...prev, ...parsed.snapshot }))
+      if (parsed.checks) setResearchChecks(prev => ({ ...prev, ...parsed.checks }))
+      if (parsed.decision) setResearchDecision(parsed.decision)
+      if (parsed.asinInput) setResearchAsinInput(parsed.asinInput)
+    } catch (_) {}
+  }
+
+  const setMsg = (type, text) => {
+    setResearchMsg({ type, text })
+    window.setTimeout(() => setResearchMsg(null), type === 'success' ? 1600 : 2200)
+  }
+
+  const handleAsinLoad = () => {
+    setResearchTouched(true)
+    const asin = extractAsin(researchAsinInput)
+    if (!asin) {
+      setMsg('error', 'ASIN o URL no vàlids')
+      return
+    }
+    const url = buildAmazonUrl(asin)
+    const defaultThumb = thumbnailUrl || ''
+    const nextSnapshot = {
+      ...researchSnapshot,
+      asin,
+      url: researchSnapshot.url?.trim() ? researchSnapshot.url : url,
+      thumbUrl: (researchSnapshot.thumbUrl || '').trim() ? researchSnapshot.thumbUrl : defaultThumb
+    }
+    setResearchSnapshot(nextSnapshot)
+    const next = {
+      asinInput: researchAsinInput,
+      snapshot: nextSnapshot,
+      checks: researchChecks,
+      decision: researchDecision
+    }
+    persistResearch(next)
+    setMsg('success', 'ASIN carregat')
+  }
+
+  const saveResearch = () => {
+    const next = {
+      asinInput: researchAsinInput,
+      snapshot: researchSnapshot,
+      checks: researchChecks,
+      decision: researchDecision
+    }
+    persistResearch(next)
+    setMsg('success', 'Guardat (local)')
+  }
+
+  const resetResearch = () => {
+    setResearchAsinInput('')
+    setResearchSnapshot({ asin: '', url: '', title: '', thumbUrl: '', price: '', weight: '', dims: '' })
+    setResearchChecks({ demand: false, competition: false, simple: false, improvable: false })
+    setResearchDecision(null)
+    setResearchTouched(false)
+    setResearchOverrideOpen(false)
+    setResearchMsg(null)
+    try { if (id) localStorage.removeItem(`research_${id}`) } catch (_) {}
+  }
+
+  const markResearchDecision = (pass, forced = false) => {
+    if (!researchHasAsin) {
+      setMsg('error', 'Primer defineix l’ASIN')
+      return
+    }
+    const decision = { pass: !!pass, forced: !!forced, at: Date.now() }
+    setResearchDecision(decision)
+    const next = {
+      asinInput: researchAsinInput,
+      snapshot: researchSnapshot,
+      checks: researchChecks,
+      decision
+    }
+    persistResearch(next)
+    setMsg('success', pass ? (forced ? 'PASSA (forçat)' : 'PASSA') : 'NO PASSA')
+  }
+
   // Carregar PROJECT_SUBFOLDERS dinàmicament per evitar cicles d'imports
   useEffect(() => {
     import('../constants/projectDrive').then((mod) => {
@@ -417,6 +547,12 @@ function ProjectDetailInner({ useApp }) {
       setLoading(false)
       setError('ID de projecte no vàlid')
     }
+  }, [id])
+
+  useEffect(() => {
+    if (!id) return
+    loadResearch()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
   // M3 — fetch marketplace TAGS for this project (UI-only mapping, no new business logic)
@@ -1129,6 +1265,356 @@ function ProjectDetailInner({ useApp }) {
         return (
           <>
             <CollapsibleSection
+              title="Recerca (ASIN)"
+              icon={Search}
+              defaultOpen={true}
+              darkMode={darkMode}
+              phaseStyle={currentPhase}
+            >
+              <div style={{ display: 'grid', gap: 14 }}>
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+                  <input
+                    type="text"
+                    value={researchAsinInput}
+                    onChange={(e) => {
+                      setResearchTouched(true)
+                      setResearchAsinInput(e.target.value)
+                    }}
+                    placeholder="ASIN o URL Amazon (ex: B0XXXXXXXXX o https://www.amazon.../dp/B0XXXXXXXXX)"
+                    style={{
+                      flex: '1 1 420px',
+                      height: 40,
+                      borderRadius: 12,
+                      border: '1px solid var(--border-1)',
+                      background: 'var(--surface-bg)',
+                      color: 'var(--text-1)',
+                      padding: '0 12px',
+                      outline: 'none'
+                    }}
+                  />
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={handleAsinLoad}
+                    disabled={!extractAsin(researchAsinInput)}
+                    title={!extractAsin(researchAsinInput) ? 'Introdueix un ASIN o URL vàlid' : 'Carregar'}
+                  >
+                    Carregar producte
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={saveResearch}
+                    disabled={!researchTouched && !researchHasAsin}
+                  >
+                    Guardar
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={resetResearch}
+                    disabled={!researchTouched && !researchHasAsin && !researchDecision}
+                  >
+                    Reset
+                  </Button>
+                </div>
+
+                {researchMsg && (
+                  <div style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: researchMsg.type === 'success' ? 'var(--success-1)' : 'var(--danger-1)'
+                  }}>
+                    {researchMsg.text}
+                  </div>
+                )}
+
+                <div style={{ display: 'grid', gap: 10 }}>
+                  {!researchHasAsin ? (
+                    <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>
+                      Introdueix un ASIN per donar vida al projecte.
+                    </div>
+                  ) : (
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: isMobile ? '1fr' : '120px 1fr',
+                      gap: 12,
+                      alignItems: 'start'
+                    }}>
+                      <div style={{
+                        width: 120,
+                        height: 120,
+                        borderRadius: 14,
+                        overflow: 'hidden',
+                        background: 'var(--surface-bg-2)',
+                        border: '1px solid var(--border-1)',
+                        display: 'grid',
+                        placeItems: 'center'
+                      }}>
+                        {researchSnapshot.thumbUrl ? (
+                          <img
+                            src={researchSnapshot.thumbUrl}
+                            alt=""
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                            loading="lazy"
+                            onError={(e) => { e.currentTarget.style.display = 'none' }}
+                          />
+                        ) : (
+                          <Image size={18} color="var(--muted-1)" />
+                        )}
+                      </div>
+
+                      <div style={{ display: 'grid', gap: 10 }}>
+                        <div style={{ display: 'grid', gap: 6 }}>
+                          <div style={{ fontSize: 12, color: 'var(--muted-1)' }}>ASIN</div>
+                          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-1)' }}>
+                            {researchSnapshot.asin}
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10 }}>
+                          <label style={{ display: 'grid', gap: 6, fontSize: 12, color: 'var(--muted-1)' }}>
+                            Títol
+                            <input
+                              type="text"
+                              value={researchSnapshot.title}
+                              onChange={(e) => {
+                                setResearchTouched(true)
+                                const next = { ...researchSnapshot, title: e.target.value }
+                                setResearchSnapshot(next)
+                              }}
+                              placeholder="Nom del producte (base)"
+                              style={{
+                                height: 40,
+                                borderRadius: 12,
+                                border: '1px solid var(--border-1)',
+                                background: 'var(--surface-bg)',
+                                color: 'var(--text-1)',
+                                padding: '0 12px',
+                                outline: 'none'
+                              }}
+                            />
+                          </label>
+
+                          <label style={{ display: 'grid', gap: 6, fontSize: 12, color: 'var(--muted-1)' }}>
+                            Preu (aprox.)
+                            <input
+                              type="text"
+                              value={researchSnapshot.price}
+                              onChange={(e) => {
+                                setResearchTouched(true)
+                                const next = { ...researchSnapshot, price: e.target.value }
+                                setResearchSnapshot(next)
+                              }}
+                              placeholder="ex: 19.99"
+                              style={{
+                                height: 40,
+                                borderRadius: 12,
+                                border: '1px solid var(--border-1)',
+                                background: 'var(--surface-bg)',
+                                color: 'var(--text-1)',
+                                padding: '0 12px',
+                                outline: 'none'
+                              }}
+                            />
+                          </label>
+
+                          <label style={{ display: 'grid', gap: 6, fontSize: 12, color: 'var(--muted-1)' }}>
+                            Pes (aprox.)
+                            <input
+                              type="text"
+                              value={researchSnapshot.weight}
+                              onChange={(e) => {
+                                setResearchTouched(true)
+                                const next = { ...researchSnapshot, weight: e.target.value }
+                                setResearchSnapshot(next)
+                              }}
+                              placeholder="ex: 1.2 kg"
+                              style={{
+                                height: 40,
+                                borderRadius: 12,
+                                border: '1px solid var(--border-1)',
+                                background: 'var(--surface-bg)',
+                                color: 'var(--text-1)',
+                                padding: '0 12px',
+                                outline: 'none'
+                              }}
+                            />
+                          </label>
+
+                          <label style={{ display: 'grid', gap: 6, fontSize: 12, color: 'var(--muted-1)' }}>
+                            Mides paquet (aprox.)
+                            <input
+                              type="text"
+                              value={researchSnapshot.dims}
+                              onChange={(e) => {
+                                setResearchTouched(true)
+                                const next = { ...researchSnapshot, dims: e.target.value }
+                                setResearchSnapshot(next)
+                              }}
+                              placeholder="ex: 40×30×10 cm"
+                              style={{
+                                height: 40,
+                                borderRadius: 12,
+                                border: '1px solid var(--border-1)',
+                                background: 'var(--surface-bg)',
+                                color: 'var(--text-1)',
+                                padding: '0 12px',
+                                outline: 'none'
+                              }}
+                            />
+                          </label>
+                        </div>
+
+                        <label style={{ display: 'grid', gap: 6, fontSize: 12, color: 'var(--muted-1)' }}>
+                          URL Amazon
+                          <input
+                            type="text"
+                            value={researchSnapshot.url}
+                            onChange={(e) => {
+                              setResearchTouched(true)
+                              const next = { ...researchSnapshot, url: e.target.value }
+                              setResearchSnapshot(next)
+                            }}
+                            placeholder={buildAmazonUrl(researchSnapshot.asin)}
+                            style={{
+                              height: 40,
+                              borderRadius: 12,
+                              border: '1px solid var(--border-1)',
+                              background: 'var(--surface-bg)',
+                              color: 'var(--text-1)',
+                              padding: '0 12px',
+                              outline: 'none'
+                            }}
+                          />
+                        </label>
+
+                        <label style={{ display: 'grid', gap: 6, fontSize: 12, color: 'var(--muted-1)' }}>
+                          Thumb URL (opcional)
+                          <input
+                            type="text"
+                            value={researchSnapshot.thumbUrl}
+                            onChange={(e) => {
+                              setResearchTouched(true)
+                              const next = { ...researchSnapshot, thumbUrl: e.target.value }
+                              setResearchSnapshot(next)
+                            }}
+                            placeholder="https://…jpg"
+                            style={{
+                              height: 40,
+                              borderRadius: 12,
+                              border: '1px solid var(--border-1)',
+                              background: 'var(--surface-bg)',
+                              color: 'var(--text-1)',
+                              padding: '0 12px',
+                              outline: 'none'
+                            }}
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ display: 'grid', gap: 10, marginTop: 6 }}>
+                  <div style={{ fontSize: 12, color: 'var(--muted-1)' }}>Checks de recerca</div>
+                  {[
+                    { key: 'demand', label: 'Demanda aparent' },
+                    { key: 'competition', label: 'Competència assumible' },
+                    { key: 'simple', label: 'Producte simple (risc baix)' },
+                    { key: 'improvable', label: 'Millorable / diferenciable' }
+                  ].map((c) => (
+                    <label key={c.key} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, color: 'var(--text-1)' }}>
+                      <input
+                        type="checkbox"
+                        checked={!!researchChecks[c.key]}
+                        onChange={(e) => {
+                          setResearchTouched(true)
+                          const nextChecks = { ...researchChecks, [c.key]: e.target.checked }
+                          setResearchChecks(nextChecks)
+                        }}
+                      />
+                      {c.label}
+                    </label>
+                  ))}
+                </div>
+
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginTop: 8 }}>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => markResearchDecision(true, false)}
+                    disabled={!researchHasAsin || !researchAllChecksOk}
+                    title={!researchHasAsin ? 'Primer defineix l’ASIN' : (!researchAllChecksOk ? 'Falten checks' : 'PASSA')}
+                  >
+                    PASSA
+                  </Button>
+
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => markResearchDecision(false, false)}
+                    disabled={!researchHasAsin}
+                    title={!researchHasAsin ? 'Primer defineix l’ASIN' : 'NO PASSA'}
+                  >
+                    NO PASSA
+                  </Button>
+
+                  {!researchAllChecksOk && researchHasAsin && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setResearchOverrideOpen(true)}
+                      title="Forçar PASSA (override)"
+                    >
+                      <Lock size={16} /> Forçar PASSA
+                    </Button>
+                  )}
+
+                  {researchDecision && (
+                    <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>
+                      Estat: <strong style={{ color: 'var(--text-1)' }}>{researchDecision.pass ? 'PASSA' : 'NO PASSA'}</strong>
+                      {researchDecision.forced ? ' (forçat)' : ''}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {researchOverrideOpen && (
+                <div style={modalStyles.overlay} onClick={() => setResearchOverrideOpen(false)}>
+                  <div
+                    style={{ ...modalStyles.modal, backgroundColor: darkMode ? '#111827' : '#ffffff' }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div style={modalStyles.header || styles.createModalHeader}>
+                      <h3 style={{ margin: 0, fontSize: 16 }}>Forçar PASSA</h3>
+                      <Button variant="ghost" size="sm" onClick={() => setResearchOverrideOpen(false)} aria-label="Tancar">×</Button>
+                    </div>
+                    <div style={modalStyles.body || styles.createModalBody}>
+                      <div style={{ fontSize: 13, color: darkMode ? '#d1d5db' : '#374151', lineHeight: 1.5 }}>
+                        Estàs marcant la fase com <strong>PASSA</strong> sense complir tots els checks.
+                        Això és un override manual.
+                      </div>
+                      <div style={styles.createModalFooter}>
+                        <Button variant="secondary" size="sm" onClick={() => setResearchOverrideOpen(false)}>Cancel·lar</Button>
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => {
+                            setResearchOverrideOpen(false)
+                            markResearchDecision(true, true)
+                          }}
+                        >
+                          Confirmar override
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CollapsibleSection>
+
+            <CollapsibleSection
               title="Resum del Projecte"
               icon={Info}
               defaultOpen={true}
@@ -1578,6 +2064,7 @@ function ProjectDetailInner({ useApp }) {
   }
   const phaseLabel = PHASE_LABELS[project?.current_phase] || `PHASE ${project?.current_phase || '—'}`
   const thumbnailUrl = project?.asin_image_url || project?.main_image_url || project?.asin_image || project?.image_url || project?.image || null
+  const effectiveThumbUrl = (researchSnapshot?.thumbUrl || '').trim() || thumbnailUrl || null
   const btnStateStyle = (state) => {
     if (state === 'inactive') return { opacity: 0.45, cursor: 'not-allowed' }
     if (state === 'drive') return { opacity: 0.65, cursor: 'pointer' }
@@ -1629,9 +2116,9 @@ function ProjectDetailInner({ useApp }) {
               }}
               aria-label="Project thumbnail"
             >
-              {thumbnailUrl ? (
+              {effectiveThumbUrl ? (
                 <img
-                  src={thumbnailUrl}
+                  src={effectiveThumbUrl}
                   alt=""
                   style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                   loading="lazy"
@@ -2408,7 +2895,7 @@ const styles = {
   phaseSection: {
     borderRadius: '16px',
     border: '1px solid',
-    borderTopWidth: '3px',
+    borderTopWidth: '1px',
     padding: '12px 16px',
     marginBottom: '20px',
     boxShadow: 'var(--shadow-soft)'
