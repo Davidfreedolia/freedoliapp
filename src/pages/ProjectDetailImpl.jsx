@@ -1382,30 +1382,34 @@ function ProjectDetailInner({ useApp }) {
 
               {/* Informe de recerca → Drive (drag & drop) */}
               <div style={{ marginTop: 10 }}>
-                {!driveConnected ? (
-                  <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>
-                    Connecta Google Drive per pujar l’informe de recerca.
+                <div
+                  style={{
+                    border: '1px dashed var(--border-1)',
+                    borderRadius: 14,
+                    padding: 12,
+                    background: 'transparent'
+                  }}
+                >
+                  <div style={{ fontSize: 12, color: 'var(--muted-1)', marginBottom: 8 }}>
+                    Informe de recerca
                   </div>
-                ) : !researchDriveFolderId ? (
-                  <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>
-                    Carregant carpeta de recerca...
-                  </div>
-                ) : (
-                  <div
-                    style={{
-                      border: '1px dashed var(--border-1)',
-                      borderRadius: 14,
-                      padding: 12,
-                      background: 'transparent'
-                    }}
-                  >
+
+                  {!driveConnected ? (
+                    <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>
+                      Connecta Google Drive per pujar l’informe (PDF, MD, TXT).
+                    </div>
+                  ) : !researchDriveFolderId ? (
+                    <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>
+                      Carregant carpeta de recerca...
+                    </div>
+                  ) : (
                     <FileUploader
                       folderId={researchDriveFolderId}
                       onUploadComplete={handleUploadComplete}
                       label="Arrossega aquí l’informe de recerca (PDF, MD, TXT)"
                     />
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
 
               {researchHasAsin ? (
@@ -1634,128 +1638,6 @@ function ProjectDetailInner({ useApp }) {
               </div>
             )}
 
-            <CollapsibleSection
-              title="Resum del Projecte"
-              icon={Info}
-              defaultOpen={true}
-              darkMode={darkMode}
-              phaseStyle={currentPhase}
-            >
-              <div style={{
-                backgroundColor: 'transparent',
-                border: 'none',
-                padding: 0,
-                marginBottom: '24px',
-                width: '100%',
-                boxSizing: 'border-box'
-              }}>
-                <PhaseChecklist
-                  project={project}
-                  currentPhase={phaseId}
-                  projectId={id}
-                  darkMode={darkMode}
-                  id="phase-checklist"
-                  onProgressUpdate={setPhaseProgress}
-                />
-              </div>
-
-              <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
-                <AmazonReadinessBadge
-                  projectId={id}
-                  darkMode={darkMode}
-                  phaseId={phaseId}
-                  onAssignGtin={() => {
-                    const targetId = phaseId >= 6
-                      ? 'identifiers-section'
-                      : 'competitive-asin-section'
-                    const target = document.getElementById(targetId)
-                    if (target) {
-                      target.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                    }
-                  }}
-                  onCreatePO={() => {
-                    navigate(`/orders?project=${id}&action=create`)
-                  }}
-                  onMarkExempt={() => {
-                    if (identifiersSectionRef.current) {
-                      identifiersSectionRef.current.markAsExempt()
-                    }
-                  }}
-                />
-              </Suspense>
-
-              {phaseId <= 2 && (
-                <div id="competitive-asin-section" style={{ marginTop: '24px' }}>
-                  <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
-                    <CompetitiveAsinSection
-                      projectId={id}
-                      darkMode={darkMode}
-                      phaseStyle={currentPhase}
-                    />
-                  </Suspense>
-                </div>
-              )}
-
-              <div style={{
-                marginTop: '24px',
-                padding: '20px',
-                ...phaseCardStyle
-              }}>
-                <h4 style={{
-                  margin: '0 0 16px 0',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  color: darkMode ? '#ffffff' : '#111827'
-                }}>
-                  Accions Ràpides
-                </h4>
-                <div style={styles.actionsGrid}>
-                  {phaseId >= 3 && (
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      style={{...styles.actionButton, backgroundColor: '#8b5cf6'}} 
-                      onClick={() => navigate(`/projects/${id}/briefing`)}
-                    >
-                      <ClipboardList size={18} />
-                      Briefing del Producte
-                    </Button>
-                  )}
-                  {phaseId >= 3 && (
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      style={{
-                        ...styles.actionButton, 
-                        backgroundColor: '#4f46e5',
-                        opacity: !driveConnected ? 0.5 : 1,
-                        cursor: !driveConnected ? 'not-allowed' : 'pointer'
-                      }} 
-                      disabled={!driveConnected}
-                      title={!driveConnected ? "Connecta Google Drive per crear" : ""}
-                      onClick={() => {
-                        if (!driveConnected) return
-                        navigate(`/orders?project=${id}`)
-                      }}
-                    >
-                      <ShoppingCart size={18} />
-                      Crear Comanda (PO)
-                    </Button>
-                  )}
-                  {phaseId === 7 && (
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      style={{...styles.actionButton, backgroundColor: '#4f46e5', border: '1px solid #4338ca'}} 
-                      onClick={() => navigate(`/inventory?project=${id}`)}
-                    >
-                      <Package size={18} />
-                      Gestionar Stock
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </CollapsibleSection>
           </>
         )
       case 2:
