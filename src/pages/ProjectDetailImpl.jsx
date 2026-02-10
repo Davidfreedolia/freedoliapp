@@ -30,9 +30,14 @@ import {
   DollarSign,
   FileImage,
   Paperclip,
-  StickyNote
+  StickyNote,
+  Search,
+  Calculator,
+  Factory,
+  Rocket
 } from 'lucide-react'
 import Header from '../components/Header'
+import MarketplaceTag, { MarketplaceTagGroup } from '../components/MarketplaceTag'
 import StatusBadge from '../components/StatusBadge'
 import FileUploader from '../components/FileUploader'
 import FileBrowser from '../components/FileBrowser'
@@ -250,6 +255,8 @@ function ProjectDetailInner({ useApp }) {
   const [project, setProject] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [marketplaceTags, setMarketplaceTags] = useState([])
+  const [marketplaceTagsLoading, setMarketplaceTagsLoading] = useState(false)
   const [projectFolders, setProjectFolders] = useState(null)
   const [selectedFolder, setSelectedFolder] = useState(null)
   const [documents, setDocuments] = useState([])
@@ -338,6 +345,46 @@ function ProjectDetailInner({ useApp }) {
       setLoading(false)
       setError('ID de projecte no vàlid')
     }
+  }, [id])
+
+  // M3 — fetch marketplace TAGS for this project (UI-only mapping, no new business logic)
+  useEffect(() => {
+    if (!id) return
+    let cancelled = false
+
+    const loadMarketplaceTags = async () => {
+      setMarketplaceTagsLoading(true)
+      try {
+        const { supabase } = await import('../lib/supabase')
+
+        const { data, error } = await supabase
+          .from('v_project_marketplace_tags')
+          .select('marketplace_code,is_primary,stock_state,is_active')
+          .eq('project_id', id)
+          .eq('is_active', true)
+          .order('is_primary', { ascending: false })
+          .order('marketplace_code', { ascending: true })
+
+        if (error) throw error
+        if (cancelled) return
+
+        // Fallback deterministic (contract): ES primary, stock_state none
+        const safe = Array.isArray(data) && data.length
+          ? data
+          : [{ marketplace_code: 'ES', is_primary: true, stock_state: 'none', is_active: true }]
+
+        setMarketplaceTags(safe)
+      } catch (e) {
+        if (cancelled) return
+        // On error, keep deterministic fallback (no heuristics)
+        setMarketplaceTags([{ marketplace_code: 'ES', is_primary: true, stock_state: 'none', is_active: true }])
+      } finally {
+        if (!cancelled) setMarketplaceTagsLoading(false)
+      }
+    }
+
+    loadMarketplaceTags()
+    return () => { cancelled = true }
   }, [id])
 
   useEffect(() => {
@@ -1353,6 +1400,7 @@ function ProjectDetailInner({ useApp }) {
             </CollapsibleSection>
 
             <CollapsibleSection
+              id="documents-section"
               title="Documents i Adjunts"
               icon={Paperclip}
               defaultOpen={false}
@@ -1536,6 +1584,7 @@ function ProjectDetailInner({ useApp }) {
       case 7:
         return (
           <CollapsibleSection
+            id="tasks-section"
             title="Tasques i Notes"
             icon={StickyNote}
             defaultOpen={false}
@@ -1584,315 +1633,311 @@ function ProjectDetailInner({ useApp }) {
     }
   }
 
+  const PHASE_LABELS = {
+    1: 'RESEARCH',
+    2: 'VIABILITY',
+    3: 'SUPPLIERS',
+    4: 'SAMPLES',
+    5: 'PRODUCTION',
+    6: 'LISTING',
+    7: 'LIVE',
+  }
+  const phaseLabel = PHASE_LABELS[project?.current_phase] || `PHASE ${project?.current_phase || '—'}`
+  const thumbnailUrl = project?.asin_image_url || project?.main_image_url || project?.asin_image || project?.image_url || project?.image || null
+  const isNarrowMobile = isMobile && typeof window !== 'undefined' && window.innerWidth < 420
+
   return (
     <div style={styles.container}>
-      <Header
-        title={project.name}
-        rightSlot={<StatusBadge status={project.status} decision={project.decision} />}
-      />
-
       <div style={{
         ...styles.content,
         padding: isMobile ? '16px' : '32px'
       }}>
-        <div style={{
-          ...styles.phaseStickyContainer,
-          borderColor: darkMode ? '#1f2937' : '#e5e7eb',
-          backgroundColor: darkMode ? '#0f172a' : '#ffffff'
+        {/* P-D1 — Project Header */}
+        <div className="project-header ui-card" style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 16,
+          padding: '20px 24px',
+          marginBottom: 16,
+          background: 'var(--surface-bg)',
+          boxShadow: 'var(--shadow-soft)',
+          borderRadius: 'var(--radius-ui)',
+          width: '100%',
+          boxSizing: 'border-box'
         }}>
-          <div style={styles.phaseTimelineSticky}>
-            <div style={{
-              ...styles.timeline,
-              flexWrap: 'nowrap',
-              gap: '0',
-              overflowX: 'auto',
-              paddingBottom: '6px'
-            }}>
-              {timelinePhases.map((phase, index) => {
-                const isActive = phase.id === phaseId
-                const isCompleted = phase.id < phaseId
-                const isFuture = phase.id > phaseId
-                const PhaseIcon = phase.icon
+          {/* Left: Thumb + Title */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
+            {/* Thumb */}
+            <div
+              className="project-header__thumb"
+              style={{ width: 48, height: 48, flex: '0 0 48px', borderRadius: 12, overflow: 'hidden' }}
+              title={thumbnailUrl ? undefined : 'ASIN image not available yet'}
+            >
+              {thumbnailUrl ? (
+                <img
+                  src={thumbnailUrl}
+                  alt={project.asin ? `ASIN ${project.asin}` : 'ASIN'}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
+              ) : (
+                <div style={{
+                  width: '100%', height: '100%', display: 'flex',
+                  alignItems: 'center', justifyContent: 'center',
+                  background: 'var(--surface-bg-2)'
+                }}>
+                  <Package size={18} />
+                </div>
+              )}
+            </div>
 
-                return (
-                  <div key={phase.id} style={styles.timelineItem}>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handlePhaseChange(phase.id)}
-                      style={{
-                        ...styles.phaseButton,
-                        backgroundColor: isActive
-                          ? phase.bg
-                          : (isCompleted ? phase.bg : 'var(--bg-secondary)'),
-                        borderColor: isActive || isCompleted ? phase.accent : 'var(--border-color)',
-                        color: isFuture ? '#9ca3af' : phase.accent,
-                        boxShadow: isActive ? `0 0 0 6px ${phase.bg}` : 'none'
-                      }}
-                    >
-                      {isCompleted ? (
-                        <Check size={20} color={phase.accent} />
-                      ) : (
-                        <PhaseIcon size={20} color={isFuture ? '#9ca3af' : phase.accent} />
-                      )}
-                    </Button>
-                    <span style={{
-                      ...styles.phaseName,
-                      color: isActive ? phase.accent : (darkMode ? '#9ca3af' : '#6b7280'),
-                      fontWeight: isActive ? '600' : '400',
-                      cursor: 'pointer'
-                    }}
-                    onClick={() => handlePhaseChange(phase.id)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault()
-                        handlePhaseChange(phase.id)
-                      }
-                    }}>
-                      {phase.name}
-                    </span>
-                    {index < timelinePhases.length - 1 && (
-                      <div style={{
-                        ...styles.timelineConnector,
-                        backgroundColor: isCompleted ? phase.accent : 'var(--border-color)'
-                      }} />
-                    )}
-                  </div>
-                )
-              })}
+            {/* Title + Meta */}
+            <div style={{ minWidth: 0 }}>
+              <h2 style={{ margin: 0, lineHeight: 1.2 }}>{project.name}</h2>
+              <div style={{ marginTop: 2, opacity: 0.8 }}>
+                <strong>{project.project_code}</strong>
+                <span style={{ opacity: 0.6 }}> · </span>
+                <span>{project.sku_internal || '—'}</span>
+              </div>
+
+              {/* Marketplace TAGS */}
+              <div style={{ marginTop: 8 }}>
+                <MarketplaceTagGroup>
+                  {(marketplaceTags || [{ marketplace_code: 'ES', is_primary: true, stock_state: 'none' }]).map((m) => (
+                    <MarketplaceTag
+                      key={`${m.marketplace_code}-${m.is_primary ? 'p' : 's'}`}
+                      code={m.marketplace_code}
+                      isPrimary={!!m.is_primary}
+                      stockState={(m.stock_state || 'none')}
+                    />
+                  ))}
+                </MarketplaceTagGroup>
+              </div>
             </div>
           </div>
-          <div style={styles.phaseCurrentBar}>
-            <div style={styles.phaseCurrentTopRow}>
-              <div style={styles.phaseCurrentInfo}>
-                <span style={{
-                  ...styles.phaseStatusChip,
-                  color: currentPhase.accent,
-                  borderColor: currentPhase.accent
-                }}>
-                  {phaseGroupLabel}
-                </span>
-                <div>
-                  <div style={{
-                    ...styles.phaseStatusTitle,
-                    color: darkMode ? '#ffffff' : '#111827'
-                  }}>
-                    {currentPhase.name}
-                  </div>
-                  <div style={{
-                    fontSize: '13px',
-                    color: darkMode ? '#9ca3af' : '#6b7280'
-                  }}>
-                    {phaseSubtitle}
-                  </div>
-                </div>
-              </div>
-              <div style={styles.phaseCurrentMeta}>
-                <div style={styles.phaseStatusCenter}>
-                  <span style={{
-                    fontSize: '12px',
-                    color: darkMode ? '#9ca3af' : '#6b7280'
-                  }}>
-                    Checklist
-                  </span>
-                  <strong style={{ color: currentPhase.accent }}>
-                    {phaseProgress.total ? `${phaseProgress.completed}/${phaseProgress.total}` : '—'}
-                  </strong>
-                </div>
-                {nextPhaseLabel ? (
-                  <div style={styles.phaseStatusNext}>
-                    <span style={{
-                      fontSize: '12px',
-                      color: darkMode ? '#9ca3af' : '#6b7280'
-                    }}>
-                      Següent fase
-                    </span>
-                    <div style={styles.phaseStatusNextRow}>
-                      <ChevronRight size={16} color={currentPhase.accent} />
-                      <span style={{
-                        fontSize: '13px',
-                        fontWeight: '600',
-                        color: darkMode ? '#ffffff' : '#111827'
-                      }}>
-                        {nextPhaseLabel}
-                      </span>
-                      {hasNextMissing && (
-                        <span style={{
-                          ...styles.phaseStatusWarning,
-                          borderColor: '#f59e0b',
-                          color: '#f59e0b'
-                        }}>
-                          {nextMissing.length} pendent{nextMissing.length > 1 ? 's' : ''}
-                        </span>
-                      )}
-                    </div>
-                    {hasNextMissing && (
-                      <>
-                        <div style={{
-                          fontSize: '12px',
-                          color: darkMode ? '#e5e7eb' : '#6b7280'
-                        }}>
-                          {missingPreview}
-                          {nextMissing.length > 3 ? '…' : ''}
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            const checklist = document.getElementById('phase-checklist')
-                            if (checklist) {
-                              checklist.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                            }
-                          }}
-                          style={styles.phaseStatusAction}
-                        >
-                          Veure pendents
-                        </Button>
-                      </>
-                    )}
-                    {hasViabilitySummary && (
-                      <div style={styles.phaseViabilitySummary}>
-                        Viabilitat: {viabilitySummary.profitPerUnit.toFixed(2)}€ · {viabilitySummary.netMarginPercent.toFixed(1)}%
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div style={styles.phaseStatusNext}>
-                    <span style={{
-                      fontSize: '12px',
-                      color: darkMode ? '#9ca3af' : '#6b7280'
-                    }}>
-                      Estat
-                    </span>
-                    <div style={styles.phaseStatusNextRow}>
-                      <CheckCircle2 size={16} color={currentPhase.accent} />
-                      <span style={{
-                        fontSize: '13px',
-                        fontWeight: '600',
-                        color: darkMode ? '#ffffff' : '#111827'
-                      }}>
-                        Totes les fases completes
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
+
+          {/* Right: Status + Phase */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <StatusBadge status={project.status} decision={project.decision} />
             </div>
-            <div style={styles.phaseActionsBar}>
-              {phaseId >= 3 && (
-                <Button
-                  variant={phaseId >= 3 ? 'ghost' : 'primary'}
-                  size="sm"
-                  onClick={() => navigate(`/projects/${id}/briefing`)}
-                >
-                  <ClipboardList size={16} />
-                  Briefing
-                </Button>
-              )}
-              {phaseId >= 3 && (
-                <Button
-                  variant={phaseId === 7 ? 'ghost' : 'primary'}
-                  size="sm"
-                  disabled={!driveConnected}
-                  onClick={() => {
-                    if (!driveConnected) return
-                    navigate(`/orders?project=${id}`)
-                  }}
-                >
-                  <ShoppingCart size={16} />
-                  Crear PO
-                </Button>
-              )}
-              {phaseId === 7 && (
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={() => navigate(`/inventory?project=${id}`)}
-                >
-                  <Package size={16} />
-                  Gestor stock
-                </Button>
-              )}
-              <div style={styles.createMenuWrapper} data-create-menu>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setCreateMenuOpen(prev => !prev)}
-                >
-                  <Plus size={16} />
-                  Crear...
-                  <ChevronDown size={14} />
-                </Button>
-                {createMenuOpen && (
-                  <div style={{
-                    ...styles.createMenu,
-                    backgroundColor: darkMode ? '#111827' : '#ffffff',
-                    borderColor: darkMode ? '#1f2937' : '#e5e7eb'
-                  }}>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      style={{
-                        ...styles.createMenuItem,
-                        color: darkMode ? '#e5e7eb' : '#374151'
-                      }}
-                      onClick={() => {
-                        setCreateMenuOpen(false)
-                        openCreateModal('supplier')
-                      }}
-                    >
-                      + Proveïdor
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      style={{
-                        ...styles.createMenuItem,
-                        color: darkMode ? '#e5e7eb' : '#374151'
-                      }}
-                      onClick={() => {
-                        setCreateMenuOpen(false)
-                        openCreateModal('warehouse')
-                      }}
-                    >
-                      + Magatzem
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      style={{
-                        ...styles.createMenuItem,
-                        color: darkMode ? '#e5e7eb' : '#374151'
-                      }}
-                      onClick={() => {
-                        setCreateMenuOpen(false)
-                        openCreateModal('forwarder')
-                      }}
-                    >
-                      + Transitari
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      style={{
-                        ...styles.createMenuItem,
-                        color: darkMode ? '#e5e7eb' : '#374151'
-                      }}
-                      onClick={() => {
-                        setCreateMenuOpen(false)
-                        openCreateModal('expense')
-                      }}
-                    >
-                      + Despesa
-                    </Button>
-                  </div>
-                )}
+            <div style={{ minWidth: 0 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, opacity: 0.8, marginBottom: 6 }}>
+                <span>{phaseLabel}</span>
+                <span>{project.current_phase}/7</span>
+              </div>
+              <div style={{
+                width: '100%',
+                height: 8,
+                borderRadius: 999,
+                background: 'var(--surface-bg-2)',
+                border: '1px solid var(--border-1)',
+                overflow: 'hidden'
+              }}>
+                <div style={{
+                  height: '100%',
+                  width: `${Math.round(((project.current_phase || 0) / 7) * 100)}%`,
+                  borderRadius: 999,
+                  background: 'var(--muted-1)'
+                }} />
+              </div>
+              <div style={{ marginTop: 10, overflowX: 'auto' }}>
+                {(() => {
+                  const cur = project?.current_phase || 0
+                  const steps = [
+                    { id: 1, label: 'Research', icon: Search },
+                    { id: 2, label: 'Viability', icon: Calculator },
+                    { id: 3, label: 'Suppliers', icon: Factory },
+                    { id: 4, label: 'Samples', icon: Package },
+                    { id: 5, label: 'Production', icon: ClipboardList },
+                    { id: 6, label: 'Listing', icon: FileText },
+                    { id: 7, label: 'Live', icon: Rocket },
+                  ]
+
+                  return (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'nowrap', minWidth: 'max-content' }}>
+                      {steps.map((s, idx) => {
+                        const Icon = s.icon
+                        const isDone = cur > s.id
+                        const isCurrent = cur === s.id
+
+                        return (
+                          <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 12, flex: idx === steps.length - 1 ? '0 0 auto' : '1 1 auto' }}>
+                            <span
+                              title={s.label}
+                              style={{
+                                width: 34,
+                                height: 34,
+                                borderRadius: 999,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                background: isDone ? 'color-mix(in srgb, var(--success-1) 18%, var(--surface-bg))'
+                                 : isCurrent ? 'color-mix(in srgb, var(--warning-1) 18%, var(--surface-bg))'
+                                 : 'var(--surface-bg)',
+                                border: `1px solid ${
+                                  isDone ? 'color-mix(in srgb, var(--success-1) 60%, var(--border-1))'
+                                  : isCurrent ? 'color-mix(in srgb, var(--warning-1) 60%, var(--border-1))'
+                                  : 'var(--border-1)'
+                                }`,
+                                boxShadow: isCurrent ? '0 0 0 3px color-mix(in srgb, var(--warning-1) 22%, transparent)' : 'none',
+                                color: isDone ? 'var(--success-1)' : isCurrent ? 'var(--warning-1)' : 'var(--muted-1)',
+                                opacity: isDone || isCurrent ? 1 : 0.75
+                              }}
+                            >
+                              <Icon size={16} />
+                            </span>
+
+                            {idx < steps.length - 1 ? (
+                              <span
+                                aria-hidden="true"
+                                style={{
+                                  height: 2,
+                                  flex: 1,
+                                  borderRadius: 999,
+                                  background: isDone ? 'color-mix(in srgb, var(--success-1) 65%, var(--border-1))' : 'var(--border-1)',
+                                  opacity: isDone ? 0.9 : 0.6
+                                }}
+                              />
+                            ) : null}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )
+                })()}
               </div>
             </div>
           </div>
         </div>
+
+        <div className="project-actions ui-card" style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'stretch',
+          gap: 12,
+          padding: '20px 24px',
+          marginBottom: 16,
+          background: 'var(--surface-bg)',
+          boxShadow: 'var(--shadow-soft)',
+          borderRadius: 'var(--radius-ui)',
+          width: '100%',
+          boxSizing: 'border-box'
+        }}>
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={!driveConnected}
+            title={!driveConnected ? 'Connecta Google Drive per crear aquest element.' : undefined}
+            onClick={() => openCreateModal('supplier')}
+            style={{
+              flex: isNarrowMobile ? '1 1 100%' : isMobile ? '1 1 calc(50% - 6px)' : '1 1 180px',
+              minWidth: isNarrowMobile ? '100%' : isMobile ? 0 : 180,
+              height: 40,
+              justifyContent: 'center',
+              opacity: !driveConnected ? 0.55 : 1
+            }}
+          >
+            Crear Proveïdor
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={!driveConnected}
+            title={!driveConnected ? 'Connecta Google Drive per crear aquest element.' : undefined}
+            onClick={() => openCreateModal('forwarder')}
+            style={{
+              flex: isNarrowMobile ? '1 1 100%' : isMobile ? '1 1 calc(50% - 6px)' : '1 1 180px',
+              minWidth: isNarrowMobile ? '100%' : isMobile ? 0 : 180,
+              height: 40,
+              justifyContent: 'center',
+              opacity: !driveConnected ? 0.55 : 1
+            }}
+          >
+            Crear Transitari
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={!driveConnected}
+            title={!driveConnected ? 'Connecta Google Drive per crear aquest element.' : undefined}
+            onClick={() => openCreateModal('warehouse')}
+            style={{
+              flex: isNarrowMobile ? '1 1 100%' : isMobile ? '1 1 calc(50% - 6px)' : '1 1 180px',
+              minWidth: isNarrowMobile ? '100%' : isMobile ? 0 : 180,
+              height: 40,
+              justifyContent: 'center',
+              opacity: !driveConnected ? 0.55 : 1
+            }}
+          >
+            Crear Magatzem
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            disabled={!driveConnected}
+            title={!driveConnected ? 'Connecta Google Drive per crear aquest element.' : undefined}
+            onClick={() => navigate(`/orders?project=${id}`)}
+            style={{
+              flex: isNarrowMobile ? '1 1 100%' : isMobile ? '1 1 calc(50% - 6px)' : '1 1 180px',
+              minWidth: isNarrowMobile ? '100%' : isMobile ? 0 : 180,
+              height: 40,
+              justifyContent: 'center',
+              opacity: !driveConnected ? 0.55 : 1
+            }}
+          >
+            Crear Comanda (PO)
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => openCreateModal('expense')}
+            style={{
+              flex: isNarrowMobile ? '1 1 100%' : isMobile ? '1 1 calc(50% - 6px)' : '1 1 180px',
+              minWidth: isNarrowMobile ? '100%' : isMobile ? 0 : 180,
+              height: 40,
+              justifyContent: 'center'
+            }}
+          >
+            Crear Despesa
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={!driveConnected}
+            title={!driveConnected ? 'Connecta Google Drive per crear aquest element.' : undefined}
+            onClick={() => {
+              const target = document.getElementById('documents-section')
+              if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }}
+            style={{
+              flex: isNarrowMobile ? '1 1 100%' : isMobile ? '1 1 calc(50% - 6px)' : '1 1 180px',
+              minWidth: isNarrowMobile ? '100%' : isMobile ? 0 : 180,
+              height: 40,
+              justifyContent: 'center',
+              opacity: !driveConnected ? 0.55 : 1
+            }}
+          >
+            + Document
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => {
+              const target = document.getElementById('tasks-section')
+              if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }}
+            style={{
+              flex: isNarrowMobile ? '1 1 100%' : isMobile ? '1 1 calc(50% - 6px)' : '1 1 180px',
+              minWidth: isNarrowMobile ? '100%' : isMobile ? 0 : 180,
+              height: 40,
+              justifyContent: 'center'
+            }}
+          >
+            + Task
+          </Button>
+        </div>
+
         {/* Banner DISCARDED */}
         {project.decision === 'DISCARDED' && (
           <div style={{
@@ -1924,29 +1969,6 @@ function ProjectDetailInner({ useApp }) {
             </Button>
           </div>
         )}
-
-        {/* Back button & Project info */}
-        <div style={styles.topBar}>
-          <Button variant="ghost" size="sm" onClick={() => navigate('/projects')} style={styles.backButton}>
-            <ArrowLeft size={18} />
-            Tornar
-          </Button>
-          <div style={styles.projectMeta}>
-            <span style={styles.projectCode}>{project.project_code}</span>
-            {project.sku && (
-              <span style={styles.sku}>Codi intern del projecte: {project.sku}</span>
-            )}
-          </div>
-          <Button
-            variant="secondary"
-            size="sm"
-            style={styles.notesButton}
-            onClick={() => setShowNotesPanel(true)}
-          >
-            <StickyNote size={16} />
-            Notes
-          </Button>
-        </div>
 
         {showNotesPanel && (
           <div style={styles.notesOverlay} onClick={() => setShowNotesPanel(false)}>
