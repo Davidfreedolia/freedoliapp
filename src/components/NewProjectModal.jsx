@@ -20,6 +20,7 @@ export default function NewProjectModal({ isOpen, onClose }) {
   const [generatingCode, setGeneratingCode] = useState(false)
   const [createMode, setCreateMode] = useState('asin')
   const [asinOrUrl, setAsinOrUrl] = useState('')
+  const [asinError, setAsinError] = useState('')
   const [reportFile, setReportFile] = useState(null)
   const [reportParsed, setReportParsed] = useState({ asin: '', title: '', thumb_url: '' })
   const [projectCodes, setProjectCodes] = useState({ projectCode: '', sku: '' })
@@ -51,10 +52,14 @@ export default function NewProjectModal({ isOpen, onClose }) {
   const extractAsin = (value) => {
     const v = (value || '').trim()
     if (!v) return ''
-    if (/^[A-Z0-9]{10}$/i.test(v)) return v.toUpperCase()
-    const m = v.match(/(?:\/dp\/|\/gp\/product\/)([A-Z0-9]{10})/i)
-    return m?.[1]?.toUpperCase() || ''
+    const urlMatch = v.match(/(?:\/dp\/|\/gp\/product\/|\/product\/)(B0[A-Z0-9]{8})/i)
+    if (urlMatch?.[1]) return urlMatch[1].toUpperCase()
+    const textMatch = v.match(/\bB0[A-Z0-9]{8}\b/i)
+    if (textMatch?.[0]) return textMatch[0].toUpperCase()
+    return ''
   }
+
+  const isUrlLike = (value) => /^https?:\/\//i.test((value || '').trim())
 
   const parseReport = (text) => {
     const getValues = (key) => {
@@ -149,12 +154,11 @@ export default function NewProjectModal({ isOpen, onClose }) {
         setCreatingFolders(false)
       }
 
-      await refreshProjects()
+      refreshProjects()
       setFormData({ name: '', description: '' })
       setProjectCodes({ projectCode: '', sku: '' })
-      onClose()
-      // Redirigir al Dashboard després de crear projecte
-      navigate('/')
+      handleClose()
+      navigate(`/projects/${newProject.id}`, { replace: true })
     } catch (err) {
       // Audit log: error creant projecte
       await logError('project', 'create', err, { 
@@ -214,7 +218,20 @@ export default function NewProjectModal({ isOpen, onClose }) {
                 <input
                   type="text"
                   value={asinOrUrl}
-                  onChange={(e) => setAsinOrUrl(e.target.value)}
+                  onChange={(e) => {
+                    const next = e.target.value
+                    setAsinOrUrl(next)
+                    if (!next.trim()) {
+                      setAsinError('')
+                      return
+                    }
+                    const asin = extractAsin(next)
+                    if (!asin && isUrlLike(next)) {
+                      setAsinError('Aquest enllaç no és una fitxa de producte. Enganxa la URL /dp/ASIN o l’ASIN.')
+                    } else {
+                      setAsinError('')
+                    }
+                  }}
                   placeholder="B0XXXXXXXX o https://www.amazon.../dp/B0XXXXXXXX"
                   className="fd-field__input fd-field__input--icon"
                   disabled={createMode === 'report'}
@@ -224,6 +241,14 @@ export default function NewProjectModal({ isOpen, onClose }) {
                 <div className="fd-modal__microcopy">
                   L’informe ja conté l’ASIN i dades clau.
                 </div>
+              ) : null}
+              {createMode !== 'report' ? (
+                <div className="fd-modal__microcopy">
+                  Formats: B0XXXXXXX o https://amazon.xx/dp/B0XXXXXXX
+                </div>
+              ) : null}
+              {createMode !== 'report' && asinError ? (
+                <div className="fd-field__error">{asinError}</div>
               ) : null}
             </div>
             <div className="fd-field">
