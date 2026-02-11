@@ -22,7 +22,13 @@ export default function NewProjectModal({ isOpen, onClose }) {
   const [asinOrUrl, setAsinOrUrl] = useState('')
   const [asinError, setAsinError] = useState('')
   const [reportFile, setReportFile] = useState(null)
-  const [reportParsed, setReportParsed] = useState({ asin: '', title: '', thumb_url: '' })
+  const [reportParsed, setReportParsed] = useState({
+    asin: '',
+    title: '',
+    thumb_url: '',
+    product_url: '',
+    summary: ''
+  })
   const [projectCodes, setProjectCodes] = useState({ projectCode: '', sku: '' })
   const [formData, setFormData] = useState({
     name: '',
@@ -52,9 +58,9 @@ export default function NewProjectModal({ isOpen, onClose }) {
   const extractAsin = (value) => {
     const v = (value || '').trim()
     if (!v) return ''
-    const urlMatch = v.match(/(?:\/dp\/|\/gp\/product\/|\/product\/)(B0[A-Z0-9]{8})/i)
+    const urlMatch = v.match(/(?:\/dp\/|\/gp\/product\/|\/product\/)(B0[A-Z0-9]{8,9})/i)
     if (urlMatch?.[1]) return urlMatch[1].toUpperCase()
-    const textMatch = v.match(/\bB0[A-Z0-9]{8}\b/i)
+    const textMatch = v.match(/\bB0[A-Z0-9]{8,9}\b/i)
     if (textMatch?.[0]) return textMatch[0].toUpperCase()
     return ''
   }
@@ -62,28 +68,30 @@ export default function NewProjectModal({ isOpen, onClose }) {
   const isUrlLike = (value) => /^https?:\/\//i.test((value || '').trim())
 
   const parseReport = (text) => {
-    const getValues = (key) => {
-      const re = new RegExp(`^\\s*${key}\\s*:\\s*(.*)$`, 'gmi')
-      const values = []
-      let match
-      while ((match = re.exec(text))) {
-        const v = (match[1] || '').trim()
-        if (v) values.push(v)
-      }
-      return values
+    const getSection = (label) => {
+      const re = new RegExp(`${label}[\\s\\S]*?(?=\\n#|\\n##|\\n###|$)`, 'i')
+      const m = text.match(re)
+      return m ? m[0] : ''
     }
+    const getValue = (section, key) => {
+      const re = new RegExp(`^\\s*${key}\\s*:\\s*(.*)$`, 'mi')
+      const m = section.match(re)
+      return m ? (m[1] || '').trim() : ''
+    }
+    const snapshot = getSection('PRODUCT_SNAPSHOT')
+    const decision = getSection('FINAL_DECISION')
+    const asin = extractAsin(getValue(snapshot, 'asin'))
+    const title = getValue(snapshot, 'title')
+    const thumb_url = getValue(snapshot, 'thumb_url')
+    const product_url = getValue(snapshot, 'product_url')
+    const summary = getValue(decision, 'summary')
+    return { asin, title, thumb_url, product_url, summary }
+  }
 
-    const asinValues = getValues('asin')
-    const asin = asinValues
-      .map(v => v.match(/[A-Z0-9]{10}/i)?.[0] || '')
-      .find(v => v) || ''
-
-    const title = getValues('title')[0] || ''
-
-    const thumbValues = getValues('thumb_url')
-    const thumb_url = thumbValues.find(v => /^https?:\/\//i.test(v)) || ''
-
-    return { asin, title, thumb_url }
+  const truncateText = (value, max) => {
+    const v = (value || '').trim()
+    if (!v) return ''
+    return v.length > max ? `${v.slice(0, max - 1).trimEnd()}…` : v
   }
 
   const handleReportFile = async (file) => {
@@ -92,19 +100,36 @@ export default function NewProjectModal({ isOpen, onClose }) {
       const parsed = parseReport(text)
       setReportParsed(parsed)
       setReportFile(file)
+      setFormData(prev => ({
+        ...prev,
+        name: prev.name.trim() ? prev.name : (parsed.title || ''),
+        description: prev.description.trim()
+          ? prev.description
+          : truncateText(parsed.summary, 180)
+      }))
     } catch {
-      setReportParsed({ asin: '', title: '', thumb_url: '' })
+      setReportParsed({ asin: '', title: '', thumb_url: '', product_url: '', summary: '' })
       setReportFile(null)
     }
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    const finalAsin = createMode === 'report' ? (reportParsed?.asin || '').trim() : extractAsin(asinOrUrl)
+    const finalAsin = createMode === 'report'
+      ? extractAsin(reportParsed?.asin || '')
+      : extractAsin(asinOrUrl)
     if (!finalAsin) return
+    const generatedThumbUrl = finalAsin
+      ? `https://m.media-amazon.com/images/P/${finalAsin}.01._SX300_.jpg`
+      : ''
     const finalName = formData.name.trim()
       || (createMode === 'report' ? (reportParsed?.title || '').trim() : '')
-      || finalAsin
+      || `ASIN ${finalAsin}`
+    const finalDescription = formData.description.trim()
+      || (createMode === 'report' ? truncateText(reportParsed?.summary, 180) : '')
+    const finalThumbUrl = (reportParsed?.thumb_url || '').trim() || generatedThumbUrl || ''
+    const finalProductUrl = (reportParsed?.product_url || '').trim()
+      || (isUrlLike(asinOrUrl) ? asinOrUrl.trim() : '')
     if (!projectCodes.projectCode) {
       showToast('Error: No s\'ha pogut generar el codi de projecte', 'error')
       return
@@ -113,15 +138,19 @@ export default function NewProjectModal({ isOpen, onClose }) {
     setLoading(true)
     try {
       // Crear projecte primer a Supabase (sense drive_folder_id encara)
-      const newProject = await createProject({
+      const payload = {
         project_code: projectCodes.projectCode,  // PR-FRDL250001
         sku: projectCodes.sku,                    // FRDL250001
         name: finalName,
-        description: formData.description.trim() || null,
+        description: finalDescription || null,
         current_phase: 1,
         status: 'active',
         drive_folder_id: null  // S'assignarà després
-      })
+      }
+      if (finalThumbUrl) {
+        payload.thumb_url = finalThumbUrl
+      }
+      const newProject = await createProject(payload)
 
       // Audit log: projecte creat
       await logSuccess('project', 'create', newProject.id, 'Project created successfully', {
@@ -154,6 +183,19 @@ export default function NewProjectModal({ isOpen, onClose }) {
         setCreatingFolders(false)
       }
 
+      try {
+        const snapshot = {
+          asin: finalAsin,
+          url: finalProductUrl,
+          title: finalName,
+          thumbUrl: finalThumbUrl
+        }
+        const seed = {
+          asinInput: createMode === 'report' ? finalProductUrl || finalAsin : asinOrUrl,
+          snapshot
+        }
+        localStorage.setItem(`research_${newProject.id}`, JSON.stringify(seed))
+      } catch (_) {}
       refreshProjects()
       setFormData({ name: '', description: '' })
       setProjectCodes({ projectCode: '', sku: '' })
@@ -176,9 +218,14 @@ export default function NewProjectModal({ isOpen, onClose }) {
     setCreateMode('asin')
     setAsinOrUrl('')
     setReportFile(null)
-    setReportParsed({ asin: '', title: '', thumb_url: '' })
+    setReportParsed({ asin: '', title: '', thumb_url: '', product_url: '', summary: '' })
     onClose()
   }
+
+  const asinPreview = extractAsin(asinOrUrl)
+  const asinThumbUrl = asinPreview
+    ? `https://m.media-amazon.com/images/P/${asinPreview}.01._SX300_.jpg`
+    : ''
 
   return (
     <div className="fd-modal__overlay" onClick={handleClose}>
@@ -251,6 +298,21 @@ export default function NewProjectModal({ isOpen, onClose }) {
                 <div className="fd-field__error">{asinError}</div>
               ) : null}
             </div>
+            {createMode === 'asin' && asinPreview ? (
+              <div className="fd-modal__preview fd-modal__preview--compact">
+                <div className="fd-modal__preview-meta">
+                  <div className="fd-modal__preview-asin">ASIN {asinPreview}</div>
+                  <div className="fd-modal__preview-title">
+                    {formData.name.trim() ? formData.name : `ASIN ${asinPreview}`}
+                  </div>
+                </div>
+                {asinThumbUrl ? (
+                  <img className="fd-modal__preview-img" src={asinThumbUrl} alt="" />
+                ) : (
+                  <div className="fd-modal__preview-img fd-modal__preview-img--placeholder" />
+                )}
+              </div>
+            ) : null}
             <div className="fd-field">
               <label className="fd-field__label">{t('projects.projectName')}</label>
               <input
@@ -290,7 +352,7 @@ export default function NewProjectModal({ isOpen, onClose }) {
                 <span>Arrossega l’informe .md aquí o fes clic</span>
               </button>
               {reportFile ? (
-                <div className="fd-modal__preview">
+                <div className="fd-modal__preview fd-modal__preview--compact">
                   <div className="fd-modal__preview-meta">
                     <div className="fd-modal__preview-asin">{reportParsed.asin || '—'}</div>
                     <div className="fd-modal__preview-title">{reportParsed.title || formData.name || '—'}</div>

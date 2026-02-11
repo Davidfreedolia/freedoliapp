@@ -1307,6 +1307,10 @@ body.dark .drive-btn--compact.drive--on {
   background: var(--surface-bg);
 }
 
+.fd-modal__preview--compact {
+  padding: 8px 10px;
+}
+
 .fd-modal__preview-meta {
   display: flex;
   flex-direction: column;
