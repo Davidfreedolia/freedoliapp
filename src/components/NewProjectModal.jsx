@@ -55,17 +55,32 @@ export default function NewProjectModal({ isOpen, onClose }) {
 
   if (!isOpen) return null
 
+  const isUrlLike = (value) => /^https?:\/\//i.test((value || '').trim())
+
   const extractAsin = (value) => {
     const v = (value || '').trim()
     if (!v) return ''
-    const urlMatch = v.match(/(?:\/dp\/|\/gp\/product\/|\/product\/)(B0[A-Z0-9]{8,9})/i)
-    if (urlMatch?.[1]) return urlMatch[1].toUpperCase()
-    const textMatch = v.match(/\bB0[A-Z0-9]{8,9}\b/i)
-    if (textMatch?.[0]) return textMatch[0].toUpperCase()
-    return ''
+    if (isUrlLike(v)) {
+      const urlMatch = v.match(/(?:\/dp\/|\/gp\/product\/)(B0[A-Z0-9]{8})/i)
+      return urlMatch?.[1]?.toUpperCase() || ''
+    }
+    const textMatch = v.match(/\bB0[A-Z0-9]{8}\b/i)
+    return textMatch?.[0]?.toUpperCase() || ''
   }
 
-  const isUrlLike = (value) => /^https?:\/\//i.test((value || '').trim())
+  const normalizeAmazonUrl = (input, asin) => {
+    const safeAsin = (asin || '').trim().toUpperCase()
+    if (!safeAsin) return ''
+    const match = (input || '').match(/amazon\.(co\.[a-z]{2}|[a-z]{2,})/i)
+    const tld = match?.[1]?.toLowerCase() || 'es'
+    return `https://www.amazon.${tld}/dp/${safeAsin}`
+  }
+
+  const buildAmazonThumbUrl = (asin) => {
+    const safeAsin = (asin || '').trim().toUpperCase()
+    if (!safeAsin) return ''
+    return `https://m.media-amazon.com/images/P/${safeAsin}.01._SX300_SY300_.jpg`
+  }
 
   const parseReport = (text) => {
     const getSection = (label) => {
@@ -119,17 +134,17 @@ export default function NewProjectModal({ isOpen, onClose }) {
       ? extractAsin(reportParsed?.asin || '')
       : extractAsin(asinOrUrl)
     if (!finalAsin) return
-    const generatedThumbUrl = finalAsin
-      ? `https://m.media-amazon.com/images/P/${finalAsin}.01._SX300_.jpg`
-      : ''
+    const generatedThumbUrl = buildAmazonThumbUrl(finalAsin)
     const finalName = formData.name.trim()
       || (createMode === 'report' ? (reportParsed?.title || '').trim() : '')
       || `ASIN ${finalAsin}`
     const finalDescription = formData.description.trim()
       || (createMode === 'report' ? truncateText(reportParsed?.summary, 180) : '')
-    const finalThumbUrl = (reportParsed?.thumb_url || '').trim() || generatedThumbUrl || ''
-    const finalProductUrl = (reportParsed?.product_url || '').trim()
-      || (isUrlLike(asinOrUrl) ? asinOrUrl.trim() : '')
+    const finalThumbUrl = (reportParsed?.thumb_url || '').trim() || generatedThumbUrl
+    const finalProductUrl = normalizeAmazonUrl(
+      createMode === 'report' ? (reportParsed?.product_url || '') : asinOrUrl,
+      finalAsin
+    )
     if (!projectCodes.projectCode) {
       showToast('Error: No s\'ha pogut generar el codi de projecte', 'error')
       return
@@ -144,14 +159,12 @@ export default function NewProjectModal({ isOpen, onClose }) {
         name: finalName,
         description: finalDescription || null,
         asin: finalAsin,
-        product_url: finalProductUrl || null,
+        product_url: finalProductUrl,
         current_phase: 1,
         status: 'active',
         drive_folder_id: null  // S'assignarà després
       }
-      if (finalThumbUrl) {
-        payload.thumb_url = finalThumbUrl
-      }
+      payload.thumb_url = finalThumbUrl
       const newProject = await createProject(payload)
 
       // Audit log: projecte creat
@@ -225,9 +238,7 @@ export default function NewProjectModal({ isOpen, onClose }) {
   }
 
   const asinPreview = extractAsin(asinOrUrl)
-  const asinThumbUrl = asinPreview
-    ? `https://m.media-amazon.com/images/P/${asinPreview}.01._SX300_.jpg`
-    : ''
+  const asinThumbUrl = buildAmazonThumbUrl(asinPreview)
 
   return (
     <div className="fd-modal__overlay" onClick={handleClose}>
