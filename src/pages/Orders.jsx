@@ -130,16 +130,6 @@ export default function Orders() {
     loadData()
   }, [])
 
-  useEffect(() => {
-    if (!filteredOrders.length) {
-      setSelectedOrderId(null)
-      return
-    }
-    if (!selectedOrderId || !filteredOrders.some(o => o.id === selectedOrderId)) {
-      setSelectedOrderId(filteredOrders[0].id)
-    }
-  }, [filteredOrders, selectedOrderId])
-
   // Abrir modal automáticamente si action=create en URL
   useEffect(() => {
     const action = searchParams.get('action')
@@ -604,6 +594,16 @@ export default function Orders() {
       return false
     }
   })
+
+  useEffect(() => {
+    if (!filteredOrders.length) {
+      setSelectedOrderId(null)
+      return
+    }
+    if (!selectedOrderId || !filteredOrders.some(o => o.id === selectedOrderId)) {
+      setSelectedOrderId(filteredOrders[0].id)
+    }
+  }, [filteredOrders, selectedOrderId])
 
   const effectiveLayout = isMobile ? 'list' : layout
   const selectedOrderCard = filteredOrders.find(o => o.id === selectedOrderId)
