@@ -21,6 +21,16 @@ export default function NewProjectModal({ isOpen, onClose }) {
   const [createMode, setCreateMode] = useState('asin')
   const [asinOrUrl, setAsinOrUrl] = useState('')
   const [asinError, setAsinError] = useState('')
+  const [enrichLoading, setEnrichLoading] = useState(false)
+  const [enrichError, setEnrichError] = useState('')
+  const [touchedName, setTouchedName] = useState(false)
+  const [touchedDescription, setTouchedDescription] = useState(false)
+  const [enrichData, setEnrichData] = useState({
+    title: '',
+    short_description: '',
+    thumb_url: '',
+    product_url: ''
+  })
   const [reportFile, setReportFile] = useState(null)
   const [reportParsed, setReportParsed] = useState({
     asin: '',
@@ -140,11 +150,12 @@ export default function NewProjectModal({ isOpen, onClose }) {
       || `ASIN ${finalAsin}`
     const finalDescription = formData.description.trim()
       || (createMode === 'report' ? truncateText(reportParsed?.summary, 180) : '')
-    const finalThumbUrl = (reportParsed?.thumb_url || '').trim() || generatedThumbUrl
-    const finalProductUrl = normalizeAmazonUrl(
-      createMode === 'report' ? (reportParsed?.product_url || '') : asinOrUrl,
-      finalAsin
-    )
+    const finalThumbUrl = createMode === 'report'
+      ? ((reportParsed?.thumb_url || '').trim() || generatedThumbUrl)
+      : ((enrichData.thumb_url || '').trim() || generatedThumbUrl)
+    const finalProductUrl = createMode === 'report'
+      ? normalizeAmazonUrl(reportParsed?.product_url || '', finalAsin)
+      : (enrichData.product_url || normalizeAmazonUrl(asinOrUrl, finalAsin))
     if (!projectCodes.projectCode) {
       showToast('Error: No s\'ha pogut generar el codi de projecte', 'error')
       return
@@ -232,13 +243,62 @@ export default function NewProjectModal({ isOpen, onClose }) {
     setProjectCodes({ projectCode: '', sku: '' })
     setCreateMode('asin')
     setAsinOrUrl('')
+    setEnrichLoading(false)
+    setEnrichError('')
+    setTouchedName(false)
+    setTouchedDescription(false)
+    setEnrichData({ title: '', short_description: '', thumb_url: '', product_url: '' })
     setReportFile(null)
     setReportParsed({ asin: '', title: '', thumb_url: '', product_url: '', summary: '' })
     onClose()
   }
 
   const asinPreview = extractAsin(asinOrUrl)
-  const asinThumbUrl = buildAmazonThumbUrl(asinPreview)
+  const asinThumbUrl = (enrichData.thumb_url || '').trim() || buildAmazonThumbUrl(asinPreview)
+
+  useEffect(() => {
+    if (createMode !== 'asin') return
+    const asin = extractAsin(asinOrUrl)
+    if (!asin) {
+      setEnrichLoading(false)
+      setEnrichError('')
+      setEnrichData({ title: '', short_description: '', thumb_url: '', product_url: '' })
+      return
+    }
+    setEnrichLoading(true)
+    setEnrichError('')
+    const timer = window.setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/asin-enrich?asin=${asin}&market=es`)
+        if (!res.ok) {
+          setEnrichError('No s’han pogut carregar dades (fallback)')
+          setEnrichData({ title: '', short_description: '', thumb_url: '', product_url: '' })
+          return
+        }
+        const data = await res.json()
+        setEnrichData({
+          title: data?.title || '',
+          short_description: data?.short_description || '',
+          thumb_url: data?.thumb_url || '',
+          product_url: data?.product_url || ''
+        })
+        if (!touchedName && !formData.name.trim() && data?.title) {
+          setFormData(prev => ({ ...prev, name: data.title }))
+        }
+        if (!touchedDescription && !formData.description.trim() && data?.short_description) {
+          setFormData(prev => ({ ...prev, description: data.short_description }))
+        }
+        if (data?.source === 'fallback') {
+          setEnrichError('No s’han pogut carregar dades (fallback)')
+        }
+      } catch {
+        setEnrichError('No s’han pogut carregar dades (fallback)')
+      } finally {
+        setEnrichLoading(false)
+      }
+    }, 600)
+    return () => window.clearTimeout(timer)
+  }, [asinOrUrl, createMode, touchedName, touchedDescription, formData.name, formData.description])
 
   return (
     <div className="fd-modal__overlay" onClick={handleClose}>
@@ -310,6 +370,12 @@ export default function NewProjectModal({ isOpen, onClose }) {
               {createMode !== 'report' && asinError ? (
                 <div className="fd-field__error">{asinError}</div>
               ) : null}
+              {createMode === 'asin' && enrichLoading ? (
+                <div className="fd-modal__microcopy">Carregant dades del producte…</div>
+              ) : null}
+              {createMode === 'asin' && enrichError ? (
+                <div className="fd-field__error">No s’han pogut carregar dades (es crea igualment).</div>
+              ) : null}
             </div>
             {createMode === 'asin' && asinPreview ? (
               <div className="fd-modal__preview fd-modal__preview--compact">
@@ -331,7 +397,10 @@ export default function NewProjectModal({ isOpen, onClose }) {
               <input
                 type="text"
                 value={formData.name}
-                onChange={e => setFormData({ ...formData, name: e.target.value })}
+                  onChange={e => {
+                    setTouchedName(true)
+                    setFormData({ ...formData, name: e.target.value })
+                  }}
                 placeholder="Nom del projecte (opcional)"
                 className="fd-field__input"
               />
@@ -420,7 +489,10 @@ export default function NewProjectModal({ isOpen, onClose }) {
             </label>
             <textarea
               value={formData.description}
-              onChange={e => setFormData({...formData, description: e.target.value})}
+              onChange={e => {
+                setTouchedDescription(true)
+                setFormData({ ...formData, description: e.target.value })
+              }}
               placeholder={t('projects.descriptionPlaceholder')}
               rows={3}
               className="fd-field__input fd-field__textarea"
