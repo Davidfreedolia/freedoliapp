@@ -143,6 +143,8 @@ export default function NewProjectModal({ isOpen, onClose }) {
         sku: projectCodes.sku,                    // FRDL250001
         name: finalName,
         description: finalDescription || null,
+        asin: finalAsin,
+        product_url: finalProductUrl || null,
         current_phase: 1,
         status: 'active',
         drive_folder_id: null  // S'assignarà després

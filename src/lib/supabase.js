@@ -192,7 +192,6 @@ export const createProject = async (project) => {
   
   // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
   const { user_id, ...projectData } = project
-  delete projectData.thumb_url
   
   // Retry up to 5 times on duplicate SKU error
   let attempts = 0
@@ -849,7 +848,7 @@ export const generateProjectCode = async () => {
   while (attempts < maxAttempts) {
     const { data, error } = await supabase
       .from('projects')
-      .select('project_code, sku')
+      .select('project_code, sku, thumb_url')
       .eq('user_id', userId)
       .eq('is_demo', demoMode) // Filter by demo mode
       .like('project_code', `${prefix}%`)
@@ -872,7 +871,7 @@ export const generateProjectCode = async () => {
     // Check if SKU already exists (scoped by user_id and is_demo)
     const { data: existingSku } = await supabase
       .from('projects')
-      .select('id')
+      .select('id, thumb_url')
       .eq('user_id', userId)
       .eq('is_demo', demoMode)
       .eq('sku', sku)
@@ -922,7 +921,7 @@ export const generatePONumber = async (projectSku) => {
 export const getProjectSku = async (projectId) => {
   const { data, error } = await supabase
     .from('projects')
-    .select('sku, project_code')
+    .select('sku, project_code, thumb_url')
     .eq('id', projectId)
     .maybeSingle()
   if (error) throw error
@@ -2185,7 +2184,7 @@ export const getAlerts = async (thresholds = {}) => {
   try {
     const { data: projects, error } = await supabase
       .from('projects')
-      .select('id, name, sku_internal, current_phase, decision, created_at')
+      .select('id, name, sku_internal, current_phase, decision, created_at, thumb_url')
       .eq('user_id', userId)
       .eq('current_phase', 1)
       .or('decision.is.null,decision.eq.HOLD')
