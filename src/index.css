@@ -1325,12 +1325,42 @@ body.dark .drive-btn--compact.drive--on {
 }
 
 .fd-modal__preview-img {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   border-radius: 8px;
   object-fit: cover;
   border: 1px solid var(--border-1);
   margin-left: auto;
+}
+
+.fd-modal__preview-img--placeholder {
+  background: var(--surface-bg-2);
+}
+
+.fd-field__input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--border-1);
+  border-radius: var(--radius-ui);
+  background: var(--surface-bg);
+  padding: 0 12px;
+}
+
+.fd-field__input-icon {
+  color: var(--muted-1);
+}
+
+.fd-field__input.fd-field__input--icon {
+  border: none;
+  background: transparent;
+  padding-left: 0;
+}
+
+.fd-modal__microcopy {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted-1);
 }
 
 .fd-modal__codes {

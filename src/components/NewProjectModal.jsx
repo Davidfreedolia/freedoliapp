@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { X, Loader, FolderPlus, Hash, Tag } from 'lucide-react'
+import { X, Loader, FolderPlus, Hash, Tag, Link } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { createProject, updateProject, generateProjectCode } from '../lib/supabase'
 import { driveService } from '../lib/googleDrive'
@@ -9,16 +9,6 @@ import { logSuccess, logError } from '../lib/auditLog'
 import { handleError } from '../lib/errorHandling'
 import { showToast } from './Toast'
 import Button from './Button'
-
-const PHASES = [
-  { id: 1, name: 'Recerca', icon: '🔍' },
-  { id: 2, name: 'Viabilitat', icon: '📊' },
-  { id: 3, name: 'Proveïdors', icon: '🏭' },
-  { id: 4, name: 'Mostres', icon: '📦' },
-  { id: 5, name: 'Producció', icon: '⚙️' },
-  { id: 6, name: 'Listing', icon: '📝' },
-  { id: 7, name: 'Live', icon: '🚀' }
-]
 
 export default function NewProjectModal({ isOpen, onClose }) {
   const { refreshProjects, driveConnected } = useApp()
@@ -67,16 +57,28 @@ export default function NewProjectModal({ isOpen, onClose }) {
   }
 
   const parseReport = (text) => {
-    const getLine = (prefix) => {
-      const re = new RegExp(`^${prefix}\\s*:\\s*(.*)$`, 'mi')
-      const m = text.match(re)
-      return m ? (m[1] || '').trim() : ''
+    const getValues = (key) => {
+      const re = new RegExp(`^\\s*${key}\\s*:\\s*(.*)$`, 'gmi')
+      const values = []
+      let match
+      while ((match = re.exec(text))) {
+        const v = (match[1] || '').trim()
+        if (v) values.push(v)
+      }
+      return values
     }
-    return {
-      asin: getLine('asin'),
-      title: getLine('title'),
-      thumb_url: getLine('thumb_url')
-    }
+
+    const asinValues = getValues('asin')
+    const asin = asinValues
+      .map(v => v.match(/[A-Z0-9]{10}/i)?.[0] || '')
+      .find(v => v) || ''
+
+    const title = getValues('title')[0] || ''
+
+    const thumbValues = getValues('thumb_url')
+    const thumb_url = thumbValues.find(v => /^https?:\/\//i.test(v)) || ''
+
+    return { asin, title, thumb_url }
   }
 
   const handleReportFile = async (file) => {
@@ -204,30 +206,39 @@ export default function NewProjectModal({ isOpen, onClose }) {
             </button>
           </div>
 
-          {createMode === 'asin' ? (
-            <div className="fd-modal__mode">
-              <div className="fd-field">
-                <label className="fd-field__label">ASIN o URL</label>
+          <div className="fd-modal__mode">
+            <div className="fd-field">
+              <label className="fd-field__label">ASIN o URL</label>
+              <div className="fd-field__input-wrap">
+                <Link size={16} className="fd-field__input-icon" />
                 <input
                   type="text"
                   value={asinOrUrl}
                   onChange={(e) => setAsinOrUrl(e.target.value)}
                   placeholder="B0XXXXXXXX o https://www.amazon.../dp/B0XXXXXXXX"
-                  className="fd-field__input"
+                  className="fd-field__input fd-field__input--icon"
+                  disabled={createMode === 'report'}
                 />
               </div>
-              <div className="fd-field">
-                <label className="fd-field__label">{t('projects.projectName')}</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={e => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Nom del projecte (opcional)"
-                  className="fd-field__input"
-                />
-              </div>
+              {createMode === 'report' ? (
+                <div className="fd-modal__microcopy">
+                  L’informe ja conté l’ASIN i dades clau.
+                </div>
+              ) : null}
             </div>
-          ) : (
+            <div className="fd-field">
+              <label className="fd-field__label">{t('projects.projectName')}</label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={e => setFormData({ ...formData, name: e.target.value })}
+                placeholder="Nom del projecte (opcional)"
+                className="fd-field__input"
+              />
+            </div>
+          </div>
+
+          {createMode === 'report' ? (
             <div className="fd-modal__mode">
               <input
                 ref={reportInputRef}
@@ -253,19 +264,21 @@ export default function NewProjectModal({ isOpen, onClose }) {
               >
                 <span>Arrossega l’informe .md aquí o fes clic</span>
               </button>
-              {reportFile && reportParsed.asin && (
+              {reportFile ? (
                 <div className="fd-modal__preview">
                   <div className="fd-modal__preview-meta">
-                    <div className="fd-modal__preview-asin">{reportParsed.asin}</div>
-                    <div className="fd-modal__preview-title">{reportParsed.title || '—'}</div>
+                    <div className="fd-modal__preview-asin">{reportParsed.asin || '—'}</div>
+                    <div className="fd-modal__preview-title">{reportParsed.title || formData.name || '—'}</div>
                   </div>
                   {reportParsed.thumb_url ? (
                     <img className="fd-modal__preview-img" src={reportParsed.thumb_url} alt="" />
-                  ) : null}
+                  ) : (
+                    <div className="fd-modal__preview-img fd-modal__preview-img--placeholder" />
+                  )}
                 </div>
-              )}
+              ) : null}
             </div>
-          )}
+          ) : null}
 
           <div className="fd-modal__codes">
             <div className="fd-modal__code-row">
@@ -315,7 +328,7 @@ export default function NewProjectModal({ isOpen, onClose }) {
           </div>
 
           <div className="fd-modal__drive-info">
-            <FolderPlus size={18} color="var(--muted-1)" />
+            <FolderPlus size={14} color="var(--muted-1)" />
             <span>
               {driveConnected
                 ? t('projects.driveFolderWillBeCreated', { sku: projectCodes.sku || '...' })
@@ -324,21 +337,6 @@ export default function NewProjectModal({ isOpen, onClose }) {
             </span>
           </div>
 
-          <div className="fd-modal__phases">
-            <span className="fd-modal__phases-label">
-              {t('projects.projectPhases')}:
-            </span>
-            <div className="fd-modal__phases-row">
-              {PHASES.map((phase, index) => (
-                <div key={phase.id} className="fd-modal__phase-item">
-                  <span className="fd-modal__phase-icon">{phase.icon}</span>
-                  {index < PHASES.length - 1 && (
-                    <div className="fd-modal__phase-line" />
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
 
           <div className="fd-modal__footer">
             <Button
