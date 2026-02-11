@@ -63,8 +63,6 @@ export default function NewProjectModal({ isOpen, onClose }) {
     }
   }, [isOpen, loadNextCode])
 
-  if (!isOpen) return null
-
   const isUrlLike = (value) => /^https?:\/\//i.test((value || '').trim())
 
   const extractAsin = (value) => {
@@ -257,6 +255,7 @@ export default function NewProjectModal({ isOpen, onClose }) {
   const asinThumbUrl = (enrichData.thumb_url || '').trim() || buildAmazonThumbUrl(asinPreview)
 
   useEffect(() => {
+    if (!isOpen) return
     if (createMode !== 'asin') return
     const asin = extractAsin(asinOrUrl)
     if (!asin) {
@@ -267,9 +266,12 @@ export default function NewProjectModal({ isOpen, onClose }) {
     }
     setEnrichLoading(true)
     setEnrichError('')
+    const controller = new AbortController()
     const timer = window.setTimeout(async () => {
       try {
-        const res = await fetch(`/api/asin-enrich?asin=${asin}&market=es`)
+        const res = await fetch(`/api/asin-enrich?asin=${asin}&market=es`, {
+          signal: controller.signal
+        })
         if (!res.ok) {
           setEnrichError('No s’han pogut carregar dades (fallback)')
           setEnrichData({ title: '', short_description: '', thumb_url: '', product_url: '' })
@@ -296,9 +298,14 @@ export default function NewProjectModal({ isOpen, onClose }) {
       } finally {
         setEnrichLoading(false)
       }
-    }, 600)
-    return () => window.clearTimeout(timer)
-  }, [asinOrUrl, createMode, touchedName, touchedDescription, formData.name, formData.description])
+    }, 400)
+    return () => {
+      controller.abort()
+      window.clearTimeout(timer)
+    }
+  }, [asinOrUrl, createMode, isOpen, touchedName, touchedDescription, formData.name, formData.description])
+
+  if (!isOpen) return null
 
   return (
     <div className="fd-modal__overlay" onClick={handleClose}>
