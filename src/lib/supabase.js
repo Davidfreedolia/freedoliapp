@@ -192,6 +192,7 @@ export const createProject = async (project) => {
   
   // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
   const { user_id, ...projectData } = project
+  delete projectData.thumb_url
   
   // Retry up to 5 times on duplicate SKU error
   let attempts = 0
@@ -199,15 +200,15 @@ export const createProject = async (project) => {
   
   while (attempts < maxAttempts) {
     try {
-      const { data, error } = await supabase
+      const newId = crypto.randomUUID()
+      const { error } = await supabase
         .from('projects')
         .insert([{ 
+          id: newId,
           ...projectData, 
           user_id: userId, // Always set user_id explicitly
           is_demo: demoMode // Mark with current demo mode
-        }])
-        .select()
-        .maybeSingle()
+        }], { returning: 'minimal' })
       
       if (error) {
         // Check if it's a duplicate SKU error (23505 = unique_violation)
@@ -230,13 +231,13 @@ export const createProject = async (project) => {
         const { logAudit } = await import('./auditLog')
         await logAudit({
           entityType: 'project',
-          entityId: data.id,
+          entityId: newId,
           action: 'create',
           status: 'success',
           message: `Project created with is_demo=${demoMode}`,
           meta: {
-            project_code: data.project_code,
-            sku: data.sku,
+            project_code: projectData.project_code,
+            sku: projectData.sku,
             is_demo: demoMode
           }
         })
@@ -245,7 +246,7 @@ export const createProject = async (project) => {
         console.warn('Failed to log project creation:', auditErr)
       }
       
-      return data
+      return { id: newId }
     } catch (err) {
       if (attempts >= maxAttempts - 1) {
         throw err
