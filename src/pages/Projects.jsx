@@ -21,9 +21,10 @@ import NewProjectModal from '../components/NewProjectModal'
 import Button from '../components/Button'
 import LayoutSwitcher from '../components/LayoutSwitcher'
 import { useLayoutPreference } from '../hooks/useLayoutPreference'
+import ProjectDriveExplorer from '../components/projects/ProjectDriveExplorer'
 
 export default function Projects() {
-  const { projects, refreshProjects, driveConnected } = useApp()
+  const { projects, refreshProjects, driveConnected, darkMode } = useApp()
   const navigate = useNavigate()
   const { isMobile, isTablet } = useBreakpoint()
   const [showModal, setShowModal] = useState(false)
@@ -35,10 +36,13 @@ export default function Projects() {
   const [selectedProjectId, setSelectedProjectId] = useState(null)
   const [isLoadingProjects, setIsLoadingProjects] = useState(true)
   const [loadError, setLoadError] = useState(null)
+  const [projectFolders, setProjectFolders] = useState(null)
 
   // Concurrency control: only latest load can commit state
   const loadSeqRef = useRef(0)
   const mountedRef = useRef(false)
+  const driveServiceRef = useRef(null)
+  const driveLoadSeqRef = useRef(0)
 
   // PHASE_STYLES is an object. We need a deterministic, always-iterable list.
   const PHASES_LIST = useMemo(() => {
@@ -92,6 +96,51 @@ export default function Projects() {
   const selectedProject = filteredProjects.find(project => project.id === selectedProjectId)
   
   const discardedCount = projects.filter(p => p.decision === 'DISCARDED').length
+
+  useEffect(() => {
+    if (!selectedProject || !driveConnected) {
+      setProjectFolders(null)
+      return
+    }
+    const seq = ++driveLoadSeqRef.current
+    const loadDriveFolders = async () => {
+      let driveService
+      try {
+        const googleDriveModule = await import('../lib/googleDrive')
+        driveService = googleDriveModule.driveService
+      } catch (importErr) {
+        if (seq === driveLoadSeqRef.current) setProjectFolders(null)
+        return
+      }
+      if (seq !== driveLoadSeqRef.current) return
+      driveServiceRef.current = driveService
+      try {
+        const folders = await driveService.ensureProjectDriveFolders({
+          id: selectedProject.id,
+          project_code: selectedProject?.project_code || '',
+          sku: selectedProject?.sku || '',
+          name: selectedProject?.name || '',
+          drive_folder_id: selectedProject?.drive_folder_id || null
+        })
+        if (seq !== driveLoadSeqRef.current) return
+        setProjectFolders(folders || null)
+        if (!selectedProject.drive_folder_id && folders?.main?.id) {
+          try {
+            const supabaseModule = await import('../lib/supabase')
+            const updateProject = supabaseModule.updateProject
+            await updateProject(selectedProject.id, { drive_folder_id: folders.main.id })
+          } catch (e) {
+            if (import.meta.env.DEV) {
+              console.warn('Error guardant drive_folder_id:', e)
+            }
+          }
+        }
+      } catch (err) {
+        if (seq === driveLoadSeqRef.current) setProjectFolders(null)
+      }
+    }
+    loadDriveFolders()
+  }, [selectedProject, driveConnected])
 
   const handleDelete = async (e, project) => {
     e.stopPropagation()
@@ -492,6 +541,25 @@ export default function Projects() {
 
                 <aside className="projects-split__right">
                   <div className="projects-split__sticky">
+                    {!selectedProject ? (
+                      <div className="projects-drive__box">
+                        <div className="projects-drive__boxHeader">
+                          <div className="projects-drive__boxTitle">Drive del projecte</div>
+                        </div>
+                        <div style={{ padding: 12, color: 'var(--muted-1)' }}>
+                          Selecciona un projecte per veure el Drive.
+                        </div>
+                      </div>
+                    ) : (
+                      <ProjectDriveExplorer
+                        projectFolders={projectFolders}
+                        driveServiceRef={driveServiceRef}
+                        driveConnected={driveConnected}
+                        darkMode={darkMode}
+                        readOnly={true}
+                        fixedFolderId={projectFolders?.research?.id || projectFolders?.research_report?.id || null}
+                      />
+                    )}
                   </div>
                 </aside>
               </div>
