@@ -232,11 +232,7 @@ export default function Projects() {
               </div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
-              <div style={{
-                ...styles.phaseBadge,
-                backgroundColor: phase.accent,
-                color: 'var(--c-white-warm)'
-              }}>
+              <div className="phase-badge">
                 <span>{phaseLabel}</span>
               </div>
               {!isPreview && (
@@ -770,12 +766,4 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center'
   },
-  phaseBadge: {
-    display: 'flex',
-    alignItems: 'center',
-    padding: '6px 12px',
-    borderRadius: '16px',
-    fontSize: '12px',
-    fontWeight: '600'
-  }
 }
