@@ -3363,3 +3363,8 @@ svg[class*="lucide-star"] {
   border:1px solid var(--border-1);
   color:var(--text-2);
 }
+
+/* Projects list: remove phase badge (RESEARCH/VIABILITY/...) */
+.projects-card__header .phase-badge {
+  display: none !important;
+}

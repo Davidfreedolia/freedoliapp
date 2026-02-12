@@ -150,17 +150,6 @@ export default function Projects() {
       : '—'
     const docsCount = project?.docs_count ?? project?.documents_count ?? project?.files_count ?? project?.drive_files_count ?? 0
     const metadataLine = `SKU: ${skuValue} · Created: ${createdLabel} · Docs: ${docsCount}`
-    const PHASE_LABELS = {
-      1: 'RESEARCH',
-      2: 'VIABILITY',
-      3: 'SUPPLIERS',
-      4: 'SAMPLES',
-      5: 'PRODUCTION',
-      6: 'LISTING',
-      7: 'LIVE'
-    }
-    const phaseLabel = PHASE_LABELS[project.current_phase] || (phase.name || '').toUpperCase()
-
     // Compute canClose and canReopen based on status
     const canClose = project.status && ['draft', 'active'].includes(project.status)
     const canReopen = project.status && ['closed', 'archived'].includes(project.status)
@@ -231,65 +220,60 @@ export default function Projects() {
                 </div>
               </div>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
-              <div className="phase-badge">
-                <span>{phaseLabel}</span>
-              </div>
-              {!isPreview && (
-                <div className="projects-card__menu">
-                  <div style={{ position: 'relative' }}>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={e => { e.stopPropagation(); setMenuOpen(menuOpen === project.id ? null : project.id) }}
-                      style={styles.menuButton}
-                    >
-                      <MoreVertical size={18} color="var(--muted-1)" />
-                    </Button>
-                    {menuOpen === project.id && (
-                      <div className="ui-popover" style={styles.menu}>
+            {!isPreview && (
+              <div className="projects-card__menu">
+                <div style={{ position: 'relative' }}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={e => { e.stopPropagation(); setMenuOpen(menuOpen === project.id ? null : project.id) }}
+                    style={styles.menuButton}
+                  >
+                    <MoreVertical size={18} color="var(--muted-1)" />
+                  </Button>
+                  {menuOpen === project.id && (
+                    <div className="ui-popover" style={styles.menu}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={e => { e.stopPropagation(); navigate(`/projects/${project.id}/edit`) }}
+                        style={styles.menuItem}
+                      >
+                        <Edit size={14} /> Editar
+                      </Button>
+                      {canClose && (
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={e => { e.stopPropagation(); navigate(`/projects/${project.id}/edit`) }}
+                          onClick={e => handleClose(e, project)}
                           style={styles.menuItem}
                         >
-                          <Edit size={14} /> Editar
+                          <XCircle size={14} /> Tancar
                         </Button>
-                        {canClose && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={e => handleClose(e, project)}
-                            style={styles.menuItem}
-                          >
-                            <XCircle size={14} /> Tancar
-                          </Button>
-                        )}
-                        {canReopen && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={e => handleReopen(e, project)}
-                            style={styles.menuItem}
-                          >
-                            <RotateCw size={14} /> Reobrir
-                          </Button>
-                        )}
+                      )}
+                      {canReopen && (
                         <Button
-                          variant="danger"
+                          variant="ghost"
                           size="sm"
-                          onClick={e => handleDelete(e, project)}
-                          style={styles.menuItemDanger}
+                          onClick={e => handleReopen(e, project)}
+                          style={styles.menuItem}
                         >
-                          <Trash2 size={14} /> Eliminar
+                          <RotateCw size={14} /> Reobrir
                         </Button>
-                      </div>
-                    )}
-                  </div>
+                      )}
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={e => handleDelete(e, project)}
+                        style={styles.menuItemDanger}
+                      >
+                        <Trash2 size={14} /> Eliminar
+                      </Button>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           <div className="projects-card__progress">
