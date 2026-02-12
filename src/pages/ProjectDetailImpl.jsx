@@ -1096,6 +1096,18 @@ function ProjectDetailInner({ useApp }) {
   }
 
   const handleImportResearchFile = async (file) => {
+    if (driveConnected && researchDriveFolderId && driveServiceRef.current?.uploadFile) {
+      try {
+        await driveServiceRef.current.uploadFile(file, researchDriveFolderId)
+      } catch (err) {
+        if (err?.message === 'AUTH_REQUIRED') {
+          try {
+            const { showToast } = await import('../components/Toast')
+            showToast('Reconnecta Google Drive. La sessió ha expirat.', 'warning')
+          } catch {}
+        }
+      }
+    }
     const text = await file.text()
     const parsed = parseResearchReport(text)
 
@@ -1877,13 +1889,7 @@ function ProjectDetailInner({ useApp }) {
       case 1:
         return (
           <>
-            <div style={{ display: 'grid', gap: 14, paddingTop: 4 }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: currentPhase.accent }}>
-                  RECERCA
-                </div>
-              </div>
-
+            <div style={{ display: 'grid', gap: 14, paddingTop: 4, boxShadow: 'none' }}>
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
                 <input
                   type="text"
@@ -1903,7 +1909,7 @@ function ProjectDetailInner({ useApp }) {
                 />
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center', justifyContent: 'flex-end' }}>
                   <Button
-                    variant="secondary"
+                    variant="success"
                     size="sm"
                     onClick={saveResearch}
                     disabled={!researchTouched && !researchHasAsin}
@@ -1911,7 +1917,7 @@ function ProjectDetailInner({ useApp }) {
                     Guardar
                   </Button>
                   <Button
-                    variant="ghost"
+                    variant="danger"
                     size="sm"
                     onClick={resetResearch}
                     disabled={!researchTouched && !researchHasAsin && !researchDecision}
@@ -1931,7 +1937,7 @@ function ProjectDetailInner({ useApp }) {
                 </div>
               )}
 
-              {/* Informe de recerca → Drive (drag & drop) */}
+              {/* Informe de recerca → Drive (import + upload) */}
               <div style={{ marginTop: 10 }}>
                 <div
                   style={{
@@ -1954,12 +1960,35 @@ function ProjectDetailInner({ useApp }) {
                       Carregant carpeta...
                     </div>
                   ) : (
-                    <ResearchDriveSplit
-                      rootFolderId={researchDriveFolderId}
-                      driveServiceRef={driveServiceRef}
-                      onUploadComplete={handleUploadComplete}
-                      darkMode={darkMode}
-                    />
+                    <>
+                      <input
+                        ref={researchFileInputRef}
+                        type="file"
+                        accept=".md,.txt"
+                        style={{ display: 'none' }}
+                        onChange={(e) => {
+                          const f = e.target.files?.[0]
+                          if (f) handleImportResearchFile(f)
+                          e.target.value = ''
+                        }}
+                      />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          disabled={!driveConnected || !researchDriveFolderId}
+                          title={!driveConnected ? 'Connecta Google Drive' : 'Importa un RESEARCH_REPORT (.md)'}
+                          onClick={() => researchFileInputRef.current?.click()}
+                        >
+                          Importar informe
+                        </Button>
+                      </div>
+                      <FileUploader
+                        folderId={researchDriveFolderId}
+                        onUploadComplete={handleUploadComplete}
+                        label="Arrossega l’informe aquí"
+                      />
+                    </>
                   )}
                 </div>
               </div>
@@ -2123,7 +2152,7 @@ function ProjectDetailInner({ useApp }) {
 
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginTop: 8 }}>
                 <Button
-                  variant="primary"
+                  variant="success"
                   size="sm"
                   onClick={() => markResearchDecision(true, false)}
                   disabled={!researchHasAsin || !researchChecksReady || !researchAllChecksOk}
@@ -2133,7 +2162,7 @@ function ProjectDetailInner({ useApp }) {
                 </Button>
 
                 <Button
-                  variant="secondary"
+                  variant="danger"
                   size="sm"
                   onClick={() => markResearchDecision(false, false)}
                   disabled={!researchHasAsin}
@@ -3227,47 +3256,25 @@ function ProjectDetailInner({ useApp }) {
           <aside className="project-split__right">
             <div className="project-split__sticky">
               <div className="projects-split__panel">
-              <div className="projects-split__panelHeader" style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-                <div>
-                  <div className="projects-split__panelTitle">Drive del projecte</div>
-                  <div className="projects-split__panelSubtitle">
-                    {project?.name || '—'}
+                <div className="projects-split__panelHeader" style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                  <div>
+                    <div className="projects-split__panelTitle">Drive del projecte</div>
+                    <div className="projects-split__panelSubtitle">
+                      {project?.name || '—'}
+                    </div>
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <input
-                    ref={researchFileInputRef}
-                    type="file"
-                    accept=".md,.txt"
-                    style={{ display: 'none' }}
-                    onChange={(e) => {
-                      const f = e.target.files?.[0]
-                      if (f) handleImportResearchFile(f)
-                      e.target.value = ''
-                    }}
-                  />
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    disabled={!driveConnected}
-                    title={!driveConnected ? 'Connecta Google Drive' : 'Importa un RESEARCH_REPORT (.md)'}
-                    onClick={() => researchFileInputRef.current?.click()}
-                  >
-                    Importar informe
-                  </Button>
-                </div>
-              </div>
 
-              {researchImport && (
-                <div style={{ padding: '10px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-                  <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>
-                    Informe: <strong style={{ color: 'var(--text-1)' }}>{researchImport.asin}</strong> · {researchImport.decision}
+                {researchImport && (
+                  <div style={{ padding: '10px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+                    <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>
+                      Informe: <strong style={{ color: 'var(--text-1)' }}>{researchImport.asin}</strong> · {researchImport.decision}
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={copyResearchPayload}>
+                      Copiar payload
+                    </Button>
                   </div>
-                  <Button variant="ghost" size="sm" onClick={copyResearchPayload}>
-                    Copiar payload
-                  </Button>
-                </div>
-              )}
+                )}
 
               <ProjectDriveSplit
                 projectFolders={projectFolders}

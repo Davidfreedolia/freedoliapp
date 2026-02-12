@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { ExternalLink, Download, Folder, FileText, Maximize2, ArrowLeft, FileDown } from 'lucide-react'
 import Button from '../Button'
 import FileUploader from '../FileUploader'
@@ -8,10 +9,13 @@ export default function ProjectDriveExplorer({
   driveServiceRef,
   driveConnected,
   darkMode,
-  onUploadComplete
+  onUploadComplete,
+  readOnly = false,
+  fixedFolderId = null
 }) {
+  const navigate = useNavigate()
   const rootId = projectFolders?.main?.id || null
-  const [selectedFolderId, setSelectedFolderId] = useState(rootId)
+  const [selectedFolderId, setSelectedFolderId] = useState(fixedFolderId || rootId)
   const [rootFolders, setRootFolders] = useState([])
   const [explorerFolders, setExplorerFolders] = useState([])
   const [explorerFiles, setExplorerFiles] = useState([])
@@ -23,6 +27,7 @@ export default function ProjectDriveExplorer({
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [folderStack, setFolderStack] = useState([])
   const [imageError, setImageError] = useState(false)
+  const [authError, setAuthError] = useState(false)
   const foldersSeq = useRef(0)
   const filesSeq = useRef(0)
 
@@ -42,6 +47,7 @@ export default function ProjectDriveExplorer({
       setRootFolders(subfolders)
     } catch (err) {
       if (seq !== foldersSeq.current) return
+      if (err?.message === 'AUTH_REQUIRED') setAuthError(true)
       setErrorFolders(err?.message || 'Error carregant Drive')
       setRootFolders([])
     } finally {
@@ -70,6 +76,7 @@ export default function ProjectDriveExplorer({
       setSelectedFile(prev => (prev && fileItems.find(f => f.id === prev.id)) ? prev : (fileItems[0] || null))
     } catch (err) {
       if (seq !== filesSeq.current) return
+      if (err?.message === 'AUTH_REQUIRED') setAuthError(true)
       setErrorFiles(err?.message || 'Error carregant Drive')
       setExplorerFolders([])
       setExplorerFiles([])
@@ -80,11 +87,12 @@ export default function ProjectDriveExplorer({
   }
 
   useEffect(() => {
-    if (!rootId) return
-    setSelectedFolderId(rootId)
+    const initialId = fixedFolderId || rootId
+    if (!initialId) return
+    setSelectedFolderId(initialId)
     setFolderStack([])
-    loadRootFolders(rootId)
-  }, [rootId])
+    if (!fixedFolderId) loadRootFolders(rootId)
+  }, [rootId, fixedFolderId])
 
   useEffect(() => {
     if (driveConnected && rootId && projectFolders) return
@@ -135,23 +143,29 @@ export default function ProjectDriveExplorer({
   const handleFolderDrop = (e, targetFolderId) => {
     e.preventDefault()
     e.stopPropagation()
+    if (readOnly) return
+    if (!canUpload) return
     const dropped = Array.from(e.dataTransfer.files || [])
     uploadFilesToFolder(dropped, targetFolderId)
   }
 
   const handlePanelDrop = (e) => {
     e.preventDefault()
+    if (readOnly) return
+    if (!canUpload) return
     const dropped = Array.from(e.dataTransfer.files || [])
     uploadFilesToFolder(dropped, selectedFolderId)
   }
 
   const handleEnterFolder = (folder) => {
+    if (fixedFolderId) return
     if (!folder?.id) return
     setFolderStack(prev => [...prev, selectedFolderId])
     setSelectedFolderId(folder.id)
   }
 
   const handleBack = () => {
+    if (fixedFolderId) return
     if (!folderStack.length) return
     const next = [...folderStack]
     const previousId = next.pop()
@@ -183,6 +197,8 @@ export default function ProjectDriveExplorer({
     || selectedFile?.mimeType === 'application/vnd.google-apps.spreadsheet'
     || selectedFile?.mimeType === 'application/vnd.google-apps.presentation'
   const canExportPdf = Boolean(isGoogleWorkspace && driveServiceRef?.current?.exportFile)
+  const canUpload = Boolean(!readOnly && driveConnected && selectedFolderId)
+  const connectLabel = !driveConnected ? 'Connecta Drive' : (authError ? 'Reconnecta Drive' : 'Drive OK')
 
   const handleExportPdf = async () => {
     const driveService = driveServiceRef?.current
@@ -225,6 +241,15 @@ export default function ProjectDriveExplorer({
       <div className="projects-drive__box">
         <div className="projects-drive__boxHeader">
           <div className="projects-drive__boxTitle">Drive del projecte</div>
+          <div>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => navigate('/settings')}
+            >
+              {connectLabel}
+            </Button>
+          </div>
         </div>
         <div style={{ padding: 12, color: 'var(--muted-1)' }}>
           Connecta Google Drive per veure els documents del projecte.
@@ -256,68 +281,99 @@ export default function ProjectDriveExplorer({
       <div className="projects-drive__box">
         <div className="projects-drive__boxHeader">
           <div className="projects-drive__boxTitle">Carpetes</div>
+          <div>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => navigate('/settings')}
+              disabled={driveConnected && !authError}
+            >
+              {connectLabel}
+            </Button>
+          </div>
         </div>
         <div className="projects-drive__list">
-          <button
-            type="button"
-            className={`projects-drive__row ${selectedFolderId === rootId ? 'is-active' : ''}`}
-            onClick={() => setSelectedFolderId(rootId)}
-          >
-            <span className="projects-drive__rowMain">Projecte</span>
-            <span className="projects-drive__rowSub">{selectedFolderId === rootId ? 'Seleccionada' : ''}</span>
-          </button>
-          {errorFolders && (
+          {fixedFolderId ? (
             <div className="projects-drive__row">
-              <span className="projects-drive__rowMain">{errorFolders}</span>
+              <span className="projects-drive__rowMain">Informe (Recerca)</span>
             </div>
-          )}
-          {!errorFolders && rootFolders.length === 0 ? (
-            <div className="projects-drive__row">
-              <span className="projects-drive__rowMain">{loadingFolders ? 'Carregant...' : 'Sense carpetes'}</span>
-            </div>
-          ) : rootFolders.map((folder) => {
-            const isActive = selectedFolderId === folder.id
-            const label = (folder.name || '').replace(/^\d+_/, '')
-            return (
+          ) : (
+            <>
               <button
-                key={folder.id}
                 type="button"
-                className={`projects-drive__row ${isActive ? 'is-active' : ''}`}
-                onClick={() => setSelectedFolderId(folder.id)}
+                className={`projects-drive__row ${selectedFolderId === rootId ? 'is-active' : ''}`}
+                onClick={() => setSelectedFolderId(rootId)}
               >
-                <span className="projects-drive__rowMain">{label || 'Carpeta'}</span>
-                <span className="projects-drive__rowSub">{isActive ? 'Seleccionada' : ''}</span>
+                <span className="projects-drive__rowMain">Projecte</span>
+                <span className="projects-drive__rowSub">{selectedFolderId === rootId ? 'Seleccionada' : ''}</span>
               </button>
-            )
-          })}
+              {errorFolders && (
+                <div className="projects-drive__row">
+                  <span className="projects-drive__rowMain">{errorFolders}</span>
+                </div>
+              )}
+              {!errorFolders && rootFolders.length === 0 ? (
+                <div className="projects-drive__row">
+                  <span className="projects-drive__rowMain">{loadingFolders ? 'Carregant...' : 'Sense carpetes'}</span>
+                </div>
+              ) : rootFolders.map((folder) => {
+                const isActive = selectedFolderId === folder.id
+                const label = (folder.name || '').replace(/^\d+_/, '')
+                return (
+                  <button
+                    key={folder.id}
+                    type="button"
+                    className={`projects-drive__row ${isActive ? 'is-active' : ''}`}
+                    onClick={() => setSelectedFolderId(folder.id)}
+                  >
+                    <span className="projects-drive__rowMain">{label || 'Carpeta'}</span>
+                    <span className="projects-drive__rowSub">{isActive ? 'Seleccionada' : ''}</span>
+                  </button>
+                )
+              })}
+            </>
+          )}
         </div>
       </div>
 
       <div className="projects-drive__box">
         <div className="projects-drive__boxHeader">
           <div className="projects-drive__boxTitle">Explorador</div>
-          <div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleBack}
-              disabled={!folderStack.length}
-              title={!folderStack.length ? 'No hi ha carpeta anterior' : 'Tornar enrere'}
-            >
-              <ArrowLeft size={14} />
-              Back
-            </Button>
-          </div>
+          {!fixedFolderId && (
+            <div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleBack}
+                disabled={!folderStack.length}
+                title={!folderStack.length ? 'No hi ha carpeta anterior' : 'Tornar enrere'}
+              >
+                <ArrowLeft size={14} />
+                Back
+              </Button>
+            </div>
+          )}
         </div>
         <div
           className="projects-drive__files"
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={handlePanelDrop}
+          onDragOver={readOnly ? undefined : (e) => e.preventDefault()}
+          onDrop={readOnly ? undefined : handlePanelDrop}
         >
           {errorFiles && (
             <div className="projects-drive__fileRow">
               <div className="projects-drive__fileMain">
                 <div className="projects-drive__fileName">{errorFiles}</div>
+              </div>
+            </div>
+          )}
+          {!readOnly && !canUpload && (
+            <div className="projects-drive__fileRow">
+              <div className="projects-drive__fileMain">
+                <div className="projects-drive__fileName">
+                  {!driveConnected
+                    ? 'Connecta Google Drive per veure carpetes i pujar arxius.'
+                    : 'Selecciona una carpeta per pujar arxius.'}
+                </div>
               </div>
             </div>
           )}
@@ -337,8 +393,8 @@ export default function ProjectDriveExplorer({
                     type="button"
                     className="projects-drive__fileRow"
                     onClick={() => handleEnterFolder(folder)}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={(e) => handleFolderDrop(e, folder.id)}
+                    onDragOver={readOnly ? undefined : (e) => e.preventDefault()}
+                    onDrop={readOnly ? undefined : (e) => handleFolderDrop(e, folder.id)}
                   >
                     <div className="projects-drive__fileMain">
                       <div className="projects-drive__fileName" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -376,13 +432,15 @@ export default function ProjectDriveExplorer({
             </>
           )}
         </div>
-        <div className="projects-drive__dropzone">
-          <FileUploader
-            folderId={selectedFolderId}
-            onUploadComplete={handleUploadDone}
-            label="Arrossega fitxers aquí"
-          />
-        </div>
+        {canUpload && !readOnly && (
+          <div className="projects-drive__dropzone">
+            <FileUploader
+              folderId={selectedFolderId}
+              onUploadComplete={handleUploadDone}
+              label="Arrossega fitxers aquí"
+            />
+          </div>
+        )}
       </div>
 
       <div className="projects-drive__previewBox">

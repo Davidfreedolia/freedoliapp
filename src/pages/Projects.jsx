@@ -556,6 +556,8 @@ export default function Projects() {
                         driveServiceRef={driveServiceRef}
                         driveConnected={driveConnected}
                         darkMode={darkMode}
+                        readOnly={true}
+                        fixedFolderId={projectFolders?.research?.id || projectFolders?.research_report?.id || null}
                       />
                     )}
                   </div>
