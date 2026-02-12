@@ -694,6 +694,7 @@ export default function ProjectDetail() {
 
 function PhaseSection({ phaseId, currentPhaseId, phaseStyle, darkMode, children }) {
   const [isOpen, setIsOpen] = useState(phaseId <= currentPhaseId)
+  const [isHovered, setIsHovered] = useState(false)
   const isCurrent = phaseId === currentPhaseId
   const isPast = phaseId < currentPhaseId
   const isFuture = phaseId > currentPhaseId
@@ -707,13 +708,17 @@ function PhaseSection({ phaseId, currentPhaseId, phaseStyle, darkMode, children 
   }, [phaseId, currentPhaseId])
 
   return (
-    <section style={{
-      ...styles.phaseSection,
-      borderColor: sectionBorder,
-      borderTopColor: sectionBorder,
-      backgroundColor: sectionBg,
-      boxShadow: 'none'
-    }}>
+    <section
+      style={{
+        ...styles.phaseSection,
+        borderColor: sectionBorder,
+        borderTopColor: sectionBorder,
+        backgroundColor: isHovered ? 'var(--surface-bg-2)' : sectionBg,
+        boxShadow: 'none'
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <Button
         variant="ghost"
         size="sm"
@@ -1889,7 +1894,7 @@ function ProjectDetailInner({ useApp }) {
       case 1:
         return (
           <>
-            <div style={{ display: 'grid', gap: 14, paddingTop: 4, boxShadow: 'none' }}>
+            <div style={{ display: 'grid', gap: 14, paddingTop: 4 }}>
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
                 <input
                   type="text"
@@ -3153,8 +3158,7 @@ function ProjectDetailInner({ useApp }) {
 
         <div className="project-split__layout">
           <div className="project-split__left">
-            <div className="projects-split__panel">
-              <div style={phaseWrapperStyle}>
+            <div style={phaseWrapperStyle}>
           <div
             data-testid="phase-gate-block-banner"
             data-revealed={phaseBlockVisible ? 'true' : 'false'}
@@ -3249,7 +3253,6 @@ function ProjectDetailInner({ useApp }) {
         >
           {renderPhaseContent(7)}
         </PhaseSection>
-              </div>
             </div>
           </div>
 
@@ -3326,7 +3329,7 @@ const styles = {
     border: '1px solid',
     borderTopWidth: '1px',
     padding: '12px 16px',
-    marginBottom: '20px',
+    marginBottom: '16px',
     boxShadow: 'var(--shadow-soft)'
   },
   phaseSectionHeader: {
