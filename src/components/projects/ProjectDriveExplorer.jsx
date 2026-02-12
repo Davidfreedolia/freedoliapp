@@ -1,21 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { ExternalLink, Download, Folder, FileText, Maximize2, ArrowLeft, FileDown } from 'lucide-react'
 import Button from '../Button'
 import FileUploader from '../FileUploader'
+import { storageService } from '../../lib/storageService'
 
 export default function ProjectDriveExplorer({
   projectFolders,
-  driveServiceRef,
-  driveConnected,
   darkMode,
   onUploadComplete,
   readOnly = false,
   fixedFolderId = null
 }) {
-  const navigate = useNavigate()
-  const rootId = projectFolders?.main?.id || null
-  const [selectedFolderId, setSelectedFolderId] = useState(fixedFolderId || rootId)
+  const rootId = fixedFolderId || projectFolders?.main?.id || null
+  const [selectedFolderId, setSelectedFolderId] = useState(rootId)
   const [rootFolders, setRootFolders] = useState([])
   const [explorerFolders, setExplorerFolders] = useState([])
   const [explorerFiles, setExplorerFiles] = useState([])
@@ -27,27 +24,24 @@ export default function ProjectDriveExplorer({
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [folderStack, setFolderStack] = useState([])
   const [imageError, setImageError] = useState(false)
-  const [authError, setAuthError] = useState(false)
   const foldersSeq = useRef(0)
   const filesSeq = useRef(0)
+  const [selectedFileUrl, setSelectedFileUrl] = useState('')
 
   const loadRootFolders = async (folderId) => {
     if (!folderId) return
-    const driveService = driveServiceRef?.current
-    if (!driveService?.listFolderContents) return
     const seq = ++foldersSeq.current
     setLoadingFolders(true)
     setErrorFolders(null)
     try {
-      const contents = await driveService.listFolderContents(folderId)
+      const contents = await storageService.listFolder(folderId)
       if (seq !== foldersSeq.current) return
       const subfolders = (contents || [])
-        .filter(item => item.mimeType === 'application/vnd.google-apps.folder')
+        .filter(item => item?.id === null)
         .sort((a, b) => (a?.name || '').localeCompare(b?.name || ''))
       setRootFolders(subfolders)
     } catch (err) {
       if (seq !== foldersSeq.current) return
-      if (err?.message === 'AUTH_REQUIRED') setAuthError(true)
       setErrorFolders(err?.message || 'Error carregant Drive')
       setRootFolders([])
     } finally {
@@ -57,26 +51,24 @@ export default function ProjectDriveExplorer({
 
   const loadFolderContents = async (folderId) => {
     if (!folderId) return
-    const driveService = driveServiceRef?.current
-    if (!driveService?.listFolderContents) return
     const seq = ++filesSeq.current
     setLoadingFiles(true)
     setErrorFiles(null)
     try {
-      const contents = await driveService.listFolderContents(folderId)
+      const contents = await storageService.listFolder(folderId)
       if (seq !== filesSeq.current) return
       const folderItems = (contents || [])
-        .filter(item => item.mimeType === 'application/vnd.google-apps.folder')
+        .filter(item => item?.id === null)
         .sort((a, b) => (a?.name || '').localeCompare(b?.name || ''))
       const fileItems = (contents || [])
-        .filter(item => item.mimeType !== 'application/vnd.google-apps.folder')
+        .filter(item => item?.id !== null)
         .sort((a, b) => (a?.name || '').localeCompare(b?.name || ''))
-      setExplorerFolders(folderItems)
-      setExplorerFiles(fileItems)
-      setSelectedFile(prev => (prev && fileItems.find(f => f.id === prev.id)) ? prev : (fileItems[0] || null))
+      setExplorerFolders(folderItems.map(item => ({ ...item, path: `${folderId}${item.name}/` })))
+      const filesWithPath = fileItems.map(item => ({ ...item, path: `${folderId}${item.name}` }))
+      setExplorerFiles(filesWithPath)
+      setSelectedFile(prev => (prev && filesWithPath.find(f => f.path === prev.path)) ? prev : (filesWithPath[0] || null))
     } catch (err) {
       if (seq !== filesSeq.current) return
-      if (err?.message === 'AUTH_REQUIRED') setAuthError(true)
       setErrorFiles(err?.message || 'Error carregant Drive')
       setExplorerFolders([])
       setExplorerFiles([])
@@ -87,15 +79,14 @@ export default function ProjectDriveExplorer({
   }
 
   useEffect(() => {
-    const initialId = fixedFolderId || rootId
-    if (!initialId) return
-    setSelectedFolderId(initialId)
+    if (!rootId) return
+    setSelectedFolderId(rootId)
     setFolderStack([])
     if (!fixedFolderId) loadRootFolders(rootId)
   }, [rootId, fixedFolderId])
 
   useEffect(() => {
-    if (driveConnected && rootId && projectFolders) return
+    if (rootId) return
     setExplorerFolders([])
     setExplorerFiles([])
     setSelectedFile(null)
@@ -113,6 +104,26 @@ export default function ProjectDriveExplorer({
     setImageError(false)
   }, [selectedFile?.id])
 
+  useEffect(() => {
+    let isActive = true
+    const loadUrl = async () => {
+      if (!selectedFile?.path) {
+        setSelectedFileUrl('')
+        return
+      }
+      try {
+        const url = await storageService.getSignedUrl(selectedFile.path)
+        if (isActive) setSelectedFileUrl(url)
+      } catch {
+        if (isActive) setSelectedFileUrl('')
+      }
+    }
+    loadUrl()
+    return () => {
+      isActive = false
+    }
+  }, [selectedFile?.path])
+
   const handleUploadDone = (uploaded) => {
     if (onUploadComplete) onUploadComplete(uploaded)
     if (selectedFolderId) loadFolderContents(selectedFolderId)
@@ -120,20 +131,17 @@ export default function ProjectDriveExplorer({
 
   const uploadFilesToFolder = async (files, targetFolderId) => {
     if (!targetFolderId || !files?.length) return
-    const driveService = driveServiceRef?.current
-    if (!driveService?.uploadFile) return
     const uploaded = []
     for (const file of files) {
       try {
-        const result = await driveService.uploadFile(file, targetFolderId)
+        await storageService.uploadFile(`${targetFolderId}${file.name}`, file)
         uploaded.push({
           name: file.name,
-          id: result.id,
-          webViewLink: result.webViewLink,
+          path: `${targetFolderId}${file.name}`,
           size: file.size
         })
       } catch (err) {
-        if (err?.message === 'AUTH_REQUIRED') break
+        break
       }
     }
     if (uploaded.length && onUploadComplete) onUploadComplete(uploaded)
@@ -158,10 +166,9 @@ export default function ProjectDriveExplorer({
   }
 
   const handleEnterFolder = (folder) => {
-    if (fixedFolderId) return
     if (!folder?.id) return
     setFolderStack(prev => [...prev, selectedFolderId])
-    setSelectedFolderId(folder.id)
+    setSelectedFolderId(folder.path || `${selectedFolderId}${folder.name}/`)
   }
 
   const handleBack = () => {
@@ -191,28 +198,16 @@ export default function ProjectDriveExplorer({
     || /\.(png|jpg|jpeg|gif|webp)$/i.test(file?.name || '')
   const isPdf = (file) => file?.mimeType?.includes('pdf')
     || /\.pdf$/i.test(file?.name || '')
-  const pdfPreviewUrl = selectedFile?.id ? `https://drive.google.com/file/d/${selectedFile.id}/preview` : ''
-  const previewImageUrl = selectedFile?.webContentLink || selectedFile?.webViewLink || ''
+  const pdfPreviewUrl = selectedFileUrl || ''
+  const previewImageUrl = selectedFileUrl || ''
   const isGoogleWorkspace = selectedFile?.mimeType === 'application/vnd.google-apps.document'
     || selectedFile?.mimeType === 'application/vnd.google-apps.spreadsheet'
     || selectedFile?.mimeType === 'application/vnd.google-apps.presentation'
-  const canExportPdf = Boolean(isGoogleWorkspace && driveServiceRef?.current?.exportFile)
-  const canUpload = Boolean(!readOnly && driveConnected && selectedFolderId)
-  const connectLabel = !driveConnected ? 'Connecta Drive' : (authError ? 'Reconnecta Drive' : 'Drive OK')
+  const canExportPdf = false
+  const canUpload = Boolean(!readOnly && selectedFolderId)
 
   const handleExportPdf = async () => {
-    const driveService = driveServiceRef?.current
-    if (!driveService?.exportFile || !selectedFile?.id) return
-    try {
-      const result = await driveService.exportFile(selectedFile.id, 'application/pdf')
-      if (typeof result === 'string') {
-        window.open(result, '_blank')
-      } else if (result?.url) {
-        window.open(result.url, '_blank')
-      }
-    } catch (err) {
-      // Silent fail: export optional
-    }
+    return
   }
 
   const renderPreview = (full = false) => (
@@ -236,33 +231,6 @@ export default function ProjectDriveExplorer({
     </div>
   )
 
-  if (!driveConnected) {
-    return (
-      <div className="projects-drive__box">
-        <div className="projects-drive__boxHeader">
-          <div className="projects-drive__boxTitle">Drive del projecte</div>
-          <div>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => navigate('/settings')}
-            >
-              {connectLabel}
-            </Button>
-          </div>
-        </div>
-        <div style={{ padding: 12, color: 'var(--muted-1)' }}>
-          Connecta Google Drive per veure els documents del projecte.
-        </div>
-        <div style={{ padding: '0 12px 12px' }}>
-          <Button variant="secondary" size="sm" onClick={() => { window.location.href = '/settings' }}>
-            Connecta Drive
-          </Button>
-        </div>
-      </div>
-    )
-  }
-
   if (!rootId) {
     return (
       <div className="projects-drive__box">
@@ -281,16 +249,6 @@ export default function ProjectDriveExplorer({
       <div className="projects-drive__box">
         <div className="projects-drive__boxHeader">
           <div className="projects-drive__boxTitle">Carpetes</div>
-          <div>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => navigate('/settings')}
-              disabled={driveConnected && !authError}
-            >
-              {connectLabel}
-            </Button>
-          </div>
         </div>
         <div className="projects-drive__list">
           {fixedFolderId ? (
@@ -370,9 +328,7 @@ export default function ProjectDriveExplorer({
             <div className="projects-drive__fileRow">
               <div className="projects-drive__fileMain">
                 <div className="projects-drive__fileName">
-                  {!driveConnected
-                    ? 'Connecta Google Drive per veure carpetes i pujar arxius.'
-                    : 'Selecciona una carpeta per pujar arxius.'}
+                  Selecciona una carpeta per pujar arxius.
                 </div>
               </div>
             </div>
@@ -447,9 +403,9 @@ export default function ProjectDriveExplorer({
         <div className="projects-drive__previewHeader">
           <div className="projects-drive__previewTitle">{selectedFile?.name || 'Previsualització'}</div>
           <div className="projects-drive__previewActions">
-            {selectedFile?.webViewLink && (
+            {selectedFileUrl && (
               <a
-                href={selectedFile.webViewLink}
+                href={selectedFileUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
@@ -467,18 +423,17 @@ export default function ProjectDriveExplorer({
                 }}
               >
                 <ExternalLink size={14} />
-                Open in Drive
+                Open
               </a>
             )}
             <Button
               variant="ghost"
               size="sm"
               onClick={() => {
-                if (selectedFile?.webContentLink) return window.open(selectedFile.webContentLink, '_blank')
-                if (selectedFile?.webViewLink) return window.open(selectedFile.webViewLink, '_blank')
+                if (selectedFileUrl) return window.open(selectedFileUrl, '_blank')
               }}
-              disabled={!selectedFile?.webContentLink && !selectedFile?.webViewLink}
-              title={!selectedFile?.webContentLink && !selectedFile?.webViewLink ? 'No hi ha enllaç de descàrrega' : 'Descarregar'}
+              disabled={!selectedFileUrl}
+              title={!selectedFileUrl ? 'No hi ha enllaç de descàrrega' : 'Descarregar'}
             >
               <Download size={14} />
               Download

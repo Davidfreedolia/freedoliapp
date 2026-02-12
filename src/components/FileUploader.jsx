@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { Upload, X, Check, Loader, FileText } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { driveService } from '../lib/googleDrive'
+import { storageService } from '../lib/storageService'
 import Button from './Button'
 
 export default function FileUploader({ folderId, onUploadComplete, label = 'Arrossega arxius aquí' }) {
@@ -51,13 +51,10 @@ export default function FileUploader({ folderId, onUploadComplete, label = 'Arro
           continue
         }
 
-        const result = await driveService.uploadFile(file, folderId)
+        await storageService.uploadFile(`${folderId}${file.name}`, file)
         uploaded.push({
           name: file.name,
-          id: result.id,
-          driveId: result.id,  // Per compatibilitat
-          driveUrl: result.webViewLink,  // Per compatibilitat
-          webViewLink: result.webViewLink,
+          path: `${folderId}${file.name}`,
           size: file.size
         })
       } catch (err) {
