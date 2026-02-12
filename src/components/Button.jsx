@@ -7,7 +7,7 @@ import React from 'react'
 
 /**
  * Button component with unified styling
- * @param {string} variant - 'primary' | 'secondary' | 'danger' | 'ghost' | 'note'
+ * @param {string} variant - 'primary' | 'secondary' | 'success' | 'danger' | 'ghost' | 'note'
  * @param {string} size - 'sm' | 'md'
  * @param {boolean} disabled
  * @param {React.ReactNode} children
@@ -58,6 +58,14 @@ export default function Button({
       border: '1px solid var(--btn-secondary-border)',
       hover: {
         backgroundColor: 'var(--btn-secondary-hover-bg)'
+      }
+    },
+    success: {
+      backgroundColor: 'var(--success-1)',
+      color: 'var(--btn-primary-fg)',
+      border: '1px solid color-mix(in srgb, var(--success) 45%, transparent)',
+      hover: {
+        backgroundColor: 'color-mix(in srgb, var(--success-1) 85%, var(--c-teal-900))'
       }
     },
     ghost: {
