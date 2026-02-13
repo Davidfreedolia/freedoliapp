@@ -27,8 +27,6 @@ import {
   Info,
   Receipt,
   DollarSign,
-  FileImage,
-  Paperclip,
   StickyNote,
   Search,
   Calculator,
@@ -40,9 +38,8 @@ import Header from '../components/Header'
 import MarketplaceTag, { MarketplaceTagGroup } from '../components/MarketplaceTag'
 import StatusBadge from '../components/StatusBadge'
 import FileUploader from '../components/FileUploader'
-import FileBrowser from '../components/FileBrowser'
+import ProjectDriveExplorer from '../components/projects/ProjectDriveExplorer'
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal'
-import ArtsFinalsSection from '../components/ArtsFinalsSection'
 import CollapsibleSection from '../components/CollapsibleSection'
 import PhaseChecklist from '../components/projects/PhaseChecklist'
 import { useBreakpoint } from '../hooks/useBreakpoint'
@@ -93,477 +90,6 @@ const getPhaseIdFromProject = (project) => {
   if (project.current_phase) return project.current_phase
   const phaseName = (project.phase || '').toString().toLowerCase()
   return PHASE_NAME_TO_ID[phaseName] || 1
-}
-
-// Mapeig fase -> carpeta Drive
-const PHASE_FOLDER_MAP = {
-  1: '01_Research',
-  2: '01_Research', // Viabilitat també usa Research
-  3: '02_Quotations',
-  4: '08_Samples',
-  5: '03_PurchaseOrders',
-  6: '09_Listings',
-  7: '09_Listings'
-}
-
-function ResearchDriveSplit({ rootFolderId, driveServiceRef, onUploadComplete, darkMode }) {
-  const [selectedFolderId, setSelectedFolderId] = useState(rootFolderId || null)
-  const [folders, setFolders] = useState([])
-  const [files, setFiles] = useState([])
-  const [selectedFile, setSelectedFile] = useState(null)
-  const [loadingFolders, setLoadingFolders] = useState(false)
-  const [loadingFiles, setLoadingFiles] = useState(false)
-  const [errorFolders, setErrorFolders] = useState(null)
-  const [errorFiles, setErrorFiles] = useState(null)
-
-  const isImage = (file) => file?.mimeType?.startsWith('image/')
-    || /\.(png|jpg|jpeg|gif|webp)$/i.test(file?.name || '')
-  const isPdf = (file) => file?.mimeType?.includes('pdf')
-    || /\.pdf$/i.test(file?.name || '')
-  const formatSize = (bytes) => {
-    if (!bytes) return ''
-    if (bytes < 1024) return `${bytes} B`
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-  }
-  const formatDate = (value) => {
-    if (!value) return ''
-    try {
-      return new Date(value).toLocaleDateString('ca-ES')
-    } catch {
-      return ''
-    }
-  }
-
-  const loadRootFolders = async () => {
-    if (!rootFolderId) return
-    const driveService = driveServiceRef?.current
-    if (!driveService?.listFolderContents) return
-    setLoadingFolders(true)
-    setErrorFolders(null)
-    try {
-      const contents = await driveService.listFolderContents(rootFolderId)
-      const subfolders = (contents || [])
-        .filter(item => item.mimeType === 'application/vnd.google-apps.folder')
-        .sort((a, b) => (a?.name || '').localeCompare(b?.name || ''))
-      setFolders(subfolders)
-    } catch (err) {
-      setErrorFolders(err?.message || 'Error carregant Drive')
-      setFolders([])
-    } finally {
-      setLoadingFolders(false)
-    }
-  }
-
-  const loadFiles = async (folderId) => {
-    if (!folderId) return
-    const driveService = driveServiceRef?.current
-    if (!driveService?.listFolderContents) return
-    setLoadingFiles(true)
-    setErrorFiles(null)
-    try {
-      const contents = await driveService.listFolderContents(folderId)
-      const fileItems = (contents || [])
-        .filter(item => item.mimeType !== 'application/vnd.google-apps.folder')
-        .sort((a, b) => (a?.name || '').localeCompare(b?.name || ''))
-      setFiles(fileItems)
-      setSelectedFile(prev => (prev && fileItems.find(f => f.id === prev.id)) ? prev : (fileItems[0] || null))
-    } catch (err) {
-      setErrorFiles(err?.message || 'Error carregant Drive')
-      setFiles([])
-      setSelectedFile(null)
-    } finally {
-      setLoadingFiles(false)
-    }
-  }
-
-  useEffect(() => {
-    if (!rootFolderId) return
-    loadRootFolders()
-    setSelectedFolderId(rootFolderId)
-  }, [rootFolderId])
-
-  useEffect(() => {
-    if (!selectedFolderId) return
-    loadFiles(selectedFolderId)
-  }, [selectedFolderId])
-
-  const handleUploadComplete = (uploadedFiles) => {
-    if (onUploadComplete) onUploadComplete(uploadedFiles)
-    if (selectedFolderId) {
-      loadFiles(selectedFolderId)
-    }
-  }
-
-  const previewUrl = selectedFile?.webViewLink || selectedFile?.webContentLink || ''
-  const previewImageUrl = selectedFile?.webContentLink || selectedFile?.webViewLink || ''
-  const pdfPreviewUrl = selectedFile?.id ? `https://drive.google.com/file/d/${selectedFile.id}/preview` : ''
-
-  return (
-    <div className="projects-drive__grid">
-      <div className="projects-drive__box">
-        <div className="projects-drive__boxHeader">
-          <div className="projects-drive__boxTitle">Carpetes</div>
-        </div>
-        <div className="projects-drive__list">
-          {rootFolderId && (
-            <button
-              type="button"
-              className={`projects-drive__row ${selectedFolderId === rootFolderId ? 'is-active' : ''}`}
-              onClick={() => setSelectedFolderId(rootFolderId)}
-            >
-              <span className="projects-drive__rowMain">Research</span>
-              <span className="projects-drive__rowSub">{selectedFolderId === rootFolderId ? 'Seleccionada' : ''}</span>
-            </button>
-          )}
-          {folders.length === 0 ? (
-            <div className="projects-drive__row">
-              <span className="projects-drive__rowMain">{loadingFolders ? 'Carregant...' : 'Sense carpetes'}</span>
-            </div>
-          ) : folders.map((folder) => {
-            const isActive = selectedFolderId === folder.id
-            const label = (folder.name || '').replace(/^\d+_/, '')
-            return (
-              <button
-                key={folder.id}
-                type="button"
-                className={`projects-drive__row ${isActive ? 'is-active' : ''}`}
-                onClick={() => setSelectedFolderId(folder.id)}
-              >
-                <span className="projects-drive__rowMain">{label || 'Carpeta'}</span>
-                <span className="projects-drive__rowSub">{isActive ? 'Seleccionada' : ''}</span>
-              </button>
-            )
-          })}
-        </div>
-      </div>
-
-      <div className="projects-drive__box">
-        <div className="projects-drive__boxHeader">
-          <div className="projects-drive__boxTitle">Fitxers</div>
-        </div>
-
-        <div className="projects-drive__files">
-          {errorFiles && (
-            <div className="projects-drive__fileRow">
-              <div className="projects-drive__fileMain">
-                <div className="projects-drive__fileName">{errorFiles}</div>
-              </div>
-            </div>
-          )}
-          {!errorFiles && files.length === 0 ? (
-            <div className="projects-drive__fileRow">
-              <div className="projects-drive__fileMain">
-                <div className="projects-drive__fileName">{loadingFiles ? 'Carregant...' : 'Cap fitxer'}</div>
-              </div>
-            </div>
-          ) : files.map((file) => {
-            const isActive = selectedFile?.id === file.id
-            const ext = (file.name || '').split('.').pop()?.toUpperCase() || 'FILE'
-            return (
-              <button
-                key={file.id}
-                type="button"
-                className={`projects-drive__fileRow ${isActive ? 'is-active' : ''}`}
-                onClick={() => setSelectedFile(file)}
-              >
-                <div className="projects-drive__fileMain">
-                  <div className="projects-drive__fileName">{file.name || 'Fitxer'}</div>
-                  <div className="projects-drive__fileMeta">
-                    {formatDate(file.modifiedTime || file.createdTime)}{file.size ? ` · ${formatSize(file.size)}` : ''}
-                  </div>
-                </div>
-                <div className="projects-drive__fileTag">{ext}</div>
-              </button>
-            )
-          })}
-        </div>
-
-        <div className="projects-drive__dropzone">
-          <FileUploader
-            folderId={selectedFolderId}
-            onUploadComplete={handleUploadComplete}
-            label="Arrossega fitxers aquí"
-          />
-        </div>
-      </div>
-
-      <div className="projects-drive__previewBox">
-        <div className="projects-drive__previewHeader">
-          <div className="projects-drive__previewTitle">{selectedFile?.name || 'Previsualització'}</div>
-          <div className="projects-drive__previewActions">
-            {selectedFile?.webViewLink && (
-              <a
-                href={selectedFile.webViewLink}
-                target="_blank"
-                rel="noreferrer"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  padding: '6px 10px',
-                  fontSize: 12,
-                  fontWeight: 600,
-                  borderRadius: 10,
-                  border: '1px solid var(--btn-ghost-border)',
-                  color: 'var(--btn-ghost-fg)',
-                  background: 'var(--btn-ghost-bg)',
-                  textDecoration: 'none'
-                }}
-              >
-                <ExternalLink size={14} />
-                Open in Drive
-              </a>
-            )}
-          </div>
-        </div>
-        <div className="projects-drive__previewBody" style={{ background: darkMode ? '#15151f' : 'var(--surface-bg)' }}>
-          {!selectedFile ? (
-            <div style={{ color: 'var(--muted-1)' }}>Selecciona un fitxer</div>
-          ) : isImage(selectedFile) && previewImageUrl ? (
-            <img src={previewImageUrl} alt="" style={{ maxWidth: '100%', maxHeight: '100%', display: 'block' }} />
-          ) : isPdf(selectedFile) && pdfPreviewUrl ? (
-            <iframe title="preview" src={pdfPreviewUrl} style={{ width: '100%', height: '100%', border: 'none' }} />
-          ) : (
-            <div style={{ color: 'var(--muted-1)' }}>Previsualització no disponible</div>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function ProjectDriveSplit({ projectFolders, driveServiceRef, darkMode, onUploadComplete }) {
-  const rootId = projectFolders?.main?.id || null
-  const [selectedFolderId, setSelectedFolderId] = useState(rootId)
-  const [folders, setFolders] = useState([])
-  const [files, setFiles] = useState([])
-  const [selectedFile, setSelectedFile] = useState(null)
-  const [loadingFolders, setLoadingFolders] = useState(false)
-  const [loadingFiles, setLoadingFiles] = useState(false)
-  const [errorFolders, setErrorFolders] = useState(null)
-  const [errorFiles, setErrorFiles] = useState(null)
-  const foldersSeq = useRef(0)
-  const filesSeq = useRef(0)
-
-  const loadRootFolders = async (rootId) => {
-    if (!rootId) return
-    const driveService = driveServiceRef?.current
-    if (!driveService?.listFolderContents) return
-    const seq = ++foldersSeq.current
-    setLoadingFolders(true)
-    setErrorFolders(null)
-    try {
-      const contents = await driveService.listFolderContents(rootId)
-      if (seq !== foldersSeq.current) return
-      const subfolders = (contents || [])
-        .filter(item => item.mimeType === 'application/vnd.google-apps.folder')
-        .sort((a, b) => (a?.name || '').localeCompare(b?.name || ''))
-      setFolders(subfolders)
-    } catch (err) {
-      if (seq !== foldersSeq.current) return
-      setErrorFolders(err?.message || 'Error carregant Drive')
-      setFolders([])
-    } finally {
-      if (seq === foldersSeq.current) setLoadingFolders(false)
-    }
-  }
-
-  useEffect(() => {
-    if (!rootId) return
-    setSelectedFolderId(rootId)
-    loadRootFolders(rootId)
-  }, [rootId])
-
-  const loadFiles = async (folderId) => {
-    if (!folderId) return
-    const driveService = driveServiceRef?.current
-    if (!driveService?.listFolderContents) return
-    const seq = ++filesSeq.current
-    setLoadingFiles(true)
-    setErrorFiles(null)
-    try {
-      const contents = await driveService.listFolderContents(folderId)
-      if (seq !== filesSeq.current) return
-      const fileItems = (contents || [])
-        .filter(item => item.mimeType !== 'application/vnd.google-apps.folder')
-        .sort((a, b) => (a?.name || '').localeCompare(b?.name || ''))
-      setFiles(fileItems)
-      setSelectedFile(prev => (prev && fileItems.find(f => f.id === prev.id)) ? prev : (fileItems[0] || null))
-    } catch (err) {
-      if (seq !== filesSeq.current) return
-      setErrorFiles(err?.message || 'Error carregant Drive')
-      setFiles([])
-      setSelectedFile(null)
-    } finally {
-      if (seq === filesSeq.current) setLoadingFiles(false)
-    }
-  }
-
-  useEffect(() => {
-    if (!selectedFolderId) return
-    loadFiles(selectedFolderId)
-  }, [selectedFolderId])
-
-  const formatSize = (bytes) => {
-    if (!bytes) return ''
-    if (bytes < 1024) return `${bytes} B`
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-  }
-  const formatDate = (value) => {
-    if (!value) return ''
-    try {
-      return new Date(value).toLocaleDateString('ca-ES')
-    } catch {
-      return ''
-    }
-  }
-  const isImage = (file) => file?.mimeType?.startsWith('image/')
-    || /\.(png|jpg|jpeg|gif|webp)$/i.test(file?.name || '')
-  const isPdf = (file) => file?.mimeType?.includes('pdf')
-    || /\.pdf$/i.test(file?.name || '')
-  const pdfPreviewUrl = selectedFile?.id ? `https://drive.google.com/file/d/${selectedFile.id}/preview` : ''
-  const previewImageUrl = selectedFile?.webContentLink || selectedFile?.webViewLink || ''
-
-  return (
-    <div className="projects-drive__grid">
-      <div className="projects-drive__box">
-        <div className="projects-drive__boxHeader">
-          <div className="projects-drive__boxTitle">Carpetes</div>
-        </div>
-        <div className="projects-drive__list">
-          {rootId && (
-            <button
-              type="button"
-              className={`projects-drive__row ${selectedFolderId === rootId ? 'is-active' : ''}`}
-              onClick={() => setSelectedFolderId(rootId)}
-            >
-              <span className="projects-drive__rowMain">Root</span>
-              <span className="projects-drive__rowSub">{selectedFolderId === rootId ? 'Seleccionada' : ''}</span>
-            </button>
-          )}
-          {errorFolders && (
-            <div className="projects-drive__row">
-              <span className="projects-drive__rowMain">{errorFolders}</span>
-            </div>
-          )}
-          {!errorFolders && folders.length === 0 ? (
-            <div className="projects-drive__row">
-              <span className="projects-drive__rowMain">{loadingFolders ? 'Carregant...' : 'Sense carpetes'}</span>
-            </div>
-          ) : folders.map((folder) => {
-            const isActive = selectedFolderId === folder.id
-            const label = (folder.name || '').replace(/^\d+_/, '')
-            return (
-              <button
-                key={folder.id}
-                type="button"
-                className={`projects-drive__row ${isActive ? 'is-active' : ''}`}
-                onClick={() => setSelectedFolderId(folder.id)}
-              >
-                <span className="projects-drive__rowMain">{label || 'Carpeta'}</span>
-                <span className="projects-drive__rowSub">{isActive ? 'Seleccionada' : ''}</span>
-              </button>
-            )
-          })}
-        </div>
-      </div>
-
-      <div className="projects-drive__box">
-        <div className="projects-drive__boxHeader">
-          <div className="projects-drive__boxTitle">Fitxers</div>
-        </div>
-        <div className="projects-drive__files">
-          {errorFiles && (
-            <div className="projects-drive__fileRow">
-              <div className="projects-drive__fileMain">
-                <div className="projects-drive__fileName">{errorFiles}</div>
-              </div>
-            </div>
-          )}
-          {!errorFiles && files.length === 0 ? (
-            <div className="projects-drive__fileRow">
-              <div className="projects-drive__fileMain">
-                <div className="projects-drive__fileName">{loadingFiles ? 'Carregant...' : 'Cap fitxer'}</div>
-              </div>
-            </div>
-          ) : files.map((file) => {
-            const isActive = selectedFile?.id === file.id
-            const ext = (file.name || '').split('.').pop()?.toUpperCase() || 'FILE'
-            return (
-              <button
-                key={file.id}
-                type="button"
-                className={`projects-drive__fileRow ${isActive ? 'is-active' : ''}`}
-                onClick={() => setSelectedFile(file)}
-              >
-                <div className="projects-drive__fileMain">
-                  <div className="projects-drive__fileName">{file.name || 'Fitxer'}</div>
-                  <div className="projects-drive__fileMeta">
-                    {formatDate(file.modifiedTime || file.createdTime)}{file.size ? ` · ${formatSize(file.size)}` : ''}
-                  </div>
-                </div>
-                <div className="projects-drive__fileTag">{ext}</div>
-              </button>
-            )
-          })}
-        </div>
-        <div className="projects-drive__dropzone">
-          <FileUploader
-            folderId={selectedFolderId}
-            onUploadComplete={(uploaded) => {
-              if (onUploadComplete) onUploadComplete(uploaded)
-              if (selectedFolderId) loadFiles(selectedFolderId)
-            }}
-            label="Arrossega fitxers aquí"
-          />
-        </div>
-      </div>
-
-      <div className="projects-drive__previewBox">
-        <div className="projects-drive__previewHeader">
-          <div className="projects-drive__previewTitle">{selectedFile?.name || 'Previsualització'}</div>
-          <div className="projects-drive__previewActions">
-            {selectedFile?.webViewLink && (
-              <a
-                href={selectedFile.webViewLink}
-                target="_blank"
-                rel="noreferrer"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  padding: '6px 10px',
-                  fontSize: 12,
-                  fontWeight: 600,
-                  borderRadius: 10,
-                  border: '1px solid var(--btn-ghost-border)',
-                  color: 'var(--btn-ghost-fg)',
-                  background: 'var(--btn-ghost-bg)',
-                  textDecoration: 'none'
-                }}
-              >
-                <ExternalLink size={14} />
-                Open in Drive
-              </a>
-            )}
-          </div>
-        </div>
-        <div className="projects-drive__previewBody" style={{ background: darkMode ? '#15151f' : 'var(--surface-bg)' }}>
-          {!selectedFile ? (
-            <div style={{ color: 'var(--muted-1)' }}>Selecciona un fitxer</div>
-          ) : isImage(selectedFile) && previewImageUrl ? (
-            <img src={previewImageUrl} alt="" style={{ maxWidth: '100%', maxHeight: '100%', display: 'block' }} />
-          ) : isPdf(selectedFile) && pdfPreviewUrl ? (
-            <iframe title="preview" src={pdfPreviewUrl} style={{ width: '100%', height: '100%', border: 'none' }} />
-          ) : (
-            <div style={{ color: 'var(--muted-1)' }}>Preview no disponible</div>
-          )}
-        </div>
-      </div>
-    </div>
-  )
 }
 
 // Lazy import AppContext to avoid initializing supabase during module init
@@ -769,12 +295,11 @@ function PhaseSection({ phaseId, currentPhaseId, phaseStyle, darkMode, children 
 function ProjectDetailInner({ useApp }) {
   const { id: rawId } = useParams()
   const navigate = useNavigate()
-  const { darkMode, driveConnected, refreshProjects, demoMode } = useApp()
+  const { darkMode, refreshProjects, demoMode } = useApp()
   const { isMobile, isTablet } = useBreakpoint()
   const { t } = useTranslation()
   const identifiersSectionRef = useRef(null)
   const researchFileInputRef = useRef(null)
-  const driveServiceRef = useRef(null)
   const modalStyles = getModalStyles(isMobile, darkMode)
   
   // Extreure UUID net del paràmetre de ruta (eliminar qualsevol sufix com "Fes:")
@@ -785,10 +310,7 @@ function ProjectDetailInner({ useApp }) {
   const [error, setError] = useState(null)
   const [marketplaceTags, setMarketplaceTags] = useState([])
   const [marketplaceTagsLoading, setMarketplaceTagsLoading] = useState(false)
-  const [projectFolders, setProjectFolders] = useState(null)
-  const [selectedFolder, setSelectedFolder] = useState(null)
   const [documents, setDocuments] = useState([])
-  const [projectSubfolders, setProjectSubfolders] = useState([])
   const [phaseProgress, setPhaseProgress] = useState({ completed: 0, total: 0, allOk: false })
   const [phaseBlockMessage, setPhaseBlockMessage] = useState(null)
   const [phaseBlockVisible, setPhaseBlockVisible] = useState(false)
@@ -954,15 +476,10 @@ function ProjectDetailInner({ useApp }) {
     return ['demand', 'competition', 'simple', 'improvable'].every((k) => hasEvidence(k))
   }, [researchEvidence])
 
-  const researchDriveFolderId = useMemo(() => {
-    if (!driveConnected || !projectFolders) return null
-    const folderKey = PHASE_FOLDER_MAP[1]
-    return (
-      projectFolders?.subfolders?.[folderKey]?.id ||
-      projectFolders?.main?.id ||
-      null
-    )
-  }, [driveConnected, projectFolders])
+  const researchStoragePrefix = useMemo(() => {
+    if (!id) return null
+    return `projects/${id}/research/`
+  }, [id])
 
   const researchAllChecksOk = useMemo(() => {
     return !!(researchChecks.demand && researchChecks.competition && researchChecks.simple && researchChecks.improvable)
@@ -1101,16 +618,15 @@ function ProjectDetailInner({ useApp }) {
   }
 
   const handleImportResearchFile = async (file) => {
-    if (driveConnected && researchDriveFolderId && driveServiceRef.current?.uploadFile) {
+    if (researchStoragePrefix) {
       try {
-        await driveServiceRef.current.uploadFile(file, researchDriveFolderId)
+        const { storageService } = await import('../lib/storageService')
+        await storageService.uploadFile(`${researchStoragePrefix}${file.name}`, file)
       } catch (err) {
-        if (err?.message === 'AUTH_REQUIRED') {
-          try {
-            const { showToast } = await import('../components/Toast')
-            showToast('Reconnecta Google Drive. La sessió ha expirat.', 'warning')
-          } catch {}
-        }
+        try {
+          const { showToast } = await import('../components/Toast')
+          showToast('Permís denegat: no tens accés a aquest projecte o el path no és vàlid.', 'warning')
+        } catch {}
       }
     }
     const text = await file.text()
@@ -1151,15 +667,6 @@ function ProjectDetailInner({ useApp }) {
       showToast('Payload copiat', 'success')
     } catch {}
   }
-
-  // Carregar PROJECT_SUBFOLDERS dinàmicament per evitar cicles d'imports
-  useEffect(() => {
-    import('../constants/projectDrive').then((mod) => {
-      setProjectSubfolders(mod.PROJECT_SUBFOLDERS || [])
-    }).catch(() => {
-      setProjectSubfolders([])
-    })
-  }, [])
 
   useEffect(() => {
     if (id) {
@@ -1225,12 +732,6 @@ function ProjectDetailInner({ useApp }) {
   }, [id])
 
   useEffect(() => {
-    if (project && driveConnected) {
-      loadDriveFolders()
-    }
-  }, [project, driveConnected])
-
-  useEffect(() => {
     if (!createMenuOpen) return
     const handleClickOutside = (event) => {
       if (!event.target.closest('[data-create-menu]')) {
@@ -1268,79 +769,7 @@ function ProjectDetailInner({ useApp }) {
     }
   }, [createModalType, createForm, expenseCategories])
 
-  const loadDriveFolders = async () => {
-    if (!project) return
-    
-    try {
-      // Import dinàmic de driveService per evitar cicles d'imports
-      let driveService
-      try {
-        const googleDriveModule = await import('../lib/googleDrive')
-        driveService = googleDriveModule.driveService
-      } catch (importErr) {
-        // Drive is optional, don't crash the route
-        setProjectFolders(null)
-        return
-      }
-      driveServiceRef.current = driveService
-      
-      // Usar ensureProjectDriveFolders per garantir idempotència
-      const folders = await driveService.ensureProjectDriveFolders({
-        id: project.id,
-        project_code: project?.project_code || '',
-        sku: project?.sku || '',
-        name: project?.name || '',
-        drive_folder_id: project?.drive_folder_id || null
-      })
-      
-      if (folders) {
-        setProjectFolders(folders)
-        
-        // Si no tenia drive_folder_id, guardar-lo ara
-        if (!project.drive_folder_id && folders?.main?.id) {
-          try {
-            let updateProject
-            try {
-              const supabaseModule = await import('../lib/supabase')
-              updateProject = supabaseModule.updateProject
-            } catch (importErr) {
-              // Silent fail - drive_folder_id update is not critical
-              return
-            }
-            await updateProject(id, { drive_folder_id: folders.main.id })
-            setProject({ ...project, drive_folder_id: folders.main.id })
-          } catch (e) {
-            if (import.meta.env.DEV) {
-              console.warn('Error guardant drive_folder_id:', e)
-            }
-          }
-        }
-        
-        // Seleccionar carpeta segons fase actual
-        const folderName = PHASE_FOLDER_MAP[getPhaseIdFromProject(project)]
-        if (folders?.subfolders && folderName && folders.subfolders[folderName]) {
-          setSelectedFolder(folders.subfolders[folderName])
-        }
-      }
-    } catch (err) {
-      try {
-        const { notifyError } = await import('../lib/errorHandling')
-        notifyError(err, { context: 'ProjectDetail:loadDriveFolders' })
-      } catch (importErr) {
-        // Silent fail - Drive is optional
-      }
-      // Don't show alert, just log - Drive is optional
-      setProjectFolders(null)
-    }
-  }
-
   const openCreateModal = (type) => {
-    if (!driveConnected && (type === 'supplier' || type === 'warehouse' || type === 'forwarder')) {
-      import('../components/Toast').then(({ showToast }) => {
-        showToast('Connecta Google Drive per crear aquest element.', 'warning')
-      }).catch(() => {})
-      return
-    }
     const baseExpenseCategory = expenseCategories[0]?.id || null
     const today = new Date().toISOString().split('T')[0]
     const templates = {
@@ -1608,15 +1037,6 @@ function ProjectDetailInner({ useApp }) {
     }
   }
 
-  // Handle project update from ArtsFinalsSection
-  const handleProjectUpdated = (updatedProject) => {
-    setProject(updatedProject)
-    // Refresh projects list in parent context
-    if (refreshProjects) {
-      refreshProjects()
-    }
-  }
-
   const handleUploadComplete = async (files) => {
     // Guardar referències a Supabase (evita duplicats automàticament)
     let savedCount = 0
@@ -1648,19 +1068,18 @@ function ProjectDetailInner({ useApp }) {
         const doc = await createDocument({
           project_id: id,
           name: file.name,
-          file_url: file.webViewLink || file.driveUrl,
-          drive_file_id: file.id,
+          file_url: file.path,
+          drive_file_id: null,
           category: getCategoryForPhase(getPhaseIdFromProject(project)),
           file_size: file.size
         })
         savedCount++
         // Audit log: document pujat correctament
         try {
-          await logSuccess('document', 'upload', doc.id, 'Document uploaded to Drive', {
+          await logSuccess('document', 'upload', doc.id, 'Document uploaded', {
             project_id: id,
             file_name: file.name,
-            file_size: file.size,
-            drive_file_id: file.id
+            file_size: file.size
           })
         } catch (auditErr) {
           // Silent fail for audit log
@@ -1675,8 +1094,7 @@ function ProjectDetailInner({ useApp }) {
           await logError('document', 'upload', err, {
             project_id: id,
             file_name: file.name,
-            file_size: file.size,
-            drive_file_id: file.id
+            file_size: file.size
           })
         } catch (auditErr) {
           // Silent fail for audit log
@@ -1956,13 +1374,9 @@ function ProjectDetailInner({ useApp }) {
                     Informe de recerca
                   </div>
 
-                  {!driveConnected ? (
+                  {!researchStoragePrefix ? (
                     <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>
-                      Connecta Google Drive per pujar-lo.
-                    </div>
-                  ) : !researchDriveFolderId ? (
-                    <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>
-                      Carregant carpeta...
+                      Carpeta no disponible.
                     </div>
                   ) : (
                     <>
@@ -1981,15 +1395,15 @@ function ProjectDetailInner({ useApp }) {
                         <Button
                           variant="secondary"
                           size="sm"
-                          disabled={!driveConnected || !researchDriveFolderId}
-                          title={!driveConnected ? 'Connecta Google Drive' : 'Importa un RESEARCH_REPORT (.md)'}
+                          disabled={!researchStoragePrefix}
+                          title="Importa un RESEARCH_REPORT (.md)"
                           onClick={() => researchFileInputRef.current?.click()}
                         >
                           Importar informe
                         </Button>
                       </div>
                       <FileUploader
-                        folderId={researchDriveFolderId}
+                        folderId={researchStoragePrefix}
                         onUploadComplete={handleUploadComplete}
                         label="Arrossega l’informe aquí"
                       />
@@ -2266,22 +1680,6 @@ function ProjectDetailInner({ useApp }) {
       case 5:
         return (
           <>
-            {project && (
-              <CollapsibleSection
-                title="Arts Finals"
-                icon={FileImage}
-                defaultOpen={false}
-                darkMode={darkMode}
-                phaseStyle={currentPhase}
-              >
-                <ArtsFinalsSection
-                  project={project}
-                  darkMode={darkMode}
-                  onProjectUpdated={handleProjectUpdated}
-                />
-              </CollapsibleSection>
-            )}
-
             <CollapsibleSection
               title="Comandes de Compra"
               icon={Receipt}
@@ -2315,130 +1713,6 @@ function ProjectDetailInner({ useApp }) {
                   Veure Comandes
                 </Button>
               </div>
-            </CollapsibleSection>
-
-            <CollapsibleSection
-              id="documents-section"
-              title="Documents i Adjunts"
-              icon={Paperclip}
-              defaultOpen={false}
-              darkMode={darkMode}
-              phaseStyle={currentPhase}
-            >
-              {!driveConnected && (
-                <div style={styles.driveWarning}>
-                  <AlertCircle size={18} color="#f59e0b" />
-                  <div style={{ flex: 1 }}>
-                    Connecta Google Drive per gestionar els documents del projecte.
-                  </div>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => navigate('/settings')}
-                    style={{
-                      ...styles.actionButton,
-                      backgroundColor: '#f59e0b',
-                      borderColor: '#f59e0b'
-                    }}
-                  >
-                    Connectar
-                  </Button>
-                </div>
-              )}
-              {driveConnected && projectFolders && (
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: isMobile ? '1fr' : (isTablet ? '200px 1fr' : '280px 1fr'),
-                  gap: isMobile ? '16px' : '24px'
-                }}>
-                  <div style={{
-                    ...styles.foldersPanel,
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    padding: 0
-                  }}>
-                    <h4 style={{
-                      ...styles.sectionTitle,
-                      color: darkMode ? '#ffffff' : '#111827',
-                      fontSize: '14px',
-                      marginBottom: '12px'
-                    }}>
-                      <FolderOpen size={16} />
-                      Carpetes del Projecte
-                    </h4>
-                    
-                    <div style={styles.foldersList}>
-                      {(projectSubfolders || []).map(folderName => {
-                        const folder = projectFolders.subfolders?.[folderName]
-                        const isSelected = selectedFolder?.name === folderName
-                        
-                        return (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            key={folderName}
-                            onClick={() => folder && setSelectedFolder(folder)}
-                            disabled={!folder}
-                            style={{
-                              ...styles.folderButton,
-                              backgroundColor: isSelected ? '#4f46e510' : 'transparent',
-                              borderColor: isSelected ? '#4f46e5' : 'var(--border-color)',
-                              opacity: folder ? 1 : 0.5
-                            }}
-                          >
-                            <FolderOpen size={16} color={isSelected ? '#4f46e5' : '#6b7280'} />
-                            <span style={{
-                              color: isSelected ? '#4f46e5' : (darkMode ? '#ffffff' : '#111827')
-                            }}>
-                              {folderName.replace(/^\d+_/, '')}
-                            </span>
-                          </Button>
-                        )
-                      })}
-                    </div>
-
-                    <a 
-                      href={`https://drive.google.com/drive/folders/${projectFolders.main.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={styles.driveLink}
-                    >
-                      <ExternalLink size={14} />
-                      Obrir a Google Drive
-                    </a>
-                  </div>
-
-                  {selectedFolder ? (
-                    <div style={styles.filesPanel}>
-                      <FileUploader
-                        folderId={selectedFolder.id}
-                        onUploadComplete={handleUploadComplete}
-                        label={`Arrossega arxius a ${selectedFolder.name?.replace(/^\d+_/, '')}`}
-                      />
-                      
-                      <FileBrowser
-                        folderId={selectedFolder.id}
-                        folderName={selectedFolder.name?.replace(/^\d+_/, '')}
-                        allowDelete={true}
-                      />
-                    </div>
-                  ) : (
-                    <div style={{
-                      padding: '40px',
-                      textAlign: 'center',
-                      color: darkMode ? '#9ca3af' : '#6b7280',
-                      fontSize: '14px'
-                    }}>
-                      Selecciona una carpeta per veure els documents
-                    </div>
-                  )}
-                </div>
-              )}
-              {driveConnected && !projectFolders && (
-                <div style={{ fontSize: '13px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
-                  Carregant carpetes de Drive...
-                </div>
-              )}
             </CollapsibleSection>
 
             <CollapsibleSection
@@ -2558,8 +1832,6 @@ function ProjectDetailInner({ useApp }) {
     if (state === 'drive') return { opacity: 0.65, cursor: 'pointer' }
     return { opacity: 1, cursor: 'pointer' }
   }
-
-  const driveAlert = () => alert('Cal connectar Google Drive')
 
   const handleCreatePO = () => navigate(`/orders?project=${id}`)
   const handleCreateExpense = () => openCreateModal('expense')
@@ -2793,8 +2065,8 @@ function ProjectDetailInner({ useApp }) {
           <Button
             variant="primary"
             size="sm"
-            style={btnStateStyle(driveConnected ? 'active' : 'drive')}
-            onClick={driveConnected ? handleAddDocument : driveAlert}
+            style={btnStateStyle('active')}
+            onClick={handleAddDocument}
           >
             + Document
           </Button>
@@ -3261,7 +2533,7 @@ function ProjectDetailInner({ useApp }) {
               <div className="projects-split__panel">
                 <div className="projects-split__panelHeader" style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
                   <div>
-                    <div className="projects-split__panelTitle">Drive del projecte</div>
+                    <div className="projects-split__panelTitle">Documents del projecte</div>
                     <div className="projects-split__panelSubtitle">
                       {project?.name || '—'}
                     </div>
@@ -3279,9 +2551,8 @@ function ProjectDetailInner({ useApp }) {
                   </div>
                 )}
 
-              <ProjectDriveSplit
-                projectFolders={projectFolders}
-                driveServiceRef={driveServiceRef}
+              <ProjectDriveExplorer
+                projectId={id}
                 darkMode={darkMode}
                 onUploadComplete={handleUploadComplete}
               />
