@@ -30,7 +30,8 @@ export default function ProjectDriveExplorer({
   darkMode,
   onUploadComplete,
   readOnly = false,
-  fixedFolderId = null
+  fixedFolderId = null,
+  onActivePathChange
 }) {
   const { i18n } = useTranslation()
   const locale = i18n?.language?.startsWith('en')
@@ -551,6 +552,10 @@ useEffect(() => {
     ? selectedFolderId?.replace(activeSection.prefix, '').replace(/\/$/, '')
     : ''
   const breadcrumbLabel = activeSubPath ? `${activeSectionLabel} / ${activeSubPath}` : activeSectionLabel
+
+  useEffect(() => {
+    onActivePathChange?.(breadcrumbLabel || '')
+  }, [breadcrumbLabel, onActivePathChange])
 
   return (
     <div className="projects-drive__grid">

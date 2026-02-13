@@ -1177,6 +1177,8 @@ function ProjectDetailInner({ useApp }) {
   const phaseSubtitle = PHASE_WORKFLOW_COPY[phaseId] || currentPhase.description
   const phaseGroupLabel = currentGroup?.label || 'PHASE'
   const nextPhaseId = phaseId < 7 ? phaseId + 1 : null
+  const projectTitle = project?.name || '—'
+  const [activeFolderLabel, setActiveFolderLabel] = useState('')
   const nextPhaseLabel = nextPhaseId ? getPhaseStyle(nextPhaseId).name : null
   const computeViabilitySummary = (values) => {
     if (!values) return null
@@ -2556,11 +2558,9 @@ function ProjectDetailInner({ useApp }) {
             <div className="project-split__sticky">
               <div className="projects-split__panel">
                 <div className="projects-split__panelHeader" style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-                  <div>
-                    <div className="projects-split__panelTitle">Documents del projecte</div>
-                    <div className="projects-split__panelSubtitle">
-                      {project?.name || '—'}
-                    </div>
+                  <div style={{ minWidth: 0 }}>
+                    <div className="projects-panel__title">{projectTitle}</div>
+                    <div className="projects-panel__subtitle">{activeFolderLabel || '—'}</div>
                   </div>
                 </div>
 
@@ -2579,6 +2579,7 @@ function ProjectDetailInner({ useApp }) {
                 projectId={id}
                 darkMode={darkMode}
                 onUploadComplete={handleUploadComplete}
+                onActivePathChange={setActiveFolderLabel}
               />
             </div>
             </div>
