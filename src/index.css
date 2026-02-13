@@ -1890,6 +1890,11 @@ body.dark .drive-btn--compact.drive--on {
   color: var(--text-1);
 }
 
+.projects-drive__row:hover {
+  background: var(--surface-bg-2);
+  border-color: var(--border-1);
+}
+
 .projects-drive__row.is-active {
   border-color: var(--cta-1);
   background: var(--cta-1-soft);
@@ -1926,6 +1931,7 @@ body.dark .drive-btn--compact.drive--on {
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+  min-width: 0;
 }
 
 .projects-drive__pathLabel {
@@ -1945,6 +1951,10 @@ body.dark .drive-btn--compact.drive--on {
   color: var(--cta-1);
   background: var(--cta-1-soft);
   border: 1px solid var(--cta-1-soft-border);
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .projects-drive__files {
@@ -1980,6 +1990,11 @@ body.dark .drive-btn--compact.drive--on {
   justify-content: space-between;
   gap: 10px;
   color: var(--text-1);
+}
+
+.projects-drive__fileRow:hover {
+  background: var(--surface-bg-2);
+  border-color: var(--border-1);
 }
 
 .projects-drive__fileRow.is-active {
@@ -2052,6 +2067,29 @@ body.dark .drive-btn--compact.drive--on {
 
 .projects-drive__dropNote {
   font-size: 12px;
+  color: var(--muted-1);
+}
+
+.projects-drive__dragOverlay {
+  position: absolute;
+  inset: 8px;
+  border-radius: 12px;
+  border: 1px dashed var(--border-1);
+  background: color-mix(in srgb, var(--surface-bg-2) 85%, transparent);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-weight: 600;
+  color: var(--text-1);
+  pointer-events: none;
+}
+
+.projects-drive__dragOverlayNote {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 500;
   color: var(--muted-1);
 }
 
