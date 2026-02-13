@@ -489,6 +489,8 @@ function ProjectDetailInner({ useApp }) {
     return !!(researchSnapshot.asin && /^[A-Z0-9]{10}$/.test(researchSnapshot.asin))
   }, [researchSnapshot.asin])
 
+  const researchHasReport = !!researchImport
+
   const persistResearch = (next) => {
     if (!id) return
     try {
@@ -1391,22 +1393,52 @@ function ProjectDetailInner({ useApp }) {
                           e.target.value = ''
                         }}
                       />
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          disabled={!researchStoragePrefix}
-                          title="Importa un RESEARCH_REPORT (.md)"
-                          onClick={() => researchFileInputRef.current?.click()}
+                      {!researchHasReport ? (
+                        <>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              disabled={!researchStoragePrefix}
+                              title="Importa un RESEARCH_REPORT (.md)"
+                              onClick={() => researchFileInputRef.current?.click()}
+                            >
+                              Importar informe
+                            </Button>
+                          </div>
+                          <FileUploader
+                            folderId={researchStoragePrefix}
+                            onUploadComplete={handleUploadComplete}
+                            label="Arrossega l’informe aquí"
+                          />
+                        </>
+                      ) : (
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: 12,
+                            padding: '10px 12px',
+                            borderRadius: 12,
+                            border: '1px solid var(--border-1)',
+                            background: 'var(--surface-bg)'
+                          }}
                         >
-                          Importar informe
-                        </Button>
-                      </div>
-                      <FileUploader
-                        folderId={researchStoragePrefix}
-                        onUploadComplete={handleUploadComplete}
-                        label="Arrossega l’informe aquí"
-                      />
+                          <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>
+                            <strong style={{ color: 'var(--text-1)' }}>Informe importat ✓</strong>
+                            {researchImport?.asin ? ` · ASIN ${researchImport.asin}` : ''}
+                            {researchImport?.decision ? ` · ${researchImport.decision}` : ''}
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => researchFileInputRef.current?.click()}
+                          >
+                            Reemplaçar informe
+                          </Button>
+                        </div>
+                      )}
                     </>
                   )}
                 </div>
@@ -1506,42 +1538,33 @@ function ProjectDetailInner({ useApp }) {
                     />
                   </div>
                 </div>
-              ) : (
-                <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>
-                  Introdueix un ASIN per començar. Sense ASIN, no hi ha projecte (i està bé).
-                </div>
-              )}
+              ) : null}
 
               <div style={{ display: 'grid', gap: 10, marginTop: 6 }}>
-                <div style={{ fontSize: 12, color: 'var(--muted-1)' }}>
-                  Checks (requereixen evidència)
-                </div>
-
                 {[
-                  { key: 'demand', label: 'Demanda (evidència: Helium10/Keepa/SERP)' },
-                  { key: 'competition', label: 'Competència (top 10 + reviews + preus)' },
-                  { key: 'simple', label: 'Simplicitat (risc: materials / retorns / compliança)' },
-                  { key: 'improvable', label: 'Millorable (bundle / feature / packaging)' }
+                  { key: 'demand', label: 'Demanda' },
+                  { key: 'competition', label: 'Competència' },
+                  { key: 'simple', label: 'Risc' },
+                  { key: 'improvable', label: 'Millora' }
                 ].map((c) => {
                   const okEvidence = hasEvidence(c.key)
                   return (
-                    <div key={c.key} style={{ display: 'grid', gap: 8 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-                        <div style={{ fontSize: 13, color: 'var(--text-1)' }}>{c.label}</div>
-                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'var(--text-1)' }}>
-                          <input
-                            type="checkbox"
-                            checked={!!researchChecks[c.key]}
-                            disabled={!okEvidence}
-                            onChange={(e) => {
-                              setResearchTouched(true)
-                              setResearchChecks({ ...researchChecks, [c.key]: e.target.checked })
-                            }}
-                          />
-                          OK
-                        </label>
+                    <div key={c.key} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <label style={{ display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'var(--text-1)' }}>
+                        <input
+                          type="checkbox"
+                          checked={!!researchChecks[c.key]}
+                          disabled={!okEvidence}
+                          onChange={(e) => {
+                            setResearchTouched(true)
+                            setResearchChecks({ ...researchChecks, [c.key]: e.target.checked })
+                          }}
+                        />
+                        OK
+                      </label>
+                      <div style={{ minWidth: 120, fontSize: 13, fontWeight: 500, color: 'var(--text-1)' }}>
+                        {c.label}
                       </div>
-
                       <input
                         type="text"
                         value={researchEvidence[c.key] || ''}
@@ -1553,8 +1576,9 @@ function ProjectDetailInner({ useApp }) {
                             setResearchChecks((prev) => ({ ...prev, [c.key]: false }))
                           }
                         }}
-                        placeholder="Enganxa link o nota curta (mín. 8 caràcters). Ex: https://…  | 'H10: 7.2k/mo, trend estable'"
+                        placeholder="Link o nota breu (mín. 8 caràcters)"
                         style={{
+                          flex: 1,
                           height: 40,
                           borderRadius: 12,
                           border: '1px solid var(--border-1)',

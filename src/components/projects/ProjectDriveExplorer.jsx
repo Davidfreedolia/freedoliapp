@@ -1,6 +1,26 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ExternalLink, Download, Folder, FileText, Maximize2, ArrowLeft, Plus, X, Trash2, RefreshCw } from 'lucide-react'
+import {
+  ExternalLink,
+  Download,
+  Folder,
+  FileText,
+  Maximize2,
+  ArrowLeft,
+  Plus,
+  X,
+  Trash2,
+  RefreshCw,
+  Search,
+  Receipt,
+  ShoppingCart,
+  FileDown,
+  Truck,
+  BadgeCheck,
+  Box,
+  Tag,
+  Image
+} from 'lucide-react'
 import Button from '../Button'
 import FileUploader from '../FileUploader'
 import { storageService } from '../../lib/storageService'
@@ -21,8 +41,9 @@ export default function ProjectDriveExplorer({
   const copy = {
     ca: {
       projectDocs: 'Documents del projecte',
-      explorer: 'Explorador',
-      preview: 'Previsualització',
+      sections: 'Seccions',
+      explorer: 'Fitxers',
+      preview: 'Vista prèvia',
       loading: 'Carregant...',
       newFolder: 'Nova carpeta',
       newFolderTooltip: 'Crea una subcarpeta dins d’aquesta secció',
@@ -35,8 +56,9 @@ export default function ProjectDriveExplorer({
       delete: 'Esborra',
       deleteTooltip: 'Elimina l’arxiu',
       emptyNoProject: 'Selecciona un projecte per veure els documents.',
-      emptyFolderTitle: 'Aquesta carpeta està buida',
-      emptyFolderSub: 'Arrossega fitxers aquí o crea una subcarpeta.',
+      emptySections: 'Sense seccions',
+      emptyFolderTitle: 'Carpeta buida',
+      emptyFolderSub: '',
       noFileSelected: 'Selecciona un fitxer per previsualitzar-lo.',
       previewUnavailable: 'Previsualització no disponible.',
       imagePreviewError: "No es pot previsualitzar. Obre l'arxiu.",
@@ -59,7 +81,8 @@ export default function ProjectDriveExplorer({
     },
     en: {
       projectDocs: 'Project documents',
-      explorer: 'Explorer',
+      sections: 'Sections',
+      explorer: 'Files',
       preview: 'Preview',
       loading: 'Loading...',
       newFolder: 'New folder',
@@ -73,8 +96,9 @@ export default function ProjectDriveExplorer({
       delete: 'Delete',
       deleteTooltip: 'Delete file',
       emptyNoProject: 'Select a project to view documents.',
-      emptyFolderTitle: 'This folder is empty',
-      emptyFolderSub: 'Drop files here or create a subfolder.',
+      emptySections: 'No sections',
+      emptyFolderTitle: 'Empty folder',
+      emptyFolderSub: '',
       noFileSelected: 'Select a file to preview it.',
       previewUnavailable: 'Preview not available.',
       imagePreviewError: "Can’t preview. Open the file.",
@@ -97,7 +121,8 @@ export default function ProjectDriveExplorer({
     },
     es: {
       projectDocs: 'Documentos del proyecto',
-      explorer: 'Explorador',
+      sections: 'Secciones',
+      explorer: 'Archivos',
       preview: 'Vista previa',
       loading: 'Cargando...',
       newFolder: 'Nueva carpeta',
@@ -111,8 +136,9 @@ export default function ProjectDriveExplorer({
       delete: 'Eliminar',
       deleteTooltip: 'Elimina el archivo',
       emptyNoProject: 'Selecciona un proyecto para ver los documentos.',
-      emptyFolderTitle: 'Esta carpeta está vacía',
-      emptyFolderSub: 'Arrastra archivos aquí o crea una subcarpeta.',
+      emptySections: 'Sin secciones',
+      emptyFolderTitle: 'Carpeta vacía',
+      emptyFolderSub: '',
       noFileSelected: 'Selecciona un archivo para previsualizarlo.',
       previewUnavailable: 'Vista previa no disponible.',
       imagePreviewError: 'No se puede previsualizar. Abre el archivo.',
@@ -136,16 +162,16 @@ export default function ProjectDriveExplorer({
   }
   const c = copy[locale]
   const sections = projectId ? [
-    { key: 'research', label: 'Research', prefix: `projects/${projectId}/research/` },
-    { key: 'briefings', label: 'Briefings', prefix: `projects/${projectId}/briefings/` },
-    { key: 'quotations', label: 'Quotations', prefix: `projects/${projectId}/quotations/` },
-    { key: 'purchaseorders', label: 'Purchase Orders', prefix: `projects/${projectId}/purchaseorders/` },
-    { key: 'invoices', label: 'Invoices', prefix: `projects/${projectId}/invoices/` },
-    { key: 'shipping', label: 'Shipping', prefix: `projects/${projectId}/shipping/` },
-    { key: 'certificates', label: 'Certificates', prefix: `projects/${projectId}/certificates/` },
-    { key: 'samples', label: 'Samples', prefix: `projects/${projectId}/samples/` },
-    { key: 'listings', label: 'Listings', prefix: `projects/${projectId}/listings/` },
-    { key: 'images', label: 'Images', prefix: `projects/${projectId}/images/` }
+    { key: 'research', label: 'Research', prefix: `projects/${projectId}/research/`, icon: Search },
+    { key: 'briefings', label: 'Briefings', prefix: `projects/${projectId}/briefings/`, icon: FileText },
+    { key: 'quotations', label: 'Quotations', prefix: `projects/${projectId}/quotations/`, icon: Receipt },
+    { key: 'purchaseorders', label: 'Purchase Orders', prefix: `projects/${projectId}/purchaseorders/`, icon: ShoppingCart },
+    { key: 'invoices', label: 'Invoices', prefix: `projects/${projectId}/invoices/`, icon: FileDown },
+    { key: 'shipping', label: 'Shipping', prefix: `projects/${projectId}/shipping/`, icon: Truck },
+    { key: 'certificates', label: 'Certificates', prefix: `projects/${projectId}/certificates/`, icon: BadgeCheck },
+    { key: 'samples', label: 'Samples', prefix: `projects/${projectId}/samples/`, icon: Box },
+    { key: 'listings', label: 'Listings', prefix: `projects/${projectId}/listings/`, icon: Tag },
+    { key: 'images', label: 'Images', prefix: `projects/${projectId}/images/`, icon: Image }
   ] : []
   const rootId = fixedFolderId || (sections[0]?.prefix ?? null)
   const [selectedFolderId, setSelectedFolderId] = useState(rootId)
@@ -460,6 +486,11 @@ useEffect(() => {
     link.remove()
   }
 
+  const handleOpen = () => {
+    if (!selectedFileUrl) return
+    window.open(selectedFileUrl, '_blank', 'noopener,noreferrer')
+  }
+
   const formatSize = (bytes) => {
     if (!bytes) return ''
     if (bytes < 1024) return `${bytes} B`
@@ -514,11 +545,29 @@ useEffect(() => {
     )
   }
 
+  const activeSection = sections.find((section) => selectedFolderId?.startsWith(section.prefix))
+  const activeSectionLabel = activeSection?.label || ''
+  const activeSubPath = activeSection
+    ? selectedFolderId?.replace(activeSection.prefix, '').replace(/\/$/, '')
+    : ''
+  const breadcrumbLabel = activeSubPath ? `${activeSectionLabel} / ${activeSubPath}` : activeSectionLabel
+
   return (
     <div className="projects-drive__grid">
       <div className="projects-drive__box">
         <div className="projects-drive__boxHeader">
-          <div className="projects-drive__boxTitle">Carpetes</div>
+          <div className="projects-drive__boxTitle">{c.sections}</div>
+          {!readOnly && canUpload && !fixedFolderId && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowNewFolder(true)}
+              title={c.newFolderTooltip}
+              aria-label={c.newFolder}
+            >
+              <Plus size={16} />
+            </Button>
+          )}
         </div>
         <div className="projects-drive__list">
           {fixedFolderId ? (
@@ -527,10 +576,11 @@ useEffect(() => {
             </div>
           ) : sections.length === 0 ? (
             <div className="projects-drive__row">
-              <span className="projects-drive__rowMain">Sense carpetes</span>
+              <span className="projects-drive__rowMain">{c.emptySections}</span>
             </div>
           ) : sections.map((section) => {
             const isActive = selectedFolderId === section.prefix
+            const SectionIcon = section.icon || Folder
             return (
               <button
                 key={section.key}
@@ -541,8 +591,11 @@ useEffect(() => {
                   setFolderStack([])
                 }}
               >
-                <span className="projects-drive__rowMain">{section.label}</span>
-                <span className="projects-drive__rowSub">{isActive ? 'Seleccionada' : ''}</span>
+                <span className="projects-drive__rowMain">
+                  <SectionIcon size={16} style={{ color: 'var(--coral-1)' }} />
+                  {section.label}
+                </span>
+                <span className="projects-drive__rowSub">{isActive ? '•' : ''}</span>
               </button>
             )
           })}
@@ -551,29 +604,23 @@ useEffect(() => {
 
       <div className="projects-drive__box">
         <div className="projects-drive__boxHeader">
-          <div className="projects-drive__boxTitle">{c.explorer}</div>
+          <div className="projects-drive__path">
+            <span className="projects-drive__pathLabel">{c.explorer}</span>
+            {breadcrumbLabel ? (
+              <span className="projects-drive__pathPill">{breadcrumbLabel}</span>
+            ) : null}
+          </div>
           {!fixedFolderId && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              {!readOnly && canUpload && (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setShowNewFolder(true)}
-                  title={c.newFolderTooltip}
-                >
-                  <Plus size={14} />
-                  {c.newFolder}
-                </Button>
-              )}
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleBack}
                 disabled={!folderStack.length}
                 title={!folderStack.length ? 'No hi ha carpeta anterior' : c.backTooltip}
+                aria-label={c.back}
               >
-                <ArrowLeft size={14} />
-                {c.back}
+                <ArrowLeft size={16} />
               </Button>
             </div>
           )}
@@ -703,22 +750,12 @@ useEffect(() => {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 10,
-              padding: '32px 12px',
+              gap: 8,
+              padding: '24px 12px',
               color: 'var(--muted-1)'
             }}>
-              <Folder size={32} />
+              <Folder size={28} />
               <div style={{ fontWeight: 600, color: 'var(--text-1)' }}>{c.emptyFolderTitle}</div>
-              <div style={{ fontSize: 13 }}>{c.emptyFolderSub}</div>
-              {!readOnly && canUpload && (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => dropzoneRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
-                >
-                  Puja el primer fitxer
-                </Button>
-              )}
             </div>
           ) : (
             <>
@@ -784,38 +821,25 @@ useEffect(() => {
         <div className="projects-drive__previewHeader">
           <div className="projects-drive__previewTitle">{selectedFile?.name || c.preview}</div>
           <div className="projects-drive__previewActions">
-            {selectedFileUrl && (
-              <a
-                href={selectedFileUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  padding: '6px 10px',
-                  fontSize: 12,
-                  fontWeight: 600,
-                  borderRadius: 10,
-                  border: '1px solid var(--btn-ghost-border)',
-                  color: 'var(--btn-ghost-fg)',
-                  background: 'var(--btn-ghost-bg)',
-                  textDecoration: 'none'
-                }}
-              >
-                <ExternalLink size={14} />
-                {c.open}
-              </a>
-            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleOpen}
+              disabled={!selectedFileUrl}
+              title={!selectedFileUrl ? c.noFileSelected : c.open}
+              aria-label={c.open}
+            >
+              <ExternalLink size={14} />
+            </Button>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleRefreshLink}
                 disabled={!selectedFile}
               title={!selectedFile ? c.noFileSelected : c.refreshLinkTooltip}
+              aria-label={c.refreshLink}
               >
               <RefreshCw size={14} />
-              {c.refreshLink}
             </Button>
             <Button
               variant="ghost"
@@ -823,9 +847,9 @@ useEffect(() => {
               onClick={handleDownload}
               disabled={!selectedFileUrl}
               title={!selectedFileUrl ? 'No hi ha enllaç de descàrrega' : 'Descarregar'}
+              aria-label={c.download}
             >
               <Download size={14} />
-              {c.download}
             </Button>
             <Button
               variant="ghost"
@@ -833,9 +857,9 @@ useEffect(() => {
               onClick={() => setIsFullscreen(true)}
               disabled={!selectedFile}
               title={!selectedFile ? 'Selecciona un fitxer' : 'Pantalla completa'}
+              aria-label="Pantalla completa"
             >
               <Maximize2 size={14} />
-              Fullscreen
             </Button>
             {!readOnly && (
               <Button
@@ -844,9 +868,9 @@ useEffect(() => {
                 onClick={() => setDeleteConfirmOpen(true)}
                 disabled={!selectedFile}
                 title={!selectedFile ? c.noFileSelected : c.deleteTooltip}
+                aria-label={c.delete}
               >
                 <Trash2 size={14} />
-                {c.delete}
               </Button>
             )}
           </div>
