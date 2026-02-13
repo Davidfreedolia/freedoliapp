@@ -1961,6 +1961,7 @@ body.dark .drive-btn--compact.drive--on {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  position: relative;
 }
 
 @media (min-width: 1200px) {
@@ -2072,10 +2073,10 @@ body.dark .drive-btn--compact.drive--on {
 
 .projects-drive__dragOverlay {
   position: absolute;
-  inset: 8px;
+  inset: 10px;
   border-radius: 12px;
-  border: 1px dashed var(--border-1);
-  background: color-mix(in srgb, var(--surface-bg-2) 85%, transparent);
+  border: 2px dashed var(--border-1);
+  background: color-mix(in srgb, var(--surface-bg-2) 70%, transparent);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2084,6 +2085,12 @@ body.dark .drive-btn--compact.drive--on {
   font-weight: 600;
   color: var(--text-1);
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.projects-drive__dragOverlay.is-on {
+  opacity: 1;
 }
 
 .projects-drive__dragOverlayNote {

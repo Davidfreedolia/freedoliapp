@@ -5,7 +5,6 @@ import {
   Download,
   Folder,
   FileText,
-  Maximize2,
   ArrowLeft,
   Plus,
   X,
@@ -188,8 +187,8 @@ export default function ProjectDriveExplorer({
   const filesSeq = useRef(0)
   const [selectedFileUrl, setSelectedFileUrl] = useState('')
   const signedUrlCache = useRef(new Map())
-  const [isDragActive, setIsDragActive] = useState(false)
-  const dragCounter = useRef(0)
+  const [isDraggingFiles, setIsDraggingFiles] = useState(false)
+  const dragDepthRef = useRef(0)
   const [showNewFolder, setShowNewFolder] = useState(false)
   const [newFolderName, setNewFolderName] = useState('')
   const [newFolderError, setNewFolderError] = useState(null)
@@ -348,23 +347,24 @@ useEffect(() => {
   const handleDragEnter = (e) => {
     if (readOnly || !canUpload) return
     e.preventDefault()
-    dragCounter.current += 1
-    setIsDragActive(true)
+    dragDepthRef.current += 1
+    setIsDraggingFiles(true)
   }
 
   const handleDragLeave = (e) => {
     if (readOnly || !canUpload) return
     e.preventDefault()
-    dragCounter.current -= 1
-    if (dragCounter.current <= 0) {
-      dragCounter.current = 0
-      setIsDragActive(false)
+    dragDepthRef.current -= 1
+    if (dragDepthRef.current <= 0) {
+      dragDepthRef.current = 0
+      setIsDraggingFiles(false)
     }
   }
 
   const handleDragOver = (e) => {
     if (readOnly || !canUpload) return
     e.preventDefault()
+    setIsDraggingFiles(true)
   }
 
   const handleFolderDrop = (e, targetFolderId) => {
@@ -372,8 +372,8 @@ useEffect(() => {
     e.stopPropagation()
     if (readOnly) return
     if (!canUpload) return
-    dragCounter.current = 0
-    setIsDragActive(false)
+    dragDepthRef.current = 0
+    setIsDraggingFiles(false)
     const dropped = Array.from(e.dataTransfer.files || [])
     uploadFilesToFolder(dropped, targetFolderId)
   }
@@ -382,8 +382,8 @@ useEffect(() => {
     e.preventDefault()
     e.stopPropagation()
     if (readOnly || !canUpload) return
-    dragCounter.current = 0
-    setIsDragActive(false)
+    dragDepthRef.current = 0
+    setIsDraggingFiles(false)
     const dropped = Array.from(e.dataTransfer.files || [])
     uploadFilesToFolder(dropped, selectedFolderId)
   }
@@ -466,7 +466,7 @@ useEffect(() => {
     }
   }
 
-  const handleRefreshLink = async () => {
+  const handleRefreshUrl = async () => {
     if (!selectedFile?.path) return
     try {
       const url = await getSignedUrlCached(selectedFile.path, { force: true })
@@ -478,13 +478,7 @@ useEffect(() => {
 
   const handleDownload = () => {
     if (!selectedFileUrl) return
-    const link = document.createElement('a')
-    link.href = selectedFileUrl
-    link.download = selectedFile?.name || 'download'
-    link.rel = 'noopener noreferrer'
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
+    window.open(selectedFileUrl, '_blank', 'noopener,noreferrer')
   }
 
   const handleOpen = () => {
@@ -702,30 +696,12 @@ useEffect(() => {
           onDragOver={handleDragOver}
           onDrop={readOnly ? undefined : handlePanelDrop}
         >
-          {isDragActive && (
-            <div
-              style={{
-                position: 'absolute',
-                inset: 8,
-                borderRadius: 12,
-                border: '1px dashed var(--border-color)',
-                background: 'var(--surface-bg-2)',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                textAlign: 'center',
-                fontWeight: 600,
-                color: 'var(--text-1)',
-                pointerEvents: 'none'
-              }}
-            >
+          <div className={`projects-drive__dragOverlay ${isDraggingFiles ? 'is-on' : ''}`}>
               <div>{c.dragTitle}</div>
-              <div style={{ marginTop: 6, fontSize: 12, color: 'var(--muted-1)', fontWeight: 500 }}>
+              <div className="projects-drive__dragOverlayNote">
                 {c.dragSub}
               </div>
-            </div>
-          )}
+          </div>
           {errorFiles && (
             <div className="projects-drive__fileRow">
               <div className="projects-drive__fileMain">
@@ -839,32 +815,22 @@ useEffect(() => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={handleRefreshLink}
+                onClick={handleRefreshUrl}
                 disabled={!selectedFile}
-              title={!selectedFile ? c.noFileSelected : c.refreshLinkTooltip}
-              aria-label={c.refreshLink}
+                title={!selectedFile ? c.noFileSelected : c.refreshLinkTooltip}
+                aria-label={c.refreshLink}
               >
-              <RefreshCw size={14} />
+                <RefreshCw size={14} />
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={handleDownload}
               disabled={!selectedFileUrl}
-              title={!selectedFileUrl ? 'No hi ha enllaç de descàrrega' : 'Descarregar'}
+              title={!selectedFileUrl ? 'No hi ha enllaç de descàrrega' : c.download}
               aria-label={c.download}
             >
               <Download size={14} />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsFullscreen(true)}
-              disabled={!selectedFile}
-              title={!selectedFile ? 'Selecciona un fitxer' : 'Pantalla completa'}
-              aria-label="Pantalla completa"
-            >
-              <Maximize2 size={14} />
             </Button>
             {!readOnly && (
               <Button
