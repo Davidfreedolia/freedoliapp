@@ -162,8 +162,8 @@ export default function PhaseChecklist({
       marginTop: '16px',
       padding: '16px',
       borderRadius: '12px',
-      border: `1px solid ${phaseStyle.accent}`,
-      backgroundColor: phaseStyle.bg
+      border: '1px solid var(--border-1)',
+      backgroundColor: 'var(--surface-bg)'
     }}>
       <div style={{
         fontSize: '16px',

@@ -78,7 +78,7 @@ const COUNTRIES_CITIES = {
 }
 
 export default function Suppliers() {
-  const { darkMode, driveConnected, demoMode } = useApp()
+  const { darkMode, demoMode } = useApp()
   const { isMobile, isTablet } = useBreakpoint()
   const modalStyles = getModalStyles(isMobile, darkMode)
   
@@ -184,7 +184,6 @@ export default function Suppliers() {
   }
 
   const handleNewSupplier = () => {
-    if (!driveConnected) return
     setEditingSupplier({
       name: '',
       type: 'manufacturer',
@@ -521,12 +520,6 @@ export default function Suppliers() {
             <Button
               size="sm"
               onClick={handleNewSupplier} 
-              disabled={!driveConnected}
-              title={!driveConnected ? "Connecta Google Drive per crear" : ""}
-              style={{
-                opacity: !driveConnected ? 0.5 : 1,
-                cursor: !driveConnected ? 'not-allowed' : 'pointer'
-              }}
               className="toolbar-cta"
             >
               <Plus size={18} /> Nou Proveïdor

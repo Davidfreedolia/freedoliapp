@@ -23,19 +23,6 @@ const GTIN_TYPES = [
   { value: 'GTIN_EXEMPT', label: 'GTIN Exempt (Amazon)' }
 ]
 
-const hexToRgba = (hex, alpha) => {
-  if (!hex) return ''
-  const normalized = hex.replace('#', '')
-  const isShort = normalized.length === 3
-  const expanded = isShort
-    ? normalized.split('').map((ch) => ch + ch).join('')
-    : normalized
-  const r = parseInt(expanded.slice(0, 2), 16)
-  const g = parseInt(expanded.slice(2, 4), 16)
-  const b = parseInt(expanded.slice(4, 6), 16)
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`
-}
-
 const IdentifiersSection = forwardRef(function IdentifiersSection({
   projectId,
   darkMode,
@@ -66,9 +53,7 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({
   })
   const hasPhaseStyle = Boolean(phaseStyle?.bg && phaseStyle?.accent)
   const phaseSurface = getPhaseSurfaceStyles(phaseStyle, { darkMode, borderWidth: 2 })
-  const inputBorderColor = hasPhaseStyle
-    ? hexToRgba(phaseStyle.accent, 0.25)
-    : (darkMode ? '#374151' : '#d1d5db')
+  const inputBorderColor = 'var(--border-1)'
   const inputSurfaceStyle = {
     backgroundColor: '#ffffff',
     color: '#111827',

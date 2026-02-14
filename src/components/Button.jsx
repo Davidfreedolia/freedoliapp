@@ -63,9 +63,9 @@ export default function Button({
     success: {
       backgroundColor: 'var(--success-1)',
       color: 'var(--btn-primary-fg)',
-      border: '1px solid color-mix(in srgb, var(--success) 45%, transparent)',
+      border: '1px solid var(--success-1)',
       hover: {
-        backgroundColor: 'color-mix(in srgb, var(--success-1) 85%, var(--c-teal-900))'
+        backgroundColor: 'var(--success-1)'
       }
     },
     ghost: {

@@ -13,7 +13,7 @@ import {
   Package,
   FolderKanban
 } from 'lucide-react'
-import { PHASE_STYLES, getPhaseStyle } from '../utils/phaseStyles'
+import { PHASE_STYLES, getPhaseStyle, getPhaseMeta } from '../utils/phaseStyles'
 import { useApp } from '../context/AppContext'
 import { deleteProject } from '../lib/supabase'
 import Header from '../components/Header'
@@ -22,9 +22,10 @@ import Button from '../components/Button'
 import LayoutSwitcher from '../components/LayoutSwitcher'
 import { useLayoutPreference } from '../hooks/useLayoutPreference'
 import ProjectDriveExplorer from '../components/projects/ProjectDriveExplorer'
+import MarketplaceTag from '../components/MarketplaceTag'
 
 export default function Projects() {
-  const { projects, refreshProjects, driveConnected, darkMode } = useApp()
+  const { projects, refreshProjects, darkMode } = useApp()
   const navigate = useNavigate()
   const { isMobile, isTablet } = useBreakpoint()
   const [showModal, setShowModal] = useState(false)
@@ -144,6 +145,7 @@ export default function Projects() {
 
   const renderProjectCard = (project, { isPreview = false, enablePreviewSelect = false, disableNavigation = false } = {}) => {
     const phase = getPhaseStyle(project.current_phase)
+    const activeMeta = getPhaseMeta(project.current_phase)
     const progress = ((project.current_phase) / 7) * 100
     const progressValue = Number.isFinite(progress) ? Math.min(100, Math.max(0, progress)) : 0
     const isSelected = project.id === selectedProjectId
@@ -157,6 +159,16 @@ export default function Projects() {
     const canClose = project.status && ['draft', 'active'].includes(project.status)
     const canReopen = project.status && ['closed', 'archived'].includes(project.status)
     const thumbnailUrl = project?.main_image_url || project?.asin_image_url || project?.asin_image || project?.image_url || project?.image
+    const marketplaceItems = Array.isArray(project?.marketplace_tags)
+      ? project.marketplace_tags
+      : Array.isArray(project?.marketplaces)
+        ? project.marketplaces
+        : Array.isArray(project?.marketplace_codes)
+          ? project.marketplace_codes
+          : (project?.marketplace ? [project.marketplace] : [])
+    const activeMarketplaces = marketplaceItems.filter((m) => (
+      typeof m === 'object' ? m.is_active !== false : true
+    ))
 
     return (
       <div
@@ -206,21 +218,43 @@ export default function Projects() {
               <div style={{ minWidth: 0 }}>
                 <h3 className="projects-card__title">{project.name}</h3>
                 <div className="projects-card__meta">{metadataLine}</div>
-                <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
-                  {PHASES_LIST.map((p) => {
-                    const Icon = p.icon
-                    const isCurrent = p.id === project.current_phase
+                <div className="project-card__phases">
+                  {[1, 2, 3, 4, 5, 6, 7].map((pid) => {
+                    const meta = getPhaseMeta(pid)
+                    const Icon = meta.icon
+                    const isCurrent = pid === project.current_phase
                     return (
                       <span
-                        key={p.id}
-                        title={isCurrent ? 'Current phase' : undefined}
-                        style={{ color: 'var(--muted-1)', opacity: isCurrent ? 1 : 0.45 }}
+                        key={pid}
+                        className={`project-card__phase ${isCurrent ? 'is-active' : ''}`}
+                        title={meta.label}
+                        style={{ color: meta.color }}
                       >
                         <Icon size={14} />
                       </span>
                     )
                   })}
                 </div>
+                {activeMarketplaces.length ? (
+                  <div className="project-card__marketplaces">
+                    <span className="project-card__marketplacesLabel">Marketplaces actius</span>
+                    <div className="project-card__marketplacesTags">
+                      {activeMarketplaces.map((m, idx) => {
+                        const code = typeof m === 'string'
+                          ? m
+                          : (m.marketplace_code || m.code || m.marketplace)
+                        return (
+                          <MarketplaceTag
+                            key={`${code || 'market'}-${idx}`}
+                            code={code}
+                            isPrimary={typeof m === 'object' ? !!m.is_primary : false}
+                            stockState={typeof m === 'object' ? (m.stock_state || 'none') : 'none'}
+                          />
+                        )
+                      })}
+                    </div>
+                  </div>
+                ) : null}
               </div>
             </div>
             {!isPreview && (
@@ -281,29 +315,23 @@ export default function Projects() {
 
           <div className="projects-card__progress">
             <div style={styles.progressContainer}>
-              <div style={styles.progressBar}>
+              <div className="project-card__progressTrack" style={styles.progressBar}>
                 <div style={{
                   ...styles.progressFill,
                   width: `${progressValue}%`,
-                  backgroundColor: 'var(--muted-1)'
+                  backgroundColor: activeMeta.color
                 }} />
               </div>
               <span style={styles.progressText}>{Math.round(progressValue)}%</span>
               <div style={{ marginTop: 6, width: '100%' }}>
-                <div style={{
-                  width: '100%',
-                  height: 6,
-                  borderRadius: 999,
-                  background: 'var(--surface-bg-2)',
-                  border: '1px solid var(--border-1)',
-                  overflow: 'hidden'
-                }}>
-                  <div style={{
-                    height: '100%',
-                    width: `${progress || 0}%`,
-                    borderRadius: 999,
-                    background: 'var(--muted-1)'
-                  }} />
+                <div className="project-card__progressTrack">
+                  <div
+                    className="project-card__progressFill"
+                    style={{
+                      width: `${progress || 0}%`,
+                      backgroundColor: activeMeta.color
+                    }}
+                  />
                 </div>
               </div>
             </div>
@@ -412,11 +440,8 @@ export default function Projects() {
               variant="primary"
               size="md"
               onClick={() => {
-                if (!driveConnected) return
                 setShowModal(true)
               }} 
-              disabled={!driveConnected}
-              title={!driveConnected ? 'Connecta Google Drive per crear' : ''}
               style={{ width: isMobile ? '100%' : 'auto' }}
               className="projects-toolbar__new"
             >
@@ -455,15 +480,8 @@ export default function Projects() {
               <>
                 <Button 
                   onClick={() => {
-                    if (!driveConnected) return
                     setShowModal(true)
                   }} 
-                  disabled={!driveConnected}
-          title={!driveConnected ? 'Connecta Google Drive per crear' : ''}
-                  style={{
-                    opacity: !driveConnected ? 0.5 : 1,
-                    cursor: !driveConnected ? 'not-allowed' : 'pointer'
-                  }}
                 >
                   <Plus size={18} />
           Nou projecte

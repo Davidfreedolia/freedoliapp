@@ -31,7 +31,7 @@ const CHECK_STATUS = {
 }
 
 export default function Diagnostics() {
-  const { darkMode, driveConnected } = useApp()
+  const { darkMode } = useApp()
   const navigate = useNavigate()
   const { t } = useTranslation()
   const [checks, setChecks] = useState({})
@@ -386,7 +386,10 @@ export default function Diagnostics() {
   const checkDrive = async () => {
     updateCheck('drive', CHECK_STATUS.RUNNING)
     try {
-      if (!driveConnected) {
+      const isConnected = typeof driveService.isAuthenticated === 'function'
+        ? driveService.isAuthenticated()
+        : false
+      if (!isConnected) {
         updateCheck('drive', CHECK_STATUS.WARNING, { connected: false }, 'Drive not connected')
         addLog('⚠️ Drive not connected (this is OK if not using Drive)', 'warning')
         return

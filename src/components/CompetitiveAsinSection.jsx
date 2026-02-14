@@ -15,19 +15,6 @@ const SIZE_TIERS = [
   { value: 'special_oversize', label: 'Especial oversize' }
 ]
 
-const hexToRgba = (hex, alpha) => {
-  if (!hex) return ''
-  const normalized = hex.replace('#', '')
-  const isShort = normalized.length === 3
-  const expanded = isShort
-    ? normalized.split('').map((ch) => ch + ch).join('')
-    : normalized
-  const r = parseInt(expanded.slice(0, 2), 16)
-  const g = parseInt(expanded.slice(2, 4), 16)
-  const b = parseInt(expanded.slice(4, 6), 16)
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`
-}
-
 const extractMarketplace = (host) => {
   if (!host) return 'es'
   if (host.endsWith('amazon.com')) return 'com'
@@ -102,9 +89,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
   const saveButtonState = useButtonState()
   const hasPhaseStyle = Boolean(phaseStyle?.bg && phaseStyle?.accent)
   const phaseSurface = getPhaseSurfaceStyles(phaseStyle, { darkMode, borderWidth: 2 })
-  const inputBorderColor = hasPhaseStyle
-    ? hexToRgba(phaseStyle.accent, 0.25)
-    : '#d1d5db'
+  const inputBorderColor = 'var(--border-1)'
 
   const storageKey = useMemo(() => `${COMPETITOR_STORAGE_PREFIX}${projectId}`, [projectId])
 

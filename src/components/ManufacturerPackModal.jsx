@@ -28,7 +28,7 @@ export default function ManufacturerPackModal({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [companySettings, setCompanySettings] = useState(null)
-  const [driveConnected, setDriveConnected] = useState(false)
+  const [driveReady, setDriveReady] = useState(false)
   const [selection, setSelection] = useState({
     includePO: true,
     includeFnskuLabels: true,
@@ -63,9 +63,9 @@ export default function ManufacturerPackModal({
   const checkDriveConnection = async () => {
     try {
       const isValid = await driveService.verifyToken()
-      setDriveConnected(isValid)
+      setDriveReady(isValid)
     } catch (err) {
-      setDriveConnected(false)
+      setDriveReady(false)
     }
   }
 
@@ -160,7 +160,7 @@ export default function ManufacturerPackModal({
 
       // Upload a Drive si està connectat i s'ha demanat
       let driveUploaded = false
-      if (uploadToDrive && driveConnected) {
+      if (uploadToDrive && driveReady) {
         try {
           // Obtenir carpeta del projecte
           if (project?.drive_folder_id) {
@@ -556,7 +556,7 @@ export default function ManufacturerPackModal({
         )}
 
         {/* Drive Status */}
-        {!driveConnected && (
+        {!driveReady && (
           <div style={{
             padding: '12px',
             borderRadius: '8px',
@@ -594,7 +594,7 @@ export default function ManufacturerPackModal({
             )}
           </button>
 
-          {driveConnected && (
+          {driveReady && (
             <button
               onClick={() => handleGenerate(true)}
               disabled={loading || validationErrors.length > 0}

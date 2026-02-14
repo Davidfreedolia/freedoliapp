@@ -81,7 +81,7 @@ const PO_STATUSES = {
 }
 
 export default function Orders() {
-  const { darkMode, driveConnected } = useApp()
+  const { darkMode } = useApp()
   // Removed unused navigate
   const { isMobile, isTablet } = useBreakpoint()
   // Removed unused t
@@ -857,16 +857,9 @@ export default function Orders() {
             <Button
               size="sm"
               onClick={() => {
-                if (!driveConnected) return
                 setEditingOrder(null)
                 setShowModal(true)
               }} 
-              disabled={!driveConnected}
-              title={!driveConnected ? "Connecta Google Drive per crear" : ""}
-              style={{
-                opacity: !driveConnected ? 0.5 : 1,
-                cursor: !driveConnected ? 'not-allowed' : 'pointer'
-              }}
               className="toolbar-cta"
             >
               <Plus size={18} />
@@ -939,15 +932,8 @@ export default function Orders() {
             </p>
             <Button 
               onClick={() => {
-                if (!driveConnected) return
                 setShowModal(true)
               }} 
-              disabled={!driveConnected}
-              title={!driveConnected ? "Connecta Google Drive per crear" : ""}
-              style={{
-                opacity: !driveConnected ? 0.5 : 1,
-                cursor: !driveConnected ? 'not-allowed' : 'pointer'
-              }}
             >
               <Plus size={18} />
               Nova Comanda

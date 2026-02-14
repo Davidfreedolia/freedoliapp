@@ -41,12 +41,12 @@
   --bg-app: var(--c-white-warm);
   --surface-bg: #FFFFFF;
   --surface-bg-2: var(--bg-secondary);
-  --surface-bg-3: color-mix(in srgb, var(--surface-bg) 88%, var(--c-yellow-200));
+  --surface-bg-3: var(--surface-bg-2);
   --border-1: var(--c-border);
 
   --text-1: var(--c-text-900);
   --text-2: var(--c-text-600);
-  --muted-1: color-mix(in srgb, var(--c-text-600) 85%, transparent);
+  --muted-1: var(--c-text-600);
 
   --brand-1: var(--c-teal-900);
   --brand-2: var(--c-teal-300);
@@ -56,8 +56,8 @@
   --cta-2: var(--c-cta-secondary);
   --cta-1-fg: var(--c-white-warm);
   --cta-2-fg: var(--c-white-warm);
-  --cta-1-soft: color-mix(in srgb, var(--cta-1) 35%, transparent);
-  --cta-1-soft-border: color-mix(in srgb, var(--cta-1) 55%, transparent);
+  --cta-1-soft: var(--brand-primary-soft);
+  --cta-1-soft-border: var(--color-primary-soft-border);
 
   --success: var(--c-success);
   --warning: var(--c-warning);
@@ -72,7 +72,16 @@
   --accent-action: var(--accent-1);
   --accent-active: var(--coral-1);
 
-  --focus-ring: color-mix(in srgb, var(--cta-1) 50%, transparent);
+  /* PHASE SYSTEM — CANONIC (7 colors, coral → green) */
+  --phase-1: #F26C6C;
+  --phase-2: #F08A3E;
+  --phase-3: #F0B429;
+  --phase-4: #B8D94A;
+  --phase-5: #3FBF9A;
+  --phase-6: #2FA4A9;
+  --phase-7: #2EAD5B;
+
+  --focus-ring: var(--cta-1);
   --focus-ring-shadow: 0 0 0 2px var(--focus-ring);
   --focus-ring-offset: 0 0 0 2px var(--surface-bg), 0 0 0 4px var(--focus-ring);
   --shadow-soft: 0 10px 30px rgba(31, 95, 99, 0.10);
@@ -233,8 +242,8 @@
   --btn-ghost-hover-bg: var(--surface-bg-2);
   --btn-danger-bg: var(--danger-1);
   --btn-danger-fg: var(--cta-1-fg);
-  --btn-danger-border: color-mix(in srgb, var(--danger) 45%, transparent);
-  --btn-danger-hover: color-mix(in srgb, var(--danger) 85%, var(--c-teal-900));
+  --btn-danger-border: var(--danger-1);
+  --btn-danger-hover: var(--danger-1);
   --btn-note-bg: rgba(244, 226, 122, 0.55);
   --btn-note-fg: var(--brand-1);
   --btn-note-border: rgba(242, 217, 78, 0.75);
@@ -251,14 +260,14 @@ body.dark {
   --bg-app: #0F1F20;
   --surface-bg: #15292A;
   --surface-bg-2: rgba(255, 255, 255, 0.04);
-  --surface-bg-3: color-mix(in srgb, var(--surface-bg) 88%, var(--c-yellow-200));
+  --surface-bg-3: var(--surface-bg-2);
   --surface-1: var(--surface-bg);
   --surface-2: var(--surface-bg-2);
   --border-1: rgba(216, 225, 222, 0.16);
   --text-1: #EAF2F1;
   --text-2: rgba(234, 242, 241, 0.70);
   --muted-1: rgba(234, 242, 241, 0.70);
-  --focus-ring: color-mix(in srgb, var(--c-teal-300) 45%, transparent);
+  --focus-ring: var(--c-teal-300);
   --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.35);
   --shadow-soft-2: 0 8px 20px rgba(0, 0, 0, 0.28);
   --switch-thumb-bg: var(--c-white-warm);
@@ -322,7 +331,7 @@ body.dark {
   --nav-highlight-strong: rgba(255, 255, 255, 0.10);
 
   /* Layout surfaces - Dark Mode */
-  --topbar-bg: color-mix(in srgb, var(--surface-bg) 88%, transparent);
+  --topbar-bg: var(--surface-bg);
   --topbar-border: none;
   --topbar-shadow: none;
   --topbar-blur: blur(12px);
@@ -355,7 +364,7 @@ body.dark {
   --btn-note-bg: rgba(244, 226, 122, 0.18);
   --btn-note-fg: var(--text-1);
   --btn-note-border: rgba(242, 217, 78, 0.35);
-  --btn-danger-hover: color-mix(in srgb, var(--danger) 85%, var(--c-teal-900));
+  --btn-danger-hover: var(--danger-1);
 
   /* Shadows adaptats per dark (mateix estil, més contrast) */
   --shadow-soft-hover: 0 2px 8px rgba(0, 0, 0, 0.35);
@@ -567,7 +576,7 @@ body.dark .topbar {
   height: 28px;
   background: var(--warning-1);
   color: #3a2f00;
-  border: 1px solid color-mix(in srgb, var(--warning-1) 70%, black);
+  border: 1px solid var(--warning-1);
 }
 
 .topbar .topbar-notes span {
@@ -580,7 +589,7 @@ body.dark .topbar {
 }
 
 .topbar .topbar-notes:hover {
-  background: color-mix(in srgb, var(--warning-1) 85%, white);
+  background: var(--warning-1);
 }
 
 
@@ -640,7 +649,7 @@ body.dark .topbar {
 }
 
 .topbar-help:hover {
-  background: color-mix(in srgb, #0ea5e9 88%, #000) !important;
+  background: var(--info-1) !important;
 }
 
 .topbar-help svg {
@@ -817,7 +826,7 @@ body.dark .avatar-circle {
 
 .toolbar-filterSelect input:hover,
 .toolbar-filterSelect select:hover {
-  border-color: color-mix(in srgb, var(--border-1) 70%, transparent);
+  border-color: var(--border-1);
 }
 
 /* Canonical radius — FORMS + FILTERS only */
@@ -940,7 +949,7 @@ body.dark .view-btn.is-active {
 
 .projects-toolbar__new:not(:disabled):hover,
 .projects-toolbar__new:not(:disabled):active {
-  background: color-mix(in srgb, var(--success-1) 88%, #000) !important;
+  background: var(--success-1) !important;
   opacity: 1 !important;
 }
 
@@ -955,7 +964,7 @@ body.dark .view-btn.is-active {
 
 .toolbar-cta:not(:disabled):hover,
 .toolbar-cta:not(:disabled):active {
-  background: color-mix(in srgb, var(--success-1) 88%, #000) !important;
+  background: var(--success-1) !important;
   opacity: 1 !important;
 }
 
@@ -1142,7 +1151,7 @@ body.dark .drive-btn--compact.drive--on {
   --btn-secondary-border: transparent;
   --btn-secondary-fg: var(--nav-fg);
   --btn-secondary-hover-bg: var(--danger-1);
-  --focus-ring: color-mix(in srgb, var(--danger) 50%, transparent);
+  --focus-ring: var(--danger-1);
 }
 
 .drive--on {
@@ -1150,7 +1159,7 @@ body.dark .drive-btn--compact.drive--on {
   --btn-secondary-border: transparent;
   --btn-secondary-fg: var(--nav-fg);
   --btn-secondary-hover-bg: var(--success-1);
-  --focus-ring: color-mix(in srgb, var(--success) 50%, transparent);
+  --focus-ring: var(--success-1);
 }
 
 /* Selection */
@@ -1708,6 +1717,57 @@ body.dark .drive-btn--compact.drive--on {
   transition: width .25s ease;
 }
 
+.project-card__phases{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.project-card__phase{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  opacity:0.85;
+}
+
+.project-card__phase.is-active{
+  opacity:1;
+}
+
+.project-card__progressTrack{
+  width:100%;
+  height:6px;
+  border-radius:999px;
+  background-color: var(--surface-bg-2);
+  border: 1px solid var(--border-1);
+  overflow:hidden;
+}
+
+.project-card__progressFill{
+  height:100%;
+  border-radius:999px;
+}
+
+.project-card__marketplaces{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.project-card__marketplacesLabel{
+  font-size:12px;
+  color: var(--muted-1);
+  font-weight: 600;
+}
+
+.project-card__marketplacesTags{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
 .projects-split__panelHeader {
   display: flex;
   flex-direction: column;
@@ -1724,6 +1784,28 @@ body.dark .drive-btn--compact.drive--on {
 .projects-split__panelSubtitle {
   font-size: 12px;
   color: var(--muted-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Canonical phase title row: icon + title */
+.phase-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.phase-title__icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.phase-title__text {
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2076,7 +2158,7 @@ body.dark .drive-btn--compact.drive--on {
   inset: 10px;
   border-radius: 12px;
   border: 2px dashed var(--border-1);
-  background: color-mix(in srgb, var(--surface-bg-2) 70%, transparent);
+  background: var(--surface-bg-2);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2245,7 +2327,7 @@ body.dark .drive-btn--compact.drive--on {
   width: 58%;
   max-width: 180px;
   margin: 12px auto 8px auto;
-  background: color-mix(in srgb, var(--coral-1) 70%, transparent);
+  background: var(--coral-1);
   border-radius: 999px;
   opacity: 0.9;
 }
@@ -3429,21 +3511,21 @@ body.dark .theme-pill__iconWrap {
 }
 
 .page-dashboard .pill--danger {
-  background: color-mix(in srgb, var(--brand-primary) 18%, transparent);
+  background: var(--brand-primary-soft);
   color: var(--brand-primary);
-  border: 1px solid color-mix(in srgb, var(--brand-primary) 35%, transparent);
+  border: 1px solid var(--color-primary-soft-border);
 }
 
 .page-dashboard .pill--warn {
-  background: color-mix(in srgb, var(--brand-amber) 22%, transparent);
+  background: var(--color-warning-soft-bg);
   color: var(--brand-ink);
-  border: 1px solid color-mix(in srgb, var(--brand-amber) 40%, transparent);
+  border: 1px solid var(--color-warning-soft-border);
 }
 
 .page-dashboard .pill--ok {
-  background: color-mix(in srgb, var(--brand-green) 18%, transparent);
+  background: var(--color-success-soft-bg);
   color: var(--brand-green);
-  border: 1px solid color-mix(in srgb, var(--brand-green) 35%, transparent);
+  border: 1px solid var(--color-success-soft-border);
 }
 
 .page-dashboard .dash-merged-subsection {

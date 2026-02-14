@@ -36,7 +36,8 @@ const formatDate = (dateString) => {
 }
 
 export default function ArtsFinalsSection({ project, darkMode, onProjectUpdated }) {
-  const { driveConnected, demoMode } = useApp()
+  const { demoMode } = useApp()
+  const isDriveReady = typeof driveService.isAuthenticated === 'function' && driveService.isAuthenticated()
   const [folderId, setFolderId] = useState(null)
   const [files, setFiles] = useState([])
   const [loading, setLoading] = useState(false)
@@ -68,12 +69,12 @@ export default function ArtsFinalsSection({ project, darkMode, onProjectUpdated 
 
   // Load files when folder ID changes
   useEffect(() => {
-    if (folderId && driveConnected && !demoMode) {
+    if (folderId && isDriveReady && !demoMode) {
       loadFiles()
     } else {
       setFiles([])
     }
-  }, [folderId, driveConnected, demoMode])
+  }, [folderId, isDriveReady, demoMode])
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -119,7 +120,7 @@ export default function ArtsFinalsSection({ project, darkMode, onProjectUpdated 
       return
     }
 
-    if (!driveConnected) {
+    if (!isDriveReady) {
       showToast('Connecta Google Drive primer', 'error')
       return
     }
@@ -171,7 +172,7 @@ export default function ArtsFinalsSection({ project, darkMode, onProjectUpdated 
 
   const handleDragOver = (e) => {
     e.preventDefault()
-    if (folderId && driveConnected && !demoMode && !uploading) {
+    if (folderId && isDriveReady && !demoMode && !uploading) {
       setDragActive(true)
     }
   }
@@ -184,7 +185,7 @@ export default function ArtsFinalsSection({ project, darkMode, onProjectUpdated 
   const handleDrop = async (e) => {
     e.preventDefault()
     setDragActive(false)
-    if (!folderId || !driveConnected || demoMode || uploading) return
+    if (!folderId || !isDriveReady || demoMode || uploading) return
     
     const files = Array.from(e.dataTransfer.files)
     if (files.length > 0) {
@@ -209,7 +210,7 @@ export default function ArtsFinalsSection({ project, darkMode, onProjectUpdated 
       return
     }
 
-    if (!driveConnected) {
+    if (!isDriveReady) {
       showToast('Connecta Google Drive primer', 'error')
       return
     }
@@ -332,7 +333,7 @@ export default function ArtsFinalsSection({ project, darkMode, onProjectUpdated 
   }
 
   // State 1: Drive NOT connected
-  if (!driveConnected) {
+  if (!isDriveReady) {
     return (
       <div style={{
         padding: '24px',

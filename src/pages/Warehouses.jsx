@@ -70,7 +70,7 @@ const WAREHOUSE_TYPES = [
 ]
 
 export default function Warehouses() {
-  const { darkMode, driveConnected, demoMode } = useApp()
+  const { darkMode, demoMode } = useApp()
   const { t } = useTranslation()
   const { isMobile, isTablet } = useBreakpoint()
   const modalStyles = getModalStyles(isMobile, darkMode)
@@ -248,7 +248,6 @@ export default function Warehouses() {
 
   // CRUD
   const handleNewWarehouse = () => {
-    if (!driveConnected) return
     setEditingWarehouse({
       name: '',
       type: 'custom',
@@ -460,12 +459,6 @@ export default function Warehouses() {
             <Button
               size="sm"
               onClick={handleNewWarehouse} 
-              disabled={!driveConnected}
-              title={!driveConnected ? "Connecta Google Drive per crear" : ""}
-              style={{
-                opacity: !driveConnected ? 0.5 : 1,
-                cursor: !driveConnected ? 'not-allowed' : 'pointer'
-              }}
               className="toolbar-cta"
             >
               <Plus size={18} />
@@ -508,12 +501,6 @@ export default function Warehouses() {
               </Button>
               <Button 
                 onClick={handleNewWarehouse} 
-                disabled={!driveConnected}
-                title={!driveConnected ? "Connecta Google Drive per crear" : ""}
-                style={{
-                  opacity: !driveConnected ? 0.5 : 1,
-                  cursor: !driveConnected ? 'not-allowed' : 'pointer'
-                }}
               >
                 <Plus size={18} />
                 Crear Magatzem

@@ -11,7 +11,7 @@ import { showToast } from './Toast'
 import Button from './Button'
 
 export default function NewProjectModal({ isOpen, onClose }) {
-  const { refreshProjects, driveConnected } = useApp()
+  const { refreshProjects } = useApp()
   const navigate = useNavigate()
   const { t } = useTranslation()
   const reportInputRef = useRef(null)
@@ -44,6 +44,7 @@ export default function NewProjectModal({ isOpen, onClose }) {
     name: '',
     description: ''
   })
+  const isDriveReady = typeof driveService.isAuthenticated === 'function' && driveService.isAuthenticated()
 
   const loadNextCode = useCallback(async () => {
     setGeneratingCode(true)
@@ -185,7 +186,7 @@ export default function NewProjectModal({ isOpen, onClose }) {
 
       // Crear carpetes a Drive si connectat (idempotent)
       let driveFolderId = null
-      if (driveConnected) {
+      if (isDriveReady) {
         setCreatingFolders(true)
         try {
           const folders = await driveService.ensureProjectDriveFolders({
@@ -509,7 +510,7 @@ export default function NewProjectModal({ isOpen, onClose }) {
           <div className="fd-modal__drive-info">
             <FolderPlus size={14} color="var(--muted-1)" />
             <span>
-              {driveConnected
+              {isDriveReady
                 ? t('projects.driveFolderWillBeCreated', { sku: projectCodes.sku || '...' })
                 : t('projects.connectDriveToCreateFolders')
               }

@@ -67,7 +67,7 @@ const PAYMENT_TERMS = [
 const INCOTERMS = ['EXW', 'FOB', 'CIF', 'CFR', 'DDP', 'DAP', 'FCA', 'CPT']
 
 export default function Forwarders() {
-  const { darkMode, driveConnected, demoMode } = useApp()
+  const { darkMode, demoMode } = useApp()
   const { isMobile, isTablet } = useBreakpoint()
   const modalStyles = getModalStyles(isMobile, darkMode)
   
@@ -405,7 +405,6 @@ export default function Forwarders() {
 
   // CRUD Transitari
   const handleNewForwarder = () => {
-    if (!driveConnected) return
     const defaultCountry = 'Xina'
     setEditingForwarder({
       name: '',
@@ -623,12 +622,6 @@ export default function Forwarders() {
             <Button
               size="sm"
               onClick={handleNewForwarder} 
-              disabled={!driveConnected}
-              title={!driveConnected ? "Connecta Google Drive per crear" : ""}
-              style={{
-                opacity: !driveConnected ? 0.5 : 1,
-                cursor: !driveConnected ? 'not-allowed' : 'pointer'
-              }}
               className="toolbar-cta"
             >
               <Plus size={18} /> Nou Transitari

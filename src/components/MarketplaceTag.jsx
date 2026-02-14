@@ -51,7 +51,7 @@ export default function MarketplaceTag({ code, isPrimary = false, stockState = '
           height: 8,
           borderRadius: 999,
           background: dot,
-          boxShadow: '0 0 0 2px color-mix(in srgb, var(--surface-bg) 65%, transparent)',
+        boxShadow: '0 0 0 2px var(--border-1)',
         }}
       />
       <span style={{ fontWeight: 600, letterSpacing: '0.02em' }}>{code || '—'}</span>

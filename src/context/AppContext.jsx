@@ -23,7 +23,6 @@ export function AppProvider({ children }) {
   const [projects, setProjects] = useState([])
   const [stats, setStats] = useState(EMPTY_STATS)
   const [loading, setLoading] = useState(true)
-  const [driveConnected, setDriveConnected] = useState(false)
   const [demoMode, setDemoMode] = useState(false)
 
   const isInvalidRefreshTokenError = (err) => {
@@ -243,20 +242,12 @@ export function AppProvider({ children }) {
   const initDrive = async () => {
     try {
       await driveService.init()
-      const isValid = await driveService.verifyToken()
-      setDriveConnected(isValid)
-      
-      // Escoltar canvis d'autenticació (token expirat, etc.)
-      driveService.onAuthChange = (connected) => {
-        setDriveConnected(connected)
-      }
+      await driveService.verifyToken()
     } catch (err) {
       // No mostrar stacktrace d'errors d'autenticació (són gestionats centralitzadament)
       if (err.message !== 'AUTH_REQUIRED' && !err.message?.includes('401')) {
         console.error('Error inicialitzant Drive:', err)
       }
-      // Sempre marcar com desconnectat si hi ha error
-      setDriveConnected(false)
     }
   }
 
@@ -287,8 +278,6 @@ export function AppProvider({ children }) {
     stats,
     loading,
     refreshProjects,
-    driveConnected,
-    setDriveConnected,
     demoMode,
     toggleDemoMode
   }

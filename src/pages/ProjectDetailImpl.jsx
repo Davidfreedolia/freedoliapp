@@ -44,7 +44,8 @@ import CollapsibleSection from '../components/CollapsibleSection'
 import PhaseChecklist from '../components/projects/PhaseChecklist'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { useNotes } from '../hooks/useNotes'
-import { PHASE_STYLES, getPhaseStyle, getPhaseSurfaceStyles } from '../utils/phaseStyles'
+import { PHASE_STYLES, getPhaseStyle, getPhaseSurfaceStyles, getPhaseMeta } from '../utils/phaseStyles'
+import PhaseMark from '../components/Phase/PhaseMark'
 import { getModalStyles } from '../utils/responsiveStyles'
 import Button from '../components/Button'
 // Dynamic imports for components that import supabase statically to avoid circular dependencies during module initialization
@@ -224,6 +225,9 @@ function PhaseSection({ phaseId, currentPhaseId, phaseStyle, darkMode, children 
   const isCurrent = phaseId === currentPhaseId
   const isPast = phaseId < currentPhaseId
   const isFuture = phaseId > currentPhaseId
+  const phaseMeta = getPhaseMeta(phaseId)
+  const PhaseIcon = phaseMeta.icon
+  const phaseColor = phaseMeta.color
   const sectionBorder = darkMode ? 'rgba(148, 163, 184, 0.24)' : 'rgba(15, 23, 42, 0.08)'
   const sectionBg = darkMode ? '#111827' : '#ffffff'
 
@@ -253,18 +257,30 @@ function PhaseSection({ phaseId, currentPhaseId, phaseStyle, darkMode, children 
         style={styles.phaseSectionHeader}
         aria-expanded={isOpen}
       >
-        <div style={styles.phaseSectionHeaderText}>
-          <span style={{
-            ...styles.phaseSectionTitle,
-            color: isCurrent ? phaseStyle.accent : (darkMode ? '#e5e7eb' : '#111827')
-          }}>
-            {phaseStyle.name}
-          </span>
-          <span style={{
-            fontSize: '13px',
-            color: darkMode ? '#9ca3af' : '#6b7280'
-          }}>
-            {phaseStyle.description}
+        <div style={styles.phaseSectionHeaderText} className="phase-panel__headerText">
+          <div className="phase-title">
+            <span className="phase-title__icon" style={{ color: phaseColor }}>
+              <PhaseIcon size={18} />
+            </span>
+            <span
+              className="phase-title__text phase-panel__titleText"
+              title={phaseMeta.label}
+              style={{
+                ...styles.phaseSectionTitle,
+                color: phaseColor
+              }}
+            >
+              {phaseMeta.label}
+            </span>
+          </div>
+          <span
+            className="phase-panel__subtitle"
+            style={{
+              fontSize: '13px',
+              color: darkMode ? '#9ca3af' : '#6b7280'
+            }}
+          >
+            {phaseMeta.description}
           </span>
         </div>
         <div style={styles.phaseSectionHeaderMeta}>
@@ -1138,18 +1154,7 @@ function ProjectDetailInner({ useApp }) {
     return map[phase] || 'other'
   }
 
-  const normalizePhaseStyle = (phaseStyle) => {
-    if (!phaseStyle) return phaseStyle
-    const greenTints = new Set([
-      '#F1FAD9', '#E8F8EC', '#E3F7F4', '#E8F5E9',
-      '#C0E67A', '#81C784', '#4DB6AC', '#66BB6A'
-    ])
-    return {
-      ...phaseStyle,
-      bg: greenTints.has(phaseStyle.bg) ? '#F8FAFC' : phaseStyle.bg,
-      accent: greenTints.has(phaseStyle.accent) ? '#4F46E5' : phaseStyle.accent
-    }
-  }
+  const normalizePhaseStyle = (phaseStyle) => phaseStyle
 
   const getPhaseStyleForUI = (phase) => normalizePhaseStyle(getPhaseStyle(phase))
   const phaseId = getPhaseIdFromProject(project)
@@ -1968,27 +1973,18 @@ function ProjectDetailInner({ useApp }) {
               <div style={{ marginTop: 10, overflowX: 'auto' }}>
                 {(() => {
                   const cur = project?.current_phase || 0
-                  const steps = [
-                    { id: 1, label: 'Research', icon: Search },
-                    { id: 2, label: 'Viability', icon: Calculator },
-                    { id: 3, label: 'Suppliers', icon: Factory },
-                    { id: 4, label: 'Samples', icon: Package },
-                    { id: 5, label: 'Production', icon: ClipboardList },
-                    { id: 6, label: 'Listing', icon: FileText },
-                    { id: 7, label: 'Live', icon: Rocket },
-                  ]
+                  const steps = [1, 2, 3, 4, 5, 6, 7]
 
                   return (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'nowrap', minWidth: 'max-content' }}>
-                      {steps.map((s, idx) => {
-                        const Icon = s.icon
-                        const isDone = cur > s.id
-                        const isCurrent = cur === s.id
+                      {steps.map((phaseId, idx) => {
+                        const isDone = cur > phaseId
+                        const isCurrent = cur === phaseId
 
                         return (
-                          <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 12, flex: idx === steps.length - 1 ? '0 0 auto' : '1 1 auto' }}>
+                          <div key={phaseId} style={{ display: 'flex', alignItems: 'center', gap: 12, flex: idx === steps.length - 1 ? '0 0 auto' : '1 1 auto' }}>
                             <span
-                              title={s.label}
+                              title={getPhaseMeta(phaseId).label}
                               style={{
                                 width: 34,
                                 height: 34,
@@ -1996,20 +1992,11 @@ function ProjectDetailInner({ useApp }) {
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                background: isDone ? 'color-mix(in srgb, var(--success-1) 18%, var(--surface-bg))'
-                                 : isCurrent ? 'color-mix(in srgb, var(--warning-1) 18%, var(--surface-bg))'
-                                 : 'var(--surface-bg)',
-                                border: `1px solid ${
-                                  isDone ? 'color-mix(in srgb, var(--success-1) 60%, var(--border-1))'
-                                  : isCurrent ? 'color-mix(in srgb, var(--warning-1) 60%, var(--border-1))'
-                                  : 'var(--border-1)'
-                                }`,
-                                boxShadow: isCurrent ? '0 0 0 3px color-mix(in srgb, var(--warning-1) 22%, transparent)' : 'none',
-                                color: isDone ? 'var(--success-1)' : isCurrent ? 'var(--warning-1)' : 'var(--muted-1)',
-                                opacity: isDone || isCurrent ? 1 : 0.75
+                                background: 'var(--surface-bg)',
+                                border: '1px solid var(--border-1)'
                               }}
                             >
-                              <Icon size={16} />
+                              <PhaseMark phaseId={phaseId} size={16} showLabel={false} />
                             </span>
 
                             {idx < steps.length - 1 ? (
@@ -2019,7 +2006,7 @@ function ProjectDetailInner({ useApp }) {
                                   height: 2,
                                   flex: 1,
                                   borderRadius: 999,
-                                  background: isDone ? 'color-mix(in srgb, var(--success-1) 65%, var(--border-1))' : 'var(--border-1)',
+                                  background: isDone ? 'var(--success-1)' : 'var(--border-1)',
                                   opacity: isDone ? 0.9 : 0.6
                                 }}
                               />
