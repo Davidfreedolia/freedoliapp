@@ -257,22 +257,10 @@ function PhaseSection({ phaseId, currentPhaseId, phaseStyle, darkMode, children 
         style={styles.phaseSectionHeader}
         aria-expanded={isOpen}
       >
-        <div style={styles.phaseSectionHeaderText} className="phase-panel__headerText">
-          <div className="phase-title">
-            <span className="phase-title__icon" style={{ color: phaseColor }}>
-              <PhaseIcon size={18} />
-            </span>
-            <span
-              className="phase-title__text phase-panel__titleText"
-              title={phaseMeta.label}
-              style={{
-                ...styles.phaseSectionTitle,
-                color: phaseColor
-              }}
-            >
-              {phaseMeta.label}
-            </span>
-          </div>
+          <div style={styles.phaseSectionHeaderText} className="phase-panel__headerText">
+            <div className="phase-panel__title">
+              <PhaseMark phaseId={phaseId} size={18} />
+            </div>
           <span
             className="phase-panel__subtitle"
             style={{
@@ -1931,16 +1919,21 @@ function ProjectDetailInner({ useApp }) {
 
               {/* Marketplace TAGS */}
               <div style={{ marginTop: 8 }}>
-                <MarketplaceTagGroup>
-                  {(marketplaceTags || [{ marketplace_code: 'ES', is_primary: true, stock_state: 'none' }]).map((m) => (
-                    <MarketplaceTag
-                      key={`${m.marketplace_code}-${m.is_primary ? 'p' : 's'}`}
-                      code={m.marketplace_code}
-                      isPrimary={!!m.is_primary}
-                      stockState={(m.stock_state || 'none')}
-                    />
-                  ))}
-                </MarketplaceTagGroup>
+                <div className="project-card__marketplaces">
+                  <span className="project-card__marketplacesLabel">Marketplaces actius</span>
+                  <div className="project-card__marketplacesTags">
+                    <MarketplaceTagGroup>
+                      {(marketplaceTags || [{ marketplace_code: 'ES', is_primary: true, stock_state: 'none' }]).map((m) => (
+                        <MarketplaceTag
+                          key={`${m.marketplace_code}-${m.is_primary ? 'p' : 's'}`}
+                          code={m.marketplace_code}
+                          isPrimary={!!m.is_primary}
+                          stockState={(m.stock_state || 'none')}
+                        />
+                      ))}
+                    </MarketplaceTagGroup>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1955,21 +1948,36 @@ function ProjectDetailInner({ useApp }) {
                 <span>{phaseLabel}</span>
                 <span>{project.current_phase}/7</span>
               </div>
-              <div style={{
-                width: '100%',
-                height: 8,
-                borderRadius: 999,
-                background: 'var(--surface-bg-2)',
-                border: '1px solid var(--border-1)',
-                overflow: 'hidden'
-              }}>
-                <div style={{
-                  height: '100%',
-                  width: `${Math.round(((project.current_phase || 0) / 7) * 100)}%`,
-                  borderRadius: 999,
-                  background: 'var(--muted-1)'
-                }} />
-              </div>
+              {(() => {
+                const cur = project?.current_phase || 0
+                const pct = Math.max(0, Math.min(100, Math.round((cur / 7) * 100)))
+                const meta = getPhaseMeta(cur)
+
+                return (
+                  <div
+                    style={{
+                      width: '100%',
+                      height: 8,
+                      borderRadius: 999,
+                      background: 'var(--surface-bg-2)',
+                      border: '1px solid var(--border-1)',
+                      overflow: 'hidden',
+                    }}
+                    data-progress-track="true"
+                  >
+                    <div
+                      style={{
+                        height: '100%',
+                        width: `${pct}%`,
+                        borderRadius: 999,
+                        background: meta.color,
+                      }}
+                      data-progress-fill="true"
+                      data-phase-id={cur}
+                    />
+                  </div>
+                )
+              })()}
               <div style={{ marginTop: 10, overflowX: 'auto' }}>
                 {(() => {
                   const cur = project?.current_phase || 0
