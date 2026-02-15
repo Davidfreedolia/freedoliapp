@@ -80,6 +80,13 @@
   --phase-5: #3FBF9A;
   --phase-6: #2FA4A9;
   --phase-7: #2EAD5B;
+  --phase-research: var(--phase-1);
+  --phase-viability: var(--phase-2);
+  --phase-suppliers: var(--phase-3);
+  --phase-samples: var(--phase-4);
+  --phase-production: var(--phase-5);
+  --phase-listing: var(--phase-6);
+  --phase-live: var(--phase-7);
 
   --focus-ring: var(--cta-1);
   --focus-ring-shadow: 0 0 0 2px var(--focus-ring);
@@ -297,6 +304,13 @@ body.dark {
   --dash-bg-2: var(--surface-2);
   --text-base-color: var(--text-1);
   --text-muted-color: var(--muted-1);
+  --phase-research: var(--phase-1);
+  --phase-viability: var(--phase-2);
+  --phase-suppliers: var(--phase-3);
+  --phase-samples: var(--phase-4);
+  --phase-production: var(--phase-5);
+  --phase-listing: var(--phase-6);
+  --phase-live: var(--phase-7);
   
   /* Soft Color Variants - Dark Mode */
   --color-primary-soft-bg: rgba(110, 203, 195, 0.12);
@@ -1809,6 +1823,41 @@ body.dark .drive-btn--compact.drive--on {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.phase-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.phase-mark__icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.phase-mark__label {
+  font-weight: 700;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.phase-panel__title {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.phase-panel__title .phase-mark {
+  min-width: 0;
+}
+
+.phase-panel__title .phase-mark__label {
+  max-width: 100%;
 }
 
 .projects-panel__title {
@@ -3571,4 +3620,243 @@ svg[class*="lucide-star"] {
 /* Projects list: remove phase badge (RESEARCH/VIABILITY/...) */
 .projects-card__header .phase-badge {
   display: none !important;
+}
+
+.projects-filter{
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--border-1);
+  background: var(--surface-1);
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  position: relative;
+}
+
+.projects-filter__select{
+  -webkit-appearance: none;
+  appearance: none;
+  border: 0 !important;
+  outline: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 28px 0 0; /* espai per la fletxa */
+  margin: 0;
+  font: inherit;
+  color: var(--text-1);
+  cursor: pointer;
+}
+
+.toolbar-row select.projects-filter__select,
+.projects-filter .projects-filter__select{
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.projects-filter .projects-filter__select:focus,
+.projects-filter .projects-filter__select:focus-visible{
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Projects — Phase filter: kill inner select border (avoid double outline) */
+.projects-filter .projects-filter__select,
+.toolbar-row select.projects-filter__select {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.projects-filter .projects-filter__select:focus,
+.projects-filter .projects-filter__select:focus-visible {
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+.projects-filter::after{
+  content: "▾";
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted-1);
+  pointer-events: none;
+  font-size: 12px;
+}
+
+.projects-marketplace-filter{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  height: 44px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border-1);
+  background: var(--surface-bg);
+}
+
+.projects-marketplace-filter::-webkit-scrollbar{
+  width: 0;
+  height: 0;
+}
+
+.projects-marketplace-filter__label{
+  font-size: 12px;
+  color: var(--muted-1);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.projects-marketplace-filter__empty{
+  font-size: 12px;
+  color: var(--muted-1);
+  white-space: nowrap;
+}
+
+.projects-marketplace-filter__chips{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  flex: 0 0 auto;
+}
+
+.projects-marketplace-filter__chip{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--btn-primary-bg);
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  height: 30px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.projects-marketplace-filter__chipText{
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.projects-marketplace-filter__chipX{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.18);
+  color: currentColor;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.projects-marketplace-filter__add{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.projects-marketplace-filter__addBtn{
+  border: 1px solid var(--border-1);
+  background: var(--surface-bg-2);
+  color: var(--text-1);
+  border-radius: 12px;
+  padding: 6px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  height: 30px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.projects-marketplace-filter__select{
+  border-radius: 12px;
+  border: 1px solid var(--border-1);
+  background: var(--surface-bg-2);
+  color: var(--text-1);
+  font-size: 12px;
+  padding: 6px 10px;
+  outline: none;
+  cursor: pointer;
+  height: 30px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.projects-marketplace-filter__clear{
+  border: 1px solid var(--border-1);
+  background: transparent;
+  color: var(--muted-1);
+  border-radius: 12px;
+  padding: 6px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  height: 30px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.projects-filter:focus-within{
+  border-color: var(--coral-1);
+  background: var(--surface-bg);
+}
+
+.projects-filter__select:focus,
+.projects-filter__select:focus-visible{
+  outline: none;
+  box-shadow: none;
+}
+
+.dash-progress__track{
+  height: 6px;
+  border-radius: 999px;
+  background: var(--surface-bg-2);
+  border: 1px solid var(--border-1);
+  overflow: hidden;
+}
+
+.dash-progress__fill{
+  height: 100%;
+  border-radius: 999px;
+  min-width: 2px;
+}
+
+.dash-phase__icon{
+  display: inline-flex;
+  align-items: center;
+}
+
+.dash-phase__label{
+  font-weight: 700;
+  font-size: 12px;
+}
+
+/* Projects — Phase filter: kill inner select border (avoid double outline) */
+.projects-filter .projects-filter__select,
+.toolbar-row select.projects-filter__select {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.projects-filter .projects-filter__select:focus,
+.projects-filter .projects-filter__select:focus-visible {
+  outline: 0 !important;
+  box-shadow: none !important;
 }

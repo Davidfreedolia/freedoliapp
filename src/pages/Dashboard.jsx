@@ -53,6 +53,8 @@ import AlertsBadge from '../components/AlertsBadge'
 import SafeWidget from '../components/SafeWidget'
 import Button from '../components/Button'
 import { safeArray } from '../lib/safeArray'
+import { getPhaseMeta } from '../utils/phaseStyles'
+import PhaseMark from '../components/Phase/PhaseMark'
 import { 
   generateLayoutFromEnabled, 
   validateLayout,
@@ -643,10 +645,17 @@ export default function Dashboard() {
                   {ordersInProgress.map(order => {
                     const projectName = order.project?.name || order.project_name || t('dashboard.noProject')
                     const thumbnailUrl = order.asin_image_url || order.image_url
+                    const phaseId = order?.phase_id ?? order?.phaseId ?? order?.current_phase ?? 1
+                    const phaseMeta = getPhaseMeta(phaseId)
+                    const progressPct = typeof order?.progress === 'number'
+                      ? Math.max(0, Math.min(100, order.progress))
+                      : Math.max(0, Math.min(100, ((phaseId - 1) / 6) * 100))
 
                     return (
                       <div
                         key={order.id}
+                        data-order-id={order.id}
+                        data-phase-id={phaseId}
                         style={styles.orderItem}
                       >
                         <div style={styles.orderInfo}>
@@ -663,6 +672,9 @@ export default function Dashboard() {
                               )}
                             </div>
                             <div className="order-content">
+                              <div style={{ marginBottom: 6 }}>
+                                <PhaseMark phaseId={phaseId} size={16} />
+                              </div>
                               <button
                                 type="button"
                                 className="dashboard-link"
@@ -700,10 +712,20 @@ export default function Dashboard() {
                                   className={`order-step ${status}`}
                                   title={step.key}
                                 >
-                                  <step.Icon className="order-step__icon" />
+                                  <step.Icon className="order-step__icon" style={{ color: phaseMeta.color }} />
                                 </span>
                               )
                             })}
+                          </div>
+                          <div className="dash-progress__track" data-progress-track="true">
+                            <div
+                              className="dash-progress__fill"
+                              data-progress-fill="true"
+                              style={{
+                                width: `${progressPct}%`,
+                                backgroundColor: phaseMeta.color
+                              }}
+                            />
                           </div>
                         </div>
                       </div>

@@ -13,7 +13,7 @@ import {
   Package,
   FolderKanban
 } from 'lucide-react'
-import { PHASE_STYLES, getPhaseStyle, getPhaseMeta } from '../utils/phaseStyles'
+import { PHASE_STYLES, getPhaseMeta } from '../utils/phaseStyles'
 import { useApp } from '../context/AppContext'
 import { deleteProject } from '../lib/supabase'
 import Header from '../components/Header'
@@ -22,7 +22,8 @@ import Button from '../components/Button'
 import LayoutSwitcher from '../components/LayoutSwitcher'
 import { useLayoutPreference } from '../hooks/useLayoutPreference'
 import ProjectDriveExplorer from '../components/projects/ProjectDriveExplorer'
-import MarketplaceTag from '../components/MarketplaceTag'
+import MarketplaceTag, { MarketplaceTagGroup } from '../components/MarketplaceTag'
+import PhaseMark from '../components/Phase/PhaseMark'
 
 export default function Projects() {
   const { projects, refreshProjects, darkMode } = useApp()
@@ -30,7 +31,10 @@ export default function Projects() {
   const { isMobile, isTablet } = useBreakpoint()
   const [showModal, setShowModal] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
+  const [searchInput, setSearchInput] = useState('')
   const [filterPhase, setFilterPhase] = useState(null)
+  const [mpFilter, setMpFilter] = useState([])
+  const [showMpAdd, setShowMpAdd] = useState(false)
   const [showDiscarded, setShowDiscarded] = useState(false)
   const [menuOpen, setMenuOpen] = useState(null)
   const [viewMode, setViewMode] = useLayoutPreference('layout:projects', 'grid')
@@ -65,14 +69,152 @@ export default function Projects() {
     }
   }
 
+  const availableMarketplaces = useMemo(() => {
+    const codes = new Set()
+    projects.forEach((project) => {
+      const items = Array.isArray(project?.marketplace_tags)
+        ? project.marketplace_tags
+        : Array.isArray(project?.marketplaces)
+          ? project.marketplaces
+          : Array.isArray(project?.marketplace_codes)
+            ? project.marketplace_codes
+            : (project?.marketplace ? [project.marketplace] : [])
+      items.forEach((item) => {
+        if (typeof item === 'object') {
+          if (item.is_active === false) return
+          const code = (item.marketplace_code || item.code || item.marketplace || '').toString().trim().toUpperCase()
+          if (code) codes.add(code)
+        } else if (item) {
+          codes.add(item.toString().trim().toUpperCase())
+        }
+      })
+    })
+    return Array.from(codes).sort((a, b) => a.localeCompare(b))
+  }, [projects])
+
+  const toggleMarketplace = (code) => {
+    setMpFilter((prev) => (
+      prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]
+    ))
+  }
+  const isMpSelected = (code) => mpFilter.includes(code)
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setSearchTerm(searchInput)
+    }, 250)
+    return () => clearTimeout(t)
+  }, [searchInput])
+
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setSearchInput('')
+        setSearchTerm('')
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
+
+  const highlightText = (text, term) => {
+    const value = (text ?? '').toString()
+    const q = (term ?? '').toString().trim()
+    if (!q) return value
+
+    const lower = value.toLowerCase()
+    const qLower = q.toLowerCase()
+
+    const idx = lower.indexOf(qLower)
+    if (idx === -1) return value
+
+    const before = value.slice(0, idx)
+    const hit = value.slice(idx, idx + q.length)
+    const after = value.slice(idx + q.length)
+
+    return (
+      <>
+        {before}
+        <mark
+          style={{
+            background: 'rgba(242, 108, 108, 0.18)',
+            color: 'var(--text-1)',
+            padding: '0 3px',
+            borderRadius: 6,
+            fontWeight: 700,
+          }}
+        >
+          {hit}
+        </mark>
+        {after}
+      </>
+    )
+  }
+
+  const getAsinValue = (project) => {
+    return (
+      project?.asin ||
+      project?.asin_code ||
+      project?.amazon_asin ||
+      project?.asin_id ||
+      project?.main_asin ||
+      null
+    )
+  }
+
   const filteredProjects = projects.filter(project => {
-    const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         project.project_code.toLowerCase().includes(searchTerm.toLowerCase())
+    const term = searchTerm.trim().toLowerCase()
+
+    let matchesSearch = true
+    if (term.length) {
+      const fields = [
+        project.name,
+        project.project_code,
+        project.sku,
+        project.asin,
+      ]
+
+      matchesSearch = fields
+        .filter(Boolean)
+        .some((value) =>
+          value.toString().toLowerCase().includes(term)
+        )
+    }
     const matchesPhase = filterPhase ? project.current_phase === filterPhase : true
     // Per defecte, ocultar DISCARDED
     const matchesDiscarded = showDiscarded ? true : (project.decision !== 'DISCARDED')
-    return matchesSearch && matchesPhase && matchesDiscarded
+    let matchesMarketplace = true
+    if (mpFilter.length) {
+      const items = Array.isArray(project?.marketplace_tags)
+        ? project.marketplace_tags
+        : Array.isArray(project?.marketplaces)
+          ? project.marketplaces
+          : Array.isArray(project?.marketplace_codes)
+            ? project.marketplace_codes
+            : (project?.marketplace ? [project.marketplace] : [])
+      if (!items.length) {
+        matchesMarketplace = false
+      } else {
+        const activeCodes = new Set()
+        items.forEach((item) => {
+          if (typeof item === 'object') {
+            if (item.is_active === false) return
+            const code = (item.marketplace_code || item.code || item.marketplace || '').toString().trim().toUpperCase()
+            if (code) activeCodes.add(code)
+          } else if (item) {
+            activeCodes.add(item.toString().trim().toUpperCase())
+          }
+        })
+        matchesMarketplace = mpFilter.some((code) => activeCodes.has(code))
+      }
+    }
+    return matchesSearch && matchesPhase && matchesDiscarded && matchesMarketplace
   })
+  const discardedCount = projects.filter(p => p.decision === 'DISCARDED').length
+  const totalCount = projects.length
+  const filteredCount = filteredProjects.length
+  const isFiltering =
+    !!searchTerm.trim() || !!filterPhase || mpFilter.length > 0 || (discardedCount > 0 && showDiscarded)
   useEffect(() => {
     if (!filteredProjects.length) {
       setSelectedProjectId(null)
@@ -92,8 +234,6 @@ export default function Projects() {
   }, [])
 
   const selectedProject = filteredProjects.find(project => project.id === selectedProjectId)
-  
-  const discardedCount = projects.filter(p => p.decision === 'DISCARDED').length
 
   const researchPrefix = selectedProject ? `projects/${selectedProject.id}/research/` : null
 
@@ -144,17 +284,17 @@ export default function Projects() {
   }
 
   const renderProjectCard = (project, { isPreview = false, enablePreviewSelect = false, disableNavigation = false } = {}) => {
-    const phase = getPhaseStyle(project.current_phase)
-    const activeMeta = getPhaseMeta(project.current_phase)
-    const progress = ((project.current_phase) / 7) * 100
+    const currentPhaseId = project?.phase_id ?? project?.phaseId ?? project?.current_phase ?? 1
+    const activeMeta = getPhaseMeta(currentPhaseId)
+    const progress = (currentPhaseId / 7) * 100
     const progressValue = Number.isFinite(progress) ? Math.min(100, Math.max(0, progress)) : 0
     const isSelected = project.id === selectedProjectId
     const skuValue = project.sku_internal || '—'
+    const asinValue = getAsinValue(project)
     const createdLabel = project?.created_at
       ? new Date(project.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
       : '—'
     const docsCount = project?.docs_count ?? project?.documents_count ?? project?.files_count ?? project?.drive_files_count ?? 0
-    const metadataLine = `SKU: ${skuValue} · Created: ${createdLabel} · Docs: ${docsCount}`
     // Compute canClose and canReopen based on status
     const canClose = project.status && ['draft', 'active'].includes(project.status)
     const canReopen = project.status && ['closed', 'archived'].includes(project.status)
@@ -173,6 +313,9 @@ export default function Projects() {
     return (
       <div
         key={project.id}
+        data-project-card="true"
+        data-project-id={project.id}
+        data-phase-id={currentPhaseId}
         className="ui-card ui-card--interactive projects-card__card"
         style={{
           ...styles.projectCard,
@@ -216,25 +359,31 @@ export default function Projects() {
                 </div>
               </div>
               <div style={{ minWidth: 0 }}>
-                <h3 className="projects-card__title">{project.name}</h3>
-                <div className="projects-card__meta">{metadataLine}</div>
-                <div className="project-card__phases">
-                  {[1, 2, 3, 4, 5, 6, 7].map((pid) => {
-                    const meta = getPhaseMeta(pid)
-                    const Icon = meta.icon
-                    const isCurrent = pid === project.current_phase
-                    return (
-                      <span
-                        key={pid}
-                        className={`project-card__phase ${isCurrent ? 'is-active' : ''}`}
-                        title={meta.label}
-                        style={{ color: meta.color }}
-                      >
-                        <Icon size={14} />
+                <h3 className="projects-card__title">
+                  {highlightText(project.name, searchTerm)}
+                </h3>
+                <div className="projects-card__meta">
+                  {project?.project_code ? (
+                    <>
+                      <span style={{ fontWeight: 600 }}>
+                        {highlightText(project.project_code, searchTerm)}
                       </span>
-                    )
-                  })}
+                      <span style={{ opacity: 0.7 }}> · </span>
+                    </>
+                  ) : null}
+                  <span>SKU: {highlightText(skuValue, searchTerm)}</span>
+                  <span style={{ opacity: 0.7 }}> · </span>
+                  <span>Created: {createdLabel}</span>
+                  <span style={{ opacity: 0.7 }}> · </span>
+                  <span>Docs: {docsCount}</span>
+                  {asinValue ? (
+                    <>
+                      <span style={{ opacity: 0.7 }}> · </span>
+                      <span>ASIN: {highlightText(asinValue, searchTerm)}</span>
+                    </>
+                  ) : null}
                 </div>
+                <PhaseMark phaseId={currentPhaseId} size={16} />
                 {activeMarketplaces.length ? (
                   <div className="project-card__marketplaces">
                     <span className="project-card__marketplacesLabel">Marketplaces actius</span>
@@ -315,18 +464,27 @@ export default function Projects() {
 
           <div className="projects-card__progress">
             <div style={styles.progressContainer}>
-              <div className="project-card__progressTrack" style={styles.progressBar}>
-                <div style={{
-                  ...styles.progressFill,
-                  width: `${progressValue}%`,
-                  backgroundColor: activeMeta.color
-                }} />
+              <div
+                className="projects-card__progressTrack"
+                data-progress-track="true"
+                style={styles.progressBar}
+              >
+                <div
+                  className="projects-card__progressFill"
+                  data-progress-fill="true"
+                  style={{
+                    ...styles.progressFill,
+                    width: `${progressValue}%`,
+                    backgroundColor: activeMeta.color
+                  }}
+                />
               </div>
               <span style={styles.progressText}>{Math.round(progressValue)}%</span>
               <div style={{ marginTop: 6, width: '100%' }}>
-                <div className="project-card__progressTrack">
+                <div className="projects-card__progressTrack" data-progress-track="true">
                   <div
-                    className="project-card__progressFill"
+                    className="projects-card__progressFill"
+                    data-progress-fill="true"
                     style={{
                       width: `${progress || 0}%`,
                       backgroundColor: activeMeta.color
@@ -371,7 +529,7 @@ export default function Projects() {
 
 
   return (
-    <div style={styles.container}>
+    <div style={styles.container} data-page="projects">
       <Header
         title={
           <span className="page-title-with-icon">
@@ -387,34 +545,136 @@ export default function Projects() {
       }}>
         {/* Toolbar */}
         <div style={styles.toolbar} className="toolbar-row projects-toolbar__row">
-          <div style={styles.searchGroup} className="toolbar-group">
-            <div style={styles.searchContainer} className="toolbar-search">
-              <Search size={18} color="var(--muted-1)" />
+          <div style={styles.toolbarLeft} className="toolbar-group">
+            <div style={{ ...styles.controlPill, ...styles.searchPill }}>
+              <Search size={18} style={styles.searchIcon} aria-hidden="true" />
               <input
                 type="text"
                 placeholder="Buscar projectes..."
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
+                value={searchInput}
+                onChange={e => setSearchInput(e.target.value)}
                 style={styles.searchInput}
               />
-            </div>
-          </div>
-
-          <div style={styles.filters} className="toolbar-group projects-toolbar__filters">
-            <div className="toolbar-filterSelect" title="Filtre per fase">
-              <span className="toolbar-filterSelect__icon" aria-hidden="true">
-                <Filter size={16} />
+              <span style={styles.countBadge}>
+                {isFiltering ? `${filteredCount}/${totalCount}` : `${totalCount}`}
               </span>
+              {searchInput.trim().length ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSearchInput('')
+                    setSearchTerm('')
+                  }}
+                  title="Clear (Esc)"
+                >
+                  Clear
+                </Button>
+              ) : null}
+            </div>
+
+            <div
+              className="projects-filter"
+              style={{
+                height: 44,
+                borderRadius: 12,
+                border: '1px solid var(--border-1)',
+                background: 'var(--surface-1)',
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0 12px'
+              }}
+            >
               <select
                 value={filterPhase || ''}
-                onChange={e => setFilterPhase(e.target.value ? parseInt(e.target.value) : null)}
+                onChange={(e) => setFilterPhase(e.target.value ? parseInt(e.target.value) : null)}
+                className="projects-filter__select"
               >
                 <option value="">Totes les fases</option>
                 {PHASES_LIST.map(phase => (
-                  <option key={phase.id} value={phase.id}>{phase.name}</option>
+                  <option key={phase.id} value={phase.id}>
+                    {phase.name}
+                  </option>
                 ))}
               </select>
             </div>
+
+            {availableMarketplaces.length ? (
+              <div
+                data-marketplace-filter="true"
+                data-selected-count={mpFilter.length}
+                className="projects-marketplace-filter"
+                title="Filtra per marketplace"
+              >
+                <span className="projects-marketplace-filter__label">Marketplace</span>
+
+                {mpFilter.length ? (
+                  <div className="projects-marketplace-filter__chips">
+                    {mpFilter.map((code) => (
+                      <button
+                        key={code}
+                        type="button"
+                        onClick={() => toggleMarketplace(code)}
+                        className="projects-marketplace-filter__chip"
+                        data-mp-chip="true"
+                        title={`Treure filtre ${code}`}
+                      >
+                        <span className="projects-marketplace-filter__chipText">{code}</span>
+                        <span className="projects-marketplace-filter__chipX" aria-hidden="true" title="Eliminar">
+                          ✕
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <span className="projects-marketplace-filter__empty">Tots</span>
+                )}
+
+                <div className="projects-marketplace-filter__add">
+                  <button
+                    type="button"
+                    className="projects-marketplace-filter__addBtn"
+                    onClick={() => setShowMpAdd(true)}
+                    title="Afegir marketplace"
+                  >
+                    + Afegir
+                  </button>
+                  {showMpAdd && availableMarketplaces.some((c) => !mpFilter.includes(c)) ? (
+                    <select
+                      value=""
+                      className="projects-marketplace-filter__select"
+                      onChange={(e) => {
+                        const v = (e.target.value || '').toString().trim()
+                        if (v) toggleMarketplace(v)
+                        setShowMpAdd(false)
+                        e.target.value = ''
+                      }}
+                      onBlur={() => setShowMpAdd(false)}
+                      title="Afegir marketplace al filtre"
+                    >
+                      <option value="" disabled>+ Afegir</option>
+                      {availableMarketplaces
+                        .filter((c) => !mpFilter.includes(c))
+                        .map((code) => (
+                          <option key={code} value={code}>{code}</option>
+                        ))}
+                    </select>
+                  ) : null}
+                </div>
+
+                {mpFilter.length ? (
+                  <button
+                    type="button"
+                    onClick={() => setMpFilter([])}
+                    className="projects-marketplace-filter__clear"
+                    title="Netejar filtres"
+                  >
+                    Clear
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
+
             {discardedCount > 0 && (
               <label style={styles.filterToggle}>
                 <input
@@ -427,15 +687,14 @@ export default function Projects() {
               </label>
             )}
           </div>
-
-          <div className="toolbar-group view-controls">
-            <LayoutSwitcher
-              value={effectiveViewMode}
-              onChange={setViewMode}
-              compact={isMobile}
-            />
-          </div>
           <div style={styles.toolbarRight} className="toolbar-group">
+            <div style={styles.viewControls}>
+              <LayoutSwitcher
+                value={effectiveViewMode}
+                onChange={setViewMode}
+                compact={isMobile}
+              />
+            </div>
             <Button
               variant="primary"
               size="md"
@@ -558,7 +817,51 @@ const styles = {
   },
   toolbar: {
     display: 'flex',
+    alignItems: 'center',
+    gap: 10,
+    flexWrap: 'nowrap',
+    justifyContent: 'space-between',
     marginBottom: '24px'
+  },
+  toolbarLeft: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 10,
+    flexWrap: 'nowrap',
+    overflowX: 'auto',
+  },
+  controlPill: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 10,
+    height: 40,
+    padding: '0 12px',
+    borderRadius: 12,
+    border: '1px solid var(--border-1)',
+    background: 'var(--surface-bg)',
+    boxShadow: 'none',
+  },
+  searchPill: {
+    minWidth: 320,
+    flex: '1 1 340px',
+  },
+  searchIcon: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 18,
+    height: 18,
+    color: 'var(--muted-1)',
+  },
+  countBadge: {
+    background: 'var(--surface-bg-2)',
+    color: 'var(--muted-1)',
+    border: '1px solid var(--border-1)',
+    padding: '2px 8px',
+    borderRadius: 999,
+    fontSize: 12,
+    fontWeight: 600,
+    whiteSpace: 'nowrap',
   },
   searchGroup: {
     display: 'inline-flex',
@@ -572,8 +875,17 @@ const styles = {
     minWidth: '240px'
   },
   searchInput: {
-    flex: 1,
-    minWidth: 0
+    border: 'none',
+    outline: 'none',
+    background: 'transparent',
+    color: 'var(--text-1)',
+    fontSize: 14,
+    width: '100%',
+  },
+  viewControls: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 8,
   },
   filters: {
     display: 'inline-flex',

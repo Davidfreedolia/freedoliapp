@@ -126,7 +126,7 @@ export default function ProjectDetail() {
         setLoadError('No s’ha pogut carregar el mòdul principal.')
         setAppContextModule(null)
       } else {
-        setAppContextModule(module)
+      setAppContextModule(module)
       }
       setLoading(false)
     }).catch(() => {
@@ -240,8 +240,8 @@ function PhaseSection({ phaseId, currentPhaseId, phaseStyle, darkMode, children 
   return (
     <section
       style={{
-        ...styles.phaseSection,
-        borderColor: sectionBorder,
+      ...styles.phaseSection,
+      borderColor: sectionBorder,
         borderTopColor: sectionBorder,
         backgroundColor: isHovered ? 'var(--surface-bg-2)' : sectionBg,
         boxShadow: 'none'
@@ -264,8 +264,8 @@ function PhaseSection({ phaseId, currentPhaseId, phaseStyle, darkMode, children 
           <span
             className="phase-panel__subtitle"
             style={{
-              fontSize: '13px',
-              color: darkMode ? '#9ca3af' : '#6b7280'
+            fontSize: '13px',
+            color: darkMode ? '#9ca3af' : '#6b7280'
             }}
           >
             {phaseMeta.description}
@@ -366,15 +366,15 @@ function ProjectDetailInner({ useApp }) {
     const seq = ++loadSeqRef.current
     if (!id) {
       if (mountedRef.current && seq === loadSeqRef.current) {
-        setError('ID de projecte no vàlid')
-        setLoading(false)
+      setError('ID de projecte no vàlid')
+      setLoading(false)
       }
       return
     }
 
     if (mountedRef.current && seq === loadSeqRef.current) {
-      setLoading(true)
-      setError(null)
+    setLoading(true)
+    setError(null)
     }
     try {
       // Import dinàmic de supabase per evitar cicles d'imports
@@ -394,9 +394,9 @@ function ProjectDetailInner({ useApp }) {
       const data = await getProject(id)
       if (!data) {
         if (mountedRef.current && seq === loadSeqRef.current) {
-          setError('Projecte no trobat')
-          setProject(null)
-          setDocuments([])
+        setError('Projecte no trobat')
+        setProject(null)
+        setDocuments([])
           setLoading(false)
         }
         return
@@ -404,7 +404,7 @@ function ProjectDetailInner({ useApp }) {
       if (mountedRef.current && seq === loadSeqRef.current) setProject(data)
       const docs = await getDocuments(id)
       if (mountedRef.current && seq === loadSeqRef.current) {
-        setDocuments(Array.isArray(docs) ? docs : [])
+      setDocuments(Array.isArray(docs) ? docs : [])
       }
     } catch (err) {
       try {
@@ -415,8 +415,8 @@ function ProjectDetailInner({ useApp }) {
         setError('Error carregant mòduls')
       }
       if (mountedRef.current && seq === loadSeqRef.current) {
-        setProject(null)
-        setDocuments([])
+      setProject(null)
+      setDocuments([])
       }
     } finally {
       if (mountedRef.current && seq === loadSeqRef.current) setLoading(false)
@@ -1307,7 +1307,7 @@ function ProjectDetailInner({ useApp }) {
   const renderPhaseContent = (sectionPhaseId) => {
     switch (sectionPhaseId) {
       case 1:
-        return (
+  return (
           <>
             <div style={{ display: 'grid', gap: 14, paddingTop: 4 }}>
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -1348,7 +1348,7 @@ function ProjectDetailInner({ useApp }) {
               </div>
 
               {researchMsg && (
-                <div style={{
+      <div style={{
                   fontSize: 13,
                   fontWeight: 600,
                   color: researchMsg.type === 'success' ? 'var(--success-1)' : 'var(--danger-1)'
@@ -1440,13 +1440,13 @@ function ProjectDetailInner({ useApp }) {
               </div>
 
               {researchHasAsin ? (
-                <div style={{
+        <div style={{
                   display: 'grid',
                   gridTemplateColumns: isMobile ? '1fr' : '120px 1fr',
                   gap: 12,
                   alignItems: 'start'
                 }}>
-                  <div style={{
+            <div style={{
                     width: 120,
                     height: 120,
                     borderRadius: 14,
@@ -1543,7 +1543,7 @@ function ProjectDetailInner({ useApp }) {
                   { key: 'improvable', label: 'Millora' }
                 ].map((c) => {
                   const okEvidence = hasEvidence(c.key)
-                  return (
+                return (
                     <div key={c.key} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                       <label style={{ display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'var(--text-1)' }}>
                         <input
@@ -1572,7 +1572,7 @@ function ProjectDetailInner({ useApp }) {
                           }
                         }}
                         placeholder="Link o nota breu (mín. 8 caràcters)"
-                        style={{
+                      style={{
                           flex: 1,
                           height: 40,
                           borderRadius: 12,
@@ -1665,8 +1665,8 @@ function ProjectDetailInner({ useApp }) {
             <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
               <ProfitabilityCalculator projectId={id} darkMode={darkMode} showAsinCapture={false} />
             </Suspense>
-          </div>
-        )
+                  </div>
+                )
       case 3:
         return (
           <>
@@ -1687,7 +1687,7 @@ function ProjectDetailInner({ useApp }) {
               <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
                 <QuotesSection projectId={id} darkMode={darkMode} />
               </Suspense>
-            </div>
+          </div>
           </>
         )
       case 4:
@@ -1706,7 +1706,7 @@ function ProjectDetailInner({ useApp }) {
               darkMode={darkMode}
               phaseStyle={currentPhase}
             >
-              <div style={{
+                <div style={{
                 padding: '16px',
                 ...phaseCardStyle,
                 textAlign: 'center'
@@ -1731,7 +1731,7 @@ function ProjectDetailInner({ useApp }) {
                   <ShoppingCart size={18} />
                   Veure Comandes
                 </Button>
-              </div>
+                </div>
             </CollapsibleSection>
 
             <CollapsibleSection
@@ -1741,7 +1741,7 @@ function ProjectDetailInner({ useApp }) {
               darkMode={darkMode}
               phaseStyle={currentPhase}
             >
-              <div style={{
+                <div style={{
                 padding: '16px',
                 ...phaseCardStyle,
                 textAlign: 'center'
@@ -1766,7 +1766,7 @@ function ProjectDetailInner({ useApp }) {
                   <DollarSign size={18} />
                   Veure Finances
                 </Button>
-              </div>
+                </div>
             </CollapsibleSection>
           </>
         )
@@ -1789,7 +1789,7 @@ function ProjectDetailInner({ useApp }) {
                   showAsin={false}
                 />
               </Suspense>
-            </div>
+              </div>
           </CollapsibleSection>
         )
       case 7:
@@ -1809,9 +1809,9 @@ function ProjectDetailInner({ useApp }) {
               <h4 style={{
                 margin: '0 0 16px 0',
                 fontSize: '14px',
-                fontWeight: '600',
-                color: darkMode ? '#ffffff' : '#111827'
-              }}>
+                      fontWeight: '600',
+                      color: darkMode ? '#ffffff' : '#111827'
+                    }}>
                 Decision
               </h4>
               <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
@@ -1826,7 +1826,7 @@ function ProjectDetailInner({ useApp }) {
                   ]}
                 />
               </Suspense>
-            </div>
+                  </div>
           </CollapsibleSection>
         )
       default:
@@ -1861,7 +1861,7 @@ function ProjectDetailInner({ useApp }) {
 
   return (
     <div style={styles.container}>
-      <div style={{
+                      <div style={{
         ...styles.content,
         padding: isMobile ? '16px' : '32px'
       }}>
@@ -1906,7 +1906,7 @@ function ProjectDetailInner({ useApp }) {
               ) : (
                 <Package size={18} color="var(--muted-1)" />
               )}
-            </div>
+                    </div>
 
             {/* Title + Meta */}
             <div style={{ minWidth: 0 }}>
@@ -1915,7 +1915,7 @@ function ProjectDetailInner({ useApp }) {
                 <strong>{project.project_code}</strong>
                 <span style={{ opacity: 0.6 }}> · </span>
                 <span>{project.sku_internal || '—'}</span>
-              </div>
+                </div>
 
               {/* Marketplace TAGS */}
               <div style={{ marginTop: 8 }}>
@@ -2005,7 +2005,7 @@ function ProjectDetailInner({ useApp }) {
                               }}
                             >
                               <PhaseMark phaseId={phaseId} size={16} showLabel={false} />
-                            </span>
+                  </span>
 
                             {idx < steps.length - 1 ? (
                               <span
@@ -2019,13 +2019,13 @@ function ProjectDetailInner({ useApp }) {
                                 }}
                               />
                             ) : null}
-                          </div>
+                  </div>
                         )
                       })}
-                    </div>
+                </div>
                   )
                 })()}
-              </div>
+            </div>
             </div>
           </div>
         </div>
@@ -2043,14 +2043,14 @@ function ProjectDetailInner({ useApp }) {
           width: '100%',
           boxSizing: 'border-box'
         }}>
-          <Button
+                <Button
             variant="primary"
-            size="sm"
+                  size="sm"
             disabled
             style={btnStateStyle('inactive')}
-          >
+                >
             Crear Proveïdor
-          </Button>
+                </Button>
           <Button
             variant="primary"
             size="sm"
@@ -2091,7 +2091,7 @@ function ProjectDetailInner({ useApp }) {
           >
             + Document
           </Button>
-        </div>
+            </div>
 
         {/* Banner DISCARDED */}
         {project.decision === 'DISCARDED' && (
@@ -2451,7 +2451,7 @@ function ProjectDetailInner({ useApp }) {
 
         <div className="project-split__layout">
           <div className="project-split__left">
-            <div style={phaseWrapperStyle}>
+        <div style={phaseWrapperStyle}>
           <div
             data-testid="phase-gate-block-banner"
             data-revealed={phaseBlockVisible ? 'true' : 'false'}
@@ -2546,7 +2546,7 @@ function ProjectDetailInner({ useApp }) {
         >
           {renderPhaseContent(7)}
         </PhaseSection>
-            </div>
+                </div>
           </div>
 
           <aside className="project-split__right">
@@ -2556,23 +2556,23 @@ function ProjectDetailInner({ useApp }) {
                   <div style={{ minWidth: 0 }}>
                     <div className="projects-panel__title">{projectTitle}</div>
                     <div className="projects-panel__subtitle">{activeFolderLabel || '—'}</div>
-                  </div>
                 </div>
+              </div>
 
                 {researchImport && (
                   <div style={{ padding: '10px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
                     <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>
                       Informe: <strong style={{ color: 'var(--text-1)' }}>{researchImport.asin}</strong> · {researchImport.decision}
-                    </div>
+                </div>
                     <Button variant="ghost" size="sm" onClick={copyResearchPayload}>
                       Copiar payload
                     </Button>
-                  </div>
-                )}
+                </div>
+              )}
 
               <ProjectDriveExplorer
-                projectId={id}
-                darkMode={darkMode}
+            projectId={id}
+            darkMode={darkMode}
                 onUploadComplete={handleUploadComplete}
                 onActivePathChange={setActiveFolderLabel}
               />

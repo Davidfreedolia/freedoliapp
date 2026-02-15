@@ -1,8 +1,9 @@
 const STOCK_DOT = {
-  ok: 'var(--success-1)',
-  low: 'var(--warning-1)',
-  out: 'var(--danger-1)',
-  none: 'var(--muted-1)',
+  ok: 'var(--success-1)',       // stock OK
+  mid: 'var(--warning-1)',      // mig stock
+  low: 'var(--danger-1)',       // baix / <50
+  out: 'var(--text-1)',         // sense stock (negre/foreground)
+  none: 'var(--muted-1)',       // desconegut
 }
 
 export function MarketplaceTagGroup({ children, style }) {
