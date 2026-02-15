@@ -147,13 +147,94 @@ export const getProjects = async (includeDiscarded = false) => {
   const { data, error } = await query
   
   if (error) throw error
+
+  const projects = data || []
+  const ids = projects.map(p => p.id).filter(Boolean)
+  if (ids.length) {
+    try {
+      let tagQuery = supabase
+        .from('v_project_marketplace_tags')
+        .select('project_id, marketplace_code, is_primary, stock_state, is_active')
+        .in('project_id', ids)
+
+      let { data: tagRows, error: tagErr } = await tagQuery
+
+      // 2) If filtered query fails (e.g. missing columns), retry unfiltered
+      if (tagErr) {
+        const retry = await supabase
+          .from('v_project_marketplace_tags')
+          .select('project_id, marketplace_code, is_primary, stock_state, is_active')
+          .in('project_id', ids)
+        tagRows = retry.data
+      }
+
+      const grouped = (tagRows || []).reduce((acc, row) => {
+        const key = row.project_id
+        if (!acc[key]) acc[key] = []
+        acc[key].push(row)
+        return acc
+      }, {})
+
+      const normalizeCode = (v) => (v || '').toString().trim().toUpperCase()
+      const deriveMarketplaceTags = (project) => {
+        const out = []
+
+        const raw = Array.isArray(project?.marketplace_tags)
+          ? project.marketplace_tags
+          : Array.isArray(project?.marketplaces)
+            ? project.marketplaces
+            : Array.isArray(project?.marketplace_codes)
+              ? project.marketplace_codes
+              : (project?.marketplace ? [project.marketplace] : [])
+
+        raw.forEach((item, idx) => {
+          if (!item) return
+          if (typeof item === 'object') {
+            if (item.is_active === false) return
+            const code = normalizeCode(item.marketplace_code || item.code || item.marketplace)
+            if (!code) return
+            out.push({
+              marketplace_code: code,
+              is_primary: !!item.is_primary || idx === 0,
+              stock_state: (item.stock_state || 'none'),
+              is_active: item.is_active !== false,
+            })
+          } else {
+            const code = normalizeCode(item)
+            if (!code) return
+            out.push({
+              marketplace_code: code,
+              is_primary: idx === 0,
+              stock_state: 'none',
+              is_active: true,
+            })
+          }
+        })
+
+        if (!out.length) {
+          out.push({ marketplace_code: 'ES', is_primary: true, stock_state: 'none', is_active: true })
+        }
+
+        return out
+      }
+
+      projects.forEach((project) => {
+        const fromView = grouped[project.id]
+        project.marketplace_tags = (Array.isArray(fromView) && fromView.length)
+          ? fromView
+          : deriveMarketplaceTags(project)
+      })
+    } catch {
+      // Silently fall back to projects without marketplace_tags
+    }
+  }
   
   // Per defecte, excloure DISCARDED (filter client-side to avoid query issues)
   if (!includeDiscarded) {
-    return (data || []).filter(p => !p.decision || p.decision !== 'DISCARDED')
+    return projects.filter(p => !p.decision || p.decision !== 'DISCARDED')
   }
   
-  return data || []
+  return projects
 }
 
 export const getProject = async (id) => {
