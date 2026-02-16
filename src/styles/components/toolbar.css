@@ -1,0 +1,107 @@
+﻿/* Canonical AppToolbar (scoped) */
+.app-toolbar,
+.toolbar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  white-space: nowrap;
+  min-height: var(--btn-h-sm);
+}
+
+.app-toolbar__left,
+.app-toolbar__right {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+.app-toolbar__right {
+  margin-left: auto;
+}
+
+.toolbar-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+.view-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: var(--h-btn);
+  padding: 0 14px;
+  border-radius: var(--btn-radius);
+  border: 1px solid var(--border-1);
+  background: var(--surface-bg);
+  box-shadow: none;
+}
+
+.toolbar-search input {
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--btn-secondary-fg);
+  font-size: 14px;
+}
+
+.toolbar-search input::placeholder {
+  color: var(--btn-secondary-fg);
+  opacity: 0.6;
+}
+
+.toolbar-search:focus-within {
+  box-shadow: var(--focus-ring-shadow);
+}
+
+.toolbar-filterSelect {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: var(--h-btn);
+  padding: 0 14px;
+  border-radius: var(--btn-radius);
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.toolbar-filterSelect__icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.75;
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.toolbar-filterSelect__icon svg {
+  display: block;
+}
+
+.toolbar-filterSelect select {
+  height: 100%;
+  padding-left: 36px;
+  border: 1px solid var(--border-1);
+  background: var(--surface-bg);
+  color: var(--btn-secondary-fg);
+  border-radius: var(--btn-radius);
+  outline: none;
+  font-size: 14px;
+  cursor: pointer;
+}
