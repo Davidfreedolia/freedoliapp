@@ -25,6 +25,7 @@ import {
 } from '../lib/supabase'
 import Header from '../components/Header'
 import Button from '../components/Button'
+import AppToolbar from '../components/ui/AppToolbar'
 import { generateBriefingPdf } from '../lib/generateBriefingPdf'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { safeJsonArray } from '../lib/safeJson'
@@ -290,23 +291,26 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
 
       <div style={styles.content}>
         {/* Toolbar */}
-        <div style={styles.toolbar} className="toolbar-row">
-          <div className="toolbar-group">
-            <Button variant="secondary" size="sm" onClick={() => navigate(-1)} style={styles.backButton}>
-              <ArrowLeft size={18} />
-              Tornar
-            </Button>
-          </div>
-          
-          <div style={styles.toolbarRight} className="toolbar-group">
-            <Button variant="primary" size="sm" onClick={handleSave} disabled={saving} style={styles.saveButton}>
-              {saving ? 'Guardant...' : <><Save size={18} /> Guardar</>}
-            </Button>
-            <Button variant="secondary" size="sm" onClick={handleGeneratePdf} disabled={generating} style={styles.pdfButton}>
-              {generating ? 'Generant...' : <><Download size={18} /> Descarregar PDF</>}
-            </Button>
-          </div>
-        </div>
+        <AppToolbar style={styles.toolbar} className="toolbar-row">
+          <AppToolbar.Left>
+            <div className="toolbar-group">
+              <Button variant="secondary" size="sm" onClick={() => navigate(-1)} style={styles.backButton}>
+                <ArrowLeft size={18} />
+                Tornar
+              </Button>
+            </div>
+          </AppToolbar.Left>
+          <AppToolbar.Right>
+            <div style={styles.toolbarRight} className="toolbar-group">
+              <Button variant="primary" size="sm" onClick={handleSave} disabled={saving} style={styles.saveButton}>
+                {saving ? 'Guardant...' : <><Save size={18} /> Guardar</>}
+              </Button>
+              <Button variant="secondary" size="sm" onClick={handleGeneratePdf} disabled={generating} style={styles.pdfButton}>
+                {generating ? 'Generant...' : <><Download size={18} /> Descarregar PDF</>}
+              </Button>
+            </div>
+          </AppToolbar.Right>
+        </AppToolbar>
 
         {/* Header del briefing */}
         <div style={{
