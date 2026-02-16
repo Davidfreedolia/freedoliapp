@@ -24,6 +24,7 @@ import { mockGetExpenses, mockGetIncomes, mockGetPurchaseOrders } from '../demo/
 import Header from '../components/Header'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import Button from '../components/Button'
+import AppToolbar from '../components/ui/AppToolbar'
 
 // Colors per categories
 const CATEGORY_COLORS = {
@@ -254,33 +255,34 @@ export default function Analytics() {
 
       <div style={styles.content}>
         {/* Toolbar */}
-        <div style={styles.toolbar} className="toolbar-row">
-          <div className="toolbar-group">
-            <select
-              value={dateRange}
-              onChange={e => setDateRange(e.target.value)}
-              style={styles.filterSelect}
-            >
-              <option value="7">Últims 7 dies</option>
-              <option value="30">Últims 30 dies</option>
-              <option value="90">Últims 90 dies</option>
-              <option value="365">Últim any</option>
-            </select>
-            <select
-              value={filterProject}
-              onChange={e => setFilterProject(e.target.value)}
-              style={styles.filterSelect}
-            >
-              <option value="">Tots els projectes</option>
-              {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
-          </div>
-          <div className="toolbar-group">
-            <Button variant="secondary" size="sm" onClick={loadData} style={styles.refreshBtn}>
-              <RefreshCw size={18} />
-            </Button>
-          </div>
-        </div>
+        <AppToolbar style={styles.toolbar} className="toolbar-row">
+          <AppToolbar.Left>
+            <div className="toolbar-group">
+              <select
+                value={dateRange}
+                onChange={e => setDateRange(e.target.value)}
+                style={styles.filterSelect}
+              >
+                <option value="7">Últims 7 dies</option>
+                <option value="30">Últims 30 dies</option>
+                <option value="90">Últims 90 dies</option>
+                <option value="365">Últim any</option>
+              </select>
+            </div>
+          </AppToolbar.Left>
+          <AppToolbar.Right>
+            <div className="toolbar-group">
+              <Button
+                onClick={loadData}
+                variant="secondary"
+                disabled={loading}
+                style={styles.refreshButton}
+              >
+                {loading ? 'Carregant...' : 'Actualitzar'}
+              </Button>
+            </div>
+          </AppToolbar.Right>
+        </AppToolbar>
 
         {loading ? (
           <div style={styles.loading}>Carregant analytics...</div>
@@ -607,6 +609,7 @@ const styles = {
   toolbar: { display: 'flex', marginBottom: '24px' },
   filterSelect: { height: 'var(--btn-h-sm)', padding: '0 12px', borderRadius: 'var(--btn-radius)', border: '1px solid var(--btn-secondary-border)', backgroundColor: 'var(--btn-ghost-bg)', color: 'var(--btn-secondary-fg)', fontSize: '14px', outline: 'none', cursor: 'pointer', boxShadow: 'var(--btn-shadow)' },
   refreshBtn: { padding: '0', width: 'var(--btn-h-sm)', minWidth: 'var(--btn-h-sm)' },
+  refreshButton: { padding: '0', width: 'var(--btn-h-sm)', minWidth: 'var(--btn-h-sm)' },
   loading: { padding: '64px', textAlign: 'center', color: '#6b7280' },
   errorContainer: { padding: '64px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' },
   retryButton: { minWidth: '160px' },
