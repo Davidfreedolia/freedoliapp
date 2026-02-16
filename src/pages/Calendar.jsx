@@ -9,6 +9,7 @@ import { useApp } from '../context/AppContext'
 import { getCalendarEvents, getProjects, getDashboardPreferences, updateDashboardPreferences, updateTask } from '../lib/supabase'
 import { Filter, X } from 'lucide-react'
 import Button from '../components/Button'
+import AppToolbar from '../components/ui/AppToolbar'
 import QuickCreateTaskModal from '../components/QuickCreateTaskModal'
 import { showToast } from '../components/Toast'
 
@@ -343,9 +344,10 @@ export default function CalendarPage() {
 
   return (
     <div style={styles.container}>
-      <div style={styles.header} className="toolbar-row">
-        <h1 style={styles.title} className="toolbar-group">{t('calendar.title', 'Calendari')}</h1>
-        <div style={{ position: 'relative' }} className="toolbar-group">
+      <AppToolbar style={styles.header} className="toolbar-row">
+        <AppToolbar.Left>
+          <h1 style={styles.title} className="toolbar-group">{t('calendar.title', 'Calendari')}</h1>
+          <div style={{ position: 'relative' }} className="toolbar-group">
           <Button
             variant="secondary"
             size="sm"
@@ -444,7 +446,8 @@ export default function CalendarPage() {
             </div>
           )}
         </div>
-      </div>
+        </AppToolbar.Left>
+      </AppToolbar>
       
       <div style={styles.calendarContainer}>
         {loading ? (
