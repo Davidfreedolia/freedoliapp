@@ -23,6 +23,7 @@ import {
   deleteWarehouse
 } from '../lib/supabase'
 import Header from '../components/Header'
+import AppToolbar from '../components/AppToolbar'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
 import { useTranslation } from 'react-i18next'
@@ -413,22 +414,24 @@ export default function Warehouses() {
         padding: isMobile ? '16px' : '32px'
       }}>
         {/* Toolbar */}
-        <div style={styles.toolbar} className="toolbar-row">
-          <div style={styles.searchGroup} className="toolbar-group">
-            <div style={styles.searchContainer} className="toolbar-search">
-              <Search size={18} color="#9ca3af" />
-              <input
-                type="text"
-                placeholder="Buscar magatzems..."
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                style={styles.searchInput}
-              />
-            </div>
-          </div>
+        <AppToolbar>
+          <AppToolbar.Group align="left">
+            <AppToolbar.Item className="toolbar-search">
+              <div style={styles.searchContainer}>
+                <Search size={18} color="#9ca3af" />
+                <input
+                  type="text"
+                  placeholder="Buscar magatzems..."
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                  style={styles.searchInput}
+                />
+              </div>
+            </AppToolbar.Item>
+          </AppToolbar.Group>
 
-          <div style={styles.filters} className="toolbar-group">
-            <div className="toolbar-filterSelect" title="Filtre per tipus">
+          <AppToolbar.Group align="center">
+            <AppToolbar.Item className="toolbar-filterSelect" title="Filtre per tipus">
               <span className="toolbar-filterSelect__icon" aria-hidden="true">
                 <Filter size={16} />
               </span>
@@ -441,31 +444,35 @@ export default function Warehouses() {
                   <option key={type.id} value={type.id}>{type.icon} {type.name}</option>
                 ))}
               </select>
-            </div>
-          </div>
+            </AppToolbar.Item>
+          </AppToolbar.Group>
 
-          <div className="toolbar-group view-controls">
-            <LayoutSwitcher
-              value={effectiveLayout}
-              onChange={setLayout}
-              compact={isMobile}
-            />
-          </div>
-          <div style={styles.toolbarRight} className="toolbar-group">
-            <Button size="sm" onClick={handleOpenAmazonModal} style={styles.amazonButton}>
-              <Package size={18} />
-              Afegir Amazon FBA
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleNewWarehouse} 
-              className="toolbar-cta"
-            >
-              <Plus size={18} />
-              Nou Magatzem
-            </Button>
-          </div>
-        </div>
+          <AppToolbar.Group align="right">
+            <AppToolbar.Item>
+              <LayoutSwitcher
+                value={effectiveLayout}
+                onChange={setLayout}
+                compact={isMobile}
+              />
+            </AppToolbar.Item>
+            <AppToolbar.Item>
+              <Button size="sm" onClick={handleOpenAmazonModal} style={styles.amazonButton}>
+                <Package size={18} />
+                Afegir Amazon FBA
+              </Button>
+            </AppToolbar.Item>
+            <AppToolbar.Item>
+              <Button
+                size="sm"
+                onClick={handleNewWarehouse} 
+                className="toolbar-cta"
+              >
+                <Plus size={18} />
+                Nou Magatzem
+              </Button>
+            </AppToolbar.Item>
+          </AppToolbar.Group>
+        </AppToolbar>
 
         {/* Stats */}
         <div style={styles.statsRow}>

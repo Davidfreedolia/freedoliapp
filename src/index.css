@@ -3676,6 +3676,179 @@ svg[class*="lucide-star"] {
   box-shadow: none !important;
 }
 
+/* =========================
+   L14 — TOOLBAR LEGACY ALIAS (SAFE)
+   Quan AppToolbar porta class "toolbar-row", el legacy NO ha de manar.
+   ========================= */
+
+/* AppToolbar + legacy className: neutralitza el layout legacy */
+.app-toolbar.toolbar-row {
+  min-height: unset;
+  overflow: visible;
+  white-space: normal;
+}
+
+/* Els items dins AppToolbar ja van amb app-toolbar__control; no volem estils legacy */
+.app-toolbar .toolbar-group,
+.app-toolbar .view-controls,
+.app-toolbar .toolbar-search,
+.app-toolbar .toolbar-filterSelect,
+.app-toolbar .toolbar-select {
+  all: unset;
+}
+
+/* Però mantenim alineació bàsica (evitem que "all: unset" trenqui display) */
+.app-toolbar .toolbar-search,
+.app-toolbar .toolbar-filterSelect,
+.app-toolbar .toolbar-select,
+.app-toolbar .view-controls,
+.app-toolbar .toolbar-group {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* =========================
+   L12.2 — AppToolbar Controls (CANON)
+   Scope: ONLY .app-toolbar
+   ========================= */
+
+.app-toolbar {
+  --tb-ctrl-h: 36px;
+  --tb-ctrl-radius: 12px;
+  --tb-ctrl-pad-x: 12px;
+  --tb-ctrl-gap: 10px;
+
+  /* fallback tokens (si ja existeixen, aquests no molesten) */
+  --tb-bg: var(--surface-bg, rgba(255,255,255,0.7));
+  --tb-bg-2: var(--surface-bg-2, rgba(255,255,255,0.55));
+  --tb-border: var(--border-1, rgba(0,0,0,0.12));
+  --tb-text: var(--text-1, rgba(15,18,20,0.92));
+  --tb-muted: var(--muted-1, rgba(15,18,20,0.62));
+  --tb-focus: var(--focus-ring, rgba(255, 125, 77, 0.35)); /* coral-ish fallback */
+}
+
+/* Wrapper “control” universal */
+.app-toolbar__control {
+  display: inline-flex;
+  align-items: center;
+  height: var(--tb-ctrl-h);
+  border-radius: var(--tb-ctrl-radius);
+  gap: 8px;
+}
+
+/* INPUT + SELECT (mateixa base) */
+.app-toolbar input,
+.app-toolbar select {
+  height: var(--tb-ctrl-h);
+  border-radius: var(--tb-ctrl-radius);
+  border: 1px solid var(--tb-border);
+  background: var(--tb-bg);
+  color: var(--tb-text);
+  padding: 0 var(--tb-ctrl-pad-x);
+  line-height: 1;
+  font: inherit;              /* adéu fonts random */
+  letter-spacing: inherit;
+  outline: none;
+  box-shadow: none;
+}
+
+/* placeholder coherent */
+.app-toolbar input::placeholder {
+  color: var(--tb-muted);
+  opacity: 1;
+}
+
+/* SELECT: fora estil natiu + caret consistent */
+.app-toolbar select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  padding-right: 34px; /* espai caret */
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--tb-muted) 50%),
+    linear-gradient(135deg, var(--tb-muted) 50%, transparent 50%),
+    linear-gradient(to right, transparent, transparent);
+  background-position:
+    calc(100% - 18px) 50%,
+    calc(100% - 12px) 50%,
+    0 0;
+  background-size:
+    6px 6px,
+    6px 6px,
+    100% 100%;
+  background-repeat: no-repeat;
+}
+
+/* Safari: evita “tall” visual */
+.app-toolbar select::-ms-expand {
+  display: none;
+}
+
+/* HOVER (subtil) */
+.app-toolbar input:hover,
+.app-toolbar select:hover {
+  background: var(--tb-bg-2);
+}
+
+/* FOCUS: únic i consistent */
+.app-toolbar input:focus,
+.app-toolbar select:focus,
+.app-toolbar button:focus-visible,
+.app-toolbar [role="switch"]:focus-visible {
+  border-color: color-mix(in srgb, var(--tb-border) 55%, var(--tb-focus));
+  box-shadow: 0 0 0 3px var(--tb-focus);
+}
+
+/* BUTTONS: normalitza padding + height (sense canviar “què fan”) */
+.app-toolbar button,
+.app-toolbar .btn {
+  height: var(--tb-ctrl-h);
+  border-radius: var(--tb-ctrl-radius);
+  padding: 0 12px;
+  line-height: 1;
+  font: inherit;
+}
+
+/* Si hi ha icona sola */
+.app-toolbar button.icon-btn,
+.app-toolbar .btn.icon-btn {
+  width: var(--tb-ctrl-h);
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* TOGGLES (switch/button) dins toolbar: alçada i focus ok */
+.app-toolbar [role="switch"],
+.app-toolbar .toggle,
+.app-toolbar .fd-theme-switch {
+  height: var(--tb-ctrl-h);
+  border-radius: var(--tb-ctrl-radius);
+}
+
+/* CHIPS dins toolbar (si existeixen) */
+.app-toolbar .chip,
+.app-toolbar .toolbar-chip,
+.app-toolbar [data-chip] {
+  height: 28px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 6px;
+  line-height: 1;
+}
+
+/* Evita desalineacions rares entre grups */
+.app-toolbar__group {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--tb-ctrl-gap);
+  flex-wrap: nowrap;
+}
+
 .projects-filter::after{
   content: "▾";
   position: absolute;

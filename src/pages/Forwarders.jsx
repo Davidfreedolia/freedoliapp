@@ -33,6 +33,7 @@ import {
   supabase
 } from '../lib/supabase'
 import Header from '../components/Header'
+import AppToolbar from '../components/AppToolbar'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
 import { showToast } from '../components/Toast'
@@ -598,36 +599,40 @@ export default function Forwarders() {
         padding: isMobile ? '16px' : '32px'
       }}>
         {/* Toolbar */}
-        <div style={styles.toolbar} className="toolbar-row">
-          <div style={styles.searchGroup} className="toolbar-group">
-            <div style={styles.searchContainer} className="toolbar-search">
-              <Search size={18} color="#9ca3af" />
-              <input
-                type="text"
-                placeholder="Buscar transitaris..."
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                style={styles.searchInput}
+        <AppToolbar>
+          <AppToolbar.Group align="left">
+            <AppToolbar.Item className="toolbar-search">
+              <div style={styles.searchContainer}>
+                <Search size={18} color="#9ca3af" />
+                <input
+                  type="text"
+                  placeholder="Buscar transitaris..."
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                  style={styles.searchInput}
+                />
+              </div>
+            </AppToolbar.Item>
+          </AppToolbar.Group>
+          <AppToolbar.Group align="right">
+            <AppToolbar.Item>
+              <LayoutSwitcher
+                value={effectiveLayout}
+                onChange={setLayout}
+                compact={isMobile}
               />
-            </div>
-          </div>
-          <div className="toolbar-group view-controls">
-            <LayoutSwitcher
-              value={effectiveLayout}
-              onChange={setLayout}
-              compact={isMobile}
-            />
-          </div>
-          <div style={styles.toolbarRight} className="toolbar-group">
-            <Button
-              size="sm"
-              onClick={handleNewForwarder} 
-              className="toolbar-cta"
-            >
-              <Plus size={18} /> Nou Transitari
-            </Button>
-          </div>
-        </div>
+            </AppToolbar.Item>
+            <AppToolbar.Item>
+              <Button
+                size="sm"
+                onClick={handleNewForwarder} 
+                className="toolbar-cta"
+              >
+                <Plus size={18} /> Nou Transitari
+              </Button>
+            </AppToolbar.Item>
+          </AppToolbar.Group>
+        </AppToolbar>
 
         {/* Stats */}
         <div style={styles.statsRow}>
