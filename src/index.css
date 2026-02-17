@@ -1731,6 +1731,45 @@ body.dark .drive-btn--compact.drive--on {
   transition: width .25s ease;
 }
 
+/* /projects — compact card density (~15%) */
+.projects-page .projects-card__card {
+  gap: 10px;
+}
+.projects-page .projects-card__body {
+  gap: 6px;
+}
+.projects-page .projects-card__header {
+  gap: 6px;
+}
+.projects-page .projects-card__title {
+  margin: 0 0 2px 0;
+  font-size: 16px;
+}
+.projects-page .projects-card__thumbWrap,
+.projects-page .projects-card__thumb,
+.projects-page .projects-card__thumbFallback {
+  width: 36px;
+  height: 36px;
+}
+.projects-page .projects-card__thumbWrap {
+  flex: 0 0 36px;
+}
+.projects-page .projects-card__progressTrack {
+  height: 4px;
+}
+.projects-page .projects-card__progressWrap {
+  margin-top: 4px;
+}
+.projects-page .projects-split__left {
+  gap: 8px;
+}
+.projects-page .project-card__marketplaces {
+  gap: 6px;
+}
+.projects-page .project-card__marketplacesLabel {
+  font-size: 11px;
+}
+
 .project-card__phases{
   display:flex;
   align-items:center;

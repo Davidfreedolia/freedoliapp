@@ -337,7 +337,7 @@ export default function Projects() {
       >
         <div className="projects-card__body">
           <div className="projects-card__header" style={{ alignItems: 'flex-start' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
               <div className="projects-card__thumbWrap" title={thumbnailUrl ? undefined : 'ASIN image not available yet'}>
                 {thumbnailUrl && (
                   <img
@@ -481,7 +481,7 @@ export default function Projects() {
                 />
               </div>
               <span style={styles.progressText}>{Math.round(progressValue)}%</span>
-              <div style={{ marginTop: 6, width: '100%' }}>
+              <div style={{ marginTop: 3, width: '100%' }}>
                 <div className="projects-card__progressTrack" data-progress-track="true">
                   <div
                     className="projects-card__progressFill"
@@ -497,7 +497,7 @@ export default function Projects() {
           </div>
 
           {!isPreview && (
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
               {project.decision === 'DISCARDED' && (
                 <Button
                   variant="secondary"
@@ -753,7 +753,7 @@ export default function Projects() {
               <div style={{
                 ...styles.projectsGrid,
                 gridTemplateColumns: isMobile ? '1fr' : (isTablet ? 'repeat(auto-fill, minmax(280px, 1fr))' : 'repeat(auto-fill, minmax(320px, 1fr))'),
-                gap: isMobile ? '12px' : '20px'
+                gap: isMobile ? '10px' : '14px'
               }}>
         {filteredProjects.map(project => renderProjectCard(project, { enablePreviewSelect: false }))}
               </div>
@@ -967,12 +967,12 @@ const styles = {
   projectsGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-    gap: '20px'
+    gap: '14px'
   },
   projectsList: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '12px'
+    gap: '8px'
   },
   splitLayout: {
     display: 'grid',
@@ -997,7 +997,7 @@ const styles = {
     color: 'var(--muted)'
   },
   projectCard: {
-    padding: '16px',
+    padding: '12px',
     borderRadius: 'var(--radius-ui)',
     border: 'none'
   },
@@ -1071,13 +1071,13 @@ const styles = {
   progressContainer: {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
-    marginBottom: '16px',
+    gap: '8px',
+    marginBottom: '0',
     width: '100%'
   },
   progressBar: {
     flex: 1,
-    height: '8px',
+    height: '5px',
     backgroundColor: 'var(--surface-bg-2)',
     border: '1px solid var(--border-1)',
     borderRadius: '999px',
@@ -1090,10 +1090,10 @@ const styles = {
     transition: 'width 0.3s ease'
   },
   progressText: {
-    fontSize: '12px',
+    fontSize: '11px',
     fontWeight: '600',
     color: 'var(--muted-1)',
-    minWidth: '36px'
+    minWidth: '32px'
   },
   cardFooter: {
     display: 'flex',
