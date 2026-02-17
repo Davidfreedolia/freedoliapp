@@ -1343,6 +1343,7 @@ function ProjectDetailInner({ useApp }) {
                     size="sm"
                     onClick={saveResearch}
                     disabled={!researchTouched && !researchHasAsin}
+                    className="btn-success"
                   >
                     Guardar
                   </Button>
@@ -1351,6 +1352,7 @@ function ProjectDetailInner({ useApp }) {
                     size="sm"
                     onClick={resetResearch}
                     disabled={!researchTouched && !researchHasAsin && !researchDecision}
+                    className="btn-danger"
                   >
                     Reset
                   </Button>
@@ -2056,6 +2058,7 @@ function ProjectDetailInner({ useApp }) {
                   size="sm"
             disabled
             style={btnStateStyle('inactive')}
+            className="btn-primary"
                 >
             Crear Proveïdor
                 </Button>
@@ -2064,6 +2067,7 @@ function ProjectDetailInner({ useApp }) {
             size="sm"
             disabled
             style={btnStateStyle('inactive')}
+            className="btn-primary"
           >
             Crear Transitari
           </Button>
@@ -2072,6 +2076,7 @@ function ProjectDetailInner({ useApp }) {
             size="sm"
             disabled
             style={btnStateStyle('inactive')}
+            className="btn-primary"
           >
             Crear Magatzem
           </Button>
@@ -2080,6 +2085,7 @@ function ProjectDetailInner({ useApp }) {
             size="sm"
             style={btnStateStyle('active')}
             onClick={handleCreatePO}
+            className="btn-primary"
           >
             Crear Comanda (PO)
           </Button>
@@ -2088,6 +2094,7 @@ function ProjectDetailInner({ useApp }) {
             size="sm"
             style={btnStateStyle('active')}
             onClick={handleCreateExpense}
+            className="btn-primary"
           >
             Crear Despesa
           </Button>
@@ -2096,6 +2103,7 @@ function ProjectDetailInner({ useApp }) {
             size="sm"
             style={btnStateStyle('active')}
             onClick={handleAddDocument}
+            className="btn-primary"
           >
             + Document
           </Button>

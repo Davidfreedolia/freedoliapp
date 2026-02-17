@@ -701,7 +701,7 @@ export default function Projects() {
                 setShowModal(true)
               }} 
               style={{ width: isMobile ? '100%' : 'auto' }}
-              className="projects-toolbar__new"
+              className="projects-toolbar__new btn-primary"
             >
               <Plus size={18} />
               Nou projecte

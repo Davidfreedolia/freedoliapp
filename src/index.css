@@ -3417,6 +3417,115 @@ body.dark .page-dashboard .fd-badge--done {
   gap: 2px;
 }
 
+/* ============================================
+   CANONICAL BUTTON SYSTEM
+   ============================================ */
+.btn-primary,
+.btn-secondary,
+.btn-ghost,
+.btn-danger,
+.btn-success {
+  height: 34px !important;
+  padding: 0 12px !important;
+  border-radius: 10px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  border: 1px solid transparent !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  outline: none !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+.btn-success {
+  background-color: var(--success-1) !important;
+  color: var(--btn-primary-fg) !important;
+  border-color: var(--success-1) !important;
+}
+
+.btn-success:hover:not(:disabled) {
+  background-color: var(--success-1) !important;
+  filter: brightness(1.05) !important;
+}
+
+.btn-success:focus-visible {
+  box-shadow: var(--shadow-soft), 0 0 0 2px var(--focus-ring) !important;
+}
+
+.btn-success:disabled {
+  opacity: var(--btn-disabled-opacity) !important;
+  cursor: not-allowed !important;
+}
+
+.btn-primary {
+  background-color: var(--btn-primary-bg) !important;
+  color: var(--btn-primary-fg) !important;
+  border-color: var(--btn-primary-bg) !important;
+}
+
+.btn-primary:hover:not(:disabled) {
+  box-shadow: var(--shadow-soft), inset 0 0 0 999px var(--btn-primary-hover) !important;
+}
+
+.btn-primary:focus-visible {
+  box-shadow: var(--shadow-soft), 0 0 0 2px var(--focus-ring) !important;
+}
+
+.btn-secondary {
+  background-color: var(--btn-secondary-bg) !important;
+  color: var(--btn-secondary-fg) !important;
+  border-color: var(--btn-secondary-border) !important;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--btn-secondary-hover-bg) !important;
+}
+
+.btn-secondary:focus-visible {
+  box-shadow: var(--shadow-soft), 0 0 0 2px var(--focus-ring) !important;
+}
+
+.btn-ghost {
+  background-color: var(--btn-ghost-bg) !important;
+  color: var(--btn-ghost-fg) !important;
+  border-color: var(--btn-ghost-border) !important;
+  box-shadow: none !important;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background-color: var(--btn-ghost-hover-bg) !important;
+}
+
+.btn-ghost:focus-visible {
+  box-shadow: 0 0 0 2px var(--focus-ring) !important;
+}
+
+.btn-danger {
+  background-color: var(--btn-danger-bg) !important;
+  color: var(--btn-danger-fg) !important;
+  border-color: var(--btn-danger-border) !important;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: var(--btn-danger-hover) !important;
+}
+
+.btn-danger:focus-visible {
+  box-shadow: var(--shadow-soft), 0 0 0 2px var(--focus-ring) !important;
+}
+
+.btn-primary:disabled,
+.btn-secondary:disabled,
+.btn-ghost:disabled,
+.btn-danger:disabled {
+  opacity: var(--btn-disabled-opacity) !important;
+  cursor: not-allowed !important;
+}
+
 body.dark .page-dashboard .fd-badge--neutral {
   color: var(--text-2);
   background: var(--color-primary-soft-bg);
