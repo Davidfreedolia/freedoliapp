@@ -1162,8 +1162,8 @@ function ProjectDetailInner({ useApp }) {
     backgroundColor: 'transparent',
     border: 'none',
     borderRadius: '0',
-    padding: isMobile ? '16px' : '24px',
-    marginTop: '12px',
+    padding: isMobile ? '12px' : '18px',
+    marginTop: '8px',
     display: 'flex',
     flexDirection: 'column',
     width: '100%',
@@ -1319,8 +1319,8 @@ function ProjectDetailInner({ useApp }) {
       case 1:
   return (
           <>
-            <div style={{ display: 'grid', gap: 14, paddingTop: 4 }}>
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'grid', gap: 10, paddingTop: 2 }}>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
                 <input
                   type="text"
                   value={researchAsinInput}
@@ -1328,16 +1328,16 @@ function ProjectDetailInner({ useApp }) {
                   placeholder="ASIN o URL Amazon"
                   style={{
                     flex: '1 1 420px',
-                    height: 40,
-                    borderRadius: 12,
+                    height: 34,
+                    borderRadius: 10,
                     border: '1px solid var(--border-1)',
                     background: 'var(--surface-bg)',
                     color: 'var(--text-1)',
-                    padding: '0 12px',
+                    padding: '0 10px',
                     outline: 'none'
                   }}
                 />
-                <div style={{ display: 'flex', gap: 10, alignItems: 'center', justifyContent: 'flex-end' }}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'flex-end' }}>
                   <Button
                     variant="success"
                     size="sm"
@@ -1368,16 +1368,16 @@ function ProjectDetailInner({ useApp }) {
               )}
 
               {/* Informe de recerca → Drive (import + upload) */}
-              <div style={{ marginTop: 10 }}>
+              <div style={{ marginTop: 6 }}>
                 <div
                   style={{
                     border: '2px dashed var(--border-1)',
-                    borderRadius: 14,
-                    padding: 14,
+                    borderRadius: 12,
+                    padding: 10,
                     background: 'var(--surface-bg-2)'
                   }}
                 >
-                  <div style={{ fontSize: 12, color: 'var(--muted-1)', marginBottom: 8 }}>
+                  <div style={{ fontSize: 12, color: 'var(--muted-1)', marginBottom: 5 }}>
                     Informe de recerca
                   </div>
 
@@ -1400,7 +1400,7 @@ function ProjectDetailInner({ useApp }) {
                       />
                       {!researchHasReport ? (
                         <>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                             <Button
                               variant="secondary"
                               size="sm"
@@ -1423,9 +1423,9 @@ function ProjectDetailInner({ useApp }) {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
-                            gap: 12,
-                            padding: '10px 12px',
-                            borderRadius: 12,
+                            gap: 8,
+                            padding: '8px 10px',
+                            borderRadius: 10,
                             border: '1px solid var(--border-1)',
                             background: 'var(--surface-bg)'
                           }}
@@ -1452,13 +1452,13 @@ function ProjectDetailInner({ useApp }) {
               {researchHasAsin ? (
         <div style={{
                   display: 'grid',
-                  gridTemplateColumns: isMobile ? '1fr' : '120px 1fr',
-                  gap: 12,
+                  gridTemplateColumns: isMobile ? '1fr' : '100px 1fr',
+                  gap: 10,
                   alignItems: 'start'
                 }}>
             <div style={{
-                    width: 120,
-                    height: 120,
+                    width: 100,
+                    height: 100,
                     borderRadius: 14,
                     overflow: 'hidden',
                     background: 'var(--surface-bg-2)',
@@ -1495,8 +1495,8 @@ function ProjectDetailInner({ useApp }) {
                         onChange={(e) => { setResearchTouched(true); setResearchSnapshot({ ...researchSnapshot, title: e.target.value }) }}
                         placeholder="Títol (base)"
                         style={{
-                          height: 40, borderRadius: 12, border: '1px solid var(--border-1)',
-                          background: 'var(--surface-bg)', color: 'var(--text-1)', padding: '0 12px', outline: 'none'
+                          height: 34, borderRadius: 10, border: '1px solid var(--border-1)',
+                          background: 'var(--surface-bg)', color: 'var(--text-1)', padding: '0 10px', outline: 'none'
                         }}
                       />
                       <input
@@ -1505,8 +1505,8 @@ function ProjectDetailInner({ useApp }) {
                         onChange={(e) => { setResearchTouched(true); setResearchSnapshot({ ...researchSnapshot, price: e.target.value }) }}
                         placeholder="Preu aprox. (ex: 19.99)"
                         style={{
-                          height: 40, borderRadius: 12, border: '1px solid var(--border-1)',
-                          background: 'var(--surface-bg)', color: 'var(--text-1)', padding: '0 12px', outline: 'none'
+                          height: 34, borderRadius: 10, border: '1px solid var(--border-1)',
+                          background: 'var(--surface-bg)', color: 'var(--text-1)', padding: '0 10px', outline: 'none'
                         }}
                       />
                       <input
@@ -1515,8 +1515,8 @@ function ProjectDetailInner({ useApp }) {
                         onChange={(e) => { setResearchTouched(true); setResearchSnapshot({ ...researchSnapshot, weight: e.target.value }) }}
                         placeholder="Pes aprox. (ex: 1.2 kg)"
                         style={{
-                          height: 40, borderRadius: 12, border: '1px solid var(--border-1)',
-                          background: 'var(--surface-bg)', color: 'var(--text-1)', padding: '0 12px', outline: 'none'
+                          height: 34, borderRadius: 10, border: '1px solid var(--border-1)',
+                          background: 'var(--surface-bg)', color: 'var(--text-1)', padding: '0 10px', outline: 'none'
                         }}
                       />
                       <input
@@ -1525,8 +1525,8 @@ function ProjectDetailInner({ useApp }) {
                         onChange={(e) => { setResearchTouched(true); setResearchSnapshot({ ...researchSnapshot, dims: e.target.value }) }}
                         placeholder="Mides aprox. (ex: 40×30×10 cm)"
                         style={{
-                          height: 40, borderRadius: 12, border: '1px solid var(--border-1)',
-                          background: 'var(--surface-bg)', color: 'var(--text-1)', padding: '0 12px', outline: 'none'
+                          height: 34, borderRadius: 10, border: '1px solid var(--border-1)',
+                          background: 'var(--surface-bg)', color: 'var(--text-1)', padding: '0 10px', outline: 'none'
                         }}
                       />
                     </div>
@@ -1537,8 +1537,8 @@ function ProjectDetailInner({ useApp }) {
                       onChange={(e) => { setResearchTouched(true); setResearchSnapshot({ ...researchSnapshot, thumbUrl: e.target.value }) }}
                       placeholder="Thumb URL (opcional: enganxa si vols sobreescriure)"
                       style={{
-                        height: 40, borderRadius: 12, border: '1px solid var(--border-1)',
-                        background: 'var(--surface-bg)', color: 'var(--text-1)', padding: '0 12px', outline: 'none'
+                        height: 34, borderRadius: 10, border: '1px solid var(--border-1)',
+                        background: 'var(--surface-bg)', color: 'var(--text-1)', padding: '0 10px', outline: 'none'
                       }}
                     />
                   </div>
@@ -1584,12 +1584,12 @@ function ProjectDetailInner({ useApp }) {
                         placeholder="Link o nota breu (mín. 8 caràcters)"
                       style={{
                           flex: 1,
-                          height: 40,
-                          borderRadius: 12,
+                          height: 34,
+                          borderRadius: 10,
                           border: '1px solid var(--border-1)',
                           background: 'var(--surface-bg)',
                           color: 'var(--text-1)',
-                          padding: '0 12px',
+                          padding: '0 10px',
                           outline: 'none'
                         }}
                       />
@@ -1878,9 +1878,9 @@ function ProjectDetailInner({ useApp }) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: 16,
-          padding: '20px 24px',
-          marginBottom: 16,
+          gap: 10,
+          padding: '14px 18px',
+          marginBottom: 10,
           background: 'var(--surface-bg)',
           boxShadow: 'var(--shadow-soft)',
           borderRadius: 'var(--radius-ui)',
@@ -1888,12 +1888,12 @@ function ProjectDetailInner({ useApp }) {
           boxSizing: 'border-box'
         }}>
           {/* Left: Thumb + Title */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
             <div
               style={{
-                width: 44,
-                height: 44,
-                borderRadius: 12,
+                width: 36,
+                height: 36,
+                borderRadius: 10,
                 overflow: 'hidden',
                 flex: '0 0 auto',
                 background: 'var(--surface-bg-2)',
@@ -1926,7 +1926,7 @@ function ProjectDetailInner({ useApp }) {
                 </div>
 
               {/* Marketplace TAGS */}
-              <div style={{ marginTop: 8 }}>
+              <div style={{ marginTop: 5 }}>
                 <div className="project-card__marketplaces">
                   <span className="project-card__marketplacesLabel">Marketplaces actius</span>
                   <div className="project-card__marketplacesTags">
@@ -1947,12 +1947,12 @@ function ProjectDetailInner({ useApp }) {
           </div>
 
           {/* Right: Status + Phase */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <StatusBadge status={project.status} decision={project.decision} />
             </div>
             <div style={{ minWidth: 0 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, opacity: 0.8, marginBottom: 6 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, opacity: 0.8, marginBottom: 4 }}>
                 <span>{phaseLabel}</span>
                 <span>{project.current_phase}/7</span>
               </div>
@@ -1965,7 +1965,7 @@ function ProjectDetailInner({ useApp }) {
                   <div
                     style={{
                       width: '100%',
-                      height: 8,
+                      height: 5,
                       borderRadius: 999,
                       background: 'var(--surface-bg-2)',
                       border: '1px solid var(--border-1)',
@@ -1986,24 +1986,24 @@ function ProjectDetailInner({ useApp }) {
                   </div>
                 )
               })()}
-              <div style={{ marginTop: 10, overflowX: 'auto' }}>
+              <div style={{ marginTop: 6, overflowX: 'auto' }}>
                 {(() => {
                   const cur = project?.current_phase || 0
                   const steps = [1, 2, 3, 4, 5, 6, 7]
 
                   return (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'nowrap', minWidth: 'max-content' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'nowrap', minWidth: 'max-content' }}>
                       {steps.map((phaseId, idx) => {
                         const isDone = cur > phaseId
                         const isCurrent = cur === phaseId
 
                         return (
-                          <div key={phaseId} style={{ display: 'flex', alignItems: 'center', gap: 12, flex: idx === steps.length - 1 ? '0 0 auto' : '1 1 auto' }}>
+                          <div key={phaseId} style={{ display: 'flex', alignItems: 'center', gap: 8, flex: idx === steps.length - 1 ? '0 0 auto' : '1 1 auto' }}>
                             <span
                               title={getPhaseMeta(phaseId).label}
                               style={{
-                                width: 34,
-                                height: 34,
+                                width: 28,
+                                height: 28,
                                 borderRadius: 999,
                                 display: 'inline-flex',
                                 alignItems: 'center',
@@ -2042,9 +2042,9 @@ function ProjectDetailInner({ useApp }) {
           display: 'flex',
           flexWrap: 'wrap',
           alignItems: 'stretch',
-          gap: 10,
-          padding: '16px 20px',
-          marginBottom: 16,
+          gap: 8,
+          padding: '12px 16px',
+          marginBottom: 10,
           background: 'var(--surface-bg)',
           boxShadow: 'var(--shadow-soft)',
           borderRadius: 'var(--radius-ui)',
@@ -2560,7 +2560,7 @@ function ProjectDetailInner({ useApp }) {
           <aside className="project-split__right">
             <div className="project-split__sticky">
               <div className="projects-split__panel">
-                <div className="projects-split__panelHeader" style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                <div className="projects-split__panelHeader" style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
                   <div style={{ minWidth: 0 }}>
                     <div className="projects-panel__title">{projectTitle}</div>
                     <div className="projects-panel__subtitle">{activeFolderLabel || '—'}</div>
@@ -2568,7 +2568,7 @@ function ProjectDetailInner({ useApp }) {
               </div>
 
                 {researchImport && (
-                  <div style={{ padding: '10px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+                  <div style={{ padding: '6px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
                     <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>
                       Informe: <strong style={{ color: 'var(--text-1)' }}>{researchImport.asin}</strong> · {researchImport.decision}
                 </div>
@@ -2604,11 +2604,11 @@ const styles = {
   discardedBanner: {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
-    padding: '16px 20px',
-    borderRadius: '12px',
+    gap: '10px',
+    padding: '12px 16px',
+    borderRadius: '10px',
     border: '2px solid',
-    marginBottom: '24px'
+    marginBottom: '18px'
   },
   restoreButton: {
     padding: '10px 20px',
@@ -2625,11 +2625,11 @@ const styles = {
     overflowY: 'auto'
   },
   phaseSection: {
-    borderRadius: '16px',
+    borderRadius: '14px',
     border: '1px solid',
     borderTopWidth: '1px',
-    padding: '12px 16px',
-    marginBottom: '16px',
+    padding: '10px 12px',
+    marginBottom: '12px',
     boxShadow: 'var(--shadow-soft)'
   },
   phaseSectionHeader: {
@@ -2637,7 +2637,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: '12px',
+    gap: '8px',
     background: 'transparent',
     border: 'none',
     padding: 0,
@@ -2652,18 +2652,18 @@ const styles = {
   phaseSectionHeaderMeta: {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
+    gap: '8px',
     color: '#6b7280'
   },
   phaseSectionTitle: {
-    fontSize: '16px',
+    fontSize: '15px',
     fontWeight: '600'
   },
   phaseSectionBody: {
-    marginTop: '16px',
+    marginTop: '12px',
     display: 'flex',
     flexDirection: 'column',
-    gap: '20px'
+    gap: '14px'
   },
   phasePreviewChip: {
     fontSize: '11px',
@@ -2687,24 +2687,24 @@ const styles = {
     backgroundColor: '#f9fafb'
   },
   phasePlaceholder: {
-    padding: '16px',
-    borderRadius: '12px',
+    padding: '12px',
+    borderRadius: '10px',
     border: '1px dashed var(--border-color)',
     color: '#6b7280',
     fontSize: '13px'
   },
   phaseStickyContainer: {
     position: 'sticky',
-    top: '12px',
+    top: '10px',
     zIndex: 6,
     display: 'flex',
     flexDirection: 'column',
-    gap: '12px',
-    padding: '12px 16px',
-    borderRadius: '14px',
+    gap: '8px',
+    padding: '10px 12px',
+    borderRadius: '12px',
     border: '1px solid',
     boxShadow: 'var(--shadow-soft)',
-    marginBottom: '24px'
+    marginBottom: '18px'
   },
   phaseCurrentBar: {
     display: 'flex',
@@ -3066,11 +3066,11 @@ const styles = {
     display: 'flex',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    gap: '12px',
-    padding: '12px 16px',
-    borderRadius: '12px',
+    gap: '8px',
+    padding: '10px 12px',
+    borderRadius: '10px',
     border: '1px solid',
-    marginBottom: '20px'
+    marginBottom: '14px'
   },
   phaseGateBannerClose: {
     background: 'transparent',

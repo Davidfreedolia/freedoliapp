@@ -3404,6 +3404,19 @@ body.dark .page-dashboard .fd-badge--done {
   padding-right: 16px !important;
 }
 
+/* Project Detail — compact density (~15%) */
+.project-detail-page .project-split__layout {
+  margin-top: 10px;
+  gap: 12px;
+}
+.project-detail-page .projects-split__panel {
+  padding: 12px;
+}
+.project-detail-page .projects-split__panelHeader {
+  margin-bottom: 8px;
+  gap: 2px;
+}
+
 body.dark .page-dashboard .fd-badge--neutral {
   color: var(--text-2);
   background: var(--color-primary-soft-bg);
