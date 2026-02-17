@@ -9,6 +9,7 @@ import { useBreakpoint } from '../hooks/useBreakpoint'
 import { useApp } from '../context/AppContext'
 import Header from '../components/Header'
 import Button from '../components/Button'
+import AppToolbar from '../components/ui/AppToolbar'
 import { useProjectCalendarEvents } from '../features/calendar/useProjectCalendarEvents'
 import { getProjects } from '../lib/supabase'
 import { Calendar as CalendarIcon, Filter, X } from 'lucide-react'
@@ -376,21 +377,24 @@ export default function CalendarPage() {
       />
       
       <div style={styles.content}>
-        <div style={styles.header} className="toolbar-row">
-          <div style={styles.headerLeft} className="toolbar-group">
-            <select
-              value={view}
-              onChange={(e) => handleViewChange(e.target.value)}
-              style={styles.viewSelector}
-            >
-              <option value={VIEWS.MONTH}>Mes</option>
-              <option value={VIEWS.WEEK}>Setmana</option>
-              <option value={VIEWS.DAY}>Dia</option>
-              <option value={VIEWS.AGENDA}>Llista</option>
-            </select>
-          </div>
-          
-          <div style={styles.headerRight} className="toolbar-group">
+        <AppToolbar style={styles.header} className="toolbar-row">
+          <AppToolbar.Left>
+            <div style={styles.headerLeft} className="toolbar-group">
+              <select
+                value={view}
+                onChange={(e) => handleViewChange(e.target.value)}
+                style={styles.viewSelector}
+              >
+                <option value={VIEWS.MONTH}>Mes</option>
+                <option value={VIEWS.WEEK}>Setmana</option>
+                <option value={VIEWS.DAY}>Dia</option>
+                <option value={VIEWS.AGENDA}>Llista</option>
+              </select>
+            </div>
+          </AppToolbar.Left>
+
+          <AppToolbar.Right>
+            <div style={styles.headerRight} className="toolbar-group">
             <Button
               variant="secondary"
               size="sm"
@@ -465,8 +469,9 @@ export default function CalendarPage() {
                 </div>
               </div>
             )}
-          </div>
-        </div>
+            </div>
+          </AppToolbar.Right>
+        </AppToolbar>
         
         {/* Loading State */}
         {loading && (
