@@ -3435,6 +3435,47 @@ body.dark .page-dashboard .fd-badge--done {
   margin-top: 0;
 }
 
+/* Project Detail — actionbar layout cleanup */
+.project-detail-page .project-actions {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.project-detail-page .actionbar__search {
+  flex: 0 0 auto;
+  max-width: 240px;
+  position: relative;
+}
+
+.project-detail-page .actionbar__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 900px) {
+  .project-detail-page .project-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .project-detail-page .actionbar__search {
+    max-width: 100%;
+    width: 100%;
+  }
+  
+  .project-detail-page .actionbar__buttons {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
 /* Project Detail — baseline alignment: header → action bar */
 .project-detail-page .project-header {
   margin-bottom: 8px;

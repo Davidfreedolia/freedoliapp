@@ -2118,22 +2118,24 @@ function ProjectDetailInner({ useApp }) {
 
         <div className="project-actions actionbar--turquoise" style={{
           display: 'flex',
-          flexWrap: 'wrap',
+          flexDirection: isMobile ? 'column' : 'row',
+          justifyContent: 'space-between',
           alignItems: 'stretch',
-          gap: 8,
+          gap: isMobile ? 8 : 12,
           padding: '8px 0',
           marginBottom: 8,
           width: '100%',
           boxSizing: 'border-box'
         }}>
-          {/* Section Quick Search */}
+          {/* Left: Section Quick Search */}
           <div 
             ref={sectionSearchRef}
+            className="actionbar__search"
             style={{ 
               position: 'relative',
               flex: isMobile ? '1 1 100%' : '0 0 auto',
-              minWidth: isMobile ? '100%' : '240px',
-              marginBottom: isMobile ? '8px' : '0'
+              maxWidth: isMobile ? '100%' : '240px',
+              width: isMobile ? '100%' : 'auto'
             }}
           >
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
@@ -2226,61 +2228,72 @@ function ProjectDetailInner({ useApp }) {
               </div>
             )}
           </div>
-                <Button
-            variant="secondary"
-                  size="sm"
-            disabled
-            style={btnStateStyle('inactive')}
-            className="btn-secondary"
-                >
-            Crear Proveïdor
-                </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            disabled
-            style={btnStateStyle('inactive')}
-            className="btn-secondary"
-          >
-            Crear Transitari
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            disabled
-            style={btnStateStyle('inactive')}
-            className="btn-secondary"
-          >
-            Crear Magatzem
-          </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            style={btnStateStyle('active')}
-            onClick={handleCreatePO}
-            className="btn-primary"
-          >
-            Crear Comanda (PO)
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            style={btnStateStyle('active')}
-            onClick={handleCreateExpense}
-            className="btn-secondary"
-          >
-            Crear Despesa
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            style={btnStateStyle('active')}
-            onClick={handleAddDocument}
-            className="btn-ghost"
-          >
-            + Document
-          </Button>
-            </div>
+          
+          {/* Right: Action Buttons */}
+          <div className="actionbar__buttons" style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            gap: 8,
+            justifyContent: isMobile ? 'flex-start' : 'flex-end',
+            flex: isMobile ? '1 1 100%' : '0 0 auto'
+          }}>
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled
+              style={btnStateStyle('inactive')}
+              className="btn-secondary"
+            >
+              Crear Proveïdor
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled
+              style={btnStateStyle('inactive')}
+              className="btn-secondary"
+            >
+              Crear Transitari
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled
+              style={btnStateStyle('inactive')}
+              className="btn-secondary"
+            >
+              Crear Magatzem
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              style={btnStateStyle('active')}
+              onClick={handleCreatePO}
+              className="btn-primary"
+            >
+              Crear Comanda (PO)
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              style={btnStateStyle('active')}
+              onClick={handleCreateExpense}
+              className="btn-secondary"
+            >
+              Crear Despesa
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              style={btnStateStyle('active')}
+              onClick={handleAddDocument}
+              className="btn-ghost"
+            >
+              + Document
+            </Button>
+          </div>
+        </div>
 
         {/* Banner DISCARDED */}
         {project.decision === 'DISCARDED' && (
