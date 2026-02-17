@@ -35,6 +35,7 @@ import {
   Lock
 } from 'lucide-react'
 import Header from '../components/Header'
+import PageGutter from '../components/ui/PageGutter'
 import MarketplaceTag, { MarketplaceTagGroup } from '../components/MarketplaceTag'
 import StatusBadge from '../components/StatusBadge'
 import FileUploader from '../components/FileUploader'
@@ -628,11 +629,20 @@ function ProjectDetailInner({ useApp }) {
       try {
         const { storageService } = await import('../lib/storageService')
         await storageService.uploadFile(`${researchStoragePrefix}${file.name}`, file)
+        // Notify Explorer to refresh after upload (same as dropzone)
+        if (handleUploadComplete) {
+          await handleUploadComplete([{
+            name: file.name,
+            path: `${researchStoragePrefix}${file.name}`,
+            size: file.size
+          }])
+        }
       } catch (err) {
         try {
           const { showToast } = await import('../components/Toast')
           showToast('Permís denegat: no tens accés a aquest projecte o el path no és vàlid.', 'warning')
         } catch {}
+        return
       }
     }
     const text = await file.text()
@@ -1860,11 +1870,9 @@ function ProjectDetailInner({ useApp }) {
   }
 
   return (
-    <div style={styles.container}>
-                      <div style={{
-        ...styles.content,
-        padding: isMobile ? '16px' : '32px'
-      }}>
+    <div style={styles.container} className="project-detail-page">
+      <PageGutter>
+        <div style={{ ...styles.content, padding: 0 }}>
         {/* P-D1 — Project Header */}
         <div className="project-header ui-card" style={{
           display: 'flex',
@@ -2575,13 +2583,14 @@ function ProjectDetailInner({ useApp }) {
             darkMode={darkMode}
                 onUploadComplete={handleUploadComplete}
                 onActivePathChange={setActiveFolderLabel}
+                fixedFolderId={phaseId === 1 ? researchStoragePrefix : null}
               />
             </div>
             </div>
           </aside>
         </div>
-
-      </div>
+        </div>
+      </PageGutter>
     </div>
   )
 }

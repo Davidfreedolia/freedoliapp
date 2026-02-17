@@ -3328,6 +3328,43 @@ body.dark .page-dashboard .fd-badge--done {
   border-color: var(--color-success-soft-border);
 }
 
+/* ============================================
+   PAGE GUTTER — canonical gutters (reusable)
+   ============================================ */
+.page-gutter {
+  padding: 12px 24px 24px;
+}
+
+@media (max-width: 1024px) {
+  .page-gutter {
+    padding: 10px 16px 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .page-gutter {
+    padding: 8px 12px 16px;
+  }
+}
+
+/* ============================================
+   PROJECT DETAIL — card alignment fix
+   ============================================ */
+.project-detail-page .ui-card {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.project-detail-page .ui-card:first-child {
+  margin-top: 0;
+}
+
+.project-detail-page .project-header,
+.project-detail-page .project-actions {
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+}
+
 body.dark .page-dashboard .fd-badge--neutral {
   color: var(--text-2);
   background: var(--color-primary-soft-bg);

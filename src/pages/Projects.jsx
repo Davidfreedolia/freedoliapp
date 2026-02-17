@@ -19,6 +19,7 @@ import { deleteProject } from '../lib/supabase'
 import Header from '../components/Header'
 import NewProjectModal from '../components/NewProjectModal'
 import Button from '../components/Button'
+import PageGutter from '../components/ui/PageGutter'
 import LayoutSwitcher from '../components/LayoutSwitcher'
 import { useLayoutPreference } from '../hooks/useLayoutPreference'
 import ProjectDriveExplorer from '../components/projects/ProjectDriveExplorer'
@@ -529,20 +530,18 @@ export default function Projects() {
 
 
   return (
-    <div style={styles.container} data-page="projects">
-      <Header
-        title={
-          <span className="page-title-with-icon">
-            <FolderKanban size={22} />
-            Projectes
-          </span>
-        }
-      />
+    <div style={styles.container} className="projects-page" data-page="projects">
+      <PageGutter>
+        <Header
+          title={
+            <span className="page-title-with-icon">
+              <FolderKanban size={22} />
+              Projectes
+            </span>
+          }
+        />
 
-      <div style={{
-        ...styles.content,
-        padding: isMobile ? '16px' : '32px'
-      }}>
+        <div style={{ ...styles.content, padding: 0 }}>
         {/* Toolbar */}
         <div style={styles.toolbar} className="toolbar-row projects-toolbar__row">
           <div style={styles.toolbarLeft} className="toolbar-group">
@@ -795,7 +794,8 @@ export default function Projects() {
             )}
           </>
         )}
-      </div>
+        </div>
+      </PageGutter>
 
       <NewProjectModal 
         isOpen={showModal} 
