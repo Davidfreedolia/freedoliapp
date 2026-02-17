@@ -3408,8 +3408,8 @@ body.dark .page-dashboard .fd-badge--done {
 }
 
 .project-detail-page .project-header {
-  padding-top: 14px;
-  padding-bottom: 14px;
+  padding: 12px 16px !important;
+  min-height: 0 !important;
 }
 
 .project-detail-page .project-split__layout {
@@ -3432,6 +3432,9 @@ body.dark .page-dashboard .fd-badge--done {
   width: 100%;
   margin-left: 0;
   margin-right: 0;
+  padding: 0 !important;
+  padding-top: 0 !important;
+  margin-top: 0 !important;
   padding-left: 0;
   padding-right: 0;
 }
@@ -3497,6 +3500,18 @@ body.dark .page-dashboard .fd-badge--done {
 
 .project-detail-page .projects-drive__grid .projects-drive__previewBody {
   height: 260px;
+}
+
+/* Drive Explorer: normalise boxes and headers, kill internal margins */
+.project-detail-page .projects-drive__box,
+.project-detail-page .projects-drive__previewBox {
+  padding: 12px !important;
+  box-sizing: border-box !important;
+}
+
+.project-detail-page .projects-drive__boxHeader,
+.project-detail-page .projects-drive__previewHeader {
+  margin: 0 0 8px 0 !important;
 }
 
 @media (max-width: 900px) {
@@ -3590,16 +3605,33 @@ body.dark .page-dashboard .fd-badge--done {
   padding-top: 0;
 }
 
-/* Project Detail — actionbar buttons: one color, one height (no pill) */
-.project-detail-page .actionbar--turquoise .actionbar__buttons button,
-.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-primary,
-.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-secondary,
-.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-ghost,
-.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-danger,
-.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-success {
+/* PROJECT DETAIL — ACTIONBAR: one skin (all competing props forced) */
+.project-detail-page .project-actions .actionbar__buttons :is(button, a, .btn-primary, .btn-secondary, .btn-ghost, .btn-danger, .btn-success) {
   height: 34px !important;
+  min-height: 34px !important;
   padding: 0 12px !important;
   border-radius: 10px !important;
+  line-height: 1 !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  font-weight: 600 !important;
+  font-size: 13px !important;
+
+  background-color: var(--btn-primary-bg) !important;
+  border: 1px solid var(--btn-primary-bg) !important;
+  border-color: var(--btn-primary-bg) !important;
+  color: var(--btn-primary-fg) !important;
+
+  opacity: 1 !important;
+  filter: none !important;
+  transform: none !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+.project-detail-page .project-actions .actionbar__buttons :is(button, a, .btn-primary, .btn-secondary, .btn-ghost, .btn-danger, .btn-success):is(:hover, :active, :focus-visible) {
   background-color: var(--btn-primary-bg) !important;
   border-color: var(--btn-primary-bg) !important;
   color: var(--btn-primary-fg) !important;
@@ -3609,66 +3641,41 @@ body.dark .page-dashboard .fd-badge--done {
   box-shadow: var(--shadow-soft) !important;
 }
 
-.project-detail-page .actionbar--turquoise .actionbar__buttons button:hover:not(:disabled),
-.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-primary:hover:not(:disabled),
-.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-secondary:hover:not(:disabled),
-.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-ghost:hover:not(:disabled),
-.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-danger:hover:not(:disabled),
-.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-success:hover:not(:disabled) {
-  background-color: var(--btn-primary-bg) !important;
-  border-color: var(--btn-primary-bg) !important;
-  color: var(--btn-primary-fg) !important;
-  box-shadow: var(--shadow-soft) !important;
-  opacity: 1 !important;
-  filter: none !important;
-  transform: none !important;
-}
-
-.project-detail-page .actionbar--turquoise .actionbar__buttons button:active:not(:disabled),
-.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-primary:active:not(:disabled),
-.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-secondary:active:not(:disabled),
-.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-ghost:active:not(:disabled),
-.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-danger:active:not(:disabled),
-.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-success:active:not(:disabled) {
-  background-color: var(--btn-primary-bg) !important;
-  border-color: var(--btn-primary-bg) !important;
-  color: var(--btn-primary-fg) !important;
-  opacity: 1 !important;
-  filter: none !important;
-  transform: none !important;
-}
-
-.project-detail-page .actionbar--turquoise .actionbar__buttons button:focus-visible,
-.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-primary:focus-visible,
-.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-secondary:focus-visible,
-.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-ghost:focus-visible,
-.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-danger:focus-visible,
-.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-success:focus-visible {
-  background-color: var(--btn-primary-bg) !important;
-  border-color: var(--btn-primary-bg) !important;
-  color: var(--btn-primary-fg) !important;
-  box-shadow: var(--shadow-soft), 0 0 0 2px var(--focus-ring) !important;
-  opacity: 1 !important;
-  filter: none !important;
-  transform: none !important;
-}
-
-.project-detail-page .actionbar--turquoise .actionbar__buttons button:disabled,
-.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-primary:disabled,
-.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-secondary:disabled,
-.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-ghost:disabled,
-.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-danger:disabled,
-.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-success:disabled {
+.project-detail-page .project-actions .actionbar__buttons :is(button, a, .btn-primary, .btn-secondary, .btn-ghost, .btn-danger, .btn-success):is(:disabled, [disabled], [aria-disabled="true"]) {
   height: 34px !important;
+  min-height: 34px !important;
   padding: 0 12px !important;
   border-radius: 10px !important;
+  line-height: 1 !important;
   background-color: var(--btn-primary-bg) !important;
   border-color: var(--btn-primary-bg) !important;
   color: var(--btn-primary-fg) !important;
-  opacity: 0.6 !important;
+  opacity: 0.75 !important;
+  filter: none !important;
+  transform: none !important;
+  box-shadow: var(--shadow-soft) !important;
   cursor: not-allowed !important;
-  filter: none !important;
-  transform: none !important;
+}
+
+/* SPLIT: make both columns start same baseline */
+.project-detail-page .project-split__layout {
+  align-items: flex-start !important;
+}
+
+/* kill sneaky offsets on columns */
+.project-detail-page .project-split__left,
+.project-detail-page .project-split__right {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+/* make left phase cards and right panels share the same box model */
+.project-detail-page [data-phase-section],
+.project-detail-page .projects-split__panel {
+  padding: 12px !important;
+  border-radius: 12px !important;
+  box-sizing: border-box !important;
+  margin-top: 0 !important;
 }
 
 /* Project Detail — align Research section with Drive panel */
