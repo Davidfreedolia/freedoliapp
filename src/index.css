@@ -3425,6 +3425,14 @@ body.dark .page-dashboard .fd-badge--done {
   transition: outline 0.2s ease, box-shadow 0.2s ease;
 }
 
+/* Project Detail — flat action bar (no frame) */
+.project-detail-page .project-actions {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
 /* ============================================
    CANONICAL BUTTON SYSTEM
    ============================================ */

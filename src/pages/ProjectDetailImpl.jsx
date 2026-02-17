@@ -2116,16 +2116,13 @@ function ProjectDetailInner({ useApp }) {
           </div>
         </div>
 
-        <div className="project-actions ui-card" style={{
+        <div className="project-actions" style={{
           display: 'flex',
           flexWrap: 'wrap',
           alignItems: 'stretch',
           gap: 8,
-          padding: '12px 16px',
-          marginBottom: 10,
-          background: 'var(--surface-bg)',
-          boxShadow: 'var(--shadow-soft)',
-          borderRadius: 'var(--radius-ui)',
+          padding: '8px 0',
+          marginBottom: 8,
           width: '100%',
           boxSizing: 'border-box'
         }}>
