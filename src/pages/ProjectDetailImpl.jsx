@@ -1163,7 +1163,7 @@ function ProjectDetailInner({ useApp }) {
     backgroundColor: 'transparent',
     border: 'none',
     borderRadius: '0',
-    padding: isMobile ? '12px' : '18px',
+    padding: isMobile ? '12px 0' : '18px 0',
     marginTop: '0',
     display: 'flex',
     flexDirection: 'column',
@@ -1950,8 +1950,7 @@ function ProjectDetailInner({ useApp }) {
   return (
     <div style={styles.container} className="project-detail-page">
       <PageGutter>
-        <div style={{ ...styles.content, padding: 0 }}>
-        <div className="project-detail-page__container">
+        <div style={{ ...styles.content, padding: 0 }} className="project-detail-page__content">
         {/* P-D1 — Project Header */}
         <div className="project-header ui-card" style={{
           display: 'flex',
@@ -2652,7 +2651,7 @@ function ProjectDetailInner({ useApp }) {
 
         <div className="project-split__layout">
           <div className="project-split__left">
-        <div style={phaseWrapperStyle}>
+        <div className="project-detail-page__phase-wrap" style={phaseWrapperStyle}>
           <div
             data-testid="phase-gate-block-banner"
             data-revealed={phaseBlockVisible ? 'true' : 'false'}
@@ -2781,7 +2780,6 @@ function ProjectDetailInner({ useApp }) {
             </div>
             </div>
           </aside>
-        </div>
         </div>
         </div>
       </PageGutter>

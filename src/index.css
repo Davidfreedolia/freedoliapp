@@ -3387,30 +3387,60 @@ body.dark .page-dashboard .fd-badge--done {
 }
 
 /* ============================================
-   PROJECT DETAIL — single container alignment
+   PROJECT DETAIL — PageGutter single source (alignment reset)
    ============================================ */
-.project-detail-page .page-gutter {
+.project-detail-page .project-detail-page__content {
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
   padding-left: 0;
   padding-right: 0;
 }
 
-.project-detail-page__container {
-  max-width: 100%;
-  margin: 0 auto;
-  padding: 0 24px;
+.project-detail-page .project-header,
+.project-detail-page .project-actions {
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0;
+  padding-right: 0;
   box-sizing: border-box;
 }
 
-@media (max-width: 1024px) {
-  .project-detail-page__container {
-    padding: 0 16px;
-  }
+.project-detail-page .project-header {
+  padding-top: 14px;
+  padding-bottom: 14px;
 }
 
-@media (max-width: 640px) {
-  .project-detail-page__container {
-    padding: 0 12px;
-  }
+.project-detail-page .project-split__layout {
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.project-detail-page .project-split__left,
+.project-detail-page .project-split__right {
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.project-detail-page .project-detail-page__phase-wrap {
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.project-detail-page [data-phase-section] {
+  margin-left: 0;
+  margin-right: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .project-detail-page .ui-card {
@@ -3533,7 +3563,7 @@ body.dark .page-dashboard .fd-badge--done {
 .project-detail-page .actionbar--turquoise .actionbar__buttons .btn-danger:hover:not(:disabled),
 .project-detail-page .actionbar--turquoise .actionbar__buttons .btn-success:hover:not(:disabled) {
   background-color: var(--btn-primary-bg) !important;
-  box-shadow: var(--shadow-soft), inset 0 0 0 999px var(--btn-primary-hover) !important;
+  box-shadow: var(--shadow-soft) !important;
   opacity: 1 !important;
   filter: none !important;
 }
