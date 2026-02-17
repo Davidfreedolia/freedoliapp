@@ -3387,8 +3387,32 @@ body.dark .page-dashboard .fd-badge--done {
 }
 
 /* ============================================
-   PROJECT DETAIL — card alignment fix
+   PROJECT DETAIL — single container alignment
    ============================================ */
+.project-detail-page .page-gutter {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.project-detail-page__container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 24px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 1024px) {
+  .project-detail-page__container {
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .project-detail-page__container {
+    padding: 0 12px;
+  }
+}
+
 .project-detail-page .ui-card {
   margin-left: 0;
   margin-right: 0;
@@ -3396,12 +3420,6 @@ body.dark .page-dashboard .fd-badge--done {
 
 .project-detail-page .ui-card:first-child {
   margin-top: 0;
-}
-
-.project-detail-page .project-header,
-.project-detail-page .project-actions {
-  padding-left: 16px !important;
-  padding-right: 16px !important;
 }
 
 /* Project Detail — compact density (~15%) */

@@ -1951,13 +1951,14 @@ function ProjectDetailInner({ useApp }) {
     <div style={styles.container} className="project-detail-page">
       <PageGutter>
         <div style={{ ...styles.content, padding: 0 }}>
+        <div className="project-detail-page__container">
         {/* P-D1 — Project Header */}
         <div className="project-header ui-card" style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: 10,
-          padding: '14px 18px',
+          padding: '14px 0',
           marginBottom: 8,
           background: 'var(--surface-bg)',
           boxShadow: 'var(--shadow-soft)',
@@ -2780,6 +2781,7 @@ function ProjectDetailInner({ useApp }) {
             </div>
             </div>
           </aside>
+        </div>
         </div>
         </div>
       </PageGutter>
