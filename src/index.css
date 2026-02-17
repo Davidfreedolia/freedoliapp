@@ -3590,19 +3590,23 @@ body.dark .page-dashboard .fd-badge--done {
   padding-top: 0;
 }
 
-/* Project Detail — turquoise action buttons (uniform, exact same tone) */
+/* Project Detail — actionbar buttons: one color, one height (no pill) */
 .project-detail-page .actionbar--turquoise .actionbar__buttons button,
 .project-detail-page .actionbar--turquoise .actionbar__buttons .btn-primary,
 .project-detail-page .actionbar--turquoise .actionbar__buttons .btn-secondary,
 .project-detail-page .actionbar--turquoise .actionbar__buttons .btn-ghost,
 .project-detail-page .actionbar--turquoise .actionbar__buttons .btn-danger,
 .project-detail-page .actionbar--turquoise .actionbar__buttons .btn-success {
+  height: 34px !important;
+  padding: 0 12px !important;
+  border-radius: 10px !important;
   background-color: var(--btn-primary-bg) !important;
-  color: var(--btn-primary-fg) !important;
   border-color: var(--btn-primary-bg) !important;
-  box-shadow: var(--shadow-soft) !important;
+  color: var(--btn-primary-fg) !important;
   opacity: 1 !important;
   filter: none !important;
+  transform: none !important;
+  box-shadow: var(--shadow-soft) !important;
 }
 
 .project-detail-page .actionbar--turquoise .actionbar__buttons button:hover:not(:disabled),
@@ -3612,9 +3616,12 @@ body.dark .page-dashboard .fd-badge--done {
 .project-detail-page .actionbar--turquoise .actionbar__buttons .btn-danger:hover:not(:disabled),
 .project-detail-page .actionbar--turquoise .actionbar__buttons .btn-success:hover:not(:disabled) {
   background-color: var(--btn-primary-bg) !important;
+  border-color: var(--btn-primary-bg) !important;
+  color: var(--btn-primary-fg) !important;
   box-shadow: var(--shadow-soft) !important;
   opacity: 1 !important;
   filter: none !important;
+  transform: none !important;
 }
 
 .project-detail-page .actionbar--turquoise .actionbar__buttons button:active:not(:disabled),
@@ -3624,8 +3631,11 @@ body.dark .page-dashboard .fd-badge--done {
 .project-detail-page .actionbar--turquoise .actionbar__buttons .btn-danger:active:not(:disabled),
 .project-detail-page .actionbar--turquoise .actionbar__buttons .btn-success:active:not(:disabled) {
   background-color: var(--btn-primary-bg) !important;
+  border-color: var(--btn-primary-bg) !important;
+  color: var(--btn-primary-fg) !important;
   opacity: 1 !important;
   filter: none !important;
+  transform: none !important;
 }
 
 .project-detail-page .actionbar--turquoise .actionbar__buttons button:focus-visible,
@@ -3635,9 +3645,12 @@ body.dark .page-dashboard .fd-badge--done {
 .project-detail-page .actionbar--turquoise .actionbar__buttons .btn-danger:focus-visible,
 .project-detail-page .actionbar--turquoise .actionbar__buttons .btn-success:focus-visible {
   background-color: var(--btn-primary-bg) !important;
+  border-color: var(--btn-primary-bg) !important;
+  color: var(--btn-primary-fg) !important;
   box-shadow: var(--shadow-soft), 0 0 0 2px var(--focus-ring) !important;
   opacity: 1 !important;
   filter: none !important;
+  transform: none !important;
 }
 
 .project-detail-page .actionbar--turquoise .actionbar__buttons button:disabled,
@@ -3646,12 +3659,16 @@ body.dark .page-dashboard .fd-badge--done {
 .project-detail-page .actionbar--turquoise .actionbar__buttons .btn-ghost:disabled,
 .project-detail-page .actionbar--turquoise .actionbar__buttons .btn-danger:disabled,
 .project-detail-page .actionbar--turquoise .actionbar__buttons .btn-success:disabled {
+  height: 34px !important;
+  padding: 0 12px !important;
+  border-radius: 10px !important;
   background-color: var(--btn-primary-bg) !important;
-  color: var(--btn-primary-fg) !important;
   border-color: var(--btn-primary-bg) !important;
-  opacity: var(--btn-disabled-opacity) !important;
+  color: var(--btn-primary-fg) !important;
+  opacity: 0.6 !important;
   cursor: not-allowed !important;
   filter: none !important;
+  transform: none !important;
 }
 
 /* Project Detail — align Research section with Drive panel */
