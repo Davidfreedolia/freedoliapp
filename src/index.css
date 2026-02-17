@@ -3433,6 +3433,68 @@ body.dark .page-dashboard .fd-badge--done {
   border-radius: 0 !important;
 }
 
+/* Project Detail — turquoise action buttons */
+.project-detail-page .actionbar--turquoise .btn-primary,
+.project-detail-page .actionbar--turquoise .btn-secondary,
+.project-detail-page .actionbar--turquoise .btn-ghost,
+.project-detail-page .actionbar--turquoise .btn-danger,
+.project-detail-page .actionbar--turquoise .btn-success {
+  background-color: var(--btn-primary-bg) !important;
+  color: var(--btn-primary-fg) !important;
+  border-color: var(--btn-primary-bg) !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+.project-detail-page .actionbar--turquoise .btn-primary:hover:not(:disabled),
+.project-detail-page .actionbar--turquoise .btn-secondary:hover:not(:disabled),
+.project-detail-page .actionbar--turquoise .btn-ghost:hover:not(:disabled),
+.project-detail-page .actionbar--turquoise .btn-danger:hover:not(:disabled),
+.project-detail-page .actionbar--turquoise .btn-success:hover:not(:disabled) {
+  box-shadow: var(--shadow-soft), inset 0 0 0 999px var(--btn-primary-hover) !important;
+}
+
+.project-detail-page .actionbar--turquoise .btn-primary:focus-visible,
+.project-detail-page .actionbar--turquoise .btn-secondary:focus-visible,
+.project-detail-page .actionbar--turquoise .btn-ghost:focus-visible,
+.project-detail-page .actionbar--turquoise .btn-danger:focus-visible,
+.project-detail-page .actionbar--turquoise .btn-success:focus-visible {
+  box-shadow: var(--shadow-soft), 0 0 0 2px var(--focus-ring) !important;
+}
+
+.project-detail-page .actionbar--turquoise .btn-primary:disabled,
+.project-detail-page .actionbar--turquoise .btn-secondary:disabled,
+.project-detail-page .actionbar--turquoise .btn-ghost:disabled,
+.project-detail-page .actionbar--turquoise .btn-danger:disabled,
+.project-detail-page .actionbar--turquoise .btn-success:disabled {
+  opacity: var(--btn-disabled-opacity) !important;
+  cursor: not-allowed !important;
+}
+
+/* Project Detail — align Research section with Drive panel */
+.project-detail-page [data-phase-section="1"] {
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.project-detail-page [data-phase-section="1"] .phase-panel__headerText {
+  margin-bottom: 0;
+}
+
+.project-detail-page [data-phase-section="1"] > div[style*="marginTop"] {
+  margin-top: 0 !important;
+}
+
+.project-detail-page [data-phase-section="1"] .phaseSectionBody {
+  padding-top: 0;
+  margin-top: 0;
+}
+
+/* Ensure Research section header aligns with Drive panel header */
+.project-detail-page [data-phase-section="1"] button[aria-expanded] {
+  padding-top: 0;
+  margin-bottom: 8px;
+}
+
 /* ============================================
    CANONICAL BUTTON SYSTEM
    ============================================ */

@@ -1446,16 +1446,16 @@ function ProjectDetailInner({ useApp }) {
               )}
 
               {/* Informe de recerca → Drive (import + upload) */}
-              <div style={{ marginTop: 6 }}>
+              <div style={{ marginTop: 4 }}>
                 <div
                   style={{
                     border: '2px dashed var(--border-1)',
-                    borderRadius: 12,
-                    padding: 10,
+                    borderRadius: 10,
+                    padding: 8,
                     background: 'var(--surface-bg-2)'
                   }}
                 >
-                  <div style={{ fontSize: 12, color: 'var(--muted-1)', marginBottom: 5 }}>
+                  <div style={{ fontSize: 12, color: 'var(--muted-1)', marginBottom: 4 }}>
                     Informe de recerca
                   </div>
 
@@ -1478,7 +1478,7 @@ function ProjectDetailInner({ useApp }) {
                       />
                       {!researchHasReport ? (
                         <>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                             <Button
                               variant="secondary"
                               size="sm"
@@ -2116,7 +2116,7 @@ function ProjectDetailInner({ useApp }) {
           </div>
         </div>
 
-        <div className="project-actions" style={{
+        <div className="project-actions actionbar--turquoise" style={{
           display: 'flex',
           flexWrap: 'wrap',
           alignItems: 'stretch',
