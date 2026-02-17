@@ -240,6 +240,7 @@ function PhaseSection({ phaseId, currentPhaseId, phaseStyle, darkMode, children 
 
   return (
     <section
+      data-phase-section={phaseId}
       style={{
       ...styles.phaseSection,
       borderColor: sectionBorder,
@@ -1183,6 +1184,10 @@ function ProjectDetailInner({ useApp }) {
   const projectTitle = project?.name || '—'
   const [activeFolderLabel, setActiveFolderLabel] = useState('')
   const nextPhaseLabel = nextPhaseId ? getPhaseStyle(nextPhaseId).name : null
+  const [sectionSearchTerm, setSectionSearchTerm] = useState('')
+  const [showSectionDropdown, setShowSectionDropdown] = useState(false)
+  const sectionSearchRef = useRef(null)
+  const sectionHighlightTimeoutRef = useRef(null)
   const computeViabilitySummary = (values) => {
     if (!values) return null
     const toNumber = (value) => {
@@ -1212,7 +1217,78 @@ function ProjectDetailInner({ useApp }) {
   }, [viabilitySnapshot])
   const hasViabilitySummary = phaseId === 2 && viabilitySummary
 
+  // Section search: list of phases
+  const phaseSections = useMemo(() => {
+    return [1, 2, 3, 4, 5, 6, 7].map(pid => {
+      const meta = getPhaseMeta(pid)
+      return {
+        id: pid,
+        name: meta.name || meta.label || `Fase ${pid}`,
+        description: meta.description || ''
+      }
+    })
+  }, [])
+
+  const filteredSections = useMemo(() => {
+    if (!sectionSearchTerm.trim()) return []
+    const term = sectionSearchTerm.toLowerCase().trim()
+    return phaseSections.filter(section => 
+      section.name.toLowerCase().includes(term) ||
+      section.description.toLowerCase().includes(term)
+    )
+  }, [sectionSearchTerm, phaseSections])
+
+  const scrollToSection = (phaseId) => {
+    const section = document.querySelector(`[data-phase-section="${phaseId}"]`)
+    if (!section) return
+    
+    // Open section if closed
+    const button = section.querySelector('button[aria-expanded]')
+    if (button && button.getAttribute('aria-expanded') === 'false') {
+      button.click()
+    }
+    
+    // Scroll smoothly
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    
+    // Highlight
+    section.classList.add('section-highlight')
+    if (sectionHighlightTimeoutRef.current) {
+      clearTimeout(sectionHighlightTimeoutRef.current)
+    }
+    sectionHighlightTimeoutRef.current = setTimeout(() => {
+      section.classList.remove('section-highlight')
+    }, 1500)
+    
+    setSectionSearchTerm('')
+    setShowSectionDropdown(false)
+  }
+
+  const handleSectionSearchKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      setShowSectionDropdown(false)
+      setSectionSearchTerm('')
+      sectionSearchRef.current?.blur()
+    } else if (e.key === 'Enter' && filteredSections.length > 0) {
+      e.preventDefault()
+      scrollToSection(filteredSections[0].id)
+    }
+  }
+
   useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (sectionSearchRef.current && !sectionSearchRef.current.contains(e.target)) {
+        setShowSectionDropdown(false)
+      }
+    }
+    if (showSectionDropdown) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showSectionDropdown])
+
+  useEffect(() => {
+    if (!id) return
     if (!id) return
     try {
       const stored = localStorage.getItem(`viability_${id}`)
@@ -2053,6 +2129,106 @@ function ProjectDetailInner({ useApp }) {
           width: '100%',
           boxSizing: 'border-box'
         }}>
+          {/* Section Quick Search */}
+          <div 
+            ref={sectionSearchRef}
+            style={{ 
+              position: 'relative',
+              flex: isMobile ? '1 1 100%' : '0 0 auto',
+              minWidth: isMobile ? '100%' : '240px',
+              marginBottom: isMobile ? '8px' : '0'
+            }}
+          >
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <Search 
+                size={16} 
+                style={{ 
+                  position: 'absolute', 
+                  left: '10px', 
+                  color: 'var(--muted-1)',
+                  pointerEvents: 'none'
+                }} 
+              />
+              <input
+                type="text"
+                placeholder="Cerca secció..."
+                value={sectionSearchTerm}
+                onChange={(e) => {
+                  setSectionSearchTerm(e.target.value)
+                  setShowSectionDropdown(e.target.value.trim().length > 0)
+                }}
+                onFocus={() => {
+                  if (sectionSearchTerm.trim().length > 0) {
+                    setShowSectionDropdown(true)
+                  }
+                }}
+                onKeyDown={handleSectionSearchKeyDown}
+                style={{
+                  width: '100%',
+                  height: '34px',
+                  padding: '0 10px 0 34px',
+                  borderRadius: '10px',
+                  border: '1px solid var(--border-1)',
+                  background: 'var(--surface-bg)',
+                  color: 'var(--text-1)',
+                  fontSize: '13px',
+                  outline: 'none'
+                }}
+              />
+            </div>
+            {showSectionDropdown && filteredSections.length > 0 && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  right: 0,
+                  marginTop: '4px',
+                  background: 'var(--surface-bg)',
+                  border: '1px solid var(--border-1)',
+                  borderRadius: '10px',
+                  boxShadow: 'var(--shadow-soft)',
+                  zIndex: 1000,
+                  maxHeight: '200px',
+                  overflowY: 'auto'
+                }}
+              >
+                {filteredSections.map((section) => (
+                  <button
+                    key={section.id}
+                    type="button"
+                    onClick={() => scrollToSection(section.id)}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      textAlign: 'left',
+                      background: 'transparent',
+                      border: 'none',
+                      color: 'var(--text-1)',
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '2px'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'var(--surface-bg-2)'
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                    }}
+                  >
+                    <span style={{ fontWeight: 600 }}>{section.name}</span>
+                    {section.description && (
+                      <span style={{ fontSize: '11px', color: 'var(--muted-1)' }}>
+                        {section.description}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
                 <Button
             variant="secondary"
                   size="sm"

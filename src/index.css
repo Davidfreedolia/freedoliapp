@@ -3417,6 +3417,14 @@ body.dark .page-dashboard .fd-badge--done {
   gap: 2px;
 }
 
+/* Project Detail — section search highlight */
+.project-detail-page [data-phase-section].section-highlight {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: var(--shadow-soft), 0 0 0 4px rgba(47, 164, 169, 0.2) !important;
+  transition: outline 0.2s ease, box-shadow 0.2s ease;
+}
+
 /* ============================================
    CANONICAL BUTTON SYSTEM
    ============================================ */
