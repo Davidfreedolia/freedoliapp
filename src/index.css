@@ -3466,6 +3466,55 @@ body.dark .page-dashboard .fd-badge--done {
   gap: 2px;
 }
 
+/* Project Detail — Drive Explorer relayout: 2-col top (folders + files), preview bottom */
+.project-detail-page .projects-drive__grid {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 12px;
+}
+
+.project-detail-page .projects-drive__grid .projects-drive__box:nth-child(1),
+.project-detail-page .projects-drive__grid .projects-drive__box:nth-child(2) {
+  max-height: min(320px, 42vh);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.project-detail-page .projects-drive__grid .projects-drive__box:nth-child(1) .projects-drive__list,
+.project-detail-page .projects-drive__grid .projects-drive__files {
+  overflow-y: auto;
+  min-height: 0;
+  flex: 1;
+  max-height: none;
+}
+
+.project-detail-page .projects-drive__grid .projects-drive__previewBox {
+  grid-column: 1 / -1;
+  min-height: 0;
+}
+
+.project-detail-page .projects-drive__grid .projects-drive__previewBody {
+  height: 260px;
+}
+
+@media (max-width: 900px) {
+  .project-detail-page .projects-drive__grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
+
+  .project-detail-page .projects-drive__grid .projects-drive__box:nth-child(1),
+  .project-detail-page .projects-drive__grid .projects-drive__box:nth-child(2) {
+    max-height: none;
+  }
+
+  .project-detail-page .projects-drive__grid .projects-drive__previewBox {
+    grid-column: auto;
+  }
+}
+
 /* Project Detail — section search highlight */
 .project-detail-page [data-phase-section].section-highlight {
   outline: 2px solid var(--focus-ring);
