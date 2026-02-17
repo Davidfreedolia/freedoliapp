@@ -1958,7 +1958,7 @@ function ProjectDetailInner({ useApp }) {
           justifyContent: 'space-between',
           gap: 10,
           padding: '14px 18px',
-          marginBottom: 4,
+          marginBottom: 8,
           background: 'var(--surface-bg)',
           boxShadow: 'var(--shadow-soft)',
           borderRadius: 'var(--radius-ui)',

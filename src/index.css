@@ -3437,7 +3437,7 @@ body.dark .page-dashboard .fd-badge--done {
 
 /* Project Detail — baseline alignment: header → action bar */
 .project-detail-page .project-header {
-  margin-bottom: 4px !important;
+  margin-bottom: 8px;
 }
 
 /* Project Detail — baseline alignment: split layout */
@@ -3447,7 +3447,8 @@ body.dark .page-dashboard .fd-badge--done {
   padding-top: 0;
 }
 
-/* Project Detail — turquoise action buttons */
+/* Project Detail — turquoise action buttons (uniform) */
+.project-detail-page .actionbar--turquoise button,
 .project-detail-page .actionbar--turquoise .btn-primary,
 .project-detail-page .actionbar--turquoise .btn-secondary,
 .project-detail-page .actionbar--turquoise .btn-ghost,
@@ -3457,31 +3458,54 @@ body.dark .page-dashboard .fd-badge--done {
   color: var(--btn-primary-fg) !important;
   border-color: var(--btn-primary-bg) !important;
   box-shadow: var(--shadow-soft) !important;
+  opacity: 1 !important;
+  filter: none !important;
 }
 
+.project-detail-page .actionbar--turquoise button:hover:not(:disabled),
 .project-detail-page .actionbar--turquoise .btn-primary:hover:not(:disabled),
 .project-detail-page .actionbar--turquoise .btn-secondary:hover:not(:disabled),
 .project-detail-page .actionbar--turquoise .btn-ghost:hover:not(:disabled),
 .project-detail-page .actionbar--turquoise .btn-danger:hover:not(:disabled),
 .project-detail-page .actionbar--turquoise .btn-success:hover:not(:disabled) {
   box-shadow: var(--shadow-soft), inset 0 0 0 999px var(--btn-primary-hover) !important;
+  opacity: 1 !important;
+  filter: none !important;
 }
 
+.project-detail-page .actionbar--turquoise button:active:not(:disabled),
+.project-detail-page .actionbar--turquoise .btn-primary:active:not(:disabled),
+.project-detail-page .actionbar--turquoise .btn-secondary:active:not(:disabled),
+.project-detail-page .actionbar--turquoise .btn-ghost:active:not(:disabled),
+.project-detail-page .actionbar--turquoise .btn-danger:active:not(:disabled),
+.project-detail-page .actionbar--turquoise .btn-success:active:not(:disabled) {
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+.project-detail-page .actionbar--turquoise button:focus-visible,
 .project-detail-page .actionbar--turquoise .btn-primary:focus-visible,
 .project-detail-page .actionbar--turquoise .btn-secondary:focus-visible,
 .project-detail-page .actionbar--turquoise .btn-ghost:focus-visible,
 .project-detail-page .actionbar--turquoise .btn-danger:focus-visible,
 .project-detail-page .actionbar--turquoise .btn-success:focus-visible {
   box-shadow: var(--shadow-soft), 0 0 0 2px var(--focus-ring) !important;
+  opacity: 1 !important;
+  filter: none !important;
 }
 
+.project-detail-page .actionbar--turquoise button:disabled,
 .project-detail-page .actionbar--turquoise .btn-primary:disabled,
 .project-detail-page .actionbar--turquoise .btn-secondary:disabled,
 .project-detail-page .actionbar--turquoise .btn-ghost:disabled,
 .project-detail-page .actionbar--turquoise .btn-danger:disabled,
 .project-detail-page .actionbar--turquoise .btn-success:disabled {
+  background-color: var(--btn-primary-bg) !important;
+  color: var(--btn-primary-fg) !important;
+  border-color: var(--btn-primary-bg) !important;
   opacity: var(--btn-disabled-opacity) !important;
   cursor: not-allowed !important;
+  filter: none !important;
 }
 
 /* Project Detail — align Research section with Drive panel */
