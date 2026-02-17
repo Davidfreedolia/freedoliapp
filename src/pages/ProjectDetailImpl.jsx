@@ -2133,9 +2133,7 @@ function ProjectDetailInner({ useApp }) {
             className="actionbar__search"
             style={{ 
               position: 'relative',
-              flex: isMobile ? '1 1 100%' : '0 0 auto',
-              maxWidth: isMobile ? '100%' : '240px',
-              width: isMobile ? '100%' : 'auto'
+              flex: isMobile ? '1 1 100%' : '0 0 auto'
             }}
           >
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>

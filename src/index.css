@@ -3446,8 +3446,13 @@ body.dark .page-dashboard .fd-badge--done {
 
 .project-detail-page .actionbar__search {
   flex: 0 0 auto;
-  max-width: 240px;
+  max-width: 360px;
+  width: 100%;
   position: relative;
+}
+
+.project-detail-page .actionbar__search input {
+  width: 100%;
 }
 
 .project-detail-page .actionbar__buttons {
@@ -3488,13 +3493,13 @@ body.dark .page-dashboard .fd-badge--done {
   padding-top: 0;
 }
 
-/* Project Detail — turquoise action buttons (uniform) */
-.project-detail-page .actionbar--turquoise button,
-.project-detail-page .actionbar--turquoise .btn-primary,
-.project-detail-page .actionbar--turquoise .btn-secondary,
-.project-detail-page .actionbar--turquoise .btn-ghost,
-.project-detail-page .actionbar--turquoise .btn-danger,
-.project-detail-page .actionbar--turquoise .btn-success {
+/* Project Detail — turquoise action buttons (uniform, exact same tone) */
+.project-detail-page .actionbar--turquoise .actionbar__buttons button,
+.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-primary,
+.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-secondary,
+.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-ghost,
+.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-danger,
+.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-success {
   background-color: var(--btn-primary-bg) !important;
   color: var(--btn-primary-fg) !important;
   border-color: var(--btn-primary-bg) !important;
@@ -3503,44 +3508,47 @@ body.dark .page-dashboard .fd-badge--done {
   filter: none !important;
 }
 
-.project-detail-page .actionbar--turquoise button:hover:not(:disabled),
-.project-detail-page .actionbar--turquoise .btn-primary:hover:not(:disabled),
-.project-detail-page .actionbar--turquoise .btn-secondary:hover:not(:disabled),
-.project-detail-page .actionbar--turquoise .btn-ghost:hover:not(:disabled),
-.project-detail-page .actionbar--turquoise .btn-danger:hover:not(:disabled),
-.project-detail-page .actionbar--turquoise .btn-success:hover:not(:disabled) {
+.project-detail-page .actionbar--turquoise .actionbar__buttons button:hover:not(:disabled),
+.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-primary:hover:not(:disabled),
+.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-secondary:hover:not(:disabled),
+.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-ghost:hover:not(:disabled),
+.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-danger:hover:not(:disabled),
+.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-success:hover:not(:disabled) {
+  background-color: var(--btn-primary-bg) !important;
   box-shadow: var(--shadow-soft), inset 0 0 0 999px var(--btn-primary-hover) !important;
   opacity: 1 !important;
   filter: none !important;
 }
 
-.project-detail-page .actionbar--turquoise button:active:not(:disabled),
-.project-detail-page .actionbar--turquoise .btn-primary:active:not(:disabled),
-.project-detail-page .actionbar--turquoise .btn-secondary:active:not(:disabled),
-.project-detail-page .actionbar--turquoise .btn-ghost:active:not(:disabled),
-.project-detail-page .actionbar--turquoise .btn-danger:active:not(:disabled),
-.project-detail-page .actionbar--turquoise .btn-success:active:not(:disabled) {
+.project-detail-page .actionbar--turquoise .actionbar__buttons button:active:not(:disabled),
+.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-primary:active:not(:disabled),
+.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-secondary:active:not(:disabled),
+.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-ghost:active:not(:disabled),
+.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-danger:active:not(:disabled),
+.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-success:active:not(:disabled) {
+  background-color: var(--btn-primary-bg) !important;
   opacity: 1 !important;
   filter: none !important;
 }
 
-.project-detail-page .actionbar--turquoise button:focus-visible,
-.project-detail-page .actionbar--turquoise .btn-primary:focus-visible,
-.project-detail-page .actionbar--turquoise .btn-secondary:focus-visible,
-.project-detail-page .actionbar--turquoise .btn-ghost:focus-visible,
-.project-detail-page .actionbar--turquoise .btn-danger:focus-visible,
-.project-detail-page .actionbar--turquoise .btn-success:focus-visible {
+.project-detail-page .actionbar--turquoise .actionbar__buttons button:focus-visible,
+.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-primary:focus-visible,
+.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-secondary:focus-visible,
+.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-ghost:focus-visible,
+.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-danger:focus-visible,
+.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-success:focus-visible {
+  background-color: var(--btn-primary-bg) !important;
   box-shadow: var(--shadow-soft), 0 0 0 2px var(--focus-ring) !important;
   opacity: 1 !important;
   filter: none !important;
 }
 
-.project-detail-page .actionbar--turquoise button:disabled,
-.project-detail-page .actionbar--turquoise .btn-primary:disabled,
-.project-detail-page .actionbar--turquoise .btn-secondary:disabled,
-.project-detail-page .actionbar--turquoise .btn-ghost:disabled,
-.project-detail-page .actionbar--turquoise .btn-danger:disabled,
-.project-detail-page .actionbar--turquoise .btn-success:disabled {
+.project-detail-page .actionbar--turquoise .actionbar__buttons button:disabled,
+.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-primary:disabled,
+.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-secondary:disabled,
+.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-ghost:disabled,
+.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-danger:disabled,
+.project-detail-page .actionbar--turquoise .actionbar__buttons .btn-success:disabled {
   background-color: var(--btn-primary-bg) !important;
   color: var(--btn-primary-fg) !important;
   border-color: var(--btn-primary-bg) !important;
