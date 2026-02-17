@@ -3406,8 +3406,9 @@ body.dark .page-dashboard .fd-badge--done {
 
 /* Project Detail — compact density (~15%) */
 .project-detail-page .project-split__layout {
-  margin-top: 10px;
+  margin-top: 0;
   gap: 12px;
+  align-items: start;
 }
 .project-detail-page .projects-split__panel {
   padding: 12px;
@@ -3431,6 +3432,19 @@ body.dark .page-dashboard .fd-badge--done {
   border: none !important;
   box-shadow: none !important;
   border-radius: 0 !important;
+  margin-top: 0;
+}
+
+/* Project Detail — baseline alignment: header → action bar */
+.project-detail-page .project-header {
+  margin-bottom: 4px !important;
+}
+
+/* Project Detail — baseline alignment: split layout */
+.project-detail-page .project-split__left,
+.project-detail-page .project-split__right {
+  margin-top: 0;
+  padding-top: 0;
 }
 
 /* Project Detail — turquoise action buttons */
