@@ -2054,29 +2054,29 @@ function ProjectDetailInner({ useApp }) {
           boxSizing: 'border-box'
         }}>
                 <Button
-            variant="primary"
+            variant="secondary"
                   size="sm"
             disabled
             style={btnStateStyle('inactive')}
-            className="btn-primary"
+            className="btn-secondary"
                 >
             Crear Proveïdor
                 </Button>
           <Button
-            variant="primary"
+            variant="secondary"
             size="sm"
             disabled
             style={btnStateStyle('inactive')}
-            className="btn-primary"
+            className="btn-secondary"
           >
             Crear Transitari
           </Button>
           <Button
-            variant="primary"
+            variant="secondary"
             size="sm"
             disabled
             style={btnStateStyle('inactive')}
-            className="btn-primary"
+            className="btn-secondary"
           >
             Crear Magatzem
           </Button>
@@ -2090,20 +2090,20 @@ function ProjectDetailInner({ useApp }) {
             Crear Comanda (PO)
           </Button>
           <Button
-            variant="primary"
+            variant="secondary"
             size="sm"
             style={btnStateStyle('active')}
             onClick={handleCreateExpense}
-            className="btn-primary"
+            className="btn-secondary"
           >
             Crear Despesa
           </Button>
           <Button
-            variant="primary"
+            variant="ghost"
             size="sm"
             style={btnStateStyle('active')}
             onClick={handleAddDocument}
-            className="btn-primary"
+            className="btn-ghost"
           >
             + Document
           </Button>
