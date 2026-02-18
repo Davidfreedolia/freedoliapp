@@ -1952,11 +1952,11 @@ function ProjectDetailInner({ useApp }) {
       <PageGutter>
         <div style={{ ...styles.content, padding: 0 }} className="project-detail-page__content">
         {/* P-D1 — Project Header */}
-        <div className="project-header ui-card" style={{
+        <div className="project-header project-header--canon ui-card" style={{
           display: 'flex',
-          alignItems: 'center',
+          alignItems: 'stretch',
           justifyContent: 'space-between',
-          gap: 10,
+          gap: 8,
           padding: '12px 16px',
           marginBottom: 8,
           background: 'var(--surface-bg)',
@@ -1966,11 +1966,13 @@ function ProjectDetailInner({ useApp }) {
           boxSizing: 'border-box'
         }}>
           {/* Left: Thumb + Title */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
             <div
+              className="project-header__thumb"
               style={{
-                width: 36,
-                height: 36,
+                width: 48,
+                minWidth: 48,
+                height: 48,
                 borderRadius: 10,
                 overflow: 'hidden',
                 flex: '0 0 auto',
@@ -1995,9 +1997,9 @@ function ProjectDetailInner({ useApp }) {
                     </div>
 
             {/* Title + Meta */}
-            <div style={{ minWidth: 0 }}>
-              <h2 style={{ margin: 0, lineHeight: 1.2 }}>{project.name}</h2>
-              <div style={{ marginTop: 2, opacity: 0.8 }}>
+            <div className="project-header__main" style={{ minWidth: 0 }}>
+              <h2 style={{ margin: 0, lineHeight: 1.3 }}>{project.name}</h2>
+              <div className="project-header__meta" style={{ marginTop: 0, opacity: 0.8 }}>
                 <strong>{project.project_code}</strong>
                 <span style={{ opacity: 0.6 }}> · </span>
                 <span>{project.sku_internal || '—'}</span>

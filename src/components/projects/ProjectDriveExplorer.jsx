@@ -23,6 +23,7 @@ import {
 import Button from '../Button'
 import FileUploader from '../FileUploader'
 import { storageService } from '../../lib/storageService'
+import { driveService } from '../../lib/googleDrive'
 
 export default function ProjectDriveExplorer({
   projectId,
@@ -508,6 +509,27 @@ useEffect(() => {
   const previewImageUrl = selectedFileUrl || ''
   const canUpload = Boolean(!readOnly && selectedFolderId)
   const isEmpty = !loadingFiles && !errorFiles && explorerFolders.length === 0 && explorerFiles.length === 0
+  const [creatingFolders, setCreatingFolders] = useState(false)
+
+  const handleCreateProjectFolders = async () => {
+    if (!projectId || creatingFolders) return
+    if (!driveService.isAuthenticated()) {
+      setErrorFiles(c.errorSession || 'Drive no connectat')
+      return
+    }
+    setCreatingFolders(true)
+    setErrorFiles(null)
+    try {
+      await driveService.ensureProjectDriveFolders({ id: projectId })
+      if (selectedFolderId) {
+        await loadFolderContents(selectedFolderId)
+      }
+    } catch (err) {
+      setErrorFiles(err?.message || c.errorGeneric || 'Error creant carpetes')
+    } finally {
+      setCreatingFolders(false)
+    }
+  }
 
   const renderPreview = (full = false) => (
     <div className="projects-drive__previewBody" style={{ background: 'var(--surface-bg)' }}>
@@ -731,12 +753,35 @@ useEffect(() => {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 8,
+              gap: 12,
               padding: '24px 12px',
-              color: 'var(--muted-1)'
+              color: 'var(--muted-1)',
+              textAlign: 'center'
             }}>
-              <Folder size={28} />
-              <div style={{ fontWeight: 600, color: 'var(--text-1)' }}>{c.emptyFolderTitle}</div>
+              <Folder size={32} style={{ opacity: 0.6 }} />
+              {projectId && selectedFolderId && !errorFiles ? (
+                <>
+                  <div style={{ fontWeight: 600, color: 'var(--text-1)', fontSize: '14px' }}>
+                    No s'han creat les carpetes del projecte
+                  </div>
+                  {driveService.isAuthenticated() ? (
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={handleCreateProjectFolders}
+                      disabled={creatingFolders}
+                    >
+                      {creatingFolders ? 'Creant...' : 'Crear carpetes'}
+                    </Button>
+                  ) : (
+                    <div style={{ fontSize: '12px', color: 'var(--muted-1)' }}>
+                      Drive no connectat
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div style={{ fontWeight: 600, color: 'var(--text-1)' }}>{c.emptyFolderTitle}</div>
+              )}
             </div>
           ) : (
             <>
