@@ -2748,7 +2748,7 @@ function ProjectDetailInner({ useApp }) {
 
           <aside className="project-split__right">
             <div className="project-split__sticky">
-              <div className="projects-split__panel">
+              <div className="projects-split__panel projects-split__panel--drive">
                 <div className="projects-split__panelHeader" style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
                   <div style={{ minWidth: 0 }}>
                     <div className="projects-panel__title">{projectTitle}</div>
@@ -2767,7 +2767,6 @@ function ProjectDetailInner({ useApp }) {
                 </div>
               )}
 
-              <div className="pd-drive">
                 <ProjectDriveExplorer
                   projectId={id}
                   darkMode={darkMode}
@@ -2775,7 +2774,6 @@ function ProjectDetailInner({ useApp }) {
                   onActivePathChange={setActiveFolderLabel}
                   fixedFolderId={phaseId === 1 ? researchStoragePrefix : null}
                 />
-              </div>
             </div>
             </div>
           </aside>

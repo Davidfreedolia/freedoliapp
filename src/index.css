@@ -3732,231 +3732,40 @@ body.dark .page-dashboard .fd-badge--done {
     backdrop-filter: none !important;
   }
 
-  /* --------------------------------------------
-     2) DRIVE: brute-force solid surfaces
-     (selectors generic to match real DOM)
-     -------------------------------------------- */
-
-  /* target any drive subtree inside project detail */
-  .project-detail-page [class*="projects-drive"] {
-    opacity: 1 !important;
-    filter: none !important;
-    backdrop-filter: none !important;
-  }
-
-  /* ✅ 1) Panells del split (on viu el Drive): mata transparència de veritat */
-  .project-detail-page .projects-split__panel,
-  .project-detail-page .projects-split__panel *:is(.projects-drive__box, .projects-drive__previewBox) {
-    background: var(--surface-bg) !important;         /* IMPORTANT: background, no background-color */
-    background-color: var(--surface-bg) !important;
-    background-image: none !important;
-    opacity: 1 !important;
-    filter: none !important;
-    backdrop-filter: none !important;
-  }
-
-  /* ✅ 2) Tot subtree del drive: si hi ha algun wrapper amb background: transparent, el rebentem */
-  .project-detail-page :is(.projects-drive__box, .projects-drive__previewBox, .projects-drive__files, .projects-drive__list, .projects-drive__previewBody, .projects-drive__preview) {
+  /* Project Detail — Drive panel must be solid and stable (no hover overlay) */
+  .project-detail-page .projects-split__panel--drive {
     background: var(--surface-bg) !important;
-    background-color: var(--surface-bg) !important;
     background-image: none !important;
     opacity: 1 !important;
     filter: none !important;
     backdrop-filter: none !important;
-  }
 
-  /* ✅ 3) Si el que es veu "rentat" és el BODY intern del drive, fixa'l com a card real */
-  .project-detail-page :is(.projects-drive__files, .projects-drive__list, .projects-drive__previewBody) {
     border: 1px solid var(--border-1) !important;
     border-radius: 12px !important;
-    padding: 12px !important;
-  }
-
-  /* ✅ 4) Dropzone/empty: també amb background (no només color) */
-  .project-detail-page :is(.projects-drive__dropzone, .projects-drive__dropZone, .projects-drive__drop) {
-    background: var(--surface-bg-1) !important;
-    background-color: var(--surface-bg-1) !important;
-    background-image: none !important;
-    border: 1px dashed var(--border-2) !important;
-    border-radius: 12px !important;
-  }
-
-  /* --------------------------------------------
-     DRIVE EXPLORER: solid + stable stacking context
-     -------------------------------------------- */
-  
-  /* Root container: create stable stacking context */
-  .project-detail-page .pd-drive {
-    position: relative !important;
-    isolation: isolate !important;
-    z-index: 0 !important;
-    overflow: visible !important;
-    background: var(--surface-bg) !important;
-    background-color: var(--surface-bg) !important;
-    background-image: none !important;
-    opacity: 1 !important;
-    filter: none !important;
-    backdrop-filter: none !important;
-  }
-
-  /* Drive grid: also solid */
-  .project-detail-page .pd-drive .projects-drive__grid {
-    background: var(--surface-bg) !important;
-    background-color: var(--surface-bg) !important;
-    background-image: none !important;
-    position: relative !important;
-    z-index: 0 !important;
-  }
-
-  /* Files pane: exact background node */
-  .project-detail-page .pd-drive .projects-drive__box--files {
-    background: var(--surface-bg) !important;
-    background-color: var(--surface-bg) !important;
-    background-image: none !important;
-    opacity: 1 !important;
-    filter: none !important;
-    backdrop-filter: none !important;
-  }
-
-  /* Drive (Project Detail) — kill hover overlays on Files pane */
-  .project-detail-page .pd-drive .projects-drive__box--files,
-  .project-detail-page .pd-drive .projects-drive__box--files:hover,
-  .project-detail-page .pd-drive .projects-drive__box--files:focus-within {
-    background: var(--surface-bg) !important;
-    background-color: var(--surface-bg) !important;
-    background-image: none !important;
-    opacity: 1 !important;
-    filter: none !important;
-    backdrop-filter: none !important;
-    /* IMPORTANT: no inset shadows */
     box-shadow: var(--shadow-soft) !important;
   }
 
-  /* If an overlay is implemented via pseudo-elements */
-  .project-detail-page .pd-drive .projects-drive__box--files::before,
-  .project-detail-page .pd-drive .projects-drive__box--files::after {
+  /* If any global rule adds inset/overlay on hover, kill it here */
+  .project-detail-page .projects-split__panel--drive:hover,
+  .project-detail-page .projects-split__panel--drive:focus-within {
+    background: var(--surface-bg) !important;
+    background-image: none !important;
+    box-shadow: var(--shadow-soft) !important; /* NOT inset */
+    filter: none !important;
+  }
+
+  /* Hard-stop pseudo overlay layers */
+  .project-detail-page .projects-split__panel--drive::before,
+  .project-detail-page .projects-split__panel--drive::after {
     content: none !important;
     display: none !important;
   }
 
-  /* Also protect the Files body/list area if it has overlays */
-  .project-detail-page .pd-drive .projects-drive__box--files .projects-drive__files,
-  .project-detail-page .pd-drive .projects-drive__box--files .projects-drive__list,
-  .project-detail-page .pd-drive .projects-drive__box--files .projects-drive__files:hover,
-  .project-detail-page .pd-drive .projects-drive__box--files .projects-drive__list:hover {
-    background: var(--surface-bg) !important;
-    background-image: none !important;
-    opacity: 1 !important;
-    filter: none !important;
-    backdrop-filter: none !important;
-    box-shadow: none !important; /* important si la "ratlla" ve d'un inset del body */
-  }
-
-  .project-detail-page .pd-drive .projects-drive__box--files .projects-drive__files::before,
-  .project-detail-page .pd-drive .projects-drive__box--files .projects-drive__files::after,
-  .project-detail-page .pd-drive .projects-drive__box--files .projects-drive__list::before,
-  .project-detail-page .pd-drive .projects-drive__box--files .projects-drive__list::after {
-    content: none !important;
-    display: none !important;
-  }
-
-  /* Override .ui-card:hover if it affects Drive elements */
-  .project-detail-page .pd-drive .projects-drive__box--files.ui-card:hover {
-    background: var(--surface-bg) !important;
-    background-image: none !important;
-    box-shadow: var(--shadow-soft) !important;
-  }
-
-  /* Headers: above content */
-  .project-detail-page .pd-drive .projects-drive__boxHeader,
-  .project-detail-page .pd-drive .projects-drive__previewHeader,
-  .project-detail-page .pd-drive .projects-split__panelHeader {
-    position: relative !important;
-    z-index: 3 !important;
-    background: var(--surface-bg) !important;
-    background-color: var(--surface-bg) !important;
-    background-image: none !important;
-  }
-
-  /* Bodies: below headers */
-  .project-detail-page .pd-drive .projects-drive__files,
-  .project-detail-page .pd-drive .projects-drive__list,
-  .project-detail-page .pd-drive .projects-drive__previewBody,
-  .project-detail-page .pd-drive .projects-drive__box,
-  .project-detail-page .pd-drive .projects-drive__previewBox {
-    position: relative !important;
-    z-index: 1 !important;
-    background: var(--surface-bg) !important;
-    background-color: var(--surface-bg) !important;
-    background-image: none !important;
-    overflow: visible !important;
-  }
-
-  /* Inner bodies: card-like appearance */
-  .project-detail-page .pd-drive .projects-drive__files,
-  .project-detail-page .pd-drive .projects-drive__list,
-  .project-detail-page .pd-drive .projects-drive__previewBody {
-    border: 1px solid var(--border-1) !important;
-    border-radius: 12px !important;
-    padding: 12px !important;
-  }
-
-  /* Dropzone: visible but below header */
-  .project-detail-page .pd-drive .projects-drive__dropzone,
-  .project-detail-page .pd-drive .projects-drive__dropZone,
-  .project-detail-page .pd-drive .projects-drive__drop {
-    position: relative !important;
-    z-index: 1 !important;
-    background: var(--surface-bg-1) !important;
-    background-color: var(--surface-bg-1) !important;
-    background-image: none !important;
-    border: 1px dashed var(--border-2) !important;
-    border-radius: 12px !important;
-    margin-top: 10px !important;
-  }
-
-  /* Neutralize internal overlays/banners that float above content */
-  .project-detail-page .pd-drive .projects-drive__dragOverlay:not(.is-on) {
-    position: static !important;
-    inset: auto !important;
-    top: auto !important;
-    left: auto !important;
-    right: auto !important;
-    bottom: auto !important;
-    z-index: 1 !important;
-    display: none !important;
-  }
-
-  /* When drag overlay is active, ensure it doesn't clip content */
-  .project-detail-page .pd-drive .projects-drive__dragOverlay.is-on {
-    z-index: 10 !important;
-    background: var(--surface-bg-2) !important;
-    background-color: var(--surface-bg-2) !important;
-    background-image: none !important;
-  }
-
-  /* Ensure parent of dragOverlay doesn't clip */
-  .project-detail-page .pd-drive .projects-drive__files {
-    overflow: visible !important;
-  }
-
-  /* Any other internal banners/notices: force normal flow */
-  .project-detail-page .pd-drive [class*="notice"],
-  .project-detail-page .pd-drive [class*="banner"],
-  .project-detail-page .pd-drive [class*="hint"],
-  .project-detail-page .pd-drive [class*="message"] {
-    position: static !important;
-    inset: auto !important;
-    top: auto !important;
-    left: auto !important;
-    right: auto !important;
-    bottom: auto !important;
-    z-index: 1 !important;
-    background: var(--surface-bg) !important;
-    border: 1px solid var(--border-1) !important;
-    border-radius: 10px !important;
-    padding: 8px 10px !important;
-    margin: 10px 0 !important;
+  /* Defensive: if descendants inherit opacity/filter on hover from a global card rule */
+  .project-detail-page .projects-split__panel--drive * {
+    opacity: 1;
+    filter: none;
+    backdrop-filter: none;
   }
 
   /* Header thumb presence */
