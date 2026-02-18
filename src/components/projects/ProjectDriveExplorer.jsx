@@ -638,7 +638,7 @@ useEffect(() => {
         </div>
       </div>
 
-      <div className="projects-drive__box">
+      <div className="projects-drive__box projects-drive__box--files">
         <div className="projects-drive__boxHeader">
           <div className="projects-drive__path">
             <span className="projects-drive__pathLabel">{c.explorer}</span>

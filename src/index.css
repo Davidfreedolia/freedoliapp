@@ -3808,6 +3808,16 @@ body.dark .page-dashboard .fd-badge--done {
     z-index: 0 !important;
   }
 
+  /* Files pane: exact background node */
+  .project-detail-page .pd-drive .projects-drive__box--files {
+    background: var(--surface-bg) !important;
+    background-color: var(--surface-bg) !important;
+    background-image: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+  }
+
   /* Headers: above content */
   .project-detail-page .pd-drive .projects-drive__boxHeader,
   .project-detail-page .pd-drive .projects-drive__previewHeader,
