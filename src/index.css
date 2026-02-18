@@ -3768,6 +3768,41 @@ body.dark .page-dashboard .fd-badge--done {
     backdrop-filter: none;
   }
 
+  /* Kill micro-movement (transform bounce) */
+  .project-detail-page .projects-split__panel--drive,
+  .project-detail-page .projects-split__panel--drive:hover,
+  .project-detail-page .projects-split__panel--drive:focus-within {
+    transform: none !important;
+    transition: background-color 120ms ease, box-shadow 120ms ease !important;
+    animation: none !important;
+    will-change: auto !important;
+  }
+
+  /* Task cards: canonical styling */
+  .project-detail-page .project-task-item {
+    background: var(--surface-bg) !important;
+    background-image: none !important;
+    border: 1px solid var(--border-1) !important;
+    border-radius: 12px !important;
+    box-shadow: var(--shadow-soft) !important;
+
+    opacity: 1 !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+    transform: none !important;
+  }
+
+  .project-detail-page .project-task-item:hover {
+    background: var(--surface-bg-2) !important;
+    box-shadow: var(--shadow-soft) !important; /* no inset */
+  }
+
+  .project-detail-page .project-task-item::before,
+  .project-detail-page .project-task-item::after {
+    content: none !important;
+    display: none !important;
+  }
+
   /* Header thumb presence */
   .project-detail-page .project-header--canon {
     padding: 10px 16px !important;

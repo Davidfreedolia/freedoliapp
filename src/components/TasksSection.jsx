@@ -244,7 +244,7 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
             const priorityColor = getPriorityColor(task.priority)
             
             return (
-              <div key={task.id} style={{
+              <div key={task.id} className="project-task-item" style={{
                 ...sectionStyles.taskItem,
                 backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
                 borderColor: darkMode ? '#374151' : '#d1d5db'
