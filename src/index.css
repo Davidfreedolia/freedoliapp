@@ -3714,68 +3714,33 @@ body.dark .page-dashboard .fd-badge--done {
     margin-bottom: 12px;
   }
 
-  .project-detail-page [data-phase-section]:hover {
-    background-color: var(--surface-bg-2);
-  }
-
   .project-detail-page .projects-split__panel {
     border: 1px solid var(--border-2) !important;
     box-shadow: var(--shadow-soft) !important;
   }
 
+
+  /* Project Detail — no lift effect on hover (neutralize global .ui-card:hover) */
+  .project-detail-page .ui-card:hover {
+    transform: none;
+    box-shadow: var(--shadow-soft);
+  }
+
+  /* Phase sections explicitly */
+  .project-detail-page [data-phase-section]:hover {
+    transform: none;
+    box-shadow: var(--shadow-soft);
+  }
+
+  /* Split panel (Drive included) */
   .project-detail-page .projects-split__panel:hover {
-    background-color: var(--surface-bg-2) !important;
-    border: 1px solid var(--border-2) !important;
-    box-shadow: var(--shadow-soft) !important;
-    opacity: 1 !important;
-    filter: none !important;
-    backdrop-filter: none !important;
+    transform: none;
+    box-shadow: var(--shadow-soft);
   }
 
-  /* Project Detail — Drive panel must be solid and stable (no hover overlay) */
-  .project-detail-page .projects-split__panel--drive {
-    background: var(--surface-bg) !important;
-    background-image: none !important;
-    opacity: 1 !important;
-    filter: none !important;
-    backdrop-filter: none !important;
-
-    border: 1px solid var(--border-1) !important;
-    border-radius: 12px !important;
-    box-shadow: var(--shadow-soft) !important;
-  }
-
-  /* If any global rule adds inset/overlay on hover, kill it here */
-  .project-detail-page .projects-split__panel--drive:hover,
-  .project-detail-page .projects-split__panel--drive:focus-within {
-    background: var(--surface-bg) !important;
-    background-image: none !important;
-    box-shadow: var(--shadow-soft) !important; /* NOT inset */
-    filter: none !important;
-  }
-
-  /* Hard-stop pseudo overlay layers */
-  .project-detail-page .projects-split__panel--drive::before,
-  .project-detail-page .projects-split__panel--drive::after {
-    content: none !important;
-    display: none !important;
-  }
-
-  /* Defensive: if descendants inherit opacity/filter on hover from a global card rule */
-  .project-detail-page .projects-split__panel--drive * {
-    opacity: 1;
-    filter: none;
-    backdrop-filter: none;
-  }
-
-  /* Kill micro-movement (transform bounce) */
-  .project-detail-page .projects-split__panel--drive,
-  .project-detail-page .projects-split__panel--drive:hover,
-  .project-detail-page .projects-split__panel--drive:focus-within {
-    transform: none !important;
-    transition: background-color 120ms ease, box-shadow 120ms ease !important;
-    animation: none !important;
-    will-change: auto !important;
+  /* Remove transform transition if exists */
+  .project-detail-page .ui-card {
+    transition: background-color 0.15s ease;
   }
 
   /* Task cards: canonical styling */
