@@ -244,8 +244,7 @@ function PhaseSection({ phaseId, currentPhaseId, phaseStyle, darkMode, children 
       style={{
       ...styles.phaseSection,
       borderColor: sectionBorder,
-        borderTopColor: sectionBorder,
-        backgroundColor: isHovered ? 'var(--surface-bg-2)' : sectionBg
+        borderTopColor: sectionBorder
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

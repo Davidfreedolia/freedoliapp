@@ -3694,12 +3694,10 @@ body.dark .page-dashboard .fd-badge--done {
     --pd-shadow: var(--shadow-soft);
   }
 
-  /* Solid cards, never transparent — GUARDRAILS */
-  .project-detail-page [data-phase-section],
+  /* Solid cards, never transparent — GUARDRAILS (Drive only) */
   .project-detail-page .projects-split__panel,
   .project-detail-page .projects-drive__box,
   .project-detail-page .projects-drive__previewBox,
-  .project-detail-page .project-detail-page__phase-wrap,
   .project-detail-page .ui-card {
     background-color: var(--surface-bg) !important;
     opacity: 1 !important;
@@ -3707,23 +3705,17 @@ body.dark .page-dashboard .fd-badge--done {
     backdrop-filter: none !important;
   }
 
-  /* --------------------------------------------
-     1) PHASE CARDS: NO SHADOW (kill the line)
-     -------------------------------------------- */
+  /* Phase cards: canonical styling */
   .project-detail-page [data-phase-section] {
-    box-shadow: none !important;
-    background-color: var(--surface-bg) !important;
-    border: 1px solid var(--border-2) !important;
-    opacity: 1 !important;
-    filter: none !important;
-    backdrop-filter: none !important;
+    background-color: var(--surface-bg);
+    border: 1px solid var(--border-1);
+    border-radius: 12px;
+    box-shadow: var(--shadow-soft);
+    margin-bottom: 12px;
   }
+
   .project-detail-page [data-phase-section]:hover {
-    box-shadow: none !important;
-    background-color: var(--surface-bg-2) !important;
-    opacity: 1 !important;
-    filter: none !important;
-    backdrop-filter: none !important;
+    background-color: var(--surface-bg-2);
   }
 
   .project-detail-page .projects-split__panel {
@@ -3966,8 +3958,7 @@ body.dark .page-dashboard .fd-badge--done {
   margin-top: 0 !important;
 }
 
-/* make left phase cards and right panels share the same box model */
-.project-detail-page [data-phase-section],
+/* Right panels: consistent padding */
 .project-detail-page .projects-split__panel {
   padding: var(--pd-padding) !important;
   border-radius: var(--pd-radius) !important;
