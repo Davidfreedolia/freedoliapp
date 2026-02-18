@@ -245,8 +245,7 @@ function PhaseSection({ phaseId, currentPhaseId, phaseStyle, darkMode, children 
       ...styles.phaseSection,
       borderColor: sectionBorder,
         borderTopColor: sectionBorder,
-        backgroundColor: isHovered ? 'var(--surface-bg-2)' : sectionBg,
-        boxShadow: 'none'
+        backgroundColor: isHovered ? 'var(--surface-bg-2)' : sectionBg
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -1168,13 +1167,11 @@ function ProjectDetailInner({ useApp }) {
     display: 'flex',
     flexDirection: 'column',
     width: '100%',
-    minWidth: 0,
-    boxShadow: 'none'
+    minWidth: 0
   }
   const phaseCardStyle = {
     border: 'none',
     borderRadius: 'var(--radius-base)',
-    boxShadow: 'var(--shadow-soft)',
     ...phaseSurface.cardStyle
   }
   const currentGroup = PHASE_GROUPS.find(group => group.phases.includes(phaseId))
@@ -1960,7 +1957,6 @@ function ProjectDetailInner({ useApp }) {
           padding: '12px 16px',
           marginBottom: 8,
           background: 'var(--surface-bg)',
-          boxShadow: 'var(--shadow-soft)',
           borderRadius: 'var(--radius-ui)',
           width: '100%',
           boxSizing: 'border-box'
@@ -2772,13 +2768,15 @@ function ProjectDetailInner({ useApp }) {
                 </div>
               )}
 
-              <ProjectDriveExplorer
-            projectId={id}
-            darkMode={darkMode}
-                onUploadComplete={handleUploadComplete}
-                onActivePathChange={setActiveFolderLabel}
-                fixedFolderId={phaseId === 1 ? researchStoragePrefix : null}
-              />
+              <div className="pd-drive">
+                <ProjectDriveExplorer
+                  projectId={id}
+                  darkMode={darkMode}
+                  onUploadComplete={handleUploadComplete}
+                  onActivePathChange={setActiveFolderLabel}
+                  fixedFolderId={phaseId === 1 ? researchStoragePrefix : null}
+                />
+              </div>
             </div>
             </div>
           </aside>
@@ -2823,8 +2821,7 @@ const styles = {
     border: '1px solid',
     borderTopWidth: '1px',
     padding: '10px 12px',
-    marginBottom: '12px',
-    boxShadow: 'var(--shadow-soft)'
+    marginBottom: '12px'
   },
   phaseSectionHeader: {
     width: '100%',

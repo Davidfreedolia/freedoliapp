@@ -218,11 +218,14 @@ export default function ProjectDriveExplorer({
     return url
   }
 
+  const [needsProvisioning, setNeedsProvisioning] = useState(false)
+
   const loadFolderContents = async (folderId) => {
     if (!folderId) return
     const seq = ++filesSeq.current
     setLoadingFiles(true)
     setErrorFiles(null)
+    setNeedsProvisioning(false)
     try {
       const contents = await storageService.listFolder(folderId)
       if (seq !== filesSeq.current) return
@@ -240,6 +243,13 @@ export default function ProjectDriveExplorer({
     } catch (err) {
       if (seq !== filesSeq.current) return
       const message = err?.message || ''
+      // Detecta si l'error indica que les carpetes no existeixen (404 o permisos quan no hi ha contingut)
+      if (isPermissionError(message) || (message.includes('404') || message.includes('not found'))) {
+        // Si és la primera carpeta del projecte i no existeix, probablement cal provisionar
+        if (projectId && folderId === rootId) {
+          setNeedsProvisioning(true)
+        }
+      }
       const resolved = isPermissionError(message)
         ? errorMessage
         : isSessionError(message)
@@ -519,10 +529,15 @@ useEffect(() => {
     }
     setCreatingFolders(true)
     setErrorFiles(null)
+    setNeedsProvisioning(false)
     try {
       await driveService.ensureProjectDriveFolders({ id: projectId })
+      // Refresh current folder after provisioning
       if (selectedFolderId) {
         await loadFolderContents(selectedFolderId)
+      } else if (rootId) {
+        // If no folder selected, try root
+        await loadFolderContents(rootId)
       }
     } catch (err) {
       setErrorFiles(err?.message || c.errorGeneric || 'Error creant carpetes')
@@ -759,10 +774,13 @@ useEffect(() => {
               textAlign: 'center'
             }}>
               <Folder size={32} style={{ opacity: 0.6 }} />
-              {projectId && selectedFolderId && !errorFiles ? (
+              {projectId && selectedFolderId && (needsProvisioning || (!errorFiles && selectedFolderId === rootId)) ? (
                 <>
                   <div style={{ fontWeight: 600, color: 'var(--text-1)', fontSize: '14px' }}>
-                    No s'han creat les carpetes del projecte
+                    {needsProvisioning 
+                      ? "Aquest projecte no ha passat pel provisioning inicial"
+                      : "No s'han creat les carpetes del projecte"
+                    }
                   </div>
                   {driveService.isAuthenticated() ? (
                     <Button
