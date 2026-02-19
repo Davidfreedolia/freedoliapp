@@ -3569,6 +3569,89 @@ body.dark .page-dashboard .fd-badge--done {
   margin-top: 0;
 }
 
+/* Project Detail — Recerca: informe row (dropzone + prompt buttons) */
+.project-detail-page .research-report-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+.project-detail-page .research-dropzone--compact {
+  min-height: 44px;
+  height: 44px;
+  padding: 0 14px;
+  border: 2px dashed var(--border-1);
+  border-radius: 10px;
+  background: var(--surface-bg-2);
+  font-size: 13px;
+  color: var(--muted-1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.project-detail-page .research-dropzone--compact.is-dragover {
+  border-color: var(--coral-1);
+  background: var(--surface-bg);
+}
+.project-detail-page .research-prompt-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+.project-detail-page .research-prompt-actions .btn--turq,
+.project-detail-page .btn--turq {
+  height: 40px !important;
+  min-height: 40px !important;
+  min-width: 140px;
+  background: var(--teal-1, #0d9488) !important;
+  border-color: var(--teal-1, #0d9488) !important;
+  color: #fff !important;
+}
+.project-detail-page .research-prompt-actions .btn--turq:hover:not(:disabled),
+.project-detail-page .btn--turq:hover:not(:disabled) {
+  background: var(--teal-2, #0f766e) !important;
+  border-color: var(--teal-2, #0f766e) !important;
+  color: #fff !important;
+}
+.project-detail-page .research-report-attachment {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-1);
+  background: var(--surface-bg);
+  font-size: 13px;
+}
+.project-detail-page .research-report-attachment__label {
+  color: var(--muted-1);
+  font-weight: 600;
+}
+.project-detail-page .research-report-attachment__name {
+  color: var(--text-1);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.project-detail-page .research-decision-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+.project-detail-page .research-decision-actions button {
+  height: 40px;
+  min-height: 40px;
+  min-width: 120px;
+}
+
 /* Project Detail — actionbar layout cleanup */
 .project-detail-page .project-actions {
   display: flex;

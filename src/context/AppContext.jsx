@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { supabase, getProjects, getDashboardStats, getCompanySettings, updateCompanySettings } from '../lib/supabase'
-import { driveService } from '../lib/googleDrive'
 import { generateDemoData, checkDemoExists, checkRealDataExists } from '../lib/demoSeed'
 import { showToast } from '../components/Toast'
 import { safeJsonParse } from '../lib/safeJson'
@@ -64,7 +63,6 @@ export function AppProvider({ children }) {
     
     const initialize = async () => {
       await loadInitialData()
-      await initDrive()
       // Auto-seed demo data if enabled (only once)
       if (!window._demoSeedInitialized) {
         window._demoSeedInitialized = true
@@ -239,17 +237,6 @@ export function AppProvider({ children }) {
     }
   }
 
-  const initDrive = async () => {
-    try {
-      await driveService.init()
-      await driveService.verifyToken()
-    } catch (err) {
-      // No mostrar stacktrace d'errors d'autenticació (són gestionats centralitzadament)
-      if (err.message !== 'AUTH_REQUIRED' && !err.message?.includes('401')) {
-        console.error('Error inicialitzant Drive:', err)
-      }
-    }
-  }
 
   const refreshProjects = async () => {
     try {

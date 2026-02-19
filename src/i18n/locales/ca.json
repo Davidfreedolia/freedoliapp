@@ -144,7 +144,6 @@
     "projectRequired": "Has de seleccionar un projecte per crear la tasca"
   },
   "errors": {
-    "driveDisconnected": "Google Drive no està connectat",
     "missingFields": "Falten camps obligatoris",
     "notAllowed": "No tens permís per realitzar aquesta acció"
   },
@@ -448,8 +447,6 @@
     "projectName": "Nom del projecte",
     "description": "Descripció",
     "descriptionPlaceholder": "Descripció breu del producte...",
-    "driveFolderWillBeCreated": "Es crearà la carpeta \"{{sku}}\" a Google Drive automàticament",
-    "connectDriveToCreateFolders": "Connecta Google Drive per crear carpetes automàticament",
     "projectPhases": "Fases del projecte",
     "createProject": "Crear Projecte",
     "creatingFolders": "Creant carpetes..."

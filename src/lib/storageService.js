@@ -39,5 +39,15 @@ export const storageService = {
       .remove([path])
 
     if (error) throw error
+  },
+
+  async createFolder(path) {
+    // Create a .folder marker file to represent a folder in Supabase Storage
+    const { error } = await supabase
+      .storage
+      .from(BUCKET)
+      .upload(path + '.folder', new Blob([''], { type: 'text/plain' }), { upsert: true })
+
+    if (error) throw error
   }
 }

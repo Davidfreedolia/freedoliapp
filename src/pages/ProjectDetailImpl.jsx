@@ -352,6 +352,7 @@ function ProjectDetailInner({ useApp }) {
   const [researchDecision, setResearchDecision] = useState(null)
   const [researchMsg, setResearchMsg] = useState(null)
   const [researchImport, setResearchImport] = useState(null)
+  const [researchClaudePrompt, setResearchClaudePrompt] = useState(null)
   const { notes, loading: notesLoading } = useNotes()
   const loadSeqRef = useRef(0)
   const mountedRef = useRef(false)
@@ -456,6 +457,20 @@ function ProjectDetailInner({ useApp }) {
 
     const ok = hasHeader && hasSnapshot && hasFinal && asinOk && urlOk && decisionOk && title !== 'NOT_AVAILABLE'
 
+    const getSectionText = (sectionName) => {
+      const re = new RegExp(`(?:^|\\n)##?\\s*${sectionName}[\\s\\S]*?(?=\\n##?\\s|$)`, 'mi')
+      const m = text.match(re)
+      return m ? (m[0] || '').replace(/^[\s\S]*?\n/, '').trim().slice(0, 500) : ''
+    }
+    const evidence = {
+      demand: getSectionText('CHECK_DEMAND') || getLineValue('demand'),
+      competition: getSectionText('CHECK_COMPETITION') || getLineValue('competition'),
+      simple: getSectionText('CHECK_SIMPLICITY') || getLineValue('simple'),
+      improvable: getSectionText('CHECK_IMPROVABLE') || getLineValue('improvable')
+    }
+    const norm = (s) => (s && s !== 'NOT_AVAILABLE' ? String(s).trim() : '')
+    const evidenceNorm = { demand: norm(evidence.demand), competition: norm(evidence.competition), simple: norm(evidence.simple), improvable: norm(evidence.improvable) }
+
     return {
       ok,
       errors: [
@@ -467,7 +482,7 @@ function ProjectDetailInner({ useApp }) {
         !decisionOk ? 'Decision invàlida' : null,
         title === 'NOT_AVAILABLE' ? 'Title buit' : null
       ].filter(Boolean),
-      data: { asin, product_url, title, thumb_url, decision, rawText: text }
+      data: { asin, product_url, title, thumb_url, decision, rawText: text, evidence: evidenceNorm }
     }
   }
 
@@ -494,6 +509,35 @@ function ProjectDetailInner({ useApp }) {
   }, [researchSnapshot.asin])
 
   const researchHasReport = !!researchImport
+
+  /** ASIN vàlid del projecte: 10 caràcters alfanumèrics (per habilitar PASSA) */
+  const hasAsin = !!(project?.asin && /^[A-Z0-9]{10}$/i.test(String(project.asin).trim()))
+  /** PASSA només si s'ha generat prompt i hi ha ASIN o informe adjunt */
+  const canPassResearch = !!(project?.research_prompt_generated && (hasAsin || researchHasReport))
+
+  /** Marca research_prompt_generated al projecte (BD + estat local) */
+  const markResearchPromptGenerated = async () => {
+    if (!project?.id) return
+    // Evitar duplicats: si ja és true, no cal update
+    if (project.research_prompt_generated) return
+    try {
+      const { updateProject } = await import('../lib/supabase')
+      const now = new Date().toISOString()
+      await updateProject(project.id, { 
+        research_prompt_generated: true, 
+        research_prompt_generated_at: now 
+      })
+      // Actualitzar estat local immediatament per reavaluar canPassResearch
+      setProject(prev => prev ? {
+        ...prev,
+        research_prompt_generated: true,
+        research_prompt_generated_at: now
+      } : null)
+    } catch (err) {
+      // Silenciós: no trencar el flux si falla l'update
+      console.warn('Error marcant research_prompt_generated:', err)
+    }
+  }
 
   const persistResearch = (next) => {
     if (!id) return
@@ -655,10 +699,22 @@ function ProjectDetailInner({ useApp }) {
       return
     }
 
-    setResearchImport(parsed.data)
+    setResearchImport({ ...parsed.data, _fileName: file.name, _importedAt: Date.now() })
+
+    const ev = parsed.data.evidence || {}
+    if (ev.demand || ev.competition || ev.simple || ev.improvable) {
+      setResearchEvidence(prev => ({ ...prev, ...ev }))
+      setResearchChecks(prev => ({
+        ...prev,
+        demand: (ev.demand || '').length >= 8,
+        competition: (ev.competition || '').length >= 8,
+        simple: (ev.simple || '').length >= 8,
+        improvable: (ev.improvable || '').length >= 8
+      }))
+    }
 
     try {
-      localStorage.setItem(`research_import_${id}`, JSON.stringify(parsed.data))
+      localStorage.setItem(`research_import_${id}`, JSON.stringify({ ...parsed.data, _fileName: file.name, _importedAt: Date.now() }))
     } catch {}
 
     try {
@@ -683,6 +739,17 @@ function ProjectDetailInner({ useApp }) {
     } catch {}
   }
 
+  const handleDownloadResearchReport = () => {
+    if (!researchImport?.rawText) return
+    const blob = new Blob([researchImport.rawText], { type: 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = researchImport._fileName || 'research_report.txt'
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   useEffect(() => {
     if (id) {
       loadProject()
@@ -705,6 +772,12 @@ function ProjectDetailInner({ useApp }) {
       if (stored) setResearchImport(JSON.parse(stored))
     } catch {}
   }, [id])
+
+  // Recerca: sincronitzar ASIN del projecte al snapshot si encara no hi és
+  useEffect(() => {
+    if (!project?.asin || (researchSnapshot.asin && researchSnapshot.asin.length >= 10)) return
+    setResearchSnapshot((prev) => ({ ...prev, asin: project.asin || prev.asin, url: prev.url || (project.product_url || buildAmazonUrl(project.asin)) }))
+  }, [project?.asin, project?.product_url])
 
   // M3 — fetch marketplace TAGS for this project (UI-only mapping, no new business logic)
   useEffect(() => {
@@ -1392,44 +1465,11 @@ function ProjectDetailInner({ useApp }) {
   return (
           <>
             <div style={{ display: 'grid', gap: 10, paddingTop: 2 }}>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
-                <input
-                  type="text"
-                  value={researchAsinInput}
-                  onChange={(e) => { setResearchTouched(true); setResearchAsinInput(e.target.value) }}
-                  placeholder="ASIN o URL Amazon"
-                  style={{
-                    flex: '1 1 420px',
-                    height: 34,
-                    borderRadius: 10,
-                    border: '1px solid var(--border-1)',
-                    background: 'var(--surface-bg)',
-                    color: 'var(--text-1)',
-                    padding: '0 10px',
-                    outline: 'none'
-                  }}
-                />
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'flex-end' }}>
-                  <Button
-                    variant="success"
-                    size="sm"
-                    onClick={saveResearch}
-                    disabled={!researchTouched && !researchHasAsin}
-                    className="btn-success"
-                  >
-                    Guardar
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={resetResearch}
-                    disabled={!researchTouched && !researchHasAsin && !researchDecision}
-                    className="btn-danger"
-                  >
-                    Reset
-                  </Button>
+              {project?.asin && (
+                <div className="research-asin-readonly" style={{ fontSize: 13, color: 'var(--muted-1)' }}>
+                  ASIN: <strong style={{ color: 'var(--text-1)' }}>{project.asin}</strong>
                 </div>
-              </div>
+              )}
 
               {researchMsg && (
       <div style={{
@@ -1441,85 +1481,77 @@ function ProjectDetailInner({ useApp }) {
                 </div>
               )}
 
-              {/* Informe de recerca → Drive (import + upload) */}
-              <div style={{ marginTop: 4 }}>
-                <div
-                  style={{
-                    border: '2px dashed var(--border-1)',
-                    borderRadius: 10,
-                    padding: 8,
-                    background: 'var(--surface-bg-2)'
+              {/* Informe de recerca: dropzone compacta + botons prompt (turquesa) a la mateixa fila */}
+              <div className="research-report-row">
+                <input
+                  ref={researchFileInputRef}
+                  type="file"
+                  accept=".md,.txt"
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0]
+                    if (f) handleImportResearchFile(f)
+                    e.target.value = ''
                   }}
-                >
-                  <div style={{ fontSize: 12, color: 'var(--muted-1)', marginBottom: 4 }}>
-                    Informe de recerca
+                />
+                {!researchStoragePrefix ? (
+                  <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>Carpeta no disponible.</div>
+                ) : !researchHasReport ? (
+                  <div
+                    className="research-dropzone--compact"
+                    onClick={() => researchFileInputRef.current?.click()}
+                    onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('is-dragover') }}
+                    onDragLeave={(e) => { e.currentTarget.classList.remove('is-dragover') }}
+                    onDrop={(e) => { e.preventDefault(); e.currentTarget.classList.remove('is-dragover'); const f = e.dataTransfer.files?.[0]; if (f) handleImportResearchFile(f) }}
+                  >
+                    Arrossega l'informe aquí o fes clic
                   </div>
-
-                  {!researchStoragePrefix ? (
-                    <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>
-                      Carpeta no disponible.
-                    </div>
-                  ) : (
-                    <>
-                      <input
-                        ref={researchFileInputRef}
-                        type="file"
-                        accept=".md,.txt"
-                        style={{ display: 'none' }}
-                        onChange={(e) => {
-                          const f = e.target.files?.[0]
-                          if (f) handleImportResearchFile(f)
-                          e.target.value = ''
-                        }}
-                      />
-                      {!researchHasReport ? (
-                        <>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              disabled={!researchStoragePrefix}
-                              title="Importa un RESEARCH_REPORT (.md)"
-                              onClick={() => researchFileInputRef.current?.click()}
-                            >
-                              Importar informe
-                            </Button>
-                          </div>
-                          <FileUploader
-                            folderId={researchStoragePrefix}
-                            onUploadComplete={handleUploadComplete}
-                            label="Arrossega l’informe aquí"
-                          />
-                        </>
-                      ) : (
-                        <div
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            gap: 8,
-                            padding: '8px 10px',
-                            borderRadius: 10,
-                            border: '1px solid var(--border-1)',
-                            background: 'var(--surface-bg)'
-                          }}
-                        >
-                          <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>
-                            <strong style={{ color: 'var(--text-1)' }}>Informe importat ✓</strong>
-                            {researchImport?.asin ? ` · ASIN ${researchImport.asin}` : ''}
-                            {researchImport?.decision ? ` · ${researchImport.decision}` : ''}
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => researchFileInputRef.current?.click()}
-                          >
-                            Reemplaçar informe
-                          </Button>
-                        </div>
-                      )}
-                    </>
-                  )}
+                ) : (
+                  <div className="research-report-attachment">
+                    <span className="research-report-attachment__label">Informe (Recerca)</span>
+                    <span className="research-report-attachment__name">{researchImport?._fileName || 'Informe importat'}</span>
+                    <Button variant="ghost" size="sm" onClick={handleDownloadResearchReport} disabled={!researchImport?.rawText}>Descarregar</Button>
+                    <Button variant="ghost" size="sm" onClick={() => researchFileInputRef.current?.click()}>Substituir</Button>
+                  </div>
+                )}
+                <div className="research-prompt-actions">
+                  <Button
+                    type="button"
+                    className="btn--turq"
+                    size="sm"
+                    disabled={!hasAsin}
+                    onClick={async () => {
+                      if (!project?.asin) return
+                      const { generateClaudeResearchPrompt } = await import('../lib/generateClaudeResearchPrompt')
+                      const marketplace = project.marketplace || (marketplaceTags?.[0]?.marketplace_code ? `Amazon ${marketplaceTags[0].marketplace_code}` : 'Amazon ES')
+                      const prompt = generateClaudeResearchPrompt({ asin: project.asin, marketplace })
+                      setResearchClaudePrompt(prompt)
+                      try {
+                        const { showToast } = await import('../components/Toast')
+                        showToast('Prompt generat correctament', 'success')
+                      } catch (_) {}
+                      await markResearchPromptGenerated()
+                    }}
+                  >
+                    Generar Prompt Claude
+                  </Button>
+                  <Button
+                    type="button"
+                    className="btn--turq"
+                    size="sm"
+                    disabled={!hasAsin}
+                    onClick={async () => {
+                      if (!project?.asin) return
+                      const { generateClaudeResearchPrompt } = await import('../lib/generateClaudeResearchPrompt')
+                      const { downloadPrompt } = await import('../utils/marketResearchPrompt')
+                      const marketplace = project.marketplace || (marketplaceTags?.[0]?.marketplace_code ? `Amazon ${marketplaceTags[0].marketplace_code}` : 'Amazon ES')
+                      const text = researchClaudePrompt || generateClaudeResearchPrompt({ asin: project.asin, marketplace })
+                      downloadPrompt(text, project.asin)
+                      await markResearchPromptGenerated()
+                    }}
+                  >
+                    Descarregar Prompt
+                  </Button>
                 </div>
               </div>
 
@@ -1629,7 +1661,7 @@ function ProjectDetailInner({ useApp }) {
                   const okEvidence = hasEvidence(c.key)
                 return (
                     <div key={c.key} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <label style={{ display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'var(--text-1)' }}>
+                      <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text-1)' }} title={c.label}>
                         <input
                           type="checkbox"
                           checked={!!researchChecks[c.key]}
@@ -1639,7 +1671,6 @@ function ProjectDetailInner({ useApp }) {
                             setResearchChecks({ ...researchChecks, [c.key]: e.target.checked })
                           }}
                         />
-                        OK
                       </label>
                       <div style={{ minWidth: 120, fontSize: 13, fontWeight: 500, color: 'var(--text-1)' }}>
                         {c.label}
@@ -1649,11 +1680,12 @@ function ProjectDetailInner({ useApp }) {
                         value={researchEvidence[c.key] || ''}
                         onChange={(e) => {
                           setResearchTouched(true)
-                          const next = { ...researchEvidence, [c.key]: e.target.value }
+                          const val = e.target.value
+                          const next = { ...researchEvidence, [c.key]: val }
                           setResearchEvidence(next)
-                          if (e.target.value.trim().length < 8 && researchChecks[c.key]) {
-                            setResearchChecks((prev) => ({ ...prev, [c.key]: false }))
-                          }
+                          const len = val.trim().length
+                          if (len >= 8) setResearchChecks((prev) => ({ ...prev, [c.key]: true }))
+                          else if (len < 8 && researchChecks[c.key]) setResearchChecks((prev) => ({ ...prev, [c.key]: false }))
                         }}
                         placeholder="Link o nota breu (mín. 8 caràcters)"
                       style={{
@@ -1672,13 +1704,18 @@ function ProjectDetailInner({ useApp }) {
                 })}
               </div>
 
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginTop: 8 }}>
+              <div className="research-decision-actions">
+                {!canPassResearch && (
+                  <span style={{ fontSize: 12, color: 'var(--muted-1)' }}>
+                    {!project?.research_prompt_generated ? 'Falta generar Research Prompt' : 'Falta ASIN o Informe'}
+                  </span>
+                )}
                 <Button
                   variant="success"
                   size="sm"
                   onClick={() => markResearchDecision(true, false)}
-                  disabled={!researchHasAsin || !researchChecksReady || !researchAllChecksOk}
-                  title={!researchHasAsin ? 'Primer defineix l’ASIN' : (!researchChecksReady ? 'Falten evidències' : (!researchAllChecksOk ? 'Falten checks' : 'PASSA'))}
+                  disabled={!canPassResearch || !researchChecksReady || !researchAllChecksOk}
+                  title={!canPassResearch ? (!project?.research_prompt_generated ? 'Falta generar Research Prompt' : 'Falta ASIN o Informe') : (!researchChecksReady ? 'Falten evidències' : (!researchAllChecksOk ? 'Falten checks' : 'PASSA'))}
                 >
                   PASSA
                 </Button>

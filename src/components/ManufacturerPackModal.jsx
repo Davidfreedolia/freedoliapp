@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import { X, Download, Upload, Loader, AlertTriangle, CheckCircle2, Package } from 'lucide-react'
 import { generateManufacturerPack } from '../lib/generateManufacturerPack'
 import { getCompanySettings, updateManufacturerPackGenerated, markManufacturerPackAsSent } from '../lib/supabase'
-import { driveService } from '../lib/googleDrive'
 import { logAudit } from '../lib/auditLog'
 import Button from './Button'
 import { useBreakpoint } from '../hooks/useBreakpoint'
@@ -28,7 +27,6 @@ export default function ManufacturerPackModal({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [companySettings, setCompanySettings] = useState(null)
-  const [driveReady, setDriveReady] = useState(false)
   const [selection, setSelection] = useState({
     includePO: true,
     includeFnskuLabels: true,
@@ -46,7 +44,6 @@ export default function ManufacturerPackModal({
   useEffect(() => {
     if (isOpen) {
       loadCompanySettings()
-      checkDriveConnection()
       validateReadiness()
     }
   }, [isOpen, readiness, identifiers])
@@ -57,15 +54,6 @@ export default function ManufacturerPackModal({
       setCompanySettings(settings)
     } catch (err) {
       console.error('Error carregant company settings:', err)
-    }
-  }
-
-  const checkDriveConnection = async () => {
-    try {
-      const isValid = await driveService.verifyToken()
-      setDriveReady(isValid)
-    } catch (err) {
-      setDriveReady(false)
     }
   }
 
@@ -115,7 +103,7 @@ export default function ManufacturerPackModal({
     validateReadiness()
   }, [selection, readiness, identifiers])
 
-  const handleGenerate = async (uploadToDrive = false) => {
+  const handleGenerate = async () => {
     if (!validateReadiness()) {
       setError('Please fix validation errors before generating the pack')
       return
@@ -157,39 +145,6 @@ export default function ManufacturerPackModal({
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
-
-      // Upload a Drive si està connectat i s'ha demanat
-      let driveUploaded = false
-      if (uploadToDrive && driveReady) {
-        try {
-          // Obtenir carpeta del projecte
-          if (project?.drive_folder_id) {
-            // Crear subcarpeta PurchaseOrders si no existeix
-            const purchaseOrdersFolder = await driveService.findOrCreateFolder(
-              '03_PurchaseOrders',
-              project.drive_folder_id
-            )
-
-            // Crear subcarpeta per aquesta PO
-            const poFolder = await driveService.findOrCreateFolder(
-              po.po_number || `PO_${po.id}`,
-              purchaseOrdersFolder.id
-            )
-
-            // Pujar ZIP amb versió al nom
-            const versionSuffix = version > 1 ? `_v${version}` : ''
-            const zipFile = new File([zipBlob], `ManufacturerPack_${po.po_number || po.id}${versionSuffix}.zip`, {
-              type: 'application/zip'
-            })
-
-            await driveService.uploadFile(zipFile, poFolder.id, `ManufacturerPack_${po.po_number || po.id}${versionSuffix}.zip`)
-            driveUploaded = true
-          }
-        } catch (driveError) {
-          console.error('Error pujant a Drive:', driveError)
-          // No bloquejar si falla l'upload a Drive
-        }
-      }
 
       // Audit log
       try {
@@ -593,30 +548,6 @@ export default function ManufacturerPackModal({
               </>
             )}
           </button>
-
-          {driveReady && (
-            <button
-              onClick={() => handleGenerate(true)}
-              disabled={loading || validationErrors.length > 0}
-              style={{
-                ...styles.button,
-                ...styles.buttonSecondary,
-                ...((loading || validationErrors.length > 0) && styles.buttonDisabled)
-              }}
-            >
-              {loading ? (
-                <>
-                  <Loader size={16} className="spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Upload size={16} />
-                  Generate & Upload to Drive
-                </>
-              )}
-            </button>
-          )}
         </div>
 
         {error && (

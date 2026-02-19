@@ -126,7 +126,15 @@ export default function Button({
     ...style
   }
 
-  const { hover, ...cleanStyle } = appliedStyle
+  // Remove hover property and ensure no conflict between background and backgroundColor
+  const { hover, background, ...cleanStyle } = appliedStyle
+  // If backgroundColor is set, remove background shorthand to avoid React warning
+  if (cleanStyle.backgroundColor && background !== undefined) {
+    // backgroundColor takes precedence, so we don't need background
+  } else if (background !== undefined && !cleanStyle.backgroundColor) {
+    // Only background is set, keep it
+    cleanStyle.background = background
+  }
 
   return (
     <button

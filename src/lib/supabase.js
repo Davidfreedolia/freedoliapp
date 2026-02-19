@@ -362,7 +362,7 @@ export const updateProject = async (id, updates) => {
 /**
  * Update project's Arts Finals folder ID
  * @param {string} projectId - Project ID
- * @param {string} folderId - Google Drive folder ID (or null to clear)
+ * @param {string} folderId - Storage folder ID (or null to clear)
  * @returns {Promise<Object>} Updated project
  */
 export const updateProjectArtsFinalsFolderId = async (projectId, folderId) => {

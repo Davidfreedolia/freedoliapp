@@ -129,7 +129,6 @@
     "projectRequired": "You must select a project to create the task"
   },
   "errors": {
-    "driveDisconnected": "Google Drive is not connected",
     "missingFields": "Missing required fields",
     "notAllowed": "You don't have permission to perform this action"
   },
@@ -435,8 +434,6 @@
     "projectName": "Project name",
     "description": "Description",
     "descriptionPlaceholder": "Brief product description...",
-    "driveFolderWillBeCreated": "The folder \"{{sku}}\" will be created in Google Drive automatically",
-    "connectDriveToCreateFolders": "Connect Google Drive to create folders automatically",
     "projectPhases": "Project phases",
     "createProject": "Create Project",
     "creatingFolders": "Creating folders..."

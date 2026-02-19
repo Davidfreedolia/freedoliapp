@@ -1,14 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { X, Loader, FolderPlus, Hash, Tag, Link } from 'lucide-react'
+import { X, Loader, Hash, Tag, Link } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { createProject, updateProject, generateProjectCode } from '../lib/supabase'
-import { driveService } from '../lib/googleDrive'
 import { logSuccess, logError } from '../lib/auditLog'
 import { handleError } from '../lib/errorHandling'
 import { showToast } from './Toast'
 import Button from './Button'
+import { downloadPrompt } from '../utils/marketResearchPrompt'
 
 export default function NewProjectModal({ isOpen, onClose }) {
   const { refreshProjects } = useApp()
@@ -16,7 +16,6 @@ export default function NewProjectModal({ isOpen, onClose }) {
   const { t } = useTranslation()
   const reportInputRef = useRef(null)
   const [loading, setLoading] = useState(false)
-  const [creatingFolders, setCreatingFolders] = useState(false)
   const [generatingCode, setGeneratingCode] = useState(false)
   const [createMode, setCreateMode] = useState('asin')
   const [asinOrUrl, setAsinOrUrl] = useState('')
@@ -44,7 +43,30 @@ export default function NewProjectModal({ isOpen, onClose }) {
     name: '',
     description: ''
   })
-  const isDriveReady = typeof driveService.isAuthenticated === 'function' && driveService.isAuthenticated()
+  const [newProjectClaudePrompt, setNewProjectClaudePrompt] = useState(null)
+
+  /** ASIN per al prompt: 10 alfanumèrics o extret de URL /dp/ o /gp/product/ */
+  const deriveAsinForPrompt = (input) => {
+    const v = (input || '').trim()
+    if (!v) return null
+    if (/^[A-Z0-9]{10}$/i.test(v)) return v.toUpperCase()
+    if (isUrlLike(v)) {
+      const m = v.match(/\/dp\/([A-Z0-9]{10})/i) || v.match(/\/gp\/product\/([A-Z0-9]{10})/i)
+      return m?.[1]?.toUpperCase() ?? null
+    }
+    return null
+  }
+
+  /** Marketplace a partir de URL: amazon.es -> Amazon ES, etc. Per defecte Amazon ES. */
+  const deriveMarketplaceFromUrl = (url) => {
+    const u = (url || '').trim()
+    if (!u) return 'Amazon ES'
+    const m = u.match(/amazon\.(co\.uk|es|de|fr|it)/i)
+    if (!m) return 'Amazon ES'
+    const tld = m[1].toLowerCase()
+    const map = { 'co.uk': 'Amazon UK', es: 'Amazon ES', de: 'Amazon DE', fr: 'Amazon FR', it: 'Amazon IT' }
+    return map[tld] || 'Amazon ES'
+  }
 
   const loadNextCode = useCallback(async () => {
     setGeneratingCode(true)
@@ -162,7 +184,7 @@ export default function NewProjectModal({ isOpen, onClose }) {
 
     setLoading(true)
     try {
-      // Crear projecte primer a Supabase (sense drive_folder_id encara)
+      // Crear projecte a Supabase
       const payload = {
         project_code: projectCodes.projectCode,  // PR-FRDL250001
         sku: projectCodes.sku,                    // FRDL250001
@@ -171,8 +193,7 @@ export default function NewProjectModal({ isOpen, onClose }) {
         asin: finalAsin,
         product_url: finalProductUrl,
         current_phase: 1,
-        status: 'active',
-        drive_folder_id: null  // S'assignarà després
+        status: 'active'
       }
       payload.thumb_url = finalThumbUrl
       const newProject = await createProject(payload)
@@ -183,30 +204,6 @@ export default function NewProjectModal({ isOpen, onClose }) {
         sku: projectCodes.sku,
         name: formData.name.trim()
       })
-
-      // Crear carpetes a Drive si connectat (idempotent)
-      let driveFolderId = null
-      if (isDriveReady) {
-        setCreatingFolders(true)
-        try {
-          const folders = await driveService.ensureProjectDriveFolders({
-            id: newProject.id,
-            project_code: projectCodes.projectCode,
-            sku: projectCodes.sku,
-            name: formData.name.trim(),
-            drive_folder_id: null
-          })
-          driveFolderId = folders.main.id
-          
-          // Actualitzar projecte amb drive_folder_id
-          await updateProject(newProject.id, { drive_folder_id: driveFolderId })
-        } catch (err) {
-          // Audit log: error creant carpetes
-          await logError('drive', 'ensure_folders', err, { project_id: newProject.id })
-          await handleError('drive', 'ensure_folders', err, { notify: true })
-        }
-        setCreatingFolders(false)
-      }
 
       try {
         const snapshot = {
@@ -249,8 +246,16 @@ export default function NewProjectModal({ isOpen, onClose }) {
     setEnrichData({ title: '', short_description: '', thumb_url: '', product_url: '' })
     setReportFile(null)
     setReportParsed({ asin: '', title: '', thumb_url: '', product_url: '', summary: '' })
+    setNewProjectClaudePrompt(null)
     onClose()
   }
+
+  const modalAsin = createMode === 'asin'
+    ? deriveAsinForPrompt(asinOrUrl)
+    : (extractAsin(reportParsed?.asin || '') || deriveAsinForPrompt(reportParsed?.product_url || '') || null)
+  const modalMarketplace = createMode === 'asin'
+    ? deriveMarketplaceFromUrl(asinOrUrl)
+    : deriveMarketplaceFromUrl(reportParsed?.product_url)
 
   const asinPreview = extractAsin(asinOrUrl)
   const asinThumbUrl = (enrichData.thumb_url || '').trim() || buildAmazonThumbUrl(asinPreview)
@@ -457,6 +462,38 @@ export default function NewProjectModal({ isOpen, onClose }) {
             </div>
           ) : null}
 
+          <div className="fd-modal__research-claude">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              disabled={!modalAsin}
+              onClick={async () => {
+                if (!modalAsin) return
+                const { generateClaudeResearchPrompt } = await import('../lib/generateClaudeResearchPrompt')
+                const prompt = generateClaudeResearchPrompt({ asin: modalAsin, marketplace: modalMarketplace })
+                setNewProjectClaudePrompt(prompt)
+                showToast('Prompt generat', 'success')
+              }}
+            >
+              Generar Prompt Claude
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              disabled={!modalAsin}
+              onClick={async () => {
+                if (!modalAsin) return
+                const { generateClaudeResearchPrompt } = await import('../lib/generateClaudeResearchPrompt')
+                const text = newProjectClaudePrompt || generateClaudeResearchPrompt({ asin: modalAsin, marketplace: modalMarketplace })
+                downloadPrompt(text, modalAsin)
+              }}
+            >
+              Descarregar Prompt
+            </Button>
+          </div>
+
           <div className="fd-modal__codes">
             <div className="fd-modal__code-row">
               <div className="fd-modal__code-item">
@@ -507,15 +544,6 @@ export default function NewProjectModal({ isOpen, onClose }) {
             />
           </div>
 
-          <div className="fd-modal__drive-info">
-            <FolderPlus size={14} color="var(--muted-1)" />
-            <span>
-              {isDriveReady
-                ? t('projects.driveFolderWillBeCreated', { sku: projectCodes.sku || '...' })
-                : t('projects.connectDriveToCreateFolders')
-              }
-            </span>
-          </div>
 
 
           <div className="fd-modal__footer">

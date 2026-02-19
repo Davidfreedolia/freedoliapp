@@ -144,7 +144,6 @@
     "projectRequired": "Debes seleccionar un proyecto para crear la tarea"
   },
   "errors": {
-    "driveDisconnected": "Google Drive no está conectado",
     "missingFields": "Faltan campos obligatorios",
     "notAllowed": "No tienes permiso para realizar esta acción"
   },
@@ -450,8 +449,6 @@
     "projectName": "Nombre del proyecto",
     "description": "Descripción",
     "descriptionPlaceholder": "Descripción breve del producto...",
-    "driveFolderWillBeCreated": "Se creará la carpeta \"{{sku}}\" en Google Drive automáticamente",
-    "connectDriveToCreateFolders": "Conecta Google Drive para crear carpetas automáticamente",
     "projectPhases": "Fases del proyecto",
     "createProject": "Crear Proyecto",
     "creatingFolders": "Creando carpetas..."

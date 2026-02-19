@@ -61,7 +61,6 @@ import { useBreakpoint } from '../hooks/useBreakpoint'
 import { validateManufacturerPack, getManufacturerPackFileNames } from '../lib/manufacturerPack'
 import { generatePackingListPdf } from '../lib/generatePackingListPdf'
 import { generateCartonLabelsPdf } from '../lib/generateCartonLabelsPdf'
-import { driveService } from '../lib/googleDrive'
 import JSZip from 'jszip'
 import { safeJsonArray } from '../lib/safeJson'
 import { safeArray } from '../lib/safeArray'
@@ -344,8 +343,7 @@ export default function Orders() {
       includePackingList,
       includeCartonLabels,
       fnskuQuantity,
-      fnskuTemplate,
-      uploadToDrive
+      fnskuTemplate
     } = options
 
     if (!selectedOrder?.id || !selectedOrder?.project_id) {
@@ -438,51 +436,24 @@ export default function Orders() {
       // Generar ZIP
       const zipBlob = await zip.generateAsync({ type: 'blob' })
 
-      // Upload a Drive si està connectat
-      if (uploadToDrive && driveService.isAuthenticated()) {
-        try {
-          // Obtenir o crear carpeta del projecte
-          const projectFolders = await driveService.ensureProjectDriveFolders(project)
-          
-          // Obtenir o crear subcarpeta PurchaseOrders
-          const poFolder = await driveService.findOrCreateFolder(
-            '03_PurchaseOrders',
-            projectFolders.main.id
-          )
-          
-          // Obtenir o crear subcarpeta per aquesta PO
-          const poSubFolder = await driveService.findOrCreateFolder(
-            selectedOrder.po_number || `PO_${selectedOrder.id}`,
-            poFolder.id
-          )
-          
-          // Pujar ZIP
-          const zipFile = new File([zipBlob], fileNames.zip, { type: 'application/zip' })
-          await driveService.uploadFile(zipFile, poSubFolder.id)
-          
-          // Pujar PDFs individuals (opcional - per facilitar accés)
-          // Nota: pujem el ZIP, els PDFs individuals ja estan dins
-
-          // Audit log
-          try {
-            const { logSuccess } = await import('../lib/auditLog')
-            await logSuccess(
-              'manufacturer_pack',
-              'manufacturer_pack_generated',
-              selectedOrder.id,
-              'Manufacturer pack generated and uploaded to Drive',
-              {
-                po_id: selectedOrder.id,
-                po_number: selectedOrder.po_number,
-                documents: {
-                  po: includePOPdf,
-                  fnsku_labels: includeFnskuLabels,
-                  packing_list: includePackingList,
-                  carton_labels: includeCartonLabels
-                },
-                uploaded_to_drive: true,
-                drive_folder_id: poSubFolder.id
-              }
+      // Audit log
+      try {
+        const { logSuccess } = await import('../lib/auditLog')
+        await logSuccess(
+          'manufacturer_pack',
+          'manufacturer_pack_generated',
+          selectedOrder.id,
+          'Manufacturer pack generated',
+          {
+            po_id: selectedOrder.id,
+            po_number: selectedOrder.po_number,
+            documents: {
+              po: includePOPdf,
+              fnsku_labels: includeFnskuLabels,
+              packing_list: includePackingList,
+              carton_labels: includeCartonLabels
+            }
+          }
             )
           } catch (auditErr) {
             if (import.meta.env.DEV) {
@@ -490,51 +461,15 @@ export default function Orders() {
             }
           }
 
-          showToast(`Manufacturer Pack generat i pujat a Google Drive! Carpeta: ${poSubFolder.name}`, 'success')
-        } catch (driveErr) {
-          showToast('S\'ha generat el pack però hi ha hagut un error pujant-lo a Drive. S\'ha descarregat localment.', 'warning')
-          notifyError(driveErr, { context: 'Orders:handleGenerateManufacturerPack:drive', critical: false })
-          // Descarregar ZIP
-          const url = URL.createObjectURL(zipBlob)
-          const a = document.createElement('a')
-          a.href = url
-          a.download = fileNames.zip
-          a.click()
-          URL.revokeObjectURL(url)
-        }
-      } else {
-        // Descarregar ZIP
-        const url = URL.createObjectURL(zipBlob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = fileNames.zip
-        a.click()
-        URL.revokeObjectURL(url)
+      // Descarregar ZIP
+      const url = URL.createObjectURL(zipBlob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = fileNames.zip
+      a.click()
+      URL.revokeObjectURL(url)
 
-        // Audit log
-        try {
-          const { logSuccess } = await import('../lib/auditLog')
-          await logSuccess(
-            'manufacturer_pack',
-            'manufacturer_pack_generated',
-            selectedOrder.id,
-            'Manufacturer pack generated and downloaded',
-            {
-              po_id: selectedOrder.id,
-              po_number: selectedOrder.po_number,
-              documents: {
-                po: includePOPdf,
-                fnsku_labels: includeFnskuLabels,
-                packing_list: includePackingList,
-                carton_labels: includeCartonLabels
-              },
-              uploaded_to_drive: false
-            }
-          )
-        } catch (auditErr) {
-          console.warn('Error registrant audit log:', auditErr)
-        }
-      }
+      showToast('Manufacturer Pack generat i descarregat correctament', 'success')
 
       // Recarregar readiness si s'han generat labels
       if (includeFnskuLabels && amazonReadiness?.needs_fnsku !== false) {

@@ -23,7 +23,6 @@ import {
 import Button from '../Button'
 import FileUploader from '../FileUploader'
 import { storageService } from '../../lib/storageService'
-import { driveService } from '../../lib/googleDrive'
 
 export default function ProjectDriveExplorer({
   projectId,
@@ -162,20 +161,11 @@ export default function ProjectDriveExplorer({
     }
   }
   const c = copy[locale]
-  const sections = projectId ? [
-    { key: 'research', label: 'Research', prefix: `projects/${projectId}/research/`, icon: Search },
-    { key: 'briefings', label: 'Briefings', prefix: `projects/${projectId}/briefings/`, icon: FileText },
-    { key: 'quotations', label: 'Quotations', prefix: `projects/${projectId}/quotations/`, icon: Receipt },
-    { key: 'purchaseorders', label: 'Purchase Orders', prefix: `projects/${projectId}/purchaseorders/`, icon: ShoppingCart },
-    { key: 'invoices', label: 'Invoices', prefix: `projects/${projectId}/invoices/`, icon: FileDown },
-    { key: 'shipping', label: 'Shipping', prefix: `projects/${projectId}/shipping/`, icon: Truck },
-    { key: 'certificates', label: 'Certificates', prefix: `projects/${projectId}/certificates/`, icon: BadgeCheck },
-    { key: 'samples', label: 'Samples', prefix: `projects/${projectId}/samples/`, icon: Box },
-    { key: 'listings', label: 'Listings', prefix: `projects/${projectId}/listings/`, icon: Tag },
-    { key: 'images', label: 'Images', prefix: `projects/${projectId}/images/`, icon: Image }
-  ] : []
-  const rootId = fixedFolderId || (sections[0]?.prefix ?? null)
+  const projectRootPath = projectId ? `projects/${projectId}/` : null
+  const rootId = fixedFolderId || projectRootPath
   const [selectedFolderId, setSelectedFolderId] = useState(rootId)
+  const [projectFolders, setProjectFolders] = useState([])
+  const [loadingFolders, setLoadingFolders] = useState(false)
   const [explorerFolders, setExplorerFolders] = useState([])
   const [explorerFiles, setExplorerFiles] = useState([])
   const [selectedFile, setSelectedFile] = useState(null)
@@ -218,14 +208,37 @@ export default function ProjectDriveExplorer({
     return url
   }
 
-  const [needsProvisioning, setNeedsProvisioning] = useState(false)
+
+  const loadProjectFolders = async () => {
+    if (!projectRootPath) return
+    const seq = ++foldersSeq.current
+    setLoadingFolders(true)
+    try {
+      const contents = await storageService.listFolder(projectRootPath)
+      if (seq !== foldersSeq.current) return
+      const folders = (contents || [])
+        .filter(item => item?.id === null)
+        .sort((a, b) => (a?.name || '').localeCompare(b?.name || ''))
+        .map(item => ({
+          key: item.name,
+          label: (item.name || '').replace(/^\d+_/, '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+          prefix: `${projectRootPath}${item.name}/`,
+          icon: Folder
+        }))
+      setProjectFolders(folders)
+    } catch (err) {
+      if (seq !== foldersSeq.current) return
+      setProjectFolders([])
+    } finally {
+      if (seq === foldersSeq.current) setLoadingFolders(false)
+    }
+  }
 
   const loadFolderContents = async (folderId) => {
     if (!folderId) return
     const seq = ++filesSeq.current
     setLoadingFiles(true)
     setErrorFiles(null)
-    setNeedsProvisioning(false)
     try {
       const contents = await storageService.listFolder(folderId)
       if (seq !== filesSeq.current) return
@@ -244,12 +257,6 @@ export default function ProjectDriveExplorer({
       if (seq !== filesSeq.current) return
       const message = err?.message || ''
       // Detecta si l'error indica que les carpetes no existeixen (404 o permisos quan no hi ha contingut)
-      if (isPermissionError(message) || (message.includes('404') || message.includes('not found'))) {
-        // Si és la primera carpeta del projecte i no existeix, probablement cal provisionar
-        if (projectId && folderId === rootId) {
-          setNeedsProvisioning(true)
-        }
-      }
       const resolved = isPermissionError(message)
         ? errorMessage
         : isSessionError(message)
@@ -272,16 +279,24 @@ export default function ProjectDriveExplorer({
     setFolderStack([])
   }, [rootId])
 
-useEffect(() => {
-  if (!rootId) {
-    setExplorerFolders([])
-    setExplorerFiles([])
-    setSelectedFile(null)
-    setFolderStack([])
-    filesSeq.current += 1
-    foldersSeq.current += 1
-  }
-}, [rootId])
+  useEffect(() => {
+    if (!rootId) {
+      setExplorerFolders([])
+      setExplorerFiles([])
+      setSelectedFile(null)
+      setFolderStack([])
+      filesSeq.current += 1
+      foldersSeq.current += 1
+    }
+  }, [rootId])
+
+  useEffect(() => {
+    if (projectRootPath) {
+      loadProjectFolders()
+    } else {
+      setProjectFolders([])
+    }
+  }, [projectId, projectRootPath])
 
   useEffect(() => {
     if (!selectedFolderId) return
@@ -438,6 +453,10 @@ useEffect(() => {
       setShowNewFolder(false)
       setNewFolderName('')
       loadFolderContents(selectedFolderId)
+      // If we're at project root, refresh the folders list
+      if (selectedFolderId === projectRootPath && projectRootPath && !fixedFolderId) {
+        await loadProjectFolders()
+      }
     } catch (err) {
       const message = err?.message || ''
       const resolved = isPermissionError(message)
@@ -519,32 +538,6 @@ useEffect(() => {
   const previewImageUrl = selectedFileUrl || ''
   const canUpload = Boolean(!readOnly && selectedFolderId)
   const isEmpty = !loadingFiles && !errorFiles && explorerFolders.length === 0 && explorerFiles.length === 0
-  const [creatingFolders, setCreatingFolders] = useState(false)
-
-  const handleCreateProjectFolders = async () => {
-    if (!projectId || creatingFolders) return
-    if (!driveService.isAuthenticated()) {
-      setErrorFiles(c.errorSession || 'Drive no connectat')
-      return
-    }
-    setCreatingFolders(true)
-    setErrorFiles(null)
-    setNeedsProvisioning(false)
-    try {
-      await driveService.ensureProjectDriveFolders({ id: projectId })
-      // Refresh current folder after provisioning
-      if (selectedFolderId) {
-        await loadFolderContents(selectedFolderId)
-      } else if (rootId) {
-        // If no folder selected, try root
-        await loadFolderContents(rootId)
-      }
-    } catch (err) {
-      setErrorFiles(err?.message || c.errorGeneric || 'Error creant carpetes')
-    } finally {
-      setCreatingFolders(false)
-    }
-  }
 
   const renderPreview = (full = false) => (
     <div className="projects-drive__previewBody" style={{ background: 'var(--surface-bg)' }}>
@@ -577,12 +570,12 @@ useEffect(() => {
     )
   }
 
-  const activeSection = sections.find((section) => selectedFolderId?.startsWith(section.prefix))
-  const activeSectionLabel = activeSection?.label || ''
-  const activeSubPath = activeSection
-    ? selectedFolderId?.replace(activeSection.prefix, '').replace(/\/$/, '')
-    : ''
-  const breadcrumbLabel = activeSubPath ? `${activeSectionLabel} / ${activeSubPath}` : activeSectionLabel
+  const activeFolder = projectFolders.find((folder) => selectedFolderId?.startsWith(folder.prefix))
+  const activeFolderLabel = activeFolder?.label || ''
+  const activeSubPath = activeFolder
+    ? selectedFolderId?.replace(activeFolder.prefix, '').replace(/\/$/, '')
+    : selectedFolderId?.replace(projectRootPath || '', '').replace(/\/$/, '')
+  const breadcrumbLabel = activeSubPath ? `${activeFolderLabel} / ${activeSubPath}` : activeFolderLabel
 
   useEffect(() => {
     onActivePathChange?.(breadcrumbLabel || '')
@@ -606,30 +599,30 @@ useEffect(() => {
           )}
         </div>
         <div className="projects-drive__list">
-          {fixedFolderId ? (
+          {loadingFolders ? (
             <div className="projects-drive__row">
-              <span className="projects-drive__rowMain">Informe (Recerca)</span>
+              <span className="projects-drive__rowMain">{c.loading}</span>
             </div>
-          ) : sections.length === 0 ? (
+          ) : projectFolders.length === 0 ? (
             <div className="projects-drive__row">
               <span className="projects-drive__rowMain">{c.emptySections}</span>
             </div>
-          ) : sections.map((section) => {
-            const isActive = selectedFolderId === section.prefix
-            const SectionIcon = section.icon || Folder
+          ) : projectFolders.map((folder) => {
+            const isActive = selectedFolderId === folder.prefix
+            const FolderIcon = folder.icon || Folder
             return (
               <button
-                key={section.key}
+                key={folder.key}
                 type="button"
                 className={`projects-drive__row ${isActive ? 'is-active' : ''}`}
                 onClick={() => {
-                  setSelectedFolderId(section.prefix)
+                  setSelectedFolderId(folder.prefix)
                   setFolderStack([])
                 }}
               >
                 <span className="projects-drive__rowMain">
-                  <SectionIcon size={16} style={{ color: 'var(--coral-1)' }} />
-                  {section.label}
+                  <FolderIcon size={16} style={{ color: 'var(--coral-1)' }} />
+                  {folder.label}
                 </span>
                 <span className="projects-drive__rowSub">{isActive ? '•' : ''}</span>
               </button>
@@ -773,33 +766,7 @@ useEffect(() => {
               color: 'var(--muted-1)',
               textAlign: 'center'
             }}>
-              <Folder size={32} style={{ opacity: 0.6 }} />
-              {projectId && selectedFolderId && (needsProvisioning || (!errorFiles && selectedFolderId === rootId)) ? (
-                <>
-                  <div style={{ fontWeight: 600, color: 'var(--text-1)', fontSize: '14px' }}>
-                    {needsProvisioning 
-                      ? "Aquest projecte no ha passat pel provisioning inicial"
-                      : "No s'han creat les carpetes del projecte"
-                    }
-                  </div>
-                  {driveService.isAuthenticated() ? (
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={handleCreateProjectFolders}
-                      disabled={creatingFolders}
-                    >
-                      {creatingFolders ? 'Creant...' : 'Crear carpetes'}
-                    </Button>
-                  ) : (
-                    <div style={{ fontSize: '12px', color: 'var(--muted-1)' }}>
-                      Drive no connectat
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div style={{ fontWeight: 600, color: 'var(--text-1)' }}>{c.emptyFolderTitle}</div>
-              )}
+              <div style={{ fontWeight: 600, color: 'var(--text-1)' }}>{c.emptyFolderTitle}</div>
             </div>
           ) : (
             <>
@@ -850,7 +817,7 @@ useEffect(() => {
             </>
           )}
         </div>
-        {canUpload && !readOnly && (
+        {canUpload && !readOnly && !selectedFolderId?.endsWith('/research/') && (
           <div className="projects-drive__dropzone" ref={dropzoneRef}>
             <FileUploader
               folderId={selectedFolderId}

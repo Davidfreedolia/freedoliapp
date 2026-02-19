@@ -39,7 +39,7 @@ export function formatError(err) {
       return 'Recurs no trobat.'
     }
     if (message.includes('AUTH_REQUIRED')) {
-      return 'Reconnecta Google Drive. La sessió ha expirat.'
+      return 'Sessió expirada. Torna a iniciar sessió.'
     }
     if (message.includes('duplicate key') || message.includes('already exists')) {
       return 'Aquest element ja existeix.'

@@ -62,9 +62,9 @@ export default function FileUploader({ folderId, onUploadComplete, label = 'Arro
         
         // Si és error d'autenticació, no continuar amb altres fitxers
         if (err.message === 'AUTH_REQUIRED') {
-          setError('Sessió expirada. Reconecta Google Drive.')
+          setError('Sessió expirada. Torna a iniciar sessió.')
           setUploading(false)
-          alert('Reconnecta Google Drive. La sessió ha expirat.')
+          alert('Sessió expirada. Torna a iniciar sessió.')
           return
         }
         
