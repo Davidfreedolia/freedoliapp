@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { X, Loader, Hash, Tag, Link } from 'lucide-react'
@@ -9,6 +9,7 @@ import { handleError } from '../lib/errorHandling'
 import { showToast } from './Toast'
 import Button from './Button'
 import { downloadPrompt } from '../utils/marketResearchPrompt'
+import { generateClaudeResearchPrompt } from '../lib/generateClaudeResearchPrompt'
 
 export default function NewProjectModal({ isOpen, onClose }) {
   const { refreshProjects } = useApp()
@@ -43,7 +44,6 @@ export default function NewProjectModal({ isOpen, onClose }) {
     name: '',
     description: ''
   })
-  const [newProjectClaudePrompt, setNewProjectClaudePrompt] = useState(null)
 
   /** ASIN per al prompt: 10 alfanumèrics o extret de URL /dp/ o /gp/product/ */
   const deriveAsinForPrompt = (input) => {
@@ -246,7 +246,6 @@ export default function NewProjectModal({ isOpen, onClose }) {
     setEnrichData({ title: '', short_description: '', thumb_url: '', product_url: '' })
     setReportFile(null)
     setReportParsed({ asin: '', title: '', thumb_url: '', product_url: '', summary: '' })
-    setNewProjectClaudePrompt(null)
     onClose()
   }
 
@@ -256,6 +255,11 @@ export default function NewProjectModal({ isOpen, onClose }) {
   const modalMarketplace = createMode === 'asin'
     ? deriveMarketplaceFromUrl(asinOrUrl)
     : deriveMarketplaceFromUrl(reportParsed?.product_url)
+
+  const newProjectPromptText = useMemo(() => {
+    if (!modalAsin) return ''
+    return generateClaudeResearchPrompt({ asin: modalAsin, marketplace: modalMarketplace })
+  }, [modalAsin, modalMarketplace])
 
   const asinPreview = extractAsin(asinOrUrl)
   const asinThumbUrl = (enrichData.thumb_url || '').trim() || buildAmazonThumbUrl(asinPreview)
@@ -463,35 +467,46 @@ export default function NewProjectModal({ isOpen, onClose }) {
           ) : null}
 
           <div className="fd-modal__research-claude">
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              disabled={!modalAsin}
-              onClick={async () => {
-                if (!modalAsin) return
-                const { generateClaudeResearchPrompt } = await import('../lib/generateClaudeResearchPrompt')
-                const prompt = generateClaudeResearchPrompt({ asin: modalAsin, marketplace: modalMarketplace })
-                setNewProjectClaudePrompt(prompt)
-                showToast('Prompt generat', 'success')
-              }}
-            >
-              Generar Prompt Claude
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              disabled={!modalAsin}
-              onClick={async () => {
-                if (!modalAsin) return
-                const { generateClaudeResearchPrompt } = await import('../lib/generateClaudeResearchPrompt')
-                const text = newProjectClaudePrompt || generateClaudeResearchPrompt({ asin: modalAsin, marketplace: modalMarketplace })
-                downloadPrompt(text, modalAsin)
-              }}
-            >
-              Descarregar Prompt
-            </Button>
+            {modalAsin && (
+              <>
+                <textarea
+                  readOnly
+                  value={newProjectPromptText}
+                  className="fd-modal__prompt-preview"
+                  style={{ maxHeight: 120, resize: 'none', width: '100%', boxSizing: 'border-box' }}
+                  aria-label="Preview del prompt"
+                />
+                <div className="fd-modal__prompt-actions" style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    disabled={!newProjectPromptText}
+                    onClick={async () => {
+                      if (!newProjectPromptText) return
+                      try {
+                        await navigator.clipboard.writeText(newProjectPromptText)
+                        showToast('Prompt copiat', 'success')
+                      } catch (_) {}
+                    }}
+                  >
+                    Copiar Prompt
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    disabled={!newProjectPromptText || !modalAsin}
+                    onClick={() => {
+                      if (!newProjectPromptText || !modalAsin) return
+                      downloadPrompt(newProjectPromptText, modalAsin)
+                    }}
+                  >
+                    Descarregar Prompt
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
 
           <div className="fd-modal__codes">

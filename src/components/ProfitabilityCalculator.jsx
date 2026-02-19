@@ -1,14 +1,18 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
-import { Save, AlertTriangle, CheckCircle2, XCircle, ExternalLink, Link2 } from 'lucide-react'
+import React, { useState, useEffect, useCallback, useRef, useImperativeHandle } from 'react'
+import { Save, AlertTriangle, CheckCircle2, XCircle, ExternalLink, Link2, BadgeEuro } from 'lucide-react'
 import supabase, { getProductIdentifiers, upsertProductIdentifiers } from '../lib/supabase'
 import { calculateQuickProfitability } from '../lib/profitability'
 import HelpIcon from './HelpIcon'
 
 /**
  * Calculadora de profitabilitat ràpida (Nivell 1.5)
- * Visible a la fase Research del projecte
+ * Visible a la fase Viabilitat del projecte.
+ * Si hideSaveButton === true, no mostra botó Guardar (el pare en té un de canònic).
  */
-export default function ProfitabilityCalculator({ projectId, darkMode, showAsinCapture = true }) {
+const ProfitabilityCalculator = React.forwardRef(function ProfitabilityCalculator(
+  { projectId, darkMode, showAsinCapture = true, hideSaveButton = false, onChange },
+  ref
+) {
   const VIABILITY_STORAGE_PREFIX = 'project_viability_'
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -138,10 +142,11 @@ export default function ProfitabilityCalculator({ projectId, darkMode, showAsinC
     // Validar que no sigui negatiu
     const numValue = parseFloat(value)
     if (value === '' || (!isNaN(numValue) && numValue >= 0)) {
-      setData(prev => ({
-        ...prev,
-        [field]: value === '' ? '0' : value
-      }))
+      setData(prev => {
+        const next = { ...prev, [field]: value === '' ? '0' : value }
+        onChange?.(next)
+        return next
+      })
     }
   }
 
@@ -379,6 +384,10 @@ export default function ProfitabilityCalculator({ projectId, darkMode, showAsinC
     }
   }
 
+  useImperativeHandle(ref, () => ({
+    save: handleSave
+  }), [handleSave])
+
   const styles = {
     card: {
       padding: '24px',
@@ -508,7 +517,8 @@ export default function ProfitabilityCalculator({ projectId, darkMode, showAsinC
   return (
     <div style={styles.card}>
       <h3 style={styles.cardTitle}>
-        💰 Quick Profitability
+        <BadgeEuro size={20} color="var(--coral-1)" />
+        Rendibilitat ràpida
         <HelpIcon helpKey="profitability" size="medium" darkMode={darkMode} />
       </h3>
 
@@ -798,24 +808,28 @@ export default function ProfitabilityCalculator({ projectId, darkMode, showAsinC
             </span>
           </div>
 
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            type="button"
-            style={styles.saveButton}
-          >
-            <Save size={16} />
-            {saving ? 'Guardant...' : 'Guardar'}
-          </button>
-          {saveStatus === 'saved' && (
-            <div style={{ marginTop: '8px', fontSize: '12px', color: '#10b981' }}>
-              ✅ Guardat
-            </div>
-          )}
-          {saveStatus === 'error' && (
-            <div style={{ marginTop: '8px', fontSize: '12px', color: '#ef4444' }}>
-              ❌ Error: {saveError || 'Error desconegut'}
-            </div>
+          {!hideSaveButton && (
+            <>
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                type="button"
+                style={styles.saveButton}
+              >
+                <Save size={16} />
+                {saving ? 'Guardant...' : 'Guardar'}
+              </button>
+              {saveStatus === 'saved' && (
+                <div style={{ marginTop: '8px', fontSize: '12px', color: '#10b981' }}>
+                  ✅ Guardat
+                </div>
+              )}
+              {saveStatus === 'error' && (
+                <div style={{ marginTop: '8px', fontSize: '12px', color: '#ef4444' }}>
+                  ❌ Error: {saveError || 'Error desconegut'}
+                </div>
+              )}
+            </>
           )}
         </div>
 
@@ -907,8 +921,8 @@ export default function ProfitabilityCalculator({ projectId, darkMode, showAsinC
                 )}
               </div>
 
-              {/* Badge GO/RISKY/NO-GO */}
-              {badge && (
+              {/* Badge GO/RISKY (NO-GO no es mostra a la UI) */}
+              {badge && badge.type !== 'no-go' && (
                 <div style={{
                   ...styles.badge,
                   backgroundColor: `${badge.color}15`,
@@ -925,4 +939,6 @@ export default function ProfitabilityCalculator({ projectId, darkMode, showAsinC
       </div>
     </div>
   )
-}
+})
+
+export default ProfitabilityCalculator

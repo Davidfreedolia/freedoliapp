@@ -1364,6 +1364,20 @@ body.dark .drive-btn--compact.drive--on {
   background: var(--surface-bg-2);
 }
 
+.fd-modal__research-claude .fd-modal__prompt-preview {
+  display: block;
+  max-height: 120px;
+  overflow: auto;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-1);
+  background: var(--surface-bg);
+  color: var(--text-1);
+  font-size: 12px;
+  font-family: inherit;
+  line-height: 1.4;
+}
+
 .fd-field__input-wrap {
   display: flex;
   align-items: center;
@@ -3569,24 +3583,43 @@ body.dark .page-dashboard .fd-badge--done {
   margin-top: 0;
 }
 
-/* Project Detail — Recerca: informe row (dropzone + prompt buttons) */
-.project-detail-page .research-report-row {
+/* Project Detail — Recerca: capçalera dades producte */
+.project-detail-page .research-product-header {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  gap: 10px 16px;
+  font-size: 13px;
+  color: var(--muted-1);
+}
+.project-detail-page .research-product-header__chip strong {
+  color: var(--text-1);
+  font-weight: 600;
+}
+
+/* Recerca: grid 2 columnes (dropzone | paste) */
+.project-detail-page .research-import-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 12px;
-  margin-top: 4px;
+  align-items: start;
+}
+.project-detail-page .research-import-grid__left,
+.project-detail-page .research-import-grid__right {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 .project-detail-page .research-dropzone--compact {
-  min-height: 44px;
-  height: 44px;
+  height: 120px;
+  min-height: 120px;
   padding: 0 14px;
   border: 2px dashed var(--border-1);
   border-radius: 10px;
   background: var(--surface-bg-2);
   font-size: 13px;
   color: var(--muted-1);
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -3596,16 +3629,24 @@ body.dark .page-dashboard .fd-badge--done {
   border-color: var(--coral-1);
   background: var(--surface-bg);
 }
+.project-detail-page .research-report-attachment--in-grid {
+  min-height: 120px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
 .project-detail-page .research-prompt-actions {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-left: auto;
+  margin-left: 0;
+  margin-top: 8px;
+  justify-content: flex-start;
 }
 .project-detail-page .research-prompt-actions .btn--turq,
 .project-detail-page .btn--turq {
-  height: 40px !important;
-  min-height: 40px !important;
+  height: 34px !important;
+  min-height: 34px !important;
   min-width: 140px;
   background: var(--teal-1, #0d9488) !important;
   border-color: var(--teal-1, #0d9488) !important;
@@ -3627,6 +3668,36 @@ body.dark .page-dashboard .fd-badge--done {
   background: var(--surface-bg);
   font-size: 13px;
 }
+/* Prompt preview: bloc tècnic monospace */
+.project-detail-page .research-prompt-preview {
+  display: block;
+  max-height: 120px;
+  overflow: auto;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-1);
+  background: var(--surface-2);
+  color: var(--text-1);
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  line-height: 1.4;
+  width: 100%;
+  box-sizing: border-box;
+}
+.project-detail-page .research-paste-input {
+  height: 120px;
+  min-height: 120px;
+  resize: none;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-1);
+  background: var(--surface-bg);
+  color: var(--text-1);
+  font-size: 13px;
+  font-family: inherit;
+  width: 100%;
+  box-sizing: border-box;
+}
 .project-detail-page .research-report-attachment__label {
   color: var(--muted-1);
   font-weight: 600;
@@ -3638,20 +3709,231 @@ body.dark .page-dashboard .fd-badge--done {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.project-detail-page .research-decision-actions {
+
+/* Alçada canònica 34px per a tots els botons a Project Detail */
+.project-detail-page .btn,
+.project-detail-page button.btn {
+  height: 34px;
+  min-height: 34px;
+  padding-top: 0;
+  padding-bottom: 0;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+}
+.project-detail-page .btn--turq,
+.project-detail-page .btn--turq-small {
+  height: 34px;
+  min-height: 34px;
+}
+.project-detail-page .phase-decision-actions .btn--icon {
+  height: 34px;
+  width: 34px;
+  min-width: 34px;
+}
+
+/* Canonical evidence check row (Research, Viability, …) */
+.project-detail-page .evidence-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 40px;
+  gap: 12px;
+  align-items: center;
+}
+.project-detail-page .evidence-row__left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-1);
+}
+.project-detail-page .evidence-row__icon {
+  color: var(--coral-1);
+  flex-shrink: 0;
+}
+.project-detail-page .evidence-row__icon svg {
+  stroke: currentColor;
+}
+.project-detail-page .evidence-row__field input,
+.project-detail-page .evidence-row__field textarea {
+  width: 100%;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid var(--border-1);
+  background: var(--surface-bg);
+  color: var(--text-1);
+  padding: 0 10px;
+  outline: none;
+  font-size: 13px;
+}
+.project-detail-page .evidence-row__field textarea {
+  height: auto;
+  min-height: 60px;
+  padding: 8px 10px;
+  resize: vertical;
+}
+.project-detail-page .evidence-row__check {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.project-detail-page .evidence-row__check input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
+  margin: 0;
+  padding: 0;
+  border: 2px solid var(--border-1);
+  border-radius: 6px;
+  background: var(--surface-bg);
+  cursor: pointer;
+  display: grid;
+  place-content: center;
+  outline: none;
+}
+.project-detail-page .evidence-row__check input[type="checkbox"]:focus {
+  box-shadow: 0 0 0 3px var(--focus-ring, rgba(6, 182, 212, 0.35));
+}
+.project-detail-page .evidence-row__check input[type="checkbox"]:checked {
+  background: var(--teal-1);
+  border-color: var(--teal-1);
+}
+.project-detail-page .evidence-row__check input[type="checkbox"]:checked::after {
+  content: '';
+  width: 6px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  margin-bottom: 3px;
+}
+.project-detail-page .evidence-row__check input[type="checkbox"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Canonical phase decision actions (Research, Viability, …) — single block, no duplicates */
+.project-detail-page .phase-decision-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 8px;
+}
+.project-detail-page .phase-decision-actions__row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-start;
+}
+.project-detail-page .phase-decision-actions .btn {
+  height: 34px;
+  min-width: 120px;
+}
+.project-detail-page .phase-decision-actions .btn--icon {
+  height: 34px;
+  width: 34px;
+  min-width: 34px;
+  padding: 0;
+}
+.project-detail-page .phase-decision-actions .btn--icon svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+}
+.project-detail-page .phase-decision-actions .btn--danger:not(:disabled) {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: rgba(239, 68, 68, 0.95);
+}
+.project-detail-page .phase-decision-actions .btn--danger:not(:disabled):hover {
+  background: rgba(239, 68, 68, 0.18);
+}
+.project-detail-page .phase-decision-actions .btn--ghost-icon {
+  border: 1px solid var(--border-1);
+  background: transparent;
+}
+.project-detail-page .phase-decision-actions .btn--ghost-icon:hover {
+  background: rgba(15, 23, 42, 0.04);
+}
+@media (prefers-color-scheme: dark) {
+  .project-detail-page .phase-decision-actions .btn--ghost-icon:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
+}
+.project-detail-page .btn:disabled,
+.project-detail-page button.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+/* Botó turquesa petit (Viabilitat) — alçada unificada 34px */
+.project-detail-page .btn--turq-small {
+  height: 34px;
+  min-height: 34px;
+  min-width: 96px;
+  background: var(--teal-1);
+  color: white;
+  border: 1px solid var(--teal-1);
+}
+.project-detail-page .btn--turq-small:hover:not(:disabled) {
+  filter: brightness(0.95);
+}
+.project-detail-page .btn--turq-small:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Project Detail — Viabilitat: informe row (dropzone) */
+.project-detail-page .viability-report-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 4px;
+}
+.project-detail-page .viability-dropzone--compact {
+  min-height: 44px;
+  height: 44px;
+  padding: 0 14px;
+  border: 2px dashed var(--border-1);
+  border-radius: 10px;
+  background: var(--surface-bg-2);
+  font-size: 13px;
+  color: var(--muted-1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.project-detail-page .viability-dropzone--compact.is-dragover {
+  border-color: var(--coral-1);
+  background: var(--surface-bg);
+}
+.project-detail-page .viability-report-attachment {
+  display: inline-flex;
+  align-items: center;
   gap: 10px;
-  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-1);
+  background: var(--surface-bg);
+  font-size: 13px;
 }
-.project-detail-page .research-decision-actions button {
-  height: 40px;
-  min-height: 40px;
-  min-width: 120px;
+.project-detail-page .viability-report-attachment__label {
+  color: var(--muted-1);
+  font-weight: 600;
 }
-
+.project-detail-page .viability-report-attachment__name {
+  color: var(--text-1);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 /* Project Detail — actionbar layout cleanup */
 .project-detail-page .project-actions {
   display: flex;

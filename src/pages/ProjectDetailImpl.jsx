@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense, lazy, useRef, useMemo } from 'react'
+import { useState, useEffect, Suspense, lazy, useRef, useMemo, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { 
@@ -32,7 +32,12 @@ import {
   Calculator,
   Factory,
   Rocket,
-  Lock
+  Lock,
+  TrendingUp,
+  Users,
+  Sparkles,
+  Truck,
+  ShieldAlert
 } from 'lucide-react'
 import Header from '../components/Header'
 import PageGutter from '../components/ui/PageGutter'
@@ -47,8 +52,11 @@ import { useBreakpoint } from '../hooks/useBreakpoint'
 import { useNotes } from '../hooks/useNotes'
 import { PHASE_STYLES, getPhaseStyle, getPhaseSurfaceStyles, getPhaseMeta } from '../utils/phaseStyles'
 import PhaseMark from '../components/Phase/PhaseMark'
+import PhaseDecisionActions from '../components/projects/PhaseDecisionActions'
+import EvidenceCheckRow from '../components/projects/EvidenceCheckRow'
 import { getModalStyles } from '../utils/responsiveStyles'
 import Button from '../components/Button'
+import { generateClaudeResearchPrompt } from '../lib/generateClaudeResearchPrompt'
 // Dynamic imports for components that import supabase statically to avoid circular dependencies during module initialization
 const IdentifiersSection = lazy(() => import('../components/IdentifiersSection'))
 const ProfitabilityCalculator = lazy(() => import('../components/ProfitabilityCalculator'))
@@ -304,6 +312,15 @@ function ProjectDetailInner({ useApp }) {
   const { t } = useTranslation()
   const identifiersSectionRef = useRef(null)
   const researchFileInputRef = useRef(null)
+  const researchPromptPreviewRef = useRef(null)
+  const viabilityFileInputRef = useRef(null)
+  const profitabilityCalcRef = useRef(null)
+
+  // Refs per autosave Viabilitat (llegir valor actual al timeout)
+  useEffect(() => {
+    viabilityNotesRef.current = viabilityNotes
+    viabilityEvidenceRef.current = viabilityEvidence
+  })
   const modalStyles = getModalStyles(isMobile, darkMode)
   
   // Extreure UUID net del paràmetre de ruta (eliminar qualsevol sufix com "Fes:")
@@ -349,10 +366,27 @@ function ProjectDetailInner({ useApp }) {
   })
   const [researchTouched, setResearchTouched] = useState(false)
   const [researchOverrideOpen, setResearchOverrideOpen] = useState(false)
+  const [viabilityOverrideOpen, setViabilityOverrideOpen] = useState(false)
   const [researchDecision, setResearchDecision] = useState(null)
   const [researchMsg, setResearchMsg] = useState(null)
   const [researchImport, setResearchImport] = useState(null)
-  const [researchClaudePrompt, setResearchClaudePrompt] = useState(null)
+  const [researchPaste, setResearchPaste] = useState('')
+  const [viabilityImport, setViabilityImport] = useState(null)
+  const [viabilityEvidence, setViabilityEvidence] = useState({
+    costs_margin: '',
+    logistics: '',
+    constraints: ''
+  })
+  const [viabilityChecks, setViabilityChecks] = useState({
+    costs_margin: false,
+    logistics: false,
+    constraints: false
+  })
+  const [viabilityNotes, setViabilityNotes] = useState('')
+  const [viabilitySaveStatus, setViabilitySaveStatus] = useState(null) // 'saving' | 'saved' | 'error'
+  const viabilityNotesRef = useRef('')
+  const viabilityEvidenceRef = useRef({ costs_margin: '', logistics: '', constraints: '' })
+  const viabilitySaveTimeoutRef = useRef(null)
   const { notes, loading: notesLoading } = useNotes()
   const loadSeqRef = useRef(0)
   const mountedRef = useRef(false)
@@ -402,7 +436,12 @@ function ProjectDetailInner({ useApp }) {
         }
         return
       }
-      if (mountedRef.current && seq === loadSeqRef.current) setProject(data)
+      if (mountedRef.current && seq === loadSeqRef.current) {
+        setProject(data)
+        if (data?.viability_notes) {
+          setViabilityNotes(data.viability_notes)
+        }
+      }
       const docs = await getDocuments(id)
       if (mountedRef.current && seq === loadSeqRef.current) {
       setDocuments(Array.isArray(docs) ? docs : [])
@@ -500,6 +539,11 @@ function ProjectDetailInner({ useApp }) {
     return `projects/${id}/research/`
   }, [id])
 
+  const viabilityStoragePrefix = useMemo(() => {
+    if (!id) return null
+    return `projects/${id}/viability/`
+  }, [id])
+
   const researchAllChecksOk = useMemo(() => {
     return !!(researchChecks.demand && researchChecks.competition && researchChecks.simple && researchChecks.improvable)
   }, [researchChecks])
@@ -514,6 +558,57 @@ function ProjectDetailInner({ useApp }) {
   const hasAsin = !!(project?.asin && /^[A-Z0-9]{10}$/i.test(String(project.asin).trim()))
   /** PASSA només si s'ha generat prompt i hi ha ASIN o informe adjunt */
   const canPassResearch = !!(project?.research_prompt_generated && (hasAsin || researchHasReport))
+
+  const derivedMarketplace = project?.marketplace || (marketplaceTags?.[0]?.marketplace_code ? `Amazon ${marketplaceTags[0].marketplace_code}` : 'Amazon ES')
+  const researchPromptText = useMemo(() => {
+    if (!hasAsin || !project?.asin) return ''
+    return generateClaudeResearchPrompt({ asin: project.asin, marketplace: derivedMarketplace })
+  }, [hasAsin, project?.asin, derivedMarketplace])
+
+  // Viabilitat helpers
+  const hasViabilityEvidence = (key) => {
+    const v = (viabilityEvidence?.[key] || '').trim()
+    return v.length >= 8
+  }
+
+  const viabilityChecksReady = useMemo(() => {
+    return ['costs_margin', 'logistics', 'constraints'].some((k) => hasViabilityEvidence(k))
+  }, [viabilityEvidence])
+
+  const viabilityAllChecksOk = useMemo(() => {
+    return !!(viabilityChecks.costs_margin && viabilityChecks.logistics && viabilityChecks.constraints)
+  }, [viabilityChecks])
+
+  const viabilityHasReport = !!viabilityImport
+  const hasAnyViabilityEvidenceChecksOk = !!(viabilityChecks.costs_margin || viabilityChecks.logistics || viabilityChecks.constraints)
+  const canPassViability = !!(hasAnyViabilityEvidenceChecksOk && (hasAsin || viabilityHasReport))
+
+  /** Autosave Viabilitat (debounced): notes + evidències + calculador */
+  const runViabilityAutosave = useCallback(async () => {
+    const projectId = project?.id
+    if (!projectId) return
+    const notes = viabilityNotesRef.current
+    setViabilitySaveStatus('saving')
+    try {
+      const { updateProject } = await import('../lib/supabase')
+      await updateProject(projectId, { viability_notes: notes })
+      await profitabilityCalcRef.current?.save?.()
+      setViabilitySaveStatus('saved')
+      setTimeout(() => setViabilitySaveStatus(null), 2000)
+    } catch (err) {
+      console.error('Error guardant viabilitat:', err)
+      setViabilitySaveStatus('error')
+      setTimeout(() => setViabilitySaveStatus(null), 3000)
+    }
+  }, [project?.id])
+
+  const scheduleViabilityAutosave = useCallback(() => {
+    if (viabilitySaveTimeoutRef.current) clearTimeout(viabilitySaveTimeoutRef.current)
+    viabilitySaveTimeoutRef.current = setTimeout(() => {
+      runViabilityAutosave()
+      viabilitySaveTimeoutRef.current = null
+    }, 800)
+  }, [runViabilityAutosave])
 
   /** Marca research_prompt_generated al projecte (BD + estat local) */
   const markResearchPromptGenerated = async () => {
@@ -667,6 +762,55 @@ function ProjectDetailInner({ useApp }) {
     setMsg('success', pass ? (forced ? 'PASSA (forçat)' : 'PASSA') : 'NO PASSA')
   }
 
+  const handleImportViabilityFile = async (file) => {
+    if (viabilityStoragePrefix) {
+      try {
+        const { storageService } = await import('../lib/storageService')
+        await storageService.uploadFile(`${viabilityStoragePrefix}${file.name}`, file)
+        // Notify Explorer to refresh after upload
+        if (handleUploadComplete) {
+          await handleUploadComplete([{
+            name: file.name,
+            path: `${viabilityStoragePrefix}${file.name}`,
+            size: file.size
+          }])
+        }
+      } catch (err) {
+        try {
+          const { showToast } = await import('../components/Toast')
+          showToast('Permís denegat: no tens accés a aquest projecte o el path no és vàlid.', 'warning')
+        } catch {}
+        return
+      }
+    }
+    setViabilityImport({ _fileName: file.name, _importedAt: Date.now() })
+  }
+
+  const handleDownloadViabilityReport = async () => {
+    if (!viabilityImport?._fileName || !viabilityStoragePrefix) return
+    try {
+      const { storageService } = await import('../lib/storageService')
+      const url = await storageService.getSignedUrl(`${viabilityStoragePrefix}${viabilityImport._fileName}`)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = viabilityImport._fileName
+      a.click()
+    } catch (err) {
+      try {
+        const { showToast } = await import('../components/Toast')
+        showToast('Error descarregant l\'informe', 'error')
+      } catch {}
+    }
+  }
+
+  const markViabilityDecision = async (pass, forced = false) => {
+    // TODO: persist viability decision if needed
+    try {
+      const { showToast } = await import('../components/Toast')
+      showToast(pass ? (forced ? 'PASSA (forçat)' : 'PASSA') : 'NO PASSA', 'success')
+    } catch {}
+  }
+
   const handleImportResearchFile = async (file) => {
     if (researchStoragePrefix) {
       try {
@@ -717,6 +861,89 @@ function ProjectDetailInner({ useApp }) {
       localStorage.setItem(`research_import_${id}`, JSON.stringify({ ...parsed.data, _fileName: file.name, _importedAt: Date.now() }))
     } catch {}
 
+    try {
+      const { showToast } = await import('../components/Toast')
+      showToast('Informe importat correctament', 'success')
+    } catch {}
+  }
+
+  const REQUIRED_CHECK_SECTIONS = ['### CHECK_DEMAND', '### CHECK_COMPETITION', '### CHECK_SIMPLICITY', '### CHECK_IMPROVABLE']
+
+  const handleImportFromPaste = async () => {
+    const t = (researchPaste || '').trim()
+    if (!t) return
+
+    const missingSections = REQUIRED_CHECK_SECTIONS.filter((s) => !t.includes(s))
+    if (missingSections.length > 0) {
+      try {
+        const { showToast } = await import('../components/Toast')
+        showToast('Text no vàlid: falten seccions CHECK_*', 'warning')
+      } catch {}
+      return
+    }
+
+    const parsed = parseResearchReport(t)
+    if (!parsed.ok) {
+      try {
+        const { showToast } = await import('../components/Toast')
+        showToast(`Informe invàlid: ${parsed.errors[0]}`, 'warning')
+      } catch {}
+      return
+    }
+
+    let fileName = 'enganxat'
+    const asinForFile = project?.asin || parsed.data?.asin || 'unknown'
+    if (researchStoragePrefix && project?.id) {
+      const now = new Date()
+      const stamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`
+      fileName = `research_report_${asinForFile}_${stamp}.md`
+      const path = `${researchStoragePrefix}${fileName}`
+      const packed = `---
+# FREEDOLIAPP — Research Report
+asin: ${asinForFile}
+marketplace: ${derivedMarketplace || 'Amazon ES'}
+created_at: ${now.toISOString()}
+source: pasted_output
+
+## PROMPT
+\`\`\`text
+${researchPromptText || ''}
+\`\`\`
+
+## OUTPUT
+${t}
+`
+      const blob = new Blob([packed], { type: 'text/markdown' })
+      try {
+        const { storageService } = await import('../lib/storageService')
+        await storageService.uploadFile(path, blob)
+        if (handleUploadComplete) {
+          await handleUploadComplete([{ name: fileName, path, size: blob.size }])
+        }
+      } catch (err) {
+        try {
+          const { showToast } = await import('../components/Toast')
+          showToast('Import correcte però no s\'ha pogut guardar a Storage.', 'warning')
+        } catch {}
+      }
+    }
+
+    setResearchImport({ ...parsed.data, rawText: t, _fileName: fileName, _importedAt: Date.now() })
+    const ev = parsed.data.evidence || {}
+    if (ev.demand || ev.competition || ev.simple || ev.improvable) {
+      setResearchEvidence(prev => ({ ...prev, ...ev }))
+      setResearchChecks(prev => ({
+        ...prev,
+        demand: (ev.demand || '').length >= 8,
+        competition: (ev.competition || '').length >= 8,
+        simple: (ev.simple || '').length >= 8,
+        improvable: (ev.improvable || '').length >= 8
+      }))
+    }
+    try {
+      localStorage.setItem(`research_import_${id}`, JSON.stringify({ ...parsed.data, rawText: t, _fileName: fileName, _importedAt: Date.now() }))
+    } catch {}
+    setResearchPaste('')
     try {
       const { showToast } = await import('../components/Toast')
       showToast('Informe importat correctament', 'success')
@@ -1465,24 +1692,84 @@ function ProjectDetailInner({ useApp }) {
   return (
           <>
             <div style={{ display: 'grid', gap: 10, paddingTop: 2 }}>
-              {project?.asin && (
-                <div className="research-asin-readonly" style={{ fontSize: 13, color: 'var(--muted-1)' }}>
-                  ASIN: <strong style={{ color: 'var(--text-1)' }}>{project.asin}</strong>
-                </div>
-              )}
-
               {researchMsg && (
-      <div style={{
-                  fontSize: 13,
-                  fontWeight: 600,
-                  color: researchMsg.type === 'success' ? 'var(--success-1)' : 'var(--danger-1)'
-                }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: researchMsg.type === 'success' ? 'var(--success-1)' : 'var(--danger-1)' }}>
                   {researchMsg.text}
                 </div>
               )}
 
-              {/* Informe de recerca: dropzone compacta + botons prompt (turquesa) a la mateixa fila */}
-              <div className="research-report-row">
+              {/* Capçalera read-only: dades del producte */}
+              <div className="research-product-header">
+                <span className="research-product-header__chip">ASIN: <strong>{project?.asin || '—'}</strong></span>
+                <span className="research-product-header__chip">Marketplace: <strong>{derivedMarketplace || '—'}</strong></span>
+                {(() => {
+                const productUrl = project?.product_url || (project?.asin ? buildAmazonUrl(project.asin) : '')
+                if (!productUrl) return null
+                return (
+                  <span className="research-product-header__chip" title={productUrl}>
+                    URL: <strong>{productUrl.length > 40 ? `${productUrl.slice(0, 37)}…` : productUrl}</strong>
+                  </span>
+                )
+              })()}
+              </div>
+
+              {/* Prompt preview + accions (quan hi ha ASIN) */}
+              {hasAsin && (
+                <>
+                  <div className="research-prompt-preview-wrap">
+                    <textarea
+                      ref={researchPromptPreviewRef}
+                      readOnly
+                      value={researchPromptText}
+                      className="research-prompt-preview"
+                      aria-label="Preview del prompt"
+                    />
+                  </div>
+                  <div className="research-prompt-actions">
+                    <Button
+                      type="button"
+                      className="btn--turq"
+                      size="sm"
+                      disabled={!researchPromptText}
+                      onClick={async () => {
+                        if (!researchPromptText) return
+                        try {
+                          await navigator.clipboard.writeText(researchPromptText)
+                        } catch {
+                          try {
+                            researchPromptPreviewRef.current?.select()
+                            document.execCommand('copy')
+                          } catch (_) {}
+                        }
+                        await markResearchPromptGenerated()
+                        try {
+                          const { showToast } = await import('../components/Toast')
+                          showToast('Prompt copiat', 'success')
+                        } catch (_) {}
+                      }}
+                    >
+                      Copiar Prompt
+                    </Button>
+                    <Button
+                      type="button"
+                      className="btn--turq"
+                      size="sm"
+                      disabled={!researchPromptText || !project?.asin}
+                      onClick={async () => {
+                        if (!researchPromptText || !project?.asin) return
+                        const { downloadPrompt } = await import('../utils/marketResearchPrompt')
+                        downloadPrompt(researchPromptText, project.asin)
+                        await markResearchPromptGenerated()
+                      }}
+                    >
+                      Descarregar Prompt
+                    </Button>
+                  </div>
+                </>
+              )}
+
+              {/* Grid 2 columnes: dropzone | paste */}
+              <div className="research-import-grid">
                 <input
                   ref={researchFileInputRef}
                   type="file"
@@ -1494,63 +1781,45 @@ function ProjectDetailInner({ useApp }) {
                     e.target.value = ''
                   }}
                 />
-                {!researchStoragePrefix ? (
-                  <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>Carpeta no disponible.</div>
-                ) : !researchHasReport ? (
-                  <div
-                    className="research-dropzone--compact"
-                    onClick={() => researchFileInputRef.current?.click()}
-                    onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('is-dragover') }}
-                    onDragLeave={(e) => { e.currentTarget.classList.remove('is-dragover') }}
-                    onDrop={(e) => { e.preventDefault(); e.currentTarget.classList.remove('is-dragover'); const f = e.dataTransfer.files?.[0]; if (f) handleImportResearchFile(f) }}
-                  >
-                    Arrossega l'informe aquí o fes clic
-                  </div>
-                ) : (
-                  <div className="research-report-attachment">
-                    <span className="research-report-attachment__label">Informe (Recerca)</span>
-                    <span className="research-report-attachment__name">{researchImport?._fileName || 'Informe importat'}</span>
-                    <Button variant="ghost" size="sm" onClick={handleDownloadResearchReport} disabled={!researchImport?.rawText}>Descarregar</Button>
-                    <Button variant="ghost" size="sm" onClick={() => researchFileInputRef.current?.click()}>Substituir</Button>
-                  </div>
-                )}
-                <div className="research-prompt-actions">
+                <div className="research-import-grid__left">
+                  {!researchStoragePrefix ? (
+                    <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>Carpeta no disponible.</div>
+                  ) : !researchHasReport ? (
+                    <div
+                      className="research-dropzone--compact"
+                      onClick={() => researchFileInputRef.current?.click()}
+                      onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('is-dragover') }}
+                      onDragLeave={(e) => { e.currentTarget.classList.remove('is-dragover') }}
+                      onDrop={(e) => { e.preventDefault(); e.currentTarget.classList.remove('is-dragover'); const f = e.dataTransfer.files?.[0]; if (f) handleImportResearchFile(f) }}
+                    >
+                      Arrossega l'informe aquí o fes clic
+                    </div>
+                  ) : (
+                    <div className="research-report-attachment research-report-attachment--in-grid">
+                      <span className="research-report-attachment__label">Informe (Recerca)</span>
+                      <span className="research-report-attachment__name">{researchImport?._fileName || 'Informe importat'}</span>
+                      <Button variant="ghost" size="sm" onClick={handleDownloadResearchReport} disabled={!researchImport?.rawText}>Descarregar</Button>
+                      <Button variant="ghost" size="sm" onClick={() => researchFileInputRef.current?.click()}>Substituir</Button>
+                    </div>
+                  )}
+                </div>
+                <div className="research-import-grid__right">
+                  <textarea
+                    value={researchPaste}
+                    onChange={(e) => setResearchPaste(e.target.value)}
+                    placeholder="Enganxa aquí el resultat de Claude (informe)..."
+                    className="research-paste-input"
+                    aria-label="Enganxa resultat"
+                  />
                   <Button
                     type="button"
                     className="btn--turq"
                     size="sm"
-                    disabled={!hasAsin}
-                    onClick={async () => {
-                      if (!project?.asin) return
-                      const { generateClaudeResearchPrompt } = await import('../lib/generateClaudeResearchPrompt')
-                      const marketplace = project.marketplace || (marketplaceTags?.[0]?.marketplace_code ? `Amazon ${marketplaceTags[0].marketplace_code}` : 'Amazon ES')
-                      const prompt = generateClaudeResearchPrompt({ asin: project.asin, marketplace })
-                      setResearchClaudePrompt(prompt)
-                      try {
-                        const { showToast } = await import('../components/Toast')
-                        showToast('Prompt generat correctament', 'success')
-                      } catch (_) {}
-                      await markResearchPromptGenerated()
-                    }}
+                    disabled={!researchPaste.trim()}
+                    onClick={handleImportFromPaste}
+                    style={{ marginTop: 8 }}
                   >
-                    Generar Prompt Claude
-                  </Button>
-                  <Button
-                    type="button"
-                    className="btn--turq"
-                    size="sm"
-                    disabled={!hasAsin}
-                    onClick={async () => {
-                      if (!project?.asin) return
-                      const { generateClaudeResearchPrompt } = await import('../lib/generateClaudeResearchPrompt')
-                      const { downloadPrompt } = await import('../utils/marketResearchPrompt')
-                      const marketplace = project.marketplace || (marketplaceTags?.[0]?.marketplace_code ? `Amazon ${marketplaceTags[0].marketplace_code}` : 'Amazon ES')
-                      const text = researchClaudePrompt || generateClaudeResearchPrompt({ asin: project.asin, marketplace })
-                      downloadPrompt(text, project.asin)
-                      await markResearchPromptGenerated()
-                    }}
-                  >
-                    Descarregar Prompt
+                    Importar des de text
                   </Button>
                 </div>
               </div>
@@ -1652,97 +1921,83 @@ function ProjectDetailInner({ useApp }) {
               ) : null}
 
               <div style={{ display: 'grid', gap: 10, marginTop: 6 }}>
-                {[
-                  { key: 'demand', label: 'Demanda' },
-                  { key: 'competition', label: 'Competència' },
-                  { key: 'simple', label: 'Risc' },
-                  { key: 'improvable', label: 'Millora' }
-                ].map((c) => {
-                  const okEvidence = hasEvidence(c.key)
-                return (
-                    <div key={c.key} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text-1)' }} title={c.label}>
-                        <input
-                          type="checkbox"
-                          checked={!!researchChecks[c.key]}
-                          disabled={!okEvidence}
-                          onChange={(e) => {
-                            setResearchTouched(true)
-                            setResearchChecks({ ...researchChecks, [c.key]: e.target.checked })
-                          }}
-                        />
-                      </label>
-                      <div style={{ minWidth: 120, fontSize: 13, fontWeight: 500, color: 'var(--text-1)' }}>
-                        {c.label}
-                      </div>
-                      <input
-                        type="text"
-                        value={researchEvidence[c.key] || ''}
-                        onChange={(e) => {
-                          setResearchTouched(true)
-                          const val = e.target.value
-                          const next = { ...researchEvidence, [c.key]: val }
-                          setResearchEvidence(next)
-                          const len = val.trim().length
-                          if (len >= 8) setResearchChecks((prev) => ({ ...prev, [c.key]: true }))
-                          else if (len < 8 && researchChecks[c.key]) setResearchChecks((prev) => ({ ...prev, [c.key]: false }))
-                        }}
-                        placeholder="Link o nota breu (mín. 8 caràcters)"
-                      style={{
-                          flex: 1,
-                          height: 34,
-                          borderRadius: 10,
-                          border: '1px solid var(--border-1)',
-                          background: 'var(--surface-bg)',
-                          color: 'var(--text-1)',
-                          padding: '0 10px',
-                          outline: 'none'
-                        }}
-                      />
-                    </div>
-                  )
-                })}
+                <EvidenceCheckRow
+                  icon={TrendingUp}
+                  label="Demanda"
+                  value={researchEvidence.demand || ''}
+                  onChange={(val) => {
+                    setResearchTouched(true)
+                    setResearchEvidence({ ...researchEvidence, demand: val })
+                  }}
+                  checked={researchChecks.demand}
+                  onCheckedChange={(checked) => {
+                    setResearchTouched(true)
+                    setResearchChecks({ ...researchChecks, demand: checked })
+                  }}
+                  autoCheck={true}
+                />
+                <EvidenceCheckRow
+                  icon={Users}
+                  label="Competència"
+                  value={researchEvidence.competition || ''}
+                  onChange={(val) => {
+                    setResearchTouched(true)
+                    setResearchEvidence({ ...researchEvidence, competition: val })
+                  }}
+                  checked={researchChecks.competition}
+                  onCheckedChange={(checked) => {
+                    setResearchTouched(true)
+                    setResearchChecks({ ...researchChecks, competition: checked })
+                  }}
+                  autoCheck={true}
+                />
+                <EvidenceCheckRow
+                  icon={AlertTriangle}
+                  label="Risc"
+                  value={researchEvidence.simple || ''}
+                  onChange={(val) => {
+                    setResearchTouched(true)
+                    setResearchEvidence({ ...researchEvidence, simple: val })
+                  }}
+                  checked={researchChecks.simple}
+                  onCheckedChange={(checked) => {
+                    setResearchTouched(true)
+                    setResearchChecks({ ...researchChecks, simple: checked })
+                  }}
+                  autoCheck={true}
+                />
+                <EvidenceCheckRow
+                  icon={Sparkles}
+                  label="Millora"
+                  value={researchEvidence.improvable || ''}
+                  onChange={(val) => {
+                    setResearchTouched(true)
+                    setResearchEvidence({ ...researchEvidence, improvable: val })
+                  }}
+                  checked={researchChecks.improvable}
+                  onCheckedChange={(checked) => {
+                    setResearchTouched(true)
+                    setResearchChecks({ ...researchChecks, improvable: checked })
+                  }}
+                  autoCheck={true}
+                />
               </div>
 
-              <div className="research-decision-actions">
-                {!canPassResearch && (
-                  <span style={{ fontSize: 12, color: 'var(--muted-1)' }}>
-                    {!project?.research_prompt_generated ? 'Falta generar Research Prompt' : 'Falta ASIN o Informe'}
-                  </span>
-                )}
-                <Button
-                  variant="success"
-                  size="sm"
-                  onClick={() => markResearchDecision(true, false)}
-                  disabled={!canPassResearch || !researchChecksReady || !researchAllChecksOk}
-                  title={!canPassResearch ? (!project?.research_prompt_generated ? 'Falta generar Research Prompt' : 'Falta ASIN o Informe') : (!researchChecksReady ? 'Falten evidències' : (!researchAllChecksOk ? 'Falten checks' : 'PASSA'))}
-                >
-                  PASSA
-                </Button>
-
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => markResearchDecision(false, false)}
-                  disabled={!researchHasAsin}
-                  title={!researchHasAsin ? 'Primer defineix l’ASIN' : 'NO PASSA'}
-                >
-                  NO PASSA
-                </Button>
-
-                {researchHasAsin && researchChecksReady && !researchAllChecksOk && (
-                  <Button variant="ghost" size="sm" onClick={() => setResearchOverrideOpen(true)} title="Forçar PASSA (override)">
-                    <Lock size={16} /> Forçar PASSA
-                  </Button>
-                )}
-
-                {researchDecision && (
-                  <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>
-                    Estat: <strong style={{ color: 'var(--text-1)' }}>{researchDecision.pass ? 'PASSA' : 'NO PASSA'}</strong>
-                    {researchDecision.forced ? ' (forçat)' : ''}
-                  </div>
-                )}
-              </div>
+              <PhaseDecisionActions
+                canPass={canPassResearch && researchChecksReady && researchAllChecksOk}
+                canNoPass={researchHasAsin}
+                onPass={() => markResearchDecision(true, false)}
+                onNoPass={() => markResearchDecision(false, false)}
+                onOverride={() => setResearchOverrideOpen(true)}
+                showOverride={true}
+                disabledReason={!canPassResearch ? (!project?.research_prompt_generated ? 'Falta generar Research Prompt' : 'Falta ASIN o Informe') : null}
+                overrideTitle="Forçar PASSA (override)"
+                passLabel="PASSA"
+                noPassLabel="NO PASSA"
+                passTitle={!canPassResearch ? (!project?.research_prompt_generated ? 'Falta generar Research Prompt' : 'Falta ASIN o Informe') : (!researchChecksReady ? 'Falten evidències' : (!researchAllChecksOk ? 'Falten checks' : 'PASSA'))}
+                noPassTitle={!researchHasAsin ? "Primer defineix l'ASIN" : 'NO PASSA'}
+                decision={researchDecision}
+              />
             </div>
 
             {researchOverrideOpen && (
@@ -1782,12 +2037,150 @@ function ProjectDetailInner({ useApp }) {
         )
       case 2:
         return (
-          <div style={{ marginBottom: '24px' }}>
-            <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
-              <ProfitabilityCalculator projectId={id} darkMode={darkMode} showAsinCapture={false} />
-            </Suspense>
+          <>
+            <div style={{ marginBottom: '24px' }}>
+              <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
+                <ProfitabilityCalculator
+                  ref={profitabilityCalcRef}
+                  projectId={id}
+                  darkMode={darkMode}
+                  showAsinCapture={false}
+                  hideSaveButton={true}
+                  onChange={scheduleViabilityAutosave}
+                />
+              </Suspense>
+            </div>
+
+            {/* Evidències */}
+            <div style={{ display: 'grid', gap: 10, marginBottom: 16 }}>
+              <EvidenceCheckRow
+                icon={Calculator}
+                label="Cost i marge"
+                value={viabilityEvidence.costs_margin || ''}
+                onChange={(val) => {
+                  setViabilityEvidence({ ...viabilityEvidence, costs_margin: val })
+                  scheduleViabilityAutosave()
+                }}
+                checked={viabilityChecks.costs_margin}
+                onCheckedChange={(checked) => {
+                  setViabilityChecks({ ...viabilityChecks, costs_margin: checked })
+                }}
+                autoCheck={true}
+              />
+              <EvidenceCheckRow
+                icon={Truck}
+                label="Logística"
+                value={viabilityEvidence.logistics || ''}
+                onChange={(val) => {
+                  setViabilityEvidence({ ...viabilityEvidence, logistics: val })
+                  scheduleViabilityAutosave()
+                }}
+                checked={viabilityChecks.logistics}
+                onCheckedChange={(checked) => {
+                  setViabilityChecks({ ...viabilityChecks, logistics: checked })
+                }}
+                autoCheck={true}
+              />
+              <EvidenceCheckRow
+                icon={ShieldAlert}
+                label="Restriccions"
+                value={viabilityEvidence.constraints || ''}
+                onChange={(val) => {
+                  setViabilityEvidence({ ...viabilityEvidence, constraints: val })
+                  scheduleViabilityAutosave()
+                }}
+                checked={viabilityChecks.constraints}
+                onCheckedChange={(checked) => {
+                  setViabilityChecks({ ...viabilityChecks, constraints: checked })
+                }}
+                autoCheck={true}
+              />
+            </div>
+
+            {/* Notes (objectius) */}
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--text-1)', marginBottom: 8 }}>
+                Notes (objectius)
+              </label>
+              <textarea
+                value={viabilityNotes}
+                onChange={(e) => {
+                  setViabilityNotes(e.target.value)
+                  scheduleViabilityAutosave()
+                }}
+                placeholder="Preus objectiu, condicions, observacions..."
+                style={{
+                  width: '100%',
+                  minHeight: 80,
+                  padding: '10px',
+                  borderRadius: 10,
+                  border: '1px solid var(--border-1)',
+                  background: 'var(--surface-bg)',
+                  color: 'var(--text-1)',
+                  fontSize: 13,
+                  fontFamily: 'inherit',
+                  resize: 'vertical',
+                  outline: 'none'
+                }}
+              />
+              {viabilitySaveStatus && (
+                <div style={{ marginTop: 8, fontSize: 12, color: 'var(--muted-1)' }}>
+                  {viabilitySaveStatus === 'saving' && 'Guardant…'}
+                  {viabilitySaveStatus === 'saved' && 'Guardat'}
+                  {viabilitySaveStatus === 'error' && 'Error guardant'}
+                </div>
+              )}
+            </div>
+
+            {/* Gate PASSA / CANDAU (sense NO PASSA), alineats a l'esquerra */}
+            <PhaseDecisionActions
+              canPass={canPassViability && viabilityChecksReady && viabilityAllChecksOk}
+              canNoPass={hasAsin}
+              onPass={() => markViabilityDecision(true, false)}
+              onNoPass={() => markViabilityDecision(false, false)}
+              onOverride={() => setViabilityOverrideOpen(true)}
+              showOverride={hasAsin && viabilityChecksReady && !viabilityAllChecksOk}
+              showNoPass={false}
+              disabledReason={!canPassViability ? (!hasAnyViabilityEvidenceChecksOk ? 'Falten evidències' : 'Falta ASIN') : null}
+              overrideTitle="Forçar PASSA (override)"
+              passLabel="PASSA"
+              noPassLabel="NO PASSA"
+              passTitle={!canPassViability ? (!hasAnyViabilityEvidenceChecksOk ? 'Falten evidències' : 'Falta ASIN') : (!viabilityChecksReady ? 'Falten evidències' : (!viabilityAllChecksOk ? 'Falten checks' : 'PASSA'))}
+              noPassTitle={!hasAsin ? 'Primer defineix l\'ASIN' : 'NO PASSA'}
+            />
+
+            {/* Modal override */}
+            {viabilityOverrideOpen && (
+              <div style={modalStyles.overlay} onClick={() => setViabilityOverrideOpen(false)}>
+                <div
+                  style={{ ...modalStyles.modal, backgroundColor: darkMode ? '#111827' : '#ffffff' }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div style={modalStyles.header || styles.createModalHeader}>
+                    <h3 style={{ margin: 0, fontSize: 16 }}>Forçar PASSA</h3>
+                    <Button variant="ghost" size="sm" onClick={() => setViabilityOverrideOpen(false)} aria-label="Tancar">×</Button>
                   </div>
-                )
+                  <div style={{ padding: '16px', fontSize: 14, color: darkMode ? '#e5e7eb' : '#374151' }}>
+                    Estàs forçant el pas de fase sota la teva responsabilitat. Vols continuar?
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '16px', borderTop: '1px solid var(--border-1)' }}>
+                    <Button variant="secondary" size="sm" onClick={() => setViabilityOverrideOpen(false)}>Cancel·lar</Button>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => {
+                        markViabilityDecision(true, true)
+                        setViabilityOverrideOpen(false)
+                      }}
+                    >
+                      Forçar PASSA
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        )
       case 3:
         return (
           <>
