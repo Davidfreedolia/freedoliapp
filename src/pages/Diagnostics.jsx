@@ -20,6 +20,7 @@ import {
   getDashboardStats
 } from '../lib/supabase'
 import { CheckCircle2, XCircle, AlertTriangle, Play, RefreshCw, ExternalLink } from 'lucide-react'
+import { driveService } from '../lib/googleDrive'
 
 const CHECK_STATUS = {
   PENDING: 'pending',
@@ -381,6 +382,53 @@ export default function Diagnostics() {
     }
   }
 
+  // 7) Drive integration
+  const checkDrive = async () => {
+    updateCheck('drive', CHECK_STATUS.RUNNING)
+    try {
+      const isConnected = typeof driveService.isAuthenticated === 'function'
+        ? driveService.isAuthenticated()
+        : false
+      if (!isConnected) {
+        updateCheck('drive', CHECK_STATUS.WARNING, { connected: false }, 'Drive not connected')
+        addLog('⚠️ Drive not connected (this is OK if not using Drive)', 'warning')
+        return
+      }
+
+      // Try to verify token
+      try {
+        const isValid = await driveService.verifyToken()
+        if (!isValid) {
+          updateCheck('drive', CHECK_STATUS.WARNING, { connected: false }, 'Drive disconnected (token invalid)')
+          addLog('⚠️ Drive disconnected: token invalid', 'warning')
+          return
+        }
+
+        // Try to list root folder (if listFolder exists)
+        if (typeof driveService.listFolder === 'function') {
+          try {
+            await driveService.listFolder('root')
+            addLog('✅ Drive root folder accessible', 'success')
+          } catch (listErr) {
+            addLog('⚠️ Cannot list root folder (may not have permission)', 'warning')
+          }
+        }
+
+        updateCheck('drive', CHECK_STATUS.OK, { connected: true })
+        addLog('✅ Drive connected and token valid', 'success')
+      } catch (driveErr) {
+        if (driveErr.message?.includes('disconnected') || driveErr.message?.includes('token') || driveErr.message?.includes('AUTH_REQUIRED')) {
+          updateCheck('drive', CHECK_STATUS.WARNING, { connected: false }, 'Drive disconnected (token invalid)')
+          addLog('⚠️ Drive disconnected: token invalid', 'warning')
+        } else {
+          throw driveErr
+        }
+      }
+    } catch (err) {
+      updateCheck('drive', CHECK_STATUS.FAIL, null, err.message, '/settings')
+      addLog(`❌ Drive check failed: ${err.message}`, 'error')
+    }
+  }
 
   // 8) Dashboard widgets
   const checkDashboard = async () => {
@@ -430,6 +478,7 @@ export default function Diagnostics() {
     await checkStickyToTask()
     await checkTasks()
     await checkCalendar()
+    await checkDrive()
     await checkDashboard()
 
     addLog('✅ All checks completed', 'success')
@@ -444,6 +493,7 @@ export default function Diagnostics() {
       sticky_to_task: checkStickyToTask,
       tasks: checkTasks,
       calendar: checkCalendar,
+      drive: checkDrive,
       dashboard: checkDashboard
     }
 
@@ -635,6 +685,7 @@ export default function Diagnostics() {
     { id: 'sticky_to_task', name: 'Sticky → Task', description: 'Conversion and linking' },
     { id: 'tasks', name: 'Tasks CRUD', description: 'Create, update, snooze, delete' },
     { id: 'calendar', name: 'Calendar Events', description: 'Event generation and structure' },
+    { id: 'drive', name: 'Drive Integration', description: 'Connection and folder access' },
     { id: 'dashboard', name: 'Dashboard Widgets', description: 'Stats loading and validation' }
   ]
 

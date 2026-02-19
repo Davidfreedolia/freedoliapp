@@ -2,6 +2,18 @@ import { supabase } from './supabase'
 
 const BUCKET = 'project-files'
 
+/** Carpetes canòniques de cada projecte (prefixos sota projects/{id}/) */
+export const PROJECT_STORAGE_FOLDERS = [
+  'research/',
+  'viability/',
+  'suppliers/',
+  'samples/',
+  'production/',
+  'listing/',
+  'live/',
+  'docs/'
+]
+
 export const storageService = {
   async listFolder(prefix) {
     const { data, error } = await supabase
@@ -49,5 +61,21 @@ export const storageService = {
       .upload(path + '.folder', new Blob([''], { type: 'text/plain' }), { upsert: true })
 
     if (error) throw error
+  },
+
+  /**
+   * Assegura que totes les carpetes del projecte existeixen (crea el marcador si cal).
+   * Cridar al obrir Project Detail o al muntar l'Explorer.
+   */
+  async ensureProjectStorageFolders(projectId) {
+    if (!projectId) return
+    const base = `projects/${projectId}/`
+    for (const folder of PROJECT_STORAGE_FOLDERS) {
+      try {
+        await this.createFolder(base + folder)
+      } catch (_) {
+        // Ignora errors per carpeta (permisos, etc.); la següent es pot crear
+      }
+    }
   }
 }

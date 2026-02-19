@@ -313,6 +313,8 @@ function ProjectDetailInner({ useApp }) {
   const identifiersSectionRef = useRef(null)
   const researchFileInputRef = useRef(null)
   const researchPromptPreviewRef = useRef(null)
+  const researchPasteRef = useRef('')
+  const researchPasteTimeoutRef = useRef(null)
   const viabilityFileInputRef = useRef(null)
   const profitabilityCalcRef = useRef(null)
 
@@ -869,18 +871,11 @@ function ProjectDetailInner({ useApp }) {
 
   const REQUIRED_CHECK_SECTIONS = ['### CHECK_DEMAND', '### CHECK_COMPETITION', '### CHECK_SIMPLICITY', '### CHECK_IMPROVABLE']
 
-  const handleImportFromPaste = async () => {
-    const t = (researchPaste || '').trim()
-    if (!t) return
-
+  const tryAutoImportFromPaste = async (text) => {
+    const t = (text || '').trim()
+    if (t.length < 200) return
     const missingSections = REQUIRED_CHECK_SECTIONS.filter((s) => !t.includes(s))
-    if (missingSections.length > 0) {
-      try {
-        const { showToast } = await import('../components/Toast')
-        showToast('Text no vàlid: falten seccions CHECK_*', 'warning')
-      } catch {}
-      return
-    }
+    if (missingSections.length > 0) return
 
     const parsed = parseResearchReport(t)
     if (!parsed.ok) {
@@ -944,10 +939,22 @@ ${t}
       localStorage.setItem(`research_import_${id}`, JSON.stringify({ ...parsed.data, rawText: t, _fileName: fileName, _importedAt: Date.now() }))
     } catch {}
     setResearchPaste('')
+    researchPasteRef.current = ''
     try {
       const { showToast } = await import('../components/Toast')
       showToast('Informe importat correctament', 'success')
     } catch {}
+  }
+
+  const handleResearchPasteChange = (e) => {
+    const value = e.target.value
+    setResearchPaste(value)
+    researchPasteRef.current = value
+    if (researchPasteTimeoutRef.current) clearTimeout(researchPasteTimeoutRef.current)
+    researchPasteTimeoutRef.current = setTimeout(() => {
+      tryAutoImportFromPaste(researchPasteRef.current)
+      researchPasteTimeoutRef.current = null
+    }, 700)
   }
 
   const copyResearchPayload = async () => {
@@ -1713,6 +1720,100 @@ ${t}
               })()}
               </div>
 
+              {/* Dades producte: snapshot (preu/pes/mides) quan hi ha ASIN */}
+              {researchHasAsin ? (
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: isMobile ? '1fr' : '100px 1fr',
+                  gap: 10,
+                  alignItems: 'start'
+                }}>
+                  <div style={{
+                    width: 100,
+                    height: 100,
+                    borderRadius: 14,
+                    overflow: 'hidden',
+                    background: 'var(--surface-bg-2)',
+                    border: '1px solid var(--border-1)',
+                    display: 'grid',
+                    placeItems: 'center'
+                  }}>
+                    {(researchSnapshot.thumbUrl || '').trim() ? (
+                      <img
+                        src={researchSnapshot.thumbUrl}
+                        alt=""
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                        loading="lazy"
+                        onError={(e) => { e.currentTarget.style.display = 'none' }}
+                      />
+                    ) : (
+                      <Image size={18} color="var(--muted-1)" />
+                    )}
+                  </div>
+                  <div style={{ display: 'grid', gap: 10 }}>
+                    <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>
+                      <strong style={{ color: 'var(--text-1)' }}>{researchSnapshot.asin}</strong>
+                      {' · '}
+                      <a href={researchSnapshot.url || buildAmazonUrl(researchSnapshot.asin)} target="_blank" rel="noreferrer" style={{ color: 'var(--text-1)' }}>
+                        Amazon
+                      </a>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10 }}>
+                      <input
+                        type="text"
+                        value={researchSnapshot.title}
+                        onChange={(e) => { setResearchTouched(true); setResearchSnapshot({ ...researchSnapshot, title: e.target.value }) }}
+                        placeholder="Títol (base)"
+                        style={{
+                          height: 34, borderRadius: 10, border: '1px solid var(--border-1)',
+                          background: 'var(--surface-bg)', color: 'var(--text-1)', padding: '0 10px', outline: 'none'
+                        }}
+                      />
+                      <input
+                        type="text"
+                        value={researchSnapshot.price}
+                        onChange={(e) => { setResearchTouched(true); setResearchSnapshot({ ...researchSnapshot, price: e.target.value }) }}
+                        placeholder="Preu aprox. (ex: 19.99)"
+                        style={{
+                          height: 34, borderRadius: 10, border: '1px solid var(--border-1)',
+                          background: 'var(--surface-bg)', color: 'var(--text-1)', padding: '0 10px', outline: 'none'
+                        }}
+                      />
+                      <input
+                        type="text"
+                        value={researchSnapshot.weight}
+                        onChange={(e) => { setResearchTouched(true); setResearchSnapshot({ ...researchSnapshot, weight: e.target.value }) }}
+                        placeholder="Pes aprox. (ex: 1.2 kg)"
+                        style={{
+                          height: 34, borderRadius: 10, border: '1px solid var(--border-1)',
+                          background: 'var(--surface-bg)', color: 'var(--text-1)', padding: '0 10px', outline: 'none'
+                        }}
+                      />
+                      <input
+                        type="text"
+                        value={researchSnapshot.dims}
+                        onChange={(e) => { setResearchTouched(true); setResearchSnapshot({ ...researchSnapshot, dims: e.target.value }) }}
+                        placeholder="Mides aprox. (ex: 40×30×10 cm)"
+                        style={{
+                          height: 34, borderRadius: 10, border: '1px solid var(--border-1)',
+                          background: 'var(--surface-bg)', color: 'var(--text-1)', padding: '0 10px', outline: 'none'
+                        }}
+                      />
+                    </div>
+                    <input
+                      type="text"
+                      value={researchSnapshot.thumbUrl}
+                      onChange={(e) => { setResearchTouched(true); setResearchSnapshot({ ...researchSnapshot, thumbUrl: e.target.value }) }}
+                      placeholder="Thumb URL (opcional: enganxa si vols sobreescriure)"
+                      style={{
+                        height: 34, borderRadius: 10, border: '1px solid var(--border-1)',
+                        background: 'var(--surface-bg)', color: 'var(--text-1)', padding: '0 10px', outline: 'none'
+                      }}
+                    />
+                  </div>
+                </div>
+              ) : null}
+
               {/* Prompt preview + accions (quan hi ha ASIN) */}
               {hasAsin && (
                 <>
@@ -1806,119 +1907,13 @@ ${t}
                 <div className="research-import-grid__right">
                   <textarea
                     value={researchPaste}
-                    onChange={(e) => setResearchPaste(e.target.value)}
-                    placeholder="Enganxa aquí el resultat de Claude (informe)..."
+                    onChange={handleResearchPasteChange}
+                    placeholder="Enganxa aquí el resultat de Claude (s'importa automàticament)"
                     className="research-paste-input"
                     aria-label="Enganxa resultat"
                   />
-                  <Button
-                    type="button"
-                    className="btn--turq"
-                    size="sm"
-                    disabled={!researchPaste.trim()}
-                    onClick={handleImportFromPaste}
-                    style={{ marginTop: 8 }}
-                  >
-                    Importar des de text
-                  </Button>
                 </div>
               </div>
-
-              {researchHasAsin ? (
-        <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: isMobile ? '1fr' : '100px 1fr',
-                  gap: 10,
-                  alignItems: 'start'
-                }}>
-            <div style={{
-                    width: 100,
-                    height: 100,
-                    borderRadius: 14,
-                    overflow: 'hidden',
-                    background: 'var(--surface-bg-2)',
-                    border: '1px solid var(--border-1)',
-                    display: 'grid',
-                    placeItems: 'center'
-                  }}>
-                    {(researchSnapshot.thumbUrl || '').trim() ? (
-                      <img
-                        src={researchSnapshot.thumbUrl}
-                        alt=""
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                        loading="lazy"
-                        onError={(e) => { e.currentTarget.style.display = 'none' }}
-                      />
-                    ) : (
-                      <Image size={18} color="var(--muted-1)" />
-                    )}
-                  </div>
-
-                  <div style={{ display: 'grid', gap: 10 }}>
-                    <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>
-                      <strong style={{ color: 'var(--text-1)' }}>{researchSnapshot.asin}</strong>
-                      {' · '}
-                      <a href={researchSnapshot.url || buildAmazonUrl(researchSnapshot.asin)} target="_blank" rel="noreferrer" style={{ color: 'var(--text-1)' }}>
-                        Amazon
-                      </a>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10 }}>
-                      <input
-                        type="text"
-                        value={researchSnapshot.title}
-                        onChange={(e) => { setResearchTouched(true); setResearchSnapshot({ ...researchSnapshot, title: e.target.value }) }}
-                        placeholder="Títol (base)"
-                        style={{
-                          height: 34, borderRadius: 10, border: '1px solid var(--border-1)',
-                          background: 'var(--surface-bg)', color: 'var(--text-1)', padding: '0 10px', outline: 'none'
-                        }}
-                      />
-                      <input
-                        type="text"
-                        value={researchSnapshot.price}
-                        onChange={(e) => { setResearchTouched(true); setResearchSnapshot({ ...researchSnapshot, price: e.target.value }) }}
-                        placeholder="Preu aprox. (ex: 19.99)"
-                        style={{
-                          height: 34, borderRadius: 10, border: '1px solid var(--border-1)',
-                          background: 'var(--surface-bg)', color: 'var(--text-1)', padding: '0 10px', outline: 'none'
-                        }}
-                      />
-                      <input
-                        type="text"
-                        value={researchSnapshot.weight}
-                        onChange={(e) => { setResearchTouched(true); setResearchSnapshot({ ...researchSnapshot, weight: e.target.value }) }}
-                        placeholder="Pes aprox. (ex: 1.2 kg)"
-                        style={{
-                          height: 34, borderRadius: 10, border: '1px solid var(--border-1)',
-                          background: 'var(--surface-bg)', color: 'var(--text-1)', padding: '0 10px', outline: 'none'
-                        }}
-                      />
-                      <input
-                        type="text"
-                        value={researchSnapshot.dims}
-                        onChange={(e) => { setResearchTouched(true); setResearchSnapshot({ ...researchSnapshot, dims: e.target.value }) }}
-                        placeholder="Mides aprox. (ex: 40×30×10 cm)"
-                        style={{
-                          height: 34, borderRadius: 10, border: '1px solid var(--border-1)',
-                          background: 'var(--surface-bg)', color: 'var(--text-1)', padding: '0 10px', outline: 'none'
-                        }}
-                      />
-                    </div>
-
-                    <input
-                      type="text"
-                      value={researchSnapshot.thumbUrl}
-                      onChange={(e) => { setResearchTouched(true); setResearchSnapshot({ ...researchSnapshot, thumbUrl: e.target.value }) }}
-                      placeholder="Thumb URL (opcional: enganxa si vols sobreescriure)"
-                      style={{
-                        height: 34, borderRadius: 10, border: '1px solid var(--border-1)',
-                        background: 'var(--surface-bg)', color: 'var(--text-1)', padding: '0 10px', outline: 'none'
-                      }}
-                    />
-                  </div>
-                </div>
-              ) : null}
 
               <div style={{ display: 'grid', gap: 10, marginTop: 6 }}>
                 <EvidenceCheckRow
@@ -2132,7 +2127,6 @@ ${t}
               )}
             </div>
 
-            {/* Gate PASSA / CANDAU (sense NO PASSA), alineats a l'esquerra */}
             <PhaseDecisionActions
               canPass={canPassViability && viabilityChecksReady && viabilityAllChecksOk}
               canNoPass={hasAsin}
@@ -2140,7 +2134,7 @@ ${t}
               onNoPass={() => markViabilityDecision(false, false)}
               onOverride={() => setViabilityOverrideOpen(true)}
               showOverride={hasAsin && viabilityChecksReady && !viabilityAllChecksOk}
-              showNoPass={false}
+              showNoPass={true}
               disabledReason={!canPassViability ? (!hasAnyViabilityEvidenceChecksOk ? 'Falten evidències' : 'Falta ASIN') : null}
               overrideTitle="Forçar PASSA (override)"
               passLabel="PASSA"

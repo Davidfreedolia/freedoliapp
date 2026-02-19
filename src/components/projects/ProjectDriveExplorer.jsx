@@ -291,11 +291,17 @@ export default function ProjectDriveExplorer({
   }, [rootId])
 
   useEffect(() => {
-    if (projectRootPath) {
-      loadProjectFolders()
-    } else {
+    if (!projectRootPath) {
       setProjectFolders([])
+      return
     }
+    let cancelled = false
+    ;(async () => {
+      await storageService.ensureProjectStorageFolders(projectId)
+      if (cancelled) return
+      loadProjectFolders()
+    })()
+    return () => { cancelled = true }
   }, [projectId, projectRootPath])
 
   useEffect(() => {
@@ -756,17 +762,17 @@ export default function ProjectDriveExplorer({
             </div>
           )}
           {isEmpty ? (
-            <div style={{
+            <div className="projects-drive__emptyState"
+            style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
               gap: 12,
               padding: '24px 12px',
-              color: 'var(--muted-1)',
               textAlign: 'center'
             }}>
-              <div style={{ fontWeight: 600, color: 'var(--text-1)' }}>{c.emptyFolderTitle}</div>
+              <div>{c.emptyFolderTitle}</div>
             </div>
           ) : (
             <>
