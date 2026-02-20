@@ -4880,3 +4880,75 @@ svg[class*="lucide-star"] {
   outline: 0 !important;
   box-shadow: none !important;
 }
+
+/* Supplier quote validity (PASSA / NO PASSA / CANDAU) */
+.quote-validity {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.quote-validity__btn {
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border-1);
+  background: transparent;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease, opacity 120ms ease;
+}
+
+.quote-validity__btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.quote-validity__btn--pass { color: var(--success-1); }
+.quote-validity__btn--fail { color: var(--danger-1); }
+.quote-validity__btn--lock { color: var(--muted-1); }
+
+.quote-validity__btn--active.quote-validity__btn--pass {
+  background: color-mix(in srgb, var(--success-1) 18%, transparent);
+  border-color: color-mix(in srgb, var(--success-1) 35%, var(--border-1));
+}
+
+.quote-validity__btn--active.quote-validity__btn--fail {
+  background: color-mix(in srgb, var(--danger-1) 18%, transparent);
+  border-color: color-mix(in srgb, var(--danger-1) 35%, var(--border-1));
+}
+
+.quote-validity__btn--active.quote-validity__btn--lock {
+  background: color-mix(in srgb, var(--muted-1) 14%, transparent);
+  border-color: var(--border-1);
+}
+
+/* Quotes comparison table */
+.quotes-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--border-1);
+}
+
+.quotes-table thead {
+  background-color: var(--surface-bg-2, #f9fafb);
+}
+
+.quotes-table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border-1);
+  color: var(--text-1);
+}
+
+.quotes-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border-1);
+  color: var(--text-1);
+}
+
+.quotes-table tbody tr:last-child td {
+  border-bottom: none;
+}

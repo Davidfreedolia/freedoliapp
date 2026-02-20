@@ -16,8 +16,10 @@ import {
 import { 
   getSupplierQuotes, 
   createSupplierQuote, 
+  updateSupplierQuote,
   deleteSupplierQuote,
   getSuppliers,
+  createSupplier,
   getProjectProfitability,
   supabase
 } from '../lib/supabase'
@@ -39,6 +41,7 @@ export default function QuotesSection({ projectId, darkMode }) {
   const [showAddForm, setShowAddForm] = useState(false)
   const [showImport, setShowImport] = useState(false)
   const [importText, setImportText] = useState('')
+  const [lastImportedSupplierName, setLastImportedSupplierName] = useState(null)
   const [targetQuantity, setTargetQuantity] = useState(100)
   const [projectShipping, setProjectShipping] = useState(0)
   const [projectProfitability, setProjectProfitability] = useState(null)
@@ -212,13 +215,23 @@ export default function QuotesSection({ projectId, darkMode }) {
 
   const handleDeleteQuote = async (quoteId) => {
     if (!confirm('Are you sure you want to delete this quote?')) return
-    
+
     try {
       await deleteSupplierQuote(quoteId)
       await loadData()
     } catch (err) {
       console.error('Error deleting quote:', err)
       alert('Error deleting quote')
+    }
+  }
+
+  const handleValidityChange = async (quoteId, validity_status) => {
+    try {
+      await updateSupplierQuote(quoteId, { validity_status })
+      await loadData()
+    } catch (err) {
+      console.error('Error updating validity:', err)
+      alert('Error updating validity')
     }
   }
 
@@ -324,7 +337,7 @@ export default function QuotesSection({ projectId, darkMode }) {
           color: darkMode ? '#ffffff' : '#111827'
         }}>
           <DollarSign size={18} />
-          Supplier Quotes Comparison
+          Comparativa ràpida de cotitzacions
         </h3>
         {!showAddForm && (
           <>
@@ -333,14 +346,52 @@ export default function QuotesSection({ projectId, darkMode }) {
               style={styles.addButton}
             >
               <Plus size={16} />
-              Add Quote
+              Afegir cotització
             </button>
             <button
               type="button"
               className="btn"
               onClick={() => setShowImport(true)}
             >
-              Import Markdown
+              Importar cotització
+            </button>
+            <button
+              type="button"
+              className="btn"
+              onClick={async () => {
+                if (!newQuote.supplier_id && lastImportedSupplierName) {
+                  const name = window.prompt('Nom del proveïdor:', lastImportedSupplierName)
+                  if (!name || !name.trim()) return
+
+                  try {
+                    const newSupplier = await createSupplier({
+                      name: name.trim(),
+                      type: 'other'
+                    })
+                    await loadData()
+                    setNewQuote(prev => ({ ...prev, supplier_id: newSupplier.id }))
+                    setLastImportedSupplierName(null)
+                  } catch (err) {
+                    alert(err.message || 'Error creant proveïdor')
+                  }
+                } else {
+                  const name = window.prompt('Nom del proveïdor:', '')
+                  if (!name || !name.trim()) return
+
+                  try {
+                    const newSupplier = await createSupplier({
+                      name: name.trim(),
+                      type: 'other'
+                    })
+                    await loadData()
+                    setNewQuote(prev => ({ ...prev, supplier_id: newSupplier.id }))
+                  } catch (err) {
+                    alert(err.message || 'Error creant proveïdor')
+                  }
+                }
+              }}
+            >
+              Crear proveïdor
             </button>
           </>
         )}
@@ -382,12 +433,16 @@ export default function QuotesSection({ projectId, darkMode }) {
                   : prev.price_breaks
               }))
 
+              if (result.data.supplier_name && !supplierId) {
+                setLastImportedSupplierName(result.data.supplier_name)
+              }
+
               setShowAddForm(true)
               setShowImport(false)
               setImportText('')
             }}
           >
-            Parse & Fill
+            Omplir formulari
           </button>
 
           <button
@@ -397,7 +452,7 @@ export default function QuotesSection({ projectId, darkMode }) {
               setImportText('')
             }}
           >
-            Cancel
+            Cancel·lar
           </button>
         </div>
       )}
@@ -450,7 +505,7 @@ export default function QuotesSection({ projectId, darkMode }) {
         </div>
       )}
 
-      {/* Add Quote Form */}
+      {/* Afegir cotització Form */}
       {showAddForm && (
         <div style={{
           ...styles.form,
@@ -740,7 +795,7 @@ export default function QuotesSection({ projectId, darkMode }) {
               }}
               style={styles.cancelButton}
             >
-              Cancel
+              Cancel·lar
             </button>
             <button
               onClick={handleSaveQuote}
@@ -762,183 +817,70 @@ export default function QuotesSection({ projectId, darkMode }) {
           }}>
             Comparison (Qty: {targetQuantity})
           </h4>
-          <div style={styles.quotesGrid}>
-            {quotes.map(quote => {
-              const profitability = calculateQuoteProfitability(quote, targetQuantity)
-              const isBest = quote.id === bestQuoteId
-              const decisionColor = profitability.decision === 'GO' ? '#10b981' :
-                                   profitability.decision === 'RISKY' ? '#f59e0b' : '#ef4444'
-              const DecisionIcon = profitability.decision === 'GO' ? CheckCircle2 :
-                                  profitability.decision === 'RISKY' ? AlertTriangle : XCircle
+          <table className="quotes-table">
+            <thead>
+              <tr>
+                <th>Proveïdor</th>
+                <th>Incoterm</th>
+                <th>MOQ</th>
+                <th>Preu unitat</th>
+                <th>Lead time</th>
+                <th>Pagament</th>
+                <th>Valid</th>
+              </tr>
+            </thead>
+            <tbody>
+              {quotes.map(quote => {
+                const firstPriceBreak = quote.supplier_quote_price_breaks?.length > 0
+                  ? [...quote.supplier_quote_price_breaks].sort((a, b) => a.min_qty - b.min_qty)[0]
+                  : null
+                const unitPrice = firstPriceBreak ? parseFloat(firstPriceBreak.unit_price) : null
 
-              return (
-                <div
-                  key={quote.id}
-                  style={{
-                    ...styles.quoteCard,
-                    backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
-                    borderColor: isBest ? '#10b981' : (darkMode ? '#374151' : '#d1d5db'),
-                    borderWidth: isBest ? '2px' : '1px',
-                    boxShadow: isBest ? '0 0 0 3px rgba(16, 185, 129, 0.1)' : 'none'
-                  }}
-                >
-                  {isBest && (
-                    <div style={{
-                      ...styles.bestBadge,
-                      backgroundColor: '#10b981'
-                    }}>
-                      <TrendingUp size={14} />
-                      Best Option
-                    </div>
-                  )}
-                  
-                  <div style={styles.quoteHeader}>
-                    <div>
-                      <h4 style={{
-                        ...styles.quoteSupplier,
-                        color: darkMode ? '#ffffff' : '#111827'
-                      }}>
-                        {quote.suppliers?.name || 'Unknown Supplier'}
-                      </h4>
-                      {quote.suppliers?.country && (
-                        <p style={{
-                          ...styles.quoteMeta,
-                          color: darkMode ? '#9ca3af' : '#6b7280'
-                        }}>
-                          {quote.suppliers.country}
-                        </p>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => handleDeleteQuote(quote.id)}
-                      style={styles.deleteButton}
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-
-                  <div style={styles.quoteDetails}>
-                    <div style={styles.quoteDetailRow}>
-                      <span style={styles.detailLabel}>Unit Price:</span>
-                      <span style={{
-                        ...styles.detailValue,
-                        color: darkMode ? '#ffffff' : '#111827'
-                      }}>
-                        {formatCurrency(profitability.unit_price, quote.currency)}
-                      </span>
-                    </div>
-                    <div style={styles.quoteDetailRow}>
-                      <span style={styles.detailLabel}>COGS:</span>
-                      <span style={{
-                        ...styles.detailValue,
-                        color: darkMode ? '#ffffff' : '#111827'
-                      }}>
-                        {formatCurrency(profitability.cogs)}
-                      </span>
-                    </div>
-                    {quote.lead_time_days && (
-                      <div style={styles.quoteDetailRow}>
-                        <span style={styles.detailLabel}>Lead Time:</span>
-                        <span style={{
-                          ...styles.detailValue,
-                          color: darkMode ? '#9ca3af' : '#6b7280'
-                        }}>
-                          {quote.lead_time_days} days
-                        </span>
+                return (
+                  <tr key={quote.id}>
+                    <td>{quote.suppliers?.name || '-'}</td>
+                    <td>{quote.incoterm || '-'}</td>
+                    <td>{quote.moq ?? '-'}</td>
+                    <td>{unitPrice ? formatCurrency(unitPrice, quote.currency) : '-'}</td>
+                    <td>{quote.lead_time_days ?? '-'}</td>
+                    <td>{quote.payment_terms || '-'}</td>
+                    <td>
+                      <div className="quote-validity">
+                        <button
+                          type="button"
+                          className={`quote-validity__btn quote-validity__btn--pass ${(quote.validity_status || 'LOCK') === 'PASS' ? 'quote-validity__btn--active' : ''}`}
+                          onClick={() => handleValidityChange(quote.id, 'PASS')}
+                        >
+                          PASSA
+                        </button>
+                        <button
+                          type="button"
+                          className={`quote-validity__btn quote-validity__btn--fail ${(quote.validity_status || 'LOCK') === 'FAIL' ? 'quote-validity__btn--active' : ''}`}
+                          onClick={() => handleValidityChange(quote.id, 'FAIL')}
+                        >
+                          NO PASSA
+                        </button>
+                        <button
+                          type="button"
+                          className={`quote-validity__btn quote-validity__btn--lock ${(quote.validity_status || 'LOCK') === 'LOCK' ? 'quote-validity__btn--active' : ''}`}
+                          onClick={() => handleValidityChange(quote.id, 'LOCK')}
+                        >
+                          CANDAU
+                        </button>
                       </div>
-                    )}
-                    {quote.moq && (
-                      <div style={styles.quoteDetailRow}>
-                        <span style={styles.detailLabel}>MOQ:</span>
-                        <span style={{
-                          ...styles.detailValue,
-                          color: darkMode ? '#9ca3af' : '#6b7280'
-                        }}>
-                          {quote.moq}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div style={{
-                    ...styles.profitabilityBox,
-                    backgroundColor: darkMode ? '#0a0a0f' : '#f9fafb',
-                    borderColor: darkMode ? '#374151' : '#e5e7eb'
-                  }}>
-                    <div style={styles.profitabilityRow}>
-                      <span style={styles.profitabilityLabel}>Net Profit:</span>
-                      <span style={{
-                        ...styles.profitabilityValue,
-                        color: profitability.net_profit >= 0 ? '#10b981' : '#ef4444'
-                      }}>
-                        {formatCurrency(profitability.net_profit)}
-                      </span>
-                    </div>
-                    <div style={styles.profitabilityRow}>
-                      <span style={styles.profitabilityLabel}>Margin:</span>
-                      <span style={{
-                        ...styles.profitabilityValue,
-                        color: profitability.margin_percent >= 30 ? '#10b981' :
-                               profitability.margin_percent >= 15 ? '#f59e0b' : '#ef4444'
-                      }}>
-                        {profitability.margin_percent.toFixed(2)}%
-                      </span>
-                    </div>
-                    <div style={styles.profitabilityRow}>
-                      <span style={styles.profitabilityLabel}>ROI:</span>
-                      <span style={{
-                        ...styles.profitabilityValue,
-                        color: profitability.roi_total >= 50 ? '#10b981' :
-                               profitability.roi_total >= 20 ? '#f59e0b' : '#ef4444'
-                      }}>
-                        {profitability.roi_total.toFixed(2)}%
-                      </span>
-                    </div>
-                    <div style={{
-                      ...styles.decisionBadge,
-                      backgroundColor: decisionColor + '20',
-                      color: decisionColor,
-                      borderColor: decisionColor
-                    }}>
-                      <DecisionIcon size={16} />
-                      {profitability.decision}
-                    </div>
-
-                    {/* Decision Log for Quote */}
-                    <div style={{ marginTop: '12px' }}>
-                      <DecisionLog 
-                        entityType="quote" 
-                        entityId={quote.id} 
-                        darkMode={darkMode}
-                        requiredReason={true}
-                        allowedDecisions={[
-                          { value: 'selected', label: 'SELECTED', icon: CheckCircle2, color: '#3b82f6' },
-                          { value: 'rejected', label: 'REJECTED', icon: XCircle, color: '#ef4444' }
-                        ]}
-                      />
-                    </div>
-
-                    {/* Planned vs Actual */}
-                    {poMap[quote.id] && (
-                      <PlannedVsActual
-                        quote={quote}
-                        po={poMap[quote.id]}
-                        shipment={shipmentMap[poMap[quote.id].id]}
-                        darkMode={darkMode}
-                      />
-                    )}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
         </div>
       )}
 
       {quotes.length === 0 && !showAddForm && (
         <div style={styles.empty}>
           <p style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
-            No quotes yet. Add your first quote to start comparing.
+            Encara no hi ha cotitzacions. Afegeix la primera per comparar.
           </p>
         </div>
       )}
