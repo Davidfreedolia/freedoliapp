@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { 
   Plus, 
   Trash2, 
@@ -7,9 +8,7 @@ import {
   FileText, 
   X, 
   Save, 
-  CheckCircle2, 
   AlertTriangle, 
-  XCircle,
   TrendingUp,
   DollarSign
 } from 'lucide-react'
@@ -35,6 +34,7 @@ const INCOTERMS = ['EXW', 'FCA', 'FAS', 'FOB', 'CFR', 'CIF', 'CPT', 'CIP', 'DAP'
 
 export default function QuotesSection({ projectId, darkMode }) {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [quotes, setQuotes] = useState([])
   const [suppliers, setSuppliers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -45,6 +45,10 @@ export default function QuotesSection({ projectId, darkMode }) {
   const [targetQuantity, setTargetQuantity] = useState(100)
   const [projectShipping, setProjectShipping] = useState(0)
   const [projectProfitability, setProjectProfitability] = useState(null)
+  const [showCreateSupplier, setShowCreateSupplier] = useState(false)
+  const [prefillSupplier, setPrefillSupplier] = useState(null)
+  const [createSupplierSaving, setCreateSupplierSaving] = useState(false)
+  const [manualDraft, setManualDraft] = useState(null)
   
   const [newQuote, setNewQuote] = useState({
     supplier_id: '',
@@ -238,15 +242,112 @@ export default function QuotesSection({ projectId, darkMode }) {
   const handleSelectedClick = async (quote) => {
     if (quote.is_selected) return
     try {
-      for (const q of quotes) {
-        if (q.is_selected) await updateSupplierQuote(q.id, { is_selected: false })
-      }
+      await supabase
+        .from('supplier_quotes')
+        .update({ is_selected: false })
+        .eq('project_id', projectId)
       await updateSupplierQuote(quote.id, { is_selected: true })
       await loadData()
     } catch (err) {
       console.error('Error updating selected quote:', err)
       alert('Error en marcar com escollida')
     }
+  }
+
+  const handleSamplesToggle = async (quote) => {
+    if (quote.id?.startsWith('demo-')) return
+    try {
+      await updateSupplierQuote(quote.id, { go_samples: !quote.go_samples })
+      await loadData()
+    } catch (err) {
+      console.error('Error updating go_samples:', err)
+      alert('Error actualitzant MOSTRES')
+    }
+  }
+
+  const handleCreateSupplier = async () => {
+    const defaultName = lastImportedSupplierName || ''
+    const name = window.prompt('Nom del proveïdor:', defaultName)
+    if (!name || !name.trim()) return
+    try {
+      const newSupplier = await createSupplier({ name: name.trim(), type: 'other' })
+      await loadData()
+      setNewQuote(prev => ({ ...prev, supplier_id: newSupplier.id }))
+      if (lastImportedSupplierName) setLastImportedSupplierName(null)
+    } catch (err) {
+      alert(err.message || 'Error creant proveïdor')
+    }
+  }
+
+  const handleSendToSamples = () => {
+    const selected = (quotes || []).filter(q => q.go_samples).map(q => q.id)
+    sessionStorage.setItem(`samples:selected_quotes:${projectId}`, JSON.stringify(selected))
+    navigate(`/projects/${projectId}?phase=samples`)
+  }
+
+  const handleAddManualRow = () => {
+    setManualDraft({
+      supplier_name: '',
+      incoterm: '',
+      moq: '',
+      unit_price: '',
+      lead_time_days: '',
+      payment_terms: ''
+    })
+  }
+
+  const handleSaveManualDraft = async () => {
+    const name = String(manualDraft.supplier_name || '').trim()
+    const unitPrice = manualDraft.unit_price != null && manualDraft.unit_price !== '' ? parseFloat(manualDraft.unit_price) : NaN
+    if (!name) {
+      alert('Cal indicar el nom del proveïdor.')
+      return
+    }
+    if (!Number.isFinite(unitPrice) || unitPrice < 0) {
+      alert('Cal indicar un preu unitat vàlid.')
+      return
+    }
+    const supplierId = await resolveSupplierIdByName(name)
+    if (!supplierId) {
+      alert('Cal crear/seleccionar el proveïdor abans de desar.')
+      return
+    }
+    const moqVal = manualDraft.moq != null && manualDraft.moq !== '' ? parseInt(manualDraft.moq, 10) : 1
+    const leadTimeVal = manualDraft.lead_time_days != null && manualDraft.lead_time_days !== '' ? parseInt(manualDraft.lead_time_days, 10) : null
+    try {
+      await createSupplierQuote({
+        project_id: projectId,
+        supplier_id: supplierId,
+        currency: 'USD',
+        incoterm: manualDraft.incoterm || null,
+        payment_terms: manualDraft.payment_terms || null,
+        lead_time_days: Number.isFinite(leadTimeVal) ? leadTimeVal : null,
+        moq: Number.isFinite(moqVal) ? moqVal : null,
+        shipping_estimate: null,
+        notes: null,
+        price_breaks: [{ min_qty: Number.isFinite(moqVal) ? moqVal : 1, unit_price: String(unitPrice) }]
+      })
+      setManualDraft(null)
+      await loadData()
+    } catch (err) {
+      alert(err.message || 'Error desant la cotització')
+    }
+  }
+
+  const openCreateSupplierFromQuote = (quote) => {
+    const parts = []
+    if (quote.currency) parts.push(`Moneda: ${quote.currency}`)
+    if (quote.incoterm) parts.push(`Incoterm: ${quote.incoterm}`)
+    if (quote.payment_terms) parts.push(`Pagament: ${quote.payment_terms}`)
+    if (quote.notes) parts.push(quote.notes)
+    setPrefillSupplier({
+      name: quote.suppliers?.name || lastImportedSupplierName || '',
+      currency: quote.currency || null,
+      incoterm: quote.incoterm || null,
+      payment_terms: quote.payment_terms || null,
+      notes: parts.length ? parts.join('\n') : null
+    })
+    setShowCreateSupplier(true)
   }
 
   const getUnitPriceForQuantity = (quote, quantity) => {
@@ -329,6 +430,48 @@ export default function QuotesSection({ projectId, darkMode }) {
     }).format(value)
   }
 
+  const getDemoQuotesForLayout = () => ([
+    {
+      id: 'demo-q1',
+      created_at: new Date().toISOString(),
+      suppliers: { name: 'Demo Supplier A' },
+      incoterm: 'FOB',
+      moq: 300,
+      lead_time_days: 28,
+      payment_terms: '30/70 TT',
+      validity_status: 'PASS',
+      is_selected: true,
+      currency: 'EUR',
+      supplier_quote_price_breaks: [{ min_qty: 300, unit_price: 2.10 }],
+    },
+    {
+      id: 'demo-q2',
+      created_at: new Date().toISOString(),
+      suppliers: { name: 'Demo Supplier B' },
+      incoterm: 'EXW',
+      moq: 500,
+      lead_time_days: 20,
+      payment_terms: '100% TT',
+      validity_status: 'LOCK',
+      is_selected: false,
+      currency: 'EUR',
+      supplier_quote_price_breaks: [{ min_qty: 500, unit_price: 1.95 }],
+    },
+    {
+      id: 'demo-q3',
+      created_at: new Date().toISOString(),
+      suppliers: { name: 'Demo Supplier C' },
+      incoterm: 'DDP',
+      moq: 200,
+      lead_time_days: 35,
+      payment_terms: '50/50',
+      validity_status: 'FAIL',
+      is_selected: false,
+      currency: 'EUR',
+      supplier_quote_price_breaks: [{ min_qty: 200, unit_price: 2.35 }],
+    },
+  ])
+
   if (loading) {
     return (
       <div style={{
@@ -340,75 +483,49 @@ export default function QuotesSection({ projectId, darkMode }) {
     )
   }
 
+  const quotesForTable =
+    (quotes && quotes.length > 0)
+      ? quotes
+      : (import.meta.env.DEV ? getDemoQuotesForLayout() : [])
+
+  const samplesCount = quotesForTable.filter(q => q.go_samples && !String(q.id).startsWith('demo-')).length
+
   return (
     <div style={{
       ...styles.container,
       backgroundColor: darkMode ? '#15151f' : '#ffffff'
     }}>
-      <div style={styles.header}>
-        <h3 style={{
-          ...styles.title,
-          color: darkMode ? '#ffffff' : '#111827'
-        }}>
-          <DollarSign size={18} />
-          Comparativa ràpida de cotitzacions
-        </h3>
-        {!showAddForm && (
-          <>
-            <button
-              onClick={() => setShowAddForm(true)}
-              style={styles.addButton}
-            >
-              <Plus size={16} />
-              Afegir cotització
-            </button>
-            <button
-              type="button"
-              className="btn"
-              onClick={() => setShowImport(true)}
-            >
-              Importar cotització
-            </button>
-            <button
-              type="button"
-              className="btn"
-              onClick={async () => {
-                if (!newQuote.supplier_id && lastImportedSupplierName) {
-                  const name = window.prompt('Nom del proveïdor:', lastImportedSupplierName)
-                  if (!name || !name.trim()) return
-
-                  try {
-                    const newSupplier = await createSupplier({
-                      name: name.trim(),
-                      type: 'other'
-                    })
-                    await loadData()
-                    setNewQuote(prev => ({ ...prev, supplier_id: newSupplier.id }))
-                    setLastImportedSupplierName(null)
-                  } catch (err) {
-                    alert(err.message || 'Error creant proveïdor')
-                  }
-                } else {
-                  const name = window.prompt('Nom del proveïdor:', '')
-                  if (!name || !name.trim()) return
-
-                  try {
-                    const newSupplier = await createSupplier({
-                      name: name.trim(),
-                      type: 'other'
-                    })
-                    await loadData()
-                    setNewQuote(prev => ({ ...prev, supplier_id: newSupplier.id }))
-                  } catch (err) {
-                    alert(err.message || 'Error creant proveïdor')
-                  }
-                }
-              }}
-            >
-              Crear proveïdor
-            </button>
-          </>
-        )}
+      <div className="quotes-header">
+        <div className="quotes-title">
+          <DollarSign className="quotes-title__icon" size={18} />
+          <h3>Comparativa ràpida de cotitzacions</h3>
+        </div>
+        <div className="quotes-actions">
+          <div
+            className="quote-import-dropzone"
+            onClick={() => setShowImport(true)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowImport(true) } }}
+            onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('is-dragover') }}
+            onDragLeave={(e) => { e.currentTarget.classList.remove('is-dragover') }}
+            onDrop={(e) => {
+              e.preventDefault()
+              e.currentTarget.classList.remove('is-dragover')
+              const f = e.dataTransfer.files?.[0]
+              if (f) {
+                f.text().then((text) => { setImportText(text); setShowImport(true) }).catch(() => {})
+              }
+            }}
+          >
+            <div className="quote-import-dropzone__title">Importar cotització</div>
+            <div className="quote-import-dropzone__hint">Arrossega aquí o fes clic</div>
+          </div>
+          <button type="button" className="btn btn--turq" onClick={handleAddManualRow}>
+            <Plus size={16} />
+            Afegir cotització
+          </button>
+        </div>
       </div>
 
       {showImport && (
@@ -823,7 +940,41 @@ export default function QuotesSection({ projectId, darkMode }) {
       )}
 
       {/* Quotes Comparison */}
-      {quotes.length > 0 && (
+      {(quotesForTable.length > 0 || manualDraft) && (() => {
+        let bestPriceQuoteId = null
+        let bestPrice = Infinity
+        for (const q of quotesForTable) {
+          const breaks = q.supplier_quote_price_breaks
+          if (!breaks?.length) continue
+          const first = [...breaks].sort((a, b) => (a.min_qty ?? 0) - (b.min_qty ?? 0))[0]
+          const price = parseFloat(first.unit_price)
+          if (Number.isFinite(price) && price < bestPrice) {
+            bestPrice = price
+            bestPriceQuoteId = q.id
+          }
+        }
+        let bestLeadTimeQuoteId = null
+        let bestLead = Infinity
+        for (const q of quotesForTable) {
+          const days = q.lead_time_days != null ? Number(q.lead_time_days) : null
+          if (days == null) continue
+          if (days < bestLead) {
+            bestLead = days
+            bestLeadTimeQuoteId = q.id
+          }
+        }
+        let bestMoqQuoteId = null
+        let bestMoq = Infinity
+        for (const q of quotesForTable) {
+          const moq = q.moq != null && q.moq !== '' ? Number(q.moq) : null
+          if (moq == null || !Number.isFinite(moq)) continue
+          if (moq < bestMoq) {
+            bestMoq = moq
+            bestMoqQuoteId = q.id
+          }
+        }
+
+        return (
         <div style={styles.comparisonSection}>
           <h4 style={{
             ...styles.comparisonTitle,
@@ -840,11 +991,72 @@ export default function QuotesSection({ projectId, darkMode }) {
                 <th>Preu unitat</th>
                 <th>Lead time</th>
                 <th>Pagament</th>
-                <th>Valid</th>
+                <th>Accions</th>
               </tr>
             </thead>
             <tbody>
-              {quotes.map(quote => {
+              {manualDraft && (
+                <tr className="quotes-row--draft">
+                  <td>
+                    <input
+                      value={manualDraft.supplier_name}
+                      onChange={(e) => setManualDraft(prev => ({ ...prev, supplier_name: e.target.value }))}
+                      placeholder="Proveïdor"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      value={manualDraft.incoterm}
+                      onChange={(e) => setManualDraft(prev => ({ ...prev, incoterm: e.target.value }))}
+                      placeholder="Incoterm"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      value={manualDraft.moq}
+                      onChange={(e) => setManualDraft(prev => ({ ...prev, moq: e.target.value }))}
+                      placeholder="MOQ"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={manualDraft.unit_price}
+                      onChange={(e) => setManualDraft(prev => ({ ...prev, unit_price: e.target.value }))}
+                      placeholder="Preu unitat"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="number"
+                      value={manualDraft.lead_time_days}
+                      onChange={(e) => setManualDraft(prev => ({ ...prev, lead_time_days: e.target.value }))}
+                      placeholder="Lead time"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      value={manualDraft.payment_terms}
+                      onChange={(e) => setManualDraft(prev => ({ ...prev, payment_terms: e.target.value }))}
+                      placeholder="Pagament"
+                    />
+                  </td>
+                  <td>
+                    <div className="quote-actions">
+                      <button type="button" className="btn btn--turq btn--sm" onClick={handleSaveManualDraft}>
+                        Desar
+                      </button>
+                      <button type="button" className="btn btn--soft btn--sm" onClick={() => setManualDraft(null)}>
+                        Cancel·lar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              )}
+              {quotesForTable.map((quote, rowIndex) => {
+                const isDemoRow = quote.id?.startsWith('demo-')
                 const firstPriceBreak = quote.supplier_quote_price_breaks?.length > 0
                   ? [...quote.supplier_quote_price_breaks].sort((a, b) => a.min_qty - b.min_qty)[0]
                   : null
@@ -854,39 +1066,39 @@ export default function QuotesSection({ projectId, darkMode }) {
                   <tr key={quote.id} className={quote.is_selected ? 'quote-selected-row' : ''}>
                     <td>{quote.suppliers?.name || '-'}</td>
                     <td>{quote.incoterm || '-'}</td>
-                    <td>{quote.moq ?? '-'}</td>
-                    <td>{unitPrice ? formatCurrency(unitPrice, quote.currency) : '-'}</td>
-                    <td>{quote.lead_time_days ?? '-'}</td>
+                    <td>
+                      {quote.moq ?? '-'}
+                      {quote.id === bestMoqQuoteId && (
+                        <span className="quote-metric-badge quote-metric-badge--best">Millor</span>
+                      )}
+                    </td>
+                    <td>
+                      {unitPrice ? formatCurrency(unitPrice, quote.currency) : '-'}
+                      {quote.id === bestPriceQuoteId && (
+                        <span className="quote-metric-badge quote-metric-badge--best">Millor</span>
+                      )}
+                    </td>
+                    <td>
+                      {quote.lead_time_days ?? '-'}
+                      {quote.id === bestLeadTimeQuoteId && (
+                        <span className="quote-metric-badge quote-metric-badge--best">Millor</span>
+                      )}
+                    </td>
                     <td>{quote.payment_terms || '-'}</td>
                     <td>
-                      <div className="quote-validity">
-                        <button
-                          type="button"
-                          className={`quote-validity__btn quote-validity__btn--pass ${(quote.validity_status || 'LOCK') === 'PASS' ? 'quote-validity__btn--active' : ''}`}
-                          onClick={() => handleValidityChange(quote.id, 'PASS')}
-                        >
-                          PASSA
-                        </button>
-                        <button
-                          type="button"
-                          className={`quote-validity__btn quote-validity__btn--fail ${(quote.validity_status || 'LOCK') === 'FAIL' ? 'quote-validity__btn--active' : ''}`}
-                          onClick={() => handleValidityChange(quote.id, 'FAIL')}
-                        >
-                          NO PASSA
-                        </button>
-                        <button
-                          type="button"
-                          className={`quote-validity__btn quote-validity__btn--lock ${(quote.validity_status || 'LOCK') === 'LOCK' ? 'quote-validity__btn--active' : ''}`}
-                          onClick={() => handleValidityChange(quote.id, 'LOCK')}
-                        >
-                          CANDAU
-                        </button>
-                        <button
-                          type="button"
-                          className={`quote-selected__btn ${quote.is_selected ? 'quote-selected__btn--active' : ''}`}
-                          onClick={() => handleSelectedClick(quote)}
-                        >
-                          ESCOLLIDA
+                      <div className="quote-actions">
+                        <label className={`quote-action-toggle ${quote.go_samples ? 'quote-action-toggle--on' : ''}`}>
+                          <input
+                            type="checkbox"
+                            checked={!!quote.go_samples}
+                            disabled={isDemoRow}
+                            onChange={() => handleSamplesToggle(quote)}
+                          />
+                          <span>MOSTRES</span>
+                        </label>
+
+                        <button type="button" className="btn btn--soft quote-create-supplier-inline" onClick={() => openCreateSupplierFromQuote(quote)} disabled={isDemoRow}>
+                          Crear proveïdor
                         </button>
                       </div>
                     </td>
@@ -896,13 +1108,88 @@ export default function QuotesSection({ projectId, darkMode }) {
             </tbody>
           </table>
         </div>
-      )}
+        )
+      })()}
 
-      {quotes.length === 0 && !showAddForm && (
+      {quotesForTable.length === 0 && !manualDraft && (
         <div style={styles.empty}>
           <p style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
             Encara no hi ha cotitzacions. Afegeix la primera per comparar.
           </p>
+        </div>
+      )}
+
+      <div className="quotes-footer">
+        <button
+          type="button"
+          className="btn btn--turq"
+          onClick={handleSendToSamples}
+          disabled={samplesCount === 0}
+        >
+          Enviar a mostres ({samplesCount})
+        </button>
+      </div>
+
+      {showCreateSupplier && prefillSupplier && (
+        <div style={styles.modalOverlay} onClick={() => setShowCreateSupplier(false)}>
+          <div style={{ ...styles.modal, backgroundColor: darkMode ? '#111827' : '#ffffff' }} onClick={e => e.stopPropagation()}>
+            <div style={styles.modalHeader}>
+              <h3 style={styles.modalTitle}>Crear proveïdor</h3>
+              <button type="button" onClick={() => setShowCreateSupplier(false)} style={styles.closeButton} aria-label="Tancar">
+                <X size={20} />
+              </button>
+            </div>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Nom *</label>
+              <input
+                type="text"
+                value={prefillSupplier.name || ''}
+                onChange={e => setPrefillSupplier(prev => ({ ...prev, name: e.target.value }))}
+                style={styles.input}
+                placeholder="Nom del proveïdor"
+              />
+            </div>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Notes</label>
+              <textarea
+                value={prefillSupplier.notes || ''}
+                onChange={e => setPrefillSupplier(prev => ({ ...prev, notes: e.target.value }))}
+                style={{ ...styles.input, minHeight: 60 }}
+                placeholder="Moneda, incoterm, pagament..."
+                rows={3}
+              />
+            </div>
+            <div style={styles.modalFooter}>
+              <button type="button" onClick={() => setShowCreateSupplier(false)} className="btn btn--soft">
+                Cancel·lar
+              </button>
+              <button
+                type="button"
+                className="btn btn--primary"
+                disabled={createSupplierSaving || !(prefillSupplier.name || '').trim()}
+                onClick={async () => {
+                  setCreateSupplierSaving(true)
+                  try {
+                    const supplier = await createSupplier({
+                      name: (prefillSupplier.name || '').trim(),
+                      type: 'other',
+                      notes: (prefillSupplier.notes || '').trim() || undefined
+                    })
+                    await loadData()
+                    setShowCreateSupplier(false)
+                    setPrefillSupplier(null)
+                    if (supplier?.id) setNewQuote(prev => ({ ...prev, supplier_id: supplier.id }))
+                  } catch (err) {
+                    alert(err.message || 'Error creant proveïdor')
+                  } finally {
+                    setCreateSupplierSaving(false)
+                  }
+                }}
+              >
+                {createSupplierSaving ? 'Guardant...' : 'Crear'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -930,19 +1217,6 @@ const styles = {
     alignItems: 'center',
     gap: '8px'
   },
-  addButton: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    padding: '10px 16px',
-    backgroundColor: '#4f46e5',
-    color: '#ffffff',
-    border: 'none',
-    borderRadius: '6px',
-    fontSize: '14px',
-    fontWeight: '500',
-    cursor: 'pointer'
-  },
   loading: {
     padding: '40px',
     textAlign: 'center',
@@ -951,6 +1225,46 @@ const styles = {
   empty: {
     padding: '40px',
     textAlign: 'center'
+  },
+  modalOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000
+  },
+  modal: {
+    borderRadius: '12px',
+    padding: '24px',
+    width: '90%',
+    maxWidth: '480px',
+    maxHeight: '90vh',
+    overflowY: 'auto',
+    border: '1px solid var(--border-1)'
+  },
+  modalHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '20px'
+  },
+  modalTitle: {
+    fontSize: '18px',
+    fontWeight: '600',
+    margin: 0
+  },
+  modalFooter: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '12px',
+    marginTop: '24px',
+    paddingTop: '16px',
+    borderTop: '1px solid var(--border-1)'
   },
   quantitySelector: {
     display: 'flex',

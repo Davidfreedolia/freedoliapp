@@ -60,7 +60,6 @@ import { generateClaudeResearchPrompt } from '../lib/generateClaudeResearchPromp
 // Dynamic imports for components that import supabase statically to avoid circular dependencies during module initialization
 const IdentifiersSection = lazy(() => import('../components/IdentifiersSection'))
 const ProfitabilityCalculator = lazy(() => import('../components/ProfitabilityCalculator'))
-const QuickSupplierPriceEstimate = lazy(() => import('../components/QuickSupplierPriceEstimate'))
 const QuotesSection = lazy(() => import('../components/QuotesSection'))
 const DecisionLog = lazy(() => import('../components/DecisionLog'))
 const AmazonReadinessBadge = lazy(() => import('../components/AmazonReadinessBadge'))
@@ -2177,26 +2176,11 @@ ${t}
         )
       case 3:
         return (
-          <>
-            <div style={{ marginBottom: '24px' }}>
-              <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
-                <QuickSupplierPriceEstimate 
-                  projectId={id} 
-                  darkMode={darkMode}
-                  onCopyToProfitability={(priceInEUR) => {
-                    window.dispatchEvent(new CustomEvent('copyPriceToCOGS', { 
-                      detail: { price: priceInEUR } 
-                    }))
-                  }}
-                />
-              </Suspense>
-            </div>
-            <div style={{ marginBottom: '24px' }}>
-              <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
-                <QuotesSection projectId={id} darkMode={darkMode} />
-              </Suspense>
+          <div style={{ marginBottom: '24px' }}>
+            <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant...</div>}>
+              <QuotesSection projectId={id} darkMode={darkMode} />
+            </Suspense>
           </div>
-          </>
         )
       case 4:
         return (
