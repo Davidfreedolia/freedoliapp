@@ -235,6 +235,20 @@ export default function QuotesSection({ projectId, darkMode }) {
     }
   }
 
+  const handleSelectedClick = async (quote) => {
+    if (quote.is_selected) return
+    try {
+      for (const q of quotes) {
+        if (q.is_selected) await updateSupplierQuote(q.id, { is_selected: false })
+      }
+      await updateSupplierQuote(quote.id, { is_selected: true })
+      await loadData()
+    } catch (err) {
+      console.error('Error updating selected quote:', err)
+      alert('Error en marcar com escollida')
+    }
+  }
+
   const getUnitPriceForQuantity = (quote, quantity) => {
     if (!quote.supplier_quote_price_breaks || quote.supplier_quote_price_breaks.length === 0) {
       return 0
@@ -837,7 +851,7 @@ export default function QuotesSection({ projectId, darkMode }) {
                 const unitPrice = firstPriceBreak ? parseFloat(firstPriceBreak.unit_price) : null
 
                 return (
-                  <tr key={quote.id}>
+                  <tr key={quote.id} className={quote.is_selected ? 'quote-selected-row' : ''}>
                     <td>{quote.suppliers?.name || '-'}</td>
                     <td>{quote.incoterm || '-'}</td>
                     <td>{quote.moq ?? '-'}</td>
@@ -866,6 +880,13 @@ export default function QuotesSection({ projectId, darkMode }) {
                           onClick={() => handleValidityChange(quote.id, 'LOCK')}
                         >
                           CANDAU
+                        </button>
+                        <button
+                          type="button"
+                          className={`quote-selected__btn ${quote.is_selected ? 'quote-selected__btn--active' : ''}`}
+                          onClick={() => handleSelectedClick(quote)}
+                        >
+                          ESCOLLIDA
                         </button>
                       </div>
                     </td>

@@ -4924,6 +4924,28 @@ svg[class*="lucide-star"] {
   border-color: var(--border-1);
 }
 
+/* Escollida (una sola cotització) */
+.quote-selected__btn {
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border-1);
+  background: transparent;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--brand-1);
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.quote-selected__btn--active {
+  background: color-mix(in srgb, var(--brand-1) 14%, transparent);
+  border-color: color-mix(in srgb, var(--brand-1) 35%, var(--border-1));
+}
+
+.quote-selected-row {
+  background: color-mix(in srgb, var(--brand-1) 8%, transparent);
+}
+
 /* Quotes comparison table */
 .quotes-table {
   width: 100%;
