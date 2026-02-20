@@ -18,12 +18,15 @@ import {
   createSupplierQuote, 
   deleteSupplierQuote,
   getSuppliers,
-  getProjectProfitability
+  getProjectProfitability,
+  supabase
 } from '../lib/supabase'
+import { resolveProjectsBucket } from '../lib/projectsBucket'
 import { calculateQuickProfitability } from '../lib/profitability'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import DecisionLog from './DecisionLog'
 import PlannedVsActual from './PlannedVsActual'
+import { parseSupplierQuote } from '../lib/parseSupplierQuote'
 
 const CURRENCIES = ['USD', 'EUR', 'CNY', 'GBP']
 const INCOTERMS = ['EXW', 'FCA', 'FAS', 'FOB', 'CFR', 'CIF', 'CPT', 'CIP', 'DAP', 'DPU', 'DDP']
@@ -34,6 +37,8 @@ export default function QuotesSection({ projectId, darkMode }) {
   const [suppliers, setSuppliers] = useState([])
   const [loading, setLoading] = useState(true)
   const [showAddForm, setShowAddForm] = useState(false)
+  const [showImport, setShowImport] = useState(false)
+  const [importText, setImportText] = useState('')
   const [targetQuantity, setTargetQuantity] = useState(100)
   const [projectShipping, setProjectShipping] = useState(0)
   const [projectProfitability, setProjectProfitability] = useState(null)
@@ -89,12 +94,14 @@ export default function QuotesSection({ projectId, darkMode }) {
 
     setUploadingFile(true)
     try {
-      // Store file name and path (in a real implementation, you'd upload to storage)
-      // For now, we'll just store the file name
+      const bucket = await resolveProjectsBucket()
+      const path = `projects/${projectId}/suppliers/quotes/${file.name}`
+      const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true })
+      if (error) throw error
       setNewQuote(prev => ({
         ...prev,
         file_name: file.name,
-        file_path: `quotes/${projectId}/${file.name}`
+        file_path: path
       }))
     } catch (err) {
       console.error('Error uploading file:', err)
@@ -124,6 +131,28 @@ export default function QuotesSection({ projectId, darkMode }) {
         i === index ? { ...pb, [field]: value } : pb
       )
     }))
+  }
+
+  const resolveSupplierIdByName = async (name) => {
+    const n = String(name || '').trim().toLowerCase()
+    if (!n) return null
+
+    // A) Primer: intenta resoldre-ho des del dropdown ja carregat (zero DB assumptions)
+    const selectEl = document.querySelector('select[data-supplier-select="true"]')
+    if (selectEl) {
+      const opt = [...selectEl.options].find(o => String(o.textContent || '').trim().toLowerCase() === n)
+      if (opt && opt.value) return opt.value
+    }
+
+    // B) Fallback DB (sense project_id)
+    const { data, error } = await supabase
+      .from('suppliers')
+      .select('id, name')
+      .ilike('name', n)
+      .limit(1)
+
+    if (error) return null
+    return data?.[0]?.id || null
   }
 
   const handleSaveQuote = async () => {
@@ -298,15 +327,80 @@ export default function QuotesSection({ projectId, darkMode }) {
           Supplier Quotes Comparison
         </h3>
         {!showAddForm && (
-          <button
-            onClick={() => setShowAddForm(true)}
-            style={styles.addButton}
-          >
-            <Plus size={16} />
-            Add Quote
-          </button>
+          <>
+            <button
+              onClick={() => setShowAddForm(true)}
+              style={styles.addButton}
+            >
+              <Plus size={16} />
+              Add Quote
+            </button>
+            <button
+              type="button"
+              className="btn"
+              onClick={() => setShowImport(true)}
+            >
+              Import Markdown
+            </button>
+          </>
         )}
       </div>
+
+      {showImport && (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <textarea
+            value={importText}
+            onChange={(e) => setImportText(e.target.value)}
+            rows={10}
+            style={{ width: '100%' }}
+          />
+          <button
+            className="btn btn--primary"
+            onClick={async () => {
+              const result = parseSupplierQuote(importText)
+              if (!result.ok) {
+                alert(result.error)
+                return
+              }
+
+              const supplierId = await resolveSupplierIdByName(result.data.supplier_name)
+
+              setNewQuote(prev => ({
+                ...prev,
+                supplier_id: supplierId || prev.supplier_id,
+                currency: result.data.currency || 'USD',
+                incoterm: result.data.incoterm || '',
+                payment_terms: result.data.payment_terms || '',
+                lead_time_days: result.data.lead_time_days || '',
+                moq: result.data.moq || '',
+                notes: result.data.notes || '',
+                shipping_estimate: result.data.shipping_estimate
+                  ? parseFloat(result.data.shipping_estimate)
+                  : null,
+                price_breaks: result.data.unit_price
+                  ? [{ min_qty: result.data.moq || 1, unit_price: result.data.unit_price }]
+                  : prev.price_breaks
+              }))
+
+              setShowAddForm(true)
+              setShowImport(false)
+              setImportText('')
+            }}
+          >
+            Parse & Fill
+          </button>
+
+          <button
+            className="btn"
+            onClick={() => {
+              setShowImport(false)
+              setImportText('')
+            }}
+          >
+            Cancel
+          </button>
+        </div>
+      )}
 
       {/* Target Quantity Selector */}
       {quotes.length > 0 && (
@@ -431,6 +525,7 @@ export default function QuotesSection({ projectId, darkMode }) {
             <div style={styles.formGroup}>
               <label style={styles.label}>Supplier *</label>
               <select
+                data-supplier-select="true"
                 value={newQuote.supplier_id}
                 onChange={(e) => setNewQuote({ ...newQuote, supplier_id: e.target.value })}
                 style={{
