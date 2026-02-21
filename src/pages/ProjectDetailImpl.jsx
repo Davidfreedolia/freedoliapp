@@ -61,6 +61,7 @@ import { generateClaudeResearchPrompt } from '../lib/generateClaudeResearchPromp
 const IdentifiersSection = lazy(() => import('../components/IdentifiersSection'))
 const ProfitabilityCalculator = lazy(() => import('../components/ProfitabilityCalculator'))
 const QuotesSection = lazy(() => import('../components/QuotesSection'))
+const SamplesSection = lazy(() => import('../components/SamplesSection'))
 const DecisionLog = lazy(() => import('../components/DecisionLog'))
 const AmazonReadinessBadge = lazy(() => import('../components/AmazonReadinessBadge'))
 const CompetitiveAsinSection = lazy(() => import('../components/CompetitiveAsinSection'))
@@ -2184,8 +2185,10 @@ ${t}
         )
       case 4:
         return (
-          <div style={styles.phasePlaceholder}>
-            Sense widgets específics encara per aquesta fase.
+          <div className="samples-phase-wrap">
+            <Suspense fallback={<div className="samples-loading-wrap">Carregant...</div>}>
+              <SamplesSection projectId={id} darkMode={darkMode} />
+            </Suspense>
           </div>
         )
       case 5:

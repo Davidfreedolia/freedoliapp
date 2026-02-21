@@ -4906,6 +4906,13 @@ svg[class*="lucide-star"] {
 }
 .btn--turq:hover { filter: brightness(0.97); }
 .btn--turq:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn--soft {
+  background: var(--surface-bg-2, #f3f4f6);
+  border: 1px solid var(--border-1);
+  color: var(--text-1);
+}
+.btn--soft:hover:not(:disabled) { filter: brightness(0.97); }
+.btn--soft:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn--send { min-width: 220px; }
 
 /* Footer cotitzacions — PAS 2 / mostres */
@@ -5197,4 +5204,225 @@ svg[class*="lucide-star"] {
 
 .quotes-table tbody tr:last-child td {
   border-bottom: none;
+}
+
+/* Mostres — PAS M1 */
+.samples-section {
+  margin-bottom: 24px;
+}
+.samples-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+.samples-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-1);
+}
+.samples-title__icon {
+  color: var(--coral-1);
+  flex-shrink: 0;
+}
+.samples-empty,
+.samples-loading {
+  padding: 20px;
+  text-align: center;
+  color: var(--muted-1, #6b7280);
+  margin: 0;
+}
+.samples-loading-wrap {
+  padding: 20px;
+  text-align: center;
+  color: var(--muted-1, #6b7280);
+}
+.samples-table {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--border-1);
+}
+.samples-table thead {
+  background-color: var(--surface-bg-2, #f9fafb);
+}
+.samples-table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border-1);
+  color: var(--text-1);
+}
+.samples-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border-1);
+  color: var(--text-1);
+}
+.samples-table tbody tr:last-child td {
+  border-bottom: none;
+}
+.samples-table__actions-col {
+  width: 200px;
+  padding-right: 12px;
+}
+.sample-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+.sample-actions .btn {
+  height: 34px;
+  min-width: 100px;
+}
+.sample-status {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.sample-status--pending {
+  background: color-mix(in srgb, var(--muted-1) 20%, transparent);
+  color: var(--text-1);
+}
+.sample-status--requested {
+  background: color-mix(in srgb, var(--teal-1, #0d9488) 18%, transparent);
+  color: var(--text-1);
+}
+.sample-status--received {
+  background: color-mix(in srgb, #22c55e 18%, transparent);
+  color: #166534;
+}
+.sample-status--rejected {
+  background: color-mix(in srgb, #ef4444 18%, transparent);
+  color: #b91c1c;
+}
+.sample-status--cancelled {
+  background: color-mix(in srgb, var(--muted-1) 25%, transparent);
+  color: var(--muted-1);
+}
+
+/* PAS M2 — PO mostra + Tria */
+.samples-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+.samples-actions .btn,
+.samples-actions .sample-po-pill {
+  height: 34px;
+  min-height: 34px;
+  box-sizing: border-box;
+}
+.sample-po-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  background: color-mix(in srgb, var(--teal-1, #0d9488) 15%, transparent);
+  color: var(--text-1);
+  border: 1px solid var(--border-1);
+}
+.sample-choice-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.sample-choice {
+  height: 34px;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--border-1);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.sample-choice--shortlist.sample-choice--off {
+  background: var(--surface-bg-2, #f9fafb);
+  color: var(--text-1);
+}
+.sample-choice--shortlist.sample-choice--on {
+  background: color-mix(in srgb, var(--teal-1, #0d9488) 18%, transparent);
+  color: var(--text-1);
+  border-color: var(--teal-1, #0d9488);
+}
+.sample-choice--winner.sample-choice--off {
+  background: var(--surface-bg-2, #f9fafb);
+  color: var(--text-1);
+}
+.sample-choice--winner.sample-choice--on {
+  background: var(--turquoise-1, var(--teal-1, #0d9488));
+  color: #fff;
+  border-color: var(--teal-1, #0d9488);
+}
+.samples-po-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.samples-po-modal {
+  background: var(--surface-bg-1, #fff);
+  border-radius: 12px;
+  border: 1px solid var(--border-1);
+  padding: 20px;
+  min-width: 320px;
+  max-width: 90vw;
+}
+.samples-po-modal__title {
+  margin: 0 0 16px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-1);
+}
+.samples-po-modal__field {
+  margin-bottom: 12px;
+}
+.samples-po-modal__label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-1);
+}
+.samples-po-modal__input,
+.samples-po-modal__textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border-1);
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--text-1);
+  background: var(--surface-bg-1, #fff);
+  box-sizing: border-box;
+}
+.samples-po-modal__textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+.samples-po-modal__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+.samples-po-modal__actions .btn {
+  height: 34px;
+  min-height: 34px;
 }

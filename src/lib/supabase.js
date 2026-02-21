@@ -3242,6 +3242,81 @@ export const createSampleRequestsFromQuotes = async (quotes, projectId) => {
   if (error) throw error
 }
 
+export const getSupplierSampleRequests = async (projectId) => {
+  const userId = await getCurrentUserId()
+  if (!userId) return []
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+  const { data, error } = await supabase
+    .from('supplier_sample_requests')
+    .select(`
+      *,
+      suppliers(id, name, country),
+      supplier_quotes(
+        id,
+        incoterm,
+        moq,
+        currency,
+        lead_time_days,
+        payment_terms,
+        supplier_quote_price_breaks(min_qty, unit_price)
+      )
+    `)
+    .eq('user_id', userId)
+    .eq('project_id', projectId)
+    .eq('is_demo', demoMode)
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data || []
+}
+
+export const updateSupplierSampleRequest = async (id, patch) => {
+  const userId = await getCurrentUserId()
+  if (!userId) return authRequired()
+  const { data, error } = await supabase
+    .from('supplier_sample_requests')
+    .update(patch)
+    .eq('id', id)
+    .eq('user_id', userId)
+    .select()
+    .maybeSingle()
+  if (error) throw error
+  return data
+}
+
+/**
+ * Crea una PO de mostra i enllaça supplier_sample_requests.po_id.
+ * Reutilitza createPurchaseOrder; total_amount existeix a purchase_orders.
+ */
+export const createSamplePurchaseOrder = async ({
+  project_id,
+  supplier_id,
+  sample_request_id,
+  currency,
+  amount_total,
+  notes,
+  incoterm
+}) => {
+  const userId = await getCurrentUserId()
+  if (!userId) return authRequired()
+  const sku = await getProjectSku(project_id)
+  const poNumber = await generatePONumber(sku ? `${sku}-S` : 'sample')
+  const po = await createPurchaseOrder({
+    project_id,
+    supplier_id,
+    po_number: poNumber,
+    currency: currency || 'USD',
+    total_amount: amount_total ?? 0,
+    notes: notes || null,
+    incoterm: incoterm || null,
+    order_date: new Date().toISOString().split('T')[0],
+    status: 'draft'
+  })
+  if (!po?.id) throw new Error('No s\'ha pogut crear la PO')
+  await updateSupplierSampleRequest(sample_request_id, { po_id: po.id })
+  return po
+}
+
 // DECISION LOG
 export const getDecisionLog = async (entityType, entityId) => {
   const userId = await getCurrentUserId()
