@@ -4898,54 +4898,80 @@ svg[class*="lucide-star"] {
   justify-content: center;
 }
 
-/* Botó turquesa canònic — PAS 52 */
+/* Botó turquesa canònic — PAS 2 */
 .btn--turq {
   background: var(--turquoise-1, var(--brand-2));
-  border: 1px solid color-mix(in srgb, var(--turquoise-1, var(--brand-2)) 60%, var(--border-1));
-  color: #ffffff;
+  color: #fff;
+  border: 1px solid var(--turquoise-1, var(--brand-2));
 }
-.btn--turq:hover { filter: brightness(0.98); }
+.btn--turq:hover { filter: brightness(0.97); }
 .btn--turq:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn--send { min-width: 220px; }
 
-/* Footer cotitzacions (Enviar a mostres) — PAS 52 */
-.quotes-footer {
+/* Footer cotitzacions — PAS 2 / mostres */
+.quotes-footer,
+.quotes-footer-actions {
   display: flex;
   justify-content: flex-end;
-  margin-top: 12px;
+  margin-top: 16px;
 }
 
-/* Quotes header — PAS 53 */
+/* Header — PAS 2 */
 .quotes-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+.quotes-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.quotes-title__icon {
+  color: var(--coral-1);
+}
+.quotes-actions {
+  display: flex;
+  align-items: center;
   gap: 12px;
 }
-.quotes-title { display: flex; align-items: center; gap: 10px; }
-.quotes-title__icon { color: var(--coral-1); }
-.quotes-actions { display: flex; align-items: center; gap: 10px; }
 
 /* Botons 34px globals — PAS 53 */
 .btn { height: 34px; }
 .btn--sm { height: 34px; padding: 0 12px; font-size: 12px; }
 
-/* Dropzone import cotització — PAS 52/53 */
+/* Dropzone import cotització — PAS 2 */
 .quote-import-dropzone {
-  height: 34px;
-  min-width: 260px;
-  padding: 0 12px;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  border-radius: 10px;
+  gap: 12px;
+  height: 48px;
+  padding: 0 14px;
+  border-radius: 12px;
   border: 1px dashed var(--border-1);
-  border-style: dashed;
-  background: color-mix(in srgb, var(--surface-bg-2) 70%, transparent);
+  background: var(--surface-bg-2);
   cursor: pointer;
+  min-width: 260px;
 }
-.quote-import-dropzone__title { font-weight: 800; font-size: 12px; }
-.quote-import-dropzone__hint { font-size: 12px; opacity: 0.6; }
+.quote-import-dropzone__icon {
+  font-weight: 700;
+  font-size: 18px;
+}
+.quote-import-dropzone__content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.quote-import-dropzone__title {
+  font-weight: 700;
+  font-size: 13px;
+}
+.quote-import-dropzone__hint {
+  font-size: 12px;
+  opacity: 0.6;
+}
 .quote-import-dropzone.is-dragover {
   border-color: var(--brand-2);
   background: color-mix(in srgb, var(--brand-2) 15%, transparent);
@@ -4967,14 +4993,17 @@ svg[class*="lucide-star"] {
 .quotes-table td:last-child {
   padding-right: 12px;
   width: 200px;
+  overflow: hidden;
 }
 
 .quote-actions {
-  width: 200px;
+  width: 180px;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: stretch;
+  justify-content: flex-start;
   gap: 8px;
+  overflow: hidden;
 }
 
 .quote-action-toggle {
@@ -5109,6 +5138,11 @@ svg[class*="lucide-star"] {
 .quote-samples-toggle--on {
   background: color-mix(in srgb, var(--coral-1) 12%, transparent);
   border-color: color-mix(in srgb, var(--coral-1) 35%, var(--border-1));
+}
+
+.quote-samples-toggle--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .quotes-table tr.quote-selected-row td {

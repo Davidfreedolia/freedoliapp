@@ -3211,6 +3211,37 @@ export const deleteSupplierQuote = async (quoteId) => {
   if (error) throw error
 }
 
+/**
+ * Crea registres a supplier_sample_requests des de les quotes marcades (go_samples).
+ * Idempotent: upsert per quote_id.
+ */
+export const createSampleRequestsFromQuotes = async (quotes, projectId) => {
+  const userId = await getCurrentUserId()
+  if (!userId) return authRequired()
+  const { getDemoMode } = await import('./demoModeFilter')
+  const demoMode = await getDemoMode()
+
+  const candidates = (quotes || []).filter(
+    q => q.go_samples === true && q.supplier_id != null && (q.validity_status == null || q.validity_status === 'PASS')
+  )
+  if (candidates.length === 0) return
+
+  const rows = candidates.map(q => ({
+    user_id: userId,
+    is_demo: demoMode,
+    project_id: projectId,
+    quote_id: q.id,
+    supplier_id: q.supplier_id,
+    status: 'PENDING'
+  }))
+
+  const { error } = await supabase
+    .from('supplier_sample_requests')
+    .upsert(rows, { onConflict: 'quote_id' })
+
+  if (error) throw error
+}
+
 // DECISION LOG
 export const getDecisionLog = async (entityType, entityId) => {
   const userId = await getCurrentUserId()

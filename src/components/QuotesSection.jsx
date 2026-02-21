@@ -17,6 +17,7 @@ import {
   createSupplierQuote, 
   updateSupplierQuote,
   deleteSupplierQuote,
+  createSampleRequestsFromQuotes,
   getSuppliers,
   createSupplier,
   getProjectProfitability,
@@ -45,8 +46,9 @@ export default function QuotesSection({ projectId, darkMode }) {
   const [targetQuantity, setTargetQuantity] = useState(100)
   const [projectShipping, setProjectShipping] = useState(0)
   const [projectProfitability, setProjectProfitability] = useState(null)
-  const [showCreateSupplier, setShowCreateSupplier] = useState(false)
-  const [prefillSupplier, setPrefillSupplier] = useState(null)
+  const [showCreateSupplierModal, setShowCreateSupplierModal] = useState(false)
+  const [supplierPrefill, setSupplierPrefill] = useState(null)
+  const [quoteToLink, setQuoteToLink] = useState(null)
   const [createSupplierSaving, setCreateSupplierSaving] = useState(false)
   const [manualDraft, setManualDraft] = useState(null)
   
@@ -239,21 +241,6 @@ export default function QuotesSection({ projectId, darkMode }) {
     }
   }
 
-  const handleSelectedClick = async (quote) => {
-    if (quote.is_selected) return
-    try {
-      await supabase
-        .from('supplier_quotes')
-        .update({ is_selected: false })
-        .eq('project_id', projectId)
-      await updateSupplierQuote(quote.id, { is_selected: true })
-      await loadData()
-    } catch (err) {
-      console.error('Error updating selected quote:', err)
-      alert('Error en marcar com escollida')
-    }
-  }
-
   const handleSamplesToggle = async (quote) => {
     if (quote.id?.startsWith('demo-')) return
     try {
@@ -279,10 +266,22 @@ export default function QuotesSection({ projectId, darkMode }) {
     }
   }
 
-  const handleSendToSamples = () => {
-    const selected = (quotes || []).filter(q => q.go_samples).map(q => q.id)
-    sessionStorage.setItem(`samples:selected_quotes:${projectId}`, JSON.stringify(selected))
-    navigate(`/projects/${projectId}?phase=samples`)
+  const handleSendToSamples = async () => {
+    const quotesForTable = (quotes || []).filter(q => !q.is_demo_row)
+    const marked = quotesForTable.filter(q => q.go_samples)
+    if (marked.length === 0) return
+    const withoutSupplier = marked.filter(q => !q.supplier_id)
+    if (withoutSupplier.length > 0) {
+      alert('Abans d\'enviar, cal crear o seleccionar el proveïdor a totes les cotitzacions marcades.')
+      return
+    }
+    try {
+      await createSampleRequestsFromQuotes(quotesForTable, projectId)
+      alert('Enviat a mostres.')
+      if (typeof loadData === 'function') loadData()
+    } catch (e) {
+      alert(e?.message || 'Error en enviar a mostres.')
+    }
   }
 
   const handleAddManualRow = () => {
@@ -334,20 +333,27 @@ export default function QuotesSection({ projectId, darkMode }) {
     }
   }
 
-  const openCreateSupplierFromQuote = (quote) => {
-    const parts = []
-    if (quote.currency) parts.push(`Moneda: ${quote.currency}`)
-    if (quote.incoterm) parts.push(`Incoterm: ${quote.incoterm}`)
-    if (quote.payment_terms) parts.push(`Pagament: ${quote.payment_terms}`)
-    if (quote.notes) parts.push(quote.notes)
-    setPrefillSupplier({
-      name: quote.suppliers?.name || lastImportedSupplierName || '',
+  const handleOpenCreateSupplier = (quote) => {
+    setQuoteToLink(quote)
+    setSupplierPrefill({
+      name: quote.supplier_name_raw || '',
       currency: quote.currency || null,
       incoterm: quote.incoterm || null,
       payment_terms: quote.payment_terms || null,
-      notes: parts.length ? parts.join('\n') : null
+      notes: quote.notes || null
     })
-    setShowCreateSupplier(true)
+    setShowCreateSupplierModal(true)
+  }
+
+  const handleSupplierCreated = async (supplier) => {
+    if (!quoteToLink) return
+    await updateSupplierQuote(quoteToLink.id, {
+      supplier_id: supplier.id,
+      supplier_name_raw: null
+    })
+    setShowCreateSupplierModal(false)
+    setQuoteToLink(null)
+    await loadData()
   }
 
   const getUnitPriceForQuantity = (quote, quantity) => {
@@ -488,7 +494,7 @@ export default function QuotesSection({ projectId, darkMode }) {
       ? quotes
       : (import.meta.env.DEV ? getDemoQuotesForLayout() : [])
 
-  const samplesCount = quotesForTable.filter(q => q.go_samples && !String(q.id).startsWith('demo-')).length
+  const samplesCount = quotesForTable.filter(q => q.go_samples && q.supplier_id && !String(q.id).startsWith('demo-')).length
 
   return (
     <div style={{
@@ -500,6 +506,7 @@ export default function QuotesSection({ projectId, darkMode }) {
           <DollarSign className="quotes-title__icon" size={18} />
           <h3>Comparativa ràpida de cotitzacions</h3>
         </div>
+
         <div className="quotes-actions">
           <div
             className="quote-import-dropzone"
@@ -518,11 +525,22 @@ export default function QuotesSection({ projectId, darkMode }) {
               }
             }}
           >
-            <div className="quote-import-dropzone__title">Importar cotització</div>
-            <div className="quote-import-dropzone__hint">Arrossega aquí o fes clic</div>
+            <div className="quote-import-dropzone__icon">+</div>
+            <div className="quote-import-dropzone__content">
+              <div className="quote-import-dropzone__title">
+                Importar cotització
+              </div>
+              <div className="quote-import-dropzone__hint">
+                Arrossega aquí o fes clic
+              </div>
+            </div>
           </div>
-          <button type="button" className="btn btn--turq" onClick={handleAddManualRow}>
-            <Plus size={16} />
+
+          <button
+            type="button"
+            className="btn btn--turq"
+            onClick={handleAddManualRow}
+          >
             Afegir cotització
           </button>
         </div>
@@ -1062,9 +1080,10 @@ export default function QuotesSection({ projectId, darkMode }) {
                   : null
                 const unitPrice = firstPriceBreak ? parseFloat(firstPriceBreak.unit_price) : null
 
+                const showCreateSupplierBtn = !isDemoRow && !quote.supplier_id && quote.supplier_name_raw
                 return (
-                  <tr key={quote.id} className={quote.is_selected ? 'quote-selected-row' : ''}>
-                    <td>{quote.suppliers?.name || '-'}</td>
+                  <tr key={quote.id}>
+                    <td>{quote.suppliers?.name || quote.supplier_name_raw || '-'}</td>
                     <td>{quote.incoterm || '-'}</td>
                     <td>
                       {quote.moq ?? '-'}
@@ -1087,19 +1106,31 @@ export default function QuotesSection({ projectId, darkMode }) {
                     <td>{quote.payment_terms || '-'}</td>
                     <td>
                       <div className="quote-actions">
-                        <label className={`quote-action-toggle ${quote.go_samples ? 'quote-action-toggle--on' : ''}`}>
+                        <label className={`quote-action-toggle ${quote.go_samples ? 'quote-action-toggle--on' : ''} ${!quote.supplier_id ? 'quote-samples-toggle--disabled' : ''}`}>
                           <input
                             type="checkbox"
                             checked={!!quote.go_samples}
-                            disabled={isDemoRow}
-                            onChange={() => handleSamplesToggle(quote)}
+                            disabled={isDemoRow || !quote.supplier_id}
+                            onChange={() => {
+                              if (!quote.supplier_id) {
+                                alert('Cal crear el proveïdor abans d\'enviar a mostres.')
+                                return
+                              }
+                              handleSamplesToggle(quote)
+                            }}
                           />
                           <span>MOSTRES</span>
                         </label>
 
-                        <button type="button" className="btn btn--soft quote-create-supplier-inline" onClick={() => openCreateSupplierFromQuote(quote)} disabled={isDemoRow}>
-                          Crear proveïdor
-                        </button>
+                        {showCreateSupplierBtn && (
+                          <button
+                            type="button"
+                            className="btn btn--soft quote-create-supplier-inline"
+                            onClick={() => handleOpenCreateSupplier(quote)}
+                          >
+                            Crear proveïdor
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -1119,10 +1150,10 @@ export default function QuotesSection({ projectId, darkMode }) {
         </div>
       )}
 
-      <div className="quotes-footer">
+      <div className="quotes-footer-actions">
         <button
           type="button"
-          className="btn btn--turq"
+          className="btn btn--turq btn--send"
           onClick={handleSendToSamples}
           disabled={samplesCount === 0}
         >
@@ -1130,12 +1161,12 @@ export default function QuotesSection({ projectId, darkMode }) {
         </button>
       </div>
 
-      {showCreateSupplier && prefillSupplier && (
-        <div style={styles.modalOverlay} onClick={() => setShowCreateSupplier(false)}>
+      {showCreateSupplierModal && supplierPrefill && (
+        <div style={styles.modalOverlay} onClick={() => { setShowCreateSupplierModal(false); setQuoteToLink(null) }}>
           <div style={{ ...styles.modal, backgroundColor: darkMode ? '#111827' : '#ffffff' }} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeader}>
               <h3 style={styles.modalTitle}>Crear proveïdor</h3>
-              <button type="button" onClick={() => setShowCreateSupplier(false)} style={styles.closeButton} aria-label="Tancar">
+              <button type="button" onClick={() => { setShowCreateSupplierModal(false); setQuoteToLink(null) }} style={styles.closeButton} aria-label="Tancar">
                 <X size={20} />
               </button>
             </div>
@@ -1143,8 +1174,8 @@ export default function QuotesSection({ projectId, darkMode }) {
               <label style={styles.label}>Nom *</label>
               <input
                 type="text"
-                value={prefillSupplier.name || ''}
-                onChange={e => setPrefillSupplier(prev => ({ ...prev, name: e.target.value }))}
+                value={supplierPrefill.name || ''}
+                onChange={e => setSupplierPrefill(prev => ({ ...prev, name: e.target.value }))}
                 style={styles.input}
                 placeholder="Nom del proveïdor"
               />
@@ -1152,33 +1183,35 @@ export default function QuotesSection({ projectId, darkMode }) {
             <div style={styles.formGroup}>
               <label style={styles.label}>Notes</label>
               <textarea
-                value={prefillSupplier.notes || ''}
-                onChange={e => setPrefillSupplier(prev => ({ ...prev, notes: e.target.value }))}
+                value={supplierPrefill.notes || ''}
+                onChange={e => setSupplierPrefill(prev => ({ ...prev, notes: e.target.value }))}
                 style={{ ...styles.input, minHeight: 60 }}
                 placeholder="Moneda, incoterm, pagament..."
                 rows={3}
               />
             </div>
             <div style={styles.modalFooter}>
-              <button type="button" onClick={() => setShowCreateSupplier(false)} className="btn btn--soft">
+              <button type="button" onClick={() => { setShowCreateSupplierModal(false); setQuoteToLink(null) }} className="btn btn--soft">
                 Cancel·lar
               </button>
               <button
                 type="button"
                 className="btn btn--primary"
-                disabled={createSupplierSaving || !(prefillSupplier.name || '').trim()}
+                disabled={createSupplierSaving || !(supplierPrefill.name || '').trim()}
                 onClick={async () => {
                   setCreateSupplierSaving(true)
                   try {
                     const supplier = await createSupplier({
-                      name: (prefillSupplier.name || '').trim(),
+                      name: (supplierPrefill.name || '').trim(),
                       type: 'other',
-                      notes: (prefillSupplier.notes || '').trim() || undefined
+                      notes: (supplierPrefill.notes || '').trim() || undefined
                     })
-                    await loadData()
-                    setShowCreateSupplier(false)
-                    setPrefillSupplier(null)
-                    if (supplier?.id) setNewQuote(prev => ({ ...prev, supplier_id: supplier.id }))
+                    if (supplier?.id) await handleSupplierCreated(supplier)
+                    else {
+                      setShowCreateSupplierModal(false)
+                      setQuoteToLink(null)
+                      await loadData()
+                    }
                   } catch (err) {
                     alert(err.message || 'Error creant proveïdor')
                   } finally {
