@@ -22,6 +22,59 @@ function smallestUnitPrice(quote) {
   return first?.unit_price != null ? first.unit_price : null
 }
 
+function getDemoSamplesForLayout() {
+  return [
+    {
+      id: 'demo-a',
+      choice_status: 'WINNER',
+      status: 'REQUESTED',
+      po_id: null,
+      created_at: new Date().toISOString(),
+      suppliers: { name: 'Demo Supplier A', country: 'CN' },
+      supplier_quotes: {
+        incoterm: 'FOB',
+        moq: 500,
+        currency: 'USD',
+        lead_time_days: 21,
+        supplier_quote_price_breaks: [{ min_qty: 100, unit_price: 2.5 }]
+      },
+      supplier_id: 'demo-sup-a'
+    },
+    {
+      id: 'demo-b',
+      choice_status: 'SHORTLIST',
+      status: 'RECEIVED',
+      po_id: 'demo-po-1',
+      created_at: new Date().toISOString(),
+      suppliers: { name: 'Demo Supplier B', country: 'VN' },
+      supplier_quotes: {
+        incoterm: 'CIF',
+        moq: 1000,
+        currency: 'EUR',
+        lead_time_days: 14,
+        supplier_quote_price_breaks: [{ min_qty: 500, unit_price: 1.8 }]
+      },
+      supplier_id: 'demo-sup-b'
+    },
+    {
+      id: 'demo-c',
+      choice_status: 'NONE',
+      status: 'REJECTED',
+      po_id: null,
+      created_at: new Date().toISOString(),
+      suppliers: { name: 'Demo Supplier C', country: 'ES' },
+      supplier_quotes: {
+        incoterm: 'EXW',
+        moq: 200,
+        currency: 'USD',
+        lead_time_days: 30,
+        supplier_quote_price_breaks: []
+      },
+      supplier_id: 'demo-sup-c'
+    }
+  ]
+}
+
 export default function SamplesSection({ projectId, darkMode }) {
   const navigate = useNavigate()
   const [list, setList] = useState([])
@@ -47,7 +100,12 @@ export default function SamplesSection({ projectId, darkMode }) {
     loadData()
   }, [loadData])
 
+  const isDemoRow = (row) => row?.id && String(row.id).startsWith('demo-')
+
+  const rowsForTable = (list?.length > 0) ? list : (import.meta.env.DEV ? getDemoSamplesForLayout() : [])
+
   const setStatus = async (id, status) => {
+    if (String(id).startsWith('demo-')) return
     setUpdatingId(id)
     try {
       const updated = await updateSupplierSampleRequest(id, { status })
@@ -62,6 +120,7 @@ export default function SamplesSection({ projectId, darkMode }) {
   }
 
   const openPoModal = (row) => {
+    if (isDemoRow(row)) return
     const quote = row.supplier_quotes
     setPoModalRow(row)
     setPoForm({
@@ -104,6 +163,7 @@ export default function SamplesSection({ projectId, darkMode }) {
   }
 
   const toggleChoice = async (row, nextStatus) => {
+    if (isDemoRow(row)) return
     const current = (row.choice_status || 'NONE').toUpperCase()
     const next = nextStatus === current ? 'NONE' : nextStatus
     setUpdatingId(row.id)
@@ -111,7 +171,7 @@ export default function SamplesSection({ projectId, darkMode }) {
       if (next === 'WINNER' && projectId) {
         await supabase
           .from('supplier_sample_requests')
-          .update({ choice_status: 'NONE' })
+          .update({ choice_status: 'SHORTLIST' })
           .eq('project_id', projectId)
           .eq('choice_status', 'WINNER')
       }
@@ -150,7 +210,7 @@ export default function SamplesSection({ projectId, darkMode }) {
         </h2>
       </div>
 
-      {list.length === 0 ? (
+      {rowsForTable.length === 0 ? (
         <p className="samples-empty">
           Encara no hi ha mostres. Marca cotitzacions com MOSTRES des de Proveïdors.
         </p>
@@ -170,11 +230,12 @@ export default function SamplesSection({ projectId, darkMode }) {
             </tr>
           </thead>
           <tbody>
-            {list.map((row) => {
+            {rowsForTable.map((row) => {
               const quote = row.supplier_quotes
               const supplier = row.suppliers
               const unitPrice = smallestUnitPrice(quote)
               const currency = quote?.currency || ''
+              const demo = isDemoRow(row)
               return (
                 <tr key={row.id}>
                   <td>{supplier?.name ?? '—'}</td>
@@ -195,7 +256,7 @@ export default function SamplesSection({ projectId, darkMode }) {
                       <button
                         type="button"
                         className={`sample-choice sample-choice--shortlist ${(row.choice_status || 'NONE').toUpperCase() === 'SHORTLIST' ? 'sample-choice--on' : 'sample-choice--off'}`}
-                        disabled={updatingId === row.id}
+                        disabled={updatingId === row.id || demo}
                         onClick={() => toggleChoice(row, 'SHORTLIST')}
                       >
                         TRIA
@@ -203,7 +264,7 @@ export default function SamplesSection({ projectId, darkMode }) {
                       <button
                         type="button"
                         className={`sample-choice sample-choice--winner ${(row.choice_status || 'NONE').toUpperCase() === 'WINNER' ? 'sample-choice--on' : 'sample-choice--off'}`}
-                        disabled={updatingId === row.id}
+                        disabled={updatingId === row.id || demo}
                         onClick={() => toggleChoice(row, 'WINNER')}
                       >
                         GUANYA
@@ -216,6 +277,7 @@ export default function SamplesSection({ projectId, darkMode }) {
                         <button
                           type="button"
                           className="btn btn--sm btn--turq"
+                          disabled={demo}
                           onClick={() => openPoModal(row)}
                         >
                           Crear PO mostra
@@ -226,7 +288,8 @@ export default function SamplesSection({ projectId, darkMode }) {
                           <button
                             type="button"
                             className="btn btn--sm btn--soft"
-                            onClick={() => navigate(`/orders?po=${row.po_id}`)}
+                            disabled={demo}
+                            onClick={() => !demo && navigate(`/orders?po=${row.po_id}`)}
                           >
                             Veure PO
                           </button>
@@ -235,7 +298,7 @@ export default function SamplesSection({ projectId, darkMode }) {
                       <button
                         type="button"
                         className="btn btn--sm btn--turq"
-                        disabled={updatingId === row.id}
+                        disabled={updatingId === row.id || demo}
                         onClick={() => setStatus(row.id, 'REQUESTED')}
                       >
                         SOL·LICITADA
@@ -243,7 +306,7 @@ export default function SamplesSection({ projectId, darkMode }) {
                       <button
                         type="button"
                         className="btn btn--sm btn--soft"
-                        disabled={updatingId === row.id}
+                        disabled={updatingId === row.id || demo}
                         onClick={() => setStatus(row.id, 'RECEIVED')}
                       >
                         REBuda
@@ -251,7 +314,7 @@ export default function SamplesSection({ projectId, darkMode }) {
                       <button
                         type="button"
                         className="btn btn--sm btn--soft"
-                        disabled={updatingId === row.id}
+                        disabled={updatingId === row.id || demo}
                         onClick={() => setStatus(row.id, 'REJECTED')}
                       >
                         REBUTJADA
