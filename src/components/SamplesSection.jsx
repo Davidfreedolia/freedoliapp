@@ -14,17 +14,6 @@ function formatShortDate(iso) {
   return d.toLocaleDateString('ca', { day: '2-digit', month: '2-digit', year: '2-digit' })
 }
 
-function toDatetimeLocal(iso) {
-  if (!iso) return ''
-  const d = new Date(iso)
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  const h = String(d.getHours()).padStart(2, '0')
-  const min = String(d.getMinutes()).padStart(2, '0')
-  return `${y}-${m}-${day}T${h}:${min}`
-}
-
 function smallestUnitPrice(quote) {
   const breaks = quote?.supplier_quote_price_breaks
   if (!breaks || breaks.length === 0) return null
@@ -96,11 +85,9 @@ export default function SamplesSection({ projectId, darkMode }) {
   const [poSubmitting, setPoSubmitting] = useState(false)
   const [trackRow, setTrackRow] = useState(null)
   const [trackDraft, setTrackDraft] = useState({
-    carrier: '',
     tracking_number: '',
-    tracking_url: '',
-    shipped_at: '',
-    delivered_at: ''
+    tracking_carrier: '',
+    tracking_url: ''
   })
   const [trackSaving, setTrackSaving] = useState(false)
 
@@ -186,11 +173,9 @@ export default function SamplesSection({ projectId, darkMode }) {
     if (isDemoRow(row)) return
     setTrackRow(row)
     setTrackDraft({
-      carrier: row.carrier ?? '',
       tracking_number: row.tracking_number ?? '',
-      tracking_url: row.tracking_url ?? '',
-      shipped_at: toDatetimeLocal(row.shipped_at),
-      delivered_at: toDatetimeLocal(row.delivered_at)
+      tracking_carrier: row.tracking_carrier ?? row.carrier ?? '',
+      tracking_url: row.tracking_url ?? ''
     })
   }
 
@@ -202,15 +187,10 @@ export default function SamplesSection({ projectId, darkMode }) {
     if (!trackRow || String(trackRow.id).startsWith('demo-')) return
     setTrackSaving(true)
     try {
-      let shippedAt = trackDraft.shipped_at ? new Date(trackDraft.shipped_at).toISOString() : null
-      const hasNumber = (trackDraft.tracking_number || '').trim().length > 0
-      if (hasNumber && !shippedAt) shippedAt = new Date().toISOString()
       const patch = {
-        carrier: (trackDraft.carrier || '').trim() || null,
         tracking_number: (trackDraft.tracking_number || '').trim() || null,
-        tracking_url: (trackDraft.tracking_url || '').trim() || null,
-        shipped_at: shippedAt,
-        delivered_at: trackDraft.delivered_at ? new Date(trackDraft.delivered_at).toISOString() : null
+        tracking_carrier: (trackDraft.tracking_carrier || '').trim() || null,
+        tracking_url: (trackDraft.tracking_url || '').trim() || null
       }
       await updateSupplierSampleRequest(trackRow.id, patch)
       closeTrackModal()
@@ -333,12 +313,16 @@ export default function SamplesSection({ projectId, darkMode }) {
                     </div>
                   </td>
                   <td>
-                    {row.tracking_number ? (
+                    {!row.tracking_number ? (
+                      <span className="sample-shipping__empty">—</span>
+                    ) : (
                       <div className="sample-shipping">
-                        {row.carrier && (
-                          <span className="sample-shipping__carrier">{row.carrier}</span>
+                        <span className="sample-shipping__num">{row.tracking_number}</span>
+                        {(row.tracking_carrier || row.carrier) && (
+                          <span className="sample-shipping__meta">
+                            {row.tracking_carrier || row.carrier}
+                          </span>
                         )}
-                        <span className="sample-shipping__code">{row.tracking_number}</span>
                         {row.tracking_url && (
                           <a
                             href={row.tracking_url}
@@ -346,12 +330,10 @@ export default function SamplesSection({ projectId, darkMode }) {
                             rel="noopener noreferrer"
                             className="sample-shipping__link"
                           >
-                            Tracking
+                            Obrir
                           </a>
                         )}
                       </div>
-                    ) : (
-                      '—'
                     )}
                   </td>
                   <td className="samples-table__actions-col">
@@ -420,52 +402,37 @@ export default function SamplesSection({ projectId, darkMode }) {
       )}
 
       {trackRow && (
-        <div className="samples-track-modal-overlay" onClick={closeTrackModal}>
-          <div className="samples-track-modal" onClick={e => e.stopPropagation()}>
-            <h3 className="samples-track-modal__title">Tracking de mostra</h3>
-            <div className="samples-track-form">
-              <div className="samples-track-field">
-                <label>Transportista</label>
-                <input
-                  type="text"
-                  value={trackDraft.carrier}
-                  onChange={e => setTrackDraft(d => ({ ...d, carrier: e.target.value }))}
-                />
-              </div>
-              <div className="samples-track-field">
-                <label>Tracking number</label>
-                <input
-                  type="text"
-                  value={trackDraft.tracking_number}
-                  onChange={e => setTrackDraft(d => ({ ...d, tracking_number: e.target.value }))}
-                />
-              </div>
-              <div className="samples-track-field samples-track-field--full">
-                <label>URL tracking</label>
-                <input
-                  type="text"
-                  value={trackDraft.tracking_url}
-                  onChange={e => setTrackDraft(d => ({ ...d, tracking_url: e.target.value }))}
-                />
-              </div>
-              <div className="samples-track-field">
-                <label>Enviada</label>
-                <input
-                  type="datetime-local"
-                  value={trackDraft.shipped_at}
-                  onChange={e => setTrackDraft(d => ({ ...d, shipped_at: e.target.value }))}
-                />
-              </div>
-              <div className="samples-track-field">
-                <label>Entregada</label>
-                <input
-                  type="datetime-local"
-                  value={trackDraft.delivered_at}
-                  onChange={e => setTrackDraft(d => ({ ...d, delivered_at: e.target.value }))}
-                />
-              </div>
+        <div className="samples-po-modal-overlay" onClick={closeTrackModal}>
+          <div className="samples-po-modal" onClick={e => e.stopPropagation()}>
+            <h3 className="samples-po-modal__title">Tracking de mostra</h3>
+            <div className="samples-po-modal__field">
+              <label className="samples-po-modal__label">Tracking number</label>
+              <input
+                type="text"
+                className="samples-po-modal__input"
+                value={trackDraft.tracking_number}
+                onChange={e => setTrackDraft(d => ({ ...d, tracking_number: e.target.value }))}
+              />
             </div>
-            <div className="samples-track-actions">
+            <div className="samples-po-modal__field">
+              <label className="samples-po-modal__label">Transportista</label>
+              <input
+                type="text"
+                className="samples-po-modal__input"
+                value={trackDraft.tracking_carrier}
+                onChange={e => setTrackDraft(d => ({ ...d, tracking_carrier: e.target.value }))}
+              />
+            </div>
+            <div className="samples-po-modal__field">
+              <label className="samples-po-modal__label">URL tracking</label>
+              <input
+                type="text"
+                className="samples-po-modal__input"
+                value={trackDraft.tracking_url}
+                onChange={e => setTrackDraft(d => ({ ...d, tracking_url: e.target.value }))}
+              />
+            </div>
+            <div className="samples-po-modal__actions">
               <button
                 type="button"
                 className="btn btn--turq"

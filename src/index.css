@@ -5434,33 +5434,28 @@ svg[class*="lucide-star"] {
   gap: 10px;
   flex-wrap: wrap;
 }
-.sample-shipping__code {
+.sample-shipping__empty {
+  font-size: 12px;
+  color: var(--muted-1, #6b7280);
+}
+.sample-shipping__num {
   font-weight: 700;
   font-size: 12px;
   letter-spacing: 0.02em;
   color: var(--text-1);
 }
-.sample-shipping__carrier {
-  opacity: 0.72;
-  font-weight: 700;
+.sample-shipping__meta {
   font-size: 12px;
+  opacity: 0.72;
+  color: var(--text-1);
 }
 .sample-shipping__link {
-  height: 34px;
-  padding: 0 12px;
-  border-radius: 10px;
-  border: 1px solid var(--border-1);
-  background: var(--surface-bg-1);
-  color: var(--text-1);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
   font-size: 12px;
-  text-decoration: none;
+  text-decoration: underline;
+  color: var(--text-1);
 }
 .sample-shipping__link:hover {
-  filter: brightness(0.98);
+  opacity: 0.85;
 }
 
 .samples-track-modal-overlay {
