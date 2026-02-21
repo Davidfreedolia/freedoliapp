@@ -14,6 +14,17 @@ function formatShortDate(iso) {
   return d.toLocaleDateString('ca', { day: '2-digit', month: '2-digit', year: '2-digit' })
 }
 
+function toDatetimeLocal(iso) {
+  if (!iso) return ''
+  const d = new Date(iso)
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  const h = String(d.getHours()).padStart(2, '0')
+  const min = String(d.getMinutes()).padStart(2, '0')
+  return `${y}-${m}-${day}T${h}:${min}`
+}
+
 function smallestUnitPrice(quote) {
   const breaks = quote?.supplier_quote_price_breaks
   if (!breaks || breaks.length === 0) return null
@@ -83,6 +94,15 @@ export default function SamplesSection({ projectId, darkMode }) {
   const [poModalRow, setPoModalRow] = useState(null)
   const [poForm, setPoForm] = useState({ amount: '', currency: 'USD', notes: '' })
   const [poSubmitting, setPoSubmitting] = useState(false)
+  const [trackRow, setTrackRow] = useState(null)
+  const [trackDraft, setTrackDraft] = useState({
+    carrier: '',
+    tracking_number: '',
+    tracking_url: '',
+    shipped_at: '',
+    delivered_at: ''
+  })
+  const [trackSaving, setTrackSaving] = useState(false)
 
   const loadData = useCallback(async () => {
     if (!projectId) return
@@ -162,6 +182,46 @@ export default function SamplesSection({ projectId, darkMode }) {
     setPoSubmitting(false)
   }
 
+  const openTrackModal = (row) => {
+    if (isDemoRow(row)) return
+    setTrackRow(row)
+    setTrackDraft({
+      carrier: row.carrier ?? '',
+      tracking_number: row.tracking_number ?? '',
+      tracking_url: row.tracking_url ?? '',
+      shipped_at: toDatetimeLocal(row.shipped_at),
+      delivered_at: toDatetimeLocal(row.delivered_at)
+    })
+  }
+
+  const closeTrackModal = () => {
+    setTrackRow(null)
+  }
+
+  const handleSaveTracking = async () => {
+    if (!trackRow || String(trackRow.id).startsWith('demo-')) return
+    setTrackSaving(true)
+    try {
+      let shippedAt = trackDraft.shipped_at ? new Date(trackDraft.shipped_at).toISOString() : null
+      const hasNumber = (trackDraft.tracking_number || '').trim().length > 0
+      if (hasNumber && !shippedAt) shippedAt = new Date().toISOString()
+      const patch = {
+        carrier: (trackDraft.carrier || '').trim() || null,
+        tracking_number: (trackDraft.tracking_number || '').trim() || null,
+        tracking_url: (trackDraft.tracking_url || '').trim() || null,
+        shipped_at: shippedAt,
+        delivered_at: trackDraft.delivered_at ? new Date(trackDraft.delivered_at).toISOString() : null
+      }
+      await updateSupplierSampleRequest(trackRow.id, patch)
+      closeTrackModal()
+      await loadData()
+    } catch (err) {
+      console.error('Error saving tracking:', err)
+      alert(err?.message || 'Error en desar el tracking.')
+    }
+    setTrackSaving(false)
+  }
+
   const toggleChoice = async (row, nextStatus) => {
     if (isDemoRow(row)) return
     const current = (row.choice_status || 'NONE').toUpperCase()
@@ -226,6 +286,7 @@ export default function SamplesSection({ projectId, darkMode }) {
               <th>Estat</th>
               <th>Data</th>
               <th>Tria</th>
+              <th>Enviament</th>
               <th className="samples-table__actions-col">Accions</th>
             </tr>
           </thead>
@@ -271,8 +332,38 @@ export default function SamplesSection({ projectId, darkMode }) {
                       </button>
                     </div>
                   </td>
+                  <td>
+                    {row.tracking_number ? (
+                      <div className="sample-shipping">
+                        {row.carrier && (
+                          <span className="sample-shipping__carrier">{row.carrier}</span>
+                        )}
+                        <span className="sample-shipping__code">{row.tracking_number}</span>
+                        {row.tracking_url && (
+                          <a
+                            href={row.tracking_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="sample-shipping__link"
+                          >
+                            Tracking
+                          </a>
+                        )}
+                      </div>
+                    ) : (
+                      '—'
+                    )}
+                  </td>
                   <td className="samples-table__actions-col">
                     <div className="samples-actions">
+                      <button
+                        type="button"
+                        className="btn btn--soft btn--sm sample-track-btn"
+                        disabled={demo}
+                        onClick={() => openTrackModal(row)}
+                      >
+                        Tracking
+                      </button>
                       {!row.po_id ? (
                         <button
                           type="button"
@@ -326,6 +417,74 @@ export default function SamplesSection({ projectId, darkMode }) {
             })}
           </tbody>
         </table>
+      )}
+
+      {trackRow && (
+        <div className="samples-track-modal-overlay" onClick={closeTrackModal}>
+          <div className="samples-track-modal" onClick={e => e.stopPropagation()}>
+            <h3 className="samples-track-modal__title">Tracking de mostra</h3>
+            <div className="samples-track-form">
+              <div className="samples-track-field">
+                <label>Transportista</label>
+                <input
+                  type="text"
+                  value={trackDraft.carrier}
+                  onChange={e => setTrackDraft(d => ({ ...d, carrier: e.target.value }))}
+                />
+              </div>
+              <div className="samples-track-field">
+                <label>Tracking number</label>
+                <input
+                  type="text"
+                  value={trackDraft.tracking_number}
+                  onChange={e => setTrackDraft(d => ({ ...d, tracking_number: e.target.value }))}
+                />
+              </div>
+              <div className="samples-track-field samples-track-field--full">
+                <label>URL tracking</label>
+                <input
+                  type="text"
+                  value={trackDraft.tracking_url}
+                  onChange={e => setTrackDraft(d => ({ ...d, tracking_url: e.target.value }))}
+                />
+              </div>
+              <div className="samples-track-field">
+                <label>Enviada</label>
+                <input
+                  type="datetime-local"
+                  value={trackDraft.shipped_at}
+                  onChange={e => setTrackDraft(d => ({ ...d, shipped_at: e.target.value }))}
+                />
+              </div>
+              <div className="samples-track-field">
+                <label>Entregada</label>
+                <input
+                  type="datetime-local"
+                  value={trackDraft.delivered_at}
+                  onChange={e => setTrackDraft(d => ({ ...d, delivered_at: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="samples-track-actions">
+              <button
+                type="button"
+                className="btn btn--turq"
+                disabled={trackSaving}
+                onClick={handleSaveTracking}
+              >
+                Desar
+              </button>
+              <button
+                type="button"
+                className="btn btn--soft"
+                disabled={trackSaving}
+                onClick={closeTrackModal}
+              >
+                Cancel·lar
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {poModalRow && (
