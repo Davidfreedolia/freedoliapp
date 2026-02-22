@@ -2132,9 +2132,9 @@ export const updateLanguage = async (language) => {
   return language
 }
 
-// Company logo: storage path company/{user_id}/logo.{ext}, persisted in company_settings.company_logo_url
+// Company logo: storage path company/{user_id}/logo.{ext}, persisted in company_settings.logo_url
 /**
- * Upload company logo to storage and save company_logo_url in company_settings.
+ * Upload company logo to storage and save logo_url in company_settings.
  * Path: company/{user_id}/logo.{ext}. Overwrites existing file.
  * @param {File} file - Image file (png, jpeg, svg, webp)
  * @returns {Promise<string>} Public URL of the logo
@@ -2153,25 +2153,25 @@ export const uploadCompanyLogo = async (file) => {
   const { data: urlData } = client.storage.from(COMPANY_ASSETS_BUCKET).getPublicUrl(path)
   const logoUrl = urlData.publicUrl
   const existing = await getCompanySettings()
-  await updateCompanySettings({ ...existing, company_logo_url: logoUrl })
+  await updateCompanySettings({ ...existing, logo_url: logoUrl })
   return logoUrl
 }
 
 /**
- * Remove company logo from storage and set company_settings.company_logo_url to null.
+ * Remove company logo from storage and set company_settings.logo_url to null.
  */
 export const deleteCompanyLogo = async () => {
   const userId = await getCurrentUserId()
   if (!userId) return authRequired()
   const existing = await getCompanySettings()
-  const url = existing?.company_logo_url
+  const url = existing?.logo_url
   if (!url) return
   const client = getSupabaseClient()
   const pathMatch = url.includes('/' + COMPANY_ASSETS_BUCKET + '/') && url.split('/' + COMPANY_ASSETS_BUCKET + '/')[1]
   if (client?.storage?.from && pathMatch) {
     await client.storage.from(COMPANY_ASSETS_BUCKET).remove([pathMatch])
   }
-  await updateCompanySettings({ ...existing, company_logo_url: null })
+  await updateCompanySettings({ ...existing, logo_url: null })
 }
 
 // DASHBOARD PREFERENCES

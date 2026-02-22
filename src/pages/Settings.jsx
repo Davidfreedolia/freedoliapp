@@ -112,7 +112,7 @@ export default function Settings() {
         supabase.from('signatures').select('*').eq('user_id', userId).order('created_at', { ascending: true })
       ])
       if (companyRes) setCompanyData(companyRes)
-      setCompanyLogoUrl(companyRes?.company_logo_url ?? null)
+      setCompanyLogoUrl(companyRes?.logo_url ?? null)
       setSignatures(signaturesRes.data || [])
     } catch (err) {
       console.error('Error carregant configuració:', err)
@@ -599,7 +599,7 @@ export default function Settings() {
 
             <p style={styles.sectionDescription}>Aquestes dades s'utilitzaran per generar els documents (PO, Briefings...)</p>
 
-            {/* Logo empresa (company_settings.company_logo_url); desactivat en demo_mode */}
+            {/* Logo empresa (company_settings.logo_url); desactivat en demo_mode */}
             <div className={`settings-logo-section ${demoMode ? 'settings-logo-section--disabled' : ''}`}>
               <h3 className="settings-logo-title">{t('settings.logo') || 'Logo empresa'}</h3>
               <div className="settings-logo-body">
