@@ -2,6 +2,16 @@ import jsPDF from 'jspdf'
 import 'jspdf-autotable'
 import { safeJsonArray } from './safeJson'
 
+async function loadImageAsBase64(url) {
+  const response = await fetch(url)
+  const blob = await response.blob()
+  return new Promise((resolve) => {
+    const reader = new FileReader()
+    reader.onloadend = () => resolve(reader.result)
+    reader.readAsDataURL(blob)
+  })
+}
+
 /**
  * Genera un PDF professional de Purchase Order
  * Format basat en l'Excel de Freedolia
@@ -20,15 +30,30 @@ export const generatePOPdf = async (poData, supplier, companySettings) => {
   // ============================================
   // HEADER - Logo i Títol
   // ============================================
-  // TODO: Logo: usar company_settings.logo_url (o companySettings.logo_url).
-  //       Si el PO té buyer_info.logo_url (snapshot), prioritzar aquest.
-  
-  // Títol principal
+  const snapshotLogo = poData?.buyer_info?.logo_url
+  const settingsLogo = companySettings?.logo_url
+  const logoUrl = snapshotLogo || settingsLogo || null
+
+  if (logoUrl) {
+    try {
+      const base64 = await loadImageAsBase64(logoUrl)
+      const format = base64.indexOf('data:image/jpeg') === 0 ? 'JPEG' : base64.indexOf('data:image/webp') === 0 ? 'WEBP' : 'PNG'
+      doc.addImage(base64, format, margin, y - 5, 30, 12)
+    } catch (e) {
+      console.warn('Logo load failed', e)
+    }
+  }
+
+  const appLang = (typeof localStorage !== 'undefined' && localStorage.getItem('i18nextLng')) || 'ca'
+  const isEnglish = appLang === 'en'
+  const title = isEnglish
+    ? 'PURCHASE ORDER'
+    : `PURCHASE ORDER / ${appLang === 'es' ? 'ORDEN DE COMPRA' : 'ORDRE DE COMPRA'}`
   doc.setFontSize(16)
   doc.setFont('helvetica', 'bold')
   doc.setTextColor(0, 0, 0)
-  doc.text('FREEDOLIA — PURCHASE ORDER / ORDRE DE COMPRA', pageWidth / 2, y, { align: 'center' })
-  
+  doc.text(`${companySettings?.company_name || 'COMPANY'} — ${title}`, pageWidth / 2, y, { align: 'center' })
+
   y += 12
 
   // ============================================
