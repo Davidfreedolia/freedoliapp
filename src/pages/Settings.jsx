@@ -25,7 +25,7 @@ import {
   Settings as SettingsIcon
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { getCompanySettings, updateCompanySettings, supabase, getAuditLogs, updateLanguage, getCurrentUserId } from '../lib/supabase'
+import { getCompanySettings, updateCompanySettings, getCompanyProfile, uploadCompanyLogo, deleteCompanyLogo, supabase, getAuditLogs, updateLanguage, getCurrentUserId } from '../lib/supabase'
 import { clearDemoData, generateDemoData, checkDemoExists } from '../lib/demoSeed'
 import Header from '../components/Header'
 import Button from '../components/Button'
@@ -74,6 +74,9 @@ export default function Settings() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [companyLogoUrl, setCompanyLogoUrl] = useState(null)
+  const [logoUploading, setLogoUploading] = useState(false)
+  const logoInputRef = useRef(null)
 
   useEffect(() => {
     loadSettings()
@@ -104,20 +107,51 @@ export default function Settings() {
     setLoading(true)
     try {
       const userId = await getCurrentUserId()
-      const [companyRes, signaturesRes] = await Promise.all([
+      const [companyRes, profileRes, signaturesRes] = await Promise.all([
         getCompanySettings(),
+        getCompanyProfile(),
         supabase.from('signatures').select('*').eq('user_id', userId).order('created_at', { ascending: true })
       ])
-      
-      if (companyRes) {
-        setCompanyData(companyRes)
-        // Demo mode is now managed by AppContext
-      }
+      if (companyRes) setCompanyData(companyRes)
+      if (profileRes?.logo_url) setCompanyLogoUrl(profileRes.logo_url)
+      else setCompanyLogoUrl(null)
       setSignatures(signaturesRes.data || [])
     } catch (err) {
       console.error('Error carregant configuració:', err)
     }
     setLoading(false)
+  }
+
+  const handleLogoFile = async (e) => {
+    const file = e.target?.files?.[0]
+    if (!file) return
+    const allowed = ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp']
+    if (!allowed.includes(file.type)) {
+      showToast(t('settings.logoFormatError') || 'Format no vàlid. Usa PNG, JPEG, SVG o WebP.', 'error')
+      return
+    }
+    setLogoUploading(true)
+    try {
+      const url = await uploadCompanyLogo(file)
+      setCompanyLogoUrl(url)
+      showToast(t('settings.logoSaved') || 'Logo guardat.', 'success')
+    } catch (err) {
+      console.error('Error pujant logo:', err)
+      showToast(t('settings.logoUploadError') || 'Error en pujar el logo.', 'error')
+    }
+    setLogoUploading(false)
+    e.target.value = ''
+  }
+
+  const handleRemoveLogo = async () => {
+    try {
+      await deleteCompanyLogo()
+      setCompanyLogoUrl(null)
+      showToast(t('settings.logoRemoved') || 'Logo eliminat.', 'success')
+    } catch (err) {
+      console.error('Error eliminant logo:', err)
+      showToast(t('settings.logoRemoveError') || 'Error en eliminar el logo.', 'error')
+    }
   }
 
   const loadAuditLogs = async () => {
@@ -564,6 +598,59 @@ export default function Settings() {
             </div>
 
             <p style={styles.sectionDescription}>Aquestes dades s'utilitzaran per generar els documents (PO, Briefings...)</p>
+
+            {/* Logo empresa */}
+            <div className="settings-logo-section">
+              <h3 className="settings-logo-title">{t('settings.logo') || 'Logo empresa'}</h3>
+              <div className="settings-logo-body">
+                {companyLogoUrl ? (
+                  <>
+                    <div className="settings-logo-preview-wrap">
+                      <img src={companyLogoUrl} alt="Logo empresa" className="settings-logo-preview" />
+                    </div>
+                    <div className="settings-logo-actions">
+                      <input
+                        ref={logoInputRef}
+                        type="file"
+                        accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                        onChange={handleLogoFile}
+                        className="settings-logo-file-input"
+                      />
+                      <Button variant="secondary" size="sm" onClick={() => logoInputRef.current?.click()} disabled={logoUploading}>
+                        {logoUploading ? (t('settings.saving') || 'Guardant...') : (t('settings.changeLogo') || 'Canviar logo')}
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={handleRemoveLogo} disabled={logoUploading}>
+                        <Trash2 size={16} /> {t('settings.removeLogo') || 'Eliminar'}
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <div
+                    className="settings-logo-upload-zone"
+                    onClick={() => !logoUploading && logoInputRef.current?.click()}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => e.key === 'Enter' && !logoUploading && logoInputRef.current?.click()}
+                  >
+                    <input
+                      ref={logoInputRef}
+                      type="file"
+                      accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                      onChange={handleLogoFile}
+                      className="settings-logo-file-input"
+                    />
+                    {logoUploading ? (
+                      <span className="settings-logo-upload-text">{t('settings.saving') || 'Guardant...'}</span>
+                    ) : (
+                      <>
+                        <Upload size={28} className="settings-logo-upload-icon" />
+                        <span className="settings-logo-upload-text">{t('settings.uploadLogo') || 'Puja el logo de l\'empresa'}</span>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
 
             {/* Dades generals */}
             <div style={styles.subsection}>

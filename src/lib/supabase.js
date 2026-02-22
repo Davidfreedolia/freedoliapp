@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { DEMO_USER_UUID } from '../utils/demoConstants'
-import { RECEIPTS_BUCKET } from './storageBuckets'
+import { RECEIPTS_BUCKET, COMPANY_ASSETS_BUCKET } from './storageBuckets'
 
 // IMPORTANT: No static imports of demoMode, auditLog, or demoModeFilter to avoid circular dependencies.
 // All imports from these modules must be dynamic (inside functions).
@@ -2130,6 +2130,82 @@ export const updateLanguage = async (language) => {
   }
   
   return language
+}
+
+// COMPANY PROFILE (logo + data for PO PDF; 1 row per user)
+/**
+ * Returns the current user's company_profile row (for PO PDF and settings).
+ * Fallback: if no logo, PDF can use a local Freedolia asset.
+ */
+export const getCompanyProfile = async () => {
+  const { isDemoMode } = await import('../demo/demoMode')
+  if (isDemoMode()) return null
+  const userId = await getCurrentUserId()
+  if (!userId) return null
+  const { data, error } = await supabase
+    .from('company_profile')
+    .select('*')
+    .eq('user_id', userId)
+    .limit(1)
+    .maybeSingle()
+  if (error && error.code !== 'PGRST116') throw error
+  return data
+}
+
+/**
+ * Upload company logo to storage and save logo_url in company_profile.
+ * Path: company/{user_id}/logo.{ext}. Overwrites existing file.
+ * @param {File} file - Image file (png, jpeg, svg, webp)
+ * @returns {Promise<string>} Public URL of the logo
+ */
+export const uploadCompanyLogo = async (file) => {
+  const userId = await getCurrentUserId()
+  if (!userId) return authRequired()
+  const client = getSupabaseClient()
+  if (!client?.storage?.from) throw new Error('Supabase storage not available')
+  const ext = (file.name.split('.').pop() || 'png').toLowerCase().replace(/jpe?g/, 'jpg')
+  const path = `company/${userId}/logo.${ext}`
+  const { error: uploadError } = await client.storage
+    .from(COMPANY_ASSETS_BUCKET)
+    .upload(path, file, { cacheControl: '3600', upsert: true })
+  if (uploadError) throw uploadError
+  const { data: urlData } = client.storage.from(COMPANY_ASSETS_BUCKET).getPublicUrl(path)
+  const logoUrl = urlData.publicUrl
+  const existing = await getCompanyProfile()
+  if (existing) {
+    const { error: updateError } = await supabase
+      .from('company_profile')
+      .update({ logo_url: logoUrl })
+      .eq('user_id', userId)
+    if (updateError) throw updateError
+  } else {
+    const { error: insertError } = await supabase
+      .from('company_profile')
+      .insert([{ user_id: userId, logo_url: logoUrl }])
+    if (insertError) throw insertError
+  }
+  return logoUrl
+}
+
+/**
+ * Remove company logo from storage and set company_profile.logo_url to null.
+ */
+export const deleteCompanyLogo = async () => {
+  const userId = await getCurrentUserId()
+  if (!userId) return authRequired()
+  const profile = await getCompanyProfile()
+  if (!profile?.logo_url) return
+  const client = getSupabaseClient()
+  const url = profile.logo_url
+  const pathMatch = url.includes('/' + COMPANY_ASSETS_BUCKET + '/') && url.split('/' + COMPANY_ASSETS_BUCKET + '/')[1]
+  if (client?.storage?.from && pathMatch) {
+    await client.storage.from(COMPANY_ASSETS_BUCKET).remove([pathMatch])
+  }
+  const { error } = await supabase
+    .from('company_profile')
+    .update({ logo_url: null })
+    .eq('user_id', userId)
+  if (error) throw error
 }
 
 // DASHBOARD PREFERENCES

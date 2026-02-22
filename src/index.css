@@ -5564,3 +5564,75 @@ svg[class*="lucide-star"] {
 @media (max-width: 640px) {
   .samples-track-form { grid-template-columns: 1fr; }
 }
+
+/* ============================================
+   SETTINGS — Logo empresa (Dades Empresa)
+   ============================================ */
+.settings-logo-section {
+  margin-bottom: 32px;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid var(--border-1);
+  background: var(--surface-bg-2);
+}
+.settings-logo-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-1);
+  margin-bottom: 16px;
+}
+.settings-logo-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.settings-logo-preview-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.settings-logo-preview {
+  max-height: 80px;
+  max-width: 200px;
+  object-fit: contain;
+}
+.settings-logo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.settings-logo-file-input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.settings-logo-upload-zone {
+  padding: 32px 24px;
+  border: 2px dashed var(--border-1);
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.settings-logo-upload-zone:hover {
+  border-color: var(--cta-1);
+  background: var(--cta-1-soft);
+}
+.settings-logo-upload-icon {
+  display: block;
+  margin: 0 auto 8px;
+  color: var(--muted-1);
+}
+.settings-logo-upload-zone:hover .settings-logo-upload-icon {
+  color: var(--cta-1);
+}
+.settings-logo-upload-text {
+  font-size: 14px;
+  color: var(--text-2);
+}
+.settings-logo-upload-zone:hover .settings-logo-upload-text {
+  color: var(--text-1);
+}
