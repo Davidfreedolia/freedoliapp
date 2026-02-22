@@ -24,6 +24,7 @@ DECLARE
   linked jsonb := '[]'::jsonb;
   skipped jsonb := '[]'::jsonb;
   first_id uuid;
+  buyer_snapshot jsonb;
 BEGIN
   uid := auth.uid();
   IF uid IS NULL THEN
@@ -68,6 +69,33 @@ BEGIN
   FROM purchase_orders
   WHERE po_number LIKE 'PO-' || replace(sku, '%', '\%') || '-S-%';
 
+  -- Snapshot buyer_info from company_settings for this user (immutable per PO).
+  -- Maps bootstrap columns (company_*) to snapshot keys; extended columns used if present via to_jsonb.
+  SELECT jsonb_build_object(
+    'company_name', COALESCE(c.row->>'company_name', ''),
+    'legal_name', COALESCE((c.row->>'legal_name'), (c.row->>'company_name'), ''),
+    'tax_id', COALESCE((c.row->>'tax_id'), (c.row->>'company_vat'), ''),
+    'address', COALESCE((c.row->>'address'), (c.row->>'company_address'), ''),
+    'city', COALESCE(c.row->>'city', ''),
+    'postal_code', COALESCE(c.row->>'postal_code', ''),
+    'province', COALESCE(c.row->>'province', ''),
+    'country', COALESCE(c.row->>'country', ''),
+    'phone', COALESCE((c.row->>'phone'), (c.row->>'company_phone'), ''),
+    'email', COALESCE((c.row->>'email'), (c.row->>'company_email'), ''),
+    'website', COALESCE(c.row->>'website', ''),
+    'logo_url', COALESCE((c.row->>'logo_url'), (c.row->>'company_logo_url'), ''),
+    'bank_name', COALESCE(c.row->>'bank_name', ''),
+    'bank_iban', COALESCE(c.row->>'bank_iban', ''),
+    'bank_swift', COALESCE(c.row->>'bank_swift', ''),
+    'snapshot_at', to_char(now() AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'),
+    'snapshot_source', 'company_settings'
+  ) INTO buyer_snapshot
+  FROM (SELECT to_jsonb(cs) AS row FROM company_settings cs WHERE cs.user_id = uid LIMIT 1) c;
+
+  IF buyer_snapshot IS NULL THEN
+    buyer_snapshot := '{}'::jsonb;
+  END IF;
+
   -- Group by supplier_id and create one PO per supplier
   FOR sid IN
     SELECT DISTINCT supplier_id
@@ -83,10 +111,10 @@ BEGIN
 
     INSERT INTO purchase_orders (
       project_id, supplier_id, user_id, po_number, order_date,
-      currency, status, total_amount, items, is_demo
+      currency, status, total_amount, items, is_demo, buyer_info
     ) VALUES (
       proj_id, sid, uid, po_num, current_date,
-      'USD', 'draft', 0, '[]'::jsonb, COALESCE(is_demo_val, false)
+      'USD', 'draft', 0, '[]'::jsonb, COALESCE(is_demo_val, false), buyer_snapshot
     )
     RETURNING id INTO new_po_id;
 

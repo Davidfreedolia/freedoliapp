@@ -618,19 +618,47 @@ export const getPurchaseOrder = async (id) => {
 }
 
 export const createPurchaseOrder = async (po) => {
-  // Get demo mode setting
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
-  
-  // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
+
   const { user_id, ...poData } = po
   const userId = await getCurrentUserId()
-  if (!userId) {
-    return authRequired()
+  if (!userId) return authRequired()
+
+  const raw = poData.buyer_info
+  const isEmpty =
+    raw == null ||
+    raw === '' ||
+    (typeof raw === 'string' && (raw.trim() === '' || raw.trim() === '{}')) ||
+    (typeof raw === 'object' && !Array.isArray(raw) && Object.keys(raw).length === 0)
+  if (isEmpty) {
+    const settings = await getCompanySettings()
+    if (settings) {
+      poData.buyer_info = {
+        company_name: settings.company_name ?? '',
+        legal_name: settings.legal_name ?? '',
+        tax_id: settings.tax_id ?? '',
+        address: settings.address ?? '',
+        city: settings.city ?? '',
+        postal_code: settings.postal_code ?? '',
+        province: settings.province ?? '',
+        country: settings.country ?? '',
+        phone: settings.phone ?? '',
+        email: settings.email ?? '',
+        website: settings.website ?? '',
+        logo_url: settings.logo_url ?? '',
+        bank_name: settings.bank_name ?? '',
+        bank_iban: settings.bank_iban ?? '',
+        bank_swift: settings.bank_swift ?? '',
+        snapshot_at: new Date().toISOString(),
+        snapshot_source: 'company_settings'
+      }
+    }
   }
+
   const { data, error } = await supabase
     .from('purchase_orders')
-    .insert([{ ...poData, is_demo: demoMode }]) // Mark with current demo mode
+    .insert([{ ...poData, is_demo: demoMode }])
     .select()
     .maybeSingle()
   if (error) throw error
