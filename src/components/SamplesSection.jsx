@@ -90,6 +90,9 @@ export default function SamplesSection({ projectId, darkMode }) {
     tracking_url: ''
   })
   const [trackSaving, setTrackSaving] = useState(false)
+  const [selectedIds, setSelectedIds] = useState(() => new Set())
+  const [bulkResult, setBulkResult] = useState(null)
+  const [bulkLoading, setBulkLoading] = useState(false)
 
   const loadData = useCallback(async () => {
     if (!projectId) return
@@ -110,6 +113,47 @@ export default function SamplesSection({ projectId, darkMode }) {
   const isDemoRow = (row) => row?.id && String(row.id).startsWith('demo-')
 
   const rowsForTable = (list?.length > 0) ? list : (import.meta.env.DEV ? getDemoSamplesForLayout() : [])
+
+  const canSelectForBulk = (row) =>
+    !isDemoRow(row) &&
+    (row.choice_status === 'SHORTLIST' || row.choice_status === 'WINNER')
+
+  const toggleSelected = (id) => {
+    if (String(id).startsWith('demo-')) return
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const toggleSelectAll = () => {
+    const selectable = rowsForTable.filter(canSelectForBulk).map(r => r.id)
+    if (selectable.length === 0) return
+    const allSelected = selectable.every(id => selectedIds.has(id))
+    setSelectedIds(allSelected ? new Set() : new Set(selectable))
+  }
+
+  const handleBulkGenerateSamplePos = async () => {
+    const ids = Array.from(selectedIds).filter(id => !String(id).startsWith('demo-'))
+    if (ids.length === 0) return
+    setBulkLoading(true)
+    setBulkResult(null)
+    try {
+      const { data, error } = await supabase.rpc('bulk_create_sample_pos', {
+        sample_request_ids: ids
+      })
+      if (error) throw error
+      setBulkResult(data || { created_pos: [], linked: [], skipped: [] })
+      setSelectedIds(new Set())
+      await loadData()
+    } catch (err) {
+      console.error('Bulk create sample POs:', err)
+      alert(err?.message || 'Error en generar comandes de mostres.')
+    }
+    setBulkLoading(false)
+  }
 
   const setStatus = async (id, status) => {
     if (String(id).startsWith('demo-')) return
@@ -248,7 +292,47 @@ export default function SamplesSection({ projectId, darkMode }) {
           <Package className="samples-title__icon" />
           Mostres
         </h2>
+        {rowsForTable.length > 0 && (
+          <div className="samples-bulk-actions">
+            <button
+              type="button"
+              className="btn btn--turq"
+              disabled={selectedIds.size === 0 || bulkLoading}
+              onClick={handleBulkGenerateSamplePos}
+            >
+              Generar comanda de mostres ({selectedIds.size})
+            </button>
+          </div>
+        )}
       </div>
+
+      {bulkResult && (
+        <div className="samples-bulk-result">
+          <p className="samples-bulk-result__summary">
+            POs creades: {Array.isArray(bulkResult.created_pos) ? bulkResult.created_pos.length : 0}
+            {' · '}
+            Enllaçades: {Array.isArray(bulkResult.linked) ? bulkResult.linked.length : 0}
+            {' · '}
+            Omeses: {Array.isArray(bulkResult.skipped) ? bulkResult.skipped.length : 0}
+          </p>
+          {Array.isArray(bulkResult.created_pos) && bulkResult.created_pos.length > 0 && (
+            <ul className="samples-bulk-result__list">
+              {bulkResult.created_pos.map((po, i) => (
+                <li key={po.id || i}>
+                  {po.po_number}
+                  <button
+                    type="button"
+                    className="btn btn--soft btn--sm"
+                    onClick={() => navigate(`/orders?po=${po.id}`)}
+                  >
+                    Veure PO
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       {rowsForTable.length === 0 ? (
         <p className="samples-empty">
@@ -258,6 +342,17 @@ export default function SamplesSection({ projectId, darkMode }) {
         <table className="samples-table">
           <thead>
             <tr>
+              <th className="samples-table__col-select">
+                <input
+                  type="checkbox"
+                  className="samples-table__checkbox"
+                  checked={
+                    rowsForTable.filter(canSelectForBulk).length > 0 &&
+                    rowsForTable.filter(canSelectForBulk).every(r => selectedIds.has(r.id))
+                  }
+                  onChange={toggleSelectAll}
+                />
+              </th>
               <th>Proveïdor</th>
               <th>Incoterm</th>
               <th>MOQ</th>
@@ -277,8 +372,18 @@ export default function SamplesSection({ projectId, darkMode }) {
               const unitPrice = smallestUnitPrice(quote)
               const currency = quote?.currency || ''
               const demo = isDemoRow(row)
+              const selectable = canSelectForBulk(row)
               return (
                 <tr key={row.id}>
+                  <td className="samples-table__col-select">
+                    <input
+                      type="checkbox"
+                      className="samples-table__checkbox"
+                      checked={selectedIds.has(row.id)}
+                      disabled={!selectable}
+                      onChange={() => toggleSelected(row.id)}
+                    />
+                  </td>
                   <td>{supplier?.name ?? '—'}</td>
                   <td>{quote?.incoterm ?? '—'}</td>
                   <td>{quote?.moq != null ? quote.moq : '—'}</td>

@@ -5216,6 +5216,51 @@ svg[class*="lucide-star"] {
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.samples-bulk-actions .btn {
+  height: 34px;
+  min-height: 34px;
+}
+.samples-bulk-result {
+  margin-bottom: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-1);
+  background: var(--surface-bg-2, #f9fafb);
+}
+.samples-bulk-result__summary {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-1);
+}
+.samples-bulk-result__list {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 13px;
+  color: var(--text-1);
+}
+.samples-bulk-result__list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.samples-table__col-select {
+  width: 44px;
+  padding-right: 8px;
+  vertical-align: middle;
+  text-align: center;
+}
+.samples-table__checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+.samples-table__checkbox:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 .samples-title {
   display: flex;
