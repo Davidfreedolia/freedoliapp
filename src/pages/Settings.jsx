@@ -25,7 +25,7 @@ import {
   Settings as SettingsIcon
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { getCompanySettings, updateCompanySettings, getCompanyProfile, uploadCompanyLogo, deleteCompanyLogo, supabase, getAuditLogs, updateLanguage, getCurrentUserId } from '../lib/supabase'
+import { getCompanySettings, updateCompanySettings, uploadCompanyLogo, deleteCompanyLogo, supabase, getAuditLogs, updateLanguage, getCurrentUserId } from '../lib/supabase'
 import { clearDemoData, generateDemoData, checkDemoExists } from '../lib/demoSeed'
 import Header from '../components/Header'
 import Button from '../components/Button'
@@ -107,14 +107,12 @@ export default function Settings() {
     setLoading(true)
     try {
       const userId = await getCurrentUserId()
-      const [companyRes, profileRes, signaturesRes] = await Promise.all([
+      const [companyRes, signaturesRes] = await Promise.all([
         getCompanySettings(),
-        getCompanyProfile(),
         supabase.from('signatures').select('*').eq('user_id', userId).order('created_at', { ascending: true })
       ])
       if (companyRes) setCompanyData(companyRes)
-      if (profileRes?.logo_url) setCompanyLogoUrl(profileRes.logo_url)
-      else setCompanyLogoUrl(null)
+      setCompanyLogoUrl(companyRes?.company_logo_url ?? null)
       setSignatures(signaturesRes.data || [])
     } catch (err) {
       console.error('Error carregant configuració:', err)
@@ -123,6 +121,7 @@ export default function Settings() {
   }
 
   const handleLogoFile = async (e) => {
+    if (demoMode) return
     const file = e.target?.files?.[0]
     if (!file) return
     const allowed = ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp']
@@ -144,6 +143,7 @@ export default function Settings() {
   }
 
   const handleRemoveLogo = async () => {
+    if (demoMode) return
     try {
       await deleteCompanyLogo()
       setCompanyLogoUrl(null)
@@ -599,8 +599,8 @@ export default function Settings() {
 
             <p style={styles.sectionDescription}>Aquestes dades s'utilitzaran per generar els documents (PO, Briefings...)</p>
 
-            {/* Logo empresa */}
-            <div className="settings-logo-section">
+            {/* Logo empresa (company_settings.company_logo_url); desactivat en demo_mode */}
+            <div className={`settings-logo-section ${demoMode ? 'settings-logo-section--disabled' : ''}`}>
               <h3 className="settings-logo-title">{t('settings.logo') || 'Logo empresa'}</h3>
               <div className="settings-logo-body">
                 {companyLogoUrl ? (
@@ -615,11 +615,12 @@ export default function Settings() {
                         accept="image/png,image/jpeg,image/svg+xml,image/webp"
                         onChange={handleLogoFile}
                         className="settings-logo-file-input"
+                        disabled={demoMode}
                       />
-                      <Button variant="secondary" size="sm" onClick={() => logoInputRef.current?.click()} disabled={logoUploading}>
+                      <Button variant="secondary" size="sm" onClick={() => logoInputRef.current?.click()} disabled={logoUploading || demoMode}>
                         {logoUploading ? (t('settings.saving') || 'Guardant...') : (t('settings.changeLogo') || 'Canviar logo')}
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={handleRemoveLogo} disabled={logoUploading}>
+                      <Button variant="ghost" size="sm" onClick={handleRemoveLogo} disabled={logoUploading || demoMode}>
                         <Trash2 size={16} /> {t('settings.removeLogo') || 'Eliminar'}
                       </Button>
                     </div>
@@ -627,10 +628,10 @@ export default function Settings() {
                 ) : (
                   <div
                     className="settings-logo-upload-zone"
-                    onClick={() => !logoUploading && logoInputRef.current?.click()}
+                    onClick={() => !logoUploading && !demoMode && logoInputRef.current?.click()}
                     role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => e.key === 'Enter' && !logoUploading && logoInputRef.current?.click()}
+                    tabIndex={demoMode ? -1 : 0}
+                    onKeyDown={(e) => e.key === 'Enter' && !logoUploading && !demoMode && logoInputRef.current?.click()}
                   >
                     <input
                       ref={logoInputRef}
@@ -638,6 +639,7 @@ export default function Settings() {
                       accept="image/png,image/jpeg,image/svg+xml,image/webp"
                       onChange={handleLogoFile}
                       className="settings-logo-file-input"
+                      disabled={demoMode}
                     />
                     {logoUploading ? (
                       <span className="settings-logo-upload-text">{t('settings.saving') || 'Guardant...'}</span>

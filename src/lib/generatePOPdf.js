@@ -20,6 +20,8 @@ export const generatePOPdf = async (poData, supplier, companySettings) => {
   // ============================================
   // HEADER - Logo i Títol
   // ============================================
+  // TODO: Logo: usar company_settings.company_logo_url (o companySettings.company_logo_url).
+  //       Si el PO té buyer_info.logo_url (snapshot), prioritzar aquest.
   
   // Títol principal
   doc.setFontSize(16)

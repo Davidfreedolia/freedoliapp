@@ -5575,6 +5575,10 @@ svg[class*="lucide-star"] {
   border: 1px solid var(--border-1);
   background: var(--surface-bg-2);
 }
+.settings-logo-section--disabled {
+  pointer-events: none;
+  opacity: 0.7;
+}
 .settings-logo-title {
   font-size: 1rem;
   font-weight: 600;
