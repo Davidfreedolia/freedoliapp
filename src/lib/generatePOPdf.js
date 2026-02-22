@@ -360,16 +360,22 @@ export const generatePOPdf = async (poData, supplier, companySettings) => {
     ]
   })
   
-  // Calcular total
+  // Calcular total (fallback si DB no en té)
   const totalAmount = items.reduce((sum, item) => {
     const qty = parseFloat(item.qty) || 0
     const price = parseFloat(item.unit_price) || 0
     return sum + (qty * price)
   }, 0)
-  
+  const dbTotal = poData?.total_amount
+  const finalTotal =
+    dbTotal !== null && dbTotal !== undefined && dbTotal !== ''
+      ? Number(dbTotal)
+      : totalAmount
+  const totalForRow = Number.isFinite(finalTotal) ? finalTotal : totalAmount
+
   // Afegir fila de total
   tableData.push(['', '', '', '', '', '', ''])
-  tableData.push(['', 'TOTAL (' + (poData.currency || 'USD') + ')', '', '', '', totalAmount.toFixed(2), ''])
+  tableData.push(['', 'TOTAL (' + (poData.currency || 'USD') + ')', '', '', '', totalForRow.toFixed(2), ''])
   
   // Generar taula
   doc.autoTable({
