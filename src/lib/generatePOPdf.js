@@ -2,14 +2,17 @@ import jsPDF from 'jspdf'
 import 'jspdf-autotable'
 import { safeJsonArray } from './safeJson'
 
-async function loadImageAsBase64(url) {
-  const response = await fetch(url)
-  const blob = await response.blob()
-  return new Promise((resolve) => {
-    const reader = new FileReader()
-    reader.onloadend = () => resolve(reader.result)
-    reader.readAsDataURL(blob)
-  })
+function loadImageAsDataURL(url) {
+  return fetch(url)
+    .then((res) => res.blob())
+    .then(
+      (blob) =>
+        new Promise((resolve) => {
+          const reader = new FileReader()
+          reader.onloadend = () => resolve(reader.result)
+          reader.readAsDataURL(blob)
+        })
+    )
 }
 
 /**
@@ -28,33 +31,56 @@ export const generatePOPdf = async (poData, supplier, companySettings) => {
   const borderColor = [229, 231, 235]
 
   // ============================================
-  // HEADER - Logo i Títol
+  // HEADER OFICIAL - Logo gran + títol bilingüe
   // ============================================
+  const headerTop = 12
+  const logoW = 55
+  const logoH = 22
+  const logoX = margin
+  const logoY = headerTop
+
   const snapshotLogo = poData?.buyer_info?.logo_url
   const settingsLogo = companySettings?.logo_url
   const logoUrl = snapshotLogo || settingsLogo || null
 
   if (logoUrl) {
     try {
-      const base64 = await loadImageAsBase64(logoUrl)
+      const base64 = await loadImageAsDataURL(logoUrl)
       const format = base64.indexOf('data:image/jpeg') === 0 ? 'JPEG' : base64.indexOf('data:image/webp') === 0 ? 'WEBP' : 'PNG'
-      doc.addImage(base64, format, margin, y - 5, 30, 12)
+      doc.addImage(base64, format, logoX, logoY, logoW, logoH)
     } catch (e) {
       console.warn('Logo load failed', e)
     }
   }
 
   const appLang = (typeof localStorage !== 'undefined' && localStorage.getItem('i18nextLng')) || 'ca'
-  const isEnglish = appLang === 'en'
-  const title = isEnglish
-    ? 'PURCHASE ORDER'
-    : `PURCHASE ORDER / ${appLang === 'es' ? 'ORDEN DE COMPRA' : 'ORDRE DE COMPRA'}`
-  doc.setFontSize(16)
-  doc.setFont('helvetica', 'bold')
-  doc.setTextColor(0, 0, 0)
-  doc.text(`${companySettings?.company_name || 'COMPANY'} — ${title}`, pageWidth / 2, y, { align: 'center' })
+  const isEN = appLang === 'en'
+  const titleMap = { ca: 'ORDRE DE COMPRA', es: 'ORDEN DE COMPRA', fr: 'BON DE COMMANDE' }
+  const localTitle = titleMap[appLang] || titleMap.ca
+  const titleLine = isEN ? 'PURCHASE ORDER' : `${localTitle} / PURCHASE ORDER`
+  const companyName = companySettings?.company_name || 'FREEDOLIA'
 
-  y += 12
+  const titleX = logoX + logoW + 8
+  const titleY = logoY + 8
+  const titleFitsRight = titleX <= pageWidth - margin - 70
+
+  doc.setTextColor(0, 0, 0)
+  doc.setFont('helvetica', 'bold')
+  if (titleFitsRight) {
+    doc.setFontSize(11)
+    doc.text(`${companyName} —`, titleX, titleY)
+    doc.setFontSize(14)
+    doc.text(titleLine, titleX, titleY + 7)
+  } else {
+    const centerX = pageWidth / 2
+    const belowY = logoY + logoH + 8
+    doc.setFontSize(11)
+    doc.text(`${companyName} —`, centerX, belowY, { align: 'center' })
+    doc.setFontSize(14)
+    doc.text(titleLine, centerX, belowY + 7, { align: 'center' })
+  }
+
+  y = logoY + logoH + 14
 
   // ============================================
   // INFORMACIÓ BÀSICA (Buyer + PO Reference)
