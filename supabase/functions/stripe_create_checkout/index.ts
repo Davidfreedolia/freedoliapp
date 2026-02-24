@@ -9,6 +9,7 @@ const STRIPE_PRICE_ID_CORE = Deno.env.get("STRIPE_PRICE_ID_CORE")!;
 const APP_BASE_URL = Deno.env.get("APP_BASE_URL")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 
 const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2023-10-16" });
 const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
@@ -28,26 +29,6 @@ function jsonResponse(body: object, status: number) {
   });
 }
 
-async function getUserIdFromRequest(req: Request): Promise<string | null> {
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) return null;
-  const token = authHeader.slice(7);
-  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
-  if (error || !user) return null;
-  return user.id;
-}
-
-async function assertOwnerOrAdmin(orgId: string, userId: string): Promise<boolean> {
-  const { data, error } = await supabaseAdmin
-    .from("org_memberships")
-    .select("role")
-    .eq("org_id", orgId)
-    .eq("user_id", userId)
-    .maybeSingle();
-  if (error || !data) return false;
-  return data.role === "owner" || data.role === "admin";
-}
-
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -56,10 +37,20 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({ error: "Method not allowed" }, 405);
   }
 
-  const userId = await getUserIdFromRequest(req);
-  if (!userId) {
-    return jsonResponse({ error: "Unauthorized" }, 401);
+  const authHeader = req.headers.get("authorization") ?? "";
+  const supabaseUser = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    global: { headers: { Authorization: authHeader } },
+    auth: { persistSession: false },
+  });
+
+  const { data: userData, error: userErr } = await supabaseUser.auth.getUser();
+  if (userErr || !userData?.user) {
+    return new Response(JSON.stringify({ code: 401, message: "Invalid JWT" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
   }
+  const userId = userData.user.id;
 
   let body: { org_id?: string };
   try {
@@ -73,8 +64,26 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({ error: "org_id required" }, 400);
   }
 
-  if (!(await assertOwnerOrAdmin(orgId, userId))) {
-    return jsonResponse({ error: "Forbidden: owner or admin required" }, 403);
+  const { data: membership, error: memErr } = await supabaseAdmin
+    .from("org_memberships")
+    .select("role")
+    .eq("org_id", orgId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (memErr || !membership) {
+    return new Response(JSON.stringify({ code: 403, message: "Forbidden" }), {
+      status: 403,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  }
+
+  const role = (membership.role ?? "").toLowerCase();
+  if (role !== "owner" && role !== "admin") {
+    return new Response(JSON.stringify({ code: 403, message: "Forbidden" }), {
+      status: 403,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
   }
 
   const { data: org, error: orgError } = await supabaseAdmin
