@@ -22,7 +22,8 @@ import {
   RefreshCw,
   BookOpen,
   ExternalLink,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  Users
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { getCompanySettings, updateCompanySettings, uploadCompanyLogo, deleteCompanyLogo, supabase, getAuditLogs, updateLanguage, getCurrentUserId } from '../lib/supabase'
@@ -78,11 +79,64 @@ export default function Settings() {
   const [logoUploading, setLogoUploading] = useState(false)
   const logoInputRef = useRef(null)
 
+  // S7.3: Workspace / billing (org, seats, members)
+  const [org, setOrg] = useState(null)
+  const [seatsUsed, setSeatsUsed] = useState(0)
+  const [members, setMembers] = useState([])
+  const [workspaceLoading, setWorkspaceLoading] = useState(false)
+  const [addMemberUserId, setAddMemberUserId] = useState('')
+  const [addingMember, setAddingMember] = useState(false)
+
   useEffect(() => {
     loadSettings()
-    // Cargar idioma desde company_settings
     loadLanguage()
   }, [])
+
+  const loadWorkspace = async () => {
+    setWorkspaceLoading(true)
+    try {
+      const userId = await getCurrentUserId()
+      if (!userId) {
+        setWorkspaceLoading(false)
+        return
+      }
+      const { data: membershipRow, error: memErr } = await supabase
+        .from('org_memberships')
+        .select('*, orgs(*)')
+        .eq('user_id', userId)
+        .limit(1)
+        .maybeSingle()
+      if (memErr || !membershipRow) {
+        setWorkspaceLoading(false)
+        return
+      }
+      const currentOrg = membershipRow.orgs ?? membershipRow.org ?? null
+      if (!currentOrg) {
+        setWorkspaceLoading(false)
+        return
+      }
+      setOrg(currentOrg)
+      const { count } = await supabase
+        .from('org_memberships')
+        .select('*', { count: 'exact', head: true })
+        .eq('org_id', currentOrg.id)
+      setSeatsUsed(count ?? 0)
+      const { data: membersData } = await supabase
+        .from('org_memberships')
+        .select('user_id, role')
+        .eq('org_id', currentOrg.id)
+      setMembers(membersData ?? [])
+    } catch (err) {
+      console.error('Error loading workspace:', err)
+    }
+    setWorkspaceLoading(false)
+  }
+
+  useEffect(() => {
+    if (activeTab === 'workspace') {
+      loadWorkspace()
+    }
+  }, [activeTab])
 
   const loadLanguage = async () => {
     try {
@@ -281,6 +335,32 @@ export default function Settings() {
     }
   }
 
+  const seatLimit = org?.seat_limit ?? null
+  const seatLimitReached = seatLimit != null && seatsUsed >= seatLimit
+
+  const handleAddMember = async () => {
+    const uid = addMemberUserId.trim()
+    if (!uid || !org) return
+    if (seatLimitReached) {
+      showToast('Seat limit reached. Upgrade your plan to add more members.', 'error')
+      return
+    }
+    setAddingMember(true)
+    try {
+      const { error } = await supabase
+        .from('org_memberships')
+        .insert({ org_id: org.id, user_id: uid, role: 'member' })
+      if (error) throw error
+      showToast('Member added.', 'success')
+      setAddMemberUserId('')
+      loadWorkspace()
+    } catch (err) {
+      console.error('Error adding member:', err)
+      showToast(err?.message || 'Error adding member.', 'error')
+    }
+    setAddingMember(false)
+  }
+
   if (loading) {
     return (
       <div style={styles.container}>
@@ -357,6 +437,17 @@ export default function Settings() {
             }}
           >
             <FileText size={18} /> Audit Log
+          </Button>
+          <Button
+            variant={activeTab === 'workspace' ? 'primary' : 'ghost'}
+            size="sm"
+            onClick={() => setActiveTab('workspace')}
+            style={{
+              ...styles.tab,
+              color: activeTab === 'workspace' ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280')
+            }}
+          >
+            <Users size={18} /> Workspace
           </Button>
         </div>
 
@@ -938,6 +1029,116 @@ export default function Settings() {
                   </div>
                 ))}
               </div>
+            )}
+          </div>
+        )}
+
+        {/* Workspace Tab — S7.3: Plan, Status, Seats, Members */}
+        {activeTab === 'workspace' && (
+          <div style={{ ...styles.section, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
+            <div style={styles.sectionHeader}>
+              <h2 style={{ ...styles.sectionTitle, color: darkMode ? '#ffffff' : '#111827' }}>
+                <Users size={20} /> Workspace
+              </h2>
+            </div>
+
+            {workspaceLoading ? (
+              <div style={styles.loading}>Carregant...</div>
+            ) : !org ? (
+              <p style={{ color: 'var(--text-secondary, #6b7280)', margin: 0 }}>No workspace found.</p>
+            ) : (
+              <>
+                {/* Subscription / Plan info */}
+                <div style={{
+                  ...styles.subsection,
+                  marginBottom: '24px',
+                  padding: '20px',
+                  borderRadius: '12px',
+                  border: '1px solid var(--border-color)',
+                  backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
+                }}>
+                  <h3 style={{ ...styles.subsectionTitle, color: darkMode ? '#ffffff' : '#111827', marginBottom: '16px' }}>
+                    <CreditCard size={16} /> Subscription
+                  </h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: '16px', marginBottom: '12px' }}>
+                    <div>
+                      <div style={{ fontSize: '12px', color: 'var(--muted-1)', marginBottom: '4px' }}>Plan</div>
+                      <div style={{ fontSize: '14px', fontWeight: 600, color: darkMode ? '#e5e7eb' : '#111827' }}>{org.plan_id ?? '—'}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '12px', color: 'var(--muted-1)', marginBottom: '4px' }}>Status</div>
+                      <div style={{ fontSize: '14px', fontWeight: 600, color: darkMode ? '#e5e7eb' : '#111827' }}>{org.billing_status ?? '—'}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '12px', color: 'var(--muted-1)', marginBottom: '4px' }}>Seats used</div>
+                      <div style={{ fontSize: '14px', fontWeight: 600, color: darkMode ? '#e5e7eb' : '#111827' }}>{seatsUsed}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '12px', color: 'var(--muted-1)', marginBottom: '4px' }}>Seat limit</div>
+                      <div style={{ fontSize: '14px', fontWeight: 600, color: darkMode ? '#e5e7eb' : '#111827' }}>{org.seat_limit ?? '—'}</div>
+                    </div>
+                  </div>
+                  {(org.stripe_customer_id || org.stripe_subscription_id) && (
+                    <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border-1)', fontSize: '12px', color: 'var(--muted-1)' }}>
+                      <div>Customer: {org.stripe_customer_id || '—'}</div>
+                      <div>Subscription: {org.stripe_subscription_id || '—'}</div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Members + Add member */}
+                <div style={{
+                  ...styles.subsection,
+                  padding: '20px',
+                  borderRadius: '12px',
+                  border: '1px solid var(--border-color)',
+                  backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
+                }}>
+                  <h3 style={{ ...styles.subsectionTitle, color: darkMode ? '#ffffff' : '#111827', marginBottom: '16px' }}>
+                    <Users size={16} /> Members
+                  </h3>
+                  {members.length === 0 ? (
+                    <p style={{ color: 'var(--muted-1)', margin: '0 0 16px', fontSize: 14 }}>No members yet.</p>
+                  ) : (
+                    <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {members.map((m) => (
+                        <li key={m.user_id} style={{ fontSize: 14, color: darkMode ? '#e5e7eb' : '#374151' }}>
+                          <code style={{ fontSize: 12, background: darkMode ? '#15151f' : '#fff', padding: '4px 8px', borderRadius: 6 }}>{String(m.user_id).slice(0, 8)}…</code>
+                          <span style={{ marginLeft: 8, color: 'var(--muted-1)' }}>({m.role})</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {seatLimitReached && (
+                    <p style={{ color: 'var(--danger-1)', fontSize: 14, marginBottom: 12 }}>
+                      Seat limit reached. Upgrade your plan to add more members.
+                    </p>
+                  )}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
+                    <input
+                      type="text"
+                      placeholder="User ID (UUID)"
+                      value={addMemberUserId}
+                      onChange={(e) => setAddMemberUserId(e.target.value)}
+                      style={{
+                        ...styles.input,
+                        maxWidth: 280,
+                        backgroundColor: darkMode ? '#15151f' : '#fff',
+                        color: darkMode ? '#fff' : '#111827',
+                        borderColor: darkMode ? '#374151' : '#d1d5db'
+                      }}
+                    />
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={handleAddMember}
+                      disabled={seatLimitReached || addingMember || !addMemberUserId.trim()}
+                    >
+                      {addingMember ? 'Adding…' : 'Add member'}
+                    </Button>
+                  </div>
+                </div>
+              </>
             )}
           </div>
         )}
