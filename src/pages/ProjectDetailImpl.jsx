@@ -57,6 +57,7 @@ import EvidenceCheckRow from '../components/projects/EvidenceCheckRow'
 import { getModalStyles } from '../utils/responsiveStyles'
 import Button from '../components/Button'
 import { generateClaudeResearchPrompt } from '../lib/generateClaudeResearchPrompt'
+import { computeCommercialGate } from '../lib/phaseGates'
 // Dynamic imports for components that import supabase statically to avoid circular dependencies during module initialization
 const IdentifiersSection = lazy(() => import('../components/IdentifiersSection'))
 const ProfitabilityCalculator = lazy(() => import('../components/ProfitabilityCalculator'))
@@ -2470,6 +2471,8 @@ ${t}
   const phaseLabel = PHASE_LABELS[project?.current_phase] || `PHASE ${project?.current_phase || '—'}`
   const thumbnailUrl = project?.asin_image_url || project?.main_image_url || project?.asin_image || project?.image_url || project?.image || null
   const effectiveThumbUrl = (researchSnapshot?.thumbUrl || '').trim() || thumbnailUrl || null
+  const phaseId = project?.phase ?? project?.phase_id ?? project?.current_phase
+  const gate = computeCommercialGate({ phaseId, businessSnapshot, stockSnapshot })
   const btnStateStyle = (state) => {
     if (state === 'inactive') return { opacity: 0.45, cursor: 'not-allowed' }
     if (state === 'drive') return { opacity: 0.65, cursor: 'pointer' }
@@ -2698,6 +2701,36 @@ ${t}
             </div>
           </div>
         </div>
+
+        {(gate.gateId !== 'NONE' && (gate.status === 'warning' || gate.status === 'blocked')) && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: 10,
+              padding: '10px 14px',
+              marginBottom: 8,
+              borderRadius: 'var(--radius-ui)',
+              border: '1px solid var(--border-1)',
+              background: 'var(--surface-bg-2)',
+              color: gate.tone === 'danger' ? 'var(--danger-1)' : 'var(--warning-1)'
+            }}
+          >
+            <span style={{ fontSize: 18 }} aria-hidden>{gate.status === 'blocked' ? '🔒' : '⚠'}</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 4 }}>
+                {gate.gateId} {gate.label}
+              </div>
+              {gate.reasons.length > 0 && (
+                <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, opacity: 0.9 }}>
+                  {gate.reasons.slice(0, 4).map((r, i) => (
+                    <li key={i}>{r}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="project-actions actionbar--turquoise" style={{
           display: 'flex',

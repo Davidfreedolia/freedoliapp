@@ -19,6 +19,7 @@ import { deleteProject, supabase, getCurrentUserId } from '../lib/supabase'
 import { getDemoMode } from '../lib/demoModeFilter'
 import { computeProjectBusinessSnapshot } from '../lib/businessSnapshot'
 import { computeProjectStockSignal } from '../lib/stockSignal'
+import { computeCommercialGate } from '../lib/phaseGates'
 import Header from '../components/Header'
 import NewProjectModal from '../components/NewProjectModal'
 import Button from '../components/Button'
@@ -609,6 +610,32 @@ export default function Projects() {
                         title={stock.badgeTextSecondary}
                       >
                         {stock.badgeTextPrimary}
+                      </span>
+                    )
+                  })()}
+                  {(() => {
+                    const b = businessByProjectId[project.id]
+                    const s = stockByProjectId[project.id]
+                    const phaseId = project.phase ?? project.phase_id ?? project.current_phase
+                    const gate = computeCommercialGate({ phaseId, businessSnapshot: b, stockSnapshot: s })
+                    if (gate.gateId === 'NONE') return null
+                    const toneVar = gate.tone === 'success' ? 'var(--success-1)' : gate.tone === 'warn' ? 'var(--warning-1)' : gate.tone === 'danger' ? 'var(--danger-1)' : 'var(--muted-1)'
+                    const shortId = gate.gateId === 'PRODUCTION' ? 'PROD' : gate.gateId === 'LISTING' ? 'LIST' : 'LIVE'
+                    return (
+                      <span
+                        style={{
+                          fontSize: 11,
+                          padding: '4px 8px',
+                          border: '1px solid var(--border-1)',
+                          background: 'var(--surface-bg-2)',
+                          borderRadius: 999,
+                          color: toneVar,
+                          fontWeight: 600,
+                          whiteSpace: 'nowrap'
+                        }}
+                        title={gate.reasons.length ? gate.reasons.join(' · ') : ''}
+                      >
+                        {shortId}: {gate.label}
                       </span>
                     )
                   })()}
