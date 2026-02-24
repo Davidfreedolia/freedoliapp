@@ -42,6 +42,7 @@ import { getDemoMode } from '../lib/demoModeFilter'
 import { computeProjectBusinessSnapshot } from '../lib/businessSnapshot'
 import { computeProjectStockSignal } from '../lib/stockSignal'
 import { computeCommercialGate } from '../lib/phaseGates'
+import { buildProjectAlerts, ALERT_SEVERITY, scoreAlert } from '../lib/businessAlerts'
 import NewProjectModal from '../components/NewProjectModal'
 import LogisticsTrackingWidget from '../components/LogisticsTrackingWidget'
 import CustomizeDashboardModal from '../components/CustomizeDashboardModal'
@@ -118,8 +119,10 @@ export default function Dashboard() {
   const [execData, setExecData] = useState({
     kpis: null,
     risk: [],
-    focus: []
+    focus: [],
+    alerts: null
   })
+  const [alertsFilter, setAlertsFilter] = useState('all')
   const execMountedRef = useRef(true)
   const execLoadSeqRef = useRef(0)
 
@@ -172,7 +175,8 @@ export default function Dashboard() {
             setExecData({
               kpis: { invested_total_all: 0, income_30d_all: 0, weighted_roi_pct: null, at_risk_count: 0 },
               risk: [],
-              focus: []
+              focus: [],
+              alerts: { all: [], counts: { criticalCount: 0, warningCount: 0, infoCount: 0 } }
             })
             setExecLoading(false)
           }
@@ -301,8 +305,20 @@ export default function Dashboard() {
           .sort((a, b) => (b.business?.roi_percent ?? 0) - (a.business?.roi_percent ?? 0) || (b.business?.invested_total ?? 0) - (a.business?.invested_total ?? 0))
           .slice(0, 5)
 
+        const allAlerts = rows.flatMap(r => buildProjectAlerts({
+          project: r.project,
+          business: r.business,
+          stock: r.stock,
+          gate: r.gate
+        }))
+        const sortedAlerts = [...allAlerts].sort((a, b) => scoreAlert(b) - scoreAlert(a)).slice(0, 20)
+        const criticalCount = allAlerts.filter(a => a.severity === ALERT_SEVERITY.CRITICAL).length
+        const warningCount = allAlerts.filter(a => a.severity === ALERT_SEVERITY.WARNING).length
+        const infoCount = allAlerts.filter(a => a.severity === ALERT_SEVERITY.INFO).length
+        const alerts = { all: sortedAlerts, counts: { criticalCount, warningCount, infoCount } }
+
         if (execMountedRef.current && seq === execLoadSeqRef.current) {
-          setExecData({ kpis, risk, focus })
+          setExecData({ kpis, risk, focus, alerts })
         }
       } catch (err) {
         console.error('Executive dashboard load error:', err)
@@ -849,6 +865,87 @@ export default function Dashboard() {
                 <div style={{ fontSize: 18, fontWeight: 600 }}>{execData.kpis.at_risk_count ?? 0}</div>
               </div>
             </div>
+
+            {/* Alerts Panel (C5) */}
+            {execData.alerts && (
+              <div style={{
+                marginBottom: 16,
+                padding: '12px 16px',
+                borderRadius: 'var(--radius-ui)',
+                border: '1px solid var(--border-1)',
+                background: 'var(--surface-bg-2)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 12, marginBottom: 12 }}>
+                  <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
+                    <Bell size={18} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+                    Alerts
+                  </h2>
+                  <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: 'var(--danger-1)', color: '#fff', fontWeight: 600 }}>Critical: {execData.alerts.counts.criticalCount}</span>
+                  <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: 'var(--warning-1)', color: '#fff', fontWeight: 600 }}>Warning: {execData.alerts.counts.warningCount}</span>
+                  <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: 'var(--muted-1)', color: 'var(--surface-bg)', fontWeight: 600 }}>Info: {execData.alerts.counts.infoCount}</span>
+                </div>
+                <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+                  {['all', 'critical', 'warning'].map((f) => (
+                    <button
+                      key={f}
+                      type="button"
+                      onClick={() => setAlertsFilter(f)}
+                      style={{
+                        fontSize: 12,
+                        padding: '6px 12px',
+                        border: '1px solid var(--border-1)',
+                        borderRadius: 'var(--radius-ui)',
+                        background: alertsFilter === f ? 'var(--surface-bg)' : 'transparent',
+                        color: alertsFilter === f ? 'var(--text-1)' : 'var(--muted-1)',
+                        cursor: 'pointer',
+                        fontWeight: alertsFilter === f ? 600 : 400
+                      }}
+                    >
+                      {f === 'all' ? 'All' : f === 'critical' ? 'Critical' : 'Warning'}
+                    </button>
+                  ))}
+                </div>
+                {execData.alerts.counts.criticalCount === 0 && execData.alerts.counts.warningCount === 0 && execData.alerts.counts.infoCount === 0 ? (
+                  <div style={{ padding: '16px 0', color: 'var(--muted-1)', fontSize: 13 }}>No alerts. You're unusually safe today.</div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {execData.alerts.all
+                      .filter(a => alertsFilter === 'all' || (alertsFilter === 'critical' && a.severity === 'critical') || (alertsFilter === 'warning' && a.severity === 'warning'))
+                      .map((alert) => (
+                        <div
+                          key={alert.id}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 12,
+                            padding: '10px 12px',
+                            border: '1px solid var(--border-1)',
+                            borderRadius: 'var(--radius-ui)',
+                            background: 'var(--surface-bg)'
+                          }}
+                        >
+                          <span style={{
+                            fontSize: 10,
+                            padding: '2px 6px',
+                            borderRadius: 4,
+                            fontWeight: 600,
+                            textTransform: 'uppercase',
+                            color: alert.tone === 'danger' ? 'var(--danger-1)' : alert.tone === 'warn' ? 'var(--warning-1)' : 'var(--muted-1)',
+                            border: `1px solid ${alert.tone === 'danger' ? 'var(--danger-1)' : alert.tone === 'warn' ? 'var(--warning-1)' : 'var(--muted-1)'}`
+                          }}>
+                            {alert.severity}
+                          </span>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontWeight: 600, fontSize: 13 }}>{alert.title}</div>
+                            {alert.detail && <div style={{ fontSize: 12, color: 'var(--muted-1)', marginTop: 2 }}>{alert.detail}</div>}
+                          </div>
+                          <Link to={alert.action.href} style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-1)' }}>{alert.action.label}</Link>
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             <div style={{
               ...styles.section,
