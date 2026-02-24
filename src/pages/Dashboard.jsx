@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import GridLayout from 'react-grid-layout'
@@ -38,6 +38,10 @@ import {
 import { useApp } from '../context/AppContext'
 import { getPurchaseOrders, getDashboardPreferences, getPosNotReady, getProjectsMissingGtin, getUnassignedGtinCodes, getPosWaitingManufacturer, updateDashboardPreferences, getCurrentUserId } from '../lib/supabase'
 import { supabase } from '../lib/supabase'
+import { getDemoMode } from '../lib/demoModeFilter'
+import { computeProjectBusinessSnapshot } from '../lib/businessSnapshot'
+import { computeProjectStockSignal } from '../lib/stockSignal'
+import { computeCommercialGate } from '../lib/phaseGates'
 import NewProjectModal from '../components/NewProjectModal'
 import LogisticsTrackingWidget from '../components/LogisticsTrackingWidget'
 import CustomizeDashboardModal from '../components/CustomizeDashboardModal'
@@ -108,6 +112,17 @@ export default function Dashboard() {
   const [gridWidth, setGridWidth] = useState(1200)
   const [financeView, setFinanceView] = useState('bar')
 
+  // Executive dashboard (C4)
+  const [execLoading, setExecLoading] = useState(true)
+  const [execError, setExecError] = useState(null)
+  const [execData, setExecData] = useState({
+    kpis: null,
+    risk: [],
+    focus: []
+  })
+  const execMountedRef = useRef(true)
+  const execLoadSeqRef = useRef(0)
+
   useEffect(() => {
     loadDashboardPreferences()
     loadOrdersInProgress()
@@ -126,7 +141,183 @@ export default function Dashboard() {
 
     return () => clearTimeout(idlePrefetchTimer)
   }, [])
-  
+
+  useEffect(() => {
+    execMountedRef.current = true
+    return () => { execMountedRef.current = false }
+  }, [])
+
+  // Executive dashboard data (C4): bulk fetch + KPIs + risk + focus
+  useEffect(() => {
+    let cancelled = false
+    const seq = ++execLoadSeqRef.current
+    setExecLoading(true)
+    setExecError(null)
+    ;(async () => {
+      try {
+        const userId = await getCurrentUserId()
+        const demoMode = await getDemoMode()
+        if (cancelled || !execMountedRef.current) return
+
+        const { data: projects } = await supabase
+          .from('projects')
+          .select('id,name,sku,phase,phase_id,current_phase,selling_price,amazon_price,price,marketplace_tags,created_at')
+          .eq('user_id', userId)
+          .eq('is_demo', demoMode)
+          .order('created_at', { ascending: false })
+
+        const ids = (projects || []).map(p => p.id).filter(Boolean)
+        if (ids.length === 0) {
+          if (execMountedRef.current && seq === execLoadSeqRef.current) {
+            setExecData({
+              kpis: { invested_total_all: 0, income_30d_all: 0, weighted_roi_pct: null, at_risk_count: 0 },
+              risk: [],
+              focus: []
+            })
+            setExecLoading(false)
+          }
+          return
+        }
+
+        const thirtyDaysIso = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+
+        let stockRowsByProject = {}
+        const stockTables = [
+          { table: 'inventory', columns: 'project_id,quantity,qty,units,total_units' },
+          { table: 'project_stock', columns: 'project_id,quantity,qty,units,total_units' }
+        ]
+        for (const { table, columns } of stockTables) {
+          try {
+            const { data, error } = await supabase
+              .from(table)
+              .select(columns)
+              .eq('user_id', userId)
+              .eq('is_demo', demoMode)
+              .in('project_id', ids)
+            if (error) throw error
+            const rows = data || []
+            for (const r of rows) {
+              const pid = r.project_id
+              if (!pid) continue
+              if (!stockRowsByProject[pid]) stockRowsByProject[pid] = []
+              stockRowsByProject[pid].push(r)
+            }
+            if (Object.keys(stockRowsByProject).length > 0) break
+          } catch (e) {
+            const code = e?.code || e?.error?.code || ''
+            if (code === '42P01' || (e?.message && /relation|does not exist|undefined table/i.test(e.message))) continue
+            break
+          }
+        }
+
+        let salesRowsByProject = {}
+        try {
+          const { data, error } = await supabase
+            .from('sales')
+            .select('project_id,qty,quantity,units,created_at')
+            .eq('user_id', userId)
+            .eq('is_demo', demoMode)
+            .in('project_id', ids)
+            .gte('created_at', thirtyDaysIso)
+          if (!error && data) {
+            for (const r of data) {
+              const pid = r.project_id
+              if (!pid) continue
+              if (!salesRowsByProject[pid]) salesRowsByProject[pid] = []
+              salesRowsByProject[pid].push(r)
+            }
+          }
+        } catch (_) {}
+
+        const [poRes, expRes, incRes] = await Promise.all([
+          supabase.from('purchase_orders').select('project_id,total_amount,items').eq('user_id', userId).eq('is_demo', demoMode).in('project_id', ids),
+          supabase.from('expenses').select('project_id,amount').eq('user_id', userId).eq('is_demo', demoMode).in('project_id', ids),
+          supabase.from('incomes').select('project_id,amount,created_at').eq('user_id', userId).eq('is_demo', demoMode).in('project_id', ids).gte('created_at', thirtyDaysIso)
+        ])
+
+        if (cancelled || !execMountedRef.current || seq !== execLoadSeqRef.current) return
+
+        const poById = {}
+        const expById = {}
+        const incById = {}
+        ;(poRes.data || []).forEach(r => { const id = r.project_id; if (id) { if (!poById[id]) poById[id] = []; poById[id].push(r) } })
+        ;(expRes.data || []).forEach(r => { const id = r.project_id; if (id) { if (!expById[id]) expById[id] = []; expById[id].push(r) } })
+        ;(incRes.data || []).forEach(r => { const id = r.project_id; if (id) { if (!incById[id]) incById[id] = []; incById[id].push(r) } })
+
+        const rows = []
+        for (const project of projects || []) {
+          if (!project.id) continue
+          const id = project.id
+          const business = computeProjectBusinessSnapshot({
+            project,
+            poRows: poById[id] || [],
+            expenseRows: expById[id] || [],
+            incomeRows: incById[id] || []
+          })
+          const stock = computeProjectStockSignal({
+            project,
+            stockRows: stockRowsByProject[id] || [],
+            salesRows: salesRowsByProject[id] || [],
+            poRows: poById[id] || []
+          })
+          const phaseId = project.phase ?? project.phase_id ?? project.current_phase
+          const gate = computeCommercialGate({ phaseId, businessSnapshot: business, stockSnapshot: stock })
+          rows.push({ project, business, stock, gate })
+        }
+
+        const invested_total_all = rows.reduce((s, r) => s + (r.business?.invested_total || 0), 0)
+        const income_30d_all = rows.reduce((s, r) => s + (r.business?.incomes_total || 0), 0)
+        const denom = invested_total_all
+        const weighted_roi_pct = denom > 0 ? ((income_30d_all - invested_total_all) / denom) * 100 : null
+        const at_risk_count = rows.filter(r => {
+          const g = r.gate
+          const st = r.stock
+          if (g && (g.status === 'blocked' || g.status === 'warning')) return true
+          if (st && (st.badgeTextPrimary === 'SENSE STOCK' || st.badgeTextPrimary === 'CRÍTIC')) return true
+          return false
+        }).length
+
+        const kpis = { invested_total_all, income_30d_all, weighted_roi_pct, at_risk_count }
+
+        const riskScore = (row) => {
+          let s = 0
+          if (row.gate?.status === 'blocked') s += 100
+          if (row.gate?.status === 'warning') s += 60
+          if (row.stock?.badgeTextPrimary === 'SENSE STOCK') s += 90
+          if (row.stock?.badgeTextPrimary === 'CRÍTIC') s += 70
+          if (row.stock?.badgeTextPrimary === 'MIG STOCK') s += 40
+          if (row.business?.roi_percent != null && row.business.roi_percent < 0) s += 50
+          if (row.business?.roi_percent == null) s += 10
+          return s
+        }
+        const risk = rows
+          .map(r => ({ ...r, riskScore: riskScore(r) }))
+          .filter(r => r.riskScore > 0)
+          .sort((a, b) => b.riskScore - a.riskScore)
+          .slice(0, 10)
+
+        const focus = rows
+          .filter(r => r.gate?.status === 'ok' && r.business?.roi_percent != null && r.business.roi_percent >= 25 && (r.stock?.tone === 'success' || r.stock?.badgeTextPrimary === 'STOCK OK'))
+          .sort((a, b) => (b.business?.roi_percent ?? 0) - (a.business?.roi_percent ?? 0) || (b.business?.invested_total ?? 0) - (a.business?.invested_total ?? 0))
+          .slice(0, 5)
+
+        if (execMountedRef.current && seq === execLoadSeqRef.current) {
+          setExecData({ kpis, risk, focus })
+        }
+      } catch (err) {
+        console.error('Executive dashboard load error:', err)
+        if (execMountedRef.current && seq === execLoadSeqRef.current) {
+          setExecError(err?.message || 'Error carregant dashboard executiu')
+        }
+      } finally {
+        if (execMountedRef.current && seq === execLoadSeqRef.current) {
+          setExecLoading(false)
+        }
+      }
+    })()
+    return () => { cancelled = true }
+  }, [])
+
   // Calculate grid width dynamically
   useEffect(() => {
     if (isMobile) return
@@ -604,6 +795,198 @@ export default function Dashboard() {
               Veure →
             </Button>
           </div>
+        )}
+
+        {/* Executive dashboard (C4): KPI row + Risk Radar + Money Focus */}
+        {execLoading && (
+          <div style={{ padding: '16px 0', color: 'var(--muted-1)', fontSize: 14 }}>Loading executive dashboard…</div>
+        )}
+        {execError && (
+          <div style={{ padding: '16px 0', color: 'var(--danger-1)', fontSize: 14 }}>{execError}</div>
+        )}
+        {!execLoading && !execError && execData.kpis != null && (
+          <>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)',
+              gap: 12,
+              marginBottom: 16
+            }}>
+              <div style={{
+                padding: '12px 16px',
+                borderRadius: 'var(--radius-ui)',
+                border: '1px solid var(--border-1)',
+                background: 'var(--surface-bg-2)'
+              }}>
+                <div style={{ fontSize: 11, color: 'var(--muted-1)', marginBottom: 4 }}>Invested</div>
+                <div style={{ fontSize: 18, fontWeight: 600 }}>€{(execData.kpis.invested_total_all || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
+              </div>
+              <div style={{
+                padding: '12px 16px',
+                borderRadius: 'var(--radius-ui)',
+                border: '1px solid var(--border-1)',
+                background: 'var(--surface-bg-2)'
+              }}>
+                <div style={{ fontSize: 11, color: 'var(--muted-1)', marginBottom: 4 }}>Income (30d)</div>
+                <div style={{ fontSize: 18, fontWeight: 600 }}>€{(execData.kpis.income_30d_all || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
+              </div>
+              <div style={{
+                padding: '12px 16px',
+                borderRadius: 'var(--radius-ui)',
+                border: '1px solid var(--border-1)',
+                background: 'var(--surface-bg-2)'
+              }}>
+                <div style={{ fontSize: 11, color: 'var(--muted-1)', marginBottom: 4 }}>ROI weighted</div>
+                <div style={{ fontSize: 18, fontWeight: 600 }}>{execData.kpis.weighted_roi_pct != null ? `${execData.kpis.weighted_roi_pct.toFixed(1)}%` : '—'}</div>
+              </div>
+              <div style={{
+                padding: '12px 16px',
+                borderRadius: 'var(--radius-ui)',
+                border: '1px solid var(--border-1)',
+                background: 'var(--surface-bg-2)'
+              }}>
+                <div style={{ fontSize: 11, color: 'var(--muted-1)', marginBottom: 4 }}>At risk</div>
+                <div style={{ fontSize: 18, fontWeight: 600 }}>{execData.kpis.at_risk_count ?? 0}</div>
+              </div>
+            </div>
+
+            <div style={{
+              ...styles.section,
+              backgroundColor: darkMode ? '#15151f' : '#ffffff',
+              marginBottom: 16
+            }}>
+              <h2 style={{ ...styles.sectionTitle, color: darkMode ? '#ffffff' : '#111827', marginBottom: 12 }}>
+                <AlertTriangle size={20} style={{ verticalAlign: 'middle', marginRight: 8 }} />
+                Risk Radar
+              </h2>
+              {execData.risk.length === 0 ? (
+                <div style={styles.empty}><p>Cap projecte en risc</p></div>
+              ) : (
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid var(--border-1)' }}>
+                        <th style={{ textAlign: 'left', padding: '8px 12px' }}>Project</th>
+                        <th style={{ textAlign: 'left', padding: '8px 12px' }}>Gate</th>
+                        <th style={{ textAlign: 'left', padding: '8px 12px' }}>ROI</th>
+                        <th style={{ textAlign: 'left', padding: '8px 12px' }}>Stock</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {execData.risk.map((row) => (
+                        <tr key={row.project.id} style={{ borderBottom: '1px solid var(--border-1)' }}>
+                          <td style={{ padding: '8px 12px' }}>
+                            <Link to={`/projects/${row.project.id}`} style={{ color: 'var(--text-1)', fontWeight: 500 }}>
+                              {row.project.name}{row.project.sku ? ` · ${row.project.sku}` : ''}
+                            </Link>
+                          </td>
+                          <td style={{ padding: '8px 12px' }}>
+                            {row.gate.gateId !== 'NONE' && (
+                              <span style={{
+                                fontSize: 11,
+                                padding: '4px 8px',
+                                border: '1px solid var(--border-1)',
+                                background: 'var(--surface-bg-2)',
+                                borderRadius: 999,
+                                color: row.gate.tone === 'success' ? 'var(--success-1)' : row.gate.tone === 'warn' ? 'var(--warning-1)' : row.gate.tone === 'danger' ? 'var(--danger-1)' : 'var(--muted-1)',
+                                fontWeight: 600
+                              }}>
+                                {row.gate.gateId === 'PRODUCTION' ? 'PROD' : row.gate.gateId === 'LISTING' ? 'LIST' : 'LIVE'}: {row.gate.label}
+                              </span>
+                            )}
+                          </td>
+                          <td style={{ padding: '8px 12px' }}>
+                            {row.business && (
+                              <span style={{
+                                fontSize: 11,
+                                padding: '4px 8px',
+                                border: '1px solid var(--border-1)',
+                                background: 'var(--surface-bg-2)',
+                                borderRadius: 999,
+                                color: row.business.badge?.tone === 'success' ? 'var(--success-1)' : row.business.badge?.tone === 'warn' ? 'var(--warning-1)' : row.business.badge?.tone === 'danger' ? 'var(--danger-1)' : 'var(--muted-1)',
+                                fontWeight: 600
+                              }}>
+                                {row.business.roi_percent != null ? `ROI ${Math.round(row.business.roi_percent)}%` : '—'}
+                              </span>
+                            )}
+                          </td>
+                          <td style={{ padding: '8px 12px' }}>
+                            {row.stock && (
+                              <span style={{
+                                fontSize: 11,
+                                padding: '4px 8px',
+                                border: '1px solid var(--border-1)',
+                                background: 'var(--surface-bg-2)',
+                                borderRadius: 999,
+                                color: row.stock.tone === 'success' ? 'var(--success-1)' : row.stock.tone === 'warn' ? 'var(--warning-1)' : row.stock.tone === 'danger' ? 'var(--danger-1)' : 'var(--muted-1)',
+                                fontWeight: 600
+                              }}>
+                                {row.stock.badgeTextPrimary}
+                                {row.stock.badgeTextSecondary && row.stock.badgeTextSecondary !== '—' ? ` · ${row.stock.badgeTextSecondary}` : ''}
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            <div style={{
+              ...styles.section,
+              backgroundColor: darkMode ? '#15151f' : '#ffffff',
+              marginBottom: 16
+            }}>
+              <h2 style={{ ...styles.sectionTitle, color: darkMode ? '#ffffff' : '#111827', marginBottom: 12 }}>
+                <TrendingUp size={20} style={{ verticalAlign: 'middle', marginRight: 8 }} />
+                Money Focus
+              </h2>
+              {execData.focus.length === 0 ? (
+                <div style={styles.empty}><p>Cap oportunitat READY amb ROI ≥25% i stock OK</p></div>
+              ) : (
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid var(--border-1)' }}>
+                        <th style={{ textAlign: 'left', padding: '8px 12px' }}>Project</th>
+                        <th style={{ textAlign: 'left', padding: '8px 12px' }}>ROI</th>
+                        <th style={{ textAlign: 'left', padding: '8px 12px' }}>Stock</th>
+                        <th style={{ textAlign: 'left', padding: '8px 12px' }}>Invested</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {execData.focus.map((row) => (
+                        <tr key={row.project.id} style={{ borderBottom: '1px solid var(--border-1)' }}>
+                          <td style={{ padding: '8px 12px' }}>
+                            <Link to={`/projects/${row.project.id}`} style={{ color: 'var(--text-1)', fontWeight: 500 }}>
+                              {row.project.name}{row.project.sku ? ` · ${row.project.sku}` : ''}
+                            </Link>
+                          </td>
+                          <td style={{ padding: '8px 12px' }}>
+                            <span style={{
+                              fontSize: 11,
+                              padding: '4px 8px',
+                              border: '1px solid var(--border-1)',
+                              background: 'var(--surface-bg-2)',
+                              borderRadius: 999,
+                              color: 'var(--success-1)',
+                              fontWeight: 600
+                            }}>
+                              ROI {Math.round(row.business?.roi_percent ?? 0)}%
+                            </span>
+                          </td>
+                          <td style={{ padding: '8px 12px' }}>{row.stock?.badgeTextPrimary ?? '—'}</td>
+                          <td style={{ padding: '8px 12px' }}>€{(row.business?.invested_total ?? 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>
         )}
 
         {/* Comandes en curs + Tracking Logístic */}
