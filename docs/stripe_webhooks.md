@@ -31,3 +31,26 @@ stripe trigger invoice.payment_failed
 ```
 
 Comprovar a DB: `select id, billing_status, stripe_customer_id, stripe_subscription_id, trial_ends_at from orgs;`
+
+---
+
+## S8.2 — Checkout + Billing Portal (TEST MODE)
+
+Edge Functions:
+
+- `supabase/functions/stripe_create_checkout` — POST `{ org_id }` → crea Checkout Session (subscription), retorna `{ url }`. Auth: JWT; user ha de ser owner/admin de l’org.
+- `supabase/functions/stripe_create_portal` — POST `{ org_id }` → crea Billing Portal session, retorna `{ url }`. Si l’org no té `stripe_customer_id` → 400 "No customer yet".
+
+Secrets addicionals:
+
+- `STRIPE_PRICE_ID_CORE` — `price_...` (preu pla core, test)
+- `APP_BASE_URL` — ex. `https://freedoliapp.vercel.app` (success/cancel/return)
+
+Deploy:
+
+```bash
+supabase functions deploy stripe_create_checkout
+supabase functions deploy stripe_create_portal
+```
+
+UI: Settings → Workspace → Subscription → botó "Manage billing" (prova portal; si no customer, obre checkout).
