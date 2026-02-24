@@ -86,6 +86,7 @@ export default function Settings() {
   const [workspaceLoading, setWorkspaceLoading] = useState(false)
   const [addMemberUserId, setAddMemberUserId] = useState('')
   const [addingMember, setAddingMember] = useState(false)
+  const [billingLoading, setBillingLoading] = useState(false)
 
   useEffect(() => {
     loadSettings()
@@ -359,6 +360,39 @@ export default function Settings() {
       showToast(err?.message || 'Error adding member.', 'error')
     }
     setAddingMember(false)
+  }
+
+  const handleManageBilling = async () => {
+    if (!org?.id || billingLoading) return
+    setBillingLoading(true)
+    try {
+      const { data: portalData, error: portalError } = await supabase.functions.invoke('stripe_create_portal', {
+        body: { org_id: org.id }
+      })
+      if (portalData?.url) {
+        window.location.href = portalData.url
+        return
+      }
+      const noCustomer = portalError?.message?.includes('No customer') || portalData?.error === 'No customer yet'
+      if (noCustomer || !portalData?.url) {
+        const { data: checkoutData, error: checkoutErr } = await supabase.functions.invoke('stripe_create_checkout', {
+          body: { org_id: org.id }
+        })
+        if (checkoutData?.url) {
+          window.location.href = checkoutData.url
+          return
+        }
+        console.error('Checkout failed', checkoutErr)
+      } else {
+        console.error('Portal failed', portalError)
+      }
+      showToast('Billing unavailable', 'error')
+    } catch (err) {
+      console.error('Billing error', err)
+      showToast('Billing unavailable', 'error')
+    } finally {
+      setBillingLoading(false)
+    }
   }
 
   if (loading) {
@@ -1084,6 +1118,16 @@ export default function Settings() {
                       <div>Subscription: {org.stripe_subscription_id || '—'}</div>
                     </div>
                   )}
+                  <div style={{ marginTop: '16px' }}>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={handleManageBilling}
+                      disabled={billingLoading}
+                    >
+                      {billingLoading ? 'Opening…' : 'Manage billing'}
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Members + Add member */}
