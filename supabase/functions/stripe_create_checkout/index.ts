@@ -15,10 +15,16 @@ const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
 });
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
 function jsonResponse(body: object, status: number) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...corsHeaders },
   });
 }
 
@@ -43,6 +49,9 @@ async function assertOwnerOrAdmin(orgId: string, userId: string): Promise<boolea
 }
 
 Deno.serve(async (req: Request) => {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
   if (req.method !== "POST") {
     return jsonResponse({ error: "Method not allowed" }, 405);
   }
