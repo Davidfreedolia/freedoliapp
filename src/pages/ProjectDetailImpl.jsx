@@ -2471,8 +2471,8 @@ ${t}
   const phaseLabel = PHASE_LABELS[project?.current_phase] || `PHASE ${project?.current_phase || '—'}`
   const thumbnailUrl = project?.asin_image_url || project?.main_image_url || project?.asin_image || project?.image_url || project?.image || null
   const effectiveThumbUrl = (researchSnapshot?.thumbUrl || '').trim() || thumbnailUrl || null
-  const phaseId = project?.phase ?? project?.phase_id ?? project?.current_phase
-  const gate = computeCommercialGate({ phaseId, businessSnapshot, stockSnapshot })
+  const gatePhaseId = project?.phase ?? project?.phase_id ?? project?.current_phase
+  const gate = computeCommercialGate({ phaseId: gatePhaseId, businessSnapshot, stockSnapshot })
   const btnStateStyle = (state) => {
     if (state === 'inactive') return { opacity: 0.45, cursor: 'not-allowed' }
     if (state === 'drive') return { opacity: 0.65, cursor: 'pointer' }
