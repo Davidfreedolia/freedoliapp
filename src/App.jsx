@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import React, { Suspense } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
 import { AppProvider, useApp } from './context/AppContext'
 import Sidebar from './components/Sidebar'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -9,8 +9,10 @@ import DemoModeBanner from './components/DemoModeBanner'
 import ErrorBoundary from './components/ErrorBoundary'
 import FloatingNotesLayer from './components/FloatingNotesLayer'
 import TopNavbar from './components/TopNavbar'
+import BillingBlockedScreen from './components/BillingBlockedScreen'
 import { useBreakpoint } from './hooks/useBreakpoint'
 import { isDemoMode } from './demo/demoMode'
+import { supabase, getCurrentUserId } from './lib/supabase'
 import './i18n'
 
 // Login (no lazy, es carrega primer)
@@ -71,7 +73,79 @@ function AppContent() {
   const location = useLocation()
   const isProjectDetail = location.pathname.startsWith('/projects/') && location.pathname.split('/').length >= 3
 
+  const [billingState, setBillingState] = useState({ loading: true, allowed: true, org: null })
+
+  useEffect(() => {
+    let cancelled = false
+    async function run() {
+      if (isDemoMode()) {
+        if (!cancelled) setBillingState({ loading: false, allowed: true, org: null })
+        return
+      }
+      const userId = await getCurrentUserId()
+      if (!userId) {
+        if (!cancelled) setBillingState({ loading: false, allowed: true, org: null })
+        return
+      }
+      const { data: membershipRow, error: memErr } = await supabase
+        .from('org_memberships')
+        .select('*, orgs(*)')
+        .eq('user_id', userId)
+        .limit(1)
+        .maybeSingle()
+      if (memErr || !membershipRow) {
+        if (!cancelled) setBillingState({ loading: false, allowed: false, org: null })
+        return
+      }
+      const org = membershipRow.orgs ?? membershipRow.org ?? null
+      if (!org) {
+        if (!cancelled) setBillingState({ loading: false, allowed: false, org: null })
+        return
+      }
+      let allowed = false
+      if (import.meta.env.DEV) {
+        allowed = true
+      } else if (org.plan_id === 'core-dev') {
+        allowed = true
+      } else {
+        const status = org.billing_status
+        const trialEndsAt = org.trial_ends_at ? new Date(org.trial_ends_at) : null
+        const now = new Date()
+        if (status === 'active') allowed = true
+        else if (status === 'trialing' && trialEndsAt && trialEndsAt > now) allowed = true
+        else if (status === 'trialing' && trialEndsAt && trialEndsAt <= now) allowed = false
+        else if (status === 'past_due' || status === 'canceled') allowed = false
+        else if (status == null) allowed = true
+      }
+      if (!cancelled) setBillingState({ loading: false, allowed, org })
+    }
+    run()
+    return () => { cancelled = true }
+  }, [])
+
   const sidebarWidth = isMobile ? 0 : (isTablet ? 72 : (sidebarCollapsed ? 72 : 260))
+
+  if (billingState.loading) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'var(--page-bg)',
+      }}>
+        <div style={{ fontSize: 16, color: 'var(--text-secondary, #6b7280)' }}>Carregant...</div>
+      </div>
+    )
+  }
+  if (!billingState.allowed) {
+    return (
+      <BillingBlockedScreen
+        org={billingState.org}
+        hasBillingPage
+      />
+    )
+  }
 
   return (
     <div style={{
