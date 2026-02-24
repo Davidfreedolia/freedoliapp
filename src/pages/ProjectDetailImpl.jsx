@@ -343,6 +343,8 @@ function ProjectDetailInner({ useApp }) {
   const [createForm, setCreateForm] = useState(null)
   const [createSaving, setCreateSaving] = useState(false)
   const [expenseCategories, setExpenseCategories] = useState([])
+  const [businessSnapshot, setBusinessSnapshot] = useState(null)
+  const [stockSnapshot, setStockSnapshot] = useState(null)
   const [showNotesPanel, setShowNotesPanel] = useState(false)
   const [researchAsinInput, setResearchAsinInput] = useState('')
   const [researchSnapshot, setResearchSnapshot] = useState({
@@ -992,6 +994,133 @@ ${t}
       setError('ID de projecte no vàlid')
     }
   }, [id])
+
+  // Business snapshot (ROI, unit cost, breakeven) for header
+  useEffect(() => {
+    if (!id || !project) {
+      setBusinessSnapshot(null)
+      return
+    }
+    let cancelled = false
+    ;(async () => {
+      const { supabase, getCurrentUserId } = await import('../lib/supabase')
+      const { getDemoMode } = await import('../lib/demoModeFilter')
+      const { computeProjectBusinessSnapshot } = await import('../lib/businessSnapshot')
+      const userId = await getCurrentUserId()
+      const demoMode = await getDemoMode()
+      if (cancelled) return
+      const [poRes, expRes, incRes] = await Promise.all([
+        supabase
+          .from('purchase_orders')
+          .select('project_id,total_amount,items')
+          .eq('project_id', id)
+          .eq('user_id', userId)
+          .eq('is_demo', demoMode),
+        supabase
+          .from('expenses')
+          .select('project_id,amount')
+          .eq('project_id', id)
+          .eq('user_id', userId)
+          .eq('is_demo', demoMode),
+        supabase
+          .from('incomes')
+          .select('project_id,amount')
+          .eq('project_id', id)
+          .eq('user_id', userId)
+          .eq('is_demo', demoMode)
+      ])
+      if (cancelled || !mountedRef.current) return
+      const snapshot = computeProjectBusinessSnapshot({
+        project,
+        poRows: poRes.data || [],
+        expenseRows: expRes.data || [],
+        incomeRows: incRes.data || []
+      })
+      setBusinessSnapshot(snapshot)
+    })()
+    return () => { cancelled = true }
+  }, [id, project])
+
+  // Stock signal for header (try-chain: inventory -> project_stock, then sales 30d, POs)
+  useEffect(() => {
+    if (!id || !project) {
+      setStockSnapshot(null)
+      return
+    }
+    let cancelled = false
+    ;(async () => {
+      const { supabase, getCurrentUserId } = await import('../lib/supabase')
+      const { getDemoMode } = await import('../lib/demoModeFilter')
+      const { computeProjectStockSignal } = await import('../lib/stockSignal')
+      const userId = await getCurrentUserId()
+      const demoMode = await getDemoMode()
+      if (cancelled) return
+      const thirtyDaysAgo = new Date()
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+      const thirtyDaysIso = thirtyDaysAgo.toISOString()
+
+      let stockRows = []
+      for (const { table, columns } of [
+        { table: 'inventory', columns: 'project_id,total_units,quantity,qty,units' },
+        { table: 'project_stock', columns: 'project_id,quantity,qty,units,total_units' }
+      ]) {
+        try {
+          const { data, error } = await supabase
+            .from(table)
+            .select(columns)
+            .eq('user_id', userId)
+            .eq('project_id', id)
+          if (!error && data) {
+            stockRows = data
+            break
+          }
+          throw error || new Error('no data')
+        } catch (e) {
+          const code = e?.code || e?.error?.code || ''
+          if (code === '42P01' || (e?.message && /relation|does not exist|undefined table/i.test(e.message))) continue
+          break
+        }
+      }
+
+      let salesRows = []
+      try {
+        const { data, error } = await supabase
+          .from('sales')
+          .select('project_id,qty,quantity,units,created_at,date')
+          .eq('user_id', userId)
+          .eq('is_demo', demoMode)
+          .eq('project_id', id)
+          .gte('created_at', thirtyDaysIso)
+        if (!error && data) {
+          salesRows = (data || []).filter((r) => {
+            const d = r.created_at || r.date
+            return d && new Date(d) >= thirtyDaysAgo
+          })
+        }
+      } catch (_) {}
+
+      let poRows = []
+      try {
+        const { data, error } = await supabase
+          .from('purchase_orders')
+          .select('project_id,items')
+          .eq('user_id', userId)
+          .eq('is_demo', demoMode)
+          .eq('project_id', id)
+        if (!error && data) poRows = data || []
+      } catch (_) {}
+
+      if (cancelled || !mountedRef.current) return
+      const snapshot = computeProjectStockSignal({
+        project,
+        stockRows,
+        salesRows,
+        poRows
+      })
+      setStockSnapshot(snapshot)
+    })()
+    return () => { cancelled = true }
+  }, [id, project])
 
   useEffect(() => {
     if (!id) return
@@ -2437,6 +2566,52 @@ ${t}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <StatusBadge status={project.status} decision={project.decision} />
             </div>
+            {businessSnapshot && (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2, minWidth: 0 }}>
+                <span
+                  style={{
+                    fontSize: 12,
+                    padding: '4px 8px',
+                    border: '1px solid var(--border-1)',
+                    background: 'var(--surface-bg-2)',
+                    borderRadius: 999,
+                    color: businessSnapshot.badge.tone === 'success' ? 'var(--success-1)' : businessSnapshot.badge.tone === 'warn' ? 'var(--warning-1)' : businessSnapshot.badge.tone === 'danger' ? 'var(--danger-1)' : 'var(--muted-1)',
+                    fontWeight: 600,
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {businessSnapshot.roi_percent != null ? `ROI ${Math.round(businessSnapshot.roi_percent)}% · ${businessSnapshot.badge.label}` : `— · ${businessSnapshot.badge.label}`}
+                </span>
+                <span style={{ fontSize: 11, color: 'var(--muted-1)' }}>
+                  Inv: €{businessSnapshot.invested_total.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                  {' · Unit: '}
+                  {businessSnapshot.unit_cost != null ? `€${businessSnapshot.unit_cost.toFixed(2)}` : '—'}
+                  {' · BE: '}
+                  {businessSnapshot.breakeven_units != null ? `${Math.round(businessSnapshot.breakeven_units)}u` : '—'}
+                </span>
+              </div>
+            )}
+            {stockSnapshot && (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2, minWidth: 0 }}>
+                <span
+                  style={{
+                    fontSize: 12,
+                    padding: '4px 8px',
+                    border: '1px solid var(--border-1)',
+                    background: 'var(--surface-bg-2)',
+                    borderRadius: 999,
+                    color: stockSnapshot.tone === 'success' ? 'var(--success-1)' : stockSnapshot.tone === 'warn' ? 'var(--warning-1)' : stockSnapshot.tone === 'danger' ? 'var(--danger-1)' : 'var(--muted-1)',
+                    fontWeight: 600,
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {stockSnapshot.badgeTextPrimary}
+                </span>
+                <span style={{ fontSize: 11, color: 'var(--muted-1)' }}>
+                  {stockSnapshot.badgeTextSecondary}
+                </span>
+              </div>
+            )}
             <div style={{ minWidth: 0 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, opacity: 0.8, marginBottom: 4 }}>
                 <span>{phaseLabel}</span>

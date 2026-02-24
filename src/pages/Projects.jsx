@@ -15,7 +15,10 @@ import {
 } from 'lucide-react'
 import { PHASE_STYLES, getPhaseMeta } from '../utils/phaseStyles'
 import { useApp } from '../context/AppContext'
-import { deleteProject } from '../lib/supabase'
+import { deleteProject, supabase, getCurrentUserId } from '../lib/supabase'
+import { getDemoMode } from '../lib/demoModeFilter'
+import { computeProjectBusinessSnapshot } from '../lib/businessSnapshot'
+import { computeProjectStockSignal } from '../lib/stockSignal'
 import Header from '../components/Header'
 import NewProjectModal from '../components/NewProjectModal'
 import Button from '../components/Button'
@@ -42,9 +45,13 @@ export default function Projects() {
   const [selectedProjectId, setSelectedProjectId] = useState(null)
   const [isLoadingProjects, setIsLoadingProjects] = useState(true)
   const [loadError, setLoadError] = useState(null)
+  const [businessByProjectId, setBusinessByProjectId] = useState({})
+  const [stockByProjectId, setStockByProjectId] = useState({})
 
   // Concurrency control: only latest load can commit state
   const loadSeqRef = useRef(0)
+  const businessLoadSeqRef = useRef(0)
+  const stockLoadSeqRef = useRef(0)
   const mountedRef = useRef(false)
 
   // PHASE_STYLES is an object. We need a deterministic, always-iterable list.
@@ -234,6 +241,179 @@ export default function Projects() {
     }
   }, [])
 
+  // Business snapshot: 3 queries for all projects (POs, expenses, incomes)
+  useEffect(() => {
+    if (!projects?.length) {
+      setBusinessByProjectId({})
+      return
+    }
+    const seq = ++businessLoadSeqRef.current
+    const ids = projects.map((p) => p.id).filter(Boolean)
+    if (!ids.length) {
+      setBusinessByProjectId({})
+      return
+    }
+    let cancelled = false
+    ;(async () => {
+      const userId = await getCurrentUserId()
+      const demoMode = await getDemoMode()
+      if (cancelled || !mountedRef.current || seq !== businessLoadSeqRef.current) return
+      const [poRes, expRes, incRes] = await Promise.all([
+        supabase
+          .from('purchase_orders')
+          .select('project_id,total_amount,items')
+          .eq('user_id', userId)
+          .eq('is_demo', demoMode)
+          .in('project_id', ids),
+        supabase
+          .from('expenses')
+          .select('project_id,amount')
+          .eq('user_id', userId)
+          .eq('is_demo', demoMode)
+          .in('project_id', ids),
+        supabase
+          .from('incomes')
+          .select('project_id,amount')
+          .eq('user_id', userId)
+          .eq('is_demo', demoMode)
+          .in('project_id', ids)
+      ])
+      if (cancelled || !mountedRef.current || seq !== businessLoadSeqRef.current) return
+      const poRows = poRes.data || []
+      const expenseRows = expRes.data || []
+      const incomeRows = incRes.data || []
+      const byId = {}
+      for (const project of projects) {
+        if (!project?.id) continue
+        const projectPo = poRows.filter((r) => r.project_id === project.id)
+        const projectExp = expenseRows.filter((r) => r.project_id === project.id)
+        const projectInc = incomeRows.filter((r) => r.project_id === project.id)
+        byId[project.id] = computeProjectBusinessSnapshot({
+          project,
+          poRows: projectPo,
+          expenseRows: projectExp,
+          incomeRows: projectInc
+        })
+      }
+      if (mountedRef.current && seq === businessLoadSeqRef.current) {
+        setBusinessByProjectId(byId)
+      }
+    })()
+    return () => { cancelled = true }
+  }, [projects])
+
+  // Stock signal: try-chain (inventory / project_stock / inventory_movements) + sales 30d + POs
+  useEffect(() => {
+    if (!projects?.length) {
+      setStockByProjectId({})
+      return
+    }
+    const seq = ++stockLoadSeqRef.current
+    const ids = projects.map((p) => p.id).filter(Boolean)
+    if (!ids.length) {
+      setStockByProjectId({})
+      return
+    }
+    let cancelled = false
+    ;(async () => {
+      const userId = await getCurrentUserId()
+      const demoMode = await getDemoMode()
+      if (cancelled || !mountedRef.current || seq !== stockLoadSeqRef.current) return
+
+      let stockRowsByProject = {}
+      const thirtyDaysAgo = new Date()
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+      const thirtyDaysIso = thirtyDaysAgo.toISOString()
+
+      // Try-chain: stock source (inventory -> project_stock)
+      const stockTables = [
+        { table: 'inventory', columns: 'project_id,total_units,quantity,qty,units' },
+        { table: 'project_stock', columns: 'project_id,quantity,qty,units,total_units' }
+      ]
+      for (const { table, columns } of stockTables) {
+        try {
+          const { data, error } = await supabase
+            .from(table)
+            .select(columns)
+            .eq('user_id', userId)
+            .in('project_id', ids)
+          if (error) throw error
+          const rows = data || []
+          for (const r of rows) {
+            const pid = r.project_id
+            if (!pid) continue
+            if (!stockRowsByProject[pid]) stockRowsByProject[pid] = []
+            stockRowsByProject[pid].push(r)
+          }
+          if (Object.keys(stockRowsByProject).length > 0) break
+        } catch (e) {
+          const code = e?.code || e?.error?.code || ''
+          if (code === '42P01' || (e?.message && /relation|does not exist|undefined table/i.test(e.message))) continue
+          break
+        }
+      }
+
+      // Sales last 30d (optional)
+      let salesRowsByProject = {}
+      try {
+        const { data, error } = await supabase
+          .from('sales')
+          .select('project_id,qty,quantity,units,created_at,date')
+          .eq('user_id', userId)
+          .eq('is_demo', demoMode)
+          .in('project_id', ids)
+          .gte('created_at', thirtyDaysIso)
+        if (!error && data) {
+          for (const r of data) {
+            const pid = r.project_id
+            if (!pid) continue
+            const created = r.created_at || r.date
+            if (created && new Date(created) >= thirtyDaysAgo) {
+              if (!salesRowsByProject[pid]) salesRowsByProject[pid] = []
+              salesRowsByProject[pid].push(r)
+            }
+          }
+        }
+      } catch (_) {}
+
+      if (cancelled || !mountedRef.current || seq !== stockLoadSeqRef.current) return
+
+      // POs minimal (for computeProjectStockSignal; reuse for items if needed)
+      let poRowsByProject = {}
+      try {
+        const { data, error } = await supabase
+          .from('purchase_orders')
+          .select('project_id,items')
+          .eq('user_id', userId)
+          .eq('is_demo', demoMode)
+          .in('project_id', ids)
+        if (!error && data) {
+          for (const r of data) {
+            const pid = r.project_id
+            if (!pid) continue
+            if (!poRowsByProject[pid]) poRowsByProject[pid] = []
+            poRowsByProject[pid].push(r)
+          }
+        }
+      } catch (_) {}
+
+      const byId = {}
+      for (const project of projects) {
+        if (!project?.id) continue
+        byId[project.id] = computeProjectStockSignal({
+          project,
+          stockRows: stockRowsByProject[project.id] || [],
+          salesRows: salesRowsByProject[project.id] || [],
+          poRows: poRowsByProject[project.id] || []
+        })
+      }
+      if (mountedRef.current && seq === stockLoadSeqRef.current) {
+        setStockByProjectId(byId)
+      }
+    })()
+    return () => { cancelled = true }
+  }, [projects])
+
   const selectedProject = filteredProjects.find(project => project.id === selectedProjectId)
 
   const researchPrefix = selectedProject ? `projects/${selectedProject.id}/research/` : null
@@ -384,7 +564,55 @@ export default function Projects() {
                     </>
                   ) : null}
                 </div>
-                <PhaseMark phaseId={currentPhaseId} size={16} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <PhaseMark phaseId={currentPhaseId} size={16} />
+                  {(() => {
+                    const snap = businessByProjectId[project.id]
+                    if (!snap) return null
+                    const { roi_percent, badge } = snap
+                    const toneVar = badge.tone === 'success' ? 'var(--success-1)' : badge.tone === 'warn' ? 'var(--warning-1)' : badge.tone === 'danger' ? 'var(--danger-1)' : 'var(--muted-1)'
+                    const label = roi_percent != null ? `ROI ${Math.round(roi_percent)}% · ${badge.label}` : `— · ${badge.label}`
+                    return (
+                      <span
+                        style={{
+                          fontSize: 12,
+                          padding: '4px 8px',
+                          border: '1px solid var(--border-1)',
+                          background: 'var(--surface-bg-2)',
+                          borderRadius: 999,
+                          color: toneVar,
+                          fontWeight: 600,
+                          whiteSpace: 'nowrap'
+                        }}
+                        title={`Invertit: ${snap.invested_total.toFixed(0)} · Unit: ${snap.unit_cost != null ? snap.unit_cost.toFixed(2) : '—'}`}
+                      >
+                        {label}
+                      </span>
+                    )
+                  })()}
+                  {(() => {
+                    const stock = stockByProjectId[project.id]
+                    if (!stock) return null
+                    const toneVar = stock.tone === 'success' ? 'var(--success-1)' : stock.tone === 'warn' ? 'var(--warning-1)' : stock.tone === 'danger' ? 'var(--danger-1)' : 'var(--muted-1)'
+                    return (
+                      <span
+                        style={{
+                          fontSize: 12,
+                          padding: '4px 8px',
+                          border: '1px solid var(--border-1)',
+                          background: 'var(--surface-bg-2)',
+                          borderRadius: 999,
+                          color: toneVar,
+                          fontWeight: 600,
+                          whiteSpace: 'nowrap'
+                        }}
+                        title={stock.badgeTextSecondary}
+                      >
+                        {stock.badgeTextPrimary}
+                      </span>
+                    )
+                  })()}
+                </div>
                 {activeMarketplaces.length ? (
                   <div className="project-card__marketplaces">
                     <span className="project-card__marketplacesLabel">Marketplaces actius</span>
