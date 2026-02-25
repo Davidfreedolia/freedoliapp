@@ -61,7 +61,7 @@ export default function Landing() {
             Inicia sessió
           </Link>
           <Link
-            to="/app"
+            to="/login"
             style={{
               display: 'inline-block',
               padding: '12px 24px',

@@ -366,8 +366,8 @@ function App() {
     <BrowserRouter>
       <AppProvider>
         <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/landing" element={<Landing />} />
+          <Route path="/" element={<Landing />} />
+          <Route path="/landing" element={<Navigate to="/" replace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Navigate to="/app" replace />} />
           <Route path="/projects/*" element={<RedirectToApp />} />
