@@ -512,7 +512,7 @@ export default function Projects() {
           setSelectedProjectId(project.id)
           if (effectiveViewMode === 'split') return
           if (disableNavigation) return
-          navigate(`/projects/${project.id}`)
+          navigate(`/app/projects/${project.id}`)
         }}
         onMouseEnter={enablePreviewSelect ? () => setSelectedProjectId(project.id) : undefined}
       >
@@ -678,7 +678,7 @@ export default function Projects() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={e => { e.stopPropagation(); navigate(`/projects/${project.id}/edit`) }}
+                        onClick={e => { e.stopPropagation(); navigate(`/app/projects/${project.id}/edit`) }}
                         style={styles.menuItem}
                       >
                         <Edit size={14} /> Editar

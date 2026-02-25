@@ -43,9 +43,9 @@ export default function AlertsBadge({ darkMode }) {
     if (alerts.length > 0) {
       const firstAlert = alerts[0]
       if (firstAlert.entityType === 'purchase_order') {
-        navigate(`/orders?po=${firstAlert.entityId}`)
+        navigate(`/app/orders?po=${firstAlert.entityId}`)
       } else if (firstAlert.entityType === 'project') {
-        navigate(`/projects/${firstAlert.entityId}`)
+        navigate(`/app/projects/${firstAlert.entityId}`)
       }
     }
   }
@@ -138,9 +138,9 @@ export default function AlertsBadge({ darkMode }) {
                   key={index}
                   onClick={() => {
                     if (alert.entityType === 'purchase_order') {
-                      navigate(`/orders?po=${alert.entityId}`)
+                      navigate(`/app/orders?po=${alert.entityId}`)
                     } else if (alert.entityType === 'project') {
-                      navigate(`/projects/${alert.entityId}`)
+                      navigate(`/app/projects/${alert.entityId}`)
                     }
                     setShowTooltip(false)
                   }}

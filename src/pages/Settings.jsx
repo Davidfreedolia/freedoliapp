@@ -577,7 +577,7 @@ export default function Settings() {
               <Button
                 variant="primary"
                 size="sm"
-                onClick={() => navigate('/help')}
+                onClick={() => navigate('/app/help')}
               >
                 <BookOpen size={16} />
                 {t('settings.openManual')}
@@ -669,7 +669,7 @@ export default function Settings() {
                         await refreshProjects()
                         // Redirect to dashboard after 2 seconds
                         setTimeout(() => {
-                          navigate('/')
+                          navigate('/app')
                         }, 2000)
                       } else {
                         showToast(t('settings.errorGeneratingDemo') + ': ' + genResult.message, 'error')

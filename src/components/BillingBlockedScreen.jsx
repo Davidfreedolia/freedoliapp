@@ -56,7 +56,7 @@ export default function BillingBlockedScreen({ org, hasBillingPage = true }) {
         <div style={{ marginTop: 24 }}>
           {hasBillingPage ? (
             <Link
-              to="/settings"
+              to="/app/settings"
               style={{
                 display: 'inline-block',
                 padding: '10px 20px',

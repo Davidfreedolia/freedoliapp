@@ -46,7 +46,7 @@ export function buildProjectAlerts({ project, business, stock, gate, now = new D
       title,
       detail: detail || '',
       tone,
-      action: { label: 'Open', href: `/projects/${pid}` }
+      action: { label: 'Open', href: `/app/projects/${pid}` }
     })
   }
 

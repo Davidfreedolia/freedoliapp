@@ -25,7 +25,12 @@ import { useBreakpoint } from '../hooks/useBreakpoint'
 // Carrega el chunk abans que es necessiti per millorar UX
 // Utilitza els mateixos imports dinàmics que React.lazy() a App.jsx per garantir compatibilitat
 const prefetchRoute = (path) => {
-  switch (path) {
+  const base = path.replace(/^\/app/, '') || '/'
+  switch (base) {
+    case '':
+    case '/':
+      import('../pages/Dashboard.jsx').catch(() => {})
+      break
     case '/orders':
       import('../pages/Orders.jsx').catch(() => {})
       break
@@ -67,16 +72,16 @@ const prefetchRoute = (path) => {
 const prefetchedRoutes = new Set()
 
 const menuItems = [
-  { path: '/', icon: LayoutDashboard, labelKey: 'sidebar.dashboard' },
-  { path: '/projects', icon: FolderKanban, labelKey: 'sidebar.projects' },
-  { path: '/suppliers', icon: Users, labelKey: 'sidebar.suppliers' },
-  { path: '/forwarders', icon: Truck, labelKey: 'sidebar.forwarders' },
-  { path: '/warehouses', icon: Warehouse, labelKey: 'sidebar.warehouses' },
-  { path: '/orders', icon: FileText, labelKey: 'sidebar.orders' },
-  { path: '/finances', icon: Receipt, labelKey: 'sidebar.finances' },
-  { path: '/inventory', icon: Package, labelKey: 'sidebar.inventory' },
-  { path: '/calendar', icon: CalendarIcon, labelKey: 'sidebar.calendar' },
-  { path: '/analytics', icon: TrendingUp, labelKey: 'sidebar.analytics' },
+  { path: '/app', icon: LayoutDashboard, labelKey: 'sidebar.dashboard' },
+  { path: '/app/projects', icon: FolderKanban, labelKey: 'sidebar.projects' },
+  { path: '/app/suppliers', icon: Users, labelKey: 'sidebar.suppliers' },
+  { path: '/app/forwarders', icon: Truck, labelKey: 'sidebar.forwarders' },
+  { path: '/app/warehouses', icon: Warehouse, labelKey: 'sidebar.warehouses' },
+  { path: '/app/orders', icon: FileText, labelKey: 'sidebar.orders' },
+  { path: '/app/finances', icon: Receipt, labelKey: 'sidebar.finances' },
+  { path: '/app/inventory', icon: Package, labelKey: 'sidebar.inventory' },
+  { path: '/app/calendar', icon: CalendarIcon, labelKey: 'sidebar.calendar' },
+  { path: '/app/analytics', icon: TrendingUp, labelKey: 'sidebar.analytics' },
 ]
 
 export default function Sidebar() {
@@ -151,7 +156,7 @@ export default function Sidebar() {
             }}
             onMouseEnter={() => {
               // Prefetch rutes quan es fa hover (només una vegada per ruta)
-              if (!prefetchedRoutes.has(item.path) && item.path !== '/') {
+              if (!prefetchedRoutes.has(item.path) && item.path !== '/app') {
                 prefetchedRoutes.add(item.path)
                 prefetchRoute(item.path)
               }
@@ -178,7 +183,7 @@ export default function Sidebar() {
 
       <div className="sidebar-footer-sep" />
       <NavLink
-        to="/settings"
+        to="/app/settings"
         onClick={() => {
           if (isMobile) {
             setMobileOpen(false)
@@ -186,17 +191,17 @@ export default function Sidebar() {
         }}
         onMouseEnter={() => {
           if (!prefetchedRoutes.has('/settings')) {
-            prefetchedRoutes.add('/settings')
-            prefetchRoute('/settings')
+prefetchedRoutes.add('/app/settings')
+                prefetchRoute('/settings')
           }
-          setHoveredPath('/settings')
+          setHoveredPath('/app/settings')
         }}
         onMouseLeave={() => setHoveredPath(null)}
         style={({ isActive }) => ({
           ...styles.navItem,
           backgroundColor: isActive
             ? 'var(--nav-highlight-strong)'
-            : (hoveredPath === '/settings' ? 'var(--nav-highlight)' : 'transparent'),
+            : (hoveredPath === '/app/settings' ? 'var(--nav-highlight)' : 'transparent'),
           color: isActive ? 'var(--nav-fg)' : 'var(--nav-fg-muted)',
           borderLeft: 'none',
           padding: shouldCollapse ? '12px 0' : '12px 16px',
@@ -230,6 +235,9 @@ export default function Sidebar() {
         </div>
       )}
 
+      <div style={{ padding: '12px 16px', marginTop: 'auto', fontSize: 10, color: 'var(--nav-fg-muted)', opacity: 0.8 }}>
+        FREEDOLIAPP v2.0.0
+      </div>
     </>
   )
 

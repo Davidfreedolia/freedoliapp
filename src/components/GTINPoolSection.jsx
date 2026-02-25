@@ -586,11 +586,11 @@ export default function GTINPoolSection({ darkMode }) {
                 <div style={styles.cardRow}>
                   <span style={styles.cardLabel}>{t('settings.gtinPool.project')}:</span>
                   <a
-                    href={`/projects/${gtin.assigned_to_project_id?.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i)?.[0] || gtin.assigned_to_project_id}`}
+                    href={`/app/projects/${gtin.assigned_to_project_id?.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i)?.[0] || gtin.assigned_to_project_id}`}
                     onClick={(e) => {
                       e.preventDefault()
                       const cleanId = gtin.assigned_to_project_id?.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i)?.[0] || gtin.assigned_to_project_id
-                      navigate(`/projects/${cleanId}`)
+                      navigate(`/app/projects/${cleanId}`)
                     }}
                     style={{
                       ...styles.projectLink,
@@ -688,11 +688,11 @@ export default function GTINPoolSection({ darkMode }) {
                   <td style={styles.td}>
                     {gtin.projects ? (
                       <a
-                        href={`/projects/${gtin.assigned_to_project_id?.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i)?.[0] || gtin.assigned_to_project_id}`}
+                        href={`/app/projects/${gtin.assigned_to_project_id?.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i)?.[0] || gtin.assigned_to_project_id}`}
                         onClick={(e) => {
                           e.preventDefault()
                           const cleanId = gtin.assigned_to_project_id?.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i)?.[0] || gtin.assigned_to_project_id
-                          navigate(`/projects/${cleanId}`)
+                          navigate(`/app/projects/${cleanId}`)
                         }}
                         style={{
                           ...styles.projectLink,

@@ -144,7 +144,7 @@ export default function CalendarPage() {
   
   const handleEventClick = useCallback((event) => {
     if (event.resource?.project?.id) {
-      navigate(`/projects/${event.resource.project.id}`)
+      navigate(`/app/projects/${event.resource.project.id}`)
     }
   }, [navigate])
   

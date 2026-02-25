@@ -19,20 +19,20 @@ export default function Login() {
   useEffect(() => {
     // Demo mode: auto-redirect to dashboard
     if (isDemoMode()) {
-      navigate('/', { replace: true })
+      navigate('/app', { replace: true })
       return
     }
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate('/', { replace: true })
+        navigate('/app', { replace: true })
       }
     })
 
     // Escoltar canvis d'autenticació (per magic link)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
-        navigate('/', { replace: true })
+        navigate('/app', { replace: true })
       }
     })
 
@@ -59,7 +59,7 @@ export default function Login() {
           email: email,
           method: 'password'
         })
-        navigate('/', { replace: true })
+        navigate('/app', { replace: true })
       }
     } catch (err) {
       // Audit log: error login

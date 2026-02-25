@@ -1,4 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+
+function RedirectToApp() {
+  const { pathname } = useLocation()
+  return <Navigate to={`/app${pathname}`} replace />
+}
 import React, { Suspense, useEffect, useState } from 'react'
 import { AppProvider, useApp } from './context/AppContext'
 import Sidebar from './components/Sidebar'
@@ -15,8 +20,9 @@ import { isDemoMode } from './demo/demoMode'
 import { supabase, getCurrentUserId } from './lib/supabase'
 import './i18n'
 
-// Login (no lazy, es carrega primer)
+// Login i Landing (no lazy)
 import Login from './pages/Login'
+import Landing from './pages/Landing'
 
 // Lazy loading wrapper with error handling
 const lazyWithErrorBoundary = (importFn, pageName) => {
@@ -71,7 +77,7 @@ function AppContent() {
   const { sidebarCollapsed, darkMode } = useApp()
   const { isMobile, isTablet } = useBreakpoint()
   const location = useLocation()
-  const isProjectDetail = location.pathname.startsWith('/projects/') && location.pathname.split('/').length >= 3
+  const isProjectDetail = location.pathname.startsWith('/app/projects/') && location.pathname.split('/').length >= 4
 
   const [billingState, setBillingState] = useState({ loading: true, allowed: true, org: null })
 
@@ -170,7 +176,7 @@ function AppContent() {
           <Suspense fallback={<PageLoader darkMode={darkMode} />}>
             <Routes>
               <Route
-                path="/"
+                path="/app"
                 element={
                   <ProtectedRoute>
                     <ErrorBoundary context="page:Dashboard" darkMode={darkMode}>
@@ -180,7 +186,7 @@ function AppContent() {
                 }
               />
               <Route
-                path="/projects"
+                path="/app/projects"
                 element={
                   <ProtectedRoute>
                     <ErrorBoundary context="page:Projects" darkMode={darkMode}>
@@ -190,7 +196,7 @@ function AppContent() {
                 }
               />
               <Route
-                path="/projects/:id"
+                path="/app/projects/:id"
                 element={
                   <ProtectedRoute>
                     <ErrorBoundary context="page:ProjectDetail" darkMode={darkMode}>
@@ -200,7 +206,7 @@ function AppContent() {
                 }
               />
             <Route
-              path="/projects/:projectId/briefing"
+              path="/app/projects/:projectId/briefing"
               element={
                 <ProtectedRoute>
                   <ErrorBoundary context="page:Briefing" darkMode={darkMode}>
@@ -210,7 +216,7 @@ function AppContent() {
               }
             />
             <Route
-              path="/suppliers"
+              path="/app/suppliers"
               element={
                 <ProtectedRoute>
                   <ErrorBoundary context="page:Suppliers" darkMode={darkMode}>
@@ -220,7 +226,7 @@ function AppContent() {
               }
             />
             <Route
-              path="/forwarders"
+              path="/app/forwarders"
               element={
                 <ProtectedRoute>
                   <ErrorBoundary context="page:Forwarders" darkMode={darkMode}>
@@ -230,7 +236,7 @@ function AppContent() {
               }
             />
             <Route
-              path="/warehouses"
+              path="/app/warehouses"
               element={
                 <ProtectedRoute>
                   <ErrorBoundary context="page:Warehouses" darkMode={darkMode}>
@@ -240,7 +246,7 @@ function AppContent() {
               }
             />
             <Route
-              path="/orders"
+              path="/app/orders"
               element={
                 <ProtectedRoute>
                   <ErrorBoundary context="page:Orders" darkMode={darkMode}>
@@ -250,7 +256,7 @@ function AppContent() {
               }
             />
             <Route
-              path="/finances"
+              path="/app/finances"
               element={
                 <ProtectedRoute>
                   <ErrorBoundary context="page:Finances" darkMode={darkMode}>
@@ -260,7 +266,7 @@ function AppContent() {
               }
             />
             <Route
-              path="/inventory"
+              path="/app/inventory"
               element={
                 <ProtectedRoute>
                   <ErrorBoundary context="page:Inventory" darkMode={darkMode}>
@@ -270,7 +276,7 @@ function AppContent() {
               }
             />
             <Route
-              path="/analytics"
+              path="/app/analytics"
               element={
                 <ProtectedRoute>
                   <ErrorBoundary context="page:Analytics" darkMode={darkMode}>
@@ -280,7 +286,7 @@ function AppContent() {
               }
             />
             <Route
-              path="/settings"
+              path="/app/settings"
               element={
                 <ProtectedRoute>
                   <ErrorBoundary context="page:Settings" darkMode={darkMode}>
@@ -290,7 +296,7 @@ function AppContent() {
               }
             />
             <Route
-              path="/help"
+              path="/app/help"
               element={
                 <ProtectedRoute>
                   <ErrorBoundary context="page:Help" darkMode={darkMode}>
@@ -300,7 +306,7 @@ function AppContent() {
               }
             />
             <Route
-              path="/calendar"
+              path="/app/calendar"
               element={
                 <ProtectedRoute>
                   <ErrorBoundary context="page:Calendar" darkMode={darkMode}>
@@ -310,7 +316,7 @@ function AppContent() {
               }
             />
             <Route
-              path="/diagnostics"
+              path="/app/diagnostics"
               element={
                 <ProtectedRoute>
                   <ErrorBoundary context="page:Diagnostics" darkMode={darkMode}>
@@ -320,7 +326,7 @@ function AppContent() {
               }
             />
             <Route
-              path="/dev/seed"
+              path="/app/dev/seed"
               element={
                 <ProtectedRoute>
                   <ErrorBoundary context="page:DevSeed" darkMode={darkMode}>
@@ -329,7 +335,7 @@ function AppContent() {
                 </ProtectedRoute>
               }
             />
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<Navigate to="/app" replace />} />
           </Routes>
         </Suspense>
         </ErrorBoundary>
@@ -345,8 +351,24 @@ function App() {
     <BrowserRouter>
       <AppProvider>
         <Routes>
+          <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
-          <Route path="*" element={<AppContent />} />
+          <Route path="/dashboard" element={<Navigate to="/app" replace />} />
+          <Route path="/projects/*" element={<RedirectToApp />} />
+          <Route path="/settings" element={<Navigate to="/app/settings" replace />} />
+          <Route path="/orders" element={<Navigate to="/app/orders" replace />} />
+          <Route path="/finances" element={<Navigate to="/app/finances" replace />} />
+          <Route path="/inventory" element={<Navigate to="/app/inventory" replace />} />
+          <Route path="/analytics" element={<Navigate to="/app/analytics" replace />} />
+          <Route path="/suppliers" element={<Navigate to="/app/suppliers" replace />} />
+          <Route path="/forwarders" element={<Navigate to="/app/forwarders" replace />} />
+          <Route path="/warehouses" element={<Navigate to="/app/warehouses" replace />} />
+          <Route path="/help" element={<Navigate to="/app/help" replace />} />
+          <Route path="/calendar" element={<Navigate to="/app/calendar" replace />} />
+          <Route path="/diagnostics" element={<Navigate to="/app/diagnostics" replace />} />
+          <Route path="/dev/seed" element={<Navigate to="/app/dev/seed" replace />} />
+          <Route path="/app/*" element={<AppContent />} />
+          <Route path="*" element={<Navigate to="/app" replace />} />
         </Routes>
       </AppProvider>
     </BrowserRouter>

@@ -62,16 +62,16 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
   const handleOpenEntity = (task) => {
     switch (task.entity_type) {
       case 'project':
-        navigate(`/projects/${task.entity_id}`)
+        navigate(`/app/projects/${task.entity_id}`)
         break
       case 'purchase_order':
-        navigate(`/orders?po=${task.entity_id}`)
+        navigate(`/app/orders?po=${task.entity_id}`)
         break
       case 'supplier':
-        navigate(`/suppliers`)
+        navigate(`/app/suppliers`)
         break
       case 'shipment':
-        navigate(`/orders`)
+        navigate(`/app/orders`)
         break
       default:
         break

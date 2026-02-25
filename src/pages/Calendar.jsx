@@ -92,7 +92,7 @@ export default function CalendarPage() {
     const { entity_type, entity_id, type, resource } = event
     
     if (entity_type === 'project') {
-      navigate(`/projects/${entity_id}`)
+      navigate(`/app/projects/${entity_id}`)
     } else if (entity_type === 'purchase_order') {
       navigate(`/orders?open=${entity_id}`)
     } else if (type === 'shipment') {
@@ -101,14 +101,14 @@ export default function CalendarPage() {
     } else if (type === 'task') {
       // Navigate to entity and highlight task
       if (resource.entity_type === 'project') {
-        navigate(`/projects/${resource.entity_id}?highlightTask=${resource.id}`)
+        navigate(`/app/projects/${resource.entity_id}?highlightTask=${resource.id}`)
       } else if (resource.entity_type === 'purchase_order') {
-        navigate(`/orders?open=${resource.entity_id}&highlightTask=${resource.id}`)
+        navigate(`/app/orders?open=${resource.entity_id}&highlightTask=${resource.id}`)
       }
     } else if (type === 'quote') {
       // Navigate to project with quote
       if (resource.project_id) {
-        navigate(`/projects/${resource.project_id}`)
+        navigate(`/app/projects/${resource.project_id}`)
       }
     }
   }

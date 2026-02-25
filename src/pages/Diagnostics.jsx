@@ -265,7 +265,7 @@ export default function Diagnostics() {
       const testProject = projects?.[0]
 
       if (!testProject) {
-        updateCheck('tasks', CHECK_STATUS.WARNING, null, 'No projects available for test task', '/projects')
+        updateCheck('tasks', CHECK_STATUS.WARNING, null, 'No projects available for test task', '/app/projects')
         addLog('⚠️ Tasks check: No projects available', 'warning')
         return
       }
@@ -365,7 +365,7 @@ export default function Diagnostics() {
       }
 
       // Navigation smoke test (just check routes exist)
-      const routes = ['/projects', '/orders', '/calendar']
+      const routes = ['/app/projects', '/app/orders', '/app/calendar']
       addLog(`✅ Routes exist: ${routes.join(', ')}`, 'success')
 
       updateCheck('calendar', CHECK_STATUS.OK, {

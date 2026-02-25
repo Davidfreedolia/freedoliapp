@@ -137,7 +137,7 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
       showToast(t('stickyNotes.taskCreated', 'Tasca creada correctament'), 'success')
       
       // Optionally navigate to calendar or task
-      // navigate(`/calendar`)
+      // navigate(`/app/calendar`)
     } catch (err) {
       console.error('Error converting to task:', err)
       
@@ -167,11 +167,11 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
     if (note.linked_task_id && note.tasks) {
       const task = Array.isArray(note.tasks) ? note.tasks[0] : note.tasks
       if (task?.entity_type === 'project') {
-        navigate(`/projects/${task.entity_id}?highlightTask=${task.id}`)
+        navigate(`/app/projects/${task.entity_id}?highlightTask=${task.id}`)
       } else if (task?.entity_type === 'purchase_order') {
-        navigate(`/orders?open=${task.entity_id}&highlightTask=${task.id}`)
+        navigate(`/app/orders?open=${task.entity_id}&highlightTask=${task.id}`)
       } else {
-        navigate(`/calendar`)
+        navigate(`/app/calendar`)
       }
     }
   }

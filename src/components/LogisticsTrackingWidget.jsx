@@ -163,7 +163,7 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false, hi
           <Button
             variant="secondary"
             size="sm"
-            onClick={() => navigate('/orders')}
+            onClick={() => navigate('/app/orders')}
             className="tracking-view-all"
           >
             Veure totes <ArrowRight size={16} />
@@ -204,7 +204,7 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false, hi
           <Button
             variant="secondary"
             size="sm"
-            onClick={() => navigate('/orders')}
+            onClick={() => navigate('/app/orders')}
             className="tracking-view-all"
           >
             Veure totes <ArrowRight size={16} />
@@ -226,7 +226,7 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false, hi
             <div 
               key={project.id}
               style={styles.projectCard}
-              onClick={() => navigate(`/projects/${project.id}`)}
+              onClick={() => navigate(`/app/projects/${project.id}`)}
             >
                 <div style={styles.projectHeader}>
                 <div style={styles.projectInfo}>

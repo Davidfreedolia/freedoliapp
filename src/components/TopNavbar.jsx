@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useApp } from '../context/AppContext'
 import { supabase } from '../lib/supabase'
+import { getDemoMode } from '../lib/demoModeFilter'
 import { logSuccess } from '../lib/auditLog'
 import { useNotes } from '../hooks/useNotes'
 import AddStickyNoteModal from './AddStickyNoteModal'
@@ -28,6 +29,7 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
   const [showAvatarSelector, setShowAvatarSelector] = useState(false)
   const [userEmail, setUserEmail] = useState('')
   const [userName, setUserName] = useState('')
+  const [demoMode, setDemoMode] = useState(false)
 
   // Load user info
   useEffect(() => {
@@ -44,6 +46,10 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
       }
     }
     loadUserInfo()
+  }, [])
+
+  useEffect(() => {
+    getDemoMode().then(setDemoMode).catch(() => setDemoMode(false))
   }, [])
 
   // No mostrar navbar a login
@@ -113,6 +119,18 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
         </div>
 
         <div style={styles.rightSection}>
+          <span style={{ fontSize: 11, color: 'var(--muted-1)', marginRight: 6 }}>Workspace: Freedolia</span>
+          <span style={{
+            fontSize: 11,
+            padding: '4px 8px',
+            border: '1px solid var(--border-1)',
+            background: 'var(--surface-bg-2)',
+            borderRadius: 999,
+            color: demoMode ? 'var(--warning-1)' : 'var(--success-1)',
+            fontWeight: 600
+          }}>
+            {demoMode ? 'DEMO' : 'LIVE'}
+          </span>
           <HeaderPreferencesWidget />
           <HeaderUserWidget
             userEmail={userEmail}

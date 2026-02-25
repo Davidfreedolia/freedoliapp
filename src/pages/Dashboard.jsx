@@ -805,13 +805,18 @@ export default function Dashboard() {
             <Button
               variant="secondary"
               size="sm"
-              onClick={() => navigate('/projects?showDiscarded=true')}
+              onClick={() => navigate('/app/projects?showDiscarded=true')}
               className="dashboard-view-all"
             >
               Veure →
             </Button>
           </div>
         )}
+
+        {/* Dashboard tagline (C6) */}
+        <p style={{ margin: '0 0 12px 0', fontSize: 14, opacity: 0.85, color: 'var(--muted-1)' }}>
+          Operational control for your Amazon business.
+        </p>
 
         {/* Executive dashboard (C4): KPI row + Risk Radar + Money Focus */}
         {execLoading && (
@@ -822,12 +827,27 @@ export default function Dashboard() {
         )}
         {!execLoading && !execError && execData.kpis != null && (
           <>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)',
-              gap: 12,
-              marginBottom: 16
-            }}>
+            {totalProjects === 0 && (
+              <div style={{
+                padding: '16px',
+                marginBottom: 16,
+                borderRadius: 'var(--radius-ui)',
+                border: '1px solid var(--border-1)',
+                background: 'var(--surface-bg-2)',
+                color: 'var(--muted-1)',
+                fontSize: 14
+              }}>
+                No active projects yet. Create your first project to start tracking ROI, stock and gates.
+              </div>
+            )}
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)',
+                gap: 12,
+                flex: 1,
+                minWidth: 0
+              }}>
               <div style={{
                 padding: '12px 16px',
                 borderRadius: 'var(--radius-ui)',
@@ -863,6 +883,13 @@ export default function Dashboard() {
               }}>
                 <div style={{ fontSize: 11, color: 'var(--muted-1)', marginBottom: 4 }}>At risk</div>
                 <div style={{ fontSize: 18, fontWeight: 600 }}>{execData.kpis.at_risk_count ?? 0}</div>
+              </div>
+              </div>
+              {/* Quick Actions (C6) */}
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <Button variant="primary" size="sm" onClick={() => navigate('/app/projects')}>New Project</Button>
+                <Button variant="secondary" size="sm" onClick={() => navigate('/app/orders')}>New PO</Button>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/app/settings')}>Settings</Button>
               </div>
             </div>
 
@@ -957,7 +984,7 @@ export default function Dashboard() {
                 Risk Radar
               </h2>
               {execData.risk.length === 0 ? (
-                <div style={styles.empty}><p>Cap projecte en risc</p></div>
+                <div style={styles.empty}><p>No risks detected.</p></div>
               ) : (
                 <div style={{ overflowX: 'auto' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
@@ -1041,7 +1068,7 @@ export default function Dashboard() {
                 Money Focus
               </h2>
               {execData.focus.length === 0 ? (
-                <div style={styles.empty}><p>Cap oportunitat READY amb ROI ≥25% i stock OK</p></div>
+                <div style={styles.empty}><p>No scale-ready projects yet.</p></div>
               ) : (
                 <div style={{ overflowX: 'auto' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
@@ -1107,7 +1134,7 @@ export default function Dashboard() {
             <Button
               variant="secondary"
                   size="sm"
-                  onClick={() => navigate('/orders')}
+                  onClick={() => navigate('/app/orders')}
               className="dashboard-view-all"
                 >
                   {t('dashboard.ordersInProgress.viewAll')} <ArrowRight size={16} />
@@ -1158,14 +1185,14 @@ export default function Dashboard() {
                               <button
                                 type="button"
                                 className="dashboard-link"
-                                onClick={() => navigate(`/projects/${order.project_id}`)}
+                                onClick={() => navigate(`/app/projects/${order.project_id}`)}
                               >
                                 [{order.project?.project_code || 'PR'}] {order.project?.name || t('dashboard.noProject')}
                               </button>
                               <button
                                 type="button"
                                 className="dashboard-link"
-                                onClick={() => navigate(`/orders/${order.id}`)}
+                                onClick={() => navigate(`/app/orders/${order.id}`)}
                               >
                                 {order.po_number}
                               </button>
@@ -1235,7 +1262,7 @@ export default function Dashboard() {
             <Button
               variant="secondary"
               size="sm"
-              onClick={() => navigate('/orders')}
+              onClick={() => navigate('/app/orders')}
               className="dashboard-view-all"
             >
               {t('dashboard.posNotReady.viewAll')} <ArrowRight size={16} />
@@ -1264,14 +1291,14 @@ export default function Dashboard() {
                     <button
                       type="button"
                       className="dashboard-link"
-                      onClick={() => navigate(`/projects/${po.project_id || po.projects?.id || ''}`)}
+                      onClick={() => navigate(`/app/projects/${po.project_id || po.projects?.id || ''}`)}
                     >
                       [{po.projects?.project_code || 'PR'}] {po.projects?.name || t('dashboard.noProject')}
                     </button>
                     <button
                       type="button"
                       className="dashboard-link"
-                      onClick={() => navigate(`/orders/${po.id}`)}
+                      onClick={() => navigate(`/app/orders/${po.id}`)}
                     >
                       {po.po_number}
                     </button>

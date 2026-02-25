@@ -167,7 +167,7 @@ export function WaitingManufacturerWidget({ darkMode, limit = 10 }) {
                   {actionLoading === po.id ? '...' : '✓ Sent'}
                 </button>
                 <button
-                  onClick={() => navigate(`/orders?po=${po.id}`)}
+                  onClick={() => navigate(`/app/orders?po=${po.id}`)}
                   style={{
                     ...widgetStyles.actionButton,
                     backgroundColor: '#4f46e5',
@@ -304,7 +304,7 @@ export function PosNotAmazonReadyWidget({ darkMode, limit = 10 }) {
                 e.stopPropagation()
                 // Navigate to PO detail with focus on missing fields
                 const missingField = po.missing && po.missing.length > 0 ? po.missing[0] : null
-                navigate(`/orders?po=${po.id}${missingField ? `&focus=${missingField}` : ''}`)
+                navigate(`/app/orders?po=${po.id}${missingField ? `&focus=${missingField}` : ''}`)
               }}
               style={{
                 ...widgetStyles.actionButton,
@@ -606,7 +606,7 @@ export function ResearchNoDecisionWidget({ darkMode, limit = 10 }) {
               </div>
             </div>
             <button
-              onClick={() => navigate(`/projects/${project.id}`)}
+              onClick={() => navigate(`/app/projects/${project.id}`)}
               style={{
                 ...widgetStyles.actionButton,
                 backgroundColor: '#8b5cf6',
@@ -738,7 +738,7 @@ export function StaleTrackingWidget({ darkMode, limit = 10, staleDays = 7 }) {
               )}
             </div>
             <button
-              onClick={() => navigate(`/orders`)}
+              onClick={() => navigate(`/app/orders`)}
               style={{
                 ...widgetStyles.actionButton,
                 backgroundColor: '#f59e0b',

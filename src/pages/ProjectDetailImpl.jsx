@@ -1443,7 +1443,7 @@ ${t}
       await refreshProjects()
       
       // Redirigir al Dashboard després d'editar el projecte
-      navigate('/')
+      navigate('/app')
     } catch (err) {
       try {
         const { formatError, notifyError } = await import('../lib/errorHandling')
@@ -1778,7 +1778,7 @@ ${t}
             <Button variant="primary" size="sm" onClick={loadProject}>
               Reintentar
             </Button>
-            <Button variant="secondary" size="sm" onClick={() => navigate('/projects')}>
+            <Button variant="secondary" size="sm" onClick={() => navigate('/app/projects')}>
               Tornar a Projectes
             </Button>
           </div>
@@ -1815,7 +1815,7 @@ ${t}
           }}>
             El projecte que busques no existeix o no tens accés.
           </p>
-          <Button variant="primary" size="sm" onClick={() => navigate('/projects')}>
+          <Button variant="primary" size="sm" onClick={() => navigate('/app/projects')}>
             Tornar a Projectes
           </Button>
         </div>
@@ -2346,7 +2346,7 @@ ${t}
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={() => navigate(`/orders?project=${id}`)}
+                  onClick={() => navigate(`/app/orders?project=${id}`)}
                   style={{
                     ...styles.actionButton,
                     backgroundColor: '#4f46e5',
@@ -2381,7 +2381,7 @@ ${t}
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={() => navigate(`/finances?project=${id}`)}
+                  onClick={() => navigate(`/app/finances?project=${id}`)}
                   style={{
                     ...styles.actionButton,
                     backgroundColor: '#4f46e5',
@@ -2479,7 +2479,7 @@ ${t}
     return { opacity: 1, cursor: 'pointer' }
   }
 
-  const handleCreatePO = () => navigate(`/orders?project=${id}`)
+  const handleCreatePO = () => navigate(`/app/orders?project=${id}`)
   const handleCreateExpense = () => openCreateModal('expense')
   const handleAddDocument = () => {
     const target = document.getElementById('documents-section')

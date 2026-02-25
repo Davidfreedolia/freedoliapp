@@ -323,7 +323,7 @@ export default function SamplesSection({ projectId, darkMode }) {
                   <button
                     type="button"
                     className="btn btn--soft btn--sm"
-                    onClick={() => navigate(`/orders?po=${po.id}`)}
+                    onClick={() => navigate(`/app/orders?po=${po.id}`)}
                   >
                     Veure PO
                   </button>
@@ -467,7 +467,7 @@ export default function SamplesSection({ projectId, darkMode }) {
                             type="button"
                             className="btn btn--sm btn--soft"
                             disabled={demo}
-                            onClick={() => !demo && navigate(`/orders?po=${row.po_id}`)}
+                            onClick={() => !demo && navigate(`/app/orders?po=${row.po_id}`)}
                           >
                             Veure PO
                           </button>

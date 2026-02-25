@@ -222,7 +222,7 @@ export default function NewProjectModal({ isOpen, onClose }) {
       setFormData({ name: '', description: '' })
       setProjectCodes({ projectCode: '', sku: '' })
       handleClose()
-      navigate(`/projects/${newProject.id}`, { replace: true })
+      navigate(`/app/projects/${newProject.id}`, { replace: true })
     } catch (err) {
       // Audit log: error creant projecte
       await logError('project', 'create', err, { 

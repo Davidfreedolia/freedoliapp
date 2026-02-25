@@ -874,7 +874,7 @@ export default function DevSeed() {
         
         // Auto-redirect to dashboard after 2 seconds
         setTimeout(() => {
-          navigate('/dashboard')
+          navigate('/app')
         }, 2000)
       } else {
         setDemoReady(false)
@@ -1354,7 +1354,7 @@ export default function DevSeed() {
             <Button
               variant="primary"
               size="sm"
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/app')}
             >
               Go to Dashboard
             </Button>
