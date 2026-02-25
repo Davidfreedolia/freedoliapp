@@ -54,3 +54,60 @@ supabase functions deploy stripe_create_portal
 ```
 
 UI: Settings → Workspace → Subscription → botó "Manage billing" (prova portal; si no customer, obre checkout).
+
+---
+
+## S8.3 — QA Wiring (TEST MODE) — Checklist executable
+
+### 1) Secrets a Supabase (imprescindible)
+
+- `STRIPE_SECRET_KEY` = `sk_test_...`
+- `STRIPE_WEBHOOK_SECRET` = `whsec_...`
+- `STRIPE_PRICE_ID_CORE` = `price_...`
+- `APP_BASE_URL` = `https://<el teu domini vercel>`
+
+(Si en falta un, el flow es trenca silenciosament.)
+
+### 2) Deploy Edge Functions
+
+```bash
+supabase functions deploy stripe_webhook
+supabase functions deploy stripe_create_checkout
+supabase functions deploy stripe_create_portal
+```
+
+### 3) Stripe CLI: escoltar webhooks cap a Supabase
+
+```bash
+stripe listen --forward-to https://<project-ref>.functions.supabase.co/stripe_webhook
+```
+
+**Important:** el `whsec_...` que et dona el CLI és el que ha d’estar a `STRIPE_WEBHOOK_SECRET` per QA amb CLI.
+
+### 4) Test end-to-end des de l’app
+
+- **DB abans:** a la teva org, `stripe_customer_id` i `stripe_subscription_id` NULL.
+- **App:** Settings → Workspace → Subscription → **Manage billing**.
+- **Esperat:** primer portal falla “No customer yet” → es crida checkout → redirigeix a Stripe Checkout → completes amb test card.
+
+### 5) Verificació webhook (prova de veritat)
+
+Després de pagar, a Supabase SQL:
+
+```sql
+select id, billing_status, plan_id, stripe_customer_id, stripe_subscription_id, trial_ends_at
+from public.orgs
+where id = '<ORG_ID>';
+```
+
+**Esperat:** `stripe_customer_id` i `stripe_subscription_id` omplerts, `billing_status` = `active` (o `trialing` si el price té trial).
+
+### 6) Test portal
+
+Tornar a Settings → **Manage billing**. **Esperat:** s’obre Billing Portal directament (sense checkout).
+
+### Si falla (punts típics)
+
+- `STRIPE_WEBHOOK_SECRET` no coincideix amb el `whsec_` del CLI (o dashboard).
+- `APP_BASE_URL` mal posat i Stripe rebutja redirect.
+- L’org no es troba al webhook (revisar `findOrgId` per `stripe_customer_id` / `stripe_subscription_id`).
