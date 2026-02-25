@@ -73,7 +73,7 @@ const Diagnostics = lazyWithErrorBoundary(() => import('./pages/Diagnostics'), '
 const DevSeed = lazyWithErrorBoundary(() => import('./pages/DevSeed'), 'DevSeed')
 const Help = lazyWithErrorBoundary(() => import('./pages/Help'), 'Help')
 
-const BILLING_ADMIN_EMAILS = new Set(['david@freedolia.com', 'david.castella@gmail.com'])
+const ADMIN_EMAILS = new Set(['david@freedolia.com'])
 
 function AppContent() {
   const { sidebarCollapsed, darkMode } = useApp()
@@ -97,7 +97,7 @@ function AppContent() {
       }
       const { data: { user: authUser } } = await supabase.auth.getUser()
       const userEmail = (authUser?.email ?? '').toLowerCase()
-      if (BILLING_ADMIN_EMAILS.has(userEmail)) {
+      if (ADMIN_EMAILS.has(userEmail)) {
         const { data: membershipRow } = await supabase
           .from('org_memberships')
           .select('*, orgs(*)')
