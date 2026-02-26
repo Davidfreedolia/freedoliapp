@@ -43,7 +43,7 @@ function formatDateDisplay(dateStr) {
   }
 }
 
-export default function ProjectEventsTimeline({ projectId, projectStatus, darkMode, phaseStyle }) {
+export default function ProjectEventsTimeline({ projectId, projectStatus, darkMode, phaseStyle, refreshToken }) {
   const { demoMode } = useApp()
   const { isMobile } = useBreakpoint()
   const [events, setEvents] = useState([])
@@ -67,7 +67,7 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
 
   useEffect(() => {
     loadEvents()
-  }, [projectId, demoMode])
+  }, [projectId, demoMode, refreshToken])
 
   const loadEvents = async () => {
     if (!projectId) return

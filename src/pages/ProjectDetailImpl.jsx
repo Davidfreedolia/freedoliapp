@@ -68,6 +68,7 @@ const DecisionLog = lazy(() => import('../components/DecisionLog'))
 const AmazonReadinessBadge = lazy(() => import('../components/AmazonReadinessBadge'))
 const CompetitiveAsinSection = lazy(() => import('../components/CompetitiveAsinSection'))
 const ViabilityCalculator = lazy(() => import('../components/projects/ViabilityCalculator'))
+const ProjectEventsTimeline = lazy(() => import('../components/ProjectEventsTimeline'))
 
 const PHASE_GROUPS = [
   { label: 'DISCOVERY', phases: [1, 2] },
@@ -340,6 +341,7 @@ function ProjectDetailInner({ useApp }) {
   const [phaseProgress, setPhaseProgress] = useState({ completed: 0, total: 0, allOk: false })
   const [phaseBlockMessage, setPhaseBlockMessage] = useState(null)
   const [phaseBlockVisible, setPhaseBlockVisible] = useState(false)
+  const [eventsRefreshToken, setEventsRefreshToken] = useState(0)
   const [viabilitySnapshot, setViabilitySnapshot] = useState(null)
   const [createMenuOpen, setCreateMenuOpen] = useState(false)
   const [createModalType, setCreateModalType] = useState(null)
@@ -1460,6 +1462,7 @@ ${t}
           org_id: project?.org_id
         })
 
+      setEventsRefreshToken((t) => t + 1)
       await refreshProjects()
       
       // Redirigir al Dashboard després d'editar el projecte
@@ -3452,6 +3455,15 @@ ${t}
                   onActivePathChange={setActiveFolderLabel}
                   fixedFolderId={phaseId === 1 ? researchStoragePrefix : null}
                 />
+                <Suspense fallback={<div style={{ padding: 8, fontSize: 12, color: 'var(--muted-1)' }}>Carregant timeline…</div>}>
+                  <ProjectEventsTimeline
+                    projectId={id}
+                    projectStatus={project?.status}
+                    darkMode={darkMode}
+                    phaseStyle={currentPhase}
+                    refreshToken={eventsRefreshToken}
+                  />
+                </Suspense>
             </div>
             </div>
           </aside>
