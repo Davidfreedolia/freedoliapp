@@ -41,13 +41,17 @@ export async function logAudit({ entityType, entityId = null, action, status, me
     }
 
     // Dynamic imports to avoid circular dependencies
-    const { getDemoMode } = await import('./demoModeFilter')
-    const demoMode = await getDemoMode()
-    
     const { getCurrentUserId, supabase } = await import('./supabase')
     const userId = await getCurrentUserId()
-    
-    // Insert a audit_log (user_id and is_demo set explicitly)
+    if (!userId) return
+
+    let demoMode = false
+    try {
+      const { getDemoMode } = await import('./demoModeFilter')
+      demoMode = await getDemoMode()
+    } catch (_) {}
+
+    // Insert a audit_log (user_id and is_demo set explicitly; org_id nullable, best-effort)
     const { error } = await supabase
       .from('audit_log')
       .insert([
@@ -59,7 +63,8 @@ export async function logAudit({ entityType, entityId = null, action, status, me
           message: message,
           meta: meta,
           user_id: userId,
-          is_demo: demoMode
+          is_demo: demoMode,
+          org_id: null
         }
       ])
 
