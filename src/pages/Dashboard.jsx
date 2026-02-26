@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useBreakpoint } from '../hooks/useBreakpoint'
+import { useBlockedProjects } from '../hooks/useBlockedProjects'
 import GridLayout from 'react-grid-layout'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
@@ -71,6 +72,7 @@ import { showToast } from '../components/Toast'
 export default function Dashboard() {
   const { stats, darkMode, setDarkMode, sidebarCollapsed } = useApp()
   const navigate = useNavigate()
+  const { data: blockedProjects } = useBlockedProjects()
   const { t } = useTranslation()
   const { isMobile, isTablet } = useBreakpoint()
   const [showNewProjectModal, setShowNewProjectModal] = useState(false)
@@ -724,6 +726,59 @@ export default function Dashboard() {
           }}>
             <Sliders size={14} color="var(--brand-primary)" />
             <span>{t('dashboard.editMode')}</span>
+          </div>
+        )}
+
+        {/* Requereix atenció — Projectes bloquejats */}
+        {blockedProjects.length >= 1 && (
+          <div style={{
+            marginBottom: 16,
+            padding: '12px 16px',
+            borderRadius: 'var(--radius-ui)',
+            border: '1px solid var(--border-1)',
+            background: 'var(--surface-bg-2)'
+          }}>
+            <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 2, color: 'var(--text-1)' }}>Requereix atenció</div>
+            <div style={{ fontSize: 12, color: 'var(--muted-1)', marginBottom: 10 }}>Projectes bloquejats</div>
+            <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+              {blockedProjects.slice(0, 5).map((p) => {
+                const ratio = p?.progress_ratio
+                const pct = ratio != null && Number.isFinite(ratio)
+                  ? Math.max(0, Math.min(100, Math.round(ratio <= 1 ? ratio * 100 : ratio)))
+                  : 0
+                const reason = (p?.blocked_reason ?? '').toString().trim()
+                return (
+                  <li key={p.id} style={{ padding: '6px 0', borderBottom: '1px solid var(--border-1)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
+                      <Link to={`/app/projects/${p.id}`} style={{ fontWeight: 500, color: 'var(--text-1)', textDecoration: 'none', minWidth: 0, flex: '1 1 auto' }}>
+                        {p.name || '—'}
+                      </Link>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--muted-1)', flexShrink: 0 }}>{pct}%</span>
+                    </div>
+                    {reason ? (
+                      <div
+                        style={{
+                          fontSize: 11,
+                          color: 'var(--text-secondary)',
+                          marginTop: 2,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}
+                        title={reason}
+                      >
+                        {reason}
+                      </div>
+                    ) : null}
+                  </li>
+                )
+              })}
+            </ul>
+            {blockedProjects.length > 5 && (
+              <div style={{ marginTop: 8, fontSize: 12 }}>
+                <Link to="/app/projects" style={{ color: 'var(--primary-1)', fontWeight: 500 }}>Veure tots a Projectes</Link>
+              </div>
+            )}
           </div>
         )}
         
