@@ -1444,22 +1444,27 @@ ${t}
         }
       }
 
-      const currentPhaseForGate = project?.phase ?? project?.current_phase
-      const { data: gateRow } = await supabaseClient
-        .from('v_project_phase_gate')
-        .select('gate_pass, blocking_total, blocking_done')
-        .eq('project_id', id)
-        .eq('phase', currentPhaseForGate)
-        .maybeSingle()
-      const gatePass = gateRow?.gate_pass !== false
-      if (!gatePass) {
-        const total = gateRow?.blocking_total ?? 0
-        const done = gateRow?.blocking_done ?? 0
-        const pending = Math.max(0, total - done)
-        const blockMessage = `No pots avançar de fase: queden ${pending} tasques bloquejants pendents.`
-        setPhaseBlockMessage(blockMessage)
-        setPhaseBlockVisible(true)
-        return
+      try {
+        const currentPhaseForGate = project?.phase ?? project?.current_phase
+        const { data: gateRow } = await supabaseClient
+          .from('v_project_phase_gate')
+          .select('gate_pass, blocking_total, blocking_done')
+          .eq('project_id', id)
+          .eq('phase', currentPhaseForGate)
+          .maybeSingle()
+        const gatePass = gateRow?.gate_pass !== false
+        if (!gatePass) {
+          const total = gateRow?.blocking_total ?? 0
+          const done = gateRow?.blocking_done ?? 0
+          const pending = Math.max(0, total - done)
+          const blockMessage = `No pots avançar de fase: queden ${pending} tasques bloquejants pendents.`
+          setPhaseBlockMessage(blockMessage)
+          setPhaseBlockVisible(true)
+          return
+        }
+      } catch (err) {
+        console.error('Gate check failed:', err)
+        // En cas d'error, PERMET avançar (fail-open) per no bloquejar UI
       }
       
       await updateProject(id, { phase: newPhase, current_phase: newPhase })
