@@ -1,8 +1,21 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 
 function RedirectToApp() {
   const { pathname } = useLocation()
   return <Navigate to={`/app${pathname}`} replace />
+}
+
+/** Quan estem dins /app/* i cap ruta fa match, mostrem això en lloc de redirigir a /app (evita loop). */
+function NotFoundInApp() {
+  const location = useLocation()
+  const navigate = useNavigate()
+  return (
+    <div style={{ padding: '2rem', textAlign: 'center' }}>
+      <h2>Pàgina no trobada</h2>
+      <p><code>{location.pathname}</code></p>
+      <button type="button" onClick={() => navigate('/app')}>Torna al Dashboard</button>
+    </div>
+  )
 }
 import React, { Suspense, useEffect, useState } from 'react'
 import { AppProvider, useApp } from './context/AppContext'
@@ -350,7 +363,7 @@ function AppContent() {
                 </ProtectedRoute>
               }
             />
-            <Route path="*" element={<Navigate to="/app" replace />} />
+            <Route path="*" element={<NotFoundInApp />} />
           </Routes>
         </Suspense>
         </ErrorBoundary>
