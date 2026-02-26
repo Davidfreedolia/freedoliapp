@@ -50,6 +50,7 @@ import CollapsibleSection from '../components/CollapsibleSection'
 import PhaseChecklist from '../components/projects/PhaseChecklist'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { useNotes } from '../hooks/useNotes'
+import { useProjectState } from '../hooks/useProjectState'
 import { PHASE_STYLES, getPhaseStyle, getPhaseSurfaceStyles, getPhaseMeta } from '../utils/phaseStyles'
 import PhaseMark from '../components/Phase/PhaseMark'
 import PhaseDecisionActions from '../components/projects/PhaseDecisionActions'
@@ -326,9 +327,10 @@ function ProjectDetailInner({ useApp }) {
   })
   const modalStyles = getModalStyles(isMobile, darkMode)
   
-  // Extreure UUID net del paràmetre de ruta (eliminar qualsevol sufix com "Fes:")
+// Extreure UUID net del paràmetre de ruta (eliminar qualsevol sufix com "Fes:")
   const id = rawId?.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i)?.[0] || null
-  
+  const { data: projectState } = useProjectState(id)
+
   const [project, setProject] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -2616,38 +2618,77 @@ ${t}
               </div>
             )}
             <div style={{ minWidth: 0 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, opacity: 0.8, marginBottom: 4 }}>
-                <span>{phaseLabel}</span>
-                <span>{project.current_phase}/7</span>
-              </div>
               {(() => {
                 const cur = project?.current_phase || 0
-                const pct = Math.max(0, Math.min(100, Math.round((cur / 7) * 100)))
+                const ratio = projectState?.progress_ratio
+                const pct = ratio != null && Number.isFinite(ratio)
+                  ? Math.max(0, Math.min(100, Math.round(ratio <= 1 ? ratio * 100 : ratio)))
+                  : Math.max(0, Math.min(100, Math.round((cur / 7) * 100)))
                 const meta = getPhaseMeta(cur)
-
+                const isBlocked = !!projectState?.is_blocked
+                const blockedReason = (projectState?.blocked_reason ?? '').toString().trim()
                 return (
-                  <div
-                    style={{
-                      width: '100%',
-                      height: 5,
-                      borderRadius: 999,
-                      background: 'var(--surface-bg-2)',
-                      border: '1px solid var(--border-1)',
-                      overflow: 'hidden',
-                    }}
-                    data-progress-track="true"
-                  >
+                  <>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, opacity: 0.8, marginBottom: 4 }}>
+                      <span>{phaseLabel}</span>
+                      <span>{project.current_phase}/7 · {pct}%</span>
+                    </div>
                     <div
                       style={{
-                        height: '100%',
-                        width: `${pct}%`,
+                        width: '100%',
+                        height: 5,
                         borderRadius: 999,
-                        background: meta.color,
+                        background: 'var(--surface-bg-2)',
+                        border: '1px solid var(--border-1)',
+                        overflow: 'hidden',
                       }}
-                      data-progress-fill="true"
-                      data-phase-id={cur}
-                    />
-                  </div>
+                      data-progress-track="true"
+                    >
+                      <div
+                        style={{
+                          height: '100%',
+                          width: `${pct}%`,
+                          borderRadius: 999,
+                          background: meta.color,
+                        }}
+                        data-progress-fill="true"
+                        data-phase-id={cur}
+                      />
+                    </div>
+                    {isBlocked && (
+                      <div style={{ marginTop: 6, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
+                        <span
+                          style={{
+                            fontSize: 12,
+                            padding: '4px 8px',
+                            border: '1px solid var(--danger-1)',
+                            background: 'var(--surface-bg-2)',
+                            borderRadius: 999,
+                            color: 'var(--danger-1)',
+                            fontWeight: 600,
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          BLOCKED
+                        </span>
+                        {blockedReason ? (
+                          <div
+                            style={{
+                              fontSize: 11,
+                              color: 'var(--text-secondary)',
+                              maxWidth: '100%',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            }}
+                            title={blockedReason}
+                          >
+                            {blockedReason}
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
+                  </>
                 )
               })()}
               <div style={{ marginTop: 6, overflowX: 'auto' }}>

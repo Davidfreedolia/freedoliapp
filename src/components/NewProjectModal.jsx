@@ -11,7 +11,7 @@ import Button from './Button'
 import { downloadPrompt } from '../utils/marketResearchPrompt'
 import { generateClaudeResearchPrompt } from '../lib/generateClaudeResearchPrompt'
 
-export default function NewProjectModal({ isOpen, onClose }) {
+export default function NewProjectModal({ isOpen, onClose, onSuccess }) {
   const { refreshProjects } = useApp()
   const navigate = useNavigate()
   const { t } = useTranslation()
@@ -219,6 +219,7 @@ export default function NewProjectModal({ isOpen, onClose }) {
         localStorage.setItem(`research_${newProject.id}`, JSON.stringify(seed))
       } catch (_) {}
       refreshProjects()
+      if (typeof onSuccess === 'function') onSuccess()
       setFormData({ name: '', description: '' })
       setProjectCodes({ projectCode: '', sku: '' })
       handleClose()

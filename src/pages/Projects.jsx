@@ -26,12 +26,14 @@ import Button from '../components/Button'
 import PageGutter from '../components/ui/PageGutter'
 import LayoutSwitcher from '../components/LayoutSwitcher'
 import { useLayoutPreference } from '../hooks/useLayoutPreference'
+import { useProjectsListState } from '../hooks/useProjectsListState'
 import ProjectDriveExplorer from '../components/projects/ProjectDriveExplorer'
 import MarketplaceTag, { MarketplaceTagGroup } from '../components/MarketplaceTag'
 import PhaseMark from '../components/Phase/PhaseMark'
 
 export default function Projects() {
-  const { projects, refreshProjects, darkMode } = useApp()
+  const { refreshProjects, darkMode } = useApp()
+  const { data: projects, loading: loadingListState, error: listStateError, refetch } = useProjectsListState()
   const navigate = useNavigate()
   const { isMobile, isTablet } = useBreakpoint()
   const [showModal, setShowModal] = useState(false)
@@ -44,8 +46,8 @@ export default function Projects() {
   const [menuOpen, setMenuOpen] = useState(null)
   const [viewMode, setViewMode] = useLayoutPreference('layout:projects', 'grid')
   const [selectedProjectId, setSelectedProjectId] = useState(null)
-  const [isLoadingProjects, setIsLoadingProjects] = useState(true)
   const [loadError, setLoadError] = useState(null)
+  const isLoadingProjects = loadingListState
   const [businessByProjectId, setBusinessByProjectId] = useState({})
   const [stockByProjectId, setStockByProjectId] = useState({})
 
@@ -62,19 +64,10 @@ export default function Projects() {
 
   const effectiveViewMode = isMobile ? 'list' : viewMode
   const loadProjects = async ({ showSpinner = true } = {}) => {
-    const seq = ++loadSeqRef.current
-    if (showSpinner) setIsLoadingProjects(true)
     setLoadError(null)
-    try {
-      await refreshProjects()
-    } catch (err) {
-      if (mountedRef.current && seq === loadSeqRef.current) {
-        setLoadError(err?.message || 'Error carregant projectes')
-      }
-    } finally {
-      if (mountedRef.current && seq === loadSeqRef.current) {
-        setIsLoadingProjects(false)
-      }
+    await refetch()
+    if (listStateError && mountedRef.current) {
+      setLoadError(listStateError?.message || 'Error carregant projectes')
     }
   }
 
@@ -236,11 +229,16 @@ export default function Projects() {
 
   useEffect(() => {
     mountedRef.current = true
-    loadProjects({ showSpinner: true })
+    refetch()
     return () => {
       mountedRef.current = false
     }
-  }, [])
+  }, [refetch])
+
+  useEffect(() => {
+    if (listStateError) setLoadError(listStateError?.message || 'Error carregant projectes')
+    else setLoadError(null)
+  }, [listStateError])
 
   // Business snapshot: 3 queries for all projects (POs, expenses, incomes)
   useEffect(() => {
@@ -425,7 +423,7 @@ export default function Projects() {
     
     try {
       await deleteProject(project.id)
-      await refreshProjects()
+      await Promise.all([refreshProjects(), refetch()])
       setMenuOpen(null)
     } catch (err) {
       console.error('Error eliminant:', err)
@@ -440,7 +438,7 @@ export default function Projects() {
       const { showToast } = await import('../components/Toast')
       await updateProject(project.id, { status: 'closed' })
       showToast('Projecte tancat', 'success')
-      await refreshProjects()
+      await Promise.all([refreshProjects(), refetch()])
       setMenuOpen(null)
     } catch (err) {
       console.error('Error tancant projecte:', err)
@@ -456,7 +454,7 @@ export default function Projects() {
       const { showToast } = await import('../components/Toast')
       await updateProject(project.id, { status: 'active' })
       showToast('Projecte reobert', 'success')
-      await refreshProjects()
+      await Promise.all([refreshProjects(), refetch()])
       setMenuOpen(null)
     } catch (err) {
       console.error('Error reobrint projecte:', err)
@@ -468,8 +466,13 @@ export default function Projects() {
   const renderProjectCard = (project, { isPreview = false, enablePreviewSelect = false, disableNavigation = false } = {}) => {
     const currentPhaseId = project?.phase_id ?? project?.phaseId ?? project?.current_phase ?? 1
     const activeMeta = getPhaseMeta(currentPhaseId)
-    const progress = (currentPhaseId / 7) * 100
+    const ratio = project?.progress_ratio
+    const progress = ratio != null && Number.isFinite(ratio)
+      ? (ratio <= 1 ? ratio * 100 : ratio)
+      : (currentPhaseId / 7) * 100
     const progressValue = Number.isFinite(progress) ? Math.min(100, Math.max(0, progress)) : 0
+    const isBlocked = !!project?.is_blocked
+    const blockedReason = (project?.blocked_reason ?? '').toString().trim()
     const isSelected = project.id === selectedProjectId
     const skuValue = project.sku_internal || '—'
     const asinValue = getAsinValue(project)
@@ -639,7 +642,28 @@ export default function Projects() {
                       </span>
                     )
                   })()}
+                  {isBlocked && (
+                    <span
+                      style={{
+                        fontSize: 12,
+                        padding: '4px 8px',
+                        border: '1px solid var(--danger-1)',
+                        background: 'var(--surface-bg-2)',
+                        borderRadius: 999,
+                        color: 'var(--danger-1)',
+                        fontWeight: 600,
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      BLOCKED
+                    </span>
+                  )}
                 </div>
+                {blockedReason ? (
+                  <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }} title={blockedReason}>
+                    {blockedReason}
+                  </div>
+                ) : null}
                 {activeMarketplaces.length ? (
                   <div className="project-card__marketplaces">
                     <span className="project-card__marketplacesLabel">Marketplaces actius</span>
@@ -736,18 +760,6 @@ export default function Projects() {
                 />
               </div>
               <span style={styles.progressText}>{Math.round(progressValue)}%</span>
-              <div style={{ marginTop: 3, width: '100%' }}>
-                <div className="projects-card__progressTrack" data-progress-track="true">
-                  <div
-                    className="projects-card__progressFill"
-                    data-progress-fill="true"
-                    style={{
-                      width: `${progress || 0}%`,
-                      backgroundColor: activeMeta.color
-                    }}
-                  />
-                </div>
-              </div>
             </div>
           </div>
 
@@ -764,7 +776,7 @@ export default function Projects() {
                       const { showToast } = await import('../components/Toast')
                       await updateProject(project.id, { decision: 'HOLD' })
                       showToast('Projecte restaurat', 'success')
-                      await refreshProjects()
+                      await Promise.all([refreshProjects(), refetch()])
                     } catch (err) {
                       const { showToast } = await import('../components/Toast')
                       showToast('Error: ' + (err.message || 'Error desconegut'), 'error')
@@ -1055,6 +1067,7 @@ export default function Projects() {
       <NewProjectModal 
         isOpen={showModal} 
         onClose={() => setShowModal(false)} 
+        onSuccess={refetch}
       />
     </div>
   )
