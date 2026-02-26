@@ -1370,11 +1370,13 @@ ${t}
     try {
       let updateProject
       let supabaseClient
+      let getCurrentUserId
       let validatePhaseTransition
       try {
         const supabaseModule = await import('../lib/supabase')
         updateProject = supabaseModule.updateProject
         supabaseClient = supabaseModule.default
+        getCurrentUserId = supabaseModule.getCurrentUserId
         const gatesModule = await import('../modules/projects/phaseGates')
         validatePhaseTransition = gatesModule.validatePhaseTransition
       } catch (importErr) {
@@ -1440,8 +1442,24 @@ ${t}
         }
       }
       
-      await updateProject(id, { current_phase: newPhase })
-      setProject({ ...project, current_phase: newPhase })
+      await updateProject(id, { phase: newPhase, current_phase: newPhase })
+      setProject({ ...project, phase: newPhase, current_phase: newPhase })
+
+      const userId = await getCurrentUserId()
+      const eventDate = new Date().toISOString().slice(0, 10)
+      await supabaseClient
+        .from('project_events')
+        .insert({
+          project_id: id,
+          user_id: userId,
+          type: 'phase_changed',
+          title: `Phase changed to ${newPhase}`,
+          event_date: eventDate,
+          notes: null,
+          is_demo: !!project?.is_demo,
+          org_id: project?.org_id
+        })
+
       await refreshProjects()
       
       // Redirigir al Dashboard després d'editar el projecte
