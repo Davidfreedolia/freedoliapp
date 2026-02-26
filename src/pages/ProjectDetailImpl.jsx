@@ -1443,6 +1443,24 @@ ${t}
           return
         }
       }
+
+      const currentPhaseForGate = project?.phase ?? project?.current_phase
+      const { data: gateRow } = await supabaseClient
+        .from('v_project_phase_gate')
+        .select('gate_pass, blocking_total, blocking_done')
+        .eq('project_id', id)
+        .eq('phase', currentPhaseForGate)
+        .maybeSingle()
+      const gatePass = gateRow?.gate_pass !== false
+      if (!gatePass) {
+        const total = gateRow?.blocking_total ?? 0
+        const done = gateRow?.blocking_done ?? 0
+        const pending = Math.max(0, total - done)
+        const blockMessage = `No pots avançar de fase: queden ${pending} tasques bloquejants pendents.`
+        setPhaseBlockMessage(blockMessage)
+        setPhaseBlockVisible(true)
+        return
+      }
       
       await updateProject(id, { phase: newPhase, current_phase: newPhase })
       setProject({ ...project, phase: newPhase, current_phase: newPhase })
