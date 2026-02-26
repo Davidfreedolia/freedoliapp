@@ -1487,9 +1487,6 @@ ${t}
 
       setEventsRefreshToken((t) => t + 1)
       await refreshProjects()
-      
-      // Redirigir al Dashboard després d'editar el projecte
-      navigate('/app')
     } catch (err) {
       try {
         const { formatError, notifyError } = await import('../lib/errorHandling')
