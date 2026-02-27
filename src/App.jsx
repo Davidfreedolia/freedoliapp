@@ -101,7 +101,7 @@ function AppPageWrap({ children, context }) {
 }
 
 function AppContent() {
-  const { sidebarCollapsed, darkMode } = useApp()
+  const { sidebarCollapsed, darkMode, setActiveOrgId } = useApp()
   const { isMobile, isTablet } = useBreakpoint()
   const location = useLocation()
   const isProjectDetail = location.pathname.startsWith('/app/projects/') && location.pathname.split('/').length >= 4
@@ -112,12 +112,18 @@ function AppContent() {
     let cancelled = false
     async function run() {
       if (isDemoMode()) {
-        if (!cancelled) setBillingState({ loading: false, allowed: true, org: null })
+        if (!cancelled) {
+          setBillingState({ loading: false, allowed: true, org: null })
+          setActiveOrgId(null)
+        }
         return
       }
       const userId = await getCurrentUserId()
       if (!userId) {
-        if (!cancelled) setBillingState({ loading: false, allowed: true, org: null })
+        if (!cancelled) {
+          setBillingState({ loading: false, allowed: true, org: null })
+          setActiveOrgId(null)
+        }
         return
       }
       const { data: { user: authUser } } = await supabase.auth.getUser()
@@ -130,7 +136,10 @@ function AppContent() {
           .limit(1)
           .maybeSingle()
         const org = membershipRow?.orgs ?? membershipRow?.org ?? null
-        if (!cancelled) setBillingState({ loading: false, allowed: true, org })
+        if (!cancelled) {
+          setBillingState({ loading: false, allowed: true, org })
+          setActiveOrgId(org?.id ?? null)
+        }
         return
       }
       const { data: membershipRow, error: memErr } = await supabase
@@ -140,12 +149,18 @@ function AppContent() {
         .limit(1)
         .maybeSingle()
       if (memErr || !membershipRow) {
-        if (!cancelled) setBillingState({ loading: false, allowed: false, org: null })
+        if (!cancelled) {
+          setBillingState({ loading: false, allowed: false, org: null })
+          setActiveOrgId(null)
+        }
         return
       }
       const org = membershipRow.orgs ?? membershipRow.org ?? null
       if (!org) {
-        if (!cancelled) setBillingState({ loading: false, allowed: false, org: null })
+        if (!cancelled) {
+          setBillingState({ loading: false, allowed: false, org: null })
+          setActiveOrgId(null)
+        }
         return
       }
       let allowed = false
@@ -163,11 +178,14 @@ function AppContent() {
         else if (status === 'past_due' || status === 'canceled') allowed = false
         else if (status == null) allowed = true
       }
-      if (!cancelled) setBillingState({ loading: false, allowed, org })
+      if (!cancelled) {
+        setBillingState({ loading: false, allowed, org })
+        setActiveOrgId(org?.id ?? null)
+      }
     }
     run()
     return () => { cancelled = true }
-  }, [])
+  }, [setActiveOrgId])
 
   const sidebarWidth = isMobile ? 0 : (isTablet ? 72 : (sidebarCollapsed ? 72 : 260))
 

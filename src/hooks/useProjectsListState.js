@@ -1,21 +1,27 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase, getCurrentUserId } from '../lib/supabase'
 import { getDemoMode } from '../lib/demoModeFilter'
+import { useApp } from '../context/AppContext'
+
+const isDev = typeof import.meta !== 'undefined' && import.meta.env?.DEV === true
 
 /**
- * Carrega projectes per a la llista (multi-tenant: user_id + org_id + is_demo).
- * Usa la taula projects directament per compatibilitat amb RLS.
+ * Carrega projectes per a la llista (multi-tenant: org_id + is_demo).
+ * L’org activa ve del context (billingState.org a AppContent); sense org no es fa query.
  *
- * @returns {{ data: Array, loading: boolean, error: Error | null, refetch: function }}
+ * @returns {{ data: Array, loading: boolean, error: Error | null, noOrg: boolean, refetch: function }}
  */
 export function useProjectsListState() {
+  const { activeOrgId } = useApp()
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [noOrg, setNoOrg] = useState(false)
 
   const fetchList = useCallback(async () => {
     setLoading(true)
     setError(null)
+    setNoOrg(false)
     try {
       const userId = await getCurrentUserId()
       if (!userId) {
@@ -29,50 +35,45 @@ export function useProjectsListState() {
         demoMode = await getDemoMode()
       } catch (_) {}
 
-      // Obtenir org activa (primera membership) per scope multi-tenant
-      let activeOrgId = null
-      try {
-        const { data: membershipRow, error: memErr } = await supabase
-          .from('org_memberships')
-          .select('*, orgs(*)')
-          .eq('user_id', userId)
-          .limit(1)
-          .maybeSingle()
-        if (!memErr && membershipRow) {
-          const org = membershipRow.orgs ?? membershipRow.org ?? null
-          activeOrgId = org?.id ?? null
+      // Org activa només des del context (font canònica: billingState.org a AppContent)
+      const orgId = activeOrgId ?? null
+      if (orgId == null) {
+        setData([])
+        setNoOrg(true)
+        setLoading(false)
+        if (isDev) {
+          console.log('[Projects] skip query: no activeOrgId', { userId, activeOrgId: orgId, demoMode })
         }
-      } catch (_) {}
-
-      // Query directa a projects (contracte RLS + org boundary)
-      let query = supabase
-        .from('projects')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-
-      if (activeOrgId != null) {
-        query = query.eq('org_id', activeOrgId)
+        return
       }
 
-      // Filtrar per is_demo només si la taula té la columna (projects la té)
-      query = query.eq('is_demo', demoMode)
+      // Query RLS-safe: org_id + is_demo (model org-based, no user_id)
+      const filters = { org_id: orgId, is_demo: demoMode }
+      const query = supabase
+        .from('projects')
+        .select('*')
+        .eq('org_id', orgId)
+        .eq('is_demo', demoMode)
+        .order('created_at', { ascending: false })
 
-      const queryInfo = { table: 'projects', userId, demoMode, orgId: activeOrgId ?? null }
-      if (typeof console?.log === 'function') {
-        console.log('[Projects] query', queryInfo)
+      const requestSignature = { table: 'projects', filters }
+      if (isDev) {
+        console.log('[Projects] query', { userId, activeOrgId: orgId, demoMode, requestSignature })
       }
 
       const { data: rows, error: err } = await query
 
       if (err) {
-        console.error('[Projects] load failed', {
-          error: err,
-          status: err?.status,
-          message: err?.message,
-          details: err?.details,
-          query: queryInfo
-        })
+        if (isDev) {
+          console.error('[Projects] load failed', {
+            code: err?.code,
+            message: err?.message,
+            details: err?.details,
+            hint: err?.hint,
+            status: err?.status,
+            requestSignature
+          })
+        }
         setError(err)
         setData([])
         setLoading(false)
@@ -81,22 +82,26 @@ export function useProjectsListState() {
 
       setData(rows ?? [])
     } catch (err) {
-      console.error('[Projects] load failed', {
-        error: err,
-        status: err?.status,
-        message: err?.message,
-        details: err?.details
-      })
+      if (isDev) {
+        console.error('[Projects] load failed (catch)', {
+          code: err?.code,
+          message: err?.message,
+          details: err?.details,
+          hint: err?.hint,
+          status: err?.status,
+          requestSignature: { table: 'projects', filters: { org_id: activeOrgId } }
+        })
+      }
       setError(err)
       setData([])
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [activeOrgId])
 
   useEffect(() => {
     fetchList()
   }, [fetchList])
 
-  return { data, loading, error, refetch: fetchList }
+  return { data, loading, error, noOrg, refetch: fetchList }
 }

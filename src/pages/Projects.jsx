@@ -33,7 +33,7 @@ import PhaseMark from '../components/Phase/PhaseMark'
 
 export default function Projects() {
   const { refreshProjects, darkMode } = useApp()
-  const { data: projects, loading: loadingListState, error: listStateError, refetch } = useProjectsListState()
+  const { data: projects, loading: loadingListState, error: listStateError, refetch, noOrg } = useProjectsListState()
   const navigate = useNavigate()
   const { isMobile, isTablet } = useBreakpoint()
   const [showModal, setShowModal] = useState(false)
@@ -992,6 +992,14 @@ export default function Projects() {
             backgroundColor: 'var(--surface-bg)'
           }}>
             <p style={{ color: 'var(--muted-1)' }}>Carregant projectes…</p>
+          </div>
+        ) : noOrg ? (
+          <div style={{ ...styles.empty, backgroundColor: 'var(--surface-bg)' }}>
+            <p style={{ color: 'var(--muted-1)' }}>No hi ha Workspace actiu / no tens org assignada.</p>
+            <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginTop: 8 }}>Configura el teu workspace a Configuració.</p>
+            <Button variant="primary" onClick={() => navigate('/app/settings')}>
+              Anar a Configuració
+            </Button>
           </div>
         ) : loadError ? (
           <div style={{ ...styles.empty, backgroundColor: 'var(--surface-bg)' }}>

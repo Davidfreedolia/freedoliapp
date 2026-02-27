@@ -23,6 +23,8 @@ export function AppProvider({ children }) {
   const [stats, setStats] = useState(EMPTY_STATS)
   const [loading, setLoading] = useState(true)
   const [demoMode, setDemoMode] = useState(false)
+  /** Org activa (workspace) — font canònica per queries multi-tenant; es estableix des d’AppContent (billingState.org). */
+  const [activeOrgId, setActiveOrgId] = useState(null)
 
   const isInvalidRefreshTokenError = (err) => {
     const message = err?.message || ''
@@ -266,7 +268,9 @@ export function AppProvider({ children }) {
     loading,
     refreshProjects,
     demoMode,
-    toggleDemoMode
+    toggleDemoMode,
+    activeOrgId,
+    setActiveOrgId
   }
 
   return (
