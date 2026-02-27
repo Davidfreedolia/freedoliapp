@@ -69,13 +69,13 @@ function getSupabaseClient() {
       missingEnvError()
     }
 
-    // Client Supabase robust (sessions, refresh, etc.)
+    // Client Supabase: sessió persistent amb key estable (no canviar entre builds)
     supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true,
-        storageKey: 'freedoliapp-auth',
+        storageKey: 'freedoliapp-auth', // localStorage key per a la sessió; ha de ser estable
       },
     })
   }
