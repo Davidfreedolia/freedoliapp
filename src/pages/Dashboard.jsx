@@ -166,7 +166,7 @@ export default function Dashboard() {
 
         const { data: projects } = await supabase
           .from('projects')
-          .select('id,name,sku,phase,phase_id,current_phase,selling_price,amazon_price,price,marketplace_tags,created_at')
+          .select('*')
           .eq('user_id', userId)
           .eq('is_demo', demoMode)
           .order('created_at', { ascending: false })
