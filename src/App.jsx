@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate, Outlet } from 'react-router-dom'
 
 function RedirectToApp() {
   const { pathname } = useLocation()
@@ -87,6 +87,18 @@ const DevSeed = lazyWithErrorBoundary(() => import('./pages/DevSeed'), 'DevSeed'
 const Help = lazyWithErrorBoundary(() => import('./pages/Help'), 'Help')
 
 const ADMIN_EMAILS = new Set(['david@freedolia.com'])
+
+/** Wrapper per a pàgines dins /app: usa darkMode del context i embolcalla ProtectedRoute + ErrorBoundary. */
+function AppPageWrap({ children, context }) {
+  const { darkMode } = useApp()
+  return (
+    <ProtectedRoute>
+      <ErrorBoundary context={context} darkMode={darkMode}>
+        {children}
+      </ErrorBoundary>
+    </ProtectedRoute>
+  )
+}
 
 function AppContent() {
   const { sidebarCollapsed, darkMode } = useApp()
@@ -202,170 +214,8 @@ function AppContent() {
         <TopNavbar sidebarWidth={sidebarWidth} />
         <ErrorBoundary context="app:main" darkMode={darkMode}>
           <Suspense fallback={<PageLoader darkMode={darkMode} />}>
-            <Routes>
-              <Route
-                path="/app"
-                element={
-                  <ProtectedRoute>
-                    <ErrorBoundary context="page:Dashboard" darkMode={darkMode}>
-                      <Dashboard />
-                    </ErrorBoundary>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/app/projects"
-                element={
-                  <ProtectedRoute>
-                    <ErrorBoundary context="page:Projects" darkMode={darkMode}>
-                      <Projects />
-                    </ErrorBoundary>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/app/projects/:id"
-                element={
-                  <ProtectedRoute>
-                    <ErrorBoundary context="page:ProjectDetail" darkMode={darkMode}>
-                      <ProjectDetailRoute />
-                    </ErrorBoundary>
-                  </ProtectedRoute>
-                }
-              />
-            <Route
-              path="/app/projects/:projectId/briefing"
-              element={
-                <ProtectedRoute>
-                  <ErrorBoundary context="page:Briefing" darkMode={darkMode}>
-                    <Briefing />
-                  </ErrorBoundary>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/app/suppliers"
-              element={
-                <ProtectedRoute>
-                  <ErrorBoundary context="page:Suppliers" darkMode={darkMode}>
-                    <Suppliers />
-                  </ErrorBoundary>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/app/forwarders"
-              element={
-                <ProtectedRoute>
-                  <ErrorBoundary context="page:Forwarders" darkMode={darkMode}>
-                    <Forwarders />
-                  </ErrorBoundary>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/app/warehouses"
-              element={
-                <ProtectedRoute>
-                  <ErrorBoundary context="page:Warehouses" darkMode={darkMode}>
-                    <Warehouses />
-                  </ErrorBoundary>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/app/orders"
-              element={
-                <ProtectedRoute>
-                  <ErrorBoundary context="page:Orders" darkMode={darkMode}>
-                    <Orders />
-                  </ErrorBoundary>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/app/finances"
-              element={
-                <ProtectedRoute>
-                  <ErrorBoundary context="page:Finances" darkMode={darkMode}>
-                    <Finances />
-                  </ErrorBoundary>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/app/inventory"
-              element={
-                <ProtectedRoute>
-                  <ErrorBoundary context="page:Inventory" darkMode={darkMode}>
-                    <Inventory />
-                  </ErrorBoundary>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/app/analytics"
-              element={
-                <ProtectedRoute>
-                  <ErrorBoundary context="page:Analytics" darkMode={darkMode}>
-                    <Analytics />
-                  </ErrorBoundary>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/app/settings"
-              element={
-                <ProtectedRoute>
-                  <ErrorBoundary context="page:Settings" darkMode={darkMode}>
-                    <Settings />
-                  </ErrorBoundary>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/app/help"
-              element={
-                <ProtectedRoute>
-                  <ErrorBoundary context="page:Help" darkMode={darkMode}>
-                    <Help />
-                  </ErrorBoundary>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/app/calendar"
-              element={
-                <ProtectedRoute>
-                  <ErrorBoundary context="page:Calendar" darkMode={darkMode}>
-                    <Calendar />
-                  </ErrorBoundary>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/app/diagnostics"
-              element={
-                <ProtectedRoute>
-                  <ErrorBoundary context="page:Diagnostics" darkMode={darkMode}>
-                    <Diagnostics />
-                  </ErrorBoundary>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/app/dev/seed"
-              element={
-                <ProtectedRoute>
-                  <ErrorBoundary context="page:DevSeed" darkMode={darkMode}>
-                    <DevSeed />
-                  </ErrorBoundary>
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<NotFoundInApp />} />
-          </Routes>
-        </Suspense>
+            <Outlet />
+          </Suspense>
         </ErrorBoundary>
       </main>
       <ToastContainer darkMode={darkMode} />
@@ -396,7 +246,25 @@ function App() {
           <Route path="/calendar" element={<Navigate to="/app/calendar" replace />} />
           <Route path="/diagnostics" element={<Navigate to="/app/diagnostics" replace />} />
           <Route path="/dev/seed" element={<Navigate to="/app/dev/seed" replace />} />
-          <Route path="/app/*" element={<AppContent />} />
+          <Route path="/app" element={<AppContent />}>
+            <Route index element={<AppPageWrap context="page:Dashboard"><Dashboard /></AppPageWrap>} />
+            <Route path="projects" element={<AppPageWrap context="page:Projects"><Projects /></AppPageWrap>} />
+            <Route path="projects/:id" element={<AppPageWrap context="page:ProjectDetail"><ProjectDetailRoute /></AppPageWrap>} />
+            <Route path="projects/:projectId/briefing" element={<AppPageWrap context="page:Briefing"><Briefing /></AppPageWrap>} />
+            <Route path="suppliers" element={<AppPageWrap context="page:Suppliers"><Suppliers /></AppPageWrap>} />
+            <Route path="forwarders" element={<AppPageWrap context="page:Forwarders"><Forwarders /></AppPageWrap>} />
+            <Route path="warehouses" element={<AppPageWrap context="page:Warehouses"><Warehouses /></AppPageWrap>} />
+            <Route path="orders" element={<AppPageWrap context="page:Orders"><Orders /></AppPageWrap>} />
+            <Route path="finances" element={<AppPageWrap context="page:Finances"><Finances /></AppPageWrap>} />
+            <Route path="inventory" element={<AppPageWrap context="page:Inventory"><Inventory /></AppPageWrap>} />
+            <Route path="analytics" element={<AppPageWrap context="page:Analytics"><Analytics /></AppPageWrap>} />
+            <Route path="settings" element={<AppPageWrap context="page:Settings"><Settings /></AppPageWrap>} />
+            <Route path="help" element={<AppPageWrap context="page:Help"><Help /></AppPageWrap>} />
+            <Route path="calendar" element={<AppPageWrap context="page:Calendar"><Calendar /></AppPageWrap>} />
+            <Route path="diagnostics" element={<AppPageWrap context="page:Diagnostics"><Diagnostics /></AppPageWrap>} />
+            <Route path="dev/seed" element={<AppPageWrap context="page:DevSeed"><DevSeed /></AppPageWrap>} />
+            <Route path="*" element={<NotFoundInApp />} />
+          </Route>
           <Route path="*" element={<Navigate to="/app" replace />} />
         </Routes>
       </AppProvider>
