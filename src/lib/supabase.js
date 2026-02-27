@@ -9,6 +9,11 @@ import { RECEIPTS_BUCKET, COMPANY_ASSETS_BUCKET } from './storageBuckets'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
+// DEV only: exposar anon key per fetch manuals / debugging (no en prod)
+if (import.meta.env.DEV && typeof window !== 'undefined' && supabaseAnonKey) {
+  window.__SUPABASE_ANON_KEY__ = supabaseAnonKey
+}
+
 // Error claríssim (en lloc de "supabaseUrl is required")
 function missingEnvError() {
   const msg =
