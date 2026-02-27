@@ -236,8 +236,17 @@ export default function Projects() {
   }, [refetch])
 
   useEffect(() => {
-    if (listStateError) setLoadError(listStateError?.message || 'Error carregant projectes')
-    else setLoadError(null)
+    if (listStateError) {
+      setLoadError(listStateError?.message || 'Error carregant projectes')
+      console.error('[Projects] load failed', {
+        error: listStateError,
+        status: listStateError?.status,
+        message: listStateError?.message,
+        details: listStateError?.details
+      })
+    } else {
+      setLoadError(null)
+    }
   }, [listStateError])
 
   // Business snapshot: 3 queries for all projects (POs, expenses, incomes)
@@ -990,6 +999,11 @@ export default function Projects() {
             <Button variant="secondary" onClick={() => loadProjects({ showSpinner: true })}>
               Reintenta
             </Button>
+            {import.meta.env.DEV && listStateError && (listStateError?.status ?? listStateError?.message) && (
+              <p style={{ marginTop: 12, fontSize: 12, color: 'var(--muted-1)', fontFamily: 'monospace' }}>
+                {[listStateError?.status, listStateError?.message].filter(Boolean).join(' — ')}
+              </p>
+            )}
           </div>
         ) : filteredProjects.length === 0 ? (
           <div style={{

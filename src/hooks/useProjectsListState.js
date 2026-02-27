@@ -3,9 +3,8 @@ import { supabase, getCurrentUserId } from '../lib/supabase'
 import { getDemoMode } from '../lib/demoModeFilter'
 
 /**
- * Llegeix l'estat de projectes des de la vista public.v_projects_list_state.
- * Filtre per user_id + is_demo (mateix criteri que getProjects) per no trencar multi-tenant.
- * Si en el futur hi ha context d'org, es pot afegir .eq('org_id', orgId).
+ * Carrega projectes per a la llista (multi-tenant: user_id + org_id + is_demo).
+ * Usa la taula projects directament per compatibilitat amb RLS.
  *
  * @returns {{ data: Array, loading: boolean, error: Error | null, refetch: function }}
  */
@@ -19,21 +18,75 @@ export function useProjectsListState() {
     setError(null)
     try {
       const userId = await getCurrentUserId()
-      const demoMode = await getDemoMode()
       if (!userId) {
         setData([])
+        setLoading(false)
         return
       }
+
+      let demoMode = false
+      try {
+        demoMode = await getDemoMode()
+      } catch (_) {}
+
+      // Obtenir org activa (primera membership) per scope multi-tenant
+      let activeOrgId = null
+      try {
+        const { data: membershipRow, error: memErr } = await supabase
+          .from('org_memberships')
+          .select('*, orgs(*)')
+          .eq('user_id', userId)
+          .limit(1)
+          .maybeSingle()
+        if (!memErr && membershipRow) {
+          const org = membershipRow.orgs ?? membershipRow.org ?? null
+          activeOrgId = org?.id ?? null
+        }
+      } catch (_) {}
+
+      // Query directa a projects (contracte RLS + org boundary)
       let query = supabase
-        .from('v_projects_list_state')
+        .from('projects')
         .select('*')
         .eq('user_id', userId)
-        .eq('is_demo', demoMode)
         .order('created_at', { ascending: false })
+
+      if (activeOrgId != null) {
+        query = query.eq('org_id', activeOrgId)
+      }
+
+      // Filtrar per is_demo només si la taula té la columna (projects la té)
+      query = query.eq('is_demo', demoMode)
+
+      const queryInfo = { table: 'projects', userId, demoMode, orgId: activeOrgId ?? null }
+      if (typeof console?.log === 'function') {
+        console.log('[Projects] query', queryInfo)
+      }
+
       const { data: rows, error: err } = await query
-      if (err) throw err
+
+      if (err) {
+        console.error('[Projects] load failed', {
+          error: err,
+          status: err?.status,
+          message: err?.message,
+          details: err?.details,
+          query: queryInfo
+        })
+        setError(err)
+        setData([])
+        setLoading(false)
+        return
+      }
+
       setData(rows ?? [])
     } catch (err) {
+      console.error('[Projects] load failed', {
+        error: err,
+        status: err?.status,
+        message: err?.message,
+        details: err?.details
+      })
       setError(err)
       setData([])
     } finally {
