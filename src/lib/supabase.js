@@ -1383,46 +1383,50 @@ export const getUnassignedGtinCodes = async () => {
   return data
 }
 
-export const getProjectsMissingGtin = async () => {
+/**
+ * Projectes actius de l'org que no tenen GTIN assignat (ni GTIN_EXEMPT).
+ * Org-scoped: requereix activeOrgId; si és null retorna [] (fail-safe).
+ */
+export const getProjectsMissingGtin = async (activeOrgId) => {
+  if (!activeOrgId) return []
+
   // Dynamic imports to avoid circular dependencies
   const { isDemoMode, mockGetProjectsMissingGtin } = await import('../demo/demoMode')
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
-  
+
   // Legacy demo mode check (for backward compatibility)
   if (isDemoMode() && !demoMode) {
     return await mockGetProjectsMissingGtin()
   }
-  
-  // Projectes actius que no tenen GTIN assignat (ni GTIN_EXEMPT)
-  // Excloure DISCARDED
-  const userId = await getCurrentUserId()
-  // Use select('*') to avoid issues if decision column doesn't exist
+
   const { data: projects, error: projectsError } = await supabase
     .from('projects')
     .select('*')
+    .eq('org_id', activeOrgId)
     .eq('status', 'active')
-    .eq('user_id', userId)
-    .eq('is_demo', demoMode) // Filter by demo mode
-  
+    .order('created_at', { ascending: false })
+
   if (projectsError) throw projectsError
-  
-  // Filter DISCARDED client-side to avoid query issues (handle if decision column doesn't exist)
+
   const filteredProjects = (projects || []).filter(p => !p.decision || p.decision !== 'DISCARDED')
-  
+  const ids = filteredProjects.map(p => p.id).filter(Boolean)
+  if (ids.length === 0) return filteredProjects
+
+  const userId = await getCurrentUserId()
   const { data: identifiers, error: identifiersError } = await supabase
     .from('product_identifiers')
     .select('project_id, gtin_type, gtin_code')
     .eq('user_id', userId)
-    .eq('is_demo', demoMode) // Filter by demo mode
+    .eq('is_demo', demoMode)
+    .in('project_id', ids)
   if (identifiersError) throw identifiersError
-  
-  const projectsWithIdentifiers = new Set(identifiers.map(i => i.project_id))
-  const missingGtin = filteredProjects.filter(p => 
-    !projectsWithIdentifiers.has(p.id) || 
-    identifiers.find(i => i.project_id === p.id && !i.gtin_code && i.gtin_type !== 'GTIN_EXEMPT')
+
+  const projectsWithIdentifiers = new Set((identifiers || []).map(i => i.project_id))
+  const missingGtin = filteredProjects.filter(p =>
+    !projectsWithIdentifiers.has(p.id) ||
+    (identifiers || []).find(i => i.project_id === p.id && !i.gtin_code && i.gtin_type !== 'GTIN_EXEMPT')
   )
-  
   return missingGtin
 }
 

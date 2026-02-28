@@ -137,15 +137,13 @@ export default function Dashboard() {
     loadPosWaitingManufacturer()
 
     // Prefetch rutes probables després de 2s idle (opcional)
-    // Millora UX pre-carregant pàgines que probablement s'utilitzaran
     const idlePrefetchTimer = setTimeout(() => {
-      // Prefetch Orders i ProjectDetailRoute (les més usades després del Dashboard)
       import('./Orders.jsx').catch(() => {})
       import('./ProjectDetailRoute.jsx').catch(() => {})
     }, 2000)
 
     return () => clearTimeout(idlePrefetchTimer)
-  }, [])
+  }, [activeOrgId])
 
   useEffect(() => {
     execMountedRef.current = true
@@ -374,7 +372,7 @@ export default function Dashboard() {
     setLoadingGtinCoverage(true)
     try {
       const [missingGtin, availableCodes] = await Promise.all([
-        getProjectsMissingGtin(),
+        getProjectsMissingGtin(activeOrgId),
         getUnassignedGtinCodes()
       ])
       setGtinCoverage({

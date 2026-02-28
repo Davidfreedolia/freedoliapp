@@ -39,7 +39,7 @@ const CATEGORY_COLORS = {
 }
 
 export default function Analytics() {
-  const { darkMode } = useApp()
+  const { darkMode, activeOrgId } = useApp()
   const { isMobile } = useBreakpoint()
   
   const [loading, setLoading] = useState(true)
@@ -58,7 +58,7 @@ export default function Analytics() {
 
   useEffect(() => {
     loadData()
-  }, [dateRange, filterProject])
+  }, [dateRange, filterProject, activeOrgId])
 
   const loadData = async () => {
     setLoading(true)
@@ -172,9 +172,9 @@ export default function Analytics() {
         setUnassignedGtins([])
       }
 
-      // Projects missing GTIN
+      // Projects missing GTIN (org-scoped)
       try {
-        const missing = await getProjectsMissingGtin()
+        const missing = await getProjectsMissingGtin(activeOrgId)
         setMissingGtinProjects(missing || [])
       } catch (missingErr) {
         console.warn('Error carregant projectes sense GTIN:', missingErr)
