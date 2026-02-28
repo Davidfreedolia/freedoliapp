@@ -55,14 +55,46 @@ export function clearDemoModeCache() {
 }
 
 /**
- * Add is_demo filter to a Supabase query
+ * Taules org-scoped on la columna is_demo ha estat eliminada (S1.5/S1.4b).
+ * No s'aplica filtre is_demo en aquestes taules.
+ */
+export const NO_IS_DEMO_TABLES = new Set([
+  'projects',
+  'suppliers',
+  'supplier_quotes',
+  'purchase_orders',
+  'product_identifiers'
+])
+
+/**
+ * Add is_demo filter to a Supabase query (legacy).
  * @param {object} query - Supabase query builder
  * @param {boolean} demoMode - Current demo mode state
- * @returns {object} Query with is_demo filter applied
+ * @param {string} [tableName] - Optional table name; if in NO_IS_DEMO_TABLES, filter is skipped
+ * @returns {object} Query with is_demo filter applied (or unchanged if table is org-scoped)
  */
-export function addDemoModeFilter(query, demoMode) {
+export function addDemoModeFilter(query, demoMode, tableName = null) {
+  if (tableName && NO_IS_DEMO_TABLES.has(tableName)) {
+    return query
+  }
   if (demoMode === null || demoMode === undefined) {
-    // If demo mode not yet loaded, default to false (real data)
+    return query.eq('is_demo', false)
+  }
+  return query.eq('is_demo', demoMode)
+}
+
+/**
+ * Apply demo mode filter only when the table is not org-scoped (no is_demo column).
+ * @param {string} tableName - Table name
+ * @param {object} query - Supabase query builder
+ * @param {boolean} demoMode - Current demo mode state
+ * @returns {object} Query unchanged if table in NO_IS_DEMO_TABLES, else with is_demo filter
+ */
+export function applyDemoModeFilter(tableName, query, demoMode) {
+  if (tableName && NO_IS_DEMO_TABLES.has(tableName)) {
+    return query
+  }
+  if (demoMode === null || demoMode === undefined) {
     return query.eq('is_demo', false)
   }
   return query.eq('is_demo', demoMode)

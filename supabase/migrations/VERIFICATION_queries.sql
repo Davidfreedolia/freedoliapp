@@ -114,3 +114,13 @@ WHERE table_schema = 'public'
   AND table_name IN ('projects', 'suppliers', 'supplier_quotes', 'purchase_orders')
   AND column_name = 'is_demo'
 ORDER BY table_name;
+
+-- ============================================
+-- S1.6 — UI: helpers no injecten is_demo per taules org-scoped
+-- ============================================
+-- Nota: No es pot verificar amb SQL (el canvi és al frontend: demoModeFilter.js / queryHelpers.js).
+-- Checklist manual:
+-- [ ] /app/projects — llista i crear projecte OK
+-- [ ] /app/suppliers — llista i crear proveïdor OK
+-- [ ] /app/orders — llista i crear PO OK
+-- [ ] /app/projects/:id — detall projecte carrega sense error 42703 (undefined column is_demo)

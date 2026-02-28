@@ -970,15 +970,21 @@ export const getDashboardStats = async () => {
 // GENERADORS DE CODIS
 // ============================================
 
+// Taules org-scoped sense columna is_demo (S1.5/S1.4b); no injectar filtre
+const CORE_NO_IS_DEMO_TABLES = new Set(['projects', 'suppliers', 'supplier_quotes', 'purchase_orders', 'product_identifiers'])
+
 /**
- * Apply demo mode filter to a Supabase query
+ * Apply demo mode filter to a Supabase query.
  * @param {object} query - Supabase query builder
  * @param {boolean} demoMode - Current demo mode state
- * @returns {object} Query with is_demo filter applied
+ * @param {string} [tableName] - Optional; if in CORE_NO_IS_DEMO_TABLES, filter is skipped (S1.6)
+ * @returns {object} Query with is_demo filter applied or unchanged for org-scoped tables
  */
-export const applyDemoFilter = async (query, demoMode = null) => {
+export const applyDemoFilter = async (query, demoMode = null, tableName = null) => {
+  if (tableName && CORE_NO_IS_DEMO_TABLES.has(tableName)) {
+    return query
+  }
   if (demoMode === null || demoMode === undefined) {
-    // Get demo mode if not provided
     const { getDemoMode } = await import('./demoModeFilter')
     demoMode = await getDemoMode()
   }
