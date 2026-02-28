@@ -152,7 +152,7 @@ export default function Dashboard() {
     return () => { execMountedRef.current = false }
   }, [])
 
-  // Executive dashboard data (C4): bulk fetch + KPIs + risk + focus
+  // Executive dashboard data (C4): bulk fetch + KPIs + risk + focus (projects org-scoped)
   useEffect(() => {
     let cancelled = false
     const seq = ++execLoadSeqRef.current
@@ -160,15 +160,27 @@ export default function Dashboard() {
     setExecError(null)
     ;(async () => {
       try {
+        if (!activeOrgId) {
+          if (execMountedRef.current && seq === execLoadSeqRef.current) {
+            setExecData({
+              kpis: { invested_total_all: 0, income_30d_all: 0, weighted_roi_pct: null, at_risk_count: 0 },
+              risk: [],
+              focus: [],
+              alerts: { all: [], counts: { criticalCount: 0, warningCount: 0, infoCount: 0 } }
+            })
+          }
+          setExecLoading(false)
+          return
+        }
+        if (cancelled || !execMountedRef.current) return
+
         const userId = await getCurrentUserId()
         const demoMode = await getDemoMode()
-        if (cancelled || !execMountedRef.current) return
 
         const { data: projects } = await supabase
           .from('projects')
           .select('*')
-          .eq('user_id', userId)
-          .eq('is_demo', demoMode)
+          .eq('org_id', activeOrgId)
           .order('created_at', { ascending: false })
 
         const ids = (projects || []).map(p => p.id).filter(Boolean)
@@ -340,7 +352,7 @@ export default function Dashboard() {
       }
     })()
     return () => { cancelled = true }
-  }, [])
+  }, [activeOrgId])
 
   // Calculate grid width dynamically
   useEffect(() => {
