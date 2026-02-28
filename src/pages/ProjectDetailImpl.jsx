@@ -1019,8 +1019,7 @@ ${t}
           .from('purchase_orders')
           .select('project_id,total_amount,items')
           .eq('project_id', id)
-          .eq('user_id', userId)
-          .eq('is_demo', demoMode),
+          .eq('user_id', userId),
         supabase
           .from('expenses')
           .select('project_id,amount')
@@ -1117,7 +1116,6 @@ ${t}
           .from('purchase_orders')
           .select('project_id,items')
           .eq('user_id', userId)
-          .eq('is_demo', demoMode)
           .eq('project_id', id)
         if (!error && data) poRows = data || []
       } catch (_) {}

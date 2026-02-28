@@ -271,7 +271,6 @@ export default function Projects() {
           .from('purchase_orders')
           .select('project_id,total_amount,items')
           .eq('user_id', userId)
-          .eq('is_demo', demoMode)
           .in('project_id', ids),
         supabase
           .from('expenses')
@@ -395,7 +394,6 @@ export default function Projects() {
           .from('purchase_orders')
           .select('project_id,items')
           .eq('user_id', userId)
-          .eq('is_demo', demoMode)
           .in('project_id', ids)
         if (!error && data) {
           for (const r of data) {

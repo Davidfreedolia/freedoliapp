@@ -197,7 +197,6 @@ export const getProjects = async (includeDiscarded = false, activeOrgId = null) 
     .from('projects')
     .select('*')
     .eq('user_id', userId)
-    .eq('is_demo', demoMode) // Filter by demo mode
     .order('created_at', { ascending: false })
 
   const { data, error } = await query
@@ -311,7 +310,6 @@ export const getProject = async (id) => {
     .select('*')
     .eq('id', id)
     .eq('user_id', userId)
-    .eq('is_demo', demoMode) // Filter by demo mode
     .maybeSingle()
   if (error) throw error
   return data
@@ -342,8 +340,7 @@ export const createProject = async (project) => {
         .insert([{ 
           id: newId,
           ...projectData, 
-          user_id: userId, // Always set user_id explicitly
-          is_demo: demoMode // Mark with current demo mode
+          user_id: userId
         }], { returning: 'minimal' })
       
       if (error) {
@@ -370,11 +367,10 @@ export const createProject = async (project) => {
           entityId: newId,
           action: 'create',
           status: 'success',
-          message: `Project created with is_demo=${demoMode}`,
+          message: 'Project created',
           meta: {
             project_code: projectData.project_code,
-            sku: projectData.sku,
-            is_demo: demoMode
+            sku: projectData.sku
           }
         })
       } catch (auditErr) {
@@ -475,7 +471,6 @@ export const getSuppliers = async () => {
     .from('suppliers')
     .select('*')
     .eq('user_id', userId)
-    .eq('is_demo', demoMode) // Filter by demo mode
     .order('name', { ascending: true })
   if (error) throw error
   return data
@@ -513,8 +508,7 @@ export const createSupplier = async (supplier) => {
     .from('suppliers')
     .insert([{
       ...supplierData,
-      user_id: userId, // Always set user_id explicitly
-      is_demo: demoMode // Set is_demo based on current mode
+      user_id: userId
     }])
     .select()
     .maybeSingle()
@@ -545,8 +539,7 @@ export const updateSupplier = async (id, updates) => {
     .from('suppliers')
     .update({ ...updateData, updated_at: new Date().toISOString() })
     .eq('id', id)
-    .eq('user_id', userId) // Ensure user can only update their own suppliers
-    .eq('is_demo', demoMode) // Ensure demo/real mode consistency
+    .eq('user_id', userId)
     .select()
     .maybeSingle()
   
@@ -574,8 +567,7 @@ export const deleteSupplier = async (id) => {
     .from('suppliers')
     .delete()
     .eq('id', id)
-    .eq('user_id', userId) // Ensure user can only delete their own suppliers
-    .eq('is_demo', demoMode) // Ensure demo/real mode consistency
+    .eq('user_id', userId)
   
   if (error) throw error
   return true
@@ -599,7 +591,6 @@ export const getSuppliersByType = async (type) => {
     .from('suppliers')
     .select('*')
     .eq('user_id', userId)
-    .eq('is_demo', demoMode) // Filter by demo mode
     .eq('type', type)
     .order('name', { ascending: true })
   
@@ -639,7 +630,6 @@ export const getPurchaseOrders = async (projectId = null) => {
     `
     )
     .eq('user_id', userId)
-    .eq('is_demo', demoMode) // Filter by demo mode
     .order('created_at', { ascending: false })
 
   if (projectId) query = query.eq('project_id', projectId)
@@ -714,7 +704,7 @@ export const createPurchaseOrder = async (po) => {
 
   const { data, error } = await supabase
     .from('purchase_orders')
-    .insert([{ ...poData, is_demo: demoMode }])
+    .insert([{ ...poData }])
     .select()
     .maybeSingle()
   if (error) throw error
@@ -915,12 +905,10 @@ export const getDashboardStats = async () => {
       totalInvested: 0,
     }
   }
-  // RLS maneja el filtrado por user_id automáticamente, pero afegim is_demo filter
   const { data: projects, error } = await supabase
     .from('projects')
     .select('*')
     .eq('user_id', userId)
-    .eq('is_demo', demoMode) // Filter by demo mode
     .order('created_at', { ascending: false })
   
   if (error) {
@@ -1015,7 +1003,6 @@ export const generateProjectCode = async () => {
       .from('projects')
       .select('project_code, sku, thumb_url')
       .eq('user_id', userId)
-      .eq('is_demo', demoMode) // Filter by demo mode
       .like('project_code', `${prefix}%`)
       .order('project_code', { ascending: false })
       .limit(1)
@@ -1033,12 +1020,11 @@ export const generateProjectCode = async () => {
     const projectCode = `PR-FRDL${year}${nextNum.toString().padStart(4, '0')}`
     const sku = `FRDL${year}${nextNum.toString().padStart(4, '0')}`
 
-    // Check if SKU already exists (scoped by user_id and is_demo)
+    // Check if SKU already exists (scoped by user_id)
     const { data: existingSku } = await supabase
       .from('projects')
       .select('id, thumb_url')
       .eq('user_id', userId)
-      .eq('is_demo', demoMode)
       .eq('sku', sku)
       .maybeSingle()
 
@@ -1643,7 +1629,6 @@ export const updateManufacturerPackGenerated = async (purchaseOrderId, version) 
       .select('project_id')
       .eq('id', purchaseOrderId)
       .eq('user_id', userId)
-      .eq('is_demo', demoMode) // Filter by demo mode
       .maybeSingle()
     if (poData) projectId = poData.project_id
   } else {
@@ -1716,7 +1701,6 @@ export const getPosWaitingManufacturer = async (limit = 10) => {
         status,
         order_date,
         project_id,
-        is_demo,
         projects (
           id,
           name,
@@ -1730,7 +1714,6 @@ export const getPosWaitingManufacturer = async (limit = 10) => {
       )
     `)
     .eq('user_id', userId)
-    .eq('purchase_orders.is_demo', demoMode) // Filter by demo mode on joined table
     .not('manufacturer_pack_generated_at', 'is', null)
     .is('manufacturer_pack_sent_at', null)
     .order('manufacturer_pack_generated_at', { ascending: true })
@@ -1858,7 +1841,6 @@ export const getShipmentsInTransit = async (limit = 10) => {
         purchase_orders!inner (
           id,
           po_number,
-          is_demo,
           projects (
             id,
             name,
@@ -1867,7 +1849,6 @@ export const getShipmentsInTransit = async (limit = 10) => {
         )
       `)
       .eq('user_id', userId)
-      .eq('purchase_orders.is_demo', false) // Filter by demo mode
       .in('status', ['picked_up', 'in_transit'])
       .order('eta_date', { ascending: true })
       .limit(limit)
@@ -2982,13 +2963,10 @@ export const getCalendarEvents = async (filters = {}) => {
           purchase_orders!inner(
             id,
             po_number,
-            is_demo,
             projects(id, name)
           )
         `)
         .eq('user_id', userId)
-        .eq('is_demo', demoMode) // Filter by demo mode on po_shipments
-        .eq('purchase_orders.is_demo', demoMode) // Filter by demo mode on purchase_orders
       
       if (!shipmentsError && shipments) {
         shipments.forEach(shipment => {
@@ -3044,7 +3022,6 @@ export const getCalendarEvents = async (filters = {}) => {
           projects(id, name)
         `)
         .eq('user_id', userId)
-        .eq('is_demo', demoMode) // Filter by demo mode
         .not('manufacturer_pack_generated_at', 'is', null)
       
       if (!posError && pos) {
@@ -3095,7 +3072,6 @@ export const getCalendarEvents = async (filters = {}) => {
             suppliers(id, name)
           `)
           .eq('user_id', userId)
-          .eq('is_demo', demoMode) // Filter by demo mode
         
         if (quotesError) {
           // If column doesn't exist, skip quotes
@@ -3140,7 +3116,6 @@ export const getCalendarEvents = async (filters = {}) => {
           projects(id, name)
         `)
         .eq('user_id', userId)
-        .eq('is_demo', demoMode) // Filter by demo mode
       
       if (!posError && pos) {
         pos.forEach(po => {

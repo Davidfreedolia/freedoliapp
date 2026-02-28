@@ -102,3 +102,15 @@ WHERE schemaname = 'public' AND tablename = 'product_identifiers';
 -- Sessió org A: INSERT/SELECT product_identifiers (projecte A) → OK.
 -- Llegir/editar identifier de projecte B → 0 rows / 401 segons client.
 -- Frontend smoke: /app/dashboard, /app/analytics, /app/projects/:id (identifiers).
+
+-- ============================================
+-- S1.5 — CORE is_demo purge checks
+-- Executar després d'aplicar 20260228213000_s1_5_is_demo_purge_core.sql
+-- ============================================
+-- Ha de retornar 0 files (cap taula core amb columna is_demo).
+SELECT column_name
+FROM information_schema.columns
+WHERE table_schema = 'public'
+  AND table_name IN ('projects', 'suppliers', 'supplier_quotes', 'purchase_orders')
+  AND column_name = 'is_demo'
+ORDER BY table_name;

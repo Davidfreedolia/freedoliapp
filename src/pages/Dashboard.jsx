@@ -252,7 +252,7 @@ export default function Dashboard() {
         }
 
         const [poRes, expRes, incRes] = await Promise.all([
-          supabase.from('purchase_orders').select('project_id,total_amount,items').eq('user_id', userId).eq('is_demo', demoMode).in('project_id', ids),
+          supabase.from('purchase_orders').select('project_id,total_amount,items').eq('user_id', userId).in('project_id', ids),
           supabase.from('expenses').select('project_id,amount').eq('user_id', userId).eq('is_demo', demoMode).in('project_id', ids),
           supabase.from('incomes').select('project_id,amount,created_at').eq('user_id', userId).eq('is_demo', demoMode).in('project_id', ids).gte('created_at', thirtyDaysIso)
         ])
