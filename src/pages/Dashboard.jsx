@@ -70,7 +70,7 @@ import {
 import { showToast } from '../components/Toast'
 
 export default function Dashboard() {
-  const { stats, darkMode, setDarkMode, sidebarCollapsed } = useApp()
+  const { stats, darkMode, setDarkMode, sidebarCollapsed, activeOrgId } = useApp()
   const navigate = useNavigate()
   const { data: blockedProjects } = useBlockedProjects()
   const { t } = useTranslation()
@@ -216,24 +216,30 @@ export default function Dashboard() {
           }
         }
 
+        // sales: org-scoped only (org_id). Schema: project_id, units_sold, sale_date, created_at, net_revenue. No user_id/is_demo.
         let salesRowsByProject = {}
-        try {
-          const { data, error } = await supabase
-            .from('sales')
-            .select('project_id,qty,quantity,units,created_at')
-            .eq('user_id', userId)
-            .eq('is_demo', demoMode)
-            .in('project_id', ids)
-            .gte('created_at', thirtyDaysIso)
-          if (!error && data) {
-            for (const r of data) {
-              const pid = r.project_id
-              if (!pid) continue
-              if (!salesRowsByProject[pid]) salesRowsByProject[pid] = []
-              salesRowsByProject[pid].push(r)
+        if (activeOrgId) {
+          try {
+            const { data, error } = await supabase
+              .from('sales')
+              .select('project_id,units_sold,sale_date,created_at,net_revenue')
+              .eq('org_id', activeOrgId)
+              .in('project_id', ids)
+              .gte('sale_date', thirtyDaysIso)
+            if (error) {
+              if (import.meta.env.DEV) console.error('[sales] load failed', error)
+            } else if (data) {
+              for (const r of data) {
+                const pid = r.project_id
+                if (!pid) continue
+                if (!salesRowsByProject[pid]) salesRowsByProject[pid] = []
+                salesRowsByProject[pid].push(r)
+              }
             }
+          } catch (e) {
+            if (import.meta.env.DEV) console.error('[sales] load failed (exception)', e)
           }
-        } catch (_) {}
+        }
 
         const [poRes, expRes, incRes] = await Promise.all([
           supabase.from('purchase_orders').select('project_id,total_amount,items').eq('user_id', userId).eq('is_demo', demoMode).in('project_id', ids),
@@ -1055,7 +1061,7 @@ export default function Dashboard() {
                       {execData.risk.map((row) => (
                         <tr key={row.project.id} style={{ borderBottom: '1px solid var(--border-1)' }}>
                           <td style={{ padding: '8px 12px' }}>
-                            <Link to={`/projects/${row.project.id}`} style={{ color: 'var(--text-1)', fontWeight: 500 }}>
+                            <Link to={`/app/projects/${row.project.id}`} style={{ color: 'var(--text-1)', fontWeight: 500 }}>
                               {row.project.name}{row.project.sku ? ` · ${row.project.sku}` : ''}
                             </Link>
                           </td>
@@ -1139,7 +1145,7 @@ export default function Dashboard() {
                       {execData.focus.map((row) => (
                         <tr key={row.project.id} style={{ borderBottom: '1px solid var(--border-1)' }}>
                           <td style={{ padding: '8px 12px' }}>
-                            <Link to={`/projects/${row.project.id}`} style={{ color: 'var(--text-1)', fontWeight: 500 }}>
+                            <Link to={`/app/projects/${row.project.id}`} style={{ color: 'var(--text-1)', fontWeight: 500 }}>
                               {row.project.name}{row.project.sku ? ` · ${row.project.sku}` : ''}
                             </Link>
                           </td>

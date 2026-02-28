@@ -32,7 +32,7 @@ import MarketplaceTag, { MarketplaceTagGroup } from '../components/MarketplaceTa
 import PhaseMark from '../components/Phase/PhaseMark'
 
 export default function Projects() {
-  const { refreshProjects, darkMode } = useApp()
+  const { refreshProjects, darkMode, activeOrgId } = useApp()
   const { data: projects, loading: loadingListState, error: listStateError, refetch, noOrg } = useProjectsListState()
   const navigate = useNavigate()
   const { isMobile, isTablet } = useBreakpoint()
@@ -361,28 +361,30 @@ export default function Projects() {
         }
       }
 
-      // Sales last 30d (optional)
+      // sales: org-scoped only (org_id). Schema: project_id, units_sold, sale_date, created_at, net_revenue. No user_id/is_demo.
       let salesRowsByProject = {}
-      try {
-        const { data, error } = await supabase
-          .from('sales')
-          .select('project_id,qty,quantity,units,created_at,date')
-          .eq('user_id', userId)
-          .eq('is_demo', demoMode)
-          .in('project_id', ids)
-          .gte('created_at', thirtyDaysIso)
-        if (!error && data) {
-          for (const r of data) {
-            const pid = r.project_id
-            if (!pid) continue
-            const created = r.created_at || r.date
-            if (created && new Date(created) >= thirtyDaysAgo) {
+      if (activeOrgId) {
+        try {
+          const { data, error } = await supabase
+            .from('sales')
+            .select('project_id,units_sold,sale_date,created_at,net_revenue')
+            .eq('org_id', activeOrgId)
+            .in('project_id', ids)
+            .gte('sale_date', thirtyDaysIso)
+          if (error) {
+            if (import.meta.env.DEV) console.error('[sales] load failed', error)
+          } else if (data) {
+            for (const r of data) {
+              const pid = r.project_id
+              if (!pid) continue
               if (!salesRowsByProject[pid]) salesRowsByProject[pid] = []
               salesRowsByProject[pid].push(r)
             }
           }
+        } catch (e) {
+          if (import.meta.env.DEV) console.error('[sales] load failed (exception)', e)
         }
-      } catch (_) {}
+      }
 
       if (cancelled || !mountedRef.current || seq !== stockLoadSeqRef.current) return
 
@@ -420,7 +422,7 @@ export default function Projects() {
       }
     })()
     return () => { cancelled = true }
-  }, [projects])
+  }, [projects, activeOrgId])
 
   const selectedProject = filteredProjects.find(project => project.id === selectedProjectId)
 

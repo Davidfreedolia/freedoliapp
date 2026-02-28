@@ -1087,22 +1087,29 @@ ${t}
         }
       }
 
+      // sales: org-scoped only (org_id). Schema: project_id, units_sold, sale_date, created_at, net_revenue. No user_id/is_demo.
       let salesRows = []
-      try {
-        const { data, error } = await supabase
-          .from('sales')
-          .select('project_id,qty,quantity,units,created_at,date')
-          .eq('user_id', userId)
-          .eq('is_demo', demoMode)
-          .eq('project_id', id)
-          .gte('created_at', thirtyDaysIso)
-        if (!error && data) {
-          salesRows = (data || []).filter((r) => {
-            const d = r.created_at || r.date
-            return d && new Date(d) >= thirtyDaysAgo
-          })
+      const orgId = project?.org_id ?? null
+      if (orgId) {
+        try {
+          const { data, error } = await supabase
+            .from('sales')
+            .select('project_id,units_sold,sale_date,created_at,net_revenue')
+            .eq('org_id', orgId)
+            .eq('project_id', id)
+            .gte('sale_date', thirtyDaysIso)
+          if (error) {
+            if (import.meta.env.DEV) console.error('[sales] load failed', error)
+          } else if (data) {
+            salesRows = (data || []).filter((r) => {
+              const d = r.sale_date ?? r.created_at
+              return d && new Date(d) >= thirtyDaysAgo
+            })
+          }
+        } catch (e) {
+          if (import.meta.env.DEV) console.error('[sales] load failed (exception)', e)
         }
-      } catch (_) {}
+      }
 
       let poRows = []
       try {
