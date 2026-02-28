@@ -124,3 +124,20 @@ ORDER BY table_name;
 -- [ ] /app/suppliers — llista i crear proveïdor OK
 -- [ ] /app/orders — llista i crear PO OK
 -- [ ] /app/projects/:id — detall projecte carrega sense error 42703 (undefined column is_demo)
+
+-- ============================================
+-- S1.8 — project_events trigger + org scope
+-- Executar després d'aplicar 20260228223000_s1_8_fix_project_events_trigger_org_scope.sql
+-- ============================================
+-- org_id nulls (esperat: 0)
+-- SELECT COUNT(*) AS project_events_org_id_nulls FROM public.project_events WHERE org_id IS NULL;
+
+-- Policies (esperat: només "Org members can manage project events")
+-- SELECT policyname, cmd FROM pg_policies WHERE schemaname='public' AND tablename='project_events';
+
+-- Trigger i funció (opcional)
+-- SELECT t.tgname, pg_get_triggerdef(t.oid) FROM pg_trigger t JOIN pg_class c ON t.tgrelid = c.oid WHERE c.relname = 'project_events' AND NOT t.tgisinternal;
+-- SELECT p.proname FROM pg_proc p JOIN pg_namespace n ON p.pronamespace = n.oid WHERE n.nspname='public' AND p.proname = 'project_events_before_ins_upd';
+
+-- Test insert (comentari; substituir project_id per un id real si es vol provar)
+-- INSERT INTO public.project_events (project_id, type, title, event_date) VALUES ('<project_id_uuid>', 'milestone', 'Test S1.8', CURRENT_DATE) RETURNING id, org_id;
