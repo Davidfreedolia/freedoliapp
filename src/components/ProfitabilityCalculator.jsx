@@ -3,6 +3,7 @@ import { Save, AlertTriangle, CheckCircle2, XCircle, ExternalLink, Link2, BadgeE
 import supabase, { getProductIdentifiers, upsertProductIdentifiers } from '../lib/supabase'
 import { calculateQuickProfitability } from '../lib/profitability'
 import HelpIcon from './HelpIcon'
+import { useApp } from '../context/AppContext'
 
 /**
  * Calculadora de profitabilitat ràpida (Nivell 1.5)
@@ -13,6 +14,7 @@ const ProfitabilityCalculator = React.forwardRef(function ProfitabilityCalculato
   { projectId, darkMode, showAsinCapture = true, hideSaveButton = false, onChange },
   ref
 ) {
+  const { activeOrgId } = useApp()
   const VIABILITY_STORAGE_PREFIX = 'project_viability_'
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -275,11 +277,13 @@ const ProfitabilityCalculator = React.forwardRef(function ProfitabilityCalculato
         setCapturingAsin(false)
         return
       }
-      
-      // Guardar en product_identifiers
-      await upsertProductIdentifiers(projectId, {
-        asin: asin
-      })
+      if (!activeOrgId) {
+        setAsinError('No hi ha Workspace actiu')
+        setCapturingAsin(false)
+        return
+      }
+      // Guardar en product_identifiers (org-scoped)
+      await upsertProductIdentifiers(projectId, { asin }, activeOrgId)
       
       setCapturedAsin(asin)
       setAsinInput('')

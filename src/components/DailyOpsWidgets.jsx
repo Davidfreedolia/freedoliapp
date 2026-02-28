@@ -18,6 +18,7 @@ import {
   getStaleTracking,
   quickMarkPackAsSent
 } from '../lib/supabase'
+import { useApp } from '../context/AppContext'
 import { showToast } from './Toast'
 
 // Widget: Waiting Manufacturer
@@ -189,13 +190,14 @@ export function WaitingManufacturerWidget({ darkMode, limit = 10 }) {
 export function PosNotAmazonReadyWidget({ darkMode, limit = 10 }) {
   const navigate = useNavigate()
   const { t } = useTranslation()
+  const { activeOrgId } = useApp()
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
 
   const loadData = async () => {
     setLoading(true)
     try {
-      const pos = await getPosNotReady(limit)
+      const pos = await getPosNotReady(limit, activeOrgId)
       setData(pos || [])
     } catch (err) {
       console.error('Error carregant POs not ready:', err)
@@ -206,7 +208,7 @@ export function PosNotAmazonReadyWidget({ darkMode, limit = 10 }) {
   useEffect(() => {
     loadData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [activeOrgId])
 
   if (loading) {
     return (

@@ -405,7 +405,7 @@ export default function Dashboard() {
   const loadPosNotReady = async () => {
     setLoadingPosNotReady(true)
     try {
-      const notReady = await getPosNotReady(5).catch(() => [])
+      const notReady = await getPosNotReady(5, activeOrgId).catch(() => [])
       setPosNotReady(safeArray(notReady))
     } catch (err) {
       console.error('Error carregant POs not ready:', err)

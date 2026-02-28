@@ -3,6 +3,7 @@ import { Barcode, ExternalLink, Save } from 'lucide-react'
 import Button from './Button'
 import { getProductIdentifiers, upsertProductIdentifiers } from '../lib/supabase'
 import { getPhaseSurfaceStyles } from '../utils/phaseStyles'
+import { useApp } from '../context/AppContext'
 import { getButtonStyles, useButtonState } from '../utils/buttonStyles'
 
 const SIZE_TIERS = [
@@ -58,6 +59,7 @@ const getAmazonUrl = (asin, marketplace = 'es') => {
 const COMPETITOR_STORAGE_PREFIX = 'competitive_asin_meta_'
 
 export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle }) {
+  const { activeOrgId } = useApp()
   const [loading, setLoading] = useState(true)
   const [savingAsin, setSavingAsin] = useState(false)
   const [asinInput, setAsinInput] = useState('')
@@ -133,6 +135,11 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
 
     setSavingAsin(true)
     try {
+      if (!activeOrgId) {
+        setAsinError('No hi ha Workspace actiu')
+        setSavingAsin(false)
+        return
+      }
       const existing = await getProductIdentifiers(projectId)
       await upsertProductIdentifiers(projectId, {
         gtin_type: existing?.gtin_type || null,
@@ -140,7 +147,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
         fnsku: existing?.fnsku || null,
         exemption_reason: existing?.exemption_reason || null,
         asin: asinValue
-      })
+      }, activeOrgId)
       setCapturedAsin(asinValue)
       if (typeof extracted === 'object' && extracted?.marketplace) {
         setMarketplace(extracted.marketplace)

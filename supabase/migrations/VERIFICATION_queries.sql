@@ -53,3 +53,30 @@ SELECT o.id AS org_id, o.name,
 FROM public.orgs o
 WHERE EXISTS (SELECT 1 FROM public.org_memberships om WHERE om.org_id = o.id AND om.user_id = auth.uid())
 ORDER BY o.name;
+
+-- ============================================
+-- S1.4 — product_identifiers ORG-SCOPED (verificació)
+-- Executar després d'aplicar 20260228193000_s1_4_product_identifiers_org_scope.sql
+-- ============================================
+
+-- C1.1) Columna org_id NOT NULL
+SELECT column_name, is_nullable, data_type
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'product_identifiers' AND column_name = 'org_id';
+-- Esperat: is_nullable = 'NO'
+
+-- C1.2) Constraint UNIQUE(org_id, project_id) existeix
+SELECT conname, pg_get_constraintdef(oid) AS def
+FROM pg_constraint
+WHERE conrelid = 'public.product_identifiers'::regclass AND contype = 'u';
+-- Esperat: product_identifiers_org_project_key UNIQUE (org_id, project_id)
+
+-- C1.3) No queden org_id NULL
+SELECT COUNT(*) AS product_identifiers_org_id_null FROM public.product_identifiers WHERE org_id IS NULL;
+-- Esperat: 0
+
+-- C1.4) Policies de product_identifiers (org-based)
+SELECT policyname, cmd, qual, with_check
+FROM pg_policies
+WHERE schemaname = 'public' AND tablename = 'product_identifiers';
+-- Esperat: "Org members can manage product identifiers" amb is_org_member(org_id)

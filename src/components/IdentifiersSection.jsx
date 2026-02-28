@@ -16,6 +16,7 @@ import { getModalStyles } from '../utils/responsiveStyles'
 import { getButtonStyles, useButtonState } from '../utils/buttonStyles'
 import { showToast } from '../components/Toast'
 import { getPhaseSurfaceStyles } from '../utils/phaseStyles'
+import { useApp } from '../context/AppContext'
 
 const GTIN_TYPES = [
   { value: 'EAN', label: 'EAN' },
@@ -29,6 +30,7 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({
   phaseStyle,
   showAsin = false
 }, ref) {
+  const { activeOrgId } = useApp()
   const { isMobile } = useBreakpoint()
   const { t } = useTranslation()
   const modalStyles = getModalStyles(isMobile, darkMode)
@@ -144,7 +146,12 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({
 
     setSaving(true)
     try {
-      const saved = await upsertProductIdentifiers(projectId, dataToSave)
+      if (!activeOrgId) {
+        alert('No hi ha Workspace actiu')
+        setSaving(false)
+        return
+      }
+      const saved = await upsertProductIdentifiers(projectId, dataToSave, activeOrgId)
       setIdentifiers(saved)
       alert('Identificadors guardats correctament')
     } catch (err) {
@@ -172,19 +179,21 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({
 
     setAssigning(true)
     try {
-      const userId = await getCurrentUserId()
-      
-      // Insertar en product_identifiers PRIMER
+      if (!activeOrgId) {
+        showToast('No hi ha Workspace actiu', 'error')
+        setAssigning(false)
+        return
+      }
+      // Insertar en product_identifiers (org-scoped)
       const { error: insertError } = await supabase
         .from('product_identifiers')
         .insert([{
-          user_id: userId,
+          org_id: activeOrgId,
           project_id: projectId,
           gtin_code: selectedGtinForAssign.gtin_code,
           gtin_type: selectedGtinForAssign.gtin_type,
           sku: assignFormData.sku.trim(),
-          fnsku: assignFormData.fnsku?.trim() || null,
-          is_demo: false
+          fnsku: assignFormData.fnsku?.trim() || null
         }])
 
       if (insertError) {

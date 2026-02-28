@@ -1179,22 +1179,19 @@ export const getProductIdentifiers = async (projectId) => {
   return data
 }
 
-export const upsertProductIdentifiers = async (projectId, identifiers) => {
-  // Get demo mode setting
-  const { getDemoMode } = await import('./demoModeFilter')
-  const demoMode = await getDemoMode()
-  
-  // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
-  const { user_id, ...identifiersData } = identifiers
+export const upsertProductIdentifiers = async (projectId, identifiers, activeOrgId) => {
+  if (!activeOrgId) throw new Error('upsertProductIdentifiers requires activeOrgId')
+  // Eliminar user_id si ve del client (seguretat: org-scoped)
+  const { user_id, is_demo, ...identifiersData } = identifiers
   const { data, error } = await supabase
     .from('product_identifiers')
     .upsert({
+      org_id: activeOrgId,
       project_id: projectId,
       ...identifiersData,
-      is_demo: demoMode, // Mark with current demo mode
       updated_at: new Date().toISOString()
     }, {
-      onConflict: 'user_id,project_id'
+      onConflict: 'org_id,project_id'
     })
     .select()
     .maybeSingle()
@@ -1464,12 +1461,10 @@ export const getProjectsMissingGtin = async (activeOrgId) => {
   const ids = filteredProjects.map(p => p.id).filter(Boolean)
   if (ids.length === 0) return filteredProjects
 
-  const userId = await getCurrentUserId()
   const { data: identifiers, error: identifiersError } = await supabase
     .from('product_identifiers')
     .select('project_id, gtin_type, gtin_code')
-    .eq('user_id', userId)
-    .eq('is_demo', demoMode)
+    .eq('org_id', activeOrgId)
     .in('project_id', ids)
   if (identifiersError) throw identifiersError
 
@@ -1481,7 +1476,7 @@ export const getProjectsMissingGtin = async (activeOrgId) => {
   return missingGtin
 }
 
-export const getProgrammaticallyAssignedGTIN = async () => {
+export const getProgrammaticallyAssignedGTIN = async (activeOrgId) => {
   // Get demo mode setting
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
@@ -1515,18 +1510,18 @@ export const getProgrammaticallyAssignedGTIN = async () => {
   
   if (poolError) throw poolError
   
-  // També obtenim els identifiers per obtenir informació completa
+  // També obtenim els identifiers per obtenir informació completa (org-scoped)
   const projectIds = assignedGtins
     ?.map(g => g.assigned_to_project_id)
     .filter(Boolean) || []
   
   let identifiersMap = {}
-  if (projectIds.length > 0) {
+  if (projectIds.length > 0 && activeOrgId) {
     const { data: identifiers, error: identifiersError } = await supabase
       .from('product_identifiers')
       .select('project_id, gtin_code, gtin_type, asin, fnsku')
       .in('project_id', projectIds)
-      .eq('user_id', userId)
+      .eq('org_id', activeOrgId)
     
     if (identifiersError) throw identifiersError
     
@@ -1751,7 +1746,7 @@ export const getPosWaitingManufacturer = async (limit = 10) => {
   })).filter(po => po.id) // Filtrar nulls
 }
 
-export const getPosNotReady = async (limit = 10) => {
+export const getPosNotReady = async (limit = 10, activeOrgId = null) => {
   // Dynamic import to avoid circular dependency
   const { isDemoMode, mockGetPosNotReady } = await import('../demo/demoMode')
   
@@ -1788,15 +1783,17 @@ export const getPosNotReady = async (limit = 10) => {
   
   if (!readinessData || readinessData.length === 0) return []
   
-  // Obtenir identifiers per cada projecte
+  // Obtenir identifiers per cada projecte (org-scoped quan activeOrgId existeix)
   const projectIds = [...new Set(readinessData.map(r => r.project_id))]
-  const { data: identifiersData, error: identifiersError } = await supabase
-    .from('product_identifiers')
-    .select('project_id, fnsku')
-    .in('project_id', projectIds)
-    .eq('user_id', userId)
-  
-  if (identifiersError) throw identifiersError
+  let identifiersData = null
+  if (projectIds.length > 0) {
+    let q = supabase.from('product_identifiers').select('project_id, fnsku').in('project_id', projectIds)
+    if (activeOrgId) q = q.eq('org_id', activeOrgId)
+    else q = q.eq('user_id', userId)
+    const { data, error: identifiersError } = await q
+    if (identifiersError) throw identifiersError
+    identifiersData = data
+  }
   
   // Crear map de identifiers per project_id
   const identifiersMap = {}
