@@ -69,8 +69,8 @@ export default function Analytics() {
       startDate.setDate(startDate.getDate() - parseInt(dateRange))
       const startDateStr = startDate.toISOString().split('T')[0]
 
-      // Projectes (usar funció de supabase.js que ja filtra per user_id)
-      const projectsData = await getProjects(true) // includeDiscarded = true
+      // Projectes: org-scoped quan activeOrgId existeix (evita user_id/is_demo)
+      const projectsData = await getProjects(true, activeOrgId) // includeDiscarded, activeOrgId
       setProjects(projectsData || [])
 
       // Despeses, Ingressos, Comandes, Inventari

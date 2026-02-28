@@ -129,17 +129,68 @@ const authRequired = () => ({
 // ============================================
 
 // PROJECTES
-export const getProjects = async (includeDiscarded = false) => {
-  // Dynamic imports to avoid circular dependencies
+// activeOrgId: when provided, query is org-scoped only (no user_id/is_demo). When null, legacy user_id+is_demo.
+export const getProjects = async (includeDiscarded = false, activeOrgId = null) => {
   const { isDemoMode, mockGetProjects } = await import('../demo/demoMode')
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
-  
-  // Legacy demo mode check (for backward compatibility)
+
   if (isDemoMode() && !demoMode) {
     return await mockGetProjects(includeDiscarded)
   }
-  
+
+  if (activeOrgId) {
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('org_id', activeOrgId)
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    const projects = data || []
+    const ids = projects.map(p => p.id).filter(Boolean)
+    if (ids.length) {
+      try {
+        const { data: tagRows } = await supabase
+          .from('v_project_marketplace_tags')
+          .select('project_id, marketplace_code, is_primary, stock_state, is_active')
+          .in('project_id', ids)
+        const grouped = (tagRows || []).reduce((acc, row) => {
+          const key = row.project_id
+          if (!acc[key]) acc[key] = []
+          acc[key].push(row)
+          return acc
+        }, {})
+        const deriveMarketplaceTags = (project) => {
+          const raw = Array.isArray(project?.marketplace_tags) ? project.marketplace_tags
+            : Array.isArray(project?.marketplaces) ? project.marketplaces
+            : Array.isArray(project?.marketplace_codes) ? project.marketplace_codes
+            : (project?.marketplace ? [project.marketplace] : [])
+          const normalizeCode = (v) => (v || '').toString().trim().toUpperCase()
+          const out = []
+          raw.forEach((item, idx) => {
+            if (!item) return
+            if (typeof item === 'object') {
+              if (item.is_active === false) return
+              const code = normalizeCode(item.marketplace_code || item.code || item.marketplace)
+              if (code) out.push({ marketplace_code: code, is_primary: !!item.is_primary || idx === 0, stock_state: (item.stock_state || 'none'), is_active: item.is_active !== false })
+            } else {
+              const code = normalizeCode(item)
+              if (code) out.push({ marketplace_code: code, is_primary: idx === 0, stock_state: 'none', is_active: true })
+            }
+          })
+          if (!out.length) out.push({ marketplace_code: 'ES', is_primary: true, stock_state: 'none', is_active: true })
+          return out
+        }
+        projects.forEach((p) => {
+          const fromView = grouped[p.id]
+          p.marketplace_tags = (Array.isArray(fromView) && fromView.length) ? fromView : deriveMarketplaceTags(p)
+        })
+      } catch {}
+    }
+    if (!includeDiscarded) return projects.filter(p => !p.decision || p.decision !== 'DISCARDED')
+    return projects
+  }
+
   const userId = await getCurrentUserId()
   if (!userId) return []
   let query = supabase
@@ -148,7 +199,7 @@ export const getProjects = async (includeDiscarded = false) => {
     .eq('user_id', userId)
     .eq('is_demo', demoMode) // Filter by demo mode
     .order('created_at', { ascending: false })
-  
+
   const { data, error } = await query
   
   if (error) throw error
