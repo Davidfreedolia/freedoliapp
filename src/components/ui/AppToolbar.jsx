@@ -37,3 +37,5 @@ function Item({ className = '', children, ...props }) {
 
 AppToolbar.Group = Group
 AppToolbar.Item = Item
+AppToolbar.Left = (props) => <Group align="left" {...props} />
+AppToolbar.Right = (props) => <Group align="right" {...props} />
