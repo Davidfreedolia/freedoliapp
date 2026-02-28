@@ -3321,13 +3321,15 @@ export const deleteSupplierQuote = async (quoteId) => {
 
 /**
  * Crea registres a supplier_sample_requests des de les quotes marcades (go_samples).
- * Idempotent: upsert per quote_id.
+ * Idempotent: upsert per quote_id. Org-scoped (S1.10): org_id des del projecte.
  */
 export const createSampleRequestsFromQuotes = async (quotes, projectId) => {
   const userId = await getCurrentUserId()
   if (!userId) return authRequired()
-  const { getDemoMode } = await import('./demoModeFilter')
-  const demoMode = await getDemoMode()
+
+  const { data: proj } = await supabase.from('projects').select('org_id').eq('id', projectId).maybeSingle()
+  const orgId = proj?.org_id
+  if (!orgId) return
 
   const candidates = (quotes || []).filter(
     q => q.go_samples === true && q.supplier_id != null && (q.validity_status == null || q.validity_status === 'PASS')
@@ -3336,7 +3338,7 @@ export const createSampleRequestsFromQuotes = async (quotes, projectId) => {
 
   const rows = candidates.map(q => ({
     user_id: userId,
-    is_demo: demoMode,
+    org_id: orgId,
     project_id: projectId,
     quote_id: q.id,
     supplier_id: q.supplier_id,
@@ -3353,8 +3355,6 @@ export const createSampleRequestsFromQuotes = async (quotes, projectId) => {
 export const getSupplierSampleRequests = async (projectId) => {
   const userId = await getCurrentUserId()
   if (!userId) return []
-  const { getDemoMode } = await import('./demoModeFilter')
-  const demoMode = await getDemoMode()
   const { data, error } = await supabase
     .from('supplier_sample_requests')
     .select(`
@@ -3370,9 +3370,7 @@ export const getSupplierSampleRequests = async (projectId) => {
         supplier_quote_price_breaks(min_qty, unit_price)
       )
     `)
-    .eq('user_id', userId)
     .eq('project_id', projectId)
-    .eq('is_demo', demoMode)
     .order('created_at', { ascending: false })
   if (error) throw error
   return data || []
@@ -3385,7 +3383,6 @@ export const updateSupplierSampleRequest = async (id, patch) => {
     .from('supplier_sample_requests')
     .update(patch)
     .eq('id', id)
-    .eq('user_id', userId)
     .select()
     .maybeSingle()
   if (error) throw error

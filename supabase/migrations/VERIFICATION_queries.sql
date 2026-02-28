@@ -151,3 +151,16 @@ ORDER BY table_name;
 
 -- Sanity: inserir event i veure org_id s'emplena (executar manualment)
 -- INSERT INTO public.project_events (project_id, type, title, event_date) VALUES ('<project_id_uuid>', 'milestone', 'Test S1.9', CURRENT_DATE) RETURNING id, org_id;
+
+-- ============================================
+-- S1.10 — supplier_sample_requests org-scoped, is_demo eliminat
+-- Executar després d'aplicar 20260228233000_s1_10_supplier_sample_requests_drop_is_demo.sql
+-- ============================================
+-- is_demo ja no existeix (esperat: 0 rows)
+-- SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='supplier_sample_requests' AND column_name='is_demo';
+
+-- null_orgs (esperat: 0)
+-- SELECT COUNT(*) AS null_orgs FROM public.supplier_sample_requests WHERE org_id IS NULL;
+
+-- Policy org-based única
+-- SELECT policyname, cmd FROM pg_policies WHERE schemaname='public' AND tablename='supplier_sample_requests';
