@@ -175,3 +175,10 @@ ORDER BY table_name;
 
 -- Policies (esperat: una per taula, org-based)
 -- SELECT tablename, policyname, cmd FROM pg_policies WHERE schemaname='public' AND tablename IN ('expenses','incomes') ORDER BY tablename;
+
+-- ============================================
+-- S1.12 — is_demo eliminat de expenses i incomes
+-- Executar després d'aplicar 20260228243000_s1_12_drop_is_demo_expenses_incomes.sql
+-- ============================================
+-- Ha de retornar 0 rows
+-- SELECT table_name, column_name FROM information_schema.columns WHERE table_schema='public' AND table_name IN ('expenses','incomes') AND column_name='is_demo' ORDER BY table_name;
