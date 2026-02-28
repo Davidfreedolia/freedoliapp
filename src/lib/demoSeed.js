@@ -182,25 +182,7 @@ export const generateDemoData = async (onProgress = null) => {
       }
     }
 
-    // 4) Product Identifiers (6 projects with identifiers, 4 without)
-    for (let i = 0; i < 6; i++) {
-      const project = projects[i]
-      const assignedGtin = gtinPool.find(g => g.assigned_to_project_id === project.id)
-
-      if (assignedGtin) {
-        await supabase
-          .from('product_identifiers')
-          .insert([{
-            project_id: project.id,
-            gtin_code: assignedGtin.gtin_code,
-            gtin_type: assignedGtin.gtin_type,
-            fnsku: `X00${String(i + 1).padStart(9, '0')}`,
-            asin: `B0${String(Math.floor(Math.random() * 90000000) + 10000000)}`,
-            user_id: userId, // Always set user_id explicitly
-            is_demo: true // Always true for demo data
-          }])
-      }
-    }
+    // 4) Product Identifiers — no seed (taula org-scoped; sense is_demo/user_id; es creen des de la UI)
 
     // 5) Supplier Quotes (3 projects with 2 quotes each)
     const quoteProjects = projects.slice(0, 3)
@@ -677,18 +659,19 @@ export const clearDemoData = async () => {
       try {
         // For tables with direct project_id reference
         if (['supplier_quotes', 'product_identifiers', 'purchase_orders'].includes(table)) {
-          // Delete items linked to demo projects
-          const { data: demoProjects } = await supabase
-            .from('projects')
-            .select('id')
-            .eq('is_demo', true)
-            .eq('user_id', userId)
+            // Delete items linked to demo projects
+            const { data: demoProjects } = await supabase
+              .from('projects')
+              .select('id')
+              .eq('is_demo', true)
+              .eq('user_id', userId)
 
-          if (demoProjects && demoProjects.length > 0) {
-            const projectIds = demoProjects.map(p => p.id)
-            
-            // Special handling for po_amazon_readiness and po_shipments which link to purchase_orders
-            if (table === 'purchase_orders') {
+            if (demoProjects && demoProjects.length > 0) {
+              const projectIds = demoProjects.map(p => p.id)
+
+            if (table === 'product_identifiers') {
+              await supabase.from('product_identifiers').delete().in('project_id', projectIds)
+            } else if (table === 'purchase_orders') {
               const { data: demoPOs } = await supabase
                 .from('purchase_orders')
                 .select('id')
@@ -709,13 +692,10 @@ export const clearDemoData = async () => {
                   .eq('user_id', userId)
                   .in('purchase_order_id', poIds)
               }
+              await supabase.from('purchase_orders').delete().eq('user_id', userId).in('project_id', projectIds)
+            } else {
+              await supabase.from(table).delete().eq('user_id', userId).in('project_id', projectIds)
             }
-            
-            await supabase
-              .from(table)
-              .delete()
-              .eq('user_id', userId)
-              .in('project_id', projectIds)
           }
         } else if (table === 'supplier_quote_price_breaks') {
           // Delete price breaks linked to demo quotes

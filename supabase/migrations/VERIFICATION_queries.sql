@@ -80,3 +80,25 @@ SELECT policyname, cmd, qual, with_check
 FROM pg_policies
 WHERE schemaname = 'public' AND tablename = 'product_identifiers';
 -- Esperat: "Org members can manage product identifiers" amb is_org_member(org_id)
+
+-- ============================================
+-- S1.4b — product_identifiers purge legacy + QA cross-org
+-- Executar després d'aplicar 20260228203000_s1_4b_product_identifiers_purge_legacy.sql
+-- ============================================
+
+-- C2.1) Cap product_identifiers amb org_id NULL
+SELECT COUNT(*) AS product_identifiers_org_id_null FROM public.product_identifiers WHERE org_id IS NULL;
+-- Esperat: 0
+
+-- C2.2) Taula existeix
+SELECT to_regclass('public.product_identifiers') AS product_identifiers_regclass;
+
+-- C2.3) Policies actuals (només org-based)
+SELECT policyname, cmd, qual, with_check
+FROM pg_policies
+WHERE schemaname = 'public' AND tablename = 'product_identifiers';
+
+-- QA CROSS-ORG (manual): 2 orgs A i B; usuari membre d'ambdues.
+-- Sessió org A: INSERT/SELECT product_identifiers (projecte A) → OK.
+-- Llegir/editar identifier de projecte B → 0 rows / 401 segons client.
+-- Frontend smoke: /app/dashboard, /app/analytics, /app/projects/:id (identifiers).

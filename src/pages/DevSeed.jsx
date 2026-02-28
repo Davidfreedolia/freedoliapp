@@ -85,12 +85,11 @@ export default function DevSeed() {
 
             if (demoProjects && demoProjects.length > 0) {
               const projectIds = demoProjects.map(p => p.id)
-              
-              await supabase
-                .from(table)
-                .delete()
-                .eq('user_id', userId)
-                .in('project_id', projectIds)
+              if (table === 'product_identifiers') {
+                await supabase.from('product_identifiers').delete().in('project_id', projectIds)
+              } else {
+                await supabase.from(table).delete().eq('user_id', userId).in('project_id', projectIds)
+              }
             }
           } else if (table === 'decision_log') {
             // Delete decision_log entries for demo projects (entity_type='project')
@@ -455,22 +454,7 @@ export default function DevSeed() {
       }
 
       // 4) Product Identifiers (6 projects with identifiers, 4 without)
-      for (let i = 0; i < 6; i++) {
-        const project = projects[i]
-        const assignedGtin = gtinPool.find(g => g.assigned_to_project_id === project.id)
-
-        if (assignedGtin) {
-          await supabase
-            .from('product_identifiers')
-            .insert([{
-              project_id: project.id,
-              gtin_code: assignedGtin.gtin_code,
-              gtin_type: assignedGtin.gtin_type,
-              fnsku: `X00${String(i + 1).padStart(9, '0')}`,
-              asin: `B0${String(Math.floor(Math.random() * 90000000) + 10000000)}`
-            }])
-        }
-      }
+      // 4) Product Identifiers — no seed (org-scoped; es creen des de la UI)
 
       // 5) Supplier Quotes (3 projects with 2 quotes each)
       const quoteProjects = projects.slice(0, 3)
