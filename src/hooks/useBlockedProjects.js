@@ -1,13 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase, getCurrentUserId } from '../lib/supabase'
-import { getDemoMode } from '../lib/demoModeFilter'
 import { useApp } from '../context/AppContext'
 
 const isDev = typeof import.meta !== 'undefined' && import.meta.env?.DEV === true
 
 /**
  * Projectes bloquejats (requereixen atenció) calculats a partir de projects + project_tasks.
- * Contracte RLS-safe: org_id + is_demo (sense dependre de vistes trencades).
+ * Contracte RLS-safe: org_id scope (no user_id / is_demo).
  *
  * @returns {{ data: Array, loading: boolean, error: Error | null, refetch: function }}
  */
@@ -39,24 +38,18 @@ export function useBlockedProjects() {
         return
       }
 
-      let demoMode = false
-      try {
-        demoMode = await getDemoMode()
-      } catch (_) {}
-
-      const filtersProjects = { org_id: orgId, is_demo: demoMode }
+      // projects: org-scoped only (no user_id / is_demo)
+      const filtersProjects = { org_id: orgId }
       const projectsQuery = supabase
         .from('projects')
         .select('*')
         .eq('org_id', orgId)
-        .eq('is_demo', demoMode)
         .order('created_at', { ascending: false })
 
       if (isDev) {
         console.log('[BlockedProjects] projects query', {
           userId,
           activeOrgId: orgId,
-          demoMode,
           requestSignature: { table: 'projects', filters: filtersProjects }
         })
       }
@@ -87,12 +80,11 @@ export function useBlockedProjects() {
         return
       }
 
-      const filtersTasks = { org_id: orgId, is_demo: demoMode, project_id_in: ids.length }
+      const filtersTasks = { org_id: orgId, project_id_in: ids.length }
       const tasksQuery = supabase
         .from('project_tasks')
         .select('*')
         .eq('org_id', orgId)
-        .eq('is_demo', demoMode)
         .in('project_id', ids)
 
       if (isDev) {
