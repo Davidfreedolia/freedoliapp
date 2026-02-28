@@ -275,14 +275,10 @@ export default function Projects() {
         supabase
           .from('expenses')
           .select('project_id,amount')
-          .eq('user_id', userId)
-          .eq('is_demo', demoMode)
           .in('project_id', ids),
         supabase
           .from('incomes')
           .select('project_id,amount')
-          .eq('user_id', userId)
-          .eq('is_demo', demoMode)
           .in('project_id', ids)
       ])
       if (cancelled || !mountedRef.current || seq !== businessLoadSeqRef.current) return

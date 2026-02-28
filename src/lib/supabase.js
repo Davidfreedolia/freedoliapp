@@ -4882,13 +4882,11 @@ export const ensureExpenseForOccurrence = async (occurrence) => {
   
   // If expense_id already exists, verify and return it
   if (occurrence.expense_id) {
-    // Verify the expense belongs to the user
+    // Verify the expense exists (RLS limits to org)
     const { data: existingExpense, error: checkError } = await supabase
       .from('expenses')
       .select('id')
       .eq('id', occurrence.expense_id)
-      .eq('user_id', userId)
-      .eq('is_demo', demoMode)
       .maybeSingle()
     
     if (existingExpense && !checkError) {
@@ -4939,12 +4937,17 @@ export const ensureExpenseForOccurrence = async (occurrence) => {
   const monthDate = new Date(occurrence.month)
   const period = `${monthDate.getFullYear()}-${String(monthDate.getMonth() + 1).padStart(2, '0')}`
   
-  // Create expense
+  // Resolve org_id for expense (project or global project)
+  const projectIdForOrg = recurring.project_id || globalProject.id
+  const { data: projRow } = await supabase.from('projects').select('org_id').eq('id', projectIdForOrg).maybeSingle()
+  const orgId = projRow?.org_id
+  if (!orgId) throw new Error('Could not resolve org for expense')
+
   const expenseData = {
-    project_id: recurring.project_id || globalProject.id,
+    project_id: projectIdForOrg,
     supplier_id: recurring.supplier_id || null,
     category_id: recurring.category_id || null,
-    category: categoryName, // REQUIRED: category (string) NOT NULL in DB
+    category: categoryName,
     description: recurring.description,
     amount: occurrence.amount_actual || occurrence.amount_expected,
     currency: occurrence.currency || recurring.currency || 'EUR',
@@ -4952,9 +4955,9 @@ export const ensureExpenseForOccurrence = async (occurrence) => {
     notes: `Recurring: ${recurring.description} | Period: ${period}${recurring.notes ? ` | ${recurring.notes}` : ''}`,
     payment_status: 'pending',
     user_id: userId,
-    is_demo: demoMode
+    org_id: orgId
   }
-  
+
   const { data: newExpense, error: createError } = await supabase
     .from('expenses')
     .insert([expenseData])
@@ -4984,40 +4987,29 @@ export const ensureExpenseForOccurrence = async (occurrence) => {
  * Get recurring expenses KPIs
  */
 export const getRecurringExpensesKPIs = async () => {
-  // Get demo mode setting
-  const { getDemoMode } = await import('./demoModeFilter')
-  const demoMode = await getDemoMode()
-  
-  const userId = await getCurrentUserId()
   const today = new Date()
   const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`
   const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1)
   const nextMonthStr = `${nextMonth.getFullYear()}-${String(nextMonth.getMonth() + 1).padStart(2, '0')}`
   
-  // Pending (expected, no pagades, mes actual o anterior)
+  // Pending (expected, no pagades, mes actual o anterior) — RLS per org
   const { data: pending } = await supabase
     .from('expenses')
     .select('amount, currency')
-    .eq('user_id', userId)
-    .eq('is_demo', demoMode) // Filter by demo mode
     .eq('recurring_status', 'expected')
     .eq('payment_status', 'pending')
     .lte('recurring_period', currentMonth)
-  
+
   // Paid (pagades)
   const { data: paid } = await supabase
     .from('expenses')
     .select('amount, currency')
-    .eq('user_id', userId)
-    .eq('is_demo', demoMode) // Filter by demo mode
     .eq('recurring_status', 'paid')
-  
+
   // Upcoming (expected, mes següent o posterior)
   const { data: upcoming } = await supabase
     .from('expenses')
     .select('amount, currency')
-    .eq('user_id', userId)
-    .eq('is_demo', demoMode) // Filter by demo mode
     .eq('recurring_status', 'expected')
     .gte('recurring_period', nextMonthStr)
   

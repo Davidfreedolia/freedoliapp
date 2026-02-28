@@ -1023,15 +1023,11 @@ ${t}
         supabase
           .from('expenses')
           .select('project_id,amount')
-          .eq('project_id', id)
-          .eq('user_id', userId)
-          .eq('is_demo', demoMode),
+          .eq('project_id', id),
         supabase
           .from('incomes')
           .select('project_id,amount')
           .eq('project_id', id)
-          .eq('user_id', userId)
-          .eq('is_demo', demoMode)
       ])
       if (cancelled || !mountedRef.current) return
       const snapshot = computeProjectBusinessSnapshot({

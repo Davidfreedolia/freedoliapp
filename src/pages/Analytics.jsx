@@ -118,7 +118,6 @@ export default function Analytics() {
         let expensesQuery = supabase
           .from('expenses')
           .select('*')
-          .eq('user_id', userId)
           .gte('expense_date', startDateStr)
         if (filterProject) expensesQuery = expensesQuery.eq('project_id', filterProject)
         const { data: expensesRes, error: expensesError } = await expensesQuery
@@ -129,7 +128,6 @@ export default function Analytics() {
         let incomesQuery = supabase
           .from('incomes')
           .select('*')
-          .eq('user_id', userId)
           .gte('income_date', startDateStr)
         if (filterProject) incomesQuery = incomesQuery.eq('project_id', filterProject)
         const { data: incomesRes, error: incomesError } = await incomesQuery

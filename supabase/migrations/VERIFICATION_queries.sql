@@ -164,3 +164,14 @@ ORDER BY table_name;
 
 -- Policy org-based única
 -- SELECT policyname, cmd FROM pg_policies WHERE schemaname='public' AND tablename='supplier_sample_requests';
+
+-- ============================================
+-- S1.11 — expenses + incomes org-scoped (ready; is_demo no eliminat encara)
+-- Executar després d'aplicar 20260228240000_s1_11_expenses_incomes_org_scope_ready.sql
+-- ============================================
+-- null orgs (esperat: 0 per ambdues)
+-- SELECT 'expenses' AS tbl, COUNT(*) AS null_orgs FROM public.expenses WHERE org_id IS NULL
+-- UNION ALL SELECT 'incomes', COUNT(*) FROM public.incomes WHERE org_id IS NULL;
+
+-- Policies (esperat: una per taula, org-based)
+-- SELECT tablename, policyname, cmd FROM pg_policies WHERE schemaname='public' AND tablename IN ('expenses','incomes') ORDER BY tablename;

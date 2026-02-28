@@ -79,7 +79,7 @@ const writeLocalFlag = (key, value) => {
 }
 
 export default function Finances() {
-  const { darkMode, demoMode } = useApp()
+  const { darkMode, demoMode, activeOrgId } = useApp()
   const { isMobile, isTablet } = useBreakpoint()
   const { t } = useTranslation()
   const modalStyles = getModalStyles(isMobile, darkMode)
@@ -352,7 +352,7 @@ export default function Finances() {
       
       setCategories({ income: incomeCats, expense: expenseCats })
       
-      // Load expenses, incomes, projects, suppliers, views (ALL with is_demo = false)
+      // Load expenses, incomes (org-scoped via RLS), projects, suppliers, views
       const results = await Promise.all([
         supabase
           .from('expenses')
@@ -366,8 +366,6 @@ export default function Finances() {
             supplier:suppliers(id, name),
             category:finance_categories(id, name, color, icon)
           `)
-          .eq('user_id', userId)
-          .eq('is_demo', false) // Real mode: only non-demo expenses
           .order('expense_date', { ascending: false }),
         supabase
           .from('incomes')
@@ -376,8 +374,6 @@ export default function Finances() {
             project:projects(id, name, project_code),
             category:finance_categories(id, name, color, icon)
           `)
-          .eq('user_id', userId)
-          .eq('is_demo', false) // Real mode: only non-demo incomes
           .order('income_date', { ascending: false }),
         getProjects(),
         getSuppliers(),
@@ -897,7 +893,8 @@ export default function Finances() {
           notes: editingTransaction.notes,
           user_id: userId
         }
-        
+        if (activeOrgId) data.org_id = activeOrgId
+
         if (editingTransaction.id) {
           const { data: updatedData, error } = await supabase
             .from('expenses')
@@ -953,7 +950,8 @@ export default function Finances() {
           notes: editingTransaction.notes,
           user_id: userId
         }
-        
+        if (activeOrgId) data.org_id = activeOrgId
+
         if (editingTransaction.id) {
           const { error } = await supabase
             .from('incomes')
