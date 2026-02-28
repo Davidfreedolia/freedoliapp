@@ -141,3 +141,13 @@ ORDER BY table_name;
 
 -- Test insert (comentari; substituir project_id per un id real si es vol provar)
 -- INSERT INTO public.project_events (project_id, type, title, event_date) VALUES ('<project_id_uuid>', 'milestone', 'Test S1.8', CURRENT_DATE) RETURNING id, org_id;
+
+-- ============================================
+-- S1.9 — is_demo eliminat de project_events
+-- Executar després d'aplicar 20260228230000_s1_9_drop_is_demo_project_events.sql
+-- ============================================
+-- is_demo ja no existeix (esperat: 0 rows)
+-- SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='project_events' AND column_name='is_demo';
+
+-- Sanity: inserir event i veure org_id s'emplena (executar manualment)
+-- INSERT INTO public.project_events (project_id, type, title, event_date) VALUES ('<project_id_uuid>', 'milestone', 'Test S1.9', CURRENT_DATE) RETURNING id, org_id;
