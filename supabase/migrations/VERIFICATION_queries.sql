@@ -276,3 +276,18 @@ ORDER BY table_name;
 -- SELECT COUNT(*) AS null_orgs FROM public.logistics_flow WHERE org_id IS NULL;
 -- Policy org-based
 -- SELECT policyname, cmd, qual FROM pg_policies WHERE schemaname='public' AND tablename='logistics_flow';
+
+-- ============================================
+-- S1.20 — gtin_pool org-scoped (contract change)
+-- Executar després d'aplicar 20260228290000_s1_20_gtin_pool_org_scope.sql
+-- ============================================
+-- is_demo absent
+-- SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='gtin_pool' AND column_name='is_demo';
+-- UNIQUE(org_id, gtin_code) present (partial index)
+-- SELECT indexname, indexdef FROM pg_indexes WHERE tablename='gtin_pool' AND indexname='idx_gtin_pool_org_gtin_code';
+-- null_orgs = 0
+-- SELECT COUNT(*) AS null_orgs FROM public.gtin_pool WHERE org_id IS NULL;
+-- RLS policy org-based
+-- SELECT policyname, cmd, qual FROM pg_policies WHERE schemaname='public' AND tablename='gtin_pool';
+-- RPC import_gtins signature (p_org_id, no p_is_demo)
+-- SELECT proname, pg_get_function_arguments(oid) FROM pg_proc WHERE proname='import_gtins';

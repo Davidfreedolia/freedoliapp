@@ -22,16 +22,17 @@ import {
   releaseGtinFromProject,
   supabase
 } from '../lib/supabase'
-import { getDemoMode } from '../lib/demoModeFilter'
 import { showToast } from './Toast'
 import Button from './Button'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
 import { getButtonStyles, useButtonState } from '../utils/buttonStyles'
+import { useApp } from '../context/AppContext'
 
 export default function GTINPoolSection({ darkMode }) {
   const navigate = useNavigate()
   const { t } = useTranslation()
+  const { activeOrgId } = useApp()
   const { isMobile } = useBreakpoint()
   const modalStyles = getModalStyles(isMobile, darkMode)
   const cancelButtonState = useButtonState()
@@ -48,13 +49,13 @@ export default function GTINPoolSection({ darkMode }) {
   const loadGtins = useCallback(async () => {
     setLoading(true)
     try {
-      const data = await getGtinPool(statusFilter)
+      const data = await getGtinPool(statusFilter, activeOrgId)
       setGtins(data || [])
     } catch (err) {
       console.error('Error carregant GTIN pool:', err)
     }
     setLoading(false)
-  }, [statusFilter])
+  }, [statusFilter, activeOrgId])
 
   useEffect(() => {
     loadGtins()
@@ -250,10 +251,12 @@ export default function GTINPoolSection({ darkMode }) {
         }
       })
 
-      // Obtenir demo mode
-      const demoMode = await getDemoMode()
+      if (!activeOrgId) {
+        showToast(t('settings.gtinPool.importError') || 'No workspace selected', 'error')
+        setImporting(false)
+        return
+      }
 
-      // Agrupar per tipus i notes per processar en batches
       const groupedByType = {}
       validatedGtins.forEach(gtin => {
         const key = `${gtin.gtin_type}|||${gtin.notes || ''}`
@@ -267,7 +270,6 @@ export default function GTINPoolSection({ darkMode }) {
         groupedByType[key].codes.push(gtin.gtin_code)
       })
 
-      // Processar cada grup amb la funció RPC
       let totalInserted = 0
       let totalRestored = 0
       let totalSkipped = 0
@@ -279,7 +281,7 @@ export default function GTINPoolSection({ darkMode }) {
             p_codes: group.codes,
             p_gtin_type: group.gtin_type,
             p_notes: group.notes,
-            p_is_demo: demoMode
+            p_org_id: activeOrgId
           })
 
           if (error) throw error

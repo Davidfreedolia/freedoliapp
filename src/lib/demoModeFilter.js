@@ -75,7 +75,8 @@ export const NO_IS_DEMO_TABLES = new Set([
   'po_shipments',
   'po_amazon_readiness',
   'supplier_price_estimates',
-  'logistics_flow'
+  'logistics_flow',
+  'gtin_pool'
 ])
 
 /**

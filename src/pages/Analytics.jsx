@@ -163,7 +163,7 @@ export default function Analytics() {
 
       // GTIN Pool - Unassigned codes
       try {
-        const unassigned = await getUnassignedGtinCodes()
+        const unassigned = await getUnassignedGtinCodes(activeOrgId)
         setUnassignedGtins(unassigned || [])
       } catch (gtinErr) {
         console.warn('Error carregant GTINs no assignats:', gtinErr)

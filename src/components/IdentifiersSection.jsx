@@ -87,23 +87,18 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({
           fnsku: data.fnsku || ''
         })
         
-        // Comprovar si aquest GTIN ve del pool
-        if (data.gtin_code) {
-          const userId = await getCurrentUserId()
-          if (userId) {
-            const { data: poolGtin } = await supabase
-              .from('gtin_pool')
-              .select('id, status, assigned_to_project_id')
-              .eq('gtin_code', data.gtin_code)
-              .eq('user_id', userId)
-              .eq('assigned_to_project_id', projectId)
-              .single()
-            
-            if (poolGtin && poolGtin.status === 'assigned') {
-              setAssignedGtinFromPool(poolGtin.id)
-            } else {
-              setAssignedGtinFromPool(null)
-            }
+        if (data.gtin_code && activeOrgId) {
+          const { data: poolGtin } = await supabase
+            .from('gtin_pool')
+            .select('id, status, assigned_to_project_id')
+            .eq('gtin_code', data.gtin_code)
+            .eq('org_id', activeOrgId)
+            .eq('assigned_to_project_id', projectId)
+            .maybeSingle()
+          if (poolGtin && poolGtin.assigned_to_project_id) {
+            setAssignedGtinFromPool(poolGtin.id)
+          } else {
+            setAssignedGtinFromPool(null)
           }
         } else {
           setAssignedGtinFromPool(null)
@@ -111,15 +106,14 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({
       } else {
         setAssignedGtinFromPool(null)
       }
-      
-      // Carregar GTINs disponibles del pool
-      const gtins = await getAvailableGtinCodes()
+
+      const gtins = await getAvailableGtinCodes(activeOrgId)
       setAvailableGtins(gtins || [])
     } catch (err) {
       console.error('Error carregant identifiers:', err)
     }
     setLoading(false)
-  }, [projectId])
+  }, [projectId, activeOrgId])
 
   useEffect(() => {
     loadData()

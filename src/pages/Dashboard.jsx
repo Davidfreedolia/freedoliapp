@@ -373,7 +373,7 @@ export default function Dashboard() {
     try {
       const [missingGtin, availableCodes] = await Promise.all([
         getProjectsMissingGtin(activeOrgId),
-        getUnassignedGtinCodes()
+        getUnassignedGtinCodes(activeOrgId)
       ])
       setGtinCoverage({
         missingGtin: missingGtin?.length || 0,
