@@ -1258,6 +1258,7 @@ export default function Finances() {
           darkMode={darkMode} 
           categories={categories}
           demoMode={demoMode}
+          activeOrgId={activeOrgId}
           expenseCategories={categories?.expense || []}
           onExpensesGenerated={loadData}
         />

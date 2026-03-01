@@ -194,3 +194,17 @@ ORDER BY table_name;
 -- UNION ALL SELECT 'sticky_notes', COUNT(*) FROM public.sticky_notes WHERE org_id IS NULL;
 -- Policies org-based
 -- SELECT tablename, policyname, cmd FROM pg_policies WHERE schemaname='public' AND tablename IN ('tasks','sticky_notes') ORDER BY tablename;
+
+-- ============================================
+-- S1.14 — recurring_expenses + recurring_expense_occurrences org-scoped, is_demo eliminat
+-- Executar després d'aplicar 20260228253000_s1_14_recurring_org_scope_drop_is_demo.sql
+-- ============================================
+-- is_demo absent (ha de retornar 0 rows)
+-- SELECT table_name, column_name FROM information_schema.columns WHERE table_schema='public' AND table_name IN ('recurring_expenses','recurring_expense_occurrences') AND column_name='is_demo' ORDER BY table_name;
+-- null orgs (ha de ser 0)
+-- SELECT 'recurring_expenses' AS tbl, COUNT(*) AS null_orgs FROM public.recurring_expenses WHERE org_id IS NULL
+-- UNION ALL SELECT 'recurring_expense_occurrences', COUNT(*) FROM public.recurring_expense_occurrences WHERE org_id IS NULL;
+-- Policies org-based
+-- SELECT tablename, policyname, cmd FROM pg_policies WHERE schemaname='public' AND tablename IN ('recurring_expenses','recurring_expense_occurrences') ORDER BY tablename;
+-- Funcions que mencionen is_demo (ha de retornar 0 per generate_recurring_expenses)
+-- SELECT proname FROM pg_proc JOIN pg_namespace ON pg_namespace.oid = pg_proc.pronamespace WHERE nspname='public' AND pg_get_functiondef(pg_proc.oid) ILIKE '%is_demo%';

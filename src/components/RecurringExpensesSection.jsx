@@ -19,7 +19,7 @@ import { getProjects, getSuppliers, createSupplier } from '../lib/supabase'
 import { showToast } from './Toast'
 import ReceiptUploader from './ReceiptUploader'
 
-export default function RecurringExpensesSection({ darkMode, categories, demoMode, expenseCategories = [], onExpensesGenerated }) {
+export default function RecurringExpensesSection({ darkMode, categories, demoMode, activeOrgId, expenseCategories = [], onExpensesGenerated }) {
   const [recurringExpenses, setRecurringExpenses] = useState([])
   const [projects, setProjects] = useState([])
   const [suppliers, setSuppliers] = useState([])
@@ -47,16 +47,15 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
   useEffect(() => {
     loadData()
     loadKPIs()
-  }, [demoMode]) // Reload when demoMode changes
+  }, [activeOrgId])
 
   const loadData = async () => {
     setLoading(true)
     try {
-      // Ensure global project exists
-      await getOrCreateGlobalProject()
-      
+      await getOrCreateGlobalProject(activeOrgId ?? undefined)
+
       const [recurring, projs, supps] = await Promise.all([
-        getRecurringExpenses(),
+        getRecurringExpenses(activeOrgId ?? undefined),
         getProjects(),
         getSuppliers()
       ])
@@ -289,7 +288,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
         await updateRecurringExpense(editingRecurring.id, editingRecurring)
         showToast('Despesa recurrent actualitzada', 'success')
       } else {
-        await createRecurringExpense(editingRecurring)
+        await createRecurringExpense({ ...editingRecurring, ...(activeOrgId ? { org_id: activeOrgId } : {}) })
         showToast('Despesa recurrent creada', 'success')
       }
       await loadData()
