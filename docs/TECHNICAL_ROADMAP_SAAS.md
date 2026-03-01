@@ -46,13 +46,38 @@
 - **Accés:** Un usuari només pot veure/modificar dades de les orgs on és membre (`org_memberships`). RLS ho aplica amb `is_org_member(org_id)`.
 - **Sense excepcions:** No hi ha “dades del usuari sense org”; si una fila no pot assignar-se a cap org, es considera orfe i es pot esborrar en migracions (p. ex. health_runs).
 
-### Normes obligatòries per taules noves (TENANT-DATA)
+### Contracte final multi-tenant (post S1.20)
+
+Després de S1.4–S1.20 totes les taules de dades de negoci són **org-scoped**: tenen `org_id` com a clau de tenancy, la columna `is_demo` ha estat eliminada d’aquestes taules i RLS es basa en `is_org_member(org_id)`. No s’usa `user_id` ni `is_demo` per filtrar dades tenant; el frontend passa `activeOrgId` on cal i confia en RLS.
+
+### Regla obligatòria per futures taules (TENANT-DATA)
+
+Qualsevol **nova taula** que emmagatzemi dades per tenant ha de complir:
+
+1. **org_id NOT NULL** — `org_id uuid NOT NULL REFERENCES public.orgs(id) ON DELETE CASCADE`.
+2. **Índex** — `CREATE INDEX idx_<table>_org_id ON public.<table>(org_id)`.
+3. **RLS** — `ALTER TABLE ... ENABLE ROW LEVEL SECURITY`.
+4. **Policies** — Una policy (o SELECT/INSERT/UPDATE/DELETE) amb `USING (public.is_org_member(org_id))` i `WITH CHECK (public.is_org_member(org_id))` per a totes les operacions. **Prohibit:** policies amb `auth.uid() = user_id` per dades tenant; prohibit `allow_all` en TENANT-DATA.
+
+Resum: **org_id NOT NULL + index + RLS is_org_member(org_id)**.
+
+### Normes detallades per taules noves (TENANT-DATA)
 
 - `org_id uuid NOT NULL REFERENCES public.orgs(id) ON DELETE CASCADE`.
 - `CREATE INDEX idx_<table>_org_id ON public.<table>(org_id)`.
 - `ALTER TABLE ... ENABLE ROW LEVEL SECURITY`.
 - Quatre policies: SELECT, INSERT, UPDATE, DELETE per `authenticated` amb `USING (public.is_org_member(org_id))` i `WITH CHECK (public.is_org_member(org_id))` on correspongui.
-- **Prohibit:** policies amb nom `allow_all%` o `%allow all%`; `qual IS NULL` o `with_check = true` permissive en TENANT-DATA.
+- **Prohibit:** policies amb nom `allow_all%` o `%allow all%`; `qual IS NULL` o `with_check = true` permissive en TENANT-DATA; policies user-based (`auth.uid() = user_id`) en taules tenant.
+
+### Auditoria global (post S1.20)
+
+**Schema (executar a la base):** Veure `supabase/migrations/VERIFICATION_queries.sql` — bloc «AUDITORIA GLOBAL POST S1.20»:
+
+1. **Columnes is_demo restants** — `SELECT table_name, column_name FROM information_schema.columns WHERE table_schema='public' AND column_name='is_demo'` → ha de retornar 0 rows en taules tenant.
+2. **Taules amb RLS desactivat** — Taules `public` amb `relrowsecurity = false`; les que tenen `org_id` haurien de tenir RLS ON.
+3. **Policies user-based** — `pg_policies` amb `qual ILIKE '%auth.uid()%'`; en taules TENANT-DATA haurien de ser 0 (només `is_org_member(org_id)`).
+
+**Frontend residual:** Queden usos de `.eq('user_id', ...)` i `is_demo` en: `org_memberships` (resolució d’org), demoSeed/DevSeed (seed demo), queryHelpers/demoModeFilter (legacy per taules no org-scoped), i en alguns components/pàgines per taules que encara no s’han migrat o per lògica de resolució. Les noves taules i les ja migrades (CORE_NO_IS_DEMO_TABLES) no han d’usar `user_id`/`is_demo` per filtrat tenant.
 
 ---
 

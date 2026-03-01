@@ -291,3 +291,28 @@ ORDER BY table_name;
 -- SELECT policyname, cmd, qual FROM pg_policies WHERE schemaname='public' AND tablename='gtin_pool';
 -- RPC import_gtins signature (p_org_id, no p_is_demo)
 -- SELECT proname, pg_get_function_arguments(oid) FROM pg_proc WHERE proname='import_gtins';
+
+-- ============================================
+-- AUDITORIA GLOBAL POST S1.20 (multi-tenant final)
+-- Executar a la base per verificar estat del schema.
+-- ============================================
+
+-- A1) Columnes is_demo restants (ha de retornar 0 rows si purga complet)
+-- SELECT table_name, column_name
+-- FROM information_schema.columns
+-- WHERE table_schema='public'
+--   AND column_name='is_demo';
+
+-- A2) Taules amb RLS desactivat (revisar: taules sense org_id poden ser REFERENCE; les amb org_id haurien de tenir RLS ON)
+-- SELECT relname
+-- FROM pg_class c
+-- JOIN pg_namespace n ON n.oid = c.relnamespace
+-- WHERE n.nspname='public'
+--   AND c.relkind='r'
+--   AND c.relrowsecurity = false;
+
+-- A3) Policies user-based residuals (auth.uid() = user_id) — haurien de ser 0 en taules TENANT-DATA
+-- SELECT tablename, policyname, qual
+-- FROM pg_policies
+-- WHERE schemaname='public'
+--   AND qual ILIKE '%auth.uid()%';

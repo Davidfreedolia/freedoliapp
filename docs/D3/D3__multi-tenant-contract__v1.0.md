@@ -2,8 +2,8 @@
 
 Status: stable  
 Owner: Lead Architect  
-Last verified against: (run: `git rev-parse --short HEAD`) — 2025-02-17  
-Related migrations: S1.0–S1.7  
+Last verified against: (run: `git rev-parse --short HEAD`) — post S1.20  
+Related migrations: S1.0–S1.20  
 
 ---
 
@@ -15,13 +15,14 @@ Cap dada de negoci fora d’org_id.
 
 ---
 
-## 2. Mandatory Rules for Tenant Tables
+## 2. Mandatory Rules for Tenant Tables (contracte final post S1.20)
 
-- org_id uuid NOT NULL
-- FK → orgs(id)
-- index on org_id
-- RLS enabled
-- CRUD policies using helpers
+**Regla obligatòria per totes les taules noves amb dades tenant:**
+
+- **org_id** uuid NOT NULL, FK → orgs(id)
+- **Índex** en org_id: `CREATE INDEX idx_<table>_org_id ON public.<table>(org_id)`
+- **RLS** enabled
+- **Policies** basades en `is_org_member(org_id)` (USING i WITH CHECK). Prohibit: policies amb `auth.uid() = user_id` per dades tenant; prohibit allow_all en TENANT-DATA.
 
 ---
 

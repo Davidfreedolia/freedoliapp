@@ -2,15 +2,15 @@
 
 Status: stable  
 Owner: Lead Architect  
-Last verified against: (run: `git rev-parse --short HEAD`) — 2025-02-17  
-Related migrations: S1.0–S1.7  
+Last verified against: (run: `git rev-parse --short HEAD`) — post S1.20  
+Related migrations: S1.0–S1.20  
 Related modules: D3, D8.x  
 
 ---
 
 ## 1. Scope
 
-Defineix el model de base de dades real i el patró RLS aplicat.
+Defineix el model de base de dades real i el patró RLS aplicat. **Contracte multi-tenant final:** totes les taules de dades de negoci són org-scoped (org_id NOT NULL + index + RLS is_org_member(org_id)). Veure D3 i TECHNICAL_ROADMAP_SAAS.md.
 
 ---
 
