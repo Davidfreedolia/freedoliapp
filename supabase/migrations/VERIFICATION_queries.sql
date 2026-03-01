@@ -208,3 +208,14 @@ ORDER BY table_name;
 -- SELECT tablename, policyname, cmd FROM pg_policies WHERE schemaname='public' AND tablename IN ('recurring_expenses','recurring_expense_occurrences') ORDER BY tablename;
 -- Funcions que mencionen is_demo (ha de retornar 0 per generate_recurring_expenses)
 -- SELECT proname FROM pg_proc JOIN pg_namespace ON pg_namespace.oid = pg_proc.pronamespace WHERE nspname='public' AND pg_get_functiondef(pg_proc.oid) ILIKE '%is_demo%';
+
+-- ============================================
+-- S1.15a — warehouses org-scoped, is_demo eliminat
+-- Executar després d'aplicar 20260228260000_s1_15a_warehouses_org_scope_drop_is_demo.sql
+-- ============================================
+-- is_demo absent (ha de retornar 0 rows)
+-- SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='warehouses' AND column_name='is_demo';
+-- null orgs (ha de ser 0)
+-- SELECT COUNT(*) AS null_orgs FROM public.warehouses WHERE org_id IS NULL;
+-- Policy org-based
+-- SELECT policyname, cmd FROM pg_policies WHERE schemaname='public' AND tablename='warehouses';

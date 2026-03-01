@@ -971,7 +971,7 @@ export const getDashboardStats = async () => {
 // ============================================
 
 // Taules org-scoped sense columna is_demo (S1.5/S1.4b); no injectar filtre
-const CORE_NO_IS_DEMO_TABLES = new Set(['projects', 'suppliers', 'supplier_quotes', 'purchase_orders', 'product_identifiers', 'tasks', 'sticky_notes', 'recurring_expenses', 'recurring_expense_occurrences'])
+const CORE_NO_IS_DEMO_TABLES = new Set(['projects', 'suppliers', 'supplier_quotes', 'purchase_orders', 'product_identifiers', 'tasks', 'sticky_notes', 'recurring_expenses', 'recurring_expense_occurrences', 'warehouses'])
 
 /**
  * Apply demo mode filter to a Supabase query.
@@ -2043,28 +2043,23 @@ export const setShipmentStatus = async (poId, status) => {
 }
 
 // MAGATZEMS
-export const getWarehouses = async () => {
-  // Get demo mode setting
-  const { getDemoMode } = await import('./demoModeFilter')
-  const demoMode = await getDemoMode()
-  
-  // Avoid relationship ambiguity - fetch warehouses without embedded supplier
-  // If supplier info is needed, it can be fetched separately using supplier_id
+export const getWarehouses = async (activeOrgId = null) => {
   const userId = await getCurrentUserId()
-  
-  // Use getSupabaseClient directly to avoid Proxy issues in production
+  if (!userId) return []
+
   const client = getSupabaseClient()
   if (!client || typeof client.from !== 'function') {
     throw new Error('Supabase client not available')
   }
-  
-  const { data, error } = await client
+
+  let query = client
     .from('warehouses')
     .select('*')
-    .eq('user_id', userId)
-    .eq('is_demo', demoMode) // Filter by demo mode
     .order('name', { ascending: true })
-  
+  if (activeOrgId) {
+    query = query.eq('org_id', activeOrgId)
+  }
+  const { data, error } = await query
   if (error) throw error
   return data || []
 }
@@ -2080,11 +2075,20 @@ export const getWarehouse = async (id) => {
 }
 
 export const createWarehouse = async (warehouse) => {
-  // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
-  const { user_id, ...warehouseData } = warehouse
+  const { user_id, org_id: payloadOrgId, ...warehouseData } = warehouse
+  const userId = await getCurrentUserId()
+  if (!userId) return authRequired()
+
+  let orgId = payloadOrgId
+  if (!orgId) {
+    const { data: om } = await supabase.from('org_memberships').select('org_id').eq('user_id', userId).limit(1).maybeSingle()
+    orgId = om?.org_id
+  }
+  if (!orgId) throw new Error('No org context for warehouse')
+
   const { data, error } = await supabase
     .from('warehouses')
-    .insert([warehouseData])
+    .insert([{ ...warehouseData, user_id: userId, org_id: orgId }])
     .select()
     .maybeSingle()
   if (error) throw error
@@ -2105,28 +2109,21 @@ export const updateWarehouse = async (id, updates) => {
 }
 
 export const deleteWarehouse = async (id) => {
-  // Get demo mode setting
-  const { getDemoMode } = await import('./demoModeFilter')
-  const demoMode = await getDemoMode()
-  
   const userId = await getCurrentUserId()
   if (!userId) {
     return authRequired()
   }
-  
-  // Use getSupabaseClient directly to avoid Proxy issues in production
+
   const client = getSupabaseClient()
   if (!client || typeof client.from !== 'function') {
     throw new Error('Supabase client not available')
   }
-  
+
   const { error } = await client
     .from('warehouses')
     .delete()
     .eq('id', id)
-    .eq('user_id', userId) // Ensure user can only delete their own warehouses
-    .eq('is_demo', demoMode) // Ensure demo/real mode consistency
-  
+
   if (error) throw error
   return true
 }

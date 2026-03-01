@@ -70,7 +70,7 @@ const WAREHOUSE_TYPES = [
 ]
 
 export default function Warehouses() {
-  const { darkMode, demoMode } = useApp()
+  const { darkMode, demoMode, activeOrgId } = useApp()
   const { t } = useTranslation()
   const { isMobile, isTablet } = useBreakpoint()
   const modalStyles = getModalStyles(isMobile, darkMode)
@@ -95,7 +95,7 @@ export default function Warehouses() {
 
   useEffect(() => {
     loadData()
-  }, [])
+  }, [activeOrgId])
 
   // Close actions menu when clicking outside
   useEffect(() => {
@@ -116,7 +116,7 @@ export default function Warehouses() {
   const loadData = async () => {
     setLoading(true)
     try {
-      const data = await getWarehouses()
+      const data = await getWarehouses(activeOrgId ?? undefined)
       // Filtrar només magatzems NO vinculats a transitaris (tipus amazon o custom)
       const filteredData = (data || []).filter(w => !w.supplier_id || w.type === 'amazon_fba' || w.type === 'amazon_fbm' || w.type === 'custom')
       setWarehouses(filteredData)
@@ -279,7 +279,7 @@ export default function Warehouses() {
         await updateWarehouse(editingWarehouse.id, editingWarehouse)
         showToast('Magatzem actualitzat correctament', 'success')
       } else {
-        await createWarehouse(editingWarehouse)
+        await createWarehouse({ ...editingWarehouse, ...(activeOrgId ? { org_id: activeOrgId } : {}) })
         showToast('Magatzem creat correctament', 'success')
       }
       await loadData()
@@ -370,7 +370,8 @@ export default function Warehouses() {
             contact_name: 'Amazon FBA',
             contact_phone: '',
             contact_email: '',
-            notes: `Codi: ${amazonWarehouse.code}`
+            notes: `Codi: ${amazonWarehouse.code}`,
+            ...(activeOrgId ? { org_id: activeOrgId } : {})
           })
         }
       }

@@ -61,6 +61,7 @@ export function clearDemoModeCache() {
 export const NO_IS_DEMO_TABLES = new Set([
   'recurring_expenses',
   'recurring_expense_occurrences',
+  'warehouses',
   'tasks',
   'sticky_notes',
   'projects',
