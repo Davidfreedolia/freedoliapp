@@ -242,3 +242,15 @@ ORDER BY table_name;
 -- SELECT COUNT(*) AS null_orgs FROM public.payments WHERE org_id IS NULL;
 -- Policy org-based
 -- SELECT policyname, cmd, qual FROM pg_policies WHERE schemaname='public' AND tablename='payments';
+
+-- ============================================
+-- S1.17 — po_shipments + po_amazon_readiness org-scoped, is_demo eliminat
+-- Executar després d'aplicar 20260228273000_s1_17_po_shipments_readiness_org_scope_drop_is_demo.sql
+-- ============================================
+-- is_demo absent (ha de retornar 0 rows)
+-- SELECT table_name, column_name FROM information_schema.columns WHERE table_schema='public' AND table_name IN ('po_shipments','po_amazon_readiness') AND column_name='is_demo' ORDER BY table_name;
+-- null_orgs (ha de ser 0)
+-- SELECT 'po_shipments' AS tbl, COUNT(*) AS null_orgs FROM public.po_shipments WHERE org_id IS NULL
+-- UNION ALL SELECT 'po_amazon_readiness', COUNT(*) FROM public.po_amazon_readiness WHERE org_id IS NULL;
+-- Policies org-based
+-- SELECT tablename, policyname, cmd FROM pg_policies WHERE schemaname='public' AND tablename IN ('po_shipments','po_amazon_readiness') ORDER BY tablename;

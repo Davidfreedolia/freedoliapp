@@ -974,7 +974,7 @@ export const getDashboardStats = async () => {
 // ============================================
 
 // Taules org-scoped sense columna is_demo (S1.5/S1.4b); no injectar filtre
-const CORE_NO_IS_DEMO_TABLES = new Set(['projects', 'suppliers', 'supplier_quotes', 'purchase_orders', 'product_identifiers', 'tasks', 'sticky_notes', 'recurring_expenses', 'recurring_expense_occurrences', 'warehouses', 'documents', 'expense_attachments', 'payments'])
+const CORE_NO_IS_DEMO_TABLES = new Set(['projects', 'suppliers', 'supplier_quotes', 'purchase_orders', 'product_identifiers', 'tasks', 'sticky_notes', 'recurring_expenses', 'recurring_expense_occurrences', 'warehouses', 'documents', 'expense_attachments', 'payments', 'po_shipments', 'po_amazon_readiness'])
 
 /**
  * Apply demo mode filter to a Supabase query.
@@ -1553,7 +1553,6 @@ export const getPoAmazonReadiness = async (purchaseOrderId) => {
     .from('po_amazon_readiness')
     .select('*')
     .eq('purchase_order_id', purchaseOrderId)
-    .eq('user_id', userId)
     .maybeSingle()
   if (error && error.code !== 'PGRST116') throw error // PGRST116 = no rows found
   return data
@@ -1564,19 +1563,25 @@ export const upsertPoAmazonReadiness = async (purchaseOrderId, projectId, readin
   if (isDemoMode() || String(purchaseOrderId).startsWith('demo-')) {
     return null
   }
-  // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
-  const { user_id, ...data } = readinessData
+  const { user_id, org_id: payloadOrgId, ...data } = readinessData || {}
   const userId = await getCurrentUserId()
   if (!userId) {
     return authRequired()
   }
-  
+  const { data: poRow } = await supabase.from('purchase_orders').select('org_id').eq('id', purchaseOrderId).maybeSingle()
+  let orgId = payloadOrgId ?? poRow?.org_id
+  if (!orgId) {
+    const { data: mem } = await supabase.from('org_memberships').select('org_id').eq('user_id', userId).order('created_at', { ascending: true }).limit(1).maybeSingle()
+    orgId = mem?.org_id
+  }
+  if (!orgId) throw new Error('Org context required for amazon readiness')
   const { data: result, error } = await supabase
     .from('po_amazon_readiness')
     .upsert({
       purchase_order_id: purchaseOrderId,
       project_id: projectId,
-      user_id: userId, // Always set user_id explicitly
+      user_id: userId,
+      org_id: orgId,
       ...data,
       updated_at: new Date().toISOString()
     }, {
@@ -1606,7 +1611,6 @@ export const updatePoAmazonReadinessLabels = async (purchaseOrderId, labelsData)
       updated_at: new Date().toISOString()
     })
     .eq('purchase_order_id', purchaseOrderId)
-    .eq('user_id', userId)
     .select()
     .maybeSingle()
   if (error) throw error
@@ -1628,16 +1632,10 @@ export const updateManufacturerPackGenerated = async (purchaseOrderId, version) 
   let projectId = null
   
   if (!existing) {
-    // Necessitem project_id per crear el registre
-    // Get demo mode setting
-    const { getDemoMode } = await import('./demoModeFilter')
-    const demoMode = await getDemoMode()
-    
     const { data: poData } = await supabase
       .from('purchase_orders')
       .select('project_id')
       .eq('id', purchaseOrderId)
-      .eq('user_id', userId)
       .maybeSingle()
     if (poData) projectId = poData.project_id
   } else {
@@ -1648,12 +1646,16 @@ export const updateManufacturerPackGenerated = async (purchaseOrderId, version) 
     throw new Error('PO must have a project_id to track manufacturer pack')
   }
   
+  const { data: poRow } = await supabase.from('purchase_orders').select('org_id').eq('id', purchaseOrderId).maybeSingle()
+  const orgId = poRow?.org_id
+  if (!orgId) throw new Error('PO org context required')
   const { data, error } = await supabase
     .from('po_amazon_readiness')
     .upsert({
       purchase_order_id: purchaseOrderId,
       project_id: projectId,
-      user_id: userId, // Always set user_id explicitly
+      user_id: userId,
+      org_id: orgId,
       manufacturer_pack_version: version,
       manufacturer_pack_generated_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
@@ -1672,7 +1674,6 @@ export const markManufacturerPackAsSent = async (purchaseOrderId) => {
   if (isDemoMode() || String(purchaseOrderId).startsWith('demo-')) {
     return null
   }
-  const userId = await getCurrentUserId()
   const { data, error } = await supabase
     .from('po_amazon_readiness')
     .update({
@@ -1680,7 +1681,6 @@ export const markManufacturerPackAsSent = async (purchaseOrderId) => {
       updated_at: new Date().toISOString()
     })
     .eq('purchase_order_id', purchaseOrderId)
-    .eq('user_id', userId)
     .select()
     .maybeSingle()
   if (error) throw error
@@ -1722,7 +1722,6 @@ export const getPosWaitingManufacturer = async (limit = 10) => {
         )
       )
     `)
-    .eq('user_id', userId)
     .not('manufacturer_pack_generated_at', 'is', null)
     .is('manufacturer_pack_sent_at', null)
     .order('manufacturer_pack_generated_at', { ascending: true })
@@ -1749,7 +1748,6 @@ export const getPosNotReady = async (limit = 10, activeOrgId = null) => {
   
   const userId = await getCurrentUserId()
   
-  // Obtenir totes les POs amb readiness
   const { data: readinessData, error: readinessError } = await supabase
     .from('po_amazon_readiness')
     .select(`
@@ -1767,7 +1765,6 @@ export const getPosNotReady = async (limit = 10, activeOrgId = null) => {
         )
       )
     `)
-    .eq('user_id', userId)
     .order('updated_at', { ascending: false })
     .limit(limit * 3) // Obtenir més per filtrar després
   
@@ -1857,7 +1854,6 @@ export const getShipmentsInTransit = async (limit = 10) => {
           )
         )
       `)
-      .eq('user_id', userId)
       .in('status', ['picked_up', 'in_transit'])
       .order('eta_date', { ascending: true })
       .limit(limit)
@@ -1959,14 +1955,11 @@ export const getStaleTracking = async (limit = 10, staleDays = 7) => {
   })
 }
 
-// SHIPMENT TRACKING
+// SHIPMENT TRACKING (org-scoped; RLS by org_id)
 export const getPoShipment = async (poId) => {
-  const userId = await getCurrentUserId()
-  
   const { data, error } = await supabase
     .from('po_shipments')
     .select('*')
-    .eq('user_id', userId)
     .eq('purchase_order_id', poId)
     .maybeSingle()
   
@@ -1979,38 +1972,32 @@ export const upsertPoShipment = async (poId, payload) => {
   if (!userId) {
     return authRequired()
   }
-  
-  // Strip user_id si ve en payload
-  const { user_id, ...cleanPayload } = payload
-  
-  // Verificar si existeix
+  const { user_id, org_id: _oid, ...cleanPayload } = payload || {}
+  const { data: poRow } = await supabase.from('purchase_orders').select('org_id').eq('id', poId).maybeSingle()
+  const orgId = payload?.org_id ?? poRow?.org_id
+  if (!orgId) throw new Error('PO org context required for shipment')
   const existing = await getPoShipment(poId)
-  
   const shipmentData = {
     ...cleanPayload,
     purchase_order_id: poId,
-    user_id: userId
+    user_id: userId,
+    org_id: orgId
   }
-  
   if (existing) {
     const { data, error } = await supabase
       .from('po_shipments')
       .update(shipmentData)
       .eq('id', existing.id)
-      .eq('user_id', userId)
       .select()
       .maybeSingle()
-    
     if (error) throw error
     return data
   }
-  
   const { data, error } = await supabase
     .from('po_shipments')
     .insert([shipmentData])
     .select()
     .maybeSingle()
-  
   if (error) throw error
   return data
 }
@@ -2037,7 +2024,6 @@ export const setShipmentStatus = async (poId, status) => {
     .from('po_shipments')
     .update({ status })
     .eq('id', existing.id)
-    .eq('user_id', userId)
     .select()
     .maybeSingle()
   
@@ -2288,7 +2274,6 @@ export const getAlerts = async (thresholds = {}) => {
           )
         )
       `)
-      .eq('user_id', userId)
       .not('manufacturer_pack_generated_at', 'is', null)
       .is('manufacturer_pack_sent_at', null)
     
@@ -2337,7 +2322,6 @@ export const getAlerts = async (thresholds = {}) => {
           )
         )
       `)
-      .eq('user_id', userId)
       .not('eta_date', 'is', null)
       .neq('status', 'delivered')
     
@@ -2822,12 +2806,10 @@ export const bulkMarkPacksAsSent = async (poIds) => {
     return authRequired()
   }
   
-  // Get readiness records
   const { data: readinessRecords, error: fetchError } = await supabase
     .from('po_amazon_readiness')
     .select('id')
     .in('purchase_order_id', poIds)
-    .eq('user_id', userId)
     .is('manufacturer_pack_sent_at', null)
     .not('manufacturer_pack_generated_at', 'is', null)
   
@@ -2846,7 +2828,6 @@ export const bulkMarkPacksAsSent = async (poIds) => {
       updated_at: new Date().toISOString()
     })
     .in('id', readinessIds)
-    .eq('user_id', userId)
     .select()
   
   if (error) throw error
@@ -2865,11 +2846,9 @@ export const bulkMarkShipmentsDelivered = async (poIds) => {
       .from('po_shipments')
       .select('id, purchase_order_id')
       .in('purchase_order_id', poIds)
-      .eq('user_id', userId)
       .in('status', ['picked_up', 'in_transit'])
     
     if (fetchError) {
-      // Table might not exist
       if (fetchError.code === '42P01') {
         return []
       }
@@ -2889,7 +2868,6 @@ export const bulkMarkShipmentsDelivered = async (poIds) => {
         updated_at: new Date().toISOString()
       })
       .in('id', shipmentIds)
-      .eq('user_id', userId)
       .select()
     
     if (error) throw error
@@ -2971,7 +2949,6 @@ export const getCalendarEvents = async (filters = {}) => {
             projects(id, name)
           )
         `)
-        .eq('user_id', userId)
       
       if (!shipmentsError && shipments) {
         shipments.forEach(shipment => {
@@ -3554,22 +3531,18 @@ export const getQuoteForPo = async (poId) => {
   return quotes[0]
 }
 
-// Planned vs Actual: Get shipment for PO
+// Planned vs Actual: Get shipment for PO (org-scoped; RLS)
 export const getShipmentForPo = async (poId) => {
-  const userId = await getCurrentUserId()
-  
   try {
     const { data, error } = await supabase
       .from('po_shipments')
       .select('*')
       .eq('purchase_order_id', poId)
-      .eq('user_id', userId)
       .maybeSingle()
     
     if (error && error.code !== 'PGRST116') throw error
     return data || null
   } catch (err) {
-    // Table might not exist
     return null
   }
 }
@@ -3593,13 +3566,11 @@ export const quickMarkPackAsSent = async (poId) => {
       updated_at: new Date().toISOString()
     })
     .eq('id', readiness.id)
-    .eq('user_id', userId)
     .select()
     .maybeSingle()
   
   if (error) throw error
   
-  // Log audit
   try {
     const { logAudit } = await import('./auditLog')
     await logAudit({

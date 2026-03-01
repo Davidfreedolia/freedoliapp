@@ -52,7 +52,6 @@ export const getSupplierMetrics = async (supplierId, supabase, getCurrentUserId)
         .from('po_shipments')
         .select('*')
         .in('purchase_order_id', poIds)
-        .eq('user_id', userId)
       
       if (shipments) {
         shipments.forEach(s => {
