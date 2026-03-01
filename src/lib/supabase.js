@@ -827,20 +827,14 @@ export const deleteDocument = async (id) => {
   return true
 }
 
-// PAGAMENTS
-export const getPayments = async (projectId = null) => {
-  // Get demo mode setting
-  const { getDemoMode } = await import('./demoModeFilter')
-  const demoMode = await getDemoMode()
-  
-  const userId = await getCurrentUserId()
+// PAGAMENTS (org-scoped; RLS by org_id)
+export const getPayments = async (projectId = null, activeOrgId = null) => {
   let query = supabase
     .from('payments')
     .select('*')
-    .eq('user_id', userId)
-    .eq('is_demo', demoMode) // Filter by demo mode
     .order('payment_date', { ascending: false })
 
+  if (activeOrgId) query = query.eq('org_id', activeOrgId)
   if (projectId) query = query.eq('project_id', projectId)
 
   const { data, error } = await query
@@ -849,19 +843,23 @@ export const getPayments = async (projectId = null) => {
 }
 
 export const createPayment = async (payment) => {
-  // Get demo mode setting
-  const { getDemoMode } = await import('./demoModeFilter')
-  const demoMode = await getDemoMode()
-  
-  // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
   const { user_id, ...paymentData } = payment
   const userId = await getCurrentUserId()
   if (!userId) {
     return authRequired()
   }
+  let orgId = paymentData.org_id
+  if (!orgId && paymentData.project_id) {
+    const { data: proj } = await supabase.from('projects').select('org_id').eq('id', paymentData.project_id).maybeSingle()
+    orgId = proj?.org_id
+  }
+  if (!orgId) {
+    const { data: membership } = await supabase.from('org_memberships').select('org_id').eq('user_id', userId).order('created_at', { ascending: true }).limit(1).maybeSingle()
+    orgId = membership?.org_id
+  }
   const { data, error } = await supabase
     .from('payments')
-    .insert([{ ...paymentData, is_demo: demoMode }]) // Mark with current demo mode
+    .insert([{ ...paymentData, user_id: userId, org_id: orgId }])
     .select()
     .maybeSingle()
   if (error) throw error
@@ -945,12 +943,9 @@ export const getDashboardStats = async () => {
     p.decision === 'DISCARDED'
   ).length || 0
 
-  // RLS maneja el filtrado por user_id automáticamente, pero afegim is_demo filter
   const { data: payments, error: paymentsError } = await supabase
     .from('payments')
     .select('amount, currency, type')
-    .eq('user_id', userId)
-    .eq('is_demo', demoMode) // Filter by demo mode
     .eq('status', 'completed')
   
   // Si hay error en payments, continuar con 0 (no crítico para stats)
@@ -979,7 +974,7 @@ export const getDashboardStats = async () => {
 // ============================================
 
 // Taules org-scoped sense columna is_demo (S1.5/S1.4b); no injectar filtre
-const CORE_NO_IS_DEMO_TABLES = new Set(['projects', 'suppliers', 'supplier_quotes', 'purchase_orders', 'product_identifiers', 'tasks', 'sticky_notes', 'recurring_expenses', 'recurring_expense_occurrences', 'warehouses', 'documents', 'expense_attachments'])
+const CORE_NO_IS_DEMO_TABLES = new Set(['projects', 'suppliers', 'supplier_quotes', 'purchase_orders', 'product_identifiers', 'tasks', 'sticky_notes', 'recurring_expenses', 'recurring_expense_occurrences', 'warehouses', 'documents', 'expense_attachments', 'payments'])
 
 /**
  * Apply demo mode filter to a Supabase query.

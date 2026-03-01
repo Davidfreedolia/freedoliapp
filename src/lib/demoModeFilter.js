@@ -70,7 +70,8 @@ export const NO_IS_DEMO_TABLES = new Set([
   'suppliers',
   'supplier_quotes',
   'purchase_orders',
-  'product_identifiers'
+  'product_identifiers',
+  'payments'
 ])
 
 /**

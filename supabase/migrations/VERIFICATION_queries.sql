@@ -231,3 +231,14 @@ ORDER BY table_name;
 -- UNION ALL SELECT 'expense_attachments', COUNT(*) FROM public.expense_attachments WHERE org_id IS NULL;
 -- Policies org-based
 -- SELECT tablename, policyname, cmd FROM pg_policies WHERE schemaname='public' AND tablename IN ('documents','expense_attachments') ORDER BY tablename;
+
+-- ============================================
+-- S1.16 — payments org-scoped, is_demo eliminat
+-- Executar després d'aplicar 20260228270000_s1_16_payments_org_scope_drop_is_demo.sql
+-- ============================================
+-- is_demo absent (ha de retornar 0 rows)
+-- SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='payments' AND column_name='is_demo';
+-- null_orgs (ha de ser 0)
+-- SELECT COUNT(*) AS null_orgs FROM public.payments WHERE org_id IS NULL;
+-- Policy org-based
+-- SELECT policyname, cmd, qual FROM pg_policies WHERE schemaname='public' AND tablename='payments';
