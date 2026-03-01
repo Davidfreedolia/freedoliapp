@@ -265,3 +265,14 @@ ORDER BY table_name;
 -- SELECT COUNT(*) AS null_orgs FROM public.supplier_price_estimates WHERE org_id IS NULL;
 -- Policy org-based
 -- SELECT policyname, cmd, qual FROM pg_policies WHERE schemaname='public' AND tablename='supplier_price_estimates';
+
+-- ============================================
+-- S1.19 — logistics_flow org-scoped, is_demo eliminat
+-- Executar després d'aplicar 20260228283000_s1_19_logistics_flow_org_scope_drop_is_demo.sql
+-- ============================================
+-- is_demo absent (ha de retornar 0 rows)
+-- SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='logistics_flow' AND column_name='is_demo';
+-- null_orgs (ha de ser 0)
+-- SELECT COUNT(*) AS null_orgs FROM public.logistics_flow WHERE org_id IS NULL;
+-- Policy org-based
+-- SELECT policyname, cmd, qual FROM pg_policies WHERE schemaname='public' AND tablename='logistics_flow';

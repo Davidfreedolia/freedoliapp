@@ -974,7 +974,7 @@ export const getDashboardStats = async () => {
 // ============================================
 
 // Taules org-scoped sense columna is_demo (S1.5/S1.4b); no injectar filtre
-const CORE_NO_IS_DEMO_TABLES = new Set(['projects', 'suppliers', 'supplier_quotes', 'purchase_orders', 'product_identifiers', 'tasks', 'sticky_notes', 'recurring_expenses', 'recurring_expense_occurrences', 'warehouses', 'documents', 'expense_attachments', 'payments', 'po_shipments', 'po_amazon_readiness', 'supplier_price_estimates'])
+const CORE_NO_IS_DEMO_TABLES = new Set(['projects', 'suppliers', 'supplier_quotes', 'purchase_orders', 'product_identifiers', 'tasks', 'sticky_notes', 'recurring_expenses', 'recurring_expense_occurrences', 'warehouses', 'documents', 'expense_attachments', 'payments', 'po_shipments', 'po_amazon_readiness', 'supplier_price_estimates', 'logistics_flow'])
 
 /**
  * Apply demo mode filter to a Supabase query.

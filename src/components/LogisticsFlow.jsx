@@ -37,7 +37,7 @@ const LOGISTICS_STAGES = [
 ]
 
 export default function LogisticsFlow({ orderId, projectId, compact = false }) {
-  const { darkMode } = useApp()
+  const { darkMode, activeOrgId } = useApp()
   const [flowData, setFlowData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
@@ -95,12 +95,22 @@ export default function LogisticsFlow({ orderId, projectId, compact = false }) {
 
   const handleSave = async () => {
     try {
+      let orgId = activeOrgId
+      if (!orgId && orderId) {
+        const { data: po } = await supabase.from('purchase_orders').select('org_id').eq('id', orderId).maybeSingle()
+        orgId = po?.org_id
+      }
+      if (!orgId && projectId) {
+        const { data: proj } = await supabase.from('projects').select('org_id').eq('id', projectId).maybeSingle()
+        orgId = proj?.org_id
+      }
       const payload = {
         order_id: orderId,
         project_id: projectId,
         stages: editData,
         updated_at: new Date().toISOString()
       }
+      if (orgId) payload.org_id = orgId
 
       if (flowData?.id) {
         const { error } = await supabase.from('logistics_flow').update(payload).eq('id', flowData.id)
