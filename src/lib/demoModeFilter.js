@@ -73,7 +73,8 @@ export const NO_IS_DEMO_TABLES = new Set([
   'product_identifiers',
   'payments',
   'po_shipments',
-  'po_amazon_readiness'
+  'po_amazon_readiness',
+  'supplier_price_estimates'
 ])
 
 /**

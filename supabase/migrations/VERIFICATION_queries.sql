@@ -254,3 +254,14 @@ ORDER BY table_name;
 -- UNION ALL SELECT 'po_amazon_readiness', COUNT(*) FROM public.po_amazon_readiness WHERE org_id IS NULL;
 -- Policies org-based
 -- SELECT tablename, policyname, cmd FROM pg_policies WHERE schemaname='public' AND tablename IN ('po_shipments','po_amazon_readiness') ORDER BY tablename;
+
+-- ============================================
+-- S1.18 — supplier_price_estimates org-scoped, is_demo eliminat
+-- Executar després d'aplicar 20260228280000_s1_18_supplier_price_estimates_org_scope_drop_is_demo.sql
+-- ============================================
+-- is_demo absent (ha de retornar 0 rows)
+-- SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name='supplier_price_estimates' AND column_name='is_demo';
+-- null_orgs (ha de ser 0)
+-- SELECT COUNT(*) AS null_orgs FROM public.supplier_price_estimates WHERE org_id IS NULL;
+-- Policy org-based
+-- SELECT policyname, cmd, qual FROM pg_policies WHERE schemaname='public' AND tablename='supplier_price_estimates';

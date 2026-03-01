@@ -974,7 +974,7 @@ export const getDashboardStats = async () => {
 // ============================================
 
 // Taules org-scoped sense columna is_demo (S1.5/S1.4b); no injectar filtre
-const CORE_NO_IS_DEMO_TABLES = new Set(['projects', 'suppliers', 'supplier_quotes', 'purchase_orders', 'product_identifiers', 'tasks', 'sticky_notes', 'recurring_expenses', 'recurring_expense_occurrences', 'warehouses', 'documents', 'expense_attachments', 'payments', 'po_shipments', 'po_amazon_readiness'])
+const CORE_NO_IS_DEMO_TABLES = new Set(['projects', 'suppliers', 'supplier_quotes', 'purchase_orders', 'product_identifiers', 'tasks', 'sticky_notes', 'recurring_expenses', 'recurring_expense_occurrences', 'warehouses', 'documents', 'expense_attachments', 'payments', 'po_shipments', 'po_amazon_readiness', 'supplier_price_estimates'])
 
 /**
  * Apply demo mode filter to a Supabase query.
@@ -1112,12 +1112,18 @@ export const getSupplierPriceEstimates = async (projectId) => {
 }
 
 export const createSupplierPriceEstimate = async (projectId, estimate) => {
-  // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
-  const { user_id, ...estimateData } = estimate
+  const { user_id, org_id: _oid, ...estimateData } = estimate || {}
+  const userId = await getCurrentUserId()
+  if (!userId) return authRequired()
+  const { data: proj } = await supabase.from('projects').select('org_id').eq('id', projectId).maybeSingle()
+  const orgId = (estimate && estimate.org_id) ? estimate.org_id : (proj && proj.org_id)
+  if (!orgId) throw new Error('Project org context required for price estimate')
   const { data, error } = await supabase
     .from('supplier_price_estimates')
     .insert([{
       project_id: projectId,
+      user_id: userId,
+      org_id: orgId,
       ...estimateData
     }])
     .select()
