@@ -743,26 +743,35 @@ export const deletePurchaseOrder = async (id) => {
 
 // DOCUMENTS
 export const getDocuments = async (projectId) => {
-  // Get demo mode setting
-  const { getDemoMode } = await import('./demoModeFilter')
-  const demoMode = await getDemoMode()
-  
   const userId = await getCurrentUserId()
+  if (!userId) return []
   const { data, error } = await supabase
     .from('documents')
     .select('*')
-    .eq('user_id', userId)
-    .eq('is_demo', demoMode) // Filter by demo mode
     .eq('project_id', projectId)
     .order('created_at', { ascending: false })
   if (error) throw error
-  return data
+  return data || []
 }
 
 export const createDocument = async (doc) => {
-  // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
-  const { user_id, ...docData } = doc
-  
+  const { user_id, org_id: payloadOrgId, ...docData } = doc
+  const userId = await getCurrentUserId()
+  if (!userId) return authRequired()
+
+  let orgId = payloadOrgId
+  if (!orgId && docData.project_id) {
+    const { data: proj } = await supabase.from('projects').select('org_id').eq('id', docData.project_id).maybeSingle()
+    orgId = proj?.org_id
+  }
+  if (!orgId) {
+    const { data: om } = await supabase.from('org_memberships').select('org_id').eq('user_id', userId).limit(1).maybeSingle()
+    orgId = om?.org_id
+  }
+  if (!orgId) throw new Error('No org context for document')
+
+  const insertData = { ...docData, user_id: userId, org_id: orgId }
+
   // Evitar duplicats: comprovar si ja existeix document amb mateix drive_file_id
   if (docData.drive_file_id) {
     const { data: existing } = await supabase
@@ -802,11 +811,10 @@ export const createDocument = async (doc) => {
       return existingByName
     }
   }
-  
-  // Crear nou document
+
   const { data, error } = await supabase
     .from('documents')
-    .insert([docData])
+    .insert([insertData])
     .select()
     .maybeSingle()
   if (error) throw error
@@ -971,7 +979,7 @@ export const getDashboardStats = async () => {
 // ============================================
 
 // Taules org-scoped sense columna is_demo (S1.5/S1.4b); no injectar filtre
-const CORE_NO_IS_DEMO_TABLES = new Set(['projects', 'suppliers', 'supplier_quotes', 'purchase_orders', 'product_identifiers', 'tasks', 'sticky_notes', 'recurring_expenses', 'recurring_expense_occurrences', 'warehouses'])
+const CORE_NO_IS_DEMO_TABLES = new Set(['projects', 'suppliers', 'supplier_quotes', 'purchase_orders', 'product_identifiers', 'tasks', 'sticky_notes', 'recurring_expenses', 'recurring_expense_occurrences', 'warehouses', 'documents', 'expense_attachments'])
 
 /**
  * Apply demo mode filter to a Supabase query.
@@ -4036,20 +4044,17 @@ const checkReceiptsBucket = async () => {
  */
 export const getExpenseAttachments = async (expenseId) => {
   if (!expenseId) return []
-  
-  const { getDemoMode } = await import('./demoModeFilter')
-  const demoMode = await getDemoMode()
+
   const userId = await getCurrentUserId()
-  
+  if (!userId) return []
+
   const client = getSupabaseClient()
   const { data, error } = await client
     .from('expense_attachments')
     .select('*')
     .eq('expense_id', expenseId)
-    .eq('user_id', userId)
-    .eq('is_demo', demoMode)
     .order('created_at', { ascending: false })
-  
+
   if (error) throw error
   return data || []
 }
@@ -4103,40 +4108,34 @@ export const uploadReceipt = async (file, expenseId) => {
     return authRequired()
   }
 
-  const { getDemoMode } = await import('./demoModeFilter')
-  const demoMode = await getDemoMode()
-
   // Validate file first
   const validation = validateReceiptFile(file)
   if (!validation.ok) {
     throw new Error(validation.error)
   }
 
-  // BLOCK in demo mode (no Storage writes, no DB inserts)
-  if (demoMode) {
-    throw new Error('Disabled in demo mode')
-  }
-  
   try {
     const client = getSupabaseClient()
     if (!client || typeof client.from !== 'function') {
       throw new Error('Supabase client not available')
     }
 
-    // Upload to storage using helper
+    const { data: expenseRow } = await client.from('expenses').select('org_id').eq('id', expenseId).maybeSingle()
+    const orgId = expenseRow?.org_id
+    if (!orgId) throw new Error('Expense not found or no org context for attachment')
+
     const uploadResult = await uploadReceiptToStorage({ userId, expenseId, file })
 
-    // Insert metadata into expense_attachments
     const { data: attachmentData, error: dbError } = await client
       .from('expense_attachments')
       .insert([{
         user_id: userId,
+        org_id: orgId,
         expense_id: expenseId,
         file_path: uploadResult.file_path,
         file_name: uploadResult.file_name,
         mime_type: uploadResult.mime_type,
-        size: uploadResult.size,
-        is_demo: demoMode
+        size: uploadResult.size
       }])
       .select()
       .maybeSingle()
@@ -4185,30 +4184,18 @@ export const deleteReceipt = async (attachmentId) => {
     return authRequired()
   }
 
-  const { getDemoMode } = await import('./demoModeFilter')
-  const demoMode = await getDemoMode()
-
-  // In demo mode, just return success (no real deletion)
-  if (demoMode) {
-    return true
-  }
-
   const client = getSupabaseClient()
 
   try {
-    // Obtener el attachment para tener el file_path
     const { data: attachment, error: fetchError } = await client
       .from('expense_attachments')
       .select('file_path')
       .eq('id', attachmentId)
-      .eq('user_id', userId)
-      .eq('is_demo', demoMode)
       .maybeSingle()
 
     if (fetchError) throw fetchError
     if (!attachment) throw new Error('Attachment not found')
 
-    // Eliminar de storage (best effort - si falla, continuar con DB delete)
     let storageError = null
     if (client && client.storage && typeof client.storage.from === 'function' && attachment.file_path) {
       try {
@@ -4224,13 +4211,10 @@ export const deleteReceipt = async (attachmentId) => {
       }
     }
 
-    // Eliminar de base de datos
     const { error: dbError } = await client
       .from('expense_attachments')
       .delete()
       .eq('id', attachmentId)
-      .eq('user_id', userId)
-      .eq('is_demo', demoMode)
 
     if (dbError) throw dbError
 
@@ -4267,18 +4251,6 @@ export const updateAttachmentName = async (attachmentId, newFileName) => {
     return authRequired()
   }
 
-  const { getDemoMode } = await import('./demoModeFilter')
-  const demoMode = await getDemoMode()
-
-  // In demo mode, just return success (no real update)
-  if (demoMode) {
-    return {
-      id: attachmentId,
-      file_name: newFileName.trim(),
-      // Return mock data structure
-    }
-  }
-
   const client = getSupabaseClient()
 
   try {
@@ -4286,8 +4258,6 @@ export const updateAttachmentName = async (attachmentId, newFileName) => {
       .from('expense_attachments')
       .update({ file_name: newFileName.trim() })
       .eq('id', attachmentId)
-      .eq('user_id', userId)
-      .eq('is_demo', demoMode)
       .select()
       .maybeSingle()
 
@@ -4344,19 +4314,15 @@ export const replaceExpenseAttachmentFile = async ({ attachment, userId, file, i
     const uploadResult = await uploadReceiptToStorage({ userId, expenseId, file })
     newFilePath = uploadResult.file_path
 
-    // 2. Update DB row with new metadata
     const { data: updatedAttachment, error: updateError } = await client
       .from('expense_attachments')
       .update({
         file_path: uploadResult.file_path,
-        file_name: uploadResult.file_name, // Use new file name
+        file_name: uploadResult.file_name,
         mime_type: uploadResult.mime_type,
         size: uploadResult.size
-        // Keep created_at original
       })
       .eq('id', attachment.id)
-      .eq('user_id', userId)
-      .eq('is_demo', isDemo)
       .select()
       .maybeSingle()
 
@@ -4440,24 +4406,20 @@ export const replaceReceipt = async (file, attachmentId) => {
     throw new Error('Supabase client not available')
   }
 
-  // Fetch existing attachment
   const { data: existingAttachment, error: fetchError } = await client
     .from('expense_attachments')
     .select('*')
     .eq('id', attachmentId)
-    .eq('user_id', userId)
-    .eq('is_demo', demoMode)
     .maybeSingle()
 
   if (fetchError) throw fetchError
   if (!existingAttachment) throw new Error('Attachment not found')
 
-  // Use orchestrator function
   const result = await replaceExpenseAttachmentFile({
     attachment: existingAttachment,
     userId,
     file,
-    isDemo: demoMode
+    isDemo: false
   })
 
   // Return compatible format

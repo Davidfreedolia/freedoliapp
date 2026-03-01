@@ -219,3 +219,15 @@ ORDER BY table_name;
 -- SELECT COUNT(*) AS null_orgs FROM public.warehouses WHERE org_id IS NULL;
 -- Policy org-based
 -- SELECT policyname, cmd FROM pg_policies WHERE schemaname='public' AND tablename='warehouses';
+
+-- ============================================
+-- S1.15b — documents + expense_attachments org-scoped, is_demo eliminat
+-- Executar després d'aplicar 20260228263000_s1_15b_documents_attachments_org_scope_drop_is_demo.sql
+-- ============================================
+-- is_demo absent (ha de retornar 0 rows)
+-- SELECT table_name, column_name FROM information_schema.columns WHERE table_schema='public' AND table_name IN ('documents','expense_attachments') AND column_name='is_demo' ORDER BY table_name;
+-- null orgs (ha de ser 0)
+-- SELECT 'documents' AS tbl, COUNT(*) AS null_orgs FROM public.documents WHERE org_id IS NULL
+-- UNION ALL SELECT 'expense_attachments', COUNT(*) FROM public.expense_attachments WHERE org_id IS NULL;
+-- Policies org-based
+-- SELECT tablename, policyname, cmd FROM pg_policies WHERE schemaname='public' AND tablename IN ('documents','expense_attachments') ORDER BY tablename;

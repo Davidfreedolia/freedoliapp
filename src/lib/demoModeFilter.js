@@ -62,6 +62,8 @@ export const NO_IS_DEMO_TABLES = new Set([
   'recurring_expenses',
   'recurring_expense_occurrences',
   'warehouses',
+  'documents',
+  'expense_attachments',
   'tasks',
   'sticky_notes',
   'projects',
