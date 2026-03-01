@@ -5,6 +5,7 @@ import { CheckCircle2, Clock, MoreVertical, Calendar, ArrowRight, AlertCircle } 
 import { getOpenTasks, markTaskDone, snoozeTask, bulkMarkTasksDone, bulkSnoozeTasks } from '../lib/supabase'
 import { showToast } from './Toast'
 import { useBreakpoint } from '../hooks/useBreakpoint'
+import { useApp } from '../context/AppContext'
 import { formatDistanceToNow, parseISO, format } from 'date-fns'
 import { es } from 'date-fns/locale'
 
@@ -12,6 +13,7 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const { isMobile } = useBreakpoint()
+  const { activeOrgId } = useApp()
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(null)
@@ -20,12 +22,12 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
 
   useEffect(() => {
     loadTasks()
-  }, [])
+  }, [activeOrgId])
 
   const loadTasks = async () => {
     setLoading(true)
     try {
-      const data = await getOpenTasks(limit)
+      const data = await getOpenTasks(limit, activeOrgId ?? undefined)
       setTasks(data || [])
     } catch (err) {
       console.error('Error loading tasks:', err)

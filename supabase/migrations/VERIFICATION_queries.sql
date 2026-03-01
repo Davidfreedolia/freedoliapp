@@ -182,3 +182,15 @@ ORDER BY table_name;
 -- ============================================
 -- Ha de retornar 0 rows
 -- SELECT table_name, column_name FROM information_schema.columns WHERE table_schema='public' AND table_name IN ('expenses','incomes') AND column_name='is_demo' ORDER BY table_name;
+
+-- ============================================
+-- S1.13 — tasks + sticky_notes org-scoped, is_demo eliminat
+-- Executar després d'aplicar 20260228250000_s1_13_tasks_sticky_org_scope_drop_is_demo.sql
+-- ============================================
+-- is_demo absent (ha de retornar 0 rows)
+-- SELECT table_name, column_name FROM information_schema.columns WHERE table_schema='public' AND table_name IN ('tasks','sticky_notes') AND column_name='is_demo' ORDER BY table_name;
+-- null orgs (ha de ser 0 per ambdues)
+-- SELECT 'tasks' AS tbl, COUNT(*) AS null_orgs FROM public.tasks WHERE org_id IS NULL
+-- UNION ALL SELECT 'sticky_notes', COUNT(*) FROM public.sticky_notes WHERE org_id IS NULL;
+-- Policies org-based
+-- SELECT tablename, policyname, cmd FROM pg_policies WHERE schemaname='public' AND tablename IN ('tasks','sticky_notes') ORDER BY tablename;

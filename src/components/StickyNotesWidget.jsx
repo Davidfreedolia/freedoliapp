@@ -28,7 +28,7 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { isMobile, isTablet } = useBreakpoint()
-  const { sidebarCollapsed } = useApp()
+  const { sidebarCollapsed, activeOrgId } = useApp()
   const [notes, setNotes] = useState([])
   const [loading, setLoading] = useState(true)
   const [showAddForm, setShowAddForm] = useState(false)
@@ -62,7 +62,8 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
         title: newNote.title || null,
         color: newNote.color,
         pinned: true,
-        status: 'open'
+        status: 'open',
+        ...(activeOrgId ? { org_id: activeOrgId } : {})
       })
       setNewNote({ content: '', title: '', color: 'yellow' })
       setShowAddForm(false)

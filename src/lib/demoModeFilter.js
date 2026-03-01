@@ -59,6 +59,8 @@ export function clearDemoModeCache() {
  * No s'aplica filtre is_demo en aquestes taules.
  */
 export const NO_IS_DEMO_TABLES = new Set([
+  'tasks',
+  'sticky_notes',
   'projects',
   'suppliers',
   'supplier_quotes',

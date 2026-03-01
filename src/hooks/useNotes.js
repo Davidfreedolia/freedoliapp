@@ -12,7 +12,7 @@ import { useApp } from '../context/AppContext'
  * Carrega notes actives i proporciona funcions per gestionar-les
  */
 export function useNotes() {
-  const { darkMode } = useApp()
+  const { darkMode, activeOrgId } = useApp()
   const [notes, setNotes] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -20,7 +20,7 @@ export function useNotes() {
   const loadNotes = useCallback(async () => {
     setLoading(true)
     try {
-      const allNotes = await getStickyNotes({ status: 'open' })
+      const allNotes = await getStickyNotes(activeOrgId ? { status: 'open', org_id: activeOrgId } : { status: 'open' })
       // Filtrar només notes amb context global o dashboard (per ara)
       // Més endavant es pot filtrar per context específic
       setNotes(allNotes || [])
@@ -30,7 +30,7 @@ export function useNotes() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [activeOrgId])
 
   // Carregar notes a l'inici
   useEffect(() => {
@@ -46,6 +46,7 @@ export function useNotes() {
         color: initialData.color || 'yellow',
         status: 'open',
         pinned: true,
+        ...(activeOrgId ? { org_id: activeOrgId } : {}),
         // Posició inicial aleatòria per evitar superposició
         position_x: initialData.position_x || Math.random() * 200 + 100,
         position_y: initialData.position_y || Math.random() * 200 + 100,

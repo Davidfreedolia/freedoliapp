@@ -971,7 +971,7 @@ export const getDashboardStats = async () => {
 // ============================================
 
 // Taules org-scoped sense columna is_demo (S1.5/S1.4b); no injectar filtre
-const CORE_NO_IS_DEMO_TABLES = new Set(['projects', 'suppliers', 'supplier_quotes', 'purchase_orders', 'product_identifiers'])
+const CORE_NO_IS_DEMO_TABLES = new Set(['projects', 'suppliers', 'supplier_quotes', 'purchase_orders', 'product_identifiers', 'tasks', 'sticky_notes'])
 
 /**
  * Apply demo mode filter to a Supabase query.
@@ -2610,8 +2610,6 @@ export const upsertProjectProfitability = async (projectId, profitabilityData) =
 export const getTasks = async (filters = {}) => {
   // Dynamic imports to avoid circular dependencies
   const { isDemoMode, mockGetTasks } = await import('../demo/demoMode')
-  const { getDemoMode } = await import('./demoModeFilter')
-  const demoMode = await getDemoMode()
   
   // Legacy demo mode check (for backward compatibility)
   if (isDemoMode() && !demoMode) {
@@ -2631,14 +2629,16 @@ export const getTasks = async (filters = {}) => {
   }
   
   const userId = await getCurrentUserId()
+  if (!userId) return []
   let query = supabase
     .from('tasks')
     .select('*')
-    .eq('user_id', userId)
-    .eq('is_demo', demoMode) // Filter by demo mode
     .order('due_date', { ascending: true, nullsLast: true })
     .order('created_at', { ascending: false })
   
+  if (filters.org_id) {
+    query = query.eq('org_id', filters.org_id)
+  }
   if (filters.status) {
     query = query.eq('status', filters.status)
   }
@@ -2654,47 +2654,51 @@ export const getTasks = async (filters = {}) => {
   return data || []
 }
 
-export const getOpenTasks = async (limit = 10) => {
-  // Get demo mode setting
-  const { getDemoMode } = await import('./demoModeFilter')
-  const demoMode = await getDemoMode()
-  
+export const getOpenTasks = async (limit = 10, activeOrgId = null) => {
   const userId = await getCurrentUserId()
-  const { data, error } = await supabase
+  if (!userId) return []
+  let query = supabase
     .from('tasks')
     .select('*')
-    .eq('user_id', userId)
-    .eq('is_demo', demoMode) // Filter by demo mode
     .eq('status', 'open')
     .order('due_date', { ascending: true, nullsLast: true })
     .order('priority', { ascending: false })
     .limit(limit)
-  
+  if (activeOrgId) {
+    query = query.eq('org_id', activeOrgId)
+  }
+  const { data, error } = await query
   if (error) throw error
   return data || []
 }
 
 export const createTask = async (task) => {
-  // Get demo mode setting
-  const { getDemoMode } = await import('./demoModeFilter')
-  const demoMode = await getDemoMode()
-  
-  const { user_id, ...taskData } = task
+  const { user_id, org_id: taskOrgId, ...taskData } = task
   const userId = await getCurrentUserId()
   if (!userId) {
     return authRequired()
   }
-  
+  let orgId = taskOrgId
+  if (!orgId && task.entity_type === 'project' && task.entity_id) {
+    const { data: proj } = await supabase.from('projects').select('org_id').eq('id', task.entity_id).maybeSingle()
+    orgId = proj?.org_id
+  }
+  if (!orgId) {
+    const { data: om } = await supabase.from('org_memberships').select('org_id').eq('user_id', userId).limit(1).maybeSingle()
+    orgId = om?.org_id
+  }
+  if (!orgId) throw new Error('No org context for task')
+
   const { data, error } = await supabase
     .from('tasks')
     .insert([{
       ...taskData,
       user_id: userId,
-      is_demo: demoMode // Mark with current demo mode
+      org_id: orgId
     }])
     .select()
     .maybeSingle()
-  
+
   if (error) throw error
   return data
 }
@@ -2705,15 +2709,14 @@ export const updateTask = async (id, updates) => {
     return authRequired()
   }
   const { user_id, ...updateData } = updates
-  
+
   const { data, error } = await supabase
     .from('tasks')
     .update(updateData)
     .eq('id', id)
-    .eq('user_id', userId)
     .select()
     .maybeSingle()
-  
+
   if (error) throw error
   return data
 }
@@ -2727,8 +2730,7 @@ export const deleteTask = async (id) => {
     .from('tasks')
     .delete()
     .eq('id', id)
-    .eq('user_id', userId)
-  
+
   if (error) throw error
 }
 
@@ -2745,7 +2747,6 @@ export const snoozeTask = async (id, days = 3) => {
     .from('tasks')
     .select('due_date')
     .eq('id', id)
-    .eq('user_id', userId)
     .maybeSingle()
   
   if (!task) throw new Error('Task not found')
@@ -2770,9 +2771,8 @@ export const bulkMarkTasksDone = async (taskIds) => {
     .from('tasks')
     .update({ status: 'done', updated_at: new Date().toISOString() })
     .in('id', taskIds)
-    .eq('user_id', userId)
     .select()
-  
+
   if (error) throw error
   return data
 }
@@ -2788,8 +2788,7 @@ export const bulkSnoozeTasks = async (taskIds, days = 3) => {
     .from('tasks')
     .select('id, due_date')
     .in('id', taskIds)
-    .eq('user_id', userId)
-  
+
   if (fetchError) throw fetchError
   
   // Calculate new due dates
@@ -3621,14 +3620,12 @@ export const quickMarkPackAsSent = async (poId) => {
 export const getStickyNotes = async (filters = {}) => {
   // Dynamic imports to avoid circular dependencies
   const { isDemoMode, mockGetStickyNotes } = await import('../demo/demoMode')
-  const { getDemoMode } = await import('./demoModeFilter')
-  const demoMode = await getDemoMode()
   
   // Legacy demo mode check (for backward compatibility)
-  if (isDemoMode() && !demoMode) {
+  if (isDemoMode()) {
     const notes = await mockGetStickyNotes(filters.projectId !== undefined ? filters.projectId : null)
     // Apply filters client-side
-    let filtered = notes
+    let filtered = notes || []
     if (filters.status) {
       filtered = filtered.filter(n => n.status === filters.status)
     }
@@ -3652,10 +3649,11 @@ export const getStickyNotes = async (filters = {}) => {
         priority
       )
     `)
-    .eq('user_id', userId)
-    .eq('is_demo', demoMode) // Filter by demo mode
     .order('created_at', { ascending: false })
   
+  if (filters.org_id) {
+    query = query.eq('org_id', filters.org_id)
+  }
   if (filters.status) {
     query = query.eq('status', filters.status)
   }
@@ -3673,26 +3671,32 @@ export const createStickyNote = async (note) => {
   if (isDemoMode()) {
     return { id: `demo-note-${Date.now()}`, ...note }
   }
-  // Get demo mode setting
-  const { getDemoMode } = await import('./demoModeFilter')
-  const demoMode = await getDemoMode()
-  
-  const { user_id, ...noteData } = note
+  const { user_id, org_id: noteOrgId, ...noteData } = note
   const userId = await getCurrentUserId()
   if (!userId) {
     return authRequired()
   }
-  
+  let orgId = noteOrgId
+  if (!orgId && note.project_id) {
+    const { data: proj } = await supabase.from('projects').select('org_id').eq('id', note.project_id).maybeSingle()
+    orgId = proj?.org_id
+  }
+  if (!orgId) {
+    const { data: om } = await supabase.from('org_memberships').select('org_id').eq('user_id', userId).limit(1).maybeSingle()
+    orgId = om?.org_id
+  }
+  if (!orgId) throw new Error('No org context for sticky note')
+
   const { data, error } = await supabase
     .from('sticky_notes')
     .insert([{
       ...noteData,
       user_id: userId,
-      is_demo: demoMode // Mark with current demo mode
+      org_id: orgId
     }])
     .select()
     .maybeSingle()
-  
+
   if (error) throw error
   return data
 }
@@ -3711,10 +3715,9 @@ export const updateStickyNote = async (id, updates) => {
     .from('sticky_notes')
     .update(updates)
     .eq('id', id)
-    .eq('user_id', userId)
     .select()
     .maybeSingle()
-  
+
   if (error) throw error
   return data
 }
@@ -3733,10 +3736,9 @@ export const deleteStickyNote = async (id) => {
     .from('sticky_notes')
     .delete()
     .eq('id', id)
-    .eq('user_id', userId)
     .select()
     .maybeSingle()
-  
+
   if (error) throw error
   return data
 }
@@ -3761,7 +3763,6 @@ export const convertStickyNoteToTask = async (stickyNoteId, options = {}) => {
     .from('sticky_notes')
     .select('*')
     .eq('id', stickyNoteId)
-    .eq('user_id', userId)
     .maybeSingle()
   
   if (stickyError) throw stickyError
@@ -3772,27 +3773,29 @@ export const convertStickyNoteToTask = async (stickyNoteId, options = {}) => {
     throw new Error('ALREADY_LINKED')
   }
   
-  // Create task from sticky note
-  // title = sticky.title o resum curt del content
+  // Create task from sticky note (org_id from sticky note)
   const taskTitle = stickyNote.title || stickyNote.content.split('\n')[0].substring(0, 100) || 'Task from note'
-  // description/notes = sticky.content
   const taskNotes = stickyNote.content
-  // due_date = sticky.due_date o today()
   const taskDueDate = stickyNote.due_date || options.dueDate || new Date().toISOString().split('T')[0]
-  // priority = sticky.priority
   const taskPriority = stickyNote.priority || 'normal'
-  
-  // Determine entity_type and entity_id
-  // si l'usuari està dins un projecte quan crea la note, linka a project
-  // sinó, entity_type='project' i entity_id null (per global tasks)
   const entityType = options.entity_type || 'project'
-  const entityId = options.entity_id || null // Allow null for global tasks
-  
-  // Create task
+  const entityId = options.entity_id ?? stickyNote.project_id ?? null
+  let orgId = stickyNote.org_id
+  if (!orgId && stickyNote.project_id) {
+    const { data: proj } = await supabase.from('projects').select('org_id').eq('id', stickyNote.project_id).maybeSingle()
+    orgId = proj?.org_id
+  }
+  if (!orgId) {
+    const { data: om } = await supabase.from('org_memberships').select('org_id').eq('user_id', userId).limit(1).maybeSingle()
+    orgId = om?.org_id
+  }
+  if (!orgId) throw new Error('No org context for task from sticky')
+
   const { data: task, error: taskError } = await supabase
     .from('tasks')
     .insert([{
       user_id: userId,
+      org_id: orgId,
       title: taskTitle,
       notes: taskNotes,
       due_date: taskDueDate,
@@ -3814,10 +3817,9 @@ export const convertStickyNoteToTask = async (stickyNoteId, options = {}) => {
     .update({
       linked_task_id: task.id,
       converted_to_task_at: new Date().toISOString(),
-      pinned: false // Para que deje de molestar en el overlay
+      pinned: false
     })
     .eq('id', stickyNoteId)
-    .eq('user_id', userId)
     .select()
     .maybeSingle()
   
@@ -3840,10 +3842,9 @@ export const unlinkStickyNoteTask = async (stickyNoteId) => {
       converted_to_task_at: null
     })
     .eq('id', stickyNoteId)
-    .eq('user_id', userId)
     .select()
     .maybeSingle()
-  
+
   if (error) throw error
   return data
 }
@@ -3866,9 +3867,8 @@ export const getStickyNoteWithTask = async (id) => {
       )
     `)
     .eq('id', id)
-    .eq('user_id', userId)
     .maybeSingle()
-  
+
   if (error) throw error
   return data
 }
