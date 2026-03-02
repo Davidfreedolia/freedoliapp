@@ -238,6 +238,69 @@ Avantatge competitiu real.
 
 ---
 
+## FASE 3 — Business Alerts (V1) — IN SCOPE / OUT OF SCOPE
+
+### Objectiu
+Crear un sistema d’alertes persistents, deduplicables i multi-tenant per detectar riscos operatius i de gestió abans que facin mal.
+
+### In scope (V1)
+Alertes:
+- F2 Unassigned expense (HIGH)
+- O1 Project stuck in phase (HIGH)
+- S1 Seat usage > 90% (MEDIUM/HIGH)
+- O2 PO sent/confirmed without logistics record (HIGH)
+
+Motor:
+- RPC manual `run_alert_engine(org_id)` (no cron, no realtime)
+- Dedup per `dedupe_key` + únic parcial per open/ack
+- Auto-resolve quan la condició desapareix
+
+UI:
+- Bell + counter
+- Drawer llistat alertes
+- Accions: acknowledge / resolve
+- Widget Dashboard “Business Risks” (severity >= high)
+
+### Out of scope
+- F3 Cash gap 30d (NO: falten dates/estats/saldo)
+- F1 Margin (NO: falten inputs sell_price/units/fees)
+- Tracking APIs (NO a F3; es mou a FASE 4)
+
+### Contracte de dades (canònic)
+Taules:
+- alert_definitions
+- alerts (amb visibility_scope Model C)
+- alert_events (audit mínim)
+
+Model C visibilitat:
+- Owner: veu tot el detall
+- Admin: veu risk flag quan sigui sensible
+- Member: no veu alertes sensibles (i en FASE 3 no n’hi ha cap activa)
+
+---
+
+## FASE 4 — Tracking Integrations (17TRACK first)
+
+### Objectiu
+Automatitzar l’actualització d’estats de tracking i habilitar alertes logístiques (delays/exceptions/delivered) sense refactors futurs.
+
+### Contracte de logística (canònic)
+- po_shipments (PO → N shipments)
+- shipment_legs (shipment → N legs)
+- shipment_packages (shipment/leg → N packages, destí per package)
+- package_trackings (package → N trackings, status + last_event_payload)
+
+### Provider strategy
+- Primary: 17TRACK (start low-cost / free quota)
+- Upgrade path: AfterShip (enterprise) si volum/necessitats ho demanen
+
+### DoD (Fase 4)
+- Sync automàtic d’estats a `package_trackings`
+- Rate limiting + idempotència
+- Alertes derivades: TRACKING_EXCEPTION, TRACKING_DELAYED, DELIVERED
+
+---
+
 # 🎯 5. PRIORITAT EXECUTIVA
 
 Prioritat clara:
