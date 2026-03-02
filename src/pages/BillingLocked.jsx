@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useWorkspace } from '../contexts/WorkspaceContext'
+import { useLang } from '../i18n/useLang'
+import { t } from '../i18n/t'
 import { supabase } from '../lib/supabase'
 import { createCheckoutSession, createPortalSession } from '../lib/billingApi'
 import { showToast } from '../components/Toast'
@@ -8,6 +10,7 @@ import { showToast } from '../components/Toast'
 export default function BillingLocked() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { lang } = useLang()
   const { activeOrgId, memberships } = useWorkspace()
   const [org, setOrg] = useState(location.state?.org ?? null)
   const [loading, setLoading] = useState(!location.state?.org)
@@ -34,9 +37,9 @@ export default function BillingLocked() {
     try {
       const { url } = await createPortalSession(org.id)
       if (url) window.location.href = url
-      else showToast('Billing portal unavailable', 'error')
+      else showToast(t(lang, 'billing_toastPortalUnavailable'), 'error')
     } catch (err) {
-      showToast(err?.message || 'Billing portal unavailable', 'error')
+      showToast(err?.message || t(lang, 'billing_toastPortalUnavailable'), 'error')
     } finally {
       setActionLoading(false)
     }
@@ -48,9 +51,9 @@ export default function BillingLocked() {
     try {
       const { url } = await createCheckoutSession(org.id)
       if (url) window.location.href = url
-      else showToast('Checkout unavailable', 'error')
+      else showToast(t(lang, 'billing_toastCheckoutUnavailable'), 'error')
     } catch (err) {
-      showToast(err?.message || 'Checkout unavailable', 'error')
+      showToast(err?.message || t(lang, 'billing_toastCheckoutUnavailable'), 'error')
     } finally {
       setActionLoading(false)
     }
@@ -58,11 +61,12 @@ export default function BillingLocked() {
 
   const status = org?.billing_status ?? 'inactive'
   const hasCustomer = !!org?.stripe_customer_id
+  const statusLabel = status === 'past_due' ? t(lang, 'billingLocked_statusPastDue') : status === 'canceled' ? t(lang, 'billingLocked_statusCanceled') : t(lang, 'billingLocked_statusInactive')
 
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--page-bg)' }}>
-        <span style={{ color: 'var(--text-secondary)' }}>Carregant...</span>
+        <span style={{ color: 'var(--text-secondary)' }}>{t(lang, 'common_loading')}</span>
       </div>
     )
   }
@@ -71,40 +75,38 @@ export default function BillingLocked() {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--page-bg)' }}>
         <div style={{ textAlign: 'center' }}>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: 16 }}>No s'ha trobat el workspace.</p>
-          <button type="button" onClick={() => navigate('/app')} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border-1)', cursor: 'pointer' }}>Tornar a l'app</button>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: 16 }}>{t(lang, 'common_workspaceNotFound')}</p>
+          <button type="button" onClick={() => navigate('/app')} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border-1)', cursor: 'pointer' }}>{t(lang, 'common_backToApp')}</button>
         </div>
       </div>
     )
   }
 
-  const statusLabel = status === 'past_due' ? 'Pagament pendent' : status === 'canceled' ? 'Cancel·lada' : status
-
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, backgroundColor: 'var(--page-bg)' }}>
       <div style={{ maxWidth: 420, width: '100%', padding: 32, background: 'var(--surface-bg-2)', border: '1px solid var(--border-1)', borderRadius: 12, textAlign: 'center' }}>
-        <h1 style={{ margin: '0 0 8px', fontSize: 22, fontWeight: 600, color: 'var(--danger-1)' }}>Subscripció inactiva</h1>
-        <p style={{ margin: 0, fontSize: 14, color: 'var(--text-secondary)' }}>Estat: {statusLabel}</p>
+        <h1 style={{ margin: '0 0 8px', fontSize: 22, fontWeight: 600, color: 'var(--danger-1)' }}>{t(lang, 'billingLocked_title')}</h1>
+        <p style={{ margin: 0, fontSize: 14, color: 'var(--text-secondary)' }}>{t(lang, 'billingLocked_status', { status: statusLabel })}</p>
         <p style={{ margin: '12px 0 0', fontSize: 15, lineHeight: 1.5, color: 'var(--text-secondary)' }}>
-          {status === 'past_due' ? 'Hi ha un pagament pendent. Actualitzeu la facturació per continuar.' : 'La subscripció del workspace no és activa. Actualitzeu la facturació per continuar.'}
+          {status === 'past_due' ? t(lang, 'billingLocked_messagePastDue') : t(lang, 'billingLocked_messageInactive')}
         </p>
         {isOwnerAdmin ? (
           <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
             {hasCustomer ? (
               <button type="button" onClick={handlePortal} disabled={actionLoading}
                 style={{ padding: '12px 20px', borderRadius: 8, background: 'var(--danger-1)', color: '#fff', border: 'none', fontWeight: 600, cursor: actionLoading ? 'not-allowed' : 'pointer' }}>
-                {actionLoading ? 'Obrint...' : 'Gestionar subscripció'}
+                {actionLoading ? t(lang, 'billingLocked_opening') : t(lang, 'billingLocked_manageSubscription')}
               </button>
             ) : (
               <button type="button" onClick={handleCheckout} disabled={actionLoading}
                 style={{ padding: '12px 20px', borderRadius: 8, background: 'var(--primary-1)', color: '#fff', border: 'none', fontWeight: 600, cursor: actionLoading ? 'not-allowed' : 'pointer' }}>
-                {actionLoading ? 'Obrint...' : 'Començar subscripció'}
+                {actionLoading ? t(lang, 'billingLocked_opening') : t(lang, 'billingLocked_startSubscription')}
               </button>
             )}
-            <button type="button" onClick={() => navigate('/app')} style={{ padding: '10px 16px', background: 'transparent', border: '1px solid var(--border-1)', borderRadius: 8, cursor: 'pointer', color: 'var(--text-secondary)' }}>Tornar a l'app</button>
+            <button type="button" onClick={() => navigate('/app')} style={{ padding: '10px 16px', background: 'transparent', border: '1px solid var(--border-1)', borderRadius: 8, cursor: 'pointer', color: 'var(--text-secondary)' }}>{t(lang, 'common_backToApp')}</button>
           </div>
         ) : (
-          <p style={{ marginTop: 24, fontSize: 14, color: 'var(--text-secondary)' }}>Contacteu l'administrador del workspace per reactivar la subscripció.</p>
+          <p style={{ marginTop: 24, fontSize: 14, color: 'var(--text-secondary)' }}>{t(lang, 'billingLocked_contactOwner')}</p>
         )}
       </div>
     </div>

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useWorkspace } from '../contexts/WorkspaceContext'
+import { useLang } from '../i18n/useLang'
+import { t } from '../i18n/t'
 import { supabase } from '../lib/supabase'
 import { createPortalSession } from '../lib/billingApi'
 import { showToast } from '../components/Toast'
@@ -8,6 +10,7 @@ import { showToast } from '../components/Toast'
 export default function BillingOverSeat() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { lang } = useLang()
   const { activeOrgId, memberships } = useWorkspace()
   const [org, setOrg] = useState(location.state?.org ?? null)
   const [seatsUsed, setSeatsUsed] = useState(location.state?.seatsUsed ?? 0)
@@ -47,9 +50,9 @@ export default function BillingOverSeat() {
     try {
       const { url } = await createPortalSession(org.id)
       if (url) window.location.href = url
-      else showToast('Billing portal unavailable', 'error')
+      else showToast(t(lang, 'billing_toastPortalUnavailable'), 'error')
     } catch (err) {
-      showToast(err?.message || 'Billing portal unavailable', 'error')
+      showToast(err?.message || t(lang, 'billing_toastPortalUnavailable'), 'error')
     } finally {
       setActionLoading(false)
     }
@@ -60,7 +63,7 @@ export default function BillingOverSeat() {
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--page-bg)' }}>
-        <span style={{ color: 'var(--text-secondary)' }}>Carregant...</span>
+        <span style={{ color: 'var(--text-secondary)' }}>{t(lang, 'common_loading')}</span>
       </div>
     )
   }
@@ -69,9 +72,9 @@ export default function BillingOverSeat() {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--page-bg)' }}>
         <div style={{ textAlign: 'center' }}>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: 16 }}>No s’ha trobat el workspace.</p>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: 16 }}>{t(lang, 'common_workspaceNotFound')}</p>
           <button type="button" onClick={() => navigate('/app')} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border-1)', cursor: 'pointer' }}>
-            Tornar a l’app
+            {t(lang, 'common_backToApp')}
           </button>
         </div>
       </div>
@@ -101,13 +104,13 @@ export default function BillingOverSeat() {
         }}
       >
         <h1 style={{ margin: '0 0 8px', fontSize: 22, fontWeight: 600, color: 'var(--warning-1, #b45309)' }}>
-          Límit de places assolit
+          {t(lang, 'billingOverSeat_title')}
         </h1>
         <p style={{ margin: 0, fontSize: 18, fontWeight: 600, color: 'var(--text-primary)' }}>
-          {seatsUsed} / {seatLimit} places
+          {t(lang, 'billingOverSeat_seatsCount', { seatsUsed, seatLimit })}
         </p>
         <p style={{ margin: '12px 0 0', fontSize: 15, lineHeight: 1.5, color: 'var(--text-secondary)' }}>
-          Heu superat el nombre de places del pla. Podeu pujar de pla des del portal de facturació o reduir membres.
+          {t(lang, 'billingOverSeat_message')}
         </p>
 
         {isOwnerAdmin ? (
@@ -126,22 +129,22 @@ export default function BillingOverSeat() {
                 cursor: actionLoading ? 'not-allowed' : 'pointer',
               }}
             >
-              {actionLoading ? 'Obrint...' : 'Obrir portal de facturació'}
+              {actionLoading ? t(lang, 'billingOverSeat_opening') : t(lang, 'billingOverSeat_openPortal')}
             </button>
             <button
               type="button"
               onClick={() => navigate('/app/settings')}
               style={{ padding: '10px 16px', background: 'transparent', border: '1px solid var(--border-1)', borderRadius: 8, cursor: 'pointer', color: 'var(--text-secondary)' }}
             >
-              Anar a Configuració (membres)
+              {t(lang, 'billingOverSeat_goToSettings')}
             </button>
             <button type="button" onClick={() => navigate('/app')} style={{ padding: '10px 16px', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
-              Tornar a l’app
+              {t(lang, 'billingOverSeat_backToApp')}
             </button>
           </div>
         ) : (
           <p style={{ marginTop: 24, fontSize: 14, color: 'var(--text-secondary)' }}>
-            Contacteu l’administrador del workspace per augmentar les places o gestionar els membres.
+            {t(lang, 'billingOverSeat_contactOwner')}
           </p>
         )}
       </div>

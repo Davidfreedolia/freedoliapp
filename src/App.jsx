@@ -20,6 +20,8 @@ function NotFoundInApp() {
 import React, { Suspense, useEffect, useState } from 'react'
 import { AppProvider, useApp } from './context/AppContext'
 import { WorkspaceProvider, useWorkspace } from './contexts/WorkspaceContext'
+import { useLang } from './i18n/useLang'
+import { t } from './i18n/t'
 import Sidebar from './components/Sidebar'
 import ProtectedRoute from './components/ProtectedRoute'
 import PageLoader from './components/PageLoader'
@@ -104,6 +106,7 @@ function AppPageWrap({ children, context }) {
 
 function AppContent() {
   const { sidebarCollapsed, darkMode } = useApp()
+  const { lang } = useLang()
   const { isWorkspaceReady, activeOrgId } = useWorkspace()
   const { isMobile, isTablet } = useBreakpoint()
   const location = useLocation()
@@ -164,14 +167,14 @@ function AppContent() {
         justifyContent: 'center',
         backgroundColor: 'var(--page-bg)',
       }}>
-        <div style={{ fontSize: 16, color: 'var(--text-secondary, #6b7280)' }}>Carregant...</div>
+        <div style={{ fontSize: 16, color: 'var(--text-secondary, #6b7280)' }}>{t(lang, 'common_loading')}</div>
       </div>
     )
   }
   if (isBillingRoute) {
     return (
       <>
-        <Suspense fallback={<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--page-bg)' }}><span style={{ color: 'var(--text-secondary)' }}>Carregant...</span></div>}>
+        <Suspense fallback={<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--page-bg)' }}><span style={{ color: 'var(--text-secondary)' }}>{t(lang, 'common_loading')}</span></div>}>
           <Outlet />
         </Suspense>
         <ToastContainer darkMode={darkMode} />
