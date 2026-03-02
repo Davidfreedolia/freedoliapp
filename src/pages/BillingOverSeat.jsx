@@ -1,0 +1,150 @@
+import { useState, useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { useWorkspace } from '../contexts/WorkspaceContext'
+import { supabase } from '../lib/supabase'
+import { createPortalSession } from '../lib/billingApi'
+import { showToast } from '../components/Toast'
+
+export default function BillingOverSeat() {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const { activeOrgId, memberships } = useWorkspace()
+  const [org, setOrg] = useState(location.state?.org ?? null)
+  const [seatsUsed, setSeatsUsed] = useState(location.state?.seatsUsed ?? 0)
+  const [loading, setLoading] = useState(!location.state?.org)
+  const [actionLoading, setActionLoading] = useState(false)
+
+  const isOwnerAdmin = memberships.some(
+    (m) => m.org_id === activeOrgId && (m.role === 'owner' || m.role === 'admin')
+  )
+
+  useEffect(() => {
+    if (!activeOrgId) return
+    if (location.state?.org) {
+      setOrg(location.state.org)
+      setSeatsUsed(location.state.seatsUsed ?? 0)
+      setLoading(false)
+      return
+    }
+    let cancelled = false
+    Promise.all([
+      supabase.from('orgs').select('*').eq('id', activeOrgId).single(),
+      supabase.from('org_memberships').select('*', { count: 'exact', head: true }).eq('org_id', activeOrgId),
+    ]).then(([orgRes, countRes]) => {
+      if (cancelled) return
+      setOrg(orgRes.data ?? null)
+      setSeatsUsed(countRes.count ?? 0)
+      setLoading(false)
+    }).catch(() => {
+      if (!cancelled) setLoading(false)
+    })
+    return () => { cancelled = true }
+  }, [activeOrgId, location.state])
+
+  const handlePortal = async () => {
+    if (!org?.id || actionLoading) return
+    setActionLoading(true)
+    try {
+      const { url } = await createPortalSession(org.id)
+      if (url) window.location.href = url
+      else showToast('Billing portal unavailable', 'error')
+    } catch (err) {
+      showToast(err?.message || 'Billing portal unavailable', 'error')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const seatLimit = org?.seat_limit ?? 1
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--page-bg)' }}>
+        <span style={{ color: 'var(--text-secondary)' }}>Carregant...</span>
+      </div>
+    )
+  }
+
+  if (!org) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--page-bg)' }}>
+        <div style={{ textAlign: 'center' }}>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: 16 }}>No s’ha trobat el workspace.</p>
+          <button type="button" onClick={() => navigate('/app')} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border-1)', cursor: 'pointer' }}>
+            Tornar a l’app
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 24,
+        backgroundColor: 'var(--page-bg)',
+      }}
+    >
+      <div
+        style={{
+          maxWidth: 420,
+          width: '100%',
+          padding: 32,
+          background: 'var(--surface-bg-2)',
+          border: '1px solid var(--border-1)',
+          borderRadius: 12,
+          textAlign: 'center',
+        }}
+      >
+        <h1 style={{ margin: '0 0 8px', fontSize: 22, fontWeight: 600, color: 'var(--warning-1, #b45309)' }}>
+          Límit de places assolit
+        </h1>
+        <p style={{ margin: 0, fontSize: 18, fontWeight: 600, color: 'var(--text-primary)' }}>
+          {seatsUsed} / {seatLimit} places
+        </p>
+        <p style={{ margin: '12px 0 0', fontSize: 15, lineHeight: 1.5, color: 'var(--text-secondary)' }}>
+          Heu superat el nombre de places del pla. Podeu pujar de pla des del portal de facturació o reduir membres.
+        </p>
+
+        {isOwnerAdmin ? (
+          <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <button
+              type="button"
+              onClick={handlePortal}
+              disabled={actionLoading}
+              style={{
+                padding: '12px 20px',
+                borderRadius: 8,
+                background: 'var(--primary-1)',
+                color: '#fff',
+                border: 'none',
+                fontWeight: 600,
+                cursor: actionLoading ? 'not-allowed' : 'pointer',
+              }}
+            >
+              {actionLoading ? 'Obrint...' : 'Obrir portal de facturació'}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/app/settings')}
+              style={{ padding: '10px 16px', background: 'transparent', border: '1px solid var(--border-1)', borderRadius: 8, cursor: 'pointer', color: 'var(--text-secondary)' }}
+            >
+              Anar a Configuració (membres)
+            </button>
+            <button type="button" onClick={() => navigate('/app')} style={{ padding: '10px 16px', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
+              Tornar a l’app
+            </button>
+          </div>
+        ) : (
+          <p style={{ marginTop: 24, fontSize: 14, color: 'var(--text-secondary)' }}>
+            Contacteu l’administrador del workspace per augmentar les places o gestionar els membres.
+          </p>
+        )}
+      </div>
+    </div>
+  )
+}

@@ -28,7 +28,6 @@ import DemoModeBanner from './components/DemoModeBanner'
 import ErrorBoundary from './components/ErrorBoundary'
 import FloatingNotesLayer from './components/FloatingNotesLayer'
 import TopNavbar from './components/TopNavbar'
-import BillingBlockedScreen from './components/BillingBlockedScreen'
 import { useBreakpoint } from './hooks/useBreakpoint'
 import { isDemoMode } from './demo/demoMode'
 import { supabase, getCurrentUserId } from './lib/supabase'
@@ -86,6 +85,8 @@ const Calendar = lazyWithErrorBoundary(() => import('./pages/CalendarPage'), 'Ca
 const Diagnostics = lazyWithErrorBoundary(() => import('./pages/Diagnostics'), 'Diagnostics')
 const DevSeed = lazyWithErrorBoundary(() => import('./pages/DevSeed'), 'DevSeed')
 const Help = lazyWithErrorBoundary(() => import('./pages/Help'), 'Help')
+const BillingLocked = lazyWithErrorBoundary(() => import('./pages/BillingLocked'), 'BillingLocked')
+const BillingOverSeat = lazyWithErrorBoundary(() => import('./pages/BillingOverSeat'), 'BillingOverSeat')
 
 const ADMIN_EMAILS = new Set(['david@freedolia.com'])
 
@@ -108,54 +109,45 @@ function AppContent() {
   const location = useLocation()
   const isProjectDetail = location.pathname.startsWith('/app/projects/') && location.pathname.split('/').length >= 4
 
-  const [billingState, setBillingState] = useState({ loading: true, allowed: true, org: null })
+  const [billingState, setBillingState] = useState({ loading: true, allowed: true, org: null, gate: null, seatsUsed: 0 })
+  const isBillingRoute = location.pathname === '/app/billing/locked' || location.pathname === '/app/billing/over-seat'
 
   useEffect(() => {
     if (!isWorkspaceReady) return
     let cancelled = false
     async function run() {
       if (isDemoMode()) {
-        if (!cancelled) setBillingState({ loading: false, allowed: true, org: null })
+        if (!cancelled) setBillingState({ loading: false, allowed: true, org: null, gate: null, seatsUsed: 0 })
         return
       }
       const userId = await getCurrentUserId()
       if (!userId) {
-        if (!cancelled) setBillingState({ loading: false, allowed: true, org: null })
+        if (!cancelled) setBillingState({ loading: false, allowed: true, org: null, gate: null, seatsUsed: 0 })
         return
       }
       if (!activeOrgId) {
-        if (!cancelled) setBillingState({ loading: false, allowed: false, org: null })
+        if (!cancelled) setBillingState({ loading: false, allowed: false, org: null, gate: 'locked', seatsUsed: 0 })
         return
       }
-      const { data: org, error: orgErr } = await supabase
-        .from('orgs')
-        .select('*')
-        .eq('id', activeOrgId)
-        .single()
+      const { data: org, error: orgErr } = await supabase.from('orgs').select('*').eq('id', activeOrgId).single()
       if (orgErr || !org) {
-        if (!cancelled) setBillingState({ loading: false, allowed: false, org: null })
+        if (!cancelled) setBillingState({ loading: false, allowed: false, org: null, gate: 'locked', seatsUsed: 0 })
         return
       }
-      const { data: { user: authUser } } = await supabase.auth.getUser()
-      const userEmail = (authUser?.email ?? '').toLowerCase()
+      const { count } = await supabase.from('org_memberships').select('*', { count: 'exact', head: true }).eq('org_id', activeOrgId)
+      const seatsUsed = count ?? 0
+      const seatLimit = org.seat_limit ?? 1
+      const status = org.billing_status
+      const trialEndsAt = org.trial_ends_at ? new Date(org.trial_ends_at) : null
+      const now = new Date()
+      const billingOk = status === 'active' || (status === 'trialing' && trialEndsAt && trialEndsAt > now) || (status == null)
+      const overSeat = seatsUsed > seatLimit
       let allowed = false
-      if (ADMIN_EMAILS.has(userEmail)) {
-        allowed = true
-      } else if (import.meta.env.DEV) {
-        allowed = true
-      } else if (org.plan_id === 'core-dev') {
-        allowed = true
-      } else {
-        const status = org.billing_status
-        const trialEndsAt = org.trial_ends_at ? new Date(org.trial_ends_at) : null
-        const now = new Date()
-        if (status === 'active') allowed = true
-        else if (status === 'trialing' && trialEndsAt && trialEndsAt > now) allowed = true
-        else if (status === 'trialing' && trialEndsAt && trialEndsAt <= now) allowed = false
-        else if (status === 'past_due' || status === 'canceled') allowed = false
-        else if (status == null) allowed = true
-      }
-      if (!cancelled) setBillingState({ loading: false, allowed, org })
+      let gate = null
+      if (!billingOk) gate = 'locked'
+      else if (overSeat) gate = 'over_seat'
+      else allowed = true
+      if (!cancelled) setBillingState({ loading: false, allowed, org, gate, seatsUsed })
     }
     run()
     return () => { cancelled = true }
@@ -176,12 +168,20 @@ function AppContent() {
       </div>
     )
   }
-  if (!billingState.allowed) {
+  if (isBillingRoute) {
     return (
-      <BillingBlockedScreen
-        org={billingState.org}
-        hasBillingPage
-      />
+      <>
+        <Suspense fallback={<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--page-bg)' }}><span style={{ color: 'var(--text-secondary)' }}>Carregant...</span></div>}>
+          <Outlet />
+        </Suspense>
+        <ToastContainer darkMode={darkMode} />
+      </>
+    )
+  }
+  if (!billingState.allowed) {
+    const to = billingState.gate === 'over_seat' ? '/app/billing/over-seat' : '/app/billing/locked'
+    return (
+      <Navigate to={to} replace state={{ org: billingState.org, seatsUsed: billingState.seatsUsed }} />
     )
   }
 
@@ -256,6 +256,8 @@ function App() {
             <Route path="calendar" element={<AppPageWrap context="page:Calendar"><Calendar /></AppPageWrap>} />
             <Route path="diagnostics" element={<AppPageWrap context="page:Diagnostics"><Diagnostics /></AppPageWrap>} />
             <Route path="dev/seed" element={<AppPageWrap context="page:DevSeed"><DevSeed /></AppPageWrap>} />
+            <Route path="billing/locked" element={<BillingLocked />} />
+            <Route path="billing/over-seat" element={<BillingOverSeat />} />
             <Route path="*" element={<NotFoundInApp />} />
           </Route>
           <Route path="*" element={<Navigate to="/app" replace />} />
