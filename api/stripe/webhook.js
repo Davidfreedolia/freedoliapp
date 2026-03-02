@@ -1,24 +1,22 @@
 /**
  * POST /api/stripe/webhook
- * Stripe webhook: verify signature, idempotency via stripe_webhook_events, update orgs.
+ * Stripe webhook: verify signature (raw body only), race-safe idempotency via insert-first, update orgs.
  * ONLY place that writes stripe_customer_id, stripe_subscription_id, billing_status, plan_id, seat_limit, trial_ends_at to orgs.
  */
 import { getStripe } from '../lib/stripe.js'
 import { mapSubscriptionStatus } from '../lib/stripe.js'
 import { getSupabaseAdmin } from '../lib/supabaseAdmin.js'
 
-async function getRawBody(req) {
-  if (typeof req.body === 'string') return req.body
-  if (Buffer.isBuffer(req.body)) return req.body.toString('utf8')
-  if (req.body && typeof req.body === 'object' && !Buffer.isBuffer(req.body)) {
+/** Read raw body from request stream; no fallback. Returns null if stream already consumed or not readable. */
+async function getRawBodyBuffer(req) {
+  const chunks = []
+  try {
+    for await (const chunk of req) chunks.push(chunk)
+  } catch (_) {
     return null
   }
-  return new Promise((resolve, reject) => {
-    const chunks = []
-    req.on('data', (c) => chunks.push(c))
-    req.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
-    req.on('error', reject)
-  })
+  const raw = Buffer.concat(chunks)
+  return raw.length ? raw : null
 }
 
 export default async function handler(req, res) {
@@ -32,10 +30,12 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'server_config' })
   }
 
-  let rawBody = await getRawBody(req)
-  if (rawBody === null) {
-    rawBody = typeof req.body === 'string' ? req.body : JSON.stringify(req.body || {})
+  const rawBody = await getRawBodyBuffer(req)
+  if (!rawBody) {
+    console.error('Webhook raw body unavailable (stream consumed or empty)')
+    return res.status(400).json({ error: 'raw_body_unavailable', message: 'Request body must be raw for signature verification' })
   }
+
   const sig = req.headers['stripe-signature'] || req.headers['Stripe-Signature']
   if (!sig) {
     return res.status(400).json({ error: 'missing_signature' })
@@ -52,22 +52,21 @@ export default async function handler(req, res) {
 
   const admin = getSupabaseAdmin()
 
-  const { data: existing } = await admin
-    .from('stripe_webhook_events')
-    .select('id')
-    .eq('id', event.id)
-    .maybeSingle()
-
-  if (existing) {
-    return res.status(200).json({ received: true, duplicate: true })
-  }
-
   const record = {
     id: event.id,
     type: event.type,
     org_id: null,
     stripe_customer_id: null,
     stripe_subscription_id: null
+  }
+
+  const { error: insertError } = await admin.from('stripe_webhook_events').insert(record)
+  if (insertError) {
+    if (insertError.code === '23505') {
+      return res.status(200).json({ received: true, duplicate: true })
+    }
+    console.error('stripe_webhook_events insert error', insertError)
+    return res.status(500).json({ error: 'idempotency_error', message: insertError.message })
   }
 
   async function upsertOrg(orgId, patch) {
@@ -194,6 +193,10 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'handler_error', message: err.message })
   }
 
-  await admin.from('stripe_webhook_events').insert(record)
+  await admin.from('stripe_webhook_events').update({
+    org_id: record.org_id,
+    stripe_customer_id: record.stripe_customer_id,
+    stripe_subscription_id: record.stripe_subscription_id
+  }).eq('id', event.id)
   return res.status(200).json({ received: true })
 }
