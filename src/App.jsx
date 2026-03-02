@@ -19,6 +19,7 @@ function NotFoundInApp() {
 }
 import React, { Suspense, useEffect, useState } from 'react'
 import { AppProvider, useApp } from './context/AppContext'
+import { WorkspaceProvider, useWorkspace } from './contexts/WorkspaceContext'
 import Sidebar from './components/Sidebar'
 import ProtectedRoute from './components/ProtectedRoute'
 import PageLoader from './components/PageLoader'
@@ -101,7 +102,8 @@ function AppPageWrap({ children, context }) {
 }
 
 function AppContent() {
-  const { sidebarCollapsed, darkMode, setActiveOrgId } = useApp()
+  const { sidebarCollapsed, darkMode } = useApp()
+  const { isWorkspaceReady, activeOrgId } = useWorkspace()
   const { isMobile, isTablet } = useBreakpoint()
   const location = useLocation()
   const isProjectDetail = location.pathname.startsWith('/app/projects/') && location.pathname.split('/').length >= 4
@@ -109,62 +111,37 @@ function AppContent() {
   const [billingState, setBillingState] = useState({ loading: true, allowed: true, org: null })
 
   useEffect(() => {
+    if (!isWorkspaceReady) return
     let cancelled = false
     async function run() {
       if (isDemoMode()) {
-        if (!cancelled) {
-          setBillingState({ loading: false, allowed: true, org: null })
-          setActiveOrgId(null)
-        }
+        if (!cancelled) setBillingState({ loading: false, allowed: true, org: null })
         return
       }
       const userId = await getCurrentUserId()
       if (!userId) {
-        if (!cancelled) {
-          setBillingState({ loading: false, allowed: true, org: null })
-          setActiveOrgId(null)
-        }
+        if (!cancelled) setBillingState({ loading: false, allowed: true, org: null })
+        return
+      }
+      if (!activeOrgId) {
+        if (!cancelled) setBillingState({ loading: false, allowed: false, org: null })
+        return
+      }
+      const { data: org, error: orgErr } = await supabase
+        .from('orgs')
+        .select('*')
+        .eq('id', activeOrgId)
+        .single()
+      if (orgErr || !org) {
+        if (!cancelled) setBillingState({ loading: false, allowed: false, org: null })
         return
       }
       const { data: { user: authUser } } = await supabase.auth.getUser()
       const userEmail = (authUser?.email ?? '').toLowerCase()
-      if (ADMIN_EMAILS.has(userEmail)) {
-        const { data: membershipRow } = await supabase
-          .from('org_memberships')
-          .select('*, orgs(*)')
-          .eq('user_id', userId)
-          .limit(1)
-          .maybeSingle()
-        const org = membershipRow?.orgs ?? membershipRow?.org ?? null
-        if (!cancelled) {
-          setBillingState({ loading: false, allowed: true, org })
-          setActiveOrgId(org?.id ?? null)
-        }
-        return
-      }
-      const { data: membershipRow, error: memErr } = await supabase
-        .from('org_memberships')
-        .select('*, orgs(*)')
-        .eq('user_id', userId)
-        .limit(1)
-        .maybeSingle()
-      if (memErr || !membershipRow) {
-        if (!cancelled) {
-          setBillingState({ loading: false, allowed: false, org: null })
-          setActiveOrgId(null)
-        }
-        return
-      }
-      const org = membershipRow.orgs ?? membershipRow.org ?? null
-      if (!org) {
-        if (!cancelled) {
-          setBillingState({ loading: false, allowed: false, org: null })
-          setActiveOrgId(null)
-        }
-        return
-      }
       let allowed = false
-      if (import.meta.env.DEV) {
+      if (ADMIN_EMAILS.has(userEmail)) {
+        allowed = true
+      } else if (import.meta.env.DEV) {
         allowed = true
       } else if (org.plan_id === 'core-dev') {
         allowed = true
@@ -178,18 +155,15 @@ function AppContent() {
         else if (status === 'past_due' || status === 'canceled') allowed = false
         else if (status == null) allowed = true
       }
-      if (!cancelled) {
-        setBillingState({ loading: false, allowed, org })
-        setActiveOrgId(org?.id ?? null)
-      }
+      if (!cancelled) setBillingState({ loading: false, allowed, org })
     }
     run()
     return () => { cancelled = true }
-  }, [setActiveOrgId])
+  }, [isWorkspaceReady, activeOrgId])
 
   const sidebarWidth = isMobile ? 0 : (isTablet ? 72 : (sidebarCollapsed ? 72 : 260))
 
-  if (billingState.loading) {
+  if (!isWorkspaceReady || billingState.loading) {
     return (
       <div style={{
         minHeight: '100vh',
@@ -246,7 +220,8 @@ function App() {
   return (
     <BrowserRouter>
       <AppProvider>
-        <Routes>
+        <WorkspaceProvider>
+          <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/landing" element={<Navigate to="/" replace />} />
           <Route path="/login" element={<Login />} />
@@ -284,7 +259,8 @@ function App() {
             <Route path="*" element={<NotFoundInApp />} />
           </Route>
           <Route path="*" element={<Navigate to="/app" replace />} />
-        </Routes>
+          </Routes>
+        </WorkspaceProvider>
       </AppProvider>
     </BrowserRouter>
   )
