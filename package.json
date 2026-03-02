@@ -31,7 +31,8 @@
     "react-dom": "^18.2.0",
     "react-grid-layout": "^2.2.2",
     "react-i18next": "^16.5.0",
-    "react-router-dom": "^6.21.0"
+    "react-router-dom": "^6.21.0",
+    "stripe": "^17.4.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",
