@@ -300,4 +300,106 @@ Details and priorities are in **`docs/ROADMAP_STATUS.md`**. Technical baseline i
 
 ---
 
-*This dossier is the single entry point for an engineer who needs to work on FREEDOLIAPP; it defers to the referenced docs for full specifications and migration details.*
+## 14. Diagrama Relacional Complet (ASCII)
+
+Esquema ampliat de les entitats principals amb relació a `orgs` (tenant boundary). Totes les taules tenant tenen `org_id` FK a `orgs.id`; RLS aplica `is_org_member(org_id)` i `org_billing_allows_access(org_id)` (o excepció owner per SELECT a orgs/org_memberships).
+
+```
+orgs
+ ├── org_memberships
+ ├── projects
+ │    ├── project_phases
+ │    ├── project_marketplaces
+ │    └── project_tasks
+ ├── suppliers
+ ├── supplier_quotes
+ ├── purchase_orders
+ │    ├── po_shipments
+ │    └── po_amazon_readiness
+ ├── expenses
+ ├── incomes
+ ├── logistics_flow
+ ├── tasks
+ ├── sticky_notes
+ └── stripe_webhook_events   (service role only; no RLS for anon/authenticated)
+```
+
+*Nota:* `stripe_webhook_events` no és una FK des de `orgs`; és una taula d’idempotència del webhook, amb `org_id` omplert opcionalment en processar. La relació lògica és “events que poden actualitzar orgs”.
+
+---
+
+## 15. Stripe Sequence Diagram (ASCII)
+
+Flux des de l’owner fins a l’actualització d’orgs i reacció de RLS/UI.
+
+```
+Owner (frontend)
+  │
+  │  POST /api/stripe/create-checkout-session { org_id, ... }
+  │  Authorization: Bearer <JWT>
+  ▼
+Checkout API (Vercel)
+  │  Validate JWT, owner/admin
+  │  stripe.checkout.sessions.create({ client_reference_id: org_id, metadata: { org_id }, ... })
+  ▼
+Stripe
+  │  User completes payment
+  │  POST webhook (checkout.session.completed, etc.)
+  ▼
+Webhook API (Vercel)
+  │  Verify signature (raw body)
+  │  Insert stripe_webhook_events (idempotency)
+  │  UPDATE orgs SET stripe_customer_id, stripe_subscription_id, billing_status, plan_id, seat_limit, trial_ends_at
+  ▼
+Update orgs (Supabase service role)
+  │
+  ▼
+RLS enforces
+  │  org_billing_allows_access(org_id) → true for org
+  │  Tenant tables become readable/writable again for members
+  ▼
+UI reacts
+  │  Next load or re-fetch: billing_status active/trialing → gate allows access; user leaves locked/over-seat
+```
+
+---
+
+## 16. API Contract Overview
+
+### POST /api/stripe/create-checkout-session
+
+| Aspect | Detail |
+|--------|--------|
+| **Auth required** | Yes. Bearer JWT (Supabase). Caller must be **owner** or **admin** of the org. |
+| **Input** | Body (JSON): `org_id` (required), `price_id` or `priceId` (or env `STRIPE_PRICE_ID`), optional `quantity`/`seats` (default 1), optional `trial_days`. |
+| **Output** | 200: `{ url: string }` (Stripe Checkout URL). |
+| **Error cases** | 401 unauthorized (invalid/absent token). 400 org_id_required, invalid_body, price_id_required. 403 forbidden (not_org_member, owner_or_admin_required). 500 server_config (APP_URL not set), stripe_error. |
+| **Side effects** | None on DB. Stripe session created; after payment Stripe sends webhook; webhook updates `orgs`. |
+
+---
+
+### POST /api/stripe/create-portal-session
+
+| Aspect | Detail |
+|--------|--------|
+| **Auth required** | Yes. Bearer JWT. Caller must be **owner** or **admin** of the org. |
+| **Input** | Body (JSON): `org_id` (required). |
+| **Output** | 200: `{ url: string }` (Stripe Customer Portal URL). |
+| **Error cases** | 401 unauthorized. 400 org_id_required, invalid_body. 403 forbidden (not_org_member, owner_or_admin_required). 404 org_not_found. **400 no_customer_yet** if `orgs.stripe_customer_id` is null (message: complete checkout first). 500 server_config, stripe_error. |
+| **Side effects** | None on DB. Stripe portal session created; user manages subscription in Stripe. |
+
+---
+
+### POST /api/stripe/webhook
+
+| Aspect | Detail |
+|--------|--------|
+| **Auth required** | No JWT. **Stripe signature** required: header `Stripe-Signature`, body must be **raw** (unparsed) for verification. |
+| **Input** | Raw request body (Buffer). Verified with `STRIPE_WEBHOOK_SECRET`. |
+| **Output** | 200: `{ received: true }` or `{ received: true, duplicate: true }` (when event.id already in stripe_webhook_events). |
+| **Error cases** | 405 method_not_allowed. 500 server_config (STRIPE_WEBHOOK_SECRET not set). 400 raw_body_unavailable (body not readable), missing_signature, invalid_signature. 500 idempotency_error (insert stripe_webhook_events failed for reason other than duplicate). |
+| **Side effects** | **Only place that writes billing fields to `orgs`.** Inserts into `stripe_webhook_events` for idempotency. On checkout.session.completed, customer.subscription.updated/deleted, invoice.payment_failed/succeeded: updates `orgs` (stripe_customer_id, stripe_subscription_id, billing_status, plan_id, seat_limit, trial_ends_at) via Supabase **service role**. |
+
+---
+
+*This dossier is the single entry point for an engineer who needs to work on FREEDOLIAPP; it defers to the referenced docs for full specifications and migration details. Changelog: `docs/DOSSIER_CHANGELOG.md`.*

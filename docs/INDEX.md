@@ -7,6 +7,15 @@ Last verified against: (run: `git rev-parse --short HEAD`) — 2025-02-17
 
 ---
 
+## 0. Document Oficial Viu
+
+- **FREEDOLIAPP_DOSSIER_TECNIC_LIVE.docx** — Editable; font única oficial del dossier (afegir a `docs/` si s’utilitza).
+- **releases/** — PDFs versionats (snapshots); veure `docs/releases/README.md`.
+
+(No duplicar contingut; només enllaçar.)
+
+---
+
 ## D0 — Executive & Vision
 - `docs/D0/D0__executive-vision__v1.0.md` — status: stable
 
