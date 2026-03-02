@@ -10,6 +10,7 @@ const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
 
 const MAX_ORGS_PER_RUN = 20;
 const MAX_PACKAGES_PER_ORG = 40;
+const STALLED_THRESHOLD_HOURS = 72;
 
 type PackageRow = {
   id: string;
@@ -212,6 +213,156 @@ async function recomputeShipmentStatus(shipmentId: string) {
       .update({ status: derived, updated_at: new Date().toISOString() })
       .eq("id", shipmentId);
   }
+  return derived;
+}
+
+type AlertDefs = Record<string, string>;
+
+async function loadTrackingAlertDefinitionIds(): Promise<AlertDefs> {
+  const { data, error } = await supabaseAdmin
+    .from("alert_definitions")
+    .select("id, code")
+    .in("code", ["SHIPMENT_EXCEPTION", "SHIPMENT_DELIVERED", "SHIPMENT_STALLED", "SHIPMENT_DELAYED"]);
+  if (error) return {};
+  const out: AlertDefs = {};
+  for (const row of data || []) {
+    out[row.code] = row.id;
+  }
+  return out;
+}
+
+async function ensureAlert(
+  orgId: string,
+  defId: string,
+  entityType: string,
+  entityId: string,
+  dedupeKey: string,
+  title: string,
+  message: string,
+  severity: string,
+) {
+  const { error } = await supabaseAdmin.from("alerts").insert({
+    org_id: orgId,
+    alert_definition_id: defId,
+    entity_type: entityType,
+    entity_id: entityId,
+    severity,
+    visibility_scope: "admin_owner",
+    status: "open",
+    title,
+    message,
+    payload: {},
+    dedupe_key: dedupeKey,
+  });
+  if (error?.code === "23505") return;
+  if (error) throw error;
+}
+
+async function resolveAlertByDedupeKey(orgId: string, dedupeKey: string) {
+  await supabaseAdmin
+    .from("alerts")
+    .update({
+      status: "resolved",
+      resolved_at: new Date().toISOString(),
+      resolved_by: null,
+      last_seen_at: new Date().toISOString(),
+    })
+    .eq("org_id", orgId)
+    .eq("dedupe_key", dedupeKey)
+    .in("status", ["open", "acknowledged"]);
+}
+
+async function emitTrackingAlertsForShipments(
+  orgId: string,
+  shipmentIds: string[],
+  hadNewEventsByShipment: Set<string>,
+  defs: AlertDefs,
+) {
+  if (!defs.SHIPMENT_EXCEPTION) return;
+  const now = new Date();
+  const stalledThreshold = new Date(now.getTime() - STALLED_THRESHOLD_HOURS * 60 * 60 * 1000).toISOString();
+
+  for (const shipmentId of shipmentIds) {
+    const { data: ship, error: shipErr } = await supabaseAdmin
+      .from("shipments")
+      .select("id, status, eta_estimated")
+      .eq("id", shipmentId)
+      .maybeSingle();
+    if (shipErr || !ship) continue;
+
+    const status = ship.status as string;
+    const hadNewEvents = hadNewEventsByShipment.has(shipmentId);
+
+    if (status === "exception" && defs.SHIPMENT_EXCEPTION) {
+      await ensureAlert(
+        orgId,
+        defs.SHIPMENT_EXCEPTION,
+        "shipment",
+        shipmentId,
+        `shipment:${shipmentId}:exception`,
+        "Shipment exception",
+        "A package in this shipment has an exception status.",
+        "high",
+      );
+    }
+
+    if (status === "delivered" && defs.SHIPMENT_DELIVERED) {
+      await ensureAlert(
+        orgId,
+        defs.SHIPMENT_DELIVERED,
+        "shipment",
+        shipmentId,
+        `shipment:${shipmentId}:delivered`,
+        "Shipment delivered",
+        "All packages in this shipment have been delivered.",
+        "low",
+      );
+      await resolveAlertByDedupeKey(orgId, `shipment:${shipmentId}:stalled`);
+      await resolveAlertByDedupeKey(orgId, `shipment:${shipmentId}:delayed`);
+    }
+
+    if (hadNewEvents) {
+      await resolveAlertByDedupeKey(orgId, `shipment:${shipmentId}:stalled`);
+    }
+
+    if (status !== "delivered" && status !== "cancelled") {
+      const { data: pkgRows } = await supabaseAdmin
+        .from("packages")
+        .select("last_tracking_sync_at")
+        .eq("shipment_id", shipmentId)
+        .not("last_tracking_sync_at", "is", null)
+        .order("last_tracking_sync_at", { ascending: false })
+        .limit(1);
+      const lastSync = pkgRows?.[0]?.last_tracking_sync_at;
+      const lastActivity = lastSync || ship.eta_estimated;
+      if (lastActivity && lastActivity < stalledThreshold && defs.SHIPMENT_STALLED) {
+        await ensureAlert(
+          orgId,
+          defs.SHIPMENT_STALLED,
+          "shipment",
+          shipmentId,
+          `shipment:${shipmentId}:stalled`,
+          "Shipment stalled",
+          "No tracking updates in the last 72 hours.",
+          "high",
+        );
+      }
+
+      const eta = ship.eta_estimated;
+      if (eta && eta < now.toISOString() && defs.SHIPMENT_DELAYED) {
+        await ensureAlert(
+          orgId,
+          defs.SHIPMENT_DELAYED,
+          "shipment",
+          shipmentId,
+          `shipment:${shipmentId}:delayed`,
+          "Shipment delayed",
+          "Estimated delivery time has passed and shipment is not yet delivered.",
+          "medium",
+        );
+      }
+    }
+  }
 }
 
 async function processOrg(orgId: string): Promise<{
@@ -234,6 +385,9 @@ async function processOrg(orgId: string): Promise<{
   }
 
   const byTracking = await call17TrackBatch(packages);
+  const defs = await loadTrackingAlertDefinitionIds();
+  const shipmentIds = Array.from(new Set(packages.map((p) => p.shipment_id)));
+  const hadNewEventsByShipment = new Set<string>();
 
   let eventsInserted = 0;
   try {
@@ -242,6 +396,7 @@ async function processOrg(orgId: string): Promise<{
       if (!tn) continue;
       const events = byTracking[tn] || [];
       if (events.length) {
+        hadNewEventsByShipment.add(pkg.shipment_id);
         const rows = events.map((ev) => ({
           org_id: orgId,
           package_id: pkg.id,
@@ -294,6 +449,8 @@ async function processOrg(orgId: string): Promise<{
     if (orgState && (orgState.error_count || orgState.backoff_until)) {
       await upsertOrgState(orgId, { error_count: 0, backoff_until: null, last_error_code: null });
     }
+
+    await emitTrackingAlertsForShipments(orgId, shipmentIds, hadNewEventsByShipment, defs);
 
     return {
       packagesProcessed: packages.length,
