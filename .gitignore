@@ -1,4 +1,4 @@
-﻿# Logs
+# Logs
 logs
 *.log
 npm-debug.log*
@@ -37,3 +37,5 @@ e2e/.auth/storageState.json
 
 _local_ignored/
 
+# Supabase CLI temp
+supabase/.temp/
