@@ -32,8 +32,9 @@ Last verified against: (run: `git rev-parse --short HEAD`) — 2025-02-17
 ## D3 — Multi-tenant Contract
 - `docs/D3/D3__multi-tenant-contract__v1.0.md` — status: stable
 
-## D4 — Frontend Architecture
+## D4 — Frontend & Tracking Architecture
 - `docs/D4/D4__frontend-architecture__v1.0.md` — status: stable
+- `docs/D4/F4_TRACKING_17TRACK_ARCHITECTURE.md` — status: draft
 
 ## D5 — Security Model
 - `docs/D5/D5__security-model__v1.0.md` — status: stable
