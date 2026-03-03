@@ -1060,9 +1060,9 @@ ${t}
       const thirtyDaysIso = thirtyDaysAgo.toISOString()
 
       let stockRows = []
+      // Stock source: inventory (org-scoped). project_stock has been removed.
       for (const { table, columns } of [
-        { table: 'inventory', columns: 'project_id,total_units,quantity,qty,units' },
-        { table: 'project_stock', columns: 'project_id,quantity,qty,units,total_units' }
+        { table: 'inventory', columns: 'project_id,total_units,quantity,qty,units' }
       ]) {
         try {
           const { data, error } = await supabase

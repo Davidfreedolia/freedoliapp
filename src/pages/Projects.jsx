@@ -328,10 +328,9 @@ export default function Projects() {
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
       const thirtyDaysIso = thirtyDaysAgo.toISOString()
 
-      // Try-chain: stock source (inventory -> project_stock)
+      // Stock source: inventory (org-scoped). project_stock has been removed.
       const stockTables = [
-        { table: 'inventory', columns: 'project_id,total_units,quantity,qty,units' },
-        { table: 'project_stock', columns: 'project_id,quantity,qty,units,total_units' }
+        { table: 'inventory', columns: 'project_id,total_units,quantity,qty,units' }
       ]
       for (const { table, columns } of stockTables) {
         try {

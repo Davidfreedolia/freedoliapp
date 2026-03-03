@@ -198,9 +198,9 @@ export default function Dashboard() {
         const thirtyDaysIso = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
 
         let stockRowsByProject = {}
+        // Stock source: inventory (org-scoped). project_stock has been removed.
         const stockTables = [
-          { table: 'inventory', columns: 'project_id,quantity,qty,units,total_units' },
-          { table: 'project_stock', columns: 'project_id,quantity,qty,units,total_units' }
+          { table: 'inventory', columns: 'project_id,quantity,qty,units,total_units' }
         ]
         for (const { table, columns } of stockTables) {
           try {
@@ -208,7 +208,6 @@ export default function Dashboard() {
               .from(table)
               .select(columns)
               .eq('user_id', userId)
-              .eq('is_demo', demoMode)
               .in('project_id', ids)
             if (error) throw error
             const rows = data || []
