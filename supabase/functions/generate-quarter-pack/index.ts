@@ -60,6 +60,54 @@ function toCSV(headers: string[], rows: any[]): string {
   return lines.join("\n");
 }
 
+async function ensureValidRates(job: QuarterlyJobRow, ledgerRows: any[]) {
+  const problems = ledgerRows.filter((row: any) => {
+    const r1 = Number(row.rate_pnl ?? 0);
+    const r2 = row.cash_at ? Number(row.rate_cash ?? 0) : 1;
+    return !Number.isFinite(r1) || r1 <= 0 || !Number.isFinite(r2) || r2 <= 0;
+  });
+  if (problems.length === 0) return;
+
+  for (const row of problems) {
+    try {
+      const { data, error } = await supabaseAdmin.rpc("get_exchange_rate_to_base", {
+        p_date: row.occurred_at,
+        p_currency: row.currency_original,
+        p_base: job.base_currency,
+      });
+      if (error) throw error;
+      const rate = Array.isArray(data) ? data[0] : data;
+      if (!rate || Number(rate) <= 0) {
+        throw new Error("missing_exchange_rate");
+      }
+      row.rate_pnl = rate;
+      if (!row.amount_base_pnl && row.amount_original != null) {
+        row.amount_base_pnl = Number(row.amount_original) * Number(rate);
+      }
+
+      if (row.cash_at && (!row.rate_cash || Number(row.rate_cash) <= 0)) {
+        const { data: cashData, error: cashError } = await supabaseAdmin.rpc("get_exchange_rate_to_base", {
+          p_date: row.cash_at,
+          p_currency: row.currency_original,
+          p_base: job.base_currency,
+        });
+        if (cashError) throw cashError;
+        const cashRate = Array.isArray(cashData) ? cashData[0] : cashData;
+        if (!cashRate || Number(cashRate) <= 0) {
+          throw new Error("missing_exchange_rate");
+        }
+        row.rate_cash = cashRate;
+        if (!row.amount_base_cash && row.amount_original != null) {
+          row.amount_base_cash = Number(row.amount_original) * Number(cashRate);
+        }
+      }
+    } catch (err) {
+      console.error("Rate fallback failed for ledger row", row.id, err);
+      throw new Error("missing_exchange_rate");
+    }
+  }
+}
+
 async function generateQuarterPack(job: QuarterlyJobRow) {
   // Mark running
   await updateJob(job.id, { status: "running", error: null });
@@ -83,30 +131,30 @@ async function generateQuarterPack(job: QuarterlyJobRow) {
     fetchRpc("ledger_reconciliation_quarterly"),
   ]);
 
+  // 1b) Ensure rates are valid; if not, try fallback via RPC
+  await ensureValidRates(job, ledgerRows);
+
   // 2) Build CSVs
   const pnlCsv = toCSV(["type", "total_base_pnl", "period_status"], pnlRows);
   const cashCsv = toCSV(["type", "total_base_cash", "period_status"], cashRows);
-  const ledgerCsv = toCSV(
-    [
-      "id",
-      "occurred_at",
-      "cash_at",
-      "type",
-      "status",
-      "amount_original",
-      "currency_original",
-      "rate_pnl",
-      "amount_base_pnl",
-      "rate_cash",
-      "amount_base_cash",
-      "reference_type",
-      "reference_id",
-      "note",
-      "created_at",
-      "period_status",
-    ],
-    ledgerRows,
-  );
+  const ledgerHeaders = [
+    "id",
+    "occurred_at",
+    "cash_at",
+    "type",
+    "status",
+    "amount_original",
+    "currency_original",
+    "rate_pnl",
+    "amount_base_pnl",
+    "rate_cash",
+    "amount_base_cash",
+    "reference_type",
+    "reference_id",
+    "note",
+    "created_at",
+    "period_status",
+  ];
   const reconCsv = toCSV(
     [
       "reference_type",
@@ -124,7 +172,21 @@ async function generateQuarterPack(job: QuarterlyJobRow) {
   const prefix = `org_${job.org_id}_Y${year}_Q${quarter}`;
   zip.file(`${prefix}_pnl.csv`, pnlCsv);
   zip.file(`${prefix}_cashflow.csv`, cashCsv);
-  zip.file(`${prefix}_ledger.csv`, ledgerCsv);
+
+  if (ledgerRows.length > 50000) {
+    const chunkSize = 50000;
+    let part = 1;
+    for (let i = 0; i < ledgerRows.length; i += chunkSize) {
+      const chunk = ledgerRows.slice(i, i + chunkSize);
+      const csv = toCSV(ledgerHeaders, chunk);
+      zip.file(`${prefix}_ledger_part${part}.csv`, csv);
+      part += 1;
+    }
+  } else {
+    const ledgerCsv = toCSV(ledgerHeaders, ledgerRows);
+    zip.file(`${prefix}_ledger.csv`, ledgerCsv);
+  }
+
   zip.file(`${prefix}_reconciliation.csv`, reconCsv);
 
   const zipBlob = await zip.generateAsync({ type: "uint8array" });
@@ -191,10 +253,20 @@ async function handler(req: Request): Promise<Response> {
     );
   } catch (err) {
     console.error("generate-quarter-pack error", err);
-    // Best-effort job update if we can parse id from body/query later if needed
+    const message = (err as any)?.message || "unknown_error";
+    // Best-effort mark job as failed when we have an id
+    try {
+      const url = new URL(req.url);
+      const jobId = url.searchParams.get("job_id");
+      if (jobId) {
+        await updateJob(jobId, { status: "failed", error: message });
+      }
+    } catch {
+      // ignore
+    }
     return new Response(
       JSON.stringify({
-        error: (err as any)?.message || "unknown_error",
+        error: message,
       }),
       { status: 500, headers: { "Content-Type": "application/json" } },
     );
