@@ -115,9 +115,14 @@ Deno.serve(async (req: Request): Promise<Response> => {
     message: "SP-API settlement worker tick",
   });
 
+  const nowIso = new Date().toISOString();
   let connections: Array<{ id: string; org_id: string; region: string; seller_id: string; lwa_client_id: string; lwa_refresh_token_plain: string; created_by: string }> = [];
   try {
-    const { data: ids } = await supabaseAdmin.from("spapi_connections").select("id").eq("status", "active");
+    const { data: ids } = await supabaseAdmin
+      .from("spapi_connections")
+      .select("id")
+      .eq("status", "active")
+      .or(`next_sync_due_at.is.null,next_sync_due_at.lte.${nowIso}`);
     if (!ids?.length) {
       await logOpsEvent({ org_id: null, source: "edge", event_type: "SPAPI_WORKER_DONE", severity: "info", message: "No active connections" });
       return new Response(JSON.stringify({ ok: true, connections: 0 }), { status: 200, headers: { "Content-Type": "application/json" } });
@@ -202,19 +207,47 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
       const { data: reportsToProcess } = await supabaseAdmin
         .from("spapi_reports")
-        .select("id, org_id, report_id, document_id, connection_id")
+        .select("id, org_id, report_id, document_id, connection_id, status, failed_attempts")
         .eq("connection_id", connectionId)
         .in("status", ["discovered", "failed"]);
 
-      const list = (reportsToProcess || []) as Array<{ id: string; org_id: string; report_id: string; document_id: string | null; connection_id: string }>;
+      const list = (reportsToProcess || []) as Array<{ id: string; org_id: string; report_id: string; document_id: string | null; connection_id: string; status?: string; failed_attempts?: number }>;
 
       for (const report of list) {
         const reportPk = report.id;
+        const failedAttempts = report.failed_attempts ?? 0;
+        if (report.status === "failed" && failedAttempts >= 5) {
+          await logOpsEvent({
+            org_id: orgId,
+            source: "edge",
+            event_type: "SPAPI_REPORT_GIVEUP",
+            severity: "critical",
+            entity_type: "spapi_report",
+            entity_id: reportPk,
+            message: "Report skipped after 5 failed attempts",
+            meta: { report_id: reportPk, failed_attempts: failedAttempts },
+          });
+          continue;
+        }
+
+        await supabaseAdmin.from("spapi_reports").update({ last_attempt_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", reportPk);
+
         const reportIdStr = report.report_id;
         const docId = report.document_id;
         if (!docId) {
-          await supabaseAdmin.from("spapi_reports").update({ status: "failed", last_error: "no_document_id", updated_at: new Date().toISOString() }).eq("id", reportPk);
+          await supabaseAdmin
+            .from("spapi_reports")
+            .update({ status: "failed", last_error: "no_document_id", failed_attempts: failedAttempts + 1, updated_at: new Date().toISOString() })
+            .eq("id", reportPk);
           await insertRun(orgId, reportPk, "download", "failed", "no_document_id");
+          await logOpsEvent({
+            org_id: orgId,
+            source: "edge",
+            event_type: "SPAPI_REPORT_FAILED",
+            severity: "warn",
+            message: "Report failed",
+            meta: { report_id: reportPk, failed_attempts: failedAttempts + 1 },
+          });
           continue;
         }
 
@@ -246,7 +279,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
           if (existing?.id) {
             jobId = existing.id;
             if (existing.status === "done") {
-              await supabaseAdmin.from("spapi_reports").update({ status: "posted", last_error: null, updated_at: new Date().toISOString() }).eq("id", reportPk);
+              await supabaseAdmin.from("spapi_reports").update({ status: "posted", last_error: null, failed_attempts: 0, updated_at: new Date().toISOString() }).eq("id", reportPk);
               await insertRun(orgId, reportPk, "post", "done", "Already posted");
               continue;
             }
@@ -254,7 +287,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
               await insertRun(orgId, reportPk, "post", "started", "Posting to ledger (retry)");
               const { data: postData, error: postErr } = await supabaseAdmin.rpc("post_amazon_job_to_ledger_backend", { p_org_id: orgId, p_job_id: jobId });
               if (postErr) throw postErr;
-              await supabaseAdmin.from("spapi_reports").update({ status: "posted", last_error: null, updated_at: new Date().toISOString() }).eq("id", reportPk);
+              await supabaseAdmin.from("spapi_reports").update({ status: "posted", last_error: null, failed_attempts: 0, updated_at: new Date().toISOString() }).eq("id", reportPk);
               await insertRun(orgId, reportPk, "post", "done", "Posted", { posted_count: Array.isArray(postData)?.[0]?.posted_count ?? 0 });
               continue;
             }
@@ -324,15 +357,32 @@ Deno.serve(async (req: Request): Promise<Response> => {
           await insertRun(orgId, reportPk, "post", "started", "Posting to ledger");
           const { data: postData, error: postErr } = await supabaseAdmin.rpc("post_amazon_job_to_ledger_backend", { p_org_id: orgId, p_job_id: jobId });
           if (postErr) throw postErr;
-          await supabaseAdmin.from("spapi_reports").update({ status: "posted", last_error: null, updated_at: new Date().toISOString() }).eq("id", reportPk);
+          await supabaseAdmin.from("spapi_reports").update({ status: "posted", last_error: null, failed_attempts: 0, updated_at: new Date().toISOString() }).eq("id", reportPk);
           await insertRun(orgId, reportPk, "post", "done", "Posted", { posted_count: Array.isArray(postData)?.[0]?.posted_count ?? 0 });
           }
         } catch (reportErr) {
           const errMsg = (reportErr as Error).message;
-          await supabaseAdmin.from("spapi_reports").update({ status: "failed", last_error: errMsg.slice(0, 500), updated_at: new Date().toISOString() }).eq("id", reportPk);
+          const newFailedAttempts = failedAttempts + 1;
+          await supabaseAdmin
+            .from("spapi_reports")
+            .update({
+              status: "failed",
+              last_error: errMsg.slice(0, 500),
+              failed_attempts: newFailedAttempts,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", reportPk);
           await insertRun(orgId, reportPk, "download", "failed", errMsg).catch(() => {});
           await insertRun(orgId, reportPk, "parse", "failed", errMsg).catch(() => {});
           await insertRun(orgId, reportPk, "post", "failed", errMsg).catch(() => {});
+          await logOpsEvent({
+            org_id: orgId,
+            source: "edge",
+            event_type: "SPAPI_REPORT_FAILED",
+            severity: "warn",
+            message: "Report failed",
+            meta: { report_id: reportPk, failed_attempts: newFailedAttempts, error: errMsg.slice(0, 200) },
+          });
           await logOpsEvent({
             org_id: orgId,
             source: "edge",
@@ -344,10 +394,37 @@ Deno.serve(async (req: Request): Promise<Response> => {
         }
       }
 
-      await supabaseAdmin.from("spapi_connections").update({ last_sync_at: new Date().toISOString(), last_error: null }).eq("id", connectionId);
+      await supabaseAdmin
+        .from("spapi_connections")
+        .update({
+          last_sync_at: new Date().toISOString(),
+          last_error: null,
+          backoff_minutes: 0,
+          next_sync_due_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+        })
+        .eq("id", connectionId);
     } catch (connErr) {
       const errMsg = (connErr as Error).message;
-      await supabaseAdmin.from("spapi_connections").update({ last_error: errMsg.slice(0, 500) }).eq("id", connectionId);
+      const { data: connRow } = await supabaseAdmin.from("spapi_connections").select("backoff_minutes").eq("id", connectionId).single();
+      const current = (connRow as { backoff_minutes?: number } | null)?.backoff_minutes ?? 0;
+      const backoffMinutes = Math.min(1440, Math.max(5, current * 2));
+      const nextDue = new Date(Date.now() + backoffMinutes * 60 * 1000).toISOString();
+      await supabaseAdmin
+        .from("spapi_connections")
+        .update({
+          last_error: errMsg.slice(0, 500),
+          backoff_minutes: backoffMinutes,
+          next_sync_due_at: nextDue,
+        })
+        .eq("id", connectionId);
+      await logOpsEvent({
+        org_id: orgId,
+        source: "edge",
+        event_type: "SPAPI_BACKOFF_SET",
+        severity: "warn",
+        message: "Connection backoff set after error",
+        meta: { connection_id: connectionId, backoff_minutes: backoffMinutes, error: errMsg.slice(0, 200) },
+      });
       await logOpsEvent({
         org_id: orgId,
         source: "edge",
