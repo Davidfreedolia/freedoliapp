@@ -108,69 +108,85 @@ function insertRun(orgId: string, reportId: string, stage: string, status: strin
 
 Deno.serve(async (req: Request): Promise<Response> => {
   let lockAcquired = false;
+  let connections: Array<{ id: string; org_id: string; region: string; seller_id: string; lwa_client_id: string; lwa_refresh_token_plain: string; created_by: string }> = [];
+
   try {
-    const { data: locked } = await supabaseAdmin.rpc("spapi_worker_try_lock");
-    if (locked === false) {
+    if (req.method === "POST") {
+      let body: { connection_id?: string } = {};
+      try {
+        body = await req.json();
+      } catch {
+        return new Response(JSON.stringify({ error: "Invalid JSON" }), { status: 400, headers: { "Content-Type": "application/json" } });
+      }
+      const connectionId = body?.connection_id;
+      if (!connectionId) {
+        return new Response(JSON.stringify({ error: "connection_id required" }), { status: 400, headers: { "Content-Type": "application/json" } });
+      }
+      const { data: conn } = await supabaseAdmin.rpc("get_spapi_connection_for_worker", { p_connection_id: connectionId });
+      const c = Array.isArray(conn) ? conn[0] : conn;
+      if (!c?.lwa_refresh_token_plain) {
+        return new Response(JSON.stringify({ error: "Connection not found or inactive" }), { status: 404, headers: { "Content-Type": "application/json" } });
+      }
+      connections = [{
+        id: c.id,
+        org_id: c.org_id,
+        region: c.region,
+        seller_id: c.seller_id,
+        lwa_client_id: c.lwa_client_id,
+        lwa_refresh_token_plain: c.lwa_refresh_token_plain,
+        created_by: c.created_by,
+      }];
+    } else {
+      const { data: locked } = await supabaseAdmin.rpc("spapi_worker_try_lock");
+      if (locked === false) {
+        await logOpsEvent({
+          org_id: null,
+          source: "edge",
+          event_type: "SPAPI_WORKER_SKIPPED_LOCKED",
+          severity: "info",
+          message: "Skipped: another run holds the lock",
+        });
+        return new Response(JSON.stringify({ skipped: true, reason: "already running" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      lockAcquired = true;
+
       await logOpsEvent({
         org_id: null,
         source: "edge",
-        event_type: "SPAPI_WORKER_SKIPPED_LOCKED",
+        event_type: "SPAPI_WORKER_TICK",
         severity: "info",
-        message: "Skipped: another run holds the lock",
+        message: "SP-API settlement worker tick",
       });
-      return new Response(JSON.stringify({ skipped: true, reason: "already running" }), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-    lockAcquired = true;
 
-    await logOpsEvent({
-      org_id: null,
-      source: "edge",
-      event_type: "SPAPI_WORKER_TICK",
-      severity: "info",
-      message: "SP-API settlement worker tick",
-    });
-
-  const nowIso = new Date().toISOString();
-  let connections: Array<{ id: string; org_id: string; region: string; seller_id: string; lwa_client_id: string; lwa_refresh_token_plain: string; created_by: string }> = [];
-  try {
-    const { data: ids } = await supabaseAdmin
-      .from("spapi_connections")
-      .select("id")
-      .eq("status", "active")
-      .or(`next_sync_due_at.is.null,next_sync_due_at.lte.${nowIso}`);
-    if (!ids?.length) {
-      await logOpsEvent({ org_id: null, source: "edge", event_type: "SPAPI_WORKER_DONE", severity: "info", message: "No active connections" });
-      return new Response(JSON.stringify({ ok: true, connections: 0 }), { status: 200, headers: { "Content-Type": "application/json" } });
-    }
-    for (const row of ids as { id: string }[]) {
-      const { data: conn } = await supabaseAdmin.rpc("get_spapi_connection_for_worker", { p_connection_id: row.id });
-      const c = Array.isArray(conn) ? conn[0] : conn;
-      if (c?.lwa_refresh_token_plain) {
-        connections.push({
-          id: c.id,
-          org_id: c.org_id,
-          region: c.region,
-          seller_id: c.seller_id,
-          lwa_client_id: c.lwa_client_id,
-          lwa_refresh_token_plain: c.lwa_refresh_token_plain,
-          created_by: c.created_by,
-        });
+      const nowIso = new Date().toISOString();
+      const { data: ids } = await supabaseAdmin
+        .from("spapi_connections")
+        .select("id")
+        .eq("status", "active")
+        .or(`next_sync_due_at.is.null,next_sync_due_at.lte.${nowIso}`);
+      if (!ids?.length) {
+        await logOpsEvent({ org_id: null, source: "edge", event_type: "SPAPI_WORKER_DONE", severity: "info", message: "No active connections" });
+        return new Response(JSON.stringify({ ok: true, connections: 0 }), { status: 200, headers: { "Content-Type": "application/json" } });
+      }
+      for (const row of ids as { id: string }[]) {
+        const { data: conn } = await supabaseAdmin.rpc("get_spapi_connection_for_worker", { p_connection_id: row.id });
+        const c = Array.isArray(conn) ? conn[0] : conn;
+        if (c?.lwa_refresh_token_plain) {
+          connections.push({
+            id: c.id,
+            org_id: c.org_id,
+            region: c.region,
+            seller_id: c.seller_id,
+            lwa_client_id: c.lwa_client_id,
+            lwa_refresh_token_plain: c.lwa_refresh_token_plain,
+            created_by: c.created_by,
+          });
+        }
       }
     }
-  } catch (e) {
-    await logOpsEvent({
-      org_id: null,
-      source: "edge",
-      event_type: "SPAPI_WORKER_ERROR",
-      severity: "error",
-      message: (e as Error).message,
-      meta: { error: (e as Error).message },
-    });
-    return new Response(JSON.stringify({ error: (e as Error).message }), { status: 500, headers: { "Content-Type": "application/json" } });
-  }
 
   for (const conn of connections) {
     const orgId = conn.org_id;

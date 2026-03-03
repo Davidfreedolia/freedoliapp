@@ -116,6 +116,10 @@ function OnboardingGate({ children }) {
     return <Navigate to="/app" replace />
   }
 
+  if (path.startsWith('/app') && typeof sessionStorage !== 'undefined' && sessionStorage.getItem('activation_amazon_path')) {
+    return <Navigate to="/activation" replace />
+  }
+
   return children
 }
 
