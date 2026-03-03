@@ -1081,6 +1081,15 @@ export default function Finances() {
             Finances
           </span>
         }
+        actions={
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => window.location.assign('/app/finances/exports')}
+          >
+            Quarterly exports
+          </Button>
+        }
       />
 
       <div style={styles.content}>

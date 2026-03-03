@@ -187,3 +187,37 @@ REVOKE ALL ON FUNCTION public.get_quarter_pack_job(uuid) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.request_quarter_pack(int, int) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_quarter_pack_job(uuid) TO authenticated;
 
+-----------------------------
+-- 6) RPC: list_quarter_pack_jobs
+-----------------------------
+
+CREATE OR REPLACE FUNCTION public.list_quarter_pack_jobs(p_limit int DEFAULT 20)
+RETURNS SETOF public.quarterly_export_jobs
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_org_id uuid;
+BEGIN
+  v_org_id := public.get_current_org_id();
+  IF v_org_id IS NULL THEN
+    RAISE EXCEPTION 'no_active_org';
+  END IF;
+
+  IF NOT public.is_org_finance_viewer(v_org_id) THEN
+    RAISE EXCEPTION 'not_allowed';
+  END IF;
+
+  RETURN QUERY
+  SELECT *
+  FROM public.quarterly_export_jobs
+  WHERE org_id = v_org_id
+  ORDER BY created_at DESC
+  LIMIT GREATEST(p_limit, 1);
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.list_quarter_pack_jobs(int) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.list_quarter_pack_jobs(int) TO authenticated;
+
