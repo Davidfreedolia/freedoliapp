@@ -1,0 +1,374 @@
+/**
+ * F7.7.2 — SP-API Settlement Worker (multi-tenant).
+ * Schedule: every 10 minutes (cron: 0,10,20,... min).
+ * Discovers settlement reports, downloads, parses, posts to ledger.
+ */
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import Papa from "https://esm.sh/papaparse@5.4.1";
+import { logOpsEvent } from "../_shared/opsEvents.ts";
+
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const LWA_CLIENT_ID = Deno.env.get("LWA_CLIENT_ID");
+const LWA_CLIENT_SECRET = Deno.env.get("LWA_CLIENT_SECRET");
+const LWA_TOKEN_URL = Deno.env.get("LWA_TOKEN_URL") || "https://api.amazon.com/auth/o2/token";
+
+const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+  auth: { persistSession: false },
+});
+
+const SPAPI_BASE_BY_REGION: Record<string, string> = {
+  EU: "https://sellingpartnerapi-eu.amazon.com",
+  NA: "https://sellingpartnerapi-na.amazon.com",
+  FE: "https://sellingpartnerapi-fe.amazon.com",
+};
+
+const SETTLEMENT_REPORT_TYPE = "GET_V2_SETTLEMENT_REPORT_DATA_FLAT_FILE_V2";
+
+function normalizeHeader(h: string): string {
+  return h.trim().toLowerCase().replace(/\s+/g, "_").replace(/-/g, "_");
+}
+
+function getRowValue(row: Record<string, string>, ...keys: string[]): string | null {
+  const lower: Record<string, string> = {};
+  for (const [k, v] of Object.entries(row)) {
+    lower[normalizeHeader(k)] = v;
+  }
+  for (const key of keys) {
+    const n = normalizeHeader(key);
+    if (lower[n] !== undefined && lower[n] !== "") return String(lower[n]).trim();
+  }
+  return null;
+}
+
+function parseDate(s: string | null): string | null {
+  if (!s) return null;
+  const d = new Date(s);
+  if (isNaN(d.getTime())) return null;
+  return d.toISOString().slice(0, 10);
+}
+
+function parseAmount(s: string | null): number | null {
+  if (s === null || s === "") return null;
+  const n = parseFloat(String(s).replace(/,/g, ""));
+  if (Number.isFinite(n)) return n;
+  return null;
+}
+
+async function getLwaAccessToken(refreshToken: string): Promise<string> {
+  if (!LWA_CLIENT_ID || !LWA_CLIENT_SECRET) throw new Error("LWA not configured");
+  const res = await fetch(LWA_TOKEN_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+    body: new URLSearchParams({
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+      client_id: LWA_CLIENT_ID,
+      client_secret: LWA_CLIENT_SECRET,
+    }),
+  });
+  if (!res.ok) throw new Error(`LWA token failed: ${res.status}`);
+  const data = (await res.json()) as { access_token?: string };
+  if (!data.access_token) throw new Error("No access_token in LWA response");
+  return data.access_token;
+}
+
+async function getReports(accessToken: string, region: string): Promise<Array<{ reportId: string; reportDocumentId?: string; processingStatus?: string; dataStartTime?: string; dataEndTime?: string; createdAt?: string }>> {
+  const base = SPAPI_BASE_BY_REGION[region] || SPAPI_BASE_BY_REGION.EU;
+  const url = `${base}/reports/2021-06-30/reports?reportTypes=${SETTLEMENT_REPORT_TYPE}`;
+  const res = await fetch(url, {
+    headers: { "x-amz-access-token": accessToken },
+  });
+  if (!res.ok) throw new Error(`getReports failed: ${res.status}`);
+  const body = (await res.json()) as { reports?: Array<{ reportId: string; reportDocumentId?: string; processingStatus?: string; dataStartTime?: string; dataEndTime?: string; createdAt?: string }> };
+  return body.reports || [];
+}
+
+async function getReportDocumentUrl(accessToken: string, region: string, reportDocumentId: string): Promise<{ url: string; compressionAlgorithm?: string }> {
+  const base = SPAPI_BASE_BY_REGION[region] || SPAPI_BASE_BY_REGION.EU;
+  const url = `${base}/reports/2021-06-30/documents/${reportDocumentId}`;
+  const res = await fetch(url, {
+    headers: { "x-amz-access-token": accessToken },
+  });
+  if (!res.ok) throw new Error(`getReportDocument failed: ${res.status}`);
+  const data = (await res.json()) as { url: string; compressionAlgorithm?: string };
+  return { url: data.url, compressionAlgorithm: data.compressionAlgorithm };
+}
+
+function insertRun(orgId: string, reportId: string, stage: string, status: string, message: string, meta?: unknown) {
+  return supabaseAdmin.from("spapi_report_runs").insert({
+    org_id: orgId,
+    report_id: reportId,
+    stage,
+    status,
+    message,
+    meta: meta ?? null,
+  });
+}
+
+Deno.serve(async (req: Request): Promise<Response> => {
+  await logOpsEvent({
+    org_id: null,
+    source: "edge",
+    event_type: "SPAPI_WORKER_TICK",
+    severity: "info",
+    message: "SP-API settlement worker tick",
+  });
+
+  let connections: Array<{ id: string; org_id: string; region: string; seller_id: string; lwa_client_id: string; lwa_refresh_token_plain: string; created_by: string }> = [];
+  try {
+    const { data: ids } = await supabaseAdmin.from("spapi_connections").select("id").eq("status", "active");
+    if (!ids?.length) {
+      await logOpsEvent({ org_id: null, source: "edge", event_type: "SPAPI_WORKER_DONE", severity: "info", message: "No active connections" });
+      return new Response(JSON.stringify({ ok: true, connections: 0 }), { status: 200, headers: { "Content-Type": "application/json" } });
+    }
+    for (const row of ids as { id: string }[]) {
+      const { data: conn } = await supabaseAdmin.rpc("get_spapi_connection_for_worker", { p_connection_id: row.id });
+      const c = Array.isArray(conn) ? conn[0] : conn;
+      if (c?.lwa_refresh_token_plain) {
+        connections.push({
+          id: c.id,
+          org_id: c.org_id,
+          region: c.region,
+          seller_id: c.seller_id,
+          lwa_client_id: c.lwa_client_id,
+          lwa_refresh_token_plain: c.lwa_refresh_token_plain,
+          created_by: c.created_by,
+        });
+      }
+    }
+  } catch (e) {
+    await logOpsEvent({
+      org_id: null,
+      source: "edge",
+      event_type: "SPAPI_WORKER_ERROR",
+      severity: "error",
+      message: (e as Error).message,
+      meta: { error: (e as Error).message },
+    });
+    return new Response(JSON.stringify({ error: (e as Error).message }), { status: 500, headers: { "Content-Type": "application/json" } });
+  }
+
+  for (const conn of connections) {
+    const orgId = conn.org_id;
+    const connectionId = conn.id;
+    try {
+      await logOpsEvent({
+        org_id: orgId,
+        source: "edge",
+        event_type: "SPAPI_DISCOVER_STARTED",
+        severity: "info",
+        message: "Discovering settlement reports",
+        meta: { connection_id: connectionId },
+      });
+
+      const accessToken = await getLwaAccessToken(conn.lwa_refresh_token_plain);
+      const reports = await getReports(accessToken, conn.region);
+
+      let discoveredCount = 0;
+      for (const r of reports) {
+        const reportId = r.reportId;
+        const { data: existing } = await supabaseAdmin.from("spapi_reports").select("id, status").eq("org_id", orgId).eq("report_id", reportId).maybeSingle();
+        if ((existing as { status?: string } | null)?.status === "posted") continue;
+        const { error: upsertErr } = await supabaseAdmin.from("spapi_reports").upsert(
+          {
+            org_id: orgId,
+            connection_id: connectionId,
+            region: conn.region,
+            report_type: SETTLEMENT_REPORT_TYPE,
+            report_id: reportId,
+            document_id: r.reportDocumentId ?? null,
+            data_start_time: r.dataStartTime ?? null,
+            data_end_time: r.dataEndTime ?? null,
+            processing_status: r.processingStatus ?? null,
+            created_time: r.createdAt ?? null,
+            status: "discovered",
+            last_error: null,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "org_id,report_id" }
+        );
+        if (!upsertErr) discoveredCount += 1;
+      }
+
+      await logOpsEvent({
+        org_id: orgId,
+        source: "edge",
+        event_type: "SPAPI_DISCOVER_DONE",
+        severity: "info",
+        message: "Discover done",
+        meta: { discovered_count: discoveredCount, connection_id: connectionId },
+      });
+
+      const { data: reportsToProcess } = await supabaseAdmin
+        .from("spapi_reports")
+        .select("id, org_id, report_id, document_id, connection_id")
+        .eq("connection_id", connectionId)
+        .in("status", ["discovered", "failed"]);
+
+      const list = (reportsToProcess || []) as Array<{ id: string; org_id: string; report_id: string; document_id: string | null; connection_id: string }>;
+
+      for (const report of list) {
+        const reportPk = report.id;
+        const reportIdStr = report.report_id;
+        const docId = report.document_id;
+        if (!docId) {
+          await supabaseAdmin.from("spapi_reports").update({ status: "failed", last_error: "no_document_id", updated_at: new Date().toISOString() }).eq("id", reportPk);
+          await insertRun(orgId, reportPk, "download", "failed", "no_document_id");
+          continue;
+        }
+
+        try {
+          await insertRun(orgId, reportPk, "download", "started", "Downloading document");
+          const { url, compressionAlgorithm } = await getReportDocumentUrl(accessToken, conn.region, docId);
+          const docRes = await fetch(url);
+          if (!docRes.ok) throw new Error(`Download failed: ${docRes.status}`);
+          const buf = await docRes.arrayBuffer();
+          let csvText: string;
+          if (compressionAlgorithm === "GZIP") {
+            const ds = new DecompressionStream("gzip");
+            const stream = new Blob([buf]).stream().pipeThrough(ds);
+            csvText = await new Response(stream).text();
+          } else {
+            csvText = new TextDecoder().decode(buf);
+          }
+
+          await supabaseAdmin.from("spapi_reports").update({ status: "downloaded", retrieved_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", reportPk);
+          await insertRun(orgId, reportPk, "download", "done", "Downloaded");
+
+          await insertRun(orgId, reportPk, "parse", "started", "Parsing CSV");
+          const parseResult = Papa.parse<Record<string, string>>(csvText, { header: true, skipEmptyLines: true, delimiter: "\t" });
+          const rows = parseResult.data || [];
+          const fileSha256 = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(reportIdStr)).then((h) => Array.from(new Uint8Array(h)).map((b) => b.toString(16).padStart(2, "0")).join(""));
+          const { data: existingJob } = await supabaseAdmin.from("amazon_import_jobs").select("id, status").eq("org_id", orgId).eq("file_sha256", fileSha256).maybeSingle();
+          const existing = existingJob as { id: string; status: string } | null;
+          let jobId: string;
+          if (existing?.id) {
+            jobId = existing.id;
+            if (existing.status === "done") {
+              await supabaseAdmin.from("spapi_reports").update({ status: "posted", last_error: null, updated_at: new Date().toISOString() }).eq("id", reportPk);
+              await insertRun(orgId, reportPk, "post", "done", "Already posted");
+              continue;
+            }
+            if (existing.status === "parsed" || existing.status === "failed") {
+              await insertRun(orgId, reportPk, "post", "started", "Posting to ledger (retry)");
+              const { data: postData, error: postErr } = await supabaseAdmin.rpc("post_amazon_job_to_ledger_backend", { p_org_id: orgId, p_job_id: jobId });
+              if (postErr) throw postErr;
+              await supabaseAdmin.from("spapi_reports").update({ status: "posted", last_error: null, updated_at: new Date().toISOString() }).eq("id", reportPk);
+              await insertRun(orgId, reportPk, "post", "done", "Posted", { posted_count: Array.isArray(postData)?.[0]?.posted_count ?? 0 });
+              continue;
+            }
+            if (existing.status === "parsing" || existing.status === "posting") continue;
+          }
+          if (!existing?.id) {
+            jobId = crypto.randomUUID();
+            await supabaseAdmin.from("amazon_import_jobs").insert({
+              id: jobId,
+              org_id: orgId,
+              file_name: `spapi-settlement-${reportIdStr}`,
+              file_sha256: fileSha256,
+              marketplace: conn.region,
+              report_type: "settlement",
+              status: "parsing",
+              created_by: conn.created_by,
+            });
+          }
+
+          if (!existing?.id) {
+          const events: Array<{ job_id: string; org_id: string; settlement_id: string | null; transaction_id: string | null; event_type: string; event_date: string; amount: number; currency: string; reference: string | null; meta: Record<string, unknown> | null }> = [];
+          for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            const rowNumber = i + 1;
+            const uniqueKey = `${jobId}:${rowNumber}`;
+            await supabaseAdmin.from("amazon_raw_rows").insert({
+              job_id: jobId,
+              org_id: orgId,
+              row_number: rowNumber,
+              raw_data: row as unknown as Record<string, unknown>,
+              unique_key: uniqueKey,
+            }).then(() => {}).catch(() => {});
+
+            const settlementId = getRowValue(row, "settlement_id", "settlement-id");
+            const transactionId = getRowValue(row, "transaction_id", "transaction-id");
+            const eventDateStr = getRowValue(row, "event_date", "date", "transaction_date");
+            const amountVal = getRowValue(row, "amount");
+            const currencyVal = getRowValue(row, "currency");
+            const eventTypeVal = getRowValue(row, "event_type", "type", "transaction_type");
+            const eventDate = parseDate(eventDateStr);
+            const amount = parseAmount(amountVal);
+            if (eventDate && amount !== null && currencyVal) {
+              const sid = settlementId || `${jobId}_r${rowNumber}`;
+              const tid = transactionId || `${jobId}_r${rowNumber}`;
+              events.push({
+                job_id: jobId,
+                org_id: orgId,
+                settlement_id: sid,
+                transaction_id: tid,
+                event_type: eventTypeVal || "unknown",
+                event_date: eventDate,
+                amount,
+                currency: currencyVal,
+                reference: getRowValue(row, "reference", "description") || null,
+                meta: Object.keys(row).length > 6 ? (row as unknown as Record<string, unknown>) : null,
+              });
+            }
+          }
+
+          if (events.length > 0) {
+            await supabaseAdmin.from("amazon_financial_events").upsert(events, { onConflict: "org_id,settlement_id,transaction_id,event_type", ignoreDuplicates: true });
+          }
+          await supabaseAdmin.rpc("finalize_amazon_parse", { p_job_id: jobId, p_total_rows: rows.length, p_parsed_rows: events.length });
+          await supabaseAdmin.from("spapi_reports").update({ status: "parsed", updated_at: new Date().toISOString() }).eq("id", reportPk);
+          await insertRun(orgId, reportPk, "parse", "done", "Parsed");
+
+          await insertRun(orgId, reportPk, "post", "started", "Posting to ledger");
+          const { data: postData, error: postErr } = await supabaseAdmin.rpc("post_amazon_job_to_ledger_backend", { p_org_id: orgId, p_job_id: jobId });
+          if (postErr) throw postErr;
+          await supabaseAdmin.from("spapi_reports").update({ status: "posted", last_error: null, updated_at: new Date().toISOString() }).eq("id", reportPk);
+          await insertRun(orgId, reportPk, "post", "done", "Posted", { posted_count: Array.isArray(postData)?.[0]?.posted_count ?? 0 });
+          }
+        } catch (reportErr) {
+          const errMsg = (reportErr as Error).message;
+          await supabaseAdmin.from("spapi_reports").update({ status: "failed", last_error: errMsg.slice(0, 500), updated_at: new Date().toISOString() }).eq("id", reportPk);
+          await insertRun(orgId, reportPk, "download", "failed", errMsg).catch(() => {});
+          await insertRun(orgId, reportPk, "parse", "failed", errMsg).catch(() => {});
+          await insertRun(orgId, reportPk, "post", "failed", errMsg).catch(() => {});
+          await logOpsEvent({
+            org_id: orgId,
+            source: "edge",
+            event_type: "SPAPI_WORKER_ERROR",
+            severity: "error",
+            message: errMsg,
+            meta: { error: errMsg, report_id: reportPk },
+          });
+        }
+      }
+
+      await supabaseAdmin.from("spapi_connections").update({ last_sync_at: new Date().toISOString(), last_error: null }).eq("id", connectionId);
+    } catch (connErr) {
+      const errMsg = (connErr as Error).message;
+      await supabaseAdmin.from("spapi_connections").update({ last_error: errMsg.slice(0, 500) }).eq("id", connectionId);
+      await logOpsEvent({
+        org_id: orgId,
+        source: "edge",
+        event_type: "SPAPI_WORKER_ERROR",
+        severity: "error",
+        message: errMsg,
+        meta: { error: errMsg, connection_id: connectionId },
+      });
+    }
+  }
+
+  await logOpsEvent({
+    org_id: null,
+    source: "edge",
+    event_type: "SPAPI_WORKER_DONE",
+    severity: "info",
+    message: "SP-API settlement worker run complete",
+  });
+
+  return new Response(JSON.stringify({ ok: true, connections: connections.length }), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
+});
