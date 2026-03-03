@@ -36,9 +36,10 @@ import { supabase, getCurrentUserId } from './lib/supabase'
 import { useOnboardingStatus } from './hooks/useOnboardingStatus'
 import './i18n'
 
-// Login i Landing (no lazy)
+// Login, Landing, Activation (no lazy)
 import Login from './pages/Login'
 import Landing from './pages/Landing'
+import ActivationWizard from './pages/ActivationWizard'
 
 // Lazy loading wrapper with error handling
 const lazyWithErrorBoundary = (importFn, pageName) => {
@@ -94,19 +95,6 @@ const BillingLocked = lazyWithErrorBoundary(() => import('./pages/BillingLocked'
 const BillingOverSeat = lazyWithErrorBoundary(() => import('./pages/BillingOverSeat'), 'BillingOverSeat')
 
 const ADMIN_EMAILS = new Set(['david@freedolia.com'])
-
-function ActivationWizard() {
-  return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
-      <div style={{ maxWidth: 600, textAlign: 'center' }}>
-        <h1>Activation wizard (coming soon)</h1>
-        <p style={{ marginTop: 8 }}>
-          Aquesta org encara no ha completat l&apos;activació. El wizard complet s&apos;implementarà a la propera fase.
-        </p>
-      </div>
-    </div>
-  )
-}
 
 function OnboardingGate({ children }) {
   const { isWorkspaceReady, activeOrgId } = useWorkspace()
@@ -268,7 +256,7 @@ function App() {
               <Route path="/" element={<Landing />} />
               <Route path="/landing" element={<Navigate to="/" replace />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/activation" element={<ActivationWizard />} />
+              <Route path="/activation" element={<ProtectedRoute><ActivationWizard /></ProtectedRoute>} />
               <Route path="/dashboard" element={<Navigate to="/app" replace />} />
               <Route path="/projects/*" element={<RedirectToApp />} />
               <Route path="/settings" element={<Navigate to="/app/settings" replace />} />
