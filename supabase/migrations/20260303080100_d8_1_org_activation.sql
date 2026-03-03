@@ -15,7 +15,8 @@ create table if not exists public.org_activation (
 -- RLS
 alter table public.org_activation enable row level security;
 
--- Policy: org members can read their own activation row
+-- Policies (idempotent: drop if exists so re-run is safe)
+drop policy if exists "org_activation_select_own" on public.org_activation;
 create policy "org_activation_select_own"
 on public.org_activation
 for select
@@ -26,7 +27,7 @@ using (
     )
 );
 
--- Policy: org members can insert their own activation row
+drop policy if exists "org_activation_insert_own" on public.org_activation;
 create policy "org_activation_insert_own"
 on public.org_activation
 for insert
@@ -37,13 +38,13 @@ with check (
     )
 );
 
--- Policy: prevent updates (activation immutable)
+drop policy if exists "org_activation_no_update" on public.org_activation;
 create policy "org_activation_no_update"
 on public.org_activation
 for update
 using (false);
 
--- Policy: prevent deletes
+drop policy if exists "org_activation_no_delete" on public.org_activation;
 create policy "org_activation_no_delete"
 on public.org_activation
 for delete

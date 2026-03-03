@@ -21,7 +21,8 @@ create table if not exists public.org_billing (
 
 alter table public.org_billing enable row level security;
 
--- org members can read billing state
+-- Policies (idempotent)
+drop policy if exists "org_billing_select_own" on public.org_billing;
 create policy "org_billing_select_own"
 on public.org_billing
 for select
@@ -38,13 +39,13 @@ on public.org_billing
 for insert
 with check (false);
 
--- prevent manual updates
+drop policy if exists "org_billing_no_update" on public.org_billing;
 create policy "org_billing_no_update"
 on public.org_billing
 for update
 using (false);
 
--- prevent deletes
+drop policy if exists "org_billing_no_delete" on public.org_billing;
 create policy "org_billing_no_delete"
 on public.org_billing
 for delete
