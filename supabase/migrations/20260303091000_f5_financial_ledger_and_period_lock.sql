@@ -129,7 +129,6 @@ CREATE TABLE IF NOT EXISTS public.financial_ledger (
 
   CONSTRAINT financial_ledger_reference_unique UNIQUE (org_id, reference_type, reference_id, type)
     DEFERRABLE INITIALLY IMMEDIATE
-    NULLS NOT DISTINCT
 );
 
 -- Unique constraint with partial semantics (reference_type/reference_id when present)
