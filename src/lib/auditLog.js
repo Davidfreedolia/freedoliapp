@@ -26,24 +26,24 @@
  *   meta: { project_code: 'PR-FRDL250001' }
  * })
  */
+/**
+ * Best-effort audit log insert. Never throws. Returns { ok: true } or { ok: false }.
+ * No session/user/org_id -> returns immediately without making any request.
+ */
 export async function logAudit({ entityType, entityId = null, action, status, message = null, meta = {} }) {
   try {
-    // Validar paràmetres requerits
     if (!entityType || !action || !status) {
-      console.error('[AuditLog] Missing required parameters', { entityType, action, status })
-      return
+      return { ok: false }
     }
-
-    // Validar que status sigui 'success' o 'error'
     if (status !== 'success' && status !== 'error') {
-      console.error('[AuditLog] Invalid status, must be "success" or "error"', { status })
-      return
+      return { ok: false }
     }
 
-    // Dynamic imports to avoid circular dependencies
     const { getCurrentUserId, supabase } = await import('./supabase')
     const userId = await getCurrentUserId()
-    if (!userId) return
+    if (!userId) {
+      return { ok: false }
+    }
 
     let demoMode = false
     try {
@@ -51,7 +51,6 @@ export async function logAudit({ entityType, entityId = null, action, status, me
       demoMode = await getDemoMode()
     } catch (_) {}
 
-    // Insert a audit_log (user_id and is_demo set explicitly; org_id nullable, best-effort)
     const { error } = await supabase
       .from('audit_log')
       .insert([
@@ -69,26 +68,13 @@ export async function logAudit({ entityType, entityId = null, action, status, me
       ])
 
     if (error) {
-      // NO llançar error, només loguejar-lo
-      console.error('[AuditLog] Error inserting audit log:', {
-        error: error.message,
-        code: error.code,
-        entityType,
-        action,
-        status,
-        timestamp: new Date().toISOString()
-      })
+      console.warn('[AuditLog] Insert failed (best-effort):', error?.message || error?.code, { entityType, action, status })
+      return { ok: false }
     }
+    return { ok: true }
   } catch (err) {
-    // Catch absolutament tot - no hem de trencar l'app per errors d'audit log
-    console.error('[AuditLog] Unexpected error in logAudit:', {
-      error: err.message,
-      stack: err.stack,
-      entityType,
-      action,
-      status,
-      timestamp: new Date().toISOString()
-    })
+    console.warn('[AuditLog] Unexpected error (best-effort):', err?.message, { entityType, action, status })
+    return { ok: false }
   }
 }
 
@@ -101,19 +87,22 @@ export async function logAudit({ entityType, entityId = null, action, status, me
  * @param {object} meta - Informació addicional
  */
 export async function logError(entityType, action, error, meta = {}) {
-  const errorMessage = error instanceof Error ? error.message : error
-  
-  await logAudit({
-    entityType,
-    action,
-    status: 'error',
-    message: errorMessage,
-    meta: {
-      ...meta,
-      error_type: error instanceof Error ? error.constructor.name : 'string',
-      ...(error instanceof Error && error.stack ? { stack: error.stack.substring(0, 500) } : {})
-    }
-  })
+  try {
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    await logAudit({
+      entityType,
+      action,
+      status: 'error',
+      message: errorMessage,
+      meta: {
+        ...meta,
+        error_type: error instanceof Error ? error.constructor.name : 'string',
+        ...(error instanceof Error && error.stack ? { stack: error.stack.substring(0, 500) } : {})
+      }
+    })
+  } catch (_) {
+    console.warn('[AuditLog] logError failed (silent):', entityType, action)
+  }
 }
 
 /**
@@ -126,14 +115,18 @@ export async function logError(entityType, action, error, meta = {}) {
  * @param {object} meta - Informació addicional
  */
 export async function logSuccess(entityType, action, entityId = null, message = null, meta = {}) {
-  await logAudit({
-    entityType,
-    entityId,
-    action,
-    status: 'success',
-    message: message || `${action} completed successfully`,
-    meta
-  })
+  try {
+    await logAudit({
+      entityType,
+      entityId,
+      action,
+      status: 'success',
+      message: message || `${action} completed successfully`,
+      meta
+    })
+  } catch (_) {
+    console.warn('[AuditLog] logSuccess failed (silent):', entityType, action)
+  }
 }
 
 export default {
