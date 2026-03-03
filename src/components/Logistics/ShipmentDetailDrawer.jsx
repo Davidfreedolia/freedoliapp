@@ -49,7 +49,7 @@ export default function ShipmentDetailDrawer({ shipment, darkMode, onClose, onSy
         }
         const list = data || []
         setPackages(list)
-        if (list.length && !selectedPackageId) setSelectedPackageId(list[0].id)
+        setSelectedPackageId(list[0]?.id ?? null)
       })
   }, [shipment?.id])
 

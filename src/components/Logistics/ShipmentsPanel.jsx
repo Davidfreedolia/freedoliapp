@@ -224,7 +224,7 @@ function ShipmentCard({
       </div>
       <div style={{ fontSize: 12, color: darkMode ? '#9ca3af' : '#6b7280', marginBottom: 12 }}>
         {packageCount != null ? `${packageCount} package(s)` : '—'}
-        {lastSync && ` · Last sync: ${formatDate(lastSync)}`}
+        {(lastSync || shipment.updated_at) && ` · Last update: ${formatDate(lastSync || shipment.updated_at)}`}
       </div>
       <div style={{ fontSize: 12, color: darkMode ? '#9ca3af' : '#6b7280', marginBottom: 12 }}>
         ETA: {formatDate(shipment.eta_estimated)}
