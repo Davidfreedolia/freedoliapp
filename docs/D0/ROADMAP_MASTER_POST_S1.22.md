@@ -301,6 +301,21 @@ Automatitzar l’actualització d’estats de tracking i habilitar alertes logí
 
 ---
 
+# FASE 8 — Activation & Adoption
+
+## Objectiu
+Assegurar que qualsevol org nova entra per un camí d’activació controlat (wizard no-skip) i que Amazon és opcional però ben integrat.
+
+## Scope
+- Activation Wizard obligatori (no skip global) amb elecció Amazon vs Setup.
+- Taula org_activation com a font de veritat de l’estat d’activació.
+- Integració amb pipeline Amazon (CSV + SP-API) per camí “Amazon”.
+
+## Docs
+- `docs/D8/D8.1_ACTIVATION_WIZARD.md`
+
+---
+
 # 🎯 5. PRIORITAT EXECUTIVA
 
 Prioritat clara:
