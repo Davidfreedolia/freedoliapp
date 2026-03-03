@@ -38,3 +38,22 @@ export async function createCheckoutSession(orgId, options = {}) {
 export async function createPortalSession(orgId) {
   return postJson('/api/stripe/create-portal-session', { org_id: orgId })
 }
+
+// D8.2 — Supabase Edge Functions (org_billing)
+export async function createStripeCheckoutSession(orgId, plan) {
+  const { data, error } = await supabase.functions.invoke('stripe-checkout-session', {
+    body: { org_id: orgId, plan: plan || 'growth' },
+  })
+  if (error) throw error
+  if (data?.error) throw new Error(data.error)
+  return data
+}
+
+export async function createStripePortalSession(orgId) {
+  const { data, error } = await supabase.functions.invoke('stripe-portal-session', {
+    body: { org_id: orgId },
+  })
+  if (error) throw error
+  if (data?.error) throw new Error(data.error)
+  return data
+}

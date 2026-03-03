@@ -94,6 +94,7 @@ const DevSeed = lazyWithErrorBoundary(() => import('./pages/DevSeed'), 'DevSeed'
 const Help = lazyWithErrorBoundary(() => import('./pages/Help'), 'Help')
 const BillingLocked = lazyWithErrorBoundary(() => import('./pages/BillingLocked'), 'BillingLocked')
 const BillingOverSeat = lazyWithErrorBoundary(() => import('./pages/BillingOverSeat'), 'BillingOverSeat')
+const BillingSettings = lazyWithErrorBoundary(() => import('./pages/BillingSettings'), 'BillingSettings')
 
 const ADMIN_EMAILS = new Set(['david@freedolia.com'])
 
@@ -292,6 +293,7 @@ function App() {
                 <Route path="inventory" element={<AppPageWrap context="page:Inventory"><Inventory /></AppPageWrap>} />
                 <Route path="analytics" element={<AppPageWrap context="page:Analytics"><Analytics /></AppPageWrap>} />
                 <Route path="settings" element={<AppPageWrap context="page:Settings"><Settings /></AppPageWrap>} />
+                <Route path="settings/billing" element={<AppPageWrap context="page:BillingSettings"><BillingSettings /></AppPageWrap>} />
                 <Route path="help" element={<AppPageWrap context="page:Help"><Help /></AppPageWrap>} />
                 <Route path="calendar" element={<AppPageWrap context="page:Calendar"><Calendar /></AppPageWrap>} />
                 <Route path="diagnostics" element={<AppPageWrap context="page:Diagnostics"><Diagnostics /></AppPageWrap>} />
