@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { logOpsEvent } from "../_shared/opsEvents.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -57,9 +58,44 @@ async function processJob(id: string) {
 async function handler(_req: Request): Promise<Response> {
   try {
     const jobs = await fetchQueuedJobs();
+
+    await logOpsEvent({
+      org_id: null,
+      source: "worker",
+      event_type: "WORKER_TICK",
+      severity: "info",
+      entity_type: "quarterly_export_job",
+      entity_id: null,
+      message: "Quarter pack worker tick",
+      meta: {
+        queued_found: jobs.length,
+        batch_size: MAX_JOBS_PER_RUN,
+      },
+    });
+
+    let failed = 0;
     for (const job of jobs) {
-      await processJob(job.id);
+      try {
+        await processJob(job.id);
+      } catch {
+        failed += 1;
+      }
     }
+
+    await logOpsEvent({
+      org_id: null,
+      source: "worker",
+      event_type: "WORKER_BATCH_DONE",
+      severity: "info",
+      entity_type: "quarterly_export_job",
+      entity_id: null,
+      message: "Quarter pack worker batch completed",
+      meta: {
+        processed: jobs.length,
+        failed,
+      },
+    });
+
     return new Response(
       JSON.stringify({
         ok: true,
@@ -69,6 +105,18 @@ async function handler(_req: Request): Promise<Response> {
     );
   } catch (err) {
     console.error("quarter-pack-worker error", err);
+    await logOpsEvent({
+      org_id: null,
+      source: "worker",
+      event_type: "WORKER_BATCH_FAILED",
+      severity: "error",
+      entity_type: "quarterly_export_job",
+      entity_id: null,
+      message: "Quarter pack worker batch failed",
+      meta: {
+        error: (err as any)?.message || "unknown_error",
+      },
+    });
     return new Response(
       JSON.stringify({
         ok: false,

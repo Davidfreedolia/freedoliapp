@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import JSZip from "https://esm.sh/jszip@3.10.1";
+import { logOpsEvent } from "../_shared/opsEvents.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -109,6 +110,24 @@ async function ensureValidRates(job: QuarterlyJobRow, ledgerRows: any[]) {
 }
 
 async function generateQuarterPack(job: QuarterlyJobRow) {
+  const startedAt = Date.now();
+
+  await logOpsEvent({
+    org_id: job.org_id,
+    source: "edge",
+    event_type: "JOB_STARTED",
+    severity: "info",
+    entity_type: "quarterly_export_job",
+    entity_id: job.id,
+    message: `Quarter pack generation started for Y${job.year} Q${job.quarter}`,
+    meta: {
+      year: job.year,
+      quarter: job.quarter,
+      period_status: job.period_status,
+      base_currency: job.base_currency,
+    },
+  });
+
   // Mark running
   await updateJob(job.id, { status: "running", error: null });
 
@@ -173,6 +192,7 @@ async function generateQuarterPack(job: QuarterlyJobRow) {
   zip.file(`${prefix}_pnl.csv`, pnlCsv);
   zip.file(`${prefix}_cashflow.csv`, cashCsv);
 
+  let ledgerParts = 1;
   if (ledgerRows.length > 50000) {
     const chunkSize = 50000;
     let part = 1;
@@ -182,6 +202,7 @@ async function generateQuarterPack(job: QuarterlyJobRow) {
       zip.file(`${prefix}_ledger_part${part}.csv`, csv);
       part += 1;
     }
+    ledgerParts = Math.ceil(ledgerRows.length / chunkSize);
   } else {
     const ledgerCsv = toCSV(ledgerHeaders, ledgerRows);
     zip.file(`${prefix}_ledger.csv`, ledgerCsv);
@@ -220,6 +241,29 @@ async function generateQuarterPack(job: QuarterlyJobRow) {
     file_path: signedPath,
     checksum,
   });
+
+  const durationMs = Date.now() - startedAt;
+
+  await logOpsEvent({
+    org_id: job.org_id,
+    source: "edge",
+    event_type: "JOB_DONE",
+    severity: "info",
+    entity_type: "quarterly_export_job",
+    entity_id: job.id,
+    message: `Quarter pack generation completed for Y${job.year} Q${job.quarter}`,
+    meta: {
+      year,
+      quarter,
+      period_status: job.period_status,
+      base_currency: job.base_currency,
+      duration_ms: durationMs,
+      rows_ledger: ledgerRows.length,
+      ledger_parts: ledgerParts,
+      file_path: signedPath,
+      checksum,
+    },
+  });
 }
 
 async function handler(req: Request): Promise<Response> {
@@ -254,12 +298,24 @@ async function handler(req: Request): Promise<Response> {
   } catch (err) {
     console.error("generate-quarter-pack error", err);
     const message = (err as any)?.message || "unknown_error";
-    // Best-effort mark job as failed when we have an id
     try {
       const url = new URL(req.url);
       const jobId = url.searchParams.get("job_id");
       if (jobId) {
+        const job = await loadJob(jobId);
         await updateJob(jobId, { status: "failed", error: message });
+        await logOpsEvent({
+          org_id: job?.org_id ?? null,
+          source: "edge",
+          event_type: "JOB_FAILED",
+          severity: "error",
+          entity_type: "quarterly_export_job",
+          entity_id: jobId,
+          message: `Quarter pack generation failed for job ${jobId}`,
+          meta: {
+            error: message,
+          },
+        });
       }
     } catch {
       // ignore
