@@ -7,6 +7,7 @@ import { createState } from "../_shared/spapiState.ts";
 const LWA_CLIENT_ID = Deno.env.get("LWA_CLIENT_ID");
 const LWA_REDIRECT_URI = Deno.env.get("LWA_REDIRECT_URI");
 const LWA_CLIENT_SECRET = Deno.env.get("LWA_CLIENT_SECRET");
+const OAUTH_STATE_SECRET = Deno.env.get("OAUTH_STATE_SECRET");
 
 const CONSENT_BY_REGION: Record<string, string> = {
   EU: "https://sellercentral-europe.amazon.com/apps/authorize/consent",
@@ -30,7 +31,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     });
   }
 
-  if (!LWA_CLIENT_ID || !LWA_REDIRECT_URI || !LWA_CLIENT_SECRET) {
+  if (!LWA_CLIENT_ID || !LWA_REDIRECT_URI || !LWA_CLIENT_SECRET || !OAUTH_STATE_SECRET) {
     return new Response(JSON.stringify({ error: "SP-API OAuth not configured" }), {
       status: 503,
       headers: { "Content-Type": "application/json" },
@@ -68,7 +69,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     exp: Math.floor(Date.now() / 1000) + 600,
   };
 
-  const state = await createState(payload, LWA_CLIENT_SECRET);
+  const state = await createState(payload, OAUTH_STATE_SECRET);
   const consentUrl = `${consentBase}?application_id=${encodeURIComponent(LWA_CLIENT_ID)}&state=${encodeURIComponent(state)}`;
 
   return new Response(

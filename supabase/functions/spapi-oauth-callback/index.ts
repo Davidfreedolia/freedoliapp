@@ -11,6 +11,7 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const LWA_CLIENT_ID = Deno.env.get("LWA_CLIENT_ID");
 const LWA_CLIENT_SECRET = Deno.env.get("LWA_CLIENT_SECRET");
 const LWA_REDIRECT_URI = Deno.env.get("LWA_REDIRECT_URI");
+const OAUTH_STATE_SECRET = Deno.env.get("OAUTH_STATE_SECRET");
 const LWA_TOKEN_URL = Deno.env.get("LWA_TOKEN_URL") || "https://api.amazon.com/auth/o2/token";
 const SPAPI_APP_BASE_URL = Deno.env.get("SPAPI_APP_BASE_URL") || "";
 
@@ -54,7 +55,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     return redirectToApp(false, "missing_params");
   }
 
-  if (!LWA_CLIENT_ID || !LWA_CLIENT_SECRET || !LWA_REDIRECT_URI) {
+  if (!LWA_CLIENT_ID || !LWA_CLIENT_SECRET || !LWA_REDIRECT_URI || !OAUTH_STATE_SECRET) {
     await logOpsEvent({
       org_id: null,
       source: "edge",
@@ -65,14 +66,15 @@ Deno.serve(async (req: Request): Promise<Response> => {
     return redirectToApp(false, "config_error");
   }
 
-  const payload = await verifyState(state, LWA_CLIENT_SECRET);
+  const payload = await verifyState(state, OAUTH_STATE_SECRET);
   if (!payload || (payload.exp as number) < Math.floor(Date.now() / 1000)) {
     await logOpsEvent({
       org_id: (payload?.org_id as string) ?? null,
       source: "edge",
-      event_type: "SPAPI_OAUTH_CALLBACK_FAILED",
+      event_type: "SPAPI_OAUTH_FAILED",
       severity: "warn",
       message: "Invalid or expired state",
+      meta: { reason: "invalid_state" },
     });
     return redirectToApp(false, "invalid_state");
   }
