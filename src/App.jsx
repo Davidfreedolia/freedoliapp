@@ -33,6 +33,7 @@ import TopNavbar from './components/TopNavbar'
 import { useBreakpoint } from './hooks/useBreakpoint'
 import { isDemoMode } from './demo/demoMode'
 import { supabase, getCurrentUserId } from './lib/supabase'
+import { useOnboardingStatus } from './hooks/useOnboardingStatus'
 import './i18n'
 
 // Login i Landing (no lazy)
@@ -93,6 +94,42 @@ const BillingLocked = lazyWithErrorBoundary(() => import('./pages/BillingLocked'
 const BillingOverSeat = lazyWithErrorBoundary(() => import('./pages/BillingOverSeat'), 'BillingOverSeat')
 
 const ADMIN_EMAILS = new Set(['david@freedolia.com'])
+
+function ActivationWizard() {
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+      <div style={{ maxWidth: 600, textAlign: 'center' }}>
+        <h1>Activation wizard (coming soon)</h1>
+        <p style={{ marginTop: 8 }}>
+          Aquesta org encara no ha completat l&apos;activació. El wizard complet s&apos;implementarà a la propera fase.
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function OnboardingGate({ children }) {
+  const { isWorkspaceReady, activeOrgId } = useWorkspace()
+  const location = useLocation()
+  const { loading, requiresOnboarding } = useOnboardingStatus(activeOrgId || null)
+
+  // No fem res fins que workspace i hook estiguin llestos
+  if (!isWorkspaceReady || loading) {
+    return children
+  }
+
+  const path = location.pathname
+
+  if (requiresOnboarding && path !== '/activation') {
+    return <Navigate to="/activation" replace />
+  }
+
+  if (!requiresOnboarding && path === '/activation') {
+    return <Navigate to="/app" replace />
+  }
+
+  return children
+}
 
 /** Wrapper per a pàgines dins /app: usa darkMode del context i embolcalla ProtectedRoute + ErrorBoundary. */
 function AppPageWrap({ children, context }) {
@@ -226,49 +263,52 @@ function App() {
     <BrowserRouter>
       <AppProvider>
         <WorkspaceProvider>
-          <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/landing" element={<Navigate to="/" replace />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/dashboard" element={<Navigate to="/app" replace />} />
-          <Route path="/projects/*" element={<RedirectToApp />} />
-          <Route path="/settings" element={<Navigate to="/app/settings" replace />} />
-          <Route path="/orders" element={<Navigate to="/app/orders" replace />} />
-          <Route path="/finances" element={<Navigate to="/app/finances" replace />} />
-          <Route path="/inventory" element={<Navigate to="/app/inventory" replace />} />
-          <Route path="/analytics" element={<Navigate to="/app/analytics" replace />} />
-          <Route path="/suppliers" element={<Navigate to="/app/suppliers" replace />} />
-          <Route path="/forwarders" element={<Navigate to="/app/forwarders" replace />} />
-          <Route path="/warehouses" element={<Navigate to="/app/warehouses" replace />} />
-          <Route path="/help" element={<Navigate to="/app/help" replace />} />
-          <Route path="/calendar" element={<Navigate to="/app/calendar" replace />} />
-          <Route path="/diagnostics" element={<Navigate to="/app/diagnostics" replace />} />
-          <Route path="/dev/seed" element={<Navigate to="/app/dev/seed" replace />} />
-          <Route path="/app" element={<AppContent />}>
-            <Route index element={<AppPageWrap context="page:Dashboard"><Dashboard /></AppPageWrap>} />
-            <Route path="projects" element={<AppPageWrap context="page:Projects"><Projects /></AppPageWrap>} />
-            <Route path="projects/:id" element={<AppPageWrap context="page:ProjectDetail"><ProjectDetailRoute /></AppPageWrap>} />
-            <Route path="projects/:projectId/briefing" element={<AppPageWrap context="page:Briefing"><Briefing /></AppPageWrap>} />
-            <Route path="suppliers" element={<AppPageWrap context="page:Suppliers"><Suppliers /></AppPageWrap>} />
-            <Route path="forwarders" element={<AppPageWrap context="page:Forwarders"><Forwarders /></AppPageWrap>} />
-            <Route path="warehouses" element={<AppPageWrap context="page:Warehouses"><Warehouses /></AppPageWrap>} />
-            <Route path="orders" element={<AppPageWrap context="page:Orders"><Orders /></AppPageWrap>} />
-            <Route path="finances" element={<AppPageWrap context="page:Finances"><Finances /></AppPageWrap>} />
-            <Route path="finances/exports" element={<AppPageWrap context="page:FinanceExports"><FinanceExports /></AppPageWrap>} />
-            <Route path="finances/amazon-imports" element={<AppPageWrap context="page:AmazonImports"><AmazonImports /></AppPageWrap>} />
-            <Route path="inventory" element={<AppPageWrap context="page:Inventory"><Inventory /></AppPageWrap>} />
-            <Route path="analytics" element={<AppPageWrap context="page:Analytics"><Analytics /></AppPageWrap>} />
-            <Route path="settings" element={<AppPageWrap context="page:Settings"><Settings /></AppPageWrap>} />
-            <Route path="help" element={<AppPageWrap context="page:Help"><Help /></AppPageWrap>} />
-            <Route path="calendar" element={<AppPageWrap context="page:Calendar"><Calendar /></AppPageWrap>} />
-            <Route path="diagnostics" element={<AppPageWrap context="page:Diagnostics"><Diagnostics /></AppPageWrap>} />
-            <Route path="dev/seed" element={<AppPageWrap context="page:DevSeed"><DevSeed /></AppPageWrap>} />
-            <Route path="billing/locked" element={<BillingLocked />} />
-            <Route path="billing/over-seat" element={<BillingOverSeat />} />
-            <Route path="*" element={<NotFoundInApp />} />
-          </Route>
-          <Route path="*" element={<Navigate to="/app" replace />} />
-          </Routes>
+          <OnboardingGate>
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/landing" element={<Navigate to="/" replace />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/activation" element={<ActivationWizard />} />
+              <Route path="/dashboard" element={<Navigate to="/app" replace />} />
+              <Route path="/projects/*" element={<RedirectToApp />} />
+              <Route path="/settings" element={<Navigate to="/app/settings" replace />} />
+              <Route path="/orders" element={<Navigate to="/app/orders" replace />} />
+              <Route path="/finances" element={<Navigate to="/app/finances" replace />} />
+              <Route path="/inventory" element={<Navigate to="/app/inventory" replace />} />
+              <Route path="/analytics" element={<Navigate to="/app/analytics" replace />} />
+              <Route path="/suppliers" element={<Navigate to="/app/suppliers" replace />} />
+              <Route path="/forwarders" element={<Navigate to="/app/forwarders" replace />} />
+              <Route path="/warehouses" element={<Navigate to="/app/warehouses" replace />} />
+              <Route path="/help" element={<Navigate to="/app/help" replace />} />
+              <Route path="/calendar" element={<Navigate to="/app/calendar" replace />} />
+              <Route path="/diagnostics" element={<Navigate to="/app/diagnostics" replace />} />
+              <Route path="/dev/seed" element={<Navigate to="/app/dev/seed" replace />} />
+              <Route path="/app" element={<AppContent />}>
+                <Route index element={<AppPageWrap context="page:Dashboard"><Dashboard /></AppPageWrap>} />
+                <Route path="projects" element={<AppPageWrap context="page:Projects"><Projects /></AppPageWrap>} />
+                <Route path="projects/:id" element={<AppPageWrap context="page:ProjectDetail"><ProjectDetailRoute /></AppPageWrap>} />
+                <Route path="projects/:projectId/briefing" element={<AppPageWrap context="page:Briefing"><Briefing /></AppPageWrap>} />
+                <Route path="suppliers" element={<AppPageWrap context="page:Suppliers"><Suppliers /></AppPageWrap>} />
+                <Route path="forwarders" element={<AppPageWrap context="page:Forwarders"><Forwarders /></AppPageWrap>} />
+                <Route path="warehouses" element={<AppPageWrap context="page:Warehouses"><Warehouses /></AppPageWrap>} />
+                <Route path="orders" element={<AppPageWrap context="page:Orders"><Orders /></AppPageWrap>} />
+                <Route path="finances" element={<AppPageWrap context="page:Finances"><Finances /></AppPageWrap>} />
+                <Route path="finances/exports" element={<AppPageWrap context="page:FinanceExports"><FinanceExports /></AppPageWrap>} />
+                <Route path="finances/amazon-imports" element={<AppPageWrap context="page:AmazonImports"><AmazonImports /></AppPageWrap>} />
+                <Route path="inventory" element={<AppPageWrap context="page:Inventory"><Inventory /></AppPageWrap>} />
+                <Route path="analytics" element={<AppPageWrap context="page:Analytics"><Analytics /></AppPageWrap>} />
+                <Route path="settings" element={<AppPageWrap context="page:Settings"><Settings /></AppPageWrap>} />
+                <Route path="help" element={<AppPageWrap context="page:Help"><Help /></AppPageWrap>} />
+                <Route path="calendar" element={<AppPageWrap context="page:Calendar"><Calendar /></AppPageWrap>} />
+                <Route path="diagnostics" element={<AppPageWrap context="page:Diagnostics"><Diagnostics /></AppPageWrap>} />
+                <Route path="dev/seed" element={<AppPageWrap context="page:DevSeed"><DevSeed /></AppPageWrap>} />
+                <Route path="billing/locked" element={<BillingLocked />} />
+                <Route path="billing/over-seat" element={<BillingOverSeat />} />
+                <Route path="*" element={<NotFoundInApp />} />
+              </Route>
+              <Route path="*" element={<Navigate to="/app" replace />} />
+            </Routes>
+          </OnboardingGate>
         </WorkspaceProvider>
       </AppProvider>
     </BrowserRouter>
