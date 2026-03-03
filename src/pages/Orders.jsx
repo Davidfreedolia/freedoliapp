@@ -49,6 +49,7 @@ import PlannedVsActual from '../components/PlannedVsActual'
 import Header from '../components/Header'
 import NewPOModal from '../components/NewPOModal'
 import LogisticsFlow from '../components/LogisticsFlow'
+import ShipmentsPanel from '../components/Logistics/ShipmentsPanel'
 import AmazonReadySection from '../components/AmazonReadySection'
 import ManufacturerPackModal from '../components/ManufacturerPackModal'
 import Button from '../components/Button'
@@ -1166,6 +1167,14 @@ export default function Orders() {
                       />
                     </div>
                   )}
+
+                  {/* Shipments (F4) */}
+                  <div style={styles.detailSection}>
+                    <ShipmentsPanel
+                      poId={selectedOrder.id}
+                      darkMode={darkMode}
+                    />
+                  </div>
 
                   {/* Generate Manufacturer Pack */}
                   <div style={styles.detailSection}>
