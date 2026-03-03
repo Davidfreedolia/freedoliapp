@@ -74,18 +74,11 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
     
     setLoading(true)
     try {
-      let query = supabase
+      const { data, error } = await supabase
         .from('project_events')
-        .select('id,type,title,event_date,notes,is_demo')
+        .select('id,type,title,event_date,notes')
         .eq('project_id', projectId)
         .order('event_date', { ascending: true })
-
-      // Filter by is_demo if demoMode is false
-      if (demoMode === false) {
-        query = query.eq('is_demo', false)
-      }
-
-      const { data, error } = await query
 
       if (error) throw error
       setEvents(data || [])

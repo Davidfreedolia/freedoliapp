@@ -57,20 +57,14 @@ export function useProjectCalendarEvents({ from, to, projectId = null }) {
         // Construir consulta base
         let query = supabase
           .from('project_events')
-          .select('id,type,title,event_date,notes,is_demo,project:projects(id,code,name,sku,status,phase)')
+          .select('id,type,title,event_date,notes,project:projects(id,code,name,sku,status,phase)')
           .eq('user_id', userId)
           .gte('event_date', fromISO)
           .lte('event_date', toISO)
           .order('event_date', { ascending: true })
 
-        // Filtrar por project_id si se proporciona
         if (projectId) {
           query = query.eq('project_id', projectId)
-        }
-
-        // Filtrar por is_demo solo si demoMode es false
-        if (demoMode === false) {
-          query = query.eq('is_demo', false)
         }
 
         const { data: eventsData, error: queryError } = await query

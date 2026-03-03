@@ -1482,7 +1482,6 @@ ${t}
           title: `Phase changed to ${newPhase}`,
           event_date: eventDate,
           notes: null,
-          is_demo: !!project?.is_demo,
           org_id: project?.org_id
         })
 
