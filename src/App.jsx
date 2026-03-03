@@ -30,6 +30,7 @@ import DemoModeBanner from './components/DemoModeBanner'
 import ErrorBoundary from './components/ErrorBoundary'
 import FloatingNotesLayer from './components/FloatingNotesLayer'
 import TopNavbar from './components/TopNavbar'
+import BillingBanner from './components/billing/BillingBanner'
 import { useBreakpoint } from './hooks/useBreakpoint'
 import { isDemoMode } from './demo/demoMode'
 import { supabase, getCurrentUserId } from './lib/supabase'
@@ -237,6 +238,7 @@ function AppContent() {
         width: isMobile ? '100%' : 'auto',
         paddingTop: 'var(--topbar-h)'
       }}>
+        <BillingBanner />
         <TopNavbar sidebarWidth={sidebarWidth} />
         <ErrorBoundary context="app:main" darkMode={darkMode}>
           <Suspense fallback={<PageLoader darkMode={darkMode} />}>
