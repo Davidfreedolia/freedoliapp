@@ -1,10 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
-import { FileSpreadsheet, Upload, RefreshCw, Play, ExternalLink } from 'lucide-react'
+import { FileSpreadsheet, Upload, RefreshCw, Play, ExternalLink, Link2 } from 'lucide-react'
 import Header from '../components/Header'
 import Button from '../components/Button'
-import { supabase } from '../lib/supabase'
+import { supabase, getCurrentUserId } from '../lib/supabase'
 import { useApp } from '../context/AppContext'
+import { useWorkspace } from '../contexts/WorkspaceContext'
 import { showToast } from '../components/Toast'
+
+const SPAPI_STATE_KEY = 'spapi_oauth_state'
+const SPAPI_REDIRECT_URI_KEY = 'spapi_oauth_redirect_uri'
 
 const BUCKET = 'amazon-imports'
 
@@ -16,9 +20,12 @@ function sha256Hex(buffer) {
 
 export default function AmazonImports() {
   const { darkMode } = useApp()
+  const { activeOrgId } = useWorkspace() || {}
   const [jobs, setJobs] = useState([])
+  const [spapiConnections, setSpapiConnections] = useState([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
+  const [connecting, setConnecting] = useState(false)
   const [processingId, setProcessingId] = useState(null)
   const [marketplace, setMarketplace] = useState('EU')
   const [reportType, setReportType] = useState('settlement')
@@ -45,9 +52,54 @@ export default function AmazonImports() {
     }
   }, [])
 
+  const loadSpapiConnections = useCallback(async () => {
+    try {
+      const { data, error } = await supabase.rpc('get_spapi_connection_safe')
+      if (error) throw error
+      setSpapiConnections(data || [])
+    } catch (err) {
+      console.error('Error loading SP-API connections:', err)
+    }
+  }, [])
+
   useEffect(() => {
     loadJobs()
-  }, [loadJobs])
+    loadSpapiConnections()
+  }, [loadJobs, loadSpapiConnections])
+
+  // OAuth login step: Amazon redirected here with amazon_callback_uri, amazon_state, selling_partner_id
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const amazonCallbackUri = params.get('amazon_callback_uri')
+    const amazonState = params.get('amazon_state')
+    const sellingPartnerId = params.get('selling_partner_id')
+    if (amazonCallbackUri && amazonState) {
+      const state = sessionStorage.getItem(SPAPI_STATE_KEY)
+      const redirectUri = sessionStorage.getItem(SPAPI_REDIRECT_URI_KEY)
+      if (state && redirectUri) {
+        const redirectUrl = `${amazonCallbackUri}?${new URLSearchParams({
+          redirect_uri: redirectUri,
+          amazon_state: amazonState,
+          state
+        })}`
+        sessionStorage.removeItem(SPAPI_STATE_KEY)
+        sessionStorage.removeItem(SPAPI_REDIRECT_URI_KEY)
+        window.location.href = redirectUrl
+        return
+      }
+    }
+    // Success/error from final callback
+    const spapi = params.get('spapi')
+    const message = params.get('message')
+    if (spapi === 'success') {
+      showToast('Connexió Amazon SP-API connectada', 'success')
+      loadSpapiConnections()
+      window.history.replaceState({}, '', window.location.pathname)
+    } else if (spapi === 'error' && message) {
+      showToast(`SP-API: ${decodeURIComponent(message)}`, 'error')
+      window.history.replaceState({}, '', window.location.pathname)
+    }
+  }, [loadSpapiConnections])
 
   useEffect(() => {
     if (!hasPending && !processingId) return
@@ -173,6 +225,41 @@ export default function AmazonImports() {
     return '#6b7280'
   }
 
+  const handleConnectAmazon = async () => {
+    if (!activeOrgId) {
+      showToast('Selecciona una organització', 'error')
+      return
+    }
+    setConnecting(true)
+    try {
+      const userId = await getCurrentUserId()
+      if (!userId) {
+        showToast('Sessió no vàlida', 'error')
+        return
+      }
+      const { data, error } = await supabase.functions.invoke('spapi-oauth-init', {
+        body: { org_id: activeOrgId, user_id: userId, region: 'EU', marketplace_ids: [] }
+      })
+      if (error) throw error
+      if (data?.error) throw new Error(data.error)
+      const consentUrl = data?.consent_url
+      const state = data?.state
+      const redirectUri = data?.redirect_uri
+      if (!consentUrl || !state) {
+        showToast('No s\'ha pogut iniciar OAuth', 'error')
+        return
+      }
+      sessionStorage.setItem(SPAPI_STATE_KEY, state)
+      if (redirectUri) sessionStorage.setItem(SPAPI_REDIRECT_URI_KEY, redirectUri)
+      window.location.href = consentUrl
+    } catch (err) {
+      console.error('SP-API init error:', err)
+      showToast(err?.message || 'Error connectant amb Amazon SP-API', 'error')
+    } finally {
+      setConnecting(false)
+    }
+  }
+
   return (
     <div style={containerStyle}>
       <Header
@@ -180,6 +267,52 @@ export default function AmazonImports() {
         description="Puja informes CSV d’Amazon (Settlement, etc.) i processa’ls al ledger."
         icon={FileSpreadsheet}
       />
+
+      {/* SP-API connections */}
+      <div style={cardStyle}>
+        <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 600, color: darkMode ? '#e5e7eb' : '#374151' }}>
+          Amazon SP-API
+        </h3>
+        {spapiConnections.length > 0 ? (
+          <p style={{ margin: '0 0 12px', fontSize: 13, color: '#22c55e' }}>Connected</p>
+        ) : null}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+          <Button
+            variant="primary"
+            size="sm"
+            disabled={connecting || !activeOrgId}
+            onClick={handleConnectAmazon}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+          >
+            <Link2 size={14} />
+            {connecting ? 'Redirecting…' : 'Connect Amazon (SP-API)'}
+          </Button>
+        </div>
+        {spapiConnections.length > 0 && (
+          <div style={{ marginTop: 12, overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+              <thead>
+                <tr>
+                  <th style={thStyle}>Region</th>
+                  <th style={thStyle}>Seller ID</th>
+                  <th style={thStyle}>Status</th>
+                  <th style={thStyle}>Last sync</th>
+                </tr>
+              </thead>
+              <tbody>
+                {spapiConnections.map((c) => (
+                  <tr key={c.id}>
+                    <td style={tdStyle}>{c.region}</td>
+                    <td style={tdStyle}>{c.seller_id}</td>
+                    <td style={tdStyle}>{c.status}</td>
+                    <td style={tdStyle}>{c.last_sync_at ? new Date(c.last_sync_at).toLocaleString() : '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       {/* Drop zone + options */}
       <div style={cardStyle}>
