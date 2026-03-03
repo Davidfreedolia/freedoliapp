@@ -107,13 +107,31 @@ function insertRun(orgId: string, reportId: string, stage: string, status: strin
 }
 
 Deno.serve(async (req: Request): Promise<Response> => {
-  await logOpsEvent({
-    org_id: null,
-    source: "edge",
-    event_type: "SPAPI_WORKER_TICK",
-    severity: "info",
-    message: "SP-API settlement worker tick",
-  });
+  let lockAcquired = false;
+  try {
+    const { data: locked } = await supabaseAdmin.rpc("spapi_worker_try_lock");
+    if (locked === false) {
+      await logOpsEvent({
+        org_id: null,
+        source: "edge",
+        event_type: "SPAPI_WORKER_SKIPPED_LOCKED",
+        severity: "info",
+        message: "Skipped: another run holds the lock",
+      });
+      return new Response(JSON.stringify({ skipped: true, reason: "already running" }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    lockAcquired = true;
+
+    await logOpsEvent({
+      org_id: null,
+      source: "edge",
+      event_type: "SPAPI_WORKER_TICK",
+      severity: "info",
+      message: "SP-API settlement worker tick",
+    });
 
   const nowIso = new Date().toISOString();
   let connections: Array<{ id: string; org_id: string; region: string; seller_id: string; lwa_client_id: string; lwa_refresh_token_plain: string; created_by: string }> = [];
@@ -448,4 +466,9 @@ Deno.serve(async (req: Request): Promise<Response> => {
     status: 200,
     headers: { "Content-Type": "application/json" },
   });
+  } finally {
+    if (lockAcquired) {
+      await supabaseAdmin.rpc("spapi_worker_unlock");
+    }
+  }
 });
