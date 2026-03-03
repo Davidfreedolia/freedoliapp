@@ -45,12 +45,6 @@ export async function logAudit({ entityType, entityId = null, action, status, me
       return { ok: false }
     }
 
-    let demoMode = false
-    try {
-      const { getDemoMode } = await import('./demoModeFilter')
-      demoMode = await getDemoMode()
-    } catch (_) {}
-
     const { error } = await supabase
       .from('audit_log')
       .insert([
@@ -61,9 +55,7 @@ export async function logAudit({ entityType, entityId = null, action, status, me
           status: status,
           message: message,
           meta: meta,
-          user_id: userId,
-          is_demo: demoMode,
-          org_id: null
+          user_id: userId
         }
       ])
 
