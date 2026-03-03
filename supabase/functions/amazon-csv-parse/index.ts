@@ -70,7 +70,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     );
   }
 
-  let body: { job_id?: string; csv_text?: string };
+  let body: { job_id?: string; csv_text?: string; storage_path?: string };
   try {
     body = await req.json();
   } catch {
@@ -81,12 +81,35 @@ Deno.serve(async (req: Request): Promise<Response> => {
   }
 
   const jobId = body.job_id;
-  const csvText = body.csv_text;
-  if (!jobId || typeof csvText !== "string") {
+  const csvTextArg = body.csv_text;
+  const storagePath = body.storage_path;
+  if (!jobId) {
     return new Response(
-      JSON.stringify({ error: "job_id and csv_text required" }),
+      JSON.stringify({ error: "job_id required" }),
       { status: 400, headers: { "Content-Type": "application/json" } },
     );
+  }
+  if (typeof csvTextArg !== "string" && typeof storagePath !== "string") {
+    return new Response(
+      JSON.stringify({ error: "csv_text or storage_path required" }),
+      { status: 400, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  let csvText: string;
+  if (typeof csvTextArg === "string") {
+    csvText = csvTextArg;
+  } else {
+    const { data: fileData, error: downloadErr } = await supabaseAdmin.storage
+      .from("amazon-imports")
+      .download(storagePath);
+    if (downloadErr || !fileData) {
+      return new Response(
+        JSON.stringify({ error: downloadErr?.message || "Failed to download file from storage" }),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      );
+    }
+    csvText = await (fileData as Blob).text();
   }
 
   const userClient = createUserClient(userJwt);

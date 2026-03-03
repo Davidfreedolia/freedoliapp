@@ -78,6 +78,7 @@ const Orders = lazyWithErrorBoundary(() => import('./pages/Orders'), 'Orders')
 const Briefing = lazyWithErrorBoundary(() => import('./pages/Briefing'), 'Briefing')
 const Finances = lazyWithErrorBoundary(() => import('./pages/Finances'), 'Finances')
 const FinanceExports = lazyWithErrorBoundary(() => import('./pages/FinanceExports'), 'FinanceExports')
+const AmazonImports = lazyWithErrorBoundary(() => import('./pages/AmazonImports'), 'AmazonImports')
 const Inventory = lazyWithErrorBoundary(() => import('./pages/Inventory'), 'Inventory')
 const Settings = lazyWithErrorBoundary(() => import('./pages/Settings'), 'Settings')
 const Analytics = lazyWithErrorBoundary(() => import('./pages/Analytics'), 'Analytics')
@@ -254,6 +255,7 @@ function App() {
             <Route path="orders" element={<AppPageWrap context="page:Orders"><Orders /></AppPageWrap>} />
             <Route path="finances" element={<AppPageWrap context="page:Finances"><Finances /></AppPageWrap>} />
             <Route path="finances/exports" element={<AppPageWrap context="page:FinanceExports"><FinanceExports /></AppPageWrap>} />
+            <Route path="finances/amazon-imports" element={<AppPageWrap context="page:AmazonImports"><AmazonImports /></AppPageWrap>} />
             <Route path="inventory" element={<AppPageWrap context="page:Inventory"><Inventory /></AppPageWrap>} />
             <Route path="analytics" element={<AppPageWrap context="page:Analytics"><Analytics /></AppPageWrap>} />
             <Route path="settings" element={<AppPageWrap context="page:Settings"><Settings /></AppPageWrap>} />

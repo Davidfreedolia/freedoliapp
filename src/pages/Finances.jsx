@@ -1082,13 +1082,23 @@ export default function Finances() {
           </span>
         }
         actions={
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => window.location.assign('/app/finances/exports')}
-          >
-            Quarterly exports
-          </Button>
+          <>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => window.location.assign('/app/finances/amazon-imports')}
+              style={{ marginRight: 8 }}
+            >
+              Amazon Imports
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => window.location.assign('/app/finances/exports')}
+            >
+              Quarterly exports
+            </Button>
+          </>
         }
       />
 

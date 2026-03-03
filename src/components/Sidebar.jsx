@@ -54,6 +54,9 @@ const prefetchRoute = (path) => {
     case '/finances/exports':
       import('../pages/FinanceExports.jsx').catch(() => {})
       break
+    case '/finances/amazon-imports':
+      import('../pages/AmazonImports.jsx').catch(() => {})
+      break
     case '/inventory':
       import('../pages/Inventory.jsx').catch(() => {})
       break
