@@ -294,7 +294,11 @@ export default function ActivationWizard() {
         return
       }
       sessionStorage.removeItem(ACTIVATION_AMAZON_PATH_KEY)
-      navigate('/app', { replace: true })
+      if (activationPath === 'amazon') {
+        navigate('/app/snapshot', { replace: true })
+      } else {
+        navigate('/app', { replace: true })
+      }
     } catch (err) {
       setSubmitError(err?.message || 'Error')
       showToast(err?.message || 'Error', 'error')

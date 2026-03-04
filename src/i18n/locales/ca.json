@@ -136,6 +136,42 @@
       "slack": "Notificacions Slack (properament)"
     }
   },
+  "snapshot": {
+    "title": "El teu snapshot Amazon",
+    "subtitle": "Basat en els teus settlements dels últims 30 dies.",
+    "kpi": {
+      "revenue": "Ingressos",
+      "fees": "Comissions",
+      "net": "Benefici net",
+      "cash": "Impacte en caixa",
+      "units": "Unitats venudes",
+      "hint": "Últims 30 dies"
+    },
+    "empty": {
+      "title": "No hem trobat activitat Amazon recent",
+      "subtitle": "Si acabes de connectar, espera un minut i torna a provar l'import. Pots igualment obrir el dashboard i explorar l'app."
+    },
+    "actions": {
+      "retryImport": "Tornar a importar",
+      "openDashboard": "Obrir dashboard",
+      "viewProducts": "Veure productes"
+    },
+    "next": {
+      "title": "Què toca ara?",
+      "createProduct": {
+        "title": "Crea el teu primer producte/projecte",
+        "desc": "Defineix un producte o projecte per començar a seguir marge i logística."
+      },
+      "viability": {
+        "title": "Revisa la viabilitat",
+        "desc": "Revisa unit economics i marges per validar la idea."
+      },
+      "quotes": {
+        "title": "Afegeix un pressupost de proveïdor",
+        "desc": "Demana el primer pressupost de proveïdor i compara costos posats a destí."
+      }
+    }
+  },
   "sidebar": {
     "dashboard": "Dashboard",
     "projects": "Projectes",

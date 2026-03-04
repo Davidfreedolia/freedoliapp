@@ -136,6 +136,42 @@
       "slack": "Slack notifications (coming soon)"
     }
   },
+  "snapshot": {
+    "title": "Your Amazon snapshot",
+    "subtitle": "Based on your settlements from the last 30 days.",
+    "kpi": {
+      "revenue": "Revenue",
+      "fees": "Fees",
+      "net": "Net profit",
+      "cash": "Cash impact",
+      "units": "Units sold",
+      "hint": "Last 30 days"
+    },
+    "empty": {
+      "title": "We couldn't find recent Amazon activity",
+      "subtitle": "If you just connected, wait a minute and retry the import. You can still open the dashboard and explore the app."
+    },
+    "actions": {
+      "retryImport": "Retry import",
+      "openDashboard": "Open dashboard",
+      "viewProducts": "View products"
+    },
+    "next": {
+      "title": "What’s next?",
+      "createProduct": {
+        "title": "Create your first product/project",
+        "desc": "Set up a product or project to start tracking margin and logistics."
+      },
+      "viability": {
+        "title": "Check viability",
+        "desc": "Review unit economics and margins to validate your idea."
+      },
+      "quotes": {
+        "title": "Add supplier quote",
+        "desc": "Request your first supplier quote and compare landed costs."
+      }
+    }
+  },
   "sidebar": {
     "dashboard": "Dashboard",
     "projects": "Projects",
