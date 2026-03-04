@@ -112,6 +112,11 @@ function OnboardingGate({ children }) {
   const hasAmazonActivationFlag =
     typeof sessionStorage !== 'undefined' && sessionStorage.getItem('activation_amazon_path')
 
+  // Usuari autenticat + org carregada + onboarding complet → root envia a /app
+  if (!requiresOnboarding && path === '/' && activeOrgId) {
+    return <Navigate to="/app" replace />
+  }
+
   if (!requiresOnboarding && path === '/activation') {
     return <Navigate to="/app" replace />
   }
