@@ -27,6 +27,50 @@
     }
   },
   "activation": {
+    "steps": {
+      "welcome": "Benvinguda",
+      "connect": "Connectar",
+      "import": "Importar",
+      "snapshot": "Snapshot",
+      "moreTools": "Més eines"
+    },
+    "welcome": {
+      "title": "Confirma la teva organització",
+      "subtitle": "Farem servir aquest workspace per als teus projectes i billing.",
+      "noOrg": "No hi ha cap organització seleccionada. Torna enrere i selecciona un workspace.",
+      "baseCurrency": "Moneda base: {{currency}}",
+      "baseCurrencyMissing": "Pots definir la moneda i marketplace més endavant a Configuració."
+    },
+    "choosePath": {
+      "title": "Tria el camí",
+      "subtitle": "Com vols començar?",
+      "amazonLabel": "Connectar Amazon i importar dades reals",
+      "setupLabel": "Començar en mode Setup (sense Amazon encara)"
+    },
+    "connect": {
+      "title": "Connectar Amazon",
+      "connected": "Connectat ✓",
+      "connectedMeta": "Regió: {{region}} · Seller: {{seller}}",
+      "description": "Connecta el teu compte d'Amazon Seller Central per importar dades de settlements (últims 30 dies).",
+      "cta": "Connectar Amazon (SP-API)",
+      "redirecting": "Redirigint…"
+    },
+    "import": {
+      "title": "Importar últims 30 dies",
+      "requesting": "Demanant informe a Amazon",
+      "processing": "Processant dades",
+      "writing": "Escrivint ledger",
+      "idle": "Iniciant import…",
+      "done": "Import completat."
+    },
+    "snapshot": {
+      "title": "El teu snapshot",
+      "noActivity": "Encara no s'ha detectat activitat als últims 30 dies. Pots entrar igualment al dashboard i connectar més dades després.",
+      "revenue": "Ingressos",
+      "fees": "Comissions",
+      "net": "Net",
+      "cashImpact": "Impacte en caixa"
+    },
     "moreTools": {
       "title": "Connecta més eines (opcional)",
       "subtitle": "Pots connectar més eines més endavant des de Configuració.",

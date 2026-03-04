@@ -27,6 +27,50 @@
     }
   },
   "activation": {
+    "steps": {
+      "welcome": "Welcome",
+      "connect": "Connect",
+      "import": "Import",
+      "snapshot": "Snapshot",
+      "moreTools": "More tools"
+    },
+    "welcome": {
+      "title": "Confirm your organization",
+      "subtitle": "We'll use this workspace for your projects and billing.",
+      "noOrg": "No organization selected. Go back and pick a workspace.",
+      "baseCurrency": "Base currency: {{currency}}",
+      "baseCurrencyMissing": "You can set currency and marketplace later in Settings."
+    },
+    "choosePath": {
+      "title": "Choose your path",
+      "subtitle": "How do you want to get started?",
+      "amazonLabel": "Connect Amazon & import real data",
+      "setupLabel": "Start in Setup Mode (no Amazon yet)"
+    },
+    "connect": {
+      "title": "Connect Amazon",
+      "connected": "Connected ✓",
+      "connectedMeta": "Region: {{region}} · Seller: {{seller}}",
+      "description": "Connect your Amazon Seller Central account to import settlement data (last 30 days).",
+      "cta": "Connect Amazon (SP-API)",
+      "redirecting": "Redirecting…"
+    },
+    "import": {
+      "title": "Import last 30 days",
+      "requesting": "Requesting Amazon report",
+      "processing": "Processing data",
+      "writing": "Writing ledger",
+      "idle": "Starting import…",
+      "done": "Import complete."
+    },
+    "snapshot": {
+      "title": "Your snapshot",
+      "noActivity": "No activity detected yet in the last 30 days. You can still enter the dashboard and connect more data later.",
+      "revenue": "Revenue",
+      "fees": "Fees",
+      "net": "Net",
+      "cashImpact": "Cash impact"
+    },
     "moreTools": {
       "title": "Connect more tools (optional)",
       "subtitle": "You can connect more tools later from Settings.",

@@ -27,6 +27,50 @@
     }
   },
   "activation": {
+    "steps": {
+      "welcome": "Bienvenida",
+      "connect": "Conectar",
+      "import": "Importar",
+      "snapshot": "Snapshot",
+      "moreTools": "Más herramientas"
+    },
+    "welcome": {
+      "title": "Confirma tu organización",
+      "subtitle": "Usaremos este workspace para tus proyectos y billing.",
+      "noOrg": "No hay ninguna organización seleccionada. Vuelve atrás y selecciona un workspace.",
+      "baseCurrency": "Moneda base: {{currency}}",
+      "baseCurrencyMissing": "Puedes definir la moneda y marketplace más adelante en Configuración."
+    },
+    "choosePath": {
+      "title": "Elige el camino",
+      "subtitle": "¿Cómo quieres empezar?",
+      "amazonLabel": "Conectar Amazon e importar datos reales",
+      "setupLabel": "Empezar en modo Setup (sin Amazon todavía)"
+    },
+    "connect": {
+      "title": "Conectar Amazon",
+      "connected": "Conectado ✓",
+      "connectedMeta": "Región: {{region}} · Seller: {{seller}}",
+      "description": "Conecta tu cuenta de Amazon Seller Central para importar datos de settlements (últimos 30 días).",
+      "cta": "Conectar Amazon (SP-API)",
+      "redirecting": "Redirigiendo…"
+    },
+    "import": {
+      "title": "Importar últimos 30 días",
+      "requesting": "Solicitando informe a Amazon",
+      "processing": "Procesando datos",
+      "writing": "Escribiendo ledger",
+      "idle": "Iniciando import…",
+      "done": "Import completado."
+    },
+    "snapshot": {
+      "title": "Tu snapshot",
+      "noActivity": "Todavía no se ha detectado actividad en los últimos 30 días. Puedes entrar igualmente al dashboard y conectar más datos después.",
+      "revenue": "Ingresos",
+      "fees": "Comisiones",
+      "net": "Neto",
+      "cashImpact": "Impacto en caja"
+    },
     "moreTools": {
       "title": "Conecta más herramientas (opcional)",
       "subtitle": "Puedes conectar más herramientas más adelante desde Configuración.",

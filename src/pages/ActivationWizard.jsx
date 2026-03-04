@@ -4,6 +4,8 @@ import { useWorkspace } from '../contexts/WorkspaceContext'
 import { supabase, getCurrentUserId } from '../lib/supabase'
 import { showToast } from '../components/Toast'
 import Button from '../components/ui/Button'
+import Card from '../components/ui/Card'
+import Stepper from '../components/ui/Stepper'
 import useT from '../hooks/useT'
 
 const STEP_CONFIRM_ORG = 1
@@ -301,268 +303,332 @@ export default function ActivationWizard() {
     }
   }
 
-  const cardStyle = {
-    maxWidth: 520,
-    margin: '0 auto',
-    padding: '24px',
-    borderRadius: 12,
-    boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-    backgroundColor: 'var(--page-bg, #fff)',
-  }
-
-  const buttonStyle = {
-    padding: '10px 20px',
-    borderRadius: 8,
-    border: 'none',
-    cursor: 'pointer',
-    fontSize: 15,
-    fontWeight: 500,
-  }
-
   if (!activeOrgId) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-        <div style={cardStyle}>
-          <p>No hi ha cap organització seleccionada. Torna a l&apos;inici i selecciona una org.</p>
-        </div>
+      <div className="wizard-shell">
+        <Card elevated className="wizard-card">
+          <h1 className="wizard-title">{t('activation.welcome.title')}</h1>
+          <p className="wizard-subtitle">{t('activation.welcome.noOrg')}</p>
+        </Card>
       </div>
     )
   }
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-        <div style={{ color: 'var(--text-secondary, #6b7280)' }}>Carregant...</div>
+      <div className="wizard-shell">
+        <Card elevated className="wizard-card">
+          <p className="wizard-subtitle">{t('common.loading')}</p>
+        </Card>
       </div>
     )
   }
 
+  const stepsForStepper = [
+    { id: 'welcome', label: t('activation.steps.welcome') },
+    { id: 'connect', label: t('activation.steps.connect') },
+    { id: 'import', label: t('activation.steps.import') },
+    { id: 'snapshot', label: t('activation.steps.snapshot') },
+    { id: 'moreTools', label: t('activation.steps.moreTools') },
+  ]
+
+  let currentStepIndex = 0
+  if (step === STEP_AMAZON_CONNECT) currentStepIndex = 1
+  else if (step === STEP_AMAZON_IMPORT) currentStepIndex = 2
+  else if (step === STEP_AMAZON_SNAPSHOT) currentStepIndex = 3
+  else if (step === STEP_MORE_TOOLS) currentStepIndex = 4
+
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, boxSizing: 'border-box' }}>
-      <div style={cardStyle}>
+    <div className="wizard-shell">
+      <Card elevated className="wizard-card">
+        <Stepper steps={stepsForStepper} currentIndex={currentStepIndex} />
 
         {step === STEP_CONFIRM_ORG && (
-          <>
-            <h2 style={{ margin: '0 0 8px', fontSize: 20 }}>Confirm your organization</h2>
-            <p style={{ margin: '0 0 16px', color: 'var(--text-secondary, #6b7280)' }}>
-              <strong>{org?.name ?? 'Organization'}</strong>
+          <div className="wizard-body">
+            <h1 className="wizard-title">{t('activation.welcome.title')}</h1>
+            <p className="wizard-subtitle">
+              {t('activation.welcome.subtitle')}
             </p>
-            {baseCurrency ? (
-              <p style={{ margin: '0 0 20px', fontSize: 14 }}>
-                Base currency: <strong>{baseCurrency}</strong>
-              </p>
-            ) : (
-              <p style={{ margin: '0 0 20px', fontSize: 14, color: 'var(--text-secondary, #6b7280)' }}>
-                You can set currency and marketplace later in Settings.
+            {org && (
+              <p className="wizard-subtitle">
+                <strong>{org.name}</strong>
               </p>
             )}
-            <button
-              type="button"
-              style={{ ...buttonStyle, backgroundColor: 'var(--primary, #2563eb)', color: '#fff' }}
-              onClick={() => setStep(STEP_CHOOSE_PATH)}
-            >
-              Continue
-            </button>
-          </>
+            {baseCurrency ? (
+              <p className="wizard-subtitle">
+                {t('activation.welcome.baseCurrency', { currency: baseCurrency })}
+              </p>
+            ) : (
+              <p className="wizard-subtitle">
+                {t('activation.welcome.baseCurrencyMissing')}
+              </p>
+            )}
+            <div className="wizard-footer">
+              <div className="wizard-footer__left" />
+              <div className="wizard-footer__right">
+                <Button variant="primary" size="md" onClick={() => setStep(STEP_CHOOSE_PATH)}>
+                  {t('common.buttons.continue')}
+                </Button>
+              </div>
+            </div>
+          </div>
         )}
 
         {step === STEP_CHOOSE_PATH && (
-          <>
-            <h2 style={{ margin: '0 0 16px', fontSize: 20 }}>Choose your path</h2>
-            <p style={{ margin: '0 0 20px', color: 'var(--text-secondary, #6b7280)' }}>
-              How do you want to get started?
+          <div className="wizard-body">
+            <h1 className="wizard-title">{t('activation.choosePath.title')}</h1>
+            <p className="wizard-subtitle">
+              {t('activation.choosePath.subtitle')}
             </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <button
-                type="button"
-                style={{ ...buttonStyle, backgroundColor: 'var(--primary, #2563eb)', color: '#fff', textAlign: 'left', padding: 14 }}
-                onClick={handleChooseAmazon}
-              >
-                Connect Amazon & import real data
-              </button>
-              <button
-                type="button"
-                style={{ ...buttonStyle, backgroundColor: 'var(--surface, #f3f4f6)', color: 'var(--text, #111)' }}
-                onClick={handleChooseSetup}
-              >
-                Start in Setup Mode (no Amazon yet)
-              </button>
+            <div className="wizard-tool-grid" style={{ marginBottom: 0 }}>
+              <div className="wizard-tool-card" onClick={handleChooseAmazon}>
+                <div className="wizard-tool-card__title">
+                  {t('activation.choosePath.amazonLabel')}
+                </div>
+              </div>
+              <div className="wizard-tool-card" onClick={handleChooseSetup}>
+                <div className="wizard-tool-card__title">
+                  {t('activation.choosePath.setupLabel')}
+                </div>
+              </div>
             </div>
-          </>
+          </div>
         )}
 
         {step === STEP_AMAZON_CONNECT && (
-          <>
-            <h2 style={{ margin: '0 0 16px', fontSize: 20 }}>Connect Amazon</h2>
+          <div className="wizard-body">
+            <h1 className="wizard-title">{t('activation.connect.title')}</h1>
             {activeConnection ? (
               <>
-                <p style={{ margin: '0 0 16px', color: '#22c55e', fontWeight: 600 }}>Connected ✓</p>
-                <p style={{ margin: '0 0 20px', fontSize: 14, color: 'var(--text-secondary, #6b7280)' }}>
-                  Region: {activeConnection.region} · Seller: {activeConnection.seller_id}
+                <p className="wizard-subtitle">
+                  {t('activation.connect.connected')}
                 </p>
-                <button
-                  type="button"
-                  style={{ ...buttonStyle, backgroundColor: 'var(--primary, #2563eb)', color: '#fff' }}
-                  onClick={() => setStep(STEP_AMAZON_IMPORT)}
-                >
-                  Continue
-                </button>
+                <p className="wizard-subtitle">
+                  {t('activation.connect.connectedMeta', {
+                    region: activeConnection.region,
+                    seller: activeConnection.seller_id,
+                  })}
+                </p>
+                <div className="wizard-footer">
+                  <div className="wizard-footer__left" />
+                  <div className="wizard-footer__right">
+                    <Button variant="primary" size="md" onClick={() => setStep(STEP_AMAZON_IMPORT)}>
+                      {t('common.buttons.continue')}
+                    </Button>
+                  </div>
+                </div>
               </>
             ) : (
               <>
-                <p style={{ margin: '0 0 20px', color: 'var(--text-secondary, #6b7280)' }}>
-                  Connect your Amazon Seller Central account to import settlement data (last 30 days).
+                <p className="wizard-subtitle">
+                  {t('activation.connect.description')}
                 </p>
-                <button
-                  type="button"
-                  style={{ ...buttonStyle, backgroundColor: 'var(--primary, #2563eb)', color: '#fff' }}
-                  onClick={handleConnectAmazon}
-                  disabled={connecting}
-                >
-                  {connecting ? 'Redirecting…' : 'Connect Amazon (SP-API)'}
-                </button>
+                <div className="wizard-footer">
+                  <div className="wizard-footer__left" />
+                  <div className="wizard-footer__right">
+                    <Button
+                      variant="primary"
+                      size="md"
+                      disabled={connecting}
+                      loading={connecting}
+                      onClick={handleConnectAmazon}
+                    >
+                      {connecting
+                        ? t('activation.connect.redirecting')
+                        : t('activation.connect.cta')}
+                    </Button>
+                  </div>
+                </div>
               </>
             )}
-          </>
+          </div>
         )}
 
         {step === STEP_AMAZON_IMPORT && (
-          <>
-            <h2 style={{ margin: '0 0 16px', fontSize: 20 }}>Import last 30 days</h2>
-            {importStatus === 'requesting' && (
-              <p style={{ margin: '0 0 20px', color: 'var(--text-secondary, #6b7280)' }}>Requesting Amazon report</p>
-            )}
-            {importStatus === 'processing' && (
-              <p style={{ margin: '0 0 20px', color: 'var(--text-secondary, #6b7280)' }}>Processing data</p>
-            )}
-            {(importStatus === 'writing' || (importStatus === 'done' && !importDone)) && (
-              <p style={{ margin: '0 0 20px', color: 'var(--text-secondary, #6b7280)' }}>Writing ledger</p>
-            )}
-            {importStatus === 'done' && importDone && (
-              <>
-                <p style={{ margin: '0 0 20px', color: 'var(--text-secondary, #6b7280)' }}>Import complete.</p>
-                <button
-                  type="button"
-                  style={{ ...buttonStyle, backgroundColor: 'var(--primary, #2563eb)', color: '#fff' }}
-                  onClick={() => setStep(STEP_AMAZON_SNAPSHOT)}
-                >
-                  Continue to snapshot
-                </button>
-              </>
-            )}
-            {importStatus === 'idle' && (
-              <p style={{ margin: '0 0 20px', color: 'var(--text-secondary, #6b7280)' }}>Starting import…</p>
-            )}
-          </>
+          <div className="wizard-body">
+            <h1 className="wizard-title">{t('activation.import.title')}</h1>
+            <ul className="wizard-subtitle">
+              <li>
+                {importStatus === 'requesting'
+                  ? `• ${t('activation.import.requesting')}`
+                  : t('activation.import.requesting')}
+              </li>
+              <li>
+                {importStatus === 'processing'
+                  ? `• ${t('activation.import.processing')}`
+                  : t('activation.import.processing')}
+              </li>
+              <li>
+                {importStatus === 'writing'
+                  ? `• ${t('activation.import.writing')}`
+                  : t('activation.import.writing')}
+              </li>
+              <li>
+                {importStatus === 'done'
+                  ? `• ${t('activation.import.done')}`
+                  : t('activation.import.idle')}
+              </li>
+            </ul>
+          </div>
         )}
 
         {step === STEP_AMAZON_SNAPSHOT && (
-          <>
-            <h2 style={{ margin: '0 0 16px', fontSize: 20 }}>Your snapshot</h2>
+          <div className="wizard-body">
+            <h1 className="wizard-title">{t('activation.snapshot.title')}</h1>
             {snapshotLoading && (
-              <p style={{ margin: '0 0 20px', color: 'var(--text-secondary, #6b7280)' }}>Loading…</p>
+              <p className="wizard-subtitle">{t('common.loading')}</p>
             )}
             {!snapshotLoading && snapshot && (
               <>
                 {snapshot.hasData ? (
-                  <div style={{ marginBottom: 20, fontSize: 14 }}>
-                    <p style={{ margin: '4px 0' }}><strong>Revenue:</strong> {snapshot.revenue.toFixed(2)}</p>
-                    <p style={{ margin: '4px 0' }}><strong>Fees:</strong> {snapshot.fees.toFixed(2)}</p>
-                    <p style={{ margin: '4px 0' }}><strong>Net:</strong> {snapshot.net.toFixed(2)}</p>
-                    <p style={{ margin: '4px 0' }}><strong>Cash impact:</strong> {snapshot.cashImpact.toFixed(2)}</p>
+                  <div className="wizard-kpis">
+                    <div className="wizard-kpi">
+                      <div className="wizard-kpi__label">{t('activation.snapshot.revenue')}</div>
+                      <div className="wizard-kpi__value">{snapshot.revenue.toFixed(2)}</div>
+                    </div>
+                    <div className="wizard-kpi">
+                      <div className="wizard-kpi__label">{t('activation.snapshot.fees')}</div>
+                      <div className="wizard-kpi__value">{snapshot.fees.toFixed(2)}</div>
+                    </div>
+                    <div className="wizard-kpi">
+                      <div className="wizard-kpi__label">{t('activation.snapshot.net')}</div>
+                      <div className="wizard-kpi__value">{snapshot.net.toFixed(2)}</div>
+                    </div>
+                    <div className="wizard-kpi">
+                      <div className="wizard-kpi__label">{t('activation.snapshot.cashImpact')}</div>
+                      <div className="wizard-kpi__value">{snapshot.cashImpact.toFixed(2)}</div>
+                    </div>
                   </div>
                 ) : (
-                  <p style={{ margin: '0 0 20px', color: 'var(--text-secondary, #6b7280)' }}>
-                    No activity detected yet in the last 30 days. You can still enter the dashboard and connect more data later.
+                  <p className="wizard-subtitle">
+                    {t('activation.snapshot.noActivity')}
                   </p>
                 )}
                 {submitError && (
-                  <p style={{ margin: '0 0 12px', color: 'var(--error, #dc2626)', fontSize: 14 }}>{submitError}</p>
+                  <p className="wizard-subtitle" style={{ color: 'var(--color-danger)', fontSize: 14 }}>
+                    {submitError}
+                  </p>
                 )}
-                <button
-                  type="button"
-                  style={{ ...buttonStyle, backgroundColor: 'var(--primary, #2563eb)', color: '#fff' }}
-                  onClick={() => setStep(STEP_MORE_TOOLS)}
-                  disabled={submitLoading}
-                >
-                  {submitLoading ? 'Saving...' : 'Enter Dashboard'}
-                </button>
+                <div className="wizard-footer">
+                  <div className="wizard-footer__left">
+                    <Button
+                      variant="secondary"
+                      size="md"
+                      disabled={submitLoading}
+                      onClick={() => setStep(STEP_CHOOSE_PATH)}
+                    >
+                      {t('common.buttons.back')}
+                    </Button>
+                  </div>
+                  <div className="wizard-footer__right">
+                    <Button
+                      variant="primary"
+                      size="md"
+                      disabled={submitLoading}
+                      onClick={() => setStep(STEP_MORE_TOOLS)}
+                    >
+                      {t('common.buttons.continue')}
+                    </Button>
+                  </div>
+                </div>
               </>
             )}
-          </>
+          </div>
         )}
 
         {step === STEP_SETUP_DONE && (
-          <>
-            <h2 style={{ margin: '0 0 8px', fontSize: 20 }}>Setup mode activated</h2>
-            <p style={{ margin: '0 0 20px', color: 'var(--text-secondary, #6b7280)' }}>
+          <div className="wizard-body">
+            <h1 className="wizard-title">Setup mode activated</h1>
+            <p className="wizard-subtitle">
               You can create products and projects, plan costs and prepare your launch.
               You can connect Amazon later in Settings.
             </p>
             {submitError && (
-              <p style={{ margin: '0 0 12px', color: 'var(--error, #dc2626)', fontSize: 14 }}>{submitError}</p>
+              <p className="wizard-subtitle" style={{ color: 'var(--color-danger)', fontSize: 14 }}>
+                {submitError}
+              </p>
             )}
-            <button
-              type="button"
-              style={{ ...buttonStyle, backgroundColor: 'var(--primary, #2563eb)', color: '#fff' }}
-              onClick={() => setStep(STEP_MORE_TOOLS)}
-              disabled={submitLoading}
-            >
-              {submitLoading ? 'Saving...' : 'Enter Dashboard'}
-            </button>
-          </>
+            <div className="wizard-footer">
+              <div className="wizard-footer__left">
+                <Button
+                  variant="secondary"
+                  size="md"
+                  disabled={submitLoading}
+                  onClick={() => setStep(STEP_CHOOSE_PATH)}
+                >
+                  {t('common.buttons.back')}
+                </Button>
+              </div>
+              <div className="wizard-footer__right">
+                <Button
+                  variant="primary"
+                  size="md"
+                  disabled={submitLoading}
+                  onClick={() => setStep(STEP_MORE_TOOLS)}
+                >
+                  {t('common.buttons.continue')}
+                </Button>
+              </div>
+            </div>
+          </div>
         )}
 
         {step === STEP_MORE_TOOLS && (
-          <>
-            <h2 style={{ margin: '0 0 8px', fontSize: 20 }}>{t('activation.moreTools.title')}</h2>
-            <p style={{ margin: '0 0 20px', color: 'var(--text-secondary, #6b7280)', fontSize: 14 }}>
+          <div className="wizard-body">
+            <h1 className="wizard-title">{t('activation.moreTools.title')}</h1>
+            <p className="wizard-subtitle">
               {t('activation.moreTools.subtitle')}
             </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 20 }}>
-              <div style={{ padding: 12, borderRadius: 8, border: '1px solid var(--border-1)', background: 'var(--surface-bg-2)' }}>
-                <div style={{ fontWeight: 600, marginBottom: 6 }}>Google Drive</div>
-                <span style={{ fontSize: 11, padding: '2px 6px', borderRadius: 999, background: 'var(--surface-bg)', border: '1px solid var(--border-1)', color: 'var(--text-secondary)' }}>
+            <div className="wizard-tool-grid">
+              <div className="wizard-tool-card">
+                <div className="wizard-tool-card__title">Google Drive</div>
+                <span className="wizard-tool-card__badge">
                   Coming soon
                 </span>
               </div>
-              <div style={{ padding: 12, borderRadius: 8, border: '1px solid var(--border-1)', background: 'var(--surface-bg-2)' }}>
-                <div style={{ fontWeight: 600, marginBottom: 6 }}>Outlook / Office 365</div>
-                <span style={{ fontSize: 11, padding: '2px 6px', borderRadius: 999, background: 'var(--surface-bg)', border: '1px solid var(--border-1)', color: 'var(--text-secondary)' }}>
+              <div className="wizard-tool-card">
+                <div className="wizard-tool-card__title">Outlook / Office 365</div>
+                <span className="wizard-tool-card__badge">
                   Coming soon
                 </span>
               </div>
-              <div style={{ padding: 12, borderRadius: 8, border: '1px solid var(--border-1)', background: 'var(--surface-bg-2)' }}>
-                <div style={{ fontWeight: 600, marginBottom: 6 }}>Slack</div>
-                <span style={{ fontSize: 11, padding: '2px 6px', borderRadius: 999, background: 'var(--surface-bg)', border: '1px solid var(--border-1)', color: 'var(--text-secondary)' }}>
+              <div className="wizard-tool-card">
+                <div className="wizard-tool-card__title">Slack</div>
+                <span className="wizard-tool-card__badge">
                   Coming soon
                 </span>
               </div>
             </div>
             {submitError && (
-              <p style={{ margin: '0 0 12px', color: 'var(--error, #dc2626)', fontSize: 14 }}>{submitError}</p>
+              <p className="wizard-subtitle" style={{ color: 'var(--color-danger)', fontSize: 14 }}>
+                {submitError}
+              </p>
             )}
-            <div style={{ display: 'flex', gap: 12, marginTop: 4 }}>
-              <Button
-                variant="primary"
-                size="md"
-                disabled={submitLoading}
-                onClick={() => handleEnterDashboard(activationPath)}
-              >
-                {submitLoading ? 'Saving...' : 'Enter Dashboard'}
-              </Button>
-              <Button
-                variant="secondary"
-                size="md"
-                disabled={submitLoading}
-                onClick={() => handleEnterDashboard(activationPath)}
-              >
-                {t('common.buttons.skipForNow')}
-              </Button>
+            <div className="wizard-footer">
+              <div className="wizard-footer__left">
+                <Button
+                  variant="secondary"
+                  size="md"
+                  disabled={submitLoading}
+                  onClick={() => handleEnterDashboard(activationPath)}
+                >
+                  {t('common.buttons.skipForNow')}
+                </Button>
+              </div>
+              <div className="wizard-footer__right">
+                <Button
+                  variant="primary"
+                  size="md"
+                  disabled={submitLoading}
+                  onClick={() => handleEnterDashboard(activationPath)}
+                >
+                  {submitLoading ? 'Saving...' : 'Enter Dashboard'}
+                </Button>
+              </div>
             </div>
-          </>
+          </div>
         )}
-      </div>
+      </Card>
     </div>
   )
 }
