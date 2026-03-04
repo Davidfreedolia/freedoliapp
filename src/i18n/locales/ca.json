@@ -16,7 +16,10 @@
       "cancel": "Cancel·lar",
       "continue": "Continuar",
       "upgrade": "Actualitzar pla",
-      "skipForNow": "Ometre ara"
+      "skipForNow": "Ometre ara",
+      "back": "Enrere",
+      "open": "Obrir",
+      "createProduct": "Crear producte"
     }
   },
   "billing": {
@@ -93,6 +96,43 @@
     "settings": "Configuració"
   },
   "dashboard": {
+    "modeB": {
+      "title": "Comença el teu primer producte Amazon",
+      "subtitle": "Crea un producte i mou-lo pel pipeline de llançament.",
+      "cta": {
+        "createProduct": "Crear producte"
+      }
+    },
+    "pipeline": {
+      "createProduct": {
+        "title": "Crear producte",
+        "desc": "Defineix el producte i el SKU."
+      },
+      "viability": {
+        "title": "Viabilitat",
+        "desc": "Comprova unit economics i marges."
+      },
+      "quotes": {
+        "title": "Pressupostos proveïdors",
+        "desc": "Demana i compara pressupostos."
+      },
+      "samples": {
+        "title": "Mostres",
+        "desc": "Demana i aprova mostres."
+      },
+      "po": {
+        "title": "Comanda de compra",
+        "desc": "Fes la comanda de producció."
+      },
+      "shipment": {
+        "title": "Enviament",
+        "desc": "Organitza l'enviament al magatzem."
+      },
+      "amazon": {
+        "title": "Enviar a Amazon / magatzem local",
+        "desc": "Envia a Amazon o al teu magatzem."
+      }
+    },
     "customize": "Personalitza el dashboard",
     "done": "Fet",
     "editMode": "Mode d'edició",

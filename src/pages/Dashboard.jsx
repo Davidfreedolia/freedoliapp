@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { useBlockedProjects } from '../hooks/useBlockedProjects'
+import { useOrgDashboardMode } from '../hooks/useOrgDashboardMode'
+import useT from '../hooks/useT'
 import GridLayout from 'react-grid-layout'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
@@ -58,6 +60,7 @@ import TasksWidget from '../components/TasksWidget'
 import AlertsBadge from '../components/AlertsBadge'
 import SafeWidget from '../components/SafeWidget'
 import Button from '../components/Button'
+import Card from '../components/ui/Card'
 import { safeArray } from '../lib/safeArray'
 import { getPhaseMeta } from '../utils/phaseStyles'
 import PhaseMark from '../components/Phase/PhaseMark'
@@ -74,6 +77,8 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const { data: blockedProjects } = useBlockedProjects()
   const { t } = useTranslation()
+  const tCommon = useT()
+  const { loading: dashboardModeLoading, hasData: dashboardHasData } = useOrgDashboardMode(activeOrgId)
   const { isMobile, isTablet } = useBreakpoint()
   const [showNewProjectModal, setShowNewProjectModal] = useState(false)
   const [showCustomizeModal, setShowCustomizeModal] = useState(false)
@@ -726,6 +731,45 @@ export default function Dashboard() {
         ...styles.content,
         padding: isMobile ? '16px' : '32px'
       }}>
+        {dashboardModeLoading && (
+          <div className="dash-onboard-shell">
+            <p className="dash-onboard-header__subtitle">{t('common.loading')}</p>
+          </div>
+        )}
+        {!dashboardModeLoading && !dashboardHasData && (
+          <div className="dash-onboard-shell">
+            <header className="dash-onboard-header">
+              <h1 className="dash-onboard-header__title">{t('dashboard.modeB.title')}</h1>
+              <p className="dash-onboard-header__subtitle">{t('dashboard.modeB.subtitle')}</p>
+            </header>
+            <div className="dash-pipeline-grid">
+              <div className="dash-onboard-header dash-onboard-cta-row">
+                <Button variant="primary" size="lg" onClick={() => setShowNewProjectModal(true)}>
+                  {tCommon('dashboard.modeB.cta.createProduct')}
+                </Button>
+              </div>
+              {[
+                { key: 'createProduct', title: tCommon('dashboard.pipeline.createProduct.title'), desc: tCommon('dashboard.pipeline.createProduct.desc'), href: '/app/projects', primary: true },
+                { key: 'viability', title: tCommon('dashboard.pipeline.viability.title'), desc: tCommon('dashboard.pipeline.viability.desc'), href: '/app/projects' },
+                { key: 'quotes', title: tCommon('dashboard.pipeline.quotes.title'), desc: tCommon('dashboard.pipeline.quotes.desc'), href: '/app/projects' },
+                { key: 'samples', title: tCommon('dashboard.pipeline.samples.title'), desc: tCommon('dashboard.pipeline.samples.desc'), href: '/app/projects' },
+                { key: 'po', title: tCommon('dashboard.pipeline.po.title'), desc: tCommon('dashboard.pipeline.po.desc'), href: '/app/orders' },
+                { key: 'shipment', title: tCommon('dashboard.pipeline.shipment.title'), desc: tCommon('dashboard.pipeline.shipment.desc'), href: '/app/orders' },
+                { key: 'amazon', title: tCommon('dashboard.pipeline.amazon.title'), desc: tCommon('dashboard.pipeline.amazon.desc'), href: '/app/projects' }
+              ].map((step) => (
+                <Card key={step.key} className="dash-pipeline-step">
+                  <h2 className="dash-pipeline-step__title">{step.title}</h2>
+                  <p className="dash-pipeline-step__desc">{step.desc}</p>
+                  <Button variant={step.primary ? 'primary' : 'secondary'} size="sm" onClick={() => step.key === 'createProduct' ? setShowNewProjectModal(true) : navigate(step.href)}>
+                    {step.key === 'createProduct' ? tCommon('common.buttons.createProduct') : tCommon('common.buttons.open')}
+                  </Button>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+        {!dashboardModeLoading && dashboardHasData && (
+          <>
         {/* Edit Mode Badge */}
         {editLayout && !isMobile && (
           <div style={{
@@ -1678,6 +1722,8 @@ export default function Dashboard() {
               </SafeWidget>
             )}
           </div>
+        )}
+          </>
         )}
       </div>
 

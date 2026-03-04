@@ -598,4 +598,64 @@
   }
 }
 
+/* F8.3.2 — Dashboard Mode B (getting started) */
+.dash-onboard-shell {
+  padding: var(--s-5);
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.dash-onboard-header {
+  margin-bottom: var(--s-5);
+}
+
+.dash-onboard-header__title {
+  margin: 0 0 var(--s-2);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-1);
+}
+
+.dash-onboard-header__subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.dash-onboard-cta-row {
+  grid-column: 1 / -1;
+}
+
+.dash-pipeline-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--s-3);
+}
+
+@media (min-width: 768px) {
+  .dash-pipeline-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.dash-pipeline-step {
+  padding: var(--s-4);
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background-color: var(--surface);
+}
+
+.dash-pipeline-step__title {
+  margin: 0 0 var(--s-1);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-1);
+}
+
+.dash-pipeline-step__desc {
+  margin: 0 0 var(--s-3);
+  font-size: 13px;
+  color: var(--text-2);
+}
+
 

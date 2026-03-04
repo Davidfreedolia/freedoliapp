@@ -16,7 +16,10 @@
       "cancel": "Cancelar",
       "continue": "Continuar",
       "upgrade": "Actualizar plan",
-      "skipForNow": "Omitir por ahora"
+      "skipForNow": "Omitir por ahora",
+      "back": "Atrás",
+      "open": "Abrir",
+      "createProduct": "Crear producto"
     }
   },
   "billing": {
@@ -93,6 +96,43 @@
     "settings": "Configuración"
   },
   "dashboard": {
+    "modeB": {
+      "title": "Empieza tu primer producto Amazon",
+      "subtitle": "Crea un producto y muévelo por el pipeline de lanzamiento.",
+      "cta": {
+        "createProduct": "Crear producto"
+      }
+    },
+    "pipeline": {
+      "createProduct": {
+        "title": "Crear producto",
+        "desc": "Define el producto y el SKU."
+      },
+      "viability": {
+        "title": "Viabilidad",
+        "desc": "Comprueba unit economics y márgenes."
+      },
+      "quotes": {
+        "title": "Presupuestos proveedores",
+        "desc": "Solicita y compara presupuestos."
+      },
+      "samples": {
+        "title": "Muestras",
+        "desc": "Pide y aprueba muestras."
+      },
+      "po": {
+        "title": "Orden de compra",
+        "desc": "Realiza la orden de producción."
+      },
+      "shipment": {
+        "title": "Envío",
+        "desc": "Organiza el envío al almacén."
+      },
+      "amazon": {
+        "title": "Enviar a Amazon / almacén local",
+        "desc": "Envía a Amazon o a tu almacén."
+      }
+    },
     "customize": "Personalizar dashboard",
     "done": "Hecho",
     "editMode": "Modo de edición",
