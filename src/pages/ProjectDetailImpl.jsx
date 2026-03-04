@@ -59,6 +59,9 @@ import { getModalStyles } from '../utils/responsiveStyles'
 import Button from '../components/Button'
 import { generateClaudeResearchPrompt } from '../lib/generateClaudeResearchPrompt'
 import { computeCommercialGate } from '../lib/phaseGates'
+import ProjectHeader from '../components/projects/ProjectHeader'
+import ProjectPhaseChecklist from '../components/projects/ProjectPhaseChecklist'
+import ProjectTabs from '../components/projects/ProjectTabs'
 // Dynamic imports for components that import supabase statically to avoid circular dependencies during module initialization
 const IdentifiersSection = lazy(() => import('../components/IdentifiersSection'))
 const ProfitabilityCalculator = lazy(() => import('../components/ProfitabilityCalculator'))
@@ -2539,7 +2542,7 @@ ${t}
               <ProjectPhaseChecklist phase={phaseId} />
             </div>
             <div className="project-detail-right">
-              <ProjectTabs />
+              <ProjectTabs projectId={id} darkMode={darkMode} />
             </div>
           </div>
         </div>

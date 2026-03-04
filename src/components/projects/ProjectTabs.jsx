@@ -2,16 +2,34 @@ import React, { useState } from 'react'
 import Card from '../ui/Card'
 import Button from '../ui/Button'
 import useT from '../../hooks/useT'
+import ProjectQuotesSection from './sections/ProjectQuotesSection'
+import ProjectSamplesSection from './sections/ProjectSamplesSection'
+import ProjectPOSection from './sections/ProjectPOSection'
+import ProjectShipmentSection from './sections/ProjectShipmentSection'
+import ProjectLedgerSection from './sections/ProjectLedgerSection'
 
 const TABS = ['quotes', 'samples', 'po', 'shipment', 'ledger']
 
-/**
- * F8.3.4 — Pestanyes de detall de projecte (Quotes / Samples / PO / Shipment / Ledger).
- * De moment mostren placeholders; es poden wiring components existents més endavant.
- */
-export default function ProjectTabs() {
+export default function ProjectTabs({ projectId, darkMode }) {
   const t = useT()
   const [tab, setTab] = useState('quotes')
+
+  const renderContent = () => {
+    switch (tab) {
+      case 'quotes':
+        return <ProjectQuotesSection projectId={projectId} darkMode={darkMode} />
+      case 'samples':
+        return <ProjectSamplesSection projectId={projectId} darkMode={darkMode} />
+      case 'po':
+        return <ProjectPOSection projectId={projectId} />
+      case 'shipment':
+        return <ProjectShipmentSection projectId={projectId} />
+      case 'ledger':
+        return <ProjectLedgerSection projectId={projectId} />
+      default:
+        return null
+    }
+  }
 
   return (
     <div className="project-tabs">
@@ -33,9 +51,7 @@ export default function ProjectTabs() {
         })}
       </div>
       <Card className="project-tabs__card">
-        <p className="project-tabs__placeholder">
-          {t('projects.tabs.comingSoon')}
-        </p>
+        {renderContent()}
       </Card>
     </div>
   )
