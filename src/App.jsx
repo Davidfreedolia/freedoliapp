@@ -157,7 +157,14 @@ function AppContent() {
   const location = useLocation()
   const isProjectDetail = location.pathname.startsWith('/app/projects/') && location.pathname.split('/').length >= 4
 
-  const [billingState, setBillingState] = useState({ loading: true, allowed: true, org: null, gate: null, seatsUsed: 0 })
+  const [billingState, setBillingState] = useState({
+    loading: true,
+    allowed: true,
+    org: null,
+    gate: null,
+    seatsUsed: 0,
+    error: null,
+  })
   const isBillingRoute = location.pathname === '/app/billing/locked' || location.pathname === '/app/billing/over-seat'
 
   useEffect(() => {
@@ -165,21 +172,59 @@ function AppContent() {
     let cancelled = false
     async function run() {
       if (isDemoMode()) {
-        if (!cancelled) setBillingState({ loading: false, allowed: true, org: null, gate: null, seatsUsed: 0 })
+        if (!cancelled) {
+          setBillingState({
+            loading: false,
+            allowed: true,
+            org: null,
+            gate: null,
+            seatsUsed: 0,
+            error: null,
+          })
+        }
         return
       }
       const userId = await getCurrentUserId()
       if (!userId) {
-        if (!cancelled) setBillingState({ loading: false, allowed: true, org: null, gate: null, seatsUsed: 0 })
+        if (!cancelled) {
+          setBillingState({
+            loading: false,
+            allowed: true,
+            org: null,
+            gate: null,
+            seatsUsed: 0,
+            error: null,
+          })
+        }
         return
       }
       if (!activeOrgId) {
-        if (!cancelled) setBillingState({ loading: false, allowed: false, org: null, gate: 'locked', seatsUsed: 0 })
+        if (!cancelled) {
+          // Sense org activa: no bloquegem per billing; ho gestiona WorkspaceContext.
+          setBillingState({
+            loading: false,
+            allowed: true,
+            org: null,
+            gate: null,
+            seatsUsed: 0,
+            error: null,
+          })
+        }
         return
       }
       const { data: org, error: orgErr } = await supabase.from('orgs').select('*').eq('id', activeOrgId).single()
       if (orgErr || !org) {
-        if (!cancelled) setBillingState({ loading: false, allowed: false, org: null, gate: 'locked', seatsUsed: 0 })
+        if (!cancelled) {
+          // Error carregant billing/org: mostrar error lleu, però mai /billing/locked fals.
+          setBillingState({
+            loading: false,
+            allowed: true,
+            org: null,
+            gate: null,
+            seatsUsed: 0,
+            error: orgErr || new Error('Org not found'),
+          })
+        }
         return
       }
       const { count } = await supabase.from('org_memberships').select('*', { count: 'exact', head: true }).eq('org_id', activeOrgId)
@@ -195,7 +240,16 @@ function AppContent() {
       if (!billingOk) gate = 'locked'
       else if (overSeat) gate = 'over_seat'
       else allowed = true
-      if (!cancelled) setBillingState({ loading: false, allowed, org, gate, seatsUsed })
+      if (!cancelled) {
+        setBillingState({
+          loading: false,
+          allowed,
+          org,
+          gate,
+          seatsUsed,
+          error: null,
+        })
+      }
     }
     run()
     return () => { cancelled = true }
@@ -213,6 +267,25 @@ function AppContent() {
         backgroundColor: 'var(--page-bg)',
       }}>
         <div style={{ fontSize: 16, color: 'var(--text-secondary, #6b7280)' }}>{t(lang, 'common_loading')}</div>
+      </div>
+    )
+  }
+  if (billingState.error && !isBillingRoute) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'var(--page-bg)',
+      }}>
+        <div style={{ textAlign: 'center', color: 'var(--text-secondary, #6b7280)', maxWidth: 480 }}>
+          <p style={{ marginBottom: 12 }}>Error carregant l'estat de billing.</p>
+          <p style={{ marginBottom: 20, fontSize: 14 }}>{billingState.error.message || String(billingState.error)}</p>
+          <button type="button" onClick={() => window.location.reload()}>
+            Reintentar
+          </button>
+        </div>
       </div>
     )
   }
