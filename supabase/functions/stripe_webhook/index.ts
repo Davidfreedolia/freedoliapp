@@ -76,10 +76,15 @@ Deno.serve(async (req: Request) => {
     return new Response("Method not allowed", { status: 405 });
   }
 
+  if (!STRIPE_WEBHOOK_SECRET) {
+    console.error("STRIPE_WEBHOOK_SECRET not set");
+    return new Response("Webhook not configured", { status: 501 });
+  }
+
   const rawBody = await req.text();
   const sig = req.headers.get("stripe-signature");
   if (!sig) {
-    return new Response("Missing Stripe-Signature", { status: 400 });
+    return new Response("Missing Stripe-Signature", { status: 401 });
   }
 
   let event: Stripe.Event;
@@ -87,7 +92,7 @@ Deno.serve(async (req: Request) => {
     event = stripe.webhooks.constructEvent(rawBody, sig, STRIPE_WEBHOOK_SECRET);
   } catch (err) {
     console.error("Webhook signature verification failed", err);
-    return new Response("Webhook signature verification failed", { status: 400 });
+    return new Response("Webhook signature verification failed", { status: 401 });
   }
 
   console.log(event.type);

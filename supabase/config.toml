@@ -1,0 +1,7 @@
+# Supabase project config (used by CLI for link, db, functions).
+# See https://supabase.com/docs/guides/functions/function-configuration
+
+# Stripe webhook: no JWT (Stripe does not send Authorization header).
+# Security: validated via Stripe-Signature + STRIPE_WEBHOOK_SECRET in function code.
+[functions.stripe_webhook]
+verify_jwt = false
