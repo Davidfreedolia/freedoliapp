@@ -25,7 +25,7 @@ export function useOrgBilling(orgId) {
       try {
         const { data, error } = await supabase
           .from('org_billing')
-          .select('plan, status, trial_ends_at, current_period_end_at')
+          .select('plan, status, trial_ends_at, current_period_end_at, stripe_customer_id')
           .eq('org_id', orgId)
           .maybeSingle()
 

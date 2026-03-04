@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, Navigate } from 'react-router-dom'
 import { useWorkspace } from '../contexts/WorkspaceContext'
 import { useLang } from '../i18n/useLang'
 import { t } from '../i18n/t'
 import { supabase } from '../lib/supabase'
 import { createCheckoutSession, createPortalSession } from '../lib/billingApi'
 import { showToast } from '../components/Toast'
+import { useOrgBilling } from '../hooks/useOrgBilling'
 
 export default function BillingLocked() {
   const location = useLocation()
@@ -15,6 +16,8 @@ export default function BillingLocked() {
   const [org, setOrg] = useState(location.state?.org ?? null)
   const [loading, setLoading] = useState(!location.state?.org)
   const [actionLoading, setActionLoading] = useState(false)
+
+  const { billing, loading: billingLoading } = useOrgBilling(activeOrgId || null)
 
   const isOwnerAdmin = memberships.some(
     (m) => m.org_id === activeOrgId && (m.role === 'owner' || m.role === 'admin')
@@ -59,16 +62,36 @@ export default function BillingLocked() {
     }
   }
 
-  const status = org?.billing_status ?? 'inactive'
-  const hasCustomer = !!org?.stripe_customer_id
+  const status = billing?.status ?? 'inactive'
+  const hasCustomer = !!billing?.stripe_customer_id
   const statusLabel = status === 'past_due' ? t(lang, 'billingLocked_statusPastDue') : status === 'canceled' ? t(lang, 'billingLocked_statusCanceled') : t(lang, 'billingLocked_statusInactive')
 
-  if (loading) {
+  if (loading || billingLoading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--page-bg)' }}>
         <span style={{ color: 'var(--text-secondary)' }}>{t(lang, 'common_loading')}</span>
       </div>
     )
+  }
+
+  // Si billing està OK (active/trial vigent) o no tenim info de billing, no mostrem pantalla locked.
+  if (!billing) {
+    return <Navigate to="/app" replace />
+  }
+
+  const now = new Date()
+  const trialEndsAt = billing.trial_ends_at ? new Date(billing.trial_ends_at) : null
+  const billingOk =
+    billing.status === 'active' ||
+    (billing.status === 'trialing' && trialEndsAt && trialEndsAt > now)
+
+  const locked =
+    billing.status === 'past_due' ||
+    billing.status === 'canceled' ||
+    (billing.status === 'trialing' && trialEndsAt && trialEndsAt <= now)
+
+  if (billingOk || !locked) {
+    return <Navigate to="/app" replace />
   }
 
   if (!org) {
