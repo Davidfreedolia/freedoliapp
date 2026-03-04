@@ -104,6 +104,7 @@ export default function ActivationWizard() {
     const spapi = params.get('spapi')
     const message = params.get('message')
     if (spapi === 'success') {
+      sessionStorage.removeItem(ACTIVATION_AMAZON_PATH_KEY)
       showToast('Connexió Amazon SP-API connectada', 'success')
       loadSpapiConnections()
       window.history.replaceState({}, '', window.location.pathname)

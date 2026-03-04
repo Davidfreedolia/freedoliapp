@@ -109,17 +109,24 @@ function OnboardingGate({ children }) {
   }
 
   const path = location.pathname
-
-  if (requiresOnboarding && path !== '/activation') {
-    return <Navigate to="/activation" replace />
-  }
+  const hasAmazonActivationFlag =
+    typeof sessionStorage !== 'undefined' && sessionStorage.getItem('activation_amazon_path')
 
   if (!requiresOnboarding && path === '/activation') {
     return <Navigate to="/app" replace />
   }
 
-  if (path.startsWith('/app') && typeof sessionStorage !== 'undefined' && sessionStorage.getItem('activation_amazon_path')) {
-    return <Navigate to="/activation" replace />
+  // Encara cal onboarding: redirigir a /activation només quan entri a /app amb el flag d'Amazon
+  if (requiresOnboarding) {
+    if (path === '/activation') {
+      return children
+    }
+    if (path.startsWith('/app') && hasAmazonActivationFlag) {
+      return <Navigate to="/activation" replace />
+    }
+    if (path !== '/activation') {
+      return <Navigate to="/activation" replace />
+    }
   }
 
   return children
