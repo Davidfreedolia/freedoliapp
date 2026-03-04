@@ -15,7 +15,8 @@
       "save": "Guardar",
       "cancel": "Cancel·lar",
       "continue": "Continuar",
-      "upgrade": "Actualitzar pla"
+      "upgrade": "Actualitzar pla",
+      "skipForNow": "Ometre ara"
     }
   },
   "billing": {
@@ -23,6 +24,15 @@
       "trialEnded": "El trial ha acabat — actualitzeu el pla per continuar creant places/connexions i desbloquejar funcionalitats Pro.",
       "pastDue": "Problema de pagament — actualitzeu la facturació per restaurar les accions Pro.",
       "upgradeCta": "Actualitzar pla"
+    }
+  },
+  "activation": {
+    "moreTools": {
+      "title": "Connecta més eines (opcional)",
+      "subtitle": "Pots connectar més eines més endavant des de Configuració.",
+      "drive": "Google Drive (properament)",
+      "outlook": "Outlook / Office 365 (properament)",
+      "slack": "Notificacions Slack (properament)"
     }
   },
   "sidebar": {

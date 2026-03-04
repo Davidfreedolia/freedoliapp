@@ -15,7 +15,8 @@
       "save": "Save",
       "cancel": "Cancel",
       "continue": "Continue",
-      "upgrade": "Upgrade"
+      "upgrade": "Upgrade",
+      "skipForNow": "Skip for now"
     }
   },
   "billing": {
@@ -23,6 +24,15 @@
       "trialEnded": "Trial ended — upgrade to keep creating seats/connections and unlock Pro features.",
       "pastDue": "Payment issue — update billing to restore Pro actions.",
       "upgradeCta": "Upgrade"
+    }
+  },
+  "activation": {
+    "moreTools": {
+      "title": "Connect more tools (optional)",
+      "subtitle": "You can connect more tools later from Settings.",
+      "drive": "Google Drive (coming soon)",
+      "outlook": "Outlook / Office 365 (coming soon)",
+      "slack": "Slack notifications (coming soon)"
     }
   },
   "sidebar": {

@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useWorkspace } from '../contexts/WorkspaceContext'
 import { supabase, getCurrentUserId } from '../lib/supabase'
 import { showToast } from '../components/Toast'
+import Button from '../components/ui/Button'
+import useT from '../hooks/useT'
 
 const STEP_CONFIRM_ORG = 1
 const STEP_CHOOSE_PATH = 2
@@ -10,6 +12,7 @@ const STEP_SETUP_DONE = 3
 const STEP_AMAZON_CONNECT = 4
 const STEP_AMAZON_IMPORT = 5
 const STEP_AMAZON_SNAPSHOT = 6
+const STEP_MORE_TOOLS = 7
 
 const SPAPI_STATE_KEY = 'spapi_oauth_state'
 const SPAPI_REDIRECT_URI_KEY = 'spapi_oauth_redirect_uri'
@@ -31,6 +34,9 @@ export default function ActivationWizard() {
   const [importDone, setImportDone] = useState(false)
   const [snapshot, setSnapshot] = useState(null) // { revenue, fees, net, cashImpact, hasData }
   const [snapshotLoading, setSnapshotLoading] = useState(false)
+  const [activationPath, setActivationPath] = useState('setup')
+
+  const t = useT()
 
   const loadSpapiConnections = useCallback(async () => {
     try {
@@ -114,10 +120,14 @@ export default function ActivationWizard() {
     }
   }, [loadSpapiConnections])
 
-  const handleChooseSetup = () => setStep(STEP_SETUP_DONE)
+  const handleChooseSetup = () => {
+    setActivationPath('setup')
+    setStep(STEP_SETUP_DONE)
+  }
 
   const handleChooseAmazon = () => {
     sessionStorage.setItem(ACTIVATION_AMAZON_PATH_KEY, '1')
+    setActivationPath('amazon')
     setStep(STEP_AMAZON_CONNECT)
   }
 
@@ -472,7 +482,7 @@ export default function ActivationWizard() {
                 <button
                   type="button"
                   style={{ ...buttonStyle, backgroundColor: 'var(--primary, #2563eb)', color: '#fff' }}
-                  onClick={() => handleEnterDashboard('amazon')}
+                  onClick={() => setStep(STEP_MORE_TOOLS)}
                   disabled={submitLoading}
                 >
                   {submitLoading ? 'Saving...' : 'Enter Dashboard'}
@@ -495,11 +505,61 @@ export default function ActivationWizard() {
             <button
               type="button"
               style={{ ...buttonStyle, backgroundColor: 'var(--primary, #2563eb)', color: '#fff' }}
-              onClick={() => handleEnterDashboard('setup')}
+              onClick={() => setStep(STEP_MORE_TOOLS)}
               disabled={submitLoading}
             >
               {submitLoading ? 'Saving...' : 'Enter Dashboard'}
             </button>
+          </>
+        )}
+
+        {step === STEP_MORE_TOOLS && (
+          <>
+            <h2 style={{ margin: '0 0 8px', fontSize: 20 }}>{t('activation.moreTools.title')}</h2>
+            <p style={{ margin: '0 0 20px', color: 'var(--text-secondary, #6b7280)', fontSize: 14 }}>
+              {t('activation.moreTools.subtitle')}
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 20 }}>
+              <div style={{ padding: 12, borderRadius: 8, border: '1px solid var(--border-1)', background: 'var(--surface-bg-2)' }}>
+                <div style={{ fontWeight: 600, marginBottom: 6 }}>Google Drive</div>
+                <span style={{ fontSize: 11, padding: '2px 6px', borderRadius: 999, background: 'var(--surface-bg)', border: '1px solid var(--border-1)', color: 'var(--text-secondary)' }}>
+                  Coming soon
+                </span>
+              </div>
+              <div style={{ padding: 12, borderRadius: 8, border: '1px solid var(--border-1)', background: 'var(--surface-bg-2)' }}>
+                <div style={{ fontWeight: 600, marginBottom: 6 }}>Outlook / Office 365</div>
+                <span style={{ fontSize: 11, padding: '2px 6px', borderRadius: 999, background: 'var(--surface-bg)', border: '1px solid var(--border-1)', color: 'var(--text-secondary)' }}>
+                  Coming soon
+                </span>
+              </div>
+              <div style={{ padding: 12, borderRadius: 8, border: '1px solid var(--border-1)', background: 'var(--surface-bg-2)' }}>
+                <div style={{ fontWeight: 600, marginBottom: 6 }}>Slack</div>
+                <span style={{ fontSize: 11, padding: '2px 6px', borderRadius: 999, background: 'var(--surface-bg)', border: '1px solid var(--border-1)', color: 'var(--text-secondary)' }}>
+                  Coming soon
+                </span>
+              </div>
+            </div>
+            {submitError && (
+              <p style={{ margin: '0 0 12px', color: 'var(--error, #dc2626)', fontSize: 14 }}>{submitError}</p>
+            )}
+            <div style={{ display: 'flex', gap: 12, marginTop: 4 }}>
+              <Button
+                variant="primary"
+                size="md"
+                disabled={submitLoading}
+                onClick={() => handleEnterDashboard(activationPath)}
+              >
+                {submitLoading ? 'Saving...' : 'Enter Dashboard'}
+              </Button>
+              <Button
+                variant="secondary"
+                size="md"
+                disabled={submitLoading}
+                onClick={() => handleEnterDashboard(activationPath)}
+              >
+                {t('common.buttons.skipForNow')}
+              </Button>
+            </div>
           </>
         )}
       </div>
