@@ -576,6 +576,72 @@
     },
     "badges": {
       "asin": "ASIN"
+    },
+    "tabs": {
+      "quotes": "Presupuestos",
+      "samples": "Muestras",
+      "po": "Órdenes de compra",
+      "shipment": "Envío",
+      "ledger": "Ledger",
+      "comingSoon": "Las secciones detalladas llegarán pronto."
+    },
+    "phase": {
+      "idea": {
+        "title": "Idea y research",
+        "items": [
+          "Aclara la idea de producto y el cliente objetivo.",
+          "Recoge 3–5 productos de referencia en Amazon.",
+          "Anota los diferenciales clave que quieres probar."
+        ]
+      },
+      "viability": {
+        "title": "Viabilidad",
+        "items": [
+          "Estima el coste unitario puesto en almacén.",
+          "Revisa comisiones y márgenes esperados en Amazon.",
+          "Valida MOQ mínimo vs. presupuesto disponible."
+        ]
+      },
+      "quotes": {
+        "title": "Presupuestos proveedores",
+        "items": [
+          "Pide presupuesto a al menos 3 proveedores.",
+          "Compara plazos, MOQs y condiciones de pago.",
+          "Selecciona las 1–2 mejores opciones."
+        ]
+      },
+      "samples": {
+        "title": "Muestras",
+        "items": [
+          "Pide muestras a los proveedores finalistas.",
+          "Revisa calidad, packaging y posibles defectos.",
+          "Decide con qué proveedor quieres trabajar."
+        ]
+      },
+      "po": {
+        "title": "Orden de compra",
+        "items": [
+          "Confirma especificaciones y packaging finales.",
+          "Negocia precio final y condiciones de pago.",
+          "Envía y confirma la orden de compra (PO)."
+        ]
+      },
+      "shipment": {
+        "title": "Envío",
+        "items": [
+          "Define Incoterms y método de envío.",
+          "Planifica etiquetas y empaquetado de cajas.",
+          "Reserva el transporte y comparte fechas con el proveedor."
+        ]
+      },
+      "amazon": {
+        "title": "Enviar a Amazon / lanzar",
+        "items": [
+          "Crea o actualiza el listing en Amazon.",
+          "Crea el envío inbound en Seller Central.",
+          "Haz seguimiento de recepción y primeras ventas."
+        ]
+      }
     }
   }
 }

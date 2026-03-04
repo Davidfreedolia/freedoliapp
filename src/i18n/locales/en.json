@@ -571,6 +571,72 @@
     },
     "badges": {
       "asin": "ASIN"
+    },
+    "tabs": {
+      "quotes": "Quotes",
+      "samples": "Samples",
+      "po": "Purchase orders",
+      "shipment": "Shipment",
+      "ledger": "Ledger",
+      "comingSoon": "Detailed sections are coming soon."
+    },
+    "phase": {
+      "idea": {
+        "title": "Idea & research",
+        "items": [
+          "Clarify the product idea and target customer.",
+          "Collect 3–5 reference products on Amazon.",
+          "List key differentiators you want to test."
+        ]
+      },
+      "viability": {
+        "title": "Viability",
+        "items": [
+          "Estimate landed cost per unit.",
+          "Check expected Amazon fees and margins.",
+          "Validate minimum order quantity vs. budget."
+        ]
+      },
+      "quotes": {
+        "title": "Supplier quotes",
+        "items": [
+          "Request quotes from at least 3 suppliers.",
+          "Compare lead times, MOQs and payment terms.",
+          "Shortlist the 1–2 best options."
+        ]
+      },
+      "samples": {
+        "title": "Samples",
+        "items": [
+          "Order samples from shortlisted suppliers.",
+          "Review quality, packaging and defects.",
+          "Decide which supplier you want to go with."
+        ]
+      },
+      "po": {
+        "title": "Purchase order",
+        "items": [
+          "Confirm final specs and packaging.",
+          "Negotiate final price and payment terms.",
+          "Send and confirm the purchase order (PO)."
+        ]
+      },
+      "shipment": {
+        "title": "Shipment",
+        "items": [
+          "Choose Incoterms and shipping method.",
+          "Plan labels and carton packing.",
+          "Book freight and share dates with supplier."
+        ]
+      },
+      "amazon": {
+        "title": "Send to Amazon / go live",
+        "items": [
+          "Create or update the Amazon listing.",
+          "Create the inbound shipment in Seller Central.",
+          "Monitor check-in and first sales."
+        ]
+      }
     }
   }
 }

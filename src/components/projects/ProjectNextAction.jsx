@@ -6,7 +6,7 @@ import useT from '../../hooks/useT'
 /**
  * F8.3.3 — CTA de propera acció per a un projecte segons fase.
  */
-export default function ProjectNextAction({ project }) {
+export default function ProjectNextAction({ project, size = 'sm' }) {
   const t = useT()
   const navigate = useNavigate()
 
@@ -38,7 +38,7 @@ export default function ProjectNextAction({ project }) {
   return (
     <Button
       variant="primary"
-      size="sm"
+      size={size}
       onClick={(e) => {
         e.stopPropagation()
         navigate(href)

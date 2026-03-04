@@ -2532,8 +2532,20 @@ ${t}
   return (
     <div style={styles.container} className="project-detail-page">
       <PageGutter>
+        <div className="project-detail-shell">
+          <ProjectHeader project={project} phase={phaseId} marketplaceTags={marketplaceTags} />
+          <div className="project-detail-grid">
+            <div className="project-detail-left">
+              <ProjectPhaseChecklist phase={phaseId} />
+            </div>
+            <div className="project-detail-right">
+              <ProjectTabs />
+            </div>
+          </div>
+        </div>
+
         <div style={{ ...styles.content, padding: 0 }} className="project-detail-page__content">
-        {/* P-D1 — Project Header */}
+        {/* P-D1 — Project Header (legacy layout below new shell) */}
         <div className="project-header project-header--canon ui-card" style={{
           display: 'flex',
           alignItems: 'stretch',

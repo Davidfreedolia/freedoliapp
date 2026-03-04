@@ -584,6 +584,72 @@
     },
     "badges": {
       "asin": "ASIN"
+    },
+    "tabs": {
+      "quotes": "Pressupostos",
+      "samples": "Mostres",
+      "po": "Comandes de compra",
+      "shipment": "Enviament",
+      "ledger": "Ledger",
+      "comingSoon": "Les seccions detallades arribaran aviat."
+    },
+    "phase": {
+      "idea": {
+        "title": "Idea i recerca",
+        "items": [
+          "Aclareix la idea de producte i el client objectiu.",
+          "Recull 3–5 productes de referència a Amazon.",
+          "Anota els diferencials clau que vols provar."
+        ]
+      },
+      "viability": {
+        "title": "Viabilitat",
+        "items": [
+          "Estima el cost unitari posat a magatzem.",
+          "Revisa comissions i marges esperats a Amazon.",
+          "Valida MOQ mínim vs. pressupost disponible."
+        ]
+      },
+      "quotes": {
+        "title": "Pressupostos proveïdors",
+        "items": [
+          "Demana pressupost a mínim 3 proveïdors.",
+          "Compara terminis, MOQs i condicions de pagament.",
+          "Selecciona les 1–2 millors opcions."
+        ]
+      },
+      "samples": {
+        "title": "Mostres",
+        "items": [
+          "Demana mostres als proveïdors finalistes.",
+          "Revisa qualitat, packaging i possibles defectes.",
+          "Decideix amb quin proveïdor vols treballar."
+        ]
+      },
+      "po": {
+        "title": "Comanda de compra",
+        "items": [
+          "Confirma especificacions i packaging finals.",
+          "Negocia preu final i condicions de pagament.",
+          "Envia i confirma la comanda de compra (PO)."
+        ]
+      },
+      "shipment": {
+        "title": "Enviament",
+        "items": [
+          "Defineix Incoterms i mètode d'enviament.",
+          "Planifica etiquetes i empaquetat de cartons.",
+          "Reserva el transport i comparteix dates amb el proveïdor."
+        ]
+      },
+      "amazon": {
+        "title": "Enviar a Amazon / llançar",
+        "items": [
+          "Crea o actualitza el listing a Amazon.",
+          "Crea l'enviament inbound a Seller Central.",
+          "Fes seguiment de recepció i primeres vendes."
+        ]
+      }
     }
   }
 }
