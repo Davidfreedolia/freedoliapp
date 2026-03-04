@@ -1,4 +1,7 @@
 /**
+ * DEPRECATED (D8.3.1) — wrapper temporal per a BillingLocked/BillingOverSeat.
+ * NO utilitzar en codi nou; fer servir i18next (`useTranslation`) i els JSON de `locales/`.
+ *
  * PAS 5 — t(lang, key, vars?). Fallback to en; missing key returns key; simple {var} interpolation.
  */
 import { en, ca, es } from './messages.js'

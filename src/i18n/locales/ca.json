@@ -10,7 +10,20 @@
     "loading": "Carregant...",
     "error": "Error",
     "success": "Èxit",
-    "optional": "Opcional"
+    "optional": "Opcional",
+    "buttons": {
+      "save": "Guardar",
+      "cancel": "Cancel·lar",
+      "continue": "Continuar",
+      "upgrade": "Actualitzar pla"
+    }
+  },
+  "billing": {
+    "banner": {
+      "trialEnded": "El trial ha acabat — actualitzeu el pla per continuar creant places/connexions i desbloquejar funcionalitats Pro.",
+      "pastDue": "Problema de pagament — actualitzeu la facturació per restaurar les accions Pro.",
+      "upgradeCta": "Actualitzar pla"
+    }
   },
   "sidebar": {
     "dashboard": "Dashboard",
@@ -149,6 +162,16 @@
   },
   "demo": {
     "banner": "Les dades són simulades"
+  },
+  "billing": {
+    "banner": {
+      "trialEnded": "S'ha acabat el trial — actualitza per seguir creant places/connexions i desbloquejar funcionalitats Pro.",
+      "pastDue": "Hi ha un problema de pagament — actualitza la facturació per restaurar les accions Pro.",
+      "upgradeCta": "Actualitzar pla"
+    }
+  },
+  "activation": {
+    "title": "Activation wizard"
   },
   "help": {
     "profitability": {

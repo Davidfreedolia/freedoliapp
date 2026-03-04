@@ -10,7 +10,20 @@
     "loading": "Cargando...",
     "error": "Error",
     "success": "Éxito",
-    "optional": "Opcional"
+    "optional": "Opcional",
+    "buttons": {
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "continue": "Continuar",
+      "upgrade": "Actualizar plan"
+    }
+  },
+  "billing": {
+    "banner": {
+      "trialEnded": "El trial ha terminado — actualiza el plan para seguir creando plazas/conexiones y desbloquear funciones Pro.",
+      "pastDue": "Problema de pago — actualiza la facturación para restaurar las acciones Pro.",
+      "upgradeCta": "Actualizar plan"
+    }
   },
   "sidebar": {
     "dashboard": "Dashboard",

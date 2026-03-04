@@ -1,4 +1,7 @@
 /**
+ * DEPRECATED (D8.3.1) — mantenim per compatibilitat amb BillingLocked/BillingOverSeat.
+ * NO utilitzar en codi nou; fer servir i18next (`src/i18n/index.js` + `useTranslation`).
+ *
  * PAS 5 billing UI — messages (en, ca, es). All keys used by BillingLocked + BillingOverSeat.
  */
 export const en = {

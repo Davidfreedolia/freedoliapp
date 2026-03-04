@@ -1,0 +1,48 @@
+/* D8.3.1 — UI tokens (canonical)
+   - Semantic colors
+   - Typography + spacing
+   - Radius, shadows
+   - Button sizing
+   NOTE: mapped over existing palette from index.css to avoid breaking current UI. */
+
+:root {
+  /* Semantic colors */
+  --color-primary: var(--brand-1);
+  --color-danger: var(--danger-1);
+  --color-warning: var(--warning-1);
+  --color-success: var(--success-1);
+
+  --text-1: var(--c-text-900);
+  --text-2: var(--c-text-600);
+
+  --bg: var(--bg-app);
+  --surface: var(--surface-bg);
+  --border: var(--border-1);
+
+  /* Radius */
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 12px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
+  --shadow-md: 0 4px 10px rgba(15, 23, 42, 0.12);
+
+  /* Spacing scale */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+
+  /* Buttons */
+  --btn-font: 14px;
+  --btn-h-sm: 28px;
+  --btn-h-md: 36px;
+  --btn-h-lg: 42px;
+  --btn-px-sm: 10px;
+  --btn-px-md: 14px;
+  --btn-px-lg: 18px;
+}
+

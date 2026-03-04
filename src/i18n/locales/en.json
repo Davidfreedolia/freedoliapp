@@ -10,7 +10,20 @@
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
-    "optional": "Optional"
+    "optional": "Optional",
+    "buttons": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "continue": "Continue",
+      "upgrade": "Upgrade"
+    }
+  },
+  "billing": {
+    "banner": {
+      "trialEnded": "Trial ended — upgrade to keep creating seats/connections and unlock Pro features.",
+      "pastDue": "Payment issue — update billing to restore Pro actions.",
+      "upgradeCta": "Upgrade"
+    }
   },
   "sidebar": {
     "dashboard": "Dashboard",
@@ -134,6 +147,16 @@
   },
   "demo": {
     "banner": "Data is simulated"
+  },
+  "billing": {
+    "banner": {
+      "trialEnded": "Trial ended — upgrade to keep creating seats/connections and unlock Pro features.",
+      "pastDue": "Payment issue — update billing to restore Pro actions.",
+      "upgradeCta": "Upgrade"
+    }
+  },
+  "activation": {
+    "title": "Activation wizard"
   },
   "help": {
     "profitability": {
