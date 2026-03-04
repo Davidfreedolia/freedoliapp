@@ -23,6 +23,59 @@
       "details": "Detalls"
     }
   },
+  "header": {
+    "cta": {
+      "signin": "Iniciar sessió",
+      "start": "Començar gratis"
+    }
+  },
+  "landing": {
+    "hero": {
+      "title": "Connecta Amazon. Entén el teu benefici real.",
+      "subtitle": "Importa settlements, segueix costos i marges i gestiona el pipeline de productes en un sol lloc.",
+      "ctaPrimary": "Començar",
+      "ctaSecondary": "Iniciar sessió"
+    },
+    "features": {
+      "analytics": {
+        "title": "Analítica Amazon",
+        "desc": "Importa dades de settlements i veu ingressos, comissions i net per producte."
+      },
+      "pipeline": {
+        "title": "Pipeline de productes",
+        "desc": "De la viabilitat al PO, mostres i enviament — un flux clar."
+      },
+      "finance": {
+        "title": "Claredat financera",
+        "desc": "Despeses, ingressos i llibre major per projecte per saber el marge real."
+      }
+    },
+    "footer": {
+      "product": "Producte",
+      "company": "Empresa",
+      "support": "Suport",
+      "legal": "Legal",
+      "features": "Funcionalitats",
+      "pricing": "Preus",
+      "about": "Sobre nosaltres",
+      "help": "Ajuda",
+      "privacy": "Privacitat",
+      "terms": "Termes"
+    }
+  },
+  "login": {
+    "title": "Freedoliapp",
+    "subtitle": "Inicia sessió per continuar",
+    "button": "Iniciar sessió",
+    "emailLabel": "Correu electrònic",
+    "passwordLabel": "Contrasenya",
+    "forgotPassword": "Has oblidat la contrasenya?",
+    "signupLink": "Crear compte",
+    "magicLink": "Enviar enllaç màgic",
+    "magicLinkSent": "Enllaç d'inici de sessió enviat!",
+    "magicLinkSubtext": "Revisa el correu i clica l'enllaç per iniciar sessió.",
+    "back": "Tornar"
+  },
   "billing": {
     "banner": {
       "trialEnded": "El trial ha acabat — actualitzeu el pla per continuar creant places/connexions i desbloquejar funcionalitats Pro.",

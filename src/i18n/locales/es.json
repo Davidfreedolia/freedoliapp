@@ -23,6 +23,59 @@
       "details": "Detalles"
     }
   },
+  "header": {
+    "cta": {
+      "signin": "Iniciar sesión",
+      "start": "Empezar gratis"
+    }
+  },
+  "landing": {
+    "hero": {
+      "title": "Conecta Amazon. Entiende tu beneficio real.",
+      "subtitle": "Importa settlements, sigue costes y márgenes y gestiona el pipeline de productos en un solo lugar.",
+      "ctaPrimary": "Empezar",
+      "ctaSecondary": "Iniciar sesión"
+    },
+    "features": {
+      "analytics": {
+        "title": "Analítica Amazon",
+        "desc": "Importa datos de settlements y ve ingresos, comisiones y neto por producto."
+      },
+      "pipeline": {
+        "title": "Pipeline de productos",
+        "desc": "De la viabilidad al PO, muestras y envío — un flujo claro."
+      },
+      "finance": {
+        "title": "Claridad financiera",
+        "desc": "Gastos, ingresos y libro mayor por proyecto para saber el margen real."
+      }
+    },
+    "footer": {
+      "product": "Producto",
+      "company": "Empresa",
+      "support": "Soporte",
+      "legal": "Legal",
+      "features": "Funcionalidades",
+      "pricing": "Precios",
+      "about": "Sobre nosotros",
+      "help": "Ayuda",
+      "privacy": "Privacidad",
+      "terms": "Términos"
+    }
+  },
+  "login": {
+    "title": "Freedoliapp",
+    "subtitle": "Inicia sesión para continuar",
+    "button": "Iniciar sesión",
+    "emailLabel": "Correo electrónico",
+    "passwordLabel": "Contraseña",
+    "forgotPassword": "¿Olvidaste la contraseña?",
+    "signupLink": "Crear cuenta",
+    "magicLink": "Enviar enlace mágico",
+    "magicLinkSent": "Enlace de inicio de sesión enviado!",
+    "magicLinkSubtext": "Revisa tu correo y haz clic en el enlace para iniciar sesión.",
+    "back": "Volver"
+  },
   "billing": {
     "banner": {
       "trialEnded": "El trial ha terminado — actualiza el plan para seguir creando plazas/conexiones y desbloquear funciones Pro.",

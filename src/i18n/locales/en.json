@@ -23,6 +23,59 @@
       "details": "Details"
     }
   },
+  "header": {
+    "cta": {
+      "signin": "Log in",
+      "start": "Start free"
+    }
+  },
+  "landing": {
+    "hero": {
+      "title": "Connect Amazon. Understand your real profit.",
+      "subtitle": "Import settlements, track costs and margins, and run your product pipeline in one place.",
+      "ctaPrimary": "Get started",
+      "ctaSecondary": "Log in"
+    },
+    "features": {
+      "analytics": {
+        "title": "Amazon analytics",
+        "desc": "Import settlement data and see real revenue, fees and net by product."
+      },
+      "pipeline": {
+        "title": "Product pipeline",
+        "desc": "From viability to PO, samples and shipment — one clear workflow."
+      },
+      "finance": {
+        "title": "Financial clarity",
+        "desc": "Expenses, incomes and ledger per project so you know your true margin."
+      }
+    },
+    "footer": {
+      "product": "Product",
+      "company": "Company",
+      "support": "Support",
+      "legal": "Legal",
+      "features": "Features",
+      "pricing": "Pricing",
+      "about": "About",
+      "help": "Help",
+      "privacy": "Privacy",
+      "terms": "Terms"
+    }
+  },
+  "login": {
+    "title": "Freedoliapp",
+    "subtitle": "Sign in to continue",
+    "button": "Sign in",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "forgotPassword": "Forgot password?",
+    "signupLink": "Create account",
+    "magicLink": "Send magic link",
+    "magicLinkSent": "Sign-in link sent!",
+    "magicLinkSubtext": "Check your email and click the link to sign in.",
+    "back": "Back"
+  },
   "billing": {
     "banner": {
       "trialEnded": "Trial ended — upgrade to keep creating seats/connections and unlock Pro features.",
