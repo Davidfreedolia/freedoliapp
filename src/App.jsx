@@ -230,14 +230,25 @@ function AppContent() {
       const { count } = await supabase.from('org_memberships').select('*', { count: 'exact', head: true }).eq('org_id', activeOrgId)
       const seatsUsed = count ?? 0
       const seatLimit = org.seat_limit ?? 1
+
       const status = org.billing_status
       const trialEndsAt = org.trial_ends_at ? new Date(org.trial_ends_at) : null
       const now = new Date()
-      const billingOk = status === 'active' || (status === 'trialing' && trialEndsAt && trialEndsAt > now) || (status == null)
+
+      const billingOk =
+        status === 'active' ||
+        (status === 'trialing' && trialEndsAt && trialEndsAt > now)
+
+      const locked =
+        status === 'past_due' ||
+        status === 'canceled' ||
+        (status === 'trialing' && trialEndsAt && trialEndsAt <= now)
+
       const overSeat = seatsUsed > seatLimit
+
       let allowed = false
       let gate = null
-      if (!billingOk) gate = 'locked'
+      if (locked) gate = 'locked'
       else if (overSeat) gate = 'over_seat'
       else allowed = true
       if (!cancelled) {
