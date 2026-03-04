@@ -4,7 +4,7 @@ import { useWorkspace } from '../contexts/WorkspaceContext'
 import { useLang } from '../i18n/useLang'
 import { t } from '../i18n/t'
 import { supabase } from '../lib/supabase'
-import { createPortalSession } from '../lib/billingApi'
+import { createStripePortalSession } from '../lib/billingApi'
 import { showToast } from '../components/Toast'
 
 export default function BillingOverSeat() {
@@ -48,7 +48,7 @@ export default function BillingOverSeat() {
     if (!org?.id || actionLoading) return
     setActionLoading(true)
     try {
-      const { url } = await createPortalSession(org.id)
+      const { url } = await createStripePortalSession(org.id)
       if (url) window.location.href = url
       else showToast(t(lang, 'billing_toastPortalUnavailable'), 'error')
     } catch (err) {

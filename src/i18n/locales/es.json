@@ -672,7 +672,29 @@
       "po": "Órdenes de compra",
       "shipment": "Envío",
       "ledger": "Ledger",
+      "economics": "Economía",
       "comingSoon": "Las secciones detalladas llegarán pronto."
+    },
+    "economics": {
+      "incompleteCallout": "Datos incompletos: añade receipts / corrige el mapping / recomputa.",
+      "coverage": "Cobertura",
+      "profitIncomplete": "Incompleto",
+      "profitComplete": "Completo",
+      "recomputeCta": "Recomputar profit",
+      "netRevenue": "Ingresos netos",
+      "contributionMargin": "Margen de contribución",
+      "marginPct": "Margen %",
+      "breakdown": "Desglose",
+      "amazonFees": "Comisiones Amazon",
+      "refunds": "Reembolsos",
+      "ads": "Anuncios",
+      "freight": "Flete",
+      "duties": "Impuestos",
+      "otherCosts": "Otros costes",
+      "cogs": "COGS",
+      "seriesTitleMargin": "Margen de contribución por día",
+      "seriesTitleRevenueFees": "Ingresos netos y comisiones Amazon",
+      "notEnoughData": "No hay suficientes datos para mostrar el gráfico"
     },
     "phase": {
       "idea": {

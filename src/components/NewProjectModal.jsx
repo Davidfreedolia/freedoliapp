@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { X, Loader, Hash, Tag, Link } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { createProject, updateProject, generateProjectCode } from '../lib/supabase'
+import { supabase, createProject, updateProject, generateProjectCode } from '../lib/supabase'
 import { logSuccess, logError } from '../lib/auditLog'
 import { handleError } from '../lib/errorHandling'
 import { showToast } from './Toast'
@@ -280,15 +280,15 @@ export default function NewProjectModal({ isOpen, onClose, onSuccess }) {
     const controller = new AbortController()
     const timer = window.setTimeout(async () => {
       try {
-        const res = await fetch(`/api/asin-enrich?asin=${asin}&market=es`, {
-          signal: controller.signal
+        const { data: resData, error: resError } = await supabase.functions.invoke('asin-enrich', {
+          body: { asin, market: 'es' }
         })
-        if (!res.ok) {
+        if (resError || !resData) {
           setEnrichError('No s’han pogut carregar dades (fallback)')
           setEnrichData({ title: '', short_description: '', thumb_url: '', product_url: '' })
           return
         }
-        const data = await res.json()
+        const data = resData
         setEnrichData({
           title: data?.title || '',
           short_description: data?.short_description || '',

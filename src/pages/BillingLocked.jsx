@@ -4,7 +4,7 @@ import { useWorkspace } from '../contexts/WorkspaceContext'
 import { useLang } from '../i18n/useLang'
 import { t } from '../i18n/t'
 import { supabase } from '../lib/supabase'
-import { createCheckoutSession, createPortalSession } from '../lib/billingApi'
+import { createStripeCheckoutSession, createStripePortalSession } from '../lib/billingApi'
 import { showToast } from '../components/Toast'
 import { useOrgBilling } from '../hooks/useOrgBilling'
 
@@ -38,7 +38,7 @@ export default function BillingLocked() {
     if (!org?.id || actionLoading) return
     setActionLoading(true)
     try {
-      const { url } = await createPortalSession(org.id)
+      const { url } = await createStripePortalSession(org.id)
       if (url) window.location.href = url
       else showToast(t(lang, 'billing_toastPortalUnavailable'), 'error')
     } catch (err) {
@@ -52,8 +52,8 @@ export default function BillingLocked() {
     if (!org?.id || actionLoading) return
     setActionLoading(true)
     try {
-      const { url } = await createCheckoutSession(org.id)
-      if (url) window.location.href = url
+      const data = await createStripeCheckoutSession(org.id, 'growth')
+      if (data?.url) window.location.href = data.url
       else showToast(t(lang, 'billing_toastCheckoutUnavailable'), 'error')
     } catch (err) {
       showToast(err?.message || t(lang, 'billing_toastCheckoutUnavailable'), 'error')

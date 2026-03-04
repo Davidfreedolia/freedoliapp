@@ -7,8 +7,9 @@ import ProjectSamplesSection from './sections/ProjectSamplesSection'
 import ProjectPOSection from './sections/ProjectPOSection'
 import ProjectShipmentSection from './sections/ProjectShipmentSection'
 import ProjectLedgerSection from './sections/ProjectLedgerSection'
+import ProjectEconomicsSection from './sections/ProjectEconomicsSection'
 
-const TABS = ['quotes', 'samples', 'po', 'shipment', 'ledger']
+const TABS = ['quotes', 'samples', 'po', 'shipment', 'ledger', 'economics']
 
 export default function ProjectTabs({ projectId, darkMode }) {
   const t = useT()
@@ -26,6 +27,8 @@ export default function ProjectTabs({ projectId, darkMode }) {
         return <ProjectShipmentSection projectId={projectId} />
       case 'ledger':
         return <ProjectLedgerSection projectId={projectId} />
+      case 'economics':
+        return <ProjectEconomicsSection projectId={projectId} />
       default:
         return null
     }

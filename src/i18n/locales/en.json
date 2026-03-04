@@ -667,7 +667,29 @@
       "po": "Purchase orders",
       "shipment": "Shipment",
       "ledger": "Ledger",
+      "economics": "Economics",
       "comingSoon": "Detailed sections are coming soon."
+    },
+    "economics": {
+      "incompleteCallout": "Data incomplete: add receipts / fix mapping / recompute.",
+      "coverage": "Coverage",
+      "profitIncomplete": "Incomplete",
+      "profitComplete": "Complete",
+      "recomputeCta": "Recompute profit",
+      "netRevenue": "Net revenue",
+      "contributionMargin": "Contribution margin",
+      "marginPct": "Margin %",
+      "breakdown": "Breakdown",
+      "amazonFees": "Amazon fees",
+      "refunds": "Refunds",
+      "ads": "Ads",
+      "freight": "Freight",
+      "duties": "Duties",
+      "otherCosts": "Other costs",
+      "cogs": "COGS",
+      "seriesTitleMargin": "Contribution margin by day",
+      "seriesTitleRevenueFees": "Net revenue & Amazon fees",
+      "notEnoughData": "Not enough data to show chart"
     },
     "phase": {
       "idea": {
