@@ -18,6 +18,11 @@ Last verified against: (run: `git rev-parse --short HEAD`) — 2025-02-17
 
 ## D0 — Executive & Vision
 - `docs/D0/D0__executive-vision__v1.0.md` — status: stable
+- `docs/D0_PRODUCT_STRATEGY_AND_ROADMAP.md` — product strategy, roadmap, F10 core, beta & feedback
+- `docs/USER_FEEDBACK.md` — user feedback log (beta and early users)
+
+## D10 — Product Core Architecture
+- `docs/D10_PRODUCT_CORE_ARCHITECTURE.md` — F10 Product Core (Product Brain, Profit Truth, Launch Pipeline, Portfolio Brain)
 
 ## D1 — Architecture Overview
 - `docs/D1/D1__architecture-overview__v1.0.md` — status: stable
