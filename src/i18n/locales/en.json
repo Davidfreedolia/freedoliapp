@@ -19,7 +19,8 @@
       "skipForNow": "Skip for now",
       "back": "Back",
       "open": "Open",
-      "createProduct": "Create product"
+      "createProduct": "Create product",
+      "details": "Details"
     }
   },
   "billing": {
@@ -553,6 +554,23 @@
     "descriptionPlaceholder": "Brief product description...",
     "projectPhases": "Project phases",
     "createProject": "Create Project",
-    "creatingFolders": "Creating folders..."
+    "creatingFolders": "Creating folders...",
+    "empty": {
+      "title": "Start your first product",
+      "subtitle": "Create a product and move it through viability, quotes, samples, PO and shipment.",
+      "cta": "Create product"
+    },
+    "nextAction": {
+      "open": "Open project",
+      "viability": "Check viability",
+      "addQuote": "Add supplier quote",
+      "requestSamples": "Request samples",
+      "createPO": "Create purchase order",
+      "prepareShipment": "Prepare shipment",
+      "sendToAmazon": "Send to Amazon"
+    },
+    "badges": {
+      "asin": "ASIN"
+    }
   }
 }

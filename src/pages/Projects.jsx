@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useBreakpoint } from '../hooks/useBreakpoint'
-import { 
-  Plus, 
-  Search, 
+import {
+  Plus,
+  Search,
   Filter,
   MoreVertical,
   Trash2,
@@ -30,6 +30,8 @@ import { useProjectsListState } from '../hooks/useProjectsListState'
 import ProjectDriveExplorer from '../components/projects/ProjectDriveExplorer'
 import MarketplaceTag, { MarketplaceTagGroup } from '../components/MarketplaceTag'
 import PhaseMark from '../components/Phase/PhaseMark'
+import ProjectCard from '../components/projects/ProjectCard'
+import useT from '../hooks/useT'
 
 export default function Projects() {
   const { refreshProjects, darkMode, activeOrgId } = useApp()
@@ -50,6 +52,7 @@ export default function Projects() {
   const isLoadingProjects = loadingListState
   const [businessByProjectId, setBusinessByProjectId] = useState({})
   const [stockByProjectId, setStockByProjectId] = useState({})
+  const t = useT()
 
   // Concurrency control: only latest load can commit state
   const loadSeqRef = useRef(0)
@@ -1009,74 +1012,32 @@ export default function Projects() {
             )}
           </div>
         ) : filteredProjects.length === 0 ? (
-          <div style={{
-            ...styles.empty,
-            backgroundColor: 'var(--surface-bg)'
-          }}>
-            <p style={{ color: 'var(--muted-1)' }}>
-              {searchTerm || filterPhase 
-                ? 'No s\'han trobat projectes amb aquests filtres'
-                : 'No hi ha projectes. Crea el primer!'}
-            </p>
-            {!searchTerm && !filterPhase && (
-              <>
-                <Button 
-                  onClick={() => {
-                    setShowModal(true)
-                  }} 
-                >
-                  <Plus size={18} />
-          Nou projecte
-                </Button>
-              </>
-            )}
+          <div className="projects-shell">
+            <div className="projects-empty">
+              <p className="projects-empty__title">
+                {t('projects.empty.title')}
+              </p>
+              <p className="projects-empty__subtitle">
+                {t('projects.empty.subtitle')}
+              </p>
+              <Button
+                variant="primary"
+                size="md"
+                onClick={() => setShowModal(true)}
+              >
+                <Plus size={18} />
+                {t('projects.empty.cta')}
+              </Button>
+            </div>
           </div>
         ) : (
-          <>
-            {effectiveViewMode === 'grid' && (
-              <div style={{
-                ...styles.projectsGrid,
-                gridTemplateColumns: isMobile ? '1fr' : (isTablet ? 'repeat(auto-fill, minmax(280px, 1fr))' : 'repeat(auto-fill, minmax(320px, 1fr))'),
-                gap: isMobile ? '10px' : '14px'
-              }}>
-        {filteredProjects.map(project => renderProjectCard(project, { enablePreviewSelect: false }))}
-              </div>
-            )}
-            {effectiveViewMode === 'list' && (
-              <div style={styles.projectsList}>
-        {filteredProjects.map(project => renderProjectCard(project, { enablePreviewSelect: false }))}
-              </div>
-            )}
-            {viewMode === 'split' && (
-              <div className="projects-split__layout">
-                <div className="projects-split__left">
-                  {filteredProjects.map(project => renderProjectCard(project, { enablePreviewSelect: true }))}
-                </div>
-
-                <aside className="projects-split__right">
-                  <div className="projects-split__sticky">
-                    {!selectedProject ? (
-                      <div className="projects-drive__box">
-                        <div className="projects-drive__boxHeader">
-                          <div className="projects-drive__boxTitle">Drive del projecte</div>
-                        </div>
-                        <div style={{ padding: 12, color: 'var(--muted-1)' }}>
-                          Selecciona un projecte per veure el Drive.
-                        </div>
-                      </div>
-                    ) : (
-                      <ProjectDriveExplorer
-                        projectFolders={null}
-                        darkMode={darkMode}
-                        readOnly={true}
-                        fixedFolderId={researchPrefix}
-                      />
-                    )}
-                  </div>
-                </aside>
-              </div>
-            )}
-          </>
+          <div className="projects-shell">
+            <div className="projects-grid">
+              {filteredProjects.map((project) => (
+                <ProjectCard key={project.id} project={project} />
+              ))}
+            </div>
+          </div>
         )}
         </div>
       </PageGutter>

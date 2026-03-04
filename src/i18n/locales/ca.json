@@ -19,7 +19,8 @@
       "skipForNow": "Ometre ara",
       "back": "Enrere",
       "open": "Obrir",
-      "createProduct": "Crear producte"
+      "createProduct": "Crear producte",
+      "details": "Detalls"
     }
   },
   "billing": {
@@ -566,7 +567,24 @@
     "descriptionPlaceholder": "Descripció breu del producte...",
     "projectPhases": "Fases del projecte",
     "createProject": "Crear Projecte",
-    "creatingFolders": "Creant carpetes..."
+    "creatingFolders": "Creant carpetes...",
+    "empty": {
+      "title": "Comença el teu primer producte",
+      "subtitle": "Crea un producte i mou-lo per viabilitat, pressupostos, mostres, PO i enviament.",
+      "cta": "Crear producte"
+    },
+    "nextAction": {
+      "open": "Obrir projecte",
+      "viability": "Revisar viabilitat",
+      "addQuote": "Afegir pressupost de proveïdor",
+      "requestSamples": "Demanar mostres",
+      "createPO": "Crear comanda de compra",
+      "prepareShipment": "Preparar enviament",
+      "sendToAmazon": "Enviar a Amazon"
+    },
+    "badges": {
+      "asin": "ASIN"
+    }
   }
 }
 
