@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useWorkspace } from '../contexts/WorkspaceContext'
 import { supabase, getCurrentUserId } from '../lib/supabase'
+import { getOrgEntitlements, hasOrgFeature } from '../lib/billing/entitlements'
 import { showToast } from '../components/Toast'
 import Button from '../components/ui/Button'
 import Card from '../components/ui/Card'
@@ -177,6 +178,15 @@ export default function ActivationWizard() {
     async function run() {
       setImportStatus('requesting')
       try {
+        const entitlements = await getOrgEntitlements(supabase, activeOrgId)
+        if (!hasOrgFeature(entitlements, 'amazon_ingest')) {
+          if (!cancelled) {
+            setImportStatus('done')
+            setImportDone(true)
+            showToast('Importació Amazon no disponible al teu pla', 'error')
+          }
+          return
+        }
         const { data, error } = await supabase.functions.invoke('spapi-settlement-worker', {
           method: 'POST',
           body: { connection_id: activeConnection.id }

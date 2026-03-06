@@ -192,6 +192,48 @@ Deno.serve(async (req: Request): Promise<Response> => {
     const orgId = conn.org_id;
     const connectionId = conn.id;
     try {
+      // D11.7 — Feature gating: amazon_ingest (single source of truth: billing_org_entitlements)
+      const { data: entRows, error: entErr } = await supabaseAdmin
+        .from("billing_org_entitlements")
+        .select("is_active, features_jsonb")
+        .eq("org_id", orgId)
+        .limit(1);
+      if (entErr || !entRows?.length) {
+        await logOpsEvent({
+          org_id: orgId,
+          source: "edge",
+          event_type: "SPAPI_GATING_BLOCKED",
+          severity: "warn",
+          message: "billing_entitlements_missing or lookup_failed",
+        });
+        if (connections.length === 1) {
+          return new Response(
+            JSON.stringify({ error: "billing_entitlements_missing" }),
+            { status: 403, headers: { "Content-Type": "application/json" } },
+          );
+        }
+        continue;
+      }
+      const ent = entRows[0] as { is_active?: boolean; features_jsonb?: Record<string, { enabled?: boolean }> };
+      if (!ent.is_active) {
+        if (connections.length === 1) {
+          return new Response(
+            JSON.stringify({ error: "org_billing_inactive" }),
+            { status: 403, headers: { "Content-Type": "application/json" } },
+          );
+        }
+        continue;
+      }
+      if (ent.features_jsonb?.amazon_ingest?.enabled !== true) {
+        if (connections.length === 1) {
+          return new Response(
+            JSON.stringify({ error: "feature_not_available" }),
+            { status: 403, headers: { "Content-Type": "application/json" } },
+          );
+        }
+        continue;
+      }
+
       await logOpsEvent({
         org_id: orgId,
         source: "edge",

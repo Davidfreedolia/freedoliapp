@@ -19,6 +19,7 @@ import {
 import { useApp } from '../context/AppContext'
 import { supabase, getCurrentUserId } from '../lib/supabase'
 import { getUnassignedGtinCodes, getProjectsMissingGtin, getProjects } from '../lib/supabase'
+import { getOrgEntitlements, hasOrgFeature } from '../lib/billing/entitlements'
 import { isDemoMode } from '../demo/demoMode'
 import { mockGetExpenses, mockGetIncomes, mockGetPurchaseOrders } from '../demo/demoMode'
 import Header from '../components/Header'
@@ -44,6 +45,7 @@ export default function Analytics() {
   
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [analyticsBlocked, setAnalyticsBlocked] = useState(false)
   const [dateRange, setDateRange] = useState('30') // dies
   const [filterProject, setFilterProject] = useState('')
   const [projects, setProjects] = useState([])
@@ -57,13 +59,37 @@ export default function Analytics() {
   const [missingGtinProjects, setMissingGtinProjects] = useState([])
 
   useEffect(() => {
+    if (!activeOrgId) {
+      setLoading(false)
+      return
+    }
+    let cancelled = false
+    getOrgEntitlements(supabase, activeOrgId)
+      .then((entitlements) => {
+        if (!cancelled && !hasOrgFeature(entitlements, 'analytics')) setAnalyticsBlocked(true)
+      })
+      .catch(() => {
+        if (!cancelled) setAnalyticsBlocked(true)
+      })
+    return () => { cancelled = true }
+  }, [activeOrgId])
+
+  useEffect(() => {
+    if (analyticsBlocked) return
     loadData()
-  }, [dateRange, filterProject, activeOrgId])
+  }, [dateRange, filterProject, activeOrgId, analyticsBlocked])
 
   const loadData = async () => {
+    if (!activeOrgId || analyticsBlocked) return
     setLoading(true)
     setError(null)
     try {
+      const entitlements = await getOrgEntitlements(supabase, activeOrgId)
+      if (!hasOrgFeature(entitlements, 'analytics')) {
+        setAnalyticsBlocked(true)
+        setLoading(false)
+        return
+      }
       const userId = await getCurrentUserId()
       const startDate = new Date()
       startDate.setDate(startDate.getDate() - parseInt(dateRange))
@@ -236,6 +262,28 @@ export default function Analytics() {
     return (
       <div style={styles.progressContainer}>
         <div style={{ ...styles.progressBar, width: `${Math.min(percentage, 100)}%`, backgroundColor: color }} />
+      </div>
+    )
+  }
+
+  if (analyticsBlocked) {
+    return (
+      <div style={styles.container}>
+        <Header
+          title={
+            <span className="page-title-with-icon">
+              <TrendingUp size={22} />
+              Analytics
+            </span>
+          }
+        />
+        <div style={styles.content}>
+          <div style={{ ...styles.errorContainer, padding: '2rem', textAlign: 'center' }}>
+            <AlertCircle size={32} color="#f59e0b" />
+            <h3 style={{ color: darkMode ? '#ffffff' : '#111827', margin: '12px 0' }}>Analítica no disponible</h3>
+            <p style={{ color: '#6b7280' }}>Aquesta funcionalitat no està inclosa al teu pla. Fes upgrade per accedir.</p>
+          </div>
+        </div>
       </div>
     )
   }

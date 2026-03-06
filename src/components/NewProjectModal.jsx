@@ -12,7 +12,7 @@ import { downloadPrompt } from '../utils/marketResearchPrompt'
 import { generateClaudeResearchPrompt } from '../lib/generateClaudeResearchPrompt'
 
 export default function NewProjectModal({ isOpen, onClose, onSuccess }) {
-  const { refreshProjects } = useApp()
+  const { refreshProjects, activeOrgId } = useApp()
   const navigate = useNavigate()
   const { t } = useTranslation()
   const reportInputRef = useRef(null)
@@ -195,6 +195,7 @@ export default function NewProjectModal({ isOpen, onClose, onSuccess }) {
         current_phase: 1,
         status: 'active'
       }
+      if (activeOrgId) payload.org_id = activeOrgId
       payload.thumb_url = finalThumbUrl
       const newProject = await createProject(payload)
 

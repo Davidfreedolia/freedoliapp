@@ -62,6 +62,13 @@ Last verified against: (run: `git rev-parse --short HEAD`) — 2025-02-17
 - **D10 — Stripe Webhook Integration** — `docs/D10/STRIPE_WEBHOOK_INTEGRATION.md`  
   Configuració del webhook Stripe, verificació de signatures, integració amb Supabase Edge Functions, esdeveniments escoltats i problemes resolts durant la implementació.
 
+## D11 — Billing Engine
+
+- **D11.1 Billing Architecture** — `docs/D11/D11_BILLING_ENGINE.md`  
+  Overview, Stripe Checkout/Webhook, taules billing_subscriptions i billing_org_entitlements, Feature Gating Architecture, features_jsonb, lifecycle, helpers i limits enforcement.
+- **D11.2 Feature Gating Engine** — `docs/D11/D11_FEATURE_GATING.md`  
+  Single source of truth (billing_org_entitlements), helper API, errors canònics i exemples d’ús.
+
 ## D9 — Runbooks & Incident Playbooks
 - `docs/D9/D9__runbooks__v1.0.md` — status: draft
 

@@ -327,6 +327,29 @@ export const createProject = async (project) => {
   
   // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
   const { user_id, ...projectData } = project
+
+  // D11.7 — Resolve org and enforce projects.max limit (billing_org_entitlements)
+  let orgId = projectData.org_id
+  if (!orgId) {
+    const { data: mem } = await supabase
+      .from('org_memberships')
+      .select('org_id')
+      .eq('user_id', userId)
+      .limit(1)
+      .maybeSingle()
+    orgId = mem?.org_id ?? null
+  }
+  if (orgId) {
+    const { getOrgEntitlements, assertOrgActive, assertOrgWithinLimit } = await import('./billing/entitlements.js')
+    const entitlements = await getOrgEntitlements(supabase, orgId)
+    assertOrgActive(entitlements)
+    const { count } = await supabase
+      .from('projects')
+      .select('*', { count: 'exact', head: true })
+      .eq('org_id', orgId)
+    assertOrgWithinLimit(entitlements, 'projects.max', count ?? 0)
+    projectData.org_id = orgId
+  }
   
   // Retry up to 5 times on duplicate SKU error
   let attempts = 0

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { useWorkspace } from '../../../contexts/WorkspaceContext'
 import { supabase } from '../../../lib/supabase'
+import { getOrgEntitlements, assertOrgFeature } from '../../../lib/billing/entitlements'
 import Card from '../../ui/Card'
 import Button from '../../ui/Button'
 import Badge from '../../ui/Badge'
@@ -73,6 +74,8 @@ export default function ProjectEconomicsSection({ projectId }) {
     if (!activeOrgId) return
     setRecomputeLoading(true)
     try {
+      const entitlements = await getOrgEntitlements(supabase, activeOrgId)
+      assertOrgFeature(entitlements, 'profit_engine')
       await supabase.rpc('rpc_profit_recompute_org', {
         p_org_id: activeOrgId,
         p_from: range.from,

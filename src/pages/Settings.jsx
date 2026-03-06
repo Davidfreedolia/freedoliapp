@@ -27,6 +27,7 @@ import {
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { getCompanySettings, updateCompanySettings, uploadCompanyLogo, deleteCompanyLogo, supabase, getAuditLogs, updateLanguage, getCurrentUserId } from '../lib/supabase'
+import { getOrgEntitlements, assertOrgWithinLimit } from '../lib/billing/entitlements'
 import { clearDemoData, generateDemoData, checkDemoExists } from '../lib/demoSeed'
 import Header from '../components/Header'
 import Button from '../components/Button'
@@ -348,6 +349,8 @@ export default function Settings() {
     }
     setAddingMember(true)
     try {
+      const entitlements = await getOrgEntitlements(supabase, org.id)
+      assertOrgWithinLimit(entitlements, 'team.seats', seatsUsed)
       const { error } = await supabase
         .from('org_memberships')
         .insert({ org_id: org.id, user_id: uid, role: 'member' })
