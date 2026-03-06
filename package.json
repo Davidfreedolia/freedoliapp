@@ -16,6 +16,7 @@
     "test:auth": "playwright test e2e/auth.spec.js"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
     "@fontsource/roboto": "^5.2.9",
     "@supabase/supabase-js": "^2.39.0",
     "date-fns": "^3.0.0",
