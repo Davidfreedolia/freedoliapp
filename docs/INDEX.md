@@ -57,6 +57,11 @@ Last verified against: (run: `git rev-parse --short HEAD`) — 2025-02-17
 - `docs/D8/D8.2_BILLING_STRIPE.md` — status: draft
 - `docs/D8/D8.3_ASANA_INSPIRED_BLUEPRINT.md` — status: draft (UX contract, dashboard dual-mode)
 
+## Stripe Billing
+
+- **D10 — Stripe Webhook Integration** — `docs/D10/STRIPE_WEBHOOK_INTEGRATION.md`  
+  Configuració del webhook Stripe, verificació de signatures, integració amb Supabase Edge Functions, esdeveniments escoltats i problemes resolts durant la implementació.
+
 ## D9 — Runbooks & Incident Playbooks
 - `docs/D9/D9__runbooks__v1.0.md` — status: draft
 
