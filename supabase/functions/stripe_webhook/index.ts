@@ -82,17 +82,18 @@ Deno.serve(async (req: Request) => {
   }
 
   const rawBody = await req.text();
-  const sig = req.headers.get("stripe-signature");
+  const sig = req.headers.get("stripe-signature") ?? req.headers.get("Stripe-Signature");
   if (!sig) {
     return new Response("Missing Stripe-Signature", { status: 401 });
   }
 
   let event: Stripe.Event;
   try {
-    event = stripe.webhooks.constructEvent(rawBody, sig, STRIPE_WEBHOOK_SECRET);
-  } catch (err) {
-    console.error("Webhook signature verification failed", err);
-    return new Response("Webhook signature verification failed", { status: 401 });
+    event = await stripe.webhooks.constructEventAsync(rawBody, sig, STRIPE_WEBHOOK_SECRET);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("Webhook signature verification failed", msg, err);
+    return new Response(`Webhook signature verification failed: ${msg}`, { status: 401 });
   }
 
   console.log(event.type);
