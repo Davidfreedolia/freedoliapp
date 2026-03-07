@@ -1,6 +1,6 @@
 # D16 — Inventory Intelligence
 
-**Status:** Slice 1 (detectStockoutRisk) + Slice 2 (getStockoutAlerts)  
+**Status:** Slice 1 (detectStockoutRisk) + Slice 2 (getStockoutAlerts) + Slice 3 (Stockout alerts UI) + Slice 4 (Global stockout alert strip)  
 **Objectiu:** Detectar risc de stockout per ASIN (dies de stock per sota d’un llindar).
 
 ---
@@ -64,3 +64,53 @@
 - No recalcular vendes; no duplicar lògica de `detectStockoutRisk()`.
 - Tot filtrat per `org_id`.
 - No es crea UI en aquest slice.
+
+---
+
+## 3. Stockout alerts UI (Slice 3)
+
+### Ubicació
+
+- **Pàgina:** `src/pages/Profit.jsx` (ruta `/app/profit`)
+- **Secció:** "Stockout risk", col·locada entre "Margin alerts" i "Profit trend".
+
+### Comportament
+
+1. **Font de dades:** la secció utilitza **només** `getStockoutAlerts(supabase, orgId, { lookbackDays: 30 })`; no es recalculen vendes al frontend.
+2. **Inputs:** `lookbackDays = 30` (fix).
+3. **Taula:** columnes ASIN, Current Stock, Daily Sales, Days of Stock; ordenada per **daysOfStock ASC** (ja provista per l’API).
+4. **Format:** Current Stock → enter; Daily Sales → decimal; Days of Stock → nombre amb 1 decimal.
+5. **Sense alertes:** es mostra el missatge "No stockout risk detected."
+6. **UX:** icona d’avís (AlertTriangle), color amber/coral (`--stockout-alert-amber`, #f59e0b), disseny compacte (padding 8px 12px, tipografia 13px).
+
+### Regles
+
+- Tot ha de venir de `getStockoutAlerts()`; cap càlcul de vendes al frontend.
+
+---
+
+## 4. Global stockout alert strip (Slice 4)
+
+### Component i ubicació
+
+- **Component:** `src/components/inventory/StockoutAlertStrip.jsx`
+- **Ubicació al layout:** dins `App.jsx`, just després de `MarginCompressionAlertStrip` i abans de l’`ErrorBoundary` que embolcalla les rutes; visible a tot `/app/*`.
+
+### Font de dades
+
+- **Única font:** `getStockoutAlerts(supabase, activeOrgId, { lookbackDays: 30 })`. No es recalculen vendes ni es duplica la lògica de `detectStockoutRisk` / `getStockoutAlerts`.
+
+### Comportament
+
+- Carrega les alertes en muntar el component i es recarrega quan canvia `activeOrgId`.
+- Si `alerts.length === 0`, el component no renderitza res (retorna `null`).
+
+### UX
+
+- **Missatge:** si hi ha 1 producte → "⚠ Product may stock out soon"; si n’hi ha més d’un → "⚠ X products may stock out soon" (X = nombre d’alertes).
+- **Estil:** franja compacta (padding 8px 16px), icona `AlertTriangle`, color **amber** (`#f59e0b`), fons amber molt suau, `border-bottom` amber; mateix patró que `MarginCompressionAlertStrip` però amb paleta amber coherent amb les alertes d’inventari.
+- **CTA:** botó "View details" que navega a `/app/profit`.
+
+### Regles
+
+- Tot ha de venir de `getStockoutAlerts()` (i per tant de `detectStockoutRisk` al backend); no recalcular vendes ni duplicar lògica al frontend.

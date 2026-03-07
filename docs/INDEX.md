@@ -89,12 +89,17 @@ Last verified against: (run: `git rev-parse --short HEAD`) — 2025-02-17
 ## D15 — Custom Home Dashboard (Pre-Design)
 
 - **D15 Custom Home Dashboard** — `docs/D15/D15_CUSTOM_HOME_DASHBOARD.md`  
-  Arquitectura d'un dashboard personalitzable per usuari amb widgets de profit, alerts, inventory i cash.
+  Pre-disseny: arquitectura del dashboard personalitzable per usuari; **Home Dashboard v1** — definició funcional i UI (objectiu de la Home, principis UX, layout canònic per files, catàleg de widgets aprovats/no aprovats, regles visuals, navegació, dependències, regla de roadmap). Implementació encara NO iniciada.
 
 ## D16 — Inventory Intelligence
 
 - **D16 Inventory Intelligence** — `docs/D16/D16_INVENTORY_INTELLIGENCE.md`  
-  Slice 1: `detectStockoutRisk(supabase, orgId, options)` a `src/lib/inventory/detectStockoutRisk.js`. Slice 2: `getStockoutAlerts(supabase, orgId, options)` a `src/lib/inventory/getStockoutAlerts.js`; alertes per tots els ASIN del workspace, ordenades per daysOfStock ASC; secció "Workspace stockout alerts".
+  Slice 1: `detectStockoutRisk`. Slice 2: `getStockoutAlerts`, alertes per workspace ordenades per daysOfStock ASC. Slice 3: secció "Stockout risk" a la pàgina Profit (`/app/profit`), amb icona d’avís, color amber i format integer/decimal. Slice 4: franja global `StockoutAlertStrip` al layout (App.jsx), visible a /app/*, CTA "View details" → /app/profit; secció "Global stockout alert strip".
+
+## D17 — Cashflow Forecast Engine (Pre-Design)
+
+- **D17 Cashflow Engine** — `docs/D17/D17_CASHFLOW_ENGINE.md`  
+  Pre-disseny: objectiu del motor ("quants diners tindré?"), inputs (v_product_econ_day, PO, shipments, payouts), output (sèrie date/cashBalance), API getCashflowForecast(supabase, orgId, options), càlcul simplificat, MVP rules, UI prevista (Home widget Cash Snapshot, pàgina /app/cash), widget kpi_cash_snapshot, dependències, prerequisite per D18/D19. Sense implementació.
 
 ## D9 — Runbooks & Incident Playbooks
 - `docs/D9/D9__runbooks__v1.0.md` — status: draft

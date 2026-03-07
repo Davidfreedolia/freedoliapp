@@ -99,3 +99,162 @@ Aquest catàleg és orientatiu; la disponibilitat real dependrà dels motors i d
 - **No implementar encara:** aquest document és només pre-disseny; no es creen taules, ni APIs ni components nous en aquesta fase.
 - **No tocar motors existents:** D13, D14, D12, Finances, etc. queden com estan; el dashboard només els consumirà.
 - **Només arquitectura i documentació:** l’únic deliverable és el document D15 amb l’arquitectura clara del dashboard personalitzable.
+
+---
+
+## Home Dashboard v1 — Functional + UI Definition
+
+### 1. Objectiu de la Home
+
+La Home ha de respondre en menys de 10 segons a:
+
+- Estic guanyant diners o no?
+- Tinc algun problema urgent?
+- Quins productes he de vigilar?
+- Què he de fer avui?
+
+### 2. Principis UX
+
+- pantalla clara, no saturada
+- prioritat a informació accionable
+- primer alertes, després rendiment, després context
+- cap widget decoratiu
+- tots els widgets han de portar a una vista de detall real
+- desktop-first, responsive net, sense invents
+
+### 3. Layout canònic de la Home v1
+
+Definir aquest ordre de dalt a baix:
+
+#### Fila 0 — Global alert strips
+
+- Margin compression alert strip
+- Workspace limit alert
+- futurs alerts globals reutilitzables
+
+#### Fila 1 — KPI row
+
+4 cards principals:
+
+- Net Profit (30d)
+- Revenue (30d)
+- Margin (30d)
+- Cash Snapshot (placeholder si encara no existeix engine real, marcat com planned)
+
+#### Fila 2 — Actionable widgets
+
+2 columnes:
+
+- Margin Alerts
+- Stockout Risk
+
+#### Fila 3 — Performance widgets
+
+2 columnes:
+
+- Profit Trend
+- Top / Worst ASINs
+
+#### Fila 4 — Operational widgets
+
+2 columnes:
+
+- Shipments in progress
+- Billing / Usage / Plan status
+
+#### Fila 5 — Projects / sourcing
+
+1 bloc ample:
+
+- Active projects / pending actions
+
+### 4. Widgets aprovats per Home v1
+
+Llistar com a catàleg inicial aprovat:
+
+- `global_margin_alert_strip`
+- `workspace_limit_alert`
+- `kpi_net_profit_30d`
+- `kpi_revenue_30d`
+- `kpi_margin_30d`
+- `kpi_cash_snapshot`
+- `widget_margin_alerts`
+- `widget_stockout_risk`
+- `widget_profit_trend`
+- `widget_top_asins`
+- `widget_shipments_status`
+- `widget_billing_usage`
+- `widget_active_projects`
+
+### 5. Widgets NO aprovats encara
+
+Llistar explícitament:
+
+- drag & drop
+- widgets lliures il·limitats
+- configurador avançat
+- AI recommendations
+- custom chart builder
+- role presets dinàmics
+
+### 6. Regles visuals
+
+Definir:
+
+- grid net de cards
+- cards amb mateixa alçada per fila quan tingui sentit
+- header de widget amb títol + CTA de detall
+- empty states curts i útils
+- loading skeletons coherents
+- ús dels colors d’alerta:
+  - coral = margin / warning financer
+  - amber = stock / inventory risk
+  - turquoise/petrol = rendiment i navegació
+- zero soroll visual
+
+### 7. Navegació
+
+Cada widget ha d’enllaçar a la seva vista real:
+
+- Margin alerts → `/app/profit`
+- Stockout risk → `/app/profit` o futura vista inventory
+- Profit trend → `/app/profit`
+- Top ASINs → `/app/profit`
+- Billing usage → `/app/billing`
+- Active projects → `/app/projects`
+
+### 8. Dependències reals
+
+Marcar què ja existeix i què encara és planned:
+
+**Existeix:**
+
+- Profit Engine
+- Margin Alerts
+- Stockout Risk
+- Billing / Usage
+- Projects
+- Shipments (si ja hi ha base real)
+
+**Planned:**
+
+- Cashflow Engine
+- Reorder Intelligence
+- Seller Decision Engine
+- Dashboard personalization
+
+### 9. Regla de roadmap
+
+La Home v1 s’implementarà només amb widgets suportats per motors ja existents o clarament marcats com planned placeholder.
+
+No s’inventarà cap widget sense engine real al darrere.
+
+### 10. Resultat esperat
+
+La Home ha de quedar definida com:
+
+- moderna
+- clara
+- accionable
+- útil per un seller en menys de 10 segons
+- base de la futura personalització de dashboard

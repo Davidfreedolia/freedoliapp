@@ -1,7 +1,8 @@
 /**
  * D13 Slice 4 + Slice 6 — Vista de profit per producte i tendència de benefici.
  * D14 Slice 3 — Alertes de compressió de marge (getMarginCompressionAlerts).
- * Taula prové de getWorkspaceProfit(); gràfic de getProfitTimeseries(); alertes de getMarginCompressionAlerts().
+ * D16 Slice 3 — Alertes de stockout (getStockoutAlerts).
+ * Taula prové de getWorkspaceProfit(); gràfic de getProfitTimeseries(); alertes de getMarginCompressionAlerts() i getStockoutAlerts().
  * No es recalcula ni es dupliquen fórmules al frontend.
  */
 import { useState, useEffect, useCallback } from 'react'
@@ -12,6 +13,7 @@ import { getOrgEntitlements, hasOrgFeature } from '../lib/billing/entitlements'
 import { getWorkspaceProfit } from '../lib/profit/getWorkspaceProfit'
 import { getProfitTimeseries } from '../lib/profit/getProfitTimeseries'
 import { getMarginCompressionAlerts } from '../lib/profit/getMarginCompressionAlerts'
+import { getStockoutAlerts } from '../lib/inventory/getStockoutAlerts'
 import {
   ResponsiveContainer,
   LineChart,
@@ -58,6 +60,9 @@ export default function Profit() {
   const [marginAlerts, setMarginAlerts] = useState([])
   const [marginAlertsLoading, setMarginAlertsLoading] = useState(false)
   const [marginAlertsError, setMarginAlertsError] = useState(null)
+  const [stockoutAlerts, setStockoutAlerts] = useState([])
+  const [stockoutAlertsLoading, setStockoutAlertsLoading] = useState(false)
+  const [stockoutAlertsError, setStockoutAlertsError] = useState(null)
 
   useEffect(() => {
     if (!activeOrgId) {
@@ -127,6 +132,21 @@ export default function Profit() {
     }
   }, [activeOrgId, profitBlocked, marketplace])
 
+  const loadStockoutAlerts = useCallback(async () => {
+    if (!activeOrgId || profitBlocked) return
+    setStockoutAlertsLoading(true)
+    setStockoutAlertsError(null)
+    try {
+      const data = await getStockoutAlerts(supabase, activeOrgId, { lookbackDays: 30 })
+      setStockoutAlerts(data || [])
+    } catch (err) {
+      setStockoutAlertsError(err?.message ?? 'Error carregant alertes de stockout.')
+      setStockoutAlerts([])
+    } finally {
+      setStockoutAlertsLoading(false)
+    }
+  }, [activeOrgId, profitBlocked])
+
   useEffect(() => {
     if (!activeOrgId || profitBlocked) return
     loadData()
@@ -141,6 +161,11 @@ export default function Profit() {
     if (!activeOrgId || profitBlocked) return
     loadMarginAlerts()
   }, [activeOrgId, profitBlocked, loadMarginAlerts])
+
+  useEffect(() => {
+    if (!activeOrgId || profitBlocked) return
+    loadStockoutAlerts()
+  }, [activeOrgId, profitBlocked, loadStockoutAlerts])
 
   if (profitBlocked) {
     return (
@@ -202,7 +227,7 @@ export default function Profit() {
             </div>
           </AppToolbar.Left>
           <AppToolbar.Right>
-            <Button variant="secondary" size="sm" onClick={() => { loadData(); loadTrendData(); loadMarginAlerts(); }} style={styles.refreshBtn} title="Actualitzar">
+            <Button variant="secondary" size="sm" onClick={() => { loadData(); loadTrendData(); loadMarginAlerts(); loadStockoutAlerts(); }} style={styles.refreshBtn} title="Actualitzar">
               <RefreshCw size={18} />
             </Button>
           </AppToolbar.Right>
@@ -240,6 +265,46 @@ export default function Profit() {
                       <td style={styles.marginAlertsTdR}>{formatPercent(alert.averageMarginLookback)}</td>
                       <td style={styles.marginAlertsTdR}>{formatPercent(alert.averageMarginRecent)}</td>
                       <td style={styles.marginAlertsTdR}>{formatPercent(alert.marginDrop)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
+        <section style={styles.stockoutSection} aria-labelledby="stockout-risk-heading">
+          <h2 id="stockout-risk-heading" style={styles.stockoutTitle}>
+            <AlertTriangle size={20} style={{ color: 'var(--stockout-alert-amber, #f59e0b)' }} />
+            Stockout risk
+          </h2>
+          {stockoutAlertsLoading ? (
+            <div style={styles.stockoutLoading}>Carregant alertes...</div>
+          ) : stockoutAlertsError ? (
+            <div style={styles.stockoutError}>
+              <AlertCircle size={18} color="#ef4444" />
+              <span>{stockoutAlertsError}</span>
+            </div>
+          ) : stockoutAlerts.length === 0 ? (
+            <div style={styles.stockoutEmpty}>No stockout risk detected.</div>
+          ) : (
+            <div style={styles.stockoutWrap}>
+              <table style={styles.stockoutTable}>
+                <thead>
+                  <tr>
+                    <th style={styles.stockoutTh}>ASIN</th>
+                    <th style={styles.stockoutThR}>Current Stock</th>
+                    <th style={styles.stockoutThR}>Daily Sales</th>
+                    <th style={styles.stockoutThR}>Days of Stock</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stockoutAlerts.map((alert) => (
+                    <tr key={alert.asin}>
+                      <td style={styles.stockoutTd}>{alert.asin}</td>
+                      <td style={styles.stockoutTdR}>{Number.isFinite(alert.currentStock) ? Math.round(alert.currentStock) : '—'}</td>
+                      <td style={styles.stockoutTdR}>{Number.isFinite(alert.dailySales) ? Number(alert.dailySales).toFixed(2) : '—'}</td>
+                      <td style={styles.stockoutTdR}>{Number.isFinite(alert.daysOfStock) ? Number(alert.daysOfStock).toFixed(1) : '—'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -371,4 +436,15 @@ const styles = {
   marginAlertsThR: { textAlign: 'right', padding: '8px 12px', borderBottom: '1px solid rgba(224, 122, 95, 0.3)', fontWeight: 600, color: 'var(--margin-alert-coral, #e07a5f)' },
   marginAlertsTd: { padding: '8px 12px', borderBottom: '1px solid rgba(224, 122, 95, 0.2)', color: 'var(--text-1)' },
   marginAlertsTdR: { textAlign: 'right', padding: '8px 12px', borderBottom: '1px solid rgba(224, 122, 95, 0.2)', color: 'var(--text-1)' },
+  stockoutSection: { marginBottom: '32px' },
+  stockoutTitle: { display: 'flex', alignItems: 'center', gap: '8px', fontSize: '16px', fontWeight: 600, color: 'var(--stockout-alert-amber, #f59e0b)', marginBottom: '12px' },
+  stockoutLoading: { padding: '16px', textAlign: 'center', color: '#6b7280', fontSize: '14px' },
+  stockoutError: { display: 'flex', alignItems: 'center', gap: '8px', padding: '16px', fontSize: '14px', color: '#ef4444' },
+  stockoutEmpty: { padding: '16px', fontSize: '14px', color: '#6b7280', border: '1px solid var(--border-color)', borderRadius: 'var(--btn-radius)', backgroundColor: 'var(--surface-1, #fff)' },
+  stockoutWrap: { border: '1px solid rgba(245, 158, 11, 0.5)', borderRadius: 'var(--btn-radius)', overflow: 'hidden', backgroundColor: 'rgba(245, 158, 11, 0.06)' },
+  stockoutTable: { width: '100%', borderCollapse: 'collapse', fontSize: '13px' },
+  stockoutTh: { textAlign: 'left', padding: '8px 12px', borderBottom: '1px solid rgba(245, 158, 11, 0.3)', fontWeight: 600, color: 'var(--stockout-alert-amber, #f59e0b)' },
+  stockoutThR: { textAlign: 'right', padding: '8px 12px', borderBottom: '1px solid rgba(245, 158, 11, 0.3)', fontWeight: 600, color: 'var(--stockout-alert-amber, #f59e0b)' },
+  stockoutTd: { padding: '8px 12px', borderBottom: '1px solid rgba(245, 158, 11, 0.2)', color: 'var(--text-1)' },
+  stockoutTdR: { textAlign: 'right', padding: '8px 12px', borderBottom: '1px solid rgba(245, 158, 11, 0.2)', color: 'var(--text-1)' },
 }

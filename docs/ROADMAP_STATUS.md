@@ -121,17 +121,17 @@ Estat real del producte després de Profit Truth Engine, Margin Compression Aler
 
 ### D15 — Custom Home Dashboard
 
-**Status:** PRE-DESIGN COMPLETE  
+**Status:** PRE-DESIGN COMPLETE (inclou Home Dashboard v1 definition)  
 **Implementation:** NOT STARTED
 
 **Objectiu:**  
-Permetre que cada usuari personalitzi el dashboard inicial amb widgets rellevants (profit, alerts, stock risk, cash, shipments, etc.).
+Permetre que cada usuari personalitzi el dashboard inicial amb widgets rellevants (profit, alerts, stock risk, cash, shipments, etc.). Definició funcional i UI de la **Home v1** (layout canònic, widgets aprovats, regles visuals, navegació) documentada dins D15.
 
 **Document de disseny:**  
-`docs/D15/D15_CUSTOM_HOME_DASHBOARD.md`
+`docs/D15/D15_CUSTOM_HOME_DASHBOARD.md` — inclou secció «Home Dashboard v1 — Functional + UI Definition».
 
 **Important:**  
-Aquesta fase NO s'implementa encara.
+Aquesta fase NO s'implementa encara. La implementació només començarà amb motors existents o placeholders planned; cap widget sense engine real al darrere.
 
 Només es desenvoluparà quan estiguin consolidats:
 
@@ -142,10 +142,23 @@ Només es desenvoluparà quan estiguin consolidats:
 
 ---
 
+### D17 — Cashflow Forecast Engine (Pre-Design)
+
+**Status:** PRE-DESIGN COMPLETE  
+**Implementation:** NOT STARTED
+
+**Objectiu:**  
+Motor de forecast de cashflow per respondre "Quants diners tindré en els pròxims dies?" — cash actual, payouts Amazon previstos, compres d’inventari, despeses operatives. API prevista: `getCashflowForecast(supabase, orgId, options)`; output sèrie temporal `{ date, cashBalance }`. Alimentarà widget Home `kpi_cash_snapshot` i futura pàgina `/app/cash`. Prerequisite per D18 (Reorder Intelligence) i D19 (Seller Decision Engine).
+
+**Document:**  
+`docs/D17/D17_CASHFLOW_ENGINE.md`
+
+---
+
 ### Future Product Phases (Planned)
 
 - **D16** — Inventory Intelligence
-- **D17** — Cashflow Forecast Engine
+- **D17** — Cashflow Forecast Engine (pre-design fet; implementació pendent)
 - **D18** — Reorder Intelligence
 - **D19** — Seller Decision Engine
 - **D20** — Custom Home Dashboard (Implementation)

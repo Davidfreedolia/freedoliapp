@@ -33,6 +33,7 @@ import TopNavbar from './components/TopNavbar'
 import BillingBanner from './components/billing/BillingBanner'
 import WorkspaceLimitAlert from './components/billing/WorkspaceLimitAlert'
 import MarginCompressionAlertStrip from './components/profit/MarginCompressionAlertStrip'
+import StockoutAlertStrip from './components/inventory/StockoutAlertStrip'
 import { useBreakpoint } from './hooks/useBreakpoint'
 import { useWorkspaceUsage } from './hooks/useWorkspaceUsage'
 import { createStripeCheckoutSession } from './lib/billingApi'
@@ -355,6 +356,7 @@ function AppContent() {
         <WorkspaceLimitAlert usage={usage} onUpgrade={handleUpgradeForLimit} />
         <TopNavbar sidebarWidth={sidebarWidth} />
         <MarginCompressionAlertStrip />
+        <StockoutAlertStrip />
         <ErrorBoundary context="app:main" darkMode={darkMode}>
           <Suspense fallback={<PageLoader darkMode={darkMode} />}>
             <Outlet />
