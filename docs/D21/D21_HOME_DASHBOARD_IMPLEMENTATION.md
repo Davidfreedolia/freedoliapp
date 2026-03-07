@@ -160,3 +160,165 @@ Però **no** es permet mock ni càlcul provisional.
 - No hi ha càlculs financers duplicats a UI
 - Loading / error / empty states definits per als widgets MVP
 - D19 queda marcat com a blocked dependency, no falsejat
+
+---
+
+## 9. Existing data sources audit
+
+Per cadascun d’aquests blocs, documenta: fitxer exacte; funció/helper/component existent; input contract; output contract; reutilitzable directament per Home; necessita adapter de presentació; READY / NOT READY.
+
+### 9.1 Profit KPIs (net profit 30d, revenue 30d, margin 30d)
+
+| Camp | Valor |
+|------|--------|
+| **Fitxer exacte** | `src/lib/profit/getWorkspaceProfit.js` |
+| **Funció existent** | `getWorkspaceProfit(supabase, orgId, options)` |
+| **Input contract** | `(supabase, orgId, { dateFrom?: string, dateTo?: string, marketplace?: string })`. Cal passar `dateFrom` i `dateTo` (YYYY-MM-DD) per una finestra 30d. |
+| **Output contract** | `Promise<Array<{ asin: string, revenue: number, netProfit: number, margin: number, roi: number }>>` — array ordenat per netProfit DESC. No retorna totals agregats. |
+| **Reutilitzable directament** | No: la Home necessita **totals** (sum netProfit, sum revenue, margin = sum(netProfit)/sum(revenue)). La pàgina Profit usa el mateix helper però mostra la taula per ASIN. |
+| **Adapter** | Sí: una crida única a `getWorkspaceProfit(supabase, orgId, { dateFrom, dateTo })` amb dates 30d; a la Home (o un helper prim a `src/lib/profit/`) sumar `revenue` i `netProfit` i derivar margin. No duplicar fórmules. |
+| **Estat** | **READY** — font real existeix; només cal agregació lleu al consumidor. |
+
+**Component existent que el consumeix:** `src/pages/Profit.jsx` (loadData amb dateFrom/dateTo; no exposa KPI row reutilitzable com a component).
+
+### 9.2 Profit trend
+
+| Camp | Valor |
+|------|--------|
+| **Fitxer exacte** | `src/lib/profit/getProfitTimeseries.js` |
+| **Funció existent** | `getProfitTimeseries(supabase, orgId, options)` |
+| **Input contract** | `(supabase, orgId, { dateFrom?: string, dateTo?: string, asin?: string, marketplace?: string })`. **Obligatoris** `dateFrom` i `dateTo`; si falten retorna `[]`. |
+| **Output contract** | `Promise<Array<{ date: string, revenue: number, netProfit: number, margin: number, roi: number }>>` — ordenat per date ASC. |
+| **Reutilitzable directament** | Sí: la Home pot cridar amb dateFrom/dateTo (p. ex. últims 30 dies) i rebre la sèrie. |
+| **Adapter** | Només de presentació: mateix patró que Profit.jsx — Recharts LineChart amb eix X = date, eix Y = netProfit. No cal canviar el helper. |
+| **Estat** | **READY** — helper i ús a Profit.jsx demostren el contract; component de gràfic es pot reutilitzar o replicar el patró. |
+
+**Component existent:** `src/pages/Profit.jsx` — secció “Profit trend” amb Recharts (ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip); no exportat com a component independent.
+
+### 9.3 Top ASINs
+
+| Camp | Valor |
+|------|--------|
+| **Fitxer exacte** | `src/lib/profit/getWorkspaceProfit.js` |
+| **Funció existent** | `getWorkspaceProfit(supabase, orgId, options)` |
+| **Input contract** | Mateix que 9.1: `dateFrom`, `dateTo`, `marketplace` opcional. |
+| **Output contract** | Array per ASIN ordenat per **netProfit DESC**; cada item té `asin`, `revenue`, `netProfit`, `margin`, `roi`. |
+| **Reutilitzable directament** | Sí: la Home pot cridar una sola vegada (compartint amb KPI 30d si es vol) i prendre els N primers (p. ex. 5–10) per al widget “Top ASINs”. |
+| **Adapter** | Només presentació: llistat compacte (asin + netProfit/revenue/margin); no cal nou helper. |
+| **Estat** | **READY** — mateixa font que KPI; un sol fetch pot servir KPI row + Top ASINs. |
+
+**Component existent:** `src/pages/Profit.jsx` — taula de rows de getWorkspaceProfit; no component widget aïllat.
+
+### 9.4 Margin alerts
+
+| Camp | Valor |
+|------|--------|
+| **Fitxer exacte** | `src/lib/profit/getMarginCompressionAlerts.js` |
+| **Funció existent** | `getMarginCompressionAlerts(supabase, orgId, options)` |
+| **Input contract** | `(supabase, orgId, { lookbackDays?: number, recentDays?: number, marketplace?: string })`. Per defecte lookback/recent a detectMarginCompression. |
+| **Output contract** | `Promise<Array<{ asin: string, averageMarginLookback: number, averageMarginRecent: number, marginDrop: number }>>` — ordenat per marginDrop DESC. |
+| **Reutilitzable directament** | Sí. |
+| **Adapter** | Opcional: la franja global `MarginCompressionAlertStrip` amaga si no hi ha alertes; per la Home es pot voler un widget amb llista (N files) + CTA a /app/profit. |
+| **Estat** | **READY** — motor i strip existents. |
+
+**Component existent:** `src/components/profit/MarginCompressionAlertStrip.jsx` — crida getMarginCompressionAlerts(supabase, activeOrgId, { lookbackDays: 30, recentDays: 7 }); retorna null si loading o alerts.length === 0; sinó mostra franja + “View details” → /app/profit. Per widget Home amb llista de files, reutilitzar el helper i renderitzar taula curta.
+
+### 9.5 Stockout alerts
+
+| Camp | Valor |
+|------|--------|
+| **Fitxer exacte** | `src/lib/inventory/getStockoutAlerts.js` |
+| **Funció existent** | `getStockoutAlerts(supabase, orgId, options)` |
+| **Input contract** | `(supabase, orgId, { lookbackDays?: number })` — lookbackDays per defecte 30. |
+| **Output contract** | `Promise<Array<{ asin: string, currentStock: number, dailySales: number, daysOfStock: number }>>` — ordenat per daysOfStock ASC. |
+| **Reutilitzable directament** | Sí. |
+| **Adapter** | Opcional: mateix patró que margin — strip global amaga si no n’hi ha; widget Home pot mostrar llista N files + CTA. |
+| **Estat** | **READY** — motor i strip existents. |
+
+**Component existent:** `src/components/inventory/StockoutAlertStrip.jsx` — getStockoutAlerts(supabase, activeOrgId, { lookbackDays: 30 }); retorna null si loading o alerts.length === 0; sinó franja + “View details” → /app/profit.
+
+### 9.6 Cash snapshot
+
+| Camp | Valor |
+|------|--------|
+| **Fitxer exacte** | `src/lib/finance/getCashflowForecast.js` |
+| **Funció existent** | `getCashflowForecast(supabase, orgId, options)` |
+| **Input contract** | `(supabase, orgId, { forecastDays?: number })` — forecastDays per defecte 30; min 1, max 365. |
+| **Output contract** | `Promise<Array<{ date: string, cashBalance: number }>>` — una entrada per dia, ordenat per date. Primera = avui, última = avui + forecastDays - 1. |
+| **Reutilitzable directament** | Sí: cash “avui” = result[0].cashBalance; cash “en 30d” = result[result.length - 1].cashBalance (quan forecastDays === 30). |
+| **Adapter** | Només presentació: mateix que Cashflow.jsx (cashToday, cashIn30); la Home mostra 1–2 valors en KPI card, no el gràfic. |
+| **Estat** | **READY** — engine i pàgina Cashflow.jsx ja fan aquest consum; zero duplicació de càlcul. |
+
+**Component existent:** `src/pages/Cashflow.jsx` — getCashflowForecast(supabase, activeOrgId, { forecastDays: 30 }); cashToday = data[0].cashBalance; cashIn30 = data[data.length - 1].cashBalance; KPIs + gràfic. La Home només necessita els dos números.
+
+### 9.7 Billing usage
+
+| Camp | Valor |
+|------|--------|
+| **Fitxers exactes** | `src/lib/workspace/usage.js` (getWorkspaceUsage), `src/hooks/useWorkspaceUsage.js` (hook), `src/hooks/useOrgBilling.js` (hook) |
+| **Funció/helper existent** | `getWorkspaceUsage(supabase, orgId)`; hooks `useWorkspaceUsage()`, `useOrgBilling(orgId)` |
+| **Input contract** | getWorkspaceUsage: (supabase, orgId). useOrgBilling: orgId (string \| null). useWorkspaceUsage: sense args (agafa activeOrgId del WorkspaceContext). |
+| **Output contract** | getWorkspaceUsage: `{ projects: { used, limit, percent }, seats: { used, limit, percent }, limitsReached: string[], nearLimits: string[] }`. useOrgBilling: `{ loading, billing: { plan, status, trial_ends_at, current_period_end_at, stripe_customer_id } \| null, isTrialExpired }`. |
+| **Reutilitzable directament** | Sí: useWorkspaceUsage + useOrgBilling donen plan, status, used/limit per projects i seats; Billing.jsx ja els usa. |
+| **Adapter** | Només presentació: widget compacte a la Home (plan, seats used/limit, projects used/limit; opcional nearLimits). |
+| **Estat** | **READY** — D12; Billing.jsx i LimitReachedBanner n’ són el consumidor. |
+
+**Component existent:** `src/pages/Billing.jsx` — useWorkspaceUsage + useOrgBilling; seccions “Current Plan” i “Usage” amb projects/seats. No component widget exportat; es pot reutilitzar el mateix hook i renderitzar una card resum.
+
+### 9.8 Active sourcing projects
+
+| Camp | Valor |
+|------|--------|
+| **Fitxer exacte** | Query directa a Supabase: taula `projects`. Hook existent: `src/hooks/useProjectsListState.js` |
+| **Funció/component existent** | `useProjectsListState()` — retorna `{ data, loading, error, noOrg, refetch }`. Query interna: `supabase.from('projects').select('*').eq('org_id', activeOrgId).order('created_at', { ascending: false })`. |
+| **Input contract** | activeOrgId del context; cap paràmetre addicional. La query no filtra per status ni phase. |
+| **Output contract** | Array de projectes (tots els de l’org), ordenat per created_at DESC. Estructura depèn del schema (id, name, status, current_phase, updated_at, etc.). |
+| **Reutilitzable directament** | Parcial: el hook retorna **tots** els projectes. “Active sourcing” requereix filtrar per status/phase (p. ex. excloure archived/cancelled; opcionalment només fases de sourcing). A la codebase, `status === 'active'` i `current_phase` (1 = Research) apareixen en altres llocs; no hi ha helper central de “active sourcing”. |
+| **Adapter** | Sí: a la Home filtrar client-side (o crear query amb .neq('status','archived') etc. si el schema ho permet) i limitar a N (p. ex. 10); ordenar per updated_at DESC si es vol. |
+| **Estat** | **READY** — font real (useProjectsListState o query equivalent); criteri “active sourcing” es documenta i s’aplica en adapter/presentació. Si el schema no té status/phase consistent, marcar què es considera “active” a D21 (p. ex. tots excepte status in ('archived','cancelled')). |
+
+**Nota:** No s’ha detectat cap helper dedicat “getActiveSourcingProjects”; la llista de projectes a Dashboard i Projects ve de la mateixa query/hook. D21 pot reutilitzar useProjectsListState i aplicar filtre + limit a la capa de presentació.
+
+---
+
+## 10. Reuse strategy
+
+Per cada widget D21 MVP, decisió clara:
+
+| Widget D21 MVP | Decisió | Justificació |
+|----------------|---------|--------------|
+| KPI Net profit (30d) | **REUSE WITH ADAPTER** | getWorkspaceProfit existeix; cal una sola crida 30d + sum(netProfit) a la Home (o helper prim que retorni totals). |
+| KPI Revenue (30d) | **REUSE WITH ADAPTER** | Mateix getWorkspaceProfit; sum(revenue). |
+| KPI Margin (30d) | **REUSE WITH ADAPTER** | Mateixa font; margin = sum(netProfit)/sum(revenue). |
+| KPI Cash snapshot | **REUSE WITH ADAPTER** | getCashflowForecast; prendre result[0].cashBalance i result[length-1].cashBalance; presentar en card. |
+| Margin alerts (widget llista) | **REUSE WITH ADAPTER** | getMarginCompressionAlerts; widget amb N files + CTA. Strip global ja existeix; Home pot reutilitzar helper i fer llistat. |
+| Stockout risk (widget llista) | **REUSE WITH ADAPTER** | getStockoutAlerts; mateix patró que margin. |
+| Profit trend | **REUSE WITH ADAPTER** | getProfitTimeseries amb dateFrom/dateTo 30d; Recharts com a Profit.jsx; només presentació. |
+| Top ASINs | **REUSE WITH ADAPTER** | getWorkspaceProfit; prendre .slice(0, N); presentar taula/llista compacta. |
+| Billing usage | **REUSE WITH ADAPTER** | useWorkspaceUsage + useOrgBilling; card resum (plan, seats, projects). |
+| Active sourcing projects | **REUSE WITH ADAPTER** | useProjectsListState (o query equivalent) + filtre client-side “active” + limit N. |
+| Reorder candidates | **BLOCKED** | Motor D19 no implementat; no mock; espai reservat o ocult. |
+
+---
+
+## 11. No-go findings
+
+Llista explícita del que **NO** s’ha de fer:
+
+- **Copiar càlculs des de pàgines existents** — No duplicar fórmules de margin, profit o cash a la Home; tot ha de passar pels helpers (getWorkspaceProfit, getProfitTimeseries, getCashflowForecast, etc.).
+- **Recrear queries al frontend si ja hi ha helper** — No fer `supabase.from('v_product_econ_day')` ni agregacions manuals a la Home; usar getWorkspaceProfit / getProfitTimeseries. Per projects, usar useProjectsListState o la mateixa query que fa el hook, no una query nova duplicada sense capa comuna.
+- **Usar mock data temporal** — Cap widget D21 MVP pot dependre de dades falses; Reorder candidates no es simula amb mock.
+- **Barrejar mètriques de finestres temporals diferents** — Tots els KPIs de profit (net profit, revenue, margin) i Top ASINs han de compartir la mateixa finestra 30d (mateix dateFrom/dateTo); cash snapshot ha d’usar la mateixa forecastDays (30) que el contracte del motor. No mostrar “profit 7d” al costat de “revenue 30d” sense etiquetar-ho clarament.
+
+---
+
+## 12. Final D21 MVP implementation order
+
+Ordre estricte d’implementació:
+
+1. **Data wiring** — Connexió de la pàgina Home/Dashboard amb els helpers: una crida a getWorkspaceProfit(30d), una a getProfitTimeseries(30d), una a getMarginCompressionAlerts, una a getStockoutAlerts, una a getCashflowForecast(30), useWorkspaceUsage, useOrgBilling, useProjectsListState (o query projects). Sense UI encara; només state + loaders + error handling. Garantir finestra 30d única per profit.
+2. **KPI cards** — Renderitzar 4 cards: Net profit (30d), Revenue (30d), Margin (30d), Cash snapshot (avui + 30d). Format EUR i %; loading/error/empty per cadascuna.
+3. **Alerts row** — Widgets Margin alerts i Stockout risk amb llista (N files) i CTA a /app/profit; empty state “No margin alerts” / “No stockout risk”.
+4. **Performance row** — Profit trend (gràfic Recharts) i Top ASINs (taula/llista N primers); mateixes dades del data wiring.
+5. **Billing / Projects row** — Billing usage card (plan, seats, projects); Active sourcing projects (llista filtrada + limit, CTA a /app/projects).
+6. **Polish states** — Loading skeletons coherents, missatges d’error, empty states, navegació CTA; revisió de no duplicar càlculs i de finestres temporals consistents.
