@@ -99,7 +99,22 @@ Last verified against: (run: `git rev-parse --short HEAD`) — 2025-02-17
 ## D17 — Cashflow Forecast Engine (Pre-Design)
 
 - **D17 Cashflow Engine** — `docs/D17/D17_CASHFLOW_ENGINE.md`  
-  Pre-disseny: objectiu del motor ("quants diners tindré?"), inputs (v_product_econ_day, PO, shipments, payouts), output (sèrie date/cashBalance), API getCashflowForecast(supabase, orgId, options), càlcul simplificat, MVP rules, UI prevista (Home widget Cash Snapshot, pàgina /app/cash), widget kpi_cash_snapshot, dependències, prerequisite per D18/D19. Sense implementació.
+  Pre-disseny + Slice 1 + Slice 2: motor `getCashflowForecast(supabase, orgId, options)` a `src/lib/finance/getCashflowForecast.js`; v_product_econ_day (averageDailyNetRevenue), purchase_orders (dailyInventoryOutflow; fallback payment date: order_date → created_at); cash(t) = cash(t-1) + avgDaily − inventoryOutflow(t). **Slice 3 — Cashflow UI:** pàgina `src/pages/Cashflow.jsx`, ruta `/app/cash`; KPIs (Cash today, Cash in 30 days), gràfic línia cashBalance per date (Recharts); loading/error/empty; entrada al Sidebar; traduccions ca/es/en.
+
+## D18 — Trial Registration Capture (Pre-Design)
+
+- **D18 Trial Registration Capture** — `docs/D18/D18_TRIAL_REGISTRATION_CAPTURE.md`  
+  Pre-disseny: captació de dades del lead abans de la prova gratuïta; objectiu, principi de producte, camps obligatoris/opcionals, flux canònic (Landing → Trial form → account → workspace → onboarding), regles, model trial_leads, ús de dades, relació amb billing/signup. Sense implementació.
+
+## D19 — Reorder Intelligence (Pre-Design)
+
+- **D19 Reorder Intelligence** — `docs/D19/D19_REORDER_INTELLIGENCE.md`  
+  Pre-disseny: motor de recomanació de recompra; objectiu (quan reordenar, quina quantitat, si hi ha prou cash); inputs (vendes mitjanes, stock, lead time, buffer, cashflow, MOQ/pack); càlcul base (dailySales, daysOfStock, reorderPointDays, recommendedReorderDate, recommendedQty); regla MVP (alerta si daysOfStock ≤ reorderPointDays; recommendedQty = dailySales*(leadTime+coverDaysTarget)−currentStock); cash awareness (affordable/risky/not affordable); output del motor; UI prevista (widget Home, vista /app/inventory o /app/reorder); MVP sense AI, determinista; dependències D16, D17, supplier/PO. Sense codi implementat.
+
+## D21 — Home Dashboard Implementation
+
+- **D21 Home Dashboard Implementation** — `docs/D21/D21_HOME_DASHBOARD_IMPLEMENTATION.md`  
+  Especificació d’implementació de la Home (D15): capa de composició sobre engines existents; principis no negociables; widgets MVP (KPI row, Alerts, Performance, Operations, Projects); Reorder candidates fora de scope fins D19; mapping engine→widget; file touch plan; risks; definition of done. Status: DRAFT.
 
 ## D9 — Runbooks & Incident Playbooks
 - `docs/D9/D9__runbooks__v1.0.md` — status: draft

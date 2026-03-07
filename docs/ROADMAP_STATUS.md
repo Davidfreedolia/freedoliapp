@@ -155,13 +155,45 @@ Motor de forecast de cashflow per respondre "Quants diners tindré en els pròxi
 
 ---
 
+### D18 — Trial Registration Capture (Pre-Design)
+
+**Status:** PRE-DESIGN COMPLETE  
+**Implementation:** NOT STARTED
+
+**Objectiu:**  
+Captar dades mínimes del lead abans d’activar la prova gratuïta (identificar, qualificar, millorar onboarding, accions comercials). Formulari curt i obligatori; flux Landing → CTA → Trial registration form → account → workspace → onboarding wizard. Taula o capa `trial_leads` (full_name, email, company_name, country, primary_marketplace, seller_type, business_stage, consent, etc.). Trial registration abans de billing; lead profile no substitueix user/org.
+
+**Document:**  
+`docs/D18/D18_TRIAL_REGISTRATION_CAPTURE.md`
+
+---
+
+### D19 — Reorder Intelligence (Pre-Design)
+
+**Status:** PRE-DESIGN COMPLETE  
+**Implementation:** NOT STARTED
+
+**Objectiu:**  
+Motor de recomanació de recompra: quan reordenar, quina quantitat, si hi ha prou cash. Inputs: vendes mitjanes diàries, stock actual, lead time, buffer days, cashflow forecast, MOQ/pack si existeixen. Càlcul base: dailySales, daysOfStock, reorderPointDays, recommendedReorderDate, recommendedQty. Regla MVP: alerta si daysOfStock ≤ reorderPointDays; recommendedQty = dailySales*(leadTime+coverDaysTarget)−currentStock. Cash awareness: affordable / risky / not affordable. Output previst: asin, currentStock, dailySales, daysOfStock, reorderPointDays, recommendedReorderDate, recommendedQty, estimatedOrderCost, cashStatus. UI prevista: widget Home Reorder candidates, vista futura `/app/inventory` o `/app/reorder`, alertes. MVP sense AI, càlcul determinista. Dependències: D16 Inventory Intelligence, D17 Cashflow Forecast, dades supplier/PO.
+
+**Deliverable:**  
+- document D19 creat  
+- fase fixada al roadmap  
+- sense codi implementat
+
+**Document:**  
+`docs/D19/D19_REORDER_INTELLIGENCE.md`
+
+---
+
 ### Future Product Phases (Planned)
 
 - **D16** — Inventory Intelligence
 - **D17** — Cashflow Forecast Engine (pre-design fet; implementació pendent)
-- **D18** — Reorder Intelligence
-- **D19** — Seller Decision Engine
-- **D20** — Custom Home Dashboard (Implementation)
+- **D18** — Trial Registration Capture (pre-design fet; implementació pendent)
+- **D19** — Reorder Intelligence (pre-design fet; implementació pendent)
+- **D20** — Seller Decision Engine
+- **D21** — Custom Home Dashboard (Implementation)
 
 **Nota:** D15 defineix l'arquitectura del dashboard. La implementació real començarà a D20.
 
