@@ -68,6 +68,33 @@ Last verified against: (run: `git rev-parse --short HEAD`) — 2025-02-17
   Overview, Stripe Checkout/Webhook, taules billing_subscriptions i billing_org_entitlements, Feature Gating Architecture, features_jsonb, lifecycle, helpers i limits enforcement.
 - **D11.2 Feature Gating Engine** — `docs/D11/D11_FEATURE_GATING.md`  
   Single source of truth (billing_org_entitlements), helper API, errors canònics i exemples d’ús.
+- **D11.8 Billing UI** — `docs/D11/D11.8_BILLING_UI.md`  
+  Slices 1–5 (complete): ruta `/app/billing`, redirect, Current Plan, Usage, Locked features, Billing alerts. LimitReachedBanner (used ≥ limit), CTAs reutilitzen handleUpgrade; UX d’avís, gating real als guards.
+
+## D12 — Workspace Usage Engine
+
+- **D12 Workspace Usage Engine** — `docs/D12/D12_WORKSPACE_USAGE_ENGINE.md`  
+  Motor, hook, Billing, WorkspaceLimitAlert global. Slice 5: `nearLimits` quan `used/limit >= 0.8`. D12 complete.
+
+## D13 — Profit Engine (Precheck + Slice 1 + Slice 2 + Slice 3 + Slice 4 + Slice 5 + Slice 6)
+
+- **D13 Profit Engine** — `docs/D13/D13_PROFIT_ENGINE.md`  
+  Precheck: fonts financeres, buits, estratègia. Slice 1: motor pur `calculateAsinProfit`. Slice 2: `getAsinProfitData`. Slice 3: `getWorkspaceProfit`. Slice 4: pàgina Profit (src/pages/Profit.jsx), ruta `/app/profit`. Slice 5: `getProfitTimeseries`, profit per dia. Slice 6: gràfic de tendència de benefici (Net Profit per dia) a la pàgina Profit, connectat a `getProfitTimeseries()`; secció "Profit trend visualization".
+
+## D14 — Margin Compression Engine
+
+- **D14 Margin Alerts** — `docs/D14/D14_MARGIN_ALERTS.md`  
+  Slice 1: `detectMarginCompression`. Slice 2: `getMarginCompressionAlerts`, alertes per workspace ordenades per marginDrop DESC. Slice 3: secció "Margin alerts" a la pàgina Profit (`/app/profit`). Slice 4: franja global d’alerta `MarginCompressionAlertStrip` al layout (App.jsx), visible a /app/*, CTA "View details" → /app/profit; secció "Global margin alert strip".
+
+## D15 — Custom Home Dashboard (Pre-Design)
+
+- **D15 Custom Home Dashboard** — `docs/D15/D15_CUSTOM_HOME_DASHBOARD.md`  
+  Arquitectura d'un dashboard personalitzable per usuari amb widgets de profit, alerts, inventory i cash.
+
+## D16 — Inventory Intelligence
+
+- **D16 Inventory Intelligence** — `docs/D16/D16_INVENTORY_INTELLIGENCE.md`  
+  Slice 1: `detectStockoutRisk(supabase, orgId, options)` a `src/lib/inventory/detectStockoutRisk.js`. Slice 2: `getStockoutAlerts(supabase, orgId, options)` a `src/lib/inventory/getStockoutAlerts.js`; alertes per tots els ASIN del workspace, ordenades per daysOfStock ASC; secció "Workspace stockout alerts".
 
 ## D9 — Runbooks & Incident Playbooks
 - `docs/D9/D9__runbooks__v1.0.md` — status: draft

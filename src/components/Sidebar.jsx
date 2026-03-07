@@ -11,6 +11,7 @@ import {
   Receipt,
   Package,
   TrendingUp,
+  DollarSign,
   Calendar as CalendarIcon,
   Settings,
   ChevronLeft,
@@ -63,6 +64,9 @@ const prefetchRoute = (path) => {
     case '/analytics':
       import('../pages/Analytics.jsx').catch(() => {})
       break
+    case '/profit':
+      import('../pages/Profit.jsx').catch(() => {})
+      break
     case '/settings':
       import('../pages/Settings.jsx').catch(() => {})
       break
@@ -88,6 +92,7 @@ const menuItems = [
   { path: '/app/inventory', icon: Package, labelKey: 'sidebar.inventory' },
   { path: '/app/calendar', icon: CalendarIcon, labelKey: 'sidebar.calendar' },
   { path: '/app/analytics', icon: TrendingUp, labelKey: 'sidebar.analytics' },
+  { path: '/app/profit', icon: DollarSign, labelKey: 'sidebar.profit' },
 ]
 
 export default function Sidebar() {

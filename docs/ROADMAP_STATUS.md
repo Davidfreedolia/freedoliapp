@@ -104,4 +104,54 @@ Decisions estructurals que **no s’han de reobrir** sense acord explícit:
 
 ---
 
+## 8. Product Roadmap (D-Series) — Consolidated Post D14 + D15 Pre-Design
+
+Estat real del producte després de Profit Truth Engine, Margin Compression Alerts i Custom Home Dashboard (pre-disseny):
+
+| Fase | Estat |
+|------|--------|
+| **D10 — Stripe Integration** | ✅ |
+| **D11 — Billing Engine** | ✅ |
+| **D11.8 — Billing UI** | ✅ |
+| **D12 — Workspace Usage Engine** | ✅ |
+| **D13 — Profit Truth Engine** | ✅ |
+| **D14 — Margin Compression Alerts** | ✅ |
+
+---
+
+### D15 — Custom Home Dashboard
+
+**Status:** PRE-DESIGN COMPLETE  
+**Implementation:** NOT STARTED
+
+**Objectiu:**  
+Permetre que cada usuari personalitzi el dashboard inicial amb widgets rellevants (profit, alerts, stock risk, cash, shipments, etc.).
+
+**Document de disseny:**  
+`docs/D15/D15_CUSTOM_HOME_DASHBOARD.md`
+
+**Important:**  
+Aquesta fase NO s'implementa encara.
+
+Només es desenvoluparà quan estiguin consolidats:
+
+- Profit engine
+- Alert engines
+- Inventory intelligence
+- Cashflow engine
+
+---
+
+### Future Product Phases (Planned)
+
+- **D16** — Inventory Intelligence
+- **D17** — Cashflow Forecast Engine
+- **D18** — Reorder Intelligence
+- **D19** — Seller Decision Engine
+- **D20** — Custom Home Dashboard (Implementation)
+
+**Nota:** D15 defineix l'arquitectura del dashboard. La implementació real començarà a D20.
+
+---
+
 *Per detall tècnic de cada àmbit, veure `docs/D0/FASE2_CBA_ARCHITECTURE_FINAL.md` i els documents D2/D3 referenciats.*

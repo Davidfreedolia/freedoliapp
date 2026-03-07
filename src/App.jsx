@@ -31,7 +31,11 @@ import ErrorBoundary from './components/ErrorBoundary'
 import FloatingNotesLayer from './components/FloatingNotesLayer'
 import TopNavbar from './components/TopNavbar'
 import BillingBanner from './components/billing/BillingBanner'
+import WorkspaceLimitAlert from './components/billing/WorkspaceLimitAlert'
+import MarginCompressionAlertStrip from './components/profit/MarginCompressionAlertStrip'
 import { useBreakpoint } from './hooks/useBreakpoint'
+import { useWorkspaceUsage } from './hooks/useWorkspaceUsage'
+import { createStripeCheckoutSession } from './lib/billingApi'
 import { isDemoMode } from './demo/demoMode'
 import { supabase, getCurrentUserId } from './lib/supabase'
 import { useOnboardingStatus } from './hooks/useOnboardingStatus'
@@ -85,6 +89,7 @@ const AmazonImports = lazyWithErrorBoundary(() => import('./pages/AmazonImports'
 const Inventory = lazyWithErrorBoundary(() => import('./pages/Inventory'), 'Inventory')
 const Settings = lazyWithErrorBoundary(() => import('./pages/Settings'), 'Settings')
 const Analytics = lazyWithErrorBoundary(() => import('./pages/Analytics'), 'Analytics')
+const Profit = lazyWithErrorBoundary(() => import('./pages/Profit'), 'Profit')
 const Suppliers = lazyWithErrorBoundary(() => import('./pages/Suppliers'), 'Suppliers')
 const Forwarders = lazyWithErrorBoundary(() => import('./pages/Forwarders'), 'Forwarders')
 const Warehouses = lazyWithErrorBoundary(() => import('./pages/Warehouses'), 'Warehouses')
@@ -95,6 +100,7 @@ const Help = lazyWithErrorBoundary(() => import('./pages/Help'), 'Help')
 const BillingLocked = lazyWithErrorBoundary(() => import('./pages/BillingLocked'), 'BillingLocked')
 const BillingOverSeat = lazyWithErrorBoundary(() => import('./pages/BillingOverSeat'), 'BillingOverSeat')
 const BillingSettings = lazyWithErrorBoundary(() => import('./pages/BillingSettings'), 'BillingSettings')
+const Billing = lazyWithErrorBoundary(() => import('./pages/Billing'), 'Billing')
 const AmazonSnapshot = lazyWithErrorBoundary(() => import('./pages/AmazonSnapshot'), 'AmazonSnapshot')
 
 const ADMIN_EMAILS = new Set(['david@freedolia.com'])
@@ -154,9 +160,18 @@ function AppContent() {
   const { sidebarCollapsed, darkMode } = useApp()
   const { lang } = useLang()
   const { isWorkspaceReady, activeOrgId } = useWorkspace()
+  const { usage } = useWorkspaceUsage()
   const { isMobile, isTablet } = useBreakpoint()
   const location = useLocation()
   const isProjectDetail = location.pathname.startsWith('/app/projects/') && location.pathname.split('/').length >= 4
+
+  const handleUpgradeForLimit = async () => {
+    if (!activeOrgId) return
+    try {
+      const data = await createStripeCheckoutSession(activeOrgId, 'growth')
+      if (data?.url) window.location.href = data.url
+    } catch (_) {}
+  }
 
   const [billingState, setBillingState] = useState({
     loading: true,
@@ -337,7 +352,9 @@ function AppContent() {
         paddingTop: 'var(--topbar-h)'
       }}>
         <BillingBanner />
+        <WorkspaceLimitAlert usage={usage} onUpgrade={handleUpgradeForLimit} />
         <TopNavbar sidebarWidth={sidebarWidth} />
+        <MarginCompressionAlertStrip />
         <ErrorBoundary context="app:main" darkMode={darkMode}>
           <Suspense fallback={<PageLoader darkMode={darkMode} />}>
             <Outlet />
@@ -390,8 +407,10 @@ function App() {
                 <Route path="finances/amazon-imports" element={<AppPageWrap context="page:AmazonImports"><AmazonImports /></AppPageWrap>} />
                 <Route path="inventory" element={<AppPageWrap context="page:Inventory"><Inventory /></AppPageWrap>} />
                 <Route path="analytics" element={<AppPageWrap context="page:Analytics"><Analytics /></AppPageWrap>} />
+                <Route path="profit" element={<AppPageWrap context="page:Profit"><Profit /></AppPageWrap>} />
                 <Route path="settings" element={<AppPageWrap context="page:Settings"><Settings /></AppPageWrap>} />
-                <Route path="settings/billing" element={<AppPageWrap context="page:BillingSettings"><BillingSettings /></AppPageWrap>} />
+                <Route path="settings/billing" element={<Navigate to="/app/billing" replace />} />
+                <Route path="billing" element={<AppPageWrap context="page:Billing"><Billing /></AppPageWrap>} />
                 <Route path="help" element={<AppPageWrap context="page:Help"><Help /></AppPageWrap>} />
                 <Route path="calendar" element={<AppPageWrap context="page:Calendar"><Calendar /></AppPageWrap>} />
                 <Route path="diagnostics" element={<AppPageWrap context="page:Diagnostics"><Diagnostics /></AppPageWrap>} />
