@@ -137,3 +137,61 @@ Freedoliapp ha de poder dir:
 - **Reorder this product in X days**
 - **Suggested quantity: Y**
 - **Cash status:** affordable / risky / not affordable
+
+---
+
+## Implementation — Engine (D19.1)
+
+**Fitxer:** `src/lib/inventory/getReorderCandidates.js`
+
+**Signatura:** `getReorderCandidates(supabase, orgId, options?)`  
+Options: `{ limit?: number, lookbackDays?: number, leadTimeDays?: number }`. Default limit 10.
+
+### Fórmula final
+
+Per cada producte (ASIN) del workspace:
+
+- **daily_sales** = mitjana d’unitats venudes per dia (darrers `lookbackDays` dies, default 30). Font: `v_product_units_sold_day` (orders_count com a proxy d’unitats).
+- **lead_time_days** = opció o fallback 30 (no existeix font única per producte; documentat com a limitació).
+- **stock_on_hand** = suma de `total_units` a `inventory` per org_id + project_id.
+- **incoming_units** = suma de quantities d’`items` de `purchase_orders` per org_id + project_id (POs sense filtre d’estat; si `items` no té format esperat, 0).
+- **demand_during_lead_time** = daily_sales × lead_time_days.
+- **reorder_needed** = demand_during_lead_time − (stock_on_hand + incoming_units).
+- Si **reorder_needed > 0** → candidat; **reorderUnits** = round(reorder_needed); **daysUntilStockout** = daily_sales > 0 ? stock_on_hand / daily_sales : 0.
+
+Ordenació: 1) daysUntilStockout asc, 2) reorderUnits desc. Es retorna fins a `limit` candidats.
+
+### Fonts de dades
+
+| Dada | Font | Notes |
+|------|------|--------|
+| Llista ASINs | `product_identifiers` (org_id, asin no null) | Únic per workspace. |
+| project_id, productName | `product_identifiers` + `projects.name` | Resolució ASIN → project. |
+| daily_sales | `v_product_units_sold_day` (d, orders_count, org_id, product_id) | Mitjana darrers 30 dies. |
+| stock_on_hand | `inventory` (org_id, project_id, total_units) | Suma total_units. |
+| incoming_units | `purchase_orders` (org_id, project_id, items) | Suma item.quantity / item.qty / item.units; sense filtre d’estat de PO. |
+| lead_time_days | Fallback 30 | No s’usa supplier_quotes.lead_time_days ni cap altra font per producte. |
+
+### Output contract
+
+```js
+[
+  {
+    asin: string,
+    productName: string | null,
+    dailySales: number,
+    stockOnHand: number,
+    incomingUnits: number,
+    leadTimeDays: number,
+    reorderUnits: number,
+    daysUntilStockout: number
+  }
+]
+```
+
+### Limitacions actuals
+
+- **Lead time:** no s’integra lead time per producte/supplier; es fa servir un fallback global (default 30 dies). Es pot estendre amb supplier_quotes o dades de PO si es defineix.
+- **POs obertes:** es sumen totes les POs del projecte; no es filtra per estat (open/ordered/received). Si el schema permet filtrar per estat, es pot afegir.
+- **Cash awareness:** el motor no crida getCashflowForecast; no retorna cashStatus ni estimatedOrderCost. La UI o un adapter superior pot combinar getReorderCandidates + getCashflowForecast.
+- **MOQ / qty per carton:** no aplicat; reorderUnits és el resultat brut arrodonit.
