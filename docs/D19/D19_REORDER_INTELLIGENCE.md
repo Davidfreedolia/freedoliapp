@@ -195,3 +195,13 @@ Ordenació: 1) daysUntilStockout asc, 2) reorderUnits desc. Es retorna fins a `l
 - **POs obertes:** es sumen totes les POs del projecte; no es filtra per estat (open/ordered/received). Si el schema permet filtrar per estat, es pot afegir.
 - **Cash awareness:** el motor no crida getCashflowForecast; no retorna cashStatus ni estimatedOrderCost. La UI o un adapter superior pot combinar getReorderCandidates + getCashflowForecast.
 - **MOQ / qty per carton:** no aplicat; reorderUnits és el resultat brut arrodonit.
+
+---
+
+## Widget Home (D19.2)
+
+El widget **Reorder candidates** a la Home consumeix el motor real `getReorderCandidates(supabase, orgId, { limit: 5 })` via el composador `useHomeDashboardData`. No es recalcula res al component.
+
+**Camps mostrats al widget:** productName (o ASIN si no hi ha nom), reorderUnits, daysUntilStockout (o "—" si no fiable), stockOnHand, incomingUnits. Màxim 5 files.
+
+**Estats:** loading; empty state "No reorder actions needed right now." quan no hi ha candidats; si el motor falla, el composador retorna `reorder.candidates = []` i es mostra el mateix empty state (no es trenca la resta de la Home).

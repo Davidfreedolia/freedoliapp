@@ -481,5 +481,5 @@ Ordre estricte d’implementació:
 
 **Estat del slot Reorder:**
 
-- **Blocked.** Placeholder visual discret; cap mock ni dades falses; dependència D19 documentada.
+- **Implementat (D19.2).** El slot és ara el widget real **Reorder candidates** que consumeix `getReorderCandidates` via el composador. Component `HomeReorderCandidates`; camps mostrats: productName (o ASIN), reorderUnits, daysUntilStockout ("—" si no fiable), stockOnHand, incomingUnits; màxim 5 files. Empty state: "No reorder actions needed right now." Si el motor falla, el composador retorna candidates buits i es mostra el mateix empty state; la resta de la Home no es veu afectada.
 

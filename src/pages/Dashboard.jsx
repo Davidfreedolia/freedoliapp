@@ -78,6 +78,7 @@ import HomeProfitTrend from '../components/home/HomeProfitTrend'
 import HomeTopAsins from '../components/home/HomeTopAsins'
 import HomeBillingUsage from '../components/home/HomeBillingUsage'
 import HomeActiveProjects from '../components/home/HomeActiveProjects'
+import HomeReorderCandidates from '../components/home/HomeReorderCandidates'
 
 const formatCurrency = (amount, currency = 'EUR') =>
   (amount != null && Number.isFinite(amount))
@@ -884,10 +885,11 @@ export default function Dashboard() {
             />
           </div>
 
-          {/* D15 reserved slot — Reorder candidates (D19); no implementat; placeholder passiu */}
-          <div style={styles.homeReorderSlot} aria-hidden="true">
-            <span style={styles.homeReorderSlotText}>Reorder candidates — no disponible (D19)</span>
-          </div>
+          {/* D19.2 — Reorder candidates widget (motor real getReorderCandidates) */}
+          <HomeReorderCandidates
+            reorder={homeData?.reorder}
+            loading={homeDataLoading}
+          />
         </section>
 
         {/* Requereix atenció — Projectes bloquejats */}

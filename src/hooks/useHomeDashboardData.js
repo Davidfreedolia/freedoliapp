@@ -11,6 +11,7 @@ import { getProfitTimeseries } from '../lib/profit/getProfitTimeseries'
 import { getMarginCompressionAlerts } from '../lib/profit/getMarginCompressionAlerts'
 import { getStockoutAlerts } from '../lib/inventory/getStockoutAlerts'
 import { getCashflowForecast } from '../lib/finance/getCashflowForecast'
+import { getReorderCandidates } from '../lib/inventory/getReorderCandidates'
 import { useWorkspaceUsage } from './useWorkspaceUsage'
 import { useOrgBilling } from './useOrgBilling'
 import { useProjectsListState } from './useProjectsListState'
@@ -101,6 +102,13 @@ export function useHomeDashboardData() {
 
       const topAsins = (profitRows || []).slice(0, TOP_ASINS_LIMIT)
 
+      let reorderCandidates = []
+      try {
+        reorderCandidates = await getReorderCandidates(supabase, activeOrgId, { limit: 5 })
+      } catch {
+        reorderCandidates = []
+      }
+
       setAsyncResult({
         kpis: {
           netProfit30d: totalNetProfit,
@@ -115,6 +123,10 @@ export function useHomeDashboardData() {
         performance: {
           profitTrend: Array.isArray(profitTrend) ? profitTrend : [],
           topAsins,
+        },
+        reorder: {
+          candidates: Array.isArray(reorderCandidates) ? reorderCandidates : [],
+          blocked: false,
         },
       })
     } catch (err) {
@@ -145,12 +157,18 @@ export function useHomeDashboardData() {
       performance: { profitTrend: [], topAsins: [] },
       operations: { billingUsage: null },
       projects: { active: [] },
-      blocked: { reorderCandidates: true },
+      reorder: { candidates: [], blocked: false },
     }
     if (asyncResult) {
       base.kpis = asyncResult.kpis
       base.alerts = asyncResult.alerts
       base.performance = asyncResult.performance
+      if (asyncResult.reorder) {
+        base.reorder = {
+          candidates: Array.isArray(asyncResult.reorder.candidates) ? asyncResult.reorder.candidates : [],
+          blocked: false,
+        }
+      }
     }
     base.operations.billingUsage =
       usage != null || billing != null
