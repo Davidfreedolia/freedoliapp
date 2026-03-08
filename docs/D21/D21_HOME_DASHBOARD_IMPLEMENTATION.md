@@ -380,3 +380,28 @@ Ordre estricte d’implementació:
 - `kpis.*` — poden ser `null` si no hi ha dades o error (per exemple profit no disponible per l’org).
 - `operations.billingUsage` — `null` si usage i billing no disponibles; sinó `{ usage, billing }`.
 - `cashNow` — `null` si la sèrie de cashflow és buida.
+
+---
+
+## 14. D21.4 — KPI + Alerts MVP (implemented)
+
+**Implementat a D21.4:**
+
+- **KPI row:** 4 targetes amb dades reals del composador: Net profit (30d), Revenue (30d), Margin (30d), Cash now. Format EUR (Intl.NumberFormat ca-ES, currency) per imports; margin com a percentatge (ratio del contracte, sense duplicar càlcul). Loading coherent (skeleton "…"); fallback "—" si no hi ha dada.
+- **Alerts row:** Dos panells (Margin alerts, Stockout risk). Fins a 5 items per panell; empty state curt ("No margin alerts." / "No stockout risk."). Cada item: ASIN + mètrica clau (margin: "drop X%"; stockout: "X days").
+- **Components nous:** `src/components/home/HomeKpiCard.jsx`, `src/components/home/HomeAlertsPanel.jsx`. Reutilitzen tokens existents (var(--card-bg), var(--border-color), var(--text-1), var(--text-2), var(--margin-alert-coral), var(--stockout-alert-amber)).
+- **Error global:** Si el composador retorna error, es mostra un bloc d’error únic a dalt; no es trenca la resta.
+- **Render temporal/debug de D21.3** substituït per aquest MVP visual; sense botons ni redireccions encara.
+
+**Widgets que segueixen pendents:**
+
+- Performance row (Profit trend, Top ASINs)
+- Billing usage row
+- Projects row
+- Reorder candidates (bloquejat fins D19)
+- Layout complet D15, polish avançat, gràfics
+
+**Decisions de UI mínimes (KPI i Alerts):**
+
+- **KPI:** Valor principal únic per targeta; sense percentatges comparatius ni subtítols addicionals. Margin es deriva del contracte (ratio sum(netProfit)/sum(revenue)); si no és segur, es mostra "—" (no s’ha duplicat cap càlcul).
+- **Alerts:** Línies simples (ASIN + mètrica); colors coral (margin) i amber (stockout) alineats amb les franjes globals existents; màxim 5 items; sense CTA ni botons a D21.4.

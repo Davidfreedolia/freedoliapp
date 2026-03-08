@@ -72,6 +72,17 @@ import {
 } from '../utils/dashboardLayout'
 import { showToast } from '../components/Toast'
 import { useHomeDashboardData } from '../hooks/useHomeDashboardData'
+import HomeKpiCard from '../components/home/HomeKpiCard'
+import HomeAlertsPanel from '../components/home/HomeAlertsPanel'
+
+const formatCurrency = (amount, currency = 'EUR') =>
+  (amount != null && Number.isFinite(amount))
+    ? new Intl.NumberFormat('ca-ES', { style: 'currency', currency }).format(amount)
+    : '—'
+const formatPercent = (ratio) =>
+  (ratio != null && Number.isFinite(ratio))
+    ? new Intl.NumberFormat('ca-ES', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(ratio)
+    : '—'
 
 export default function Dashboard() {
   const { stats, darkMode, setDarkMode, sidebarCollapsed, activeOrgId } = useApp()
@@ -785,39 +796,58 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* D21.3 — Home data wiring: estats controlats (loading / error / success debug) */}
-        <div
-          role="status"
-          aria-live="polite"
-          style={{
-            marginBottom: 12,
-            padding: '12px 16px',
-            borderRadius: 8,
-            fontSize: 12,
-            color: darkMode ? '#9ca3af' : '#6b7280',
-            background: darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
-            border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
-          }}
-        >
-          {homeDataLoading && <div><strong>Home Dashboard</strong> — loading…</div>}
-          {!homeDataLoading && homeDataError && (
-            <div><strong>Home Dashboard</strong> — error: {homeDataError}</div>
-          )}
-          {!homeDataLoading && !homeDataError && homeData && (
-            <>
-              <div style={{ fontWeight: 600, marginBottom: 8 }}>Home Dashboard</div>
-              <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: 11 }}>
-                kpis: netProfit30d={homeData.kpis?.netProfit30d ?? 'null'} revenue30d={homeData.kpis?.revenue30d ?? 'null'} margin30d={homeData.kpis?.margin30d ?? 'null'} cashNow={homeData.kpis?.cashNow ?? 'null'}
-                margin alerts: {homeData.alerts?.margin?.length ?? 0}
-                stockout alerts: {homeData.alerts?.stockout?.length ?? 0}
-                profit trend points: {homeData.performance?.profitTrend?.length ?? 0}
-                top ASINs: {homeData.performance?.topAsins?.length ?? 0}
-                billing usage: {homeData.operations?.billingUsage != null ? 'available' : 'no'}
-                active projects: {homeData.projects?.active?.length ?? 0}
-                reorder blocked: {homeData.blocked?.reorderCandidates === true ? 'true' : 'false'}
-              </pre>
-            </>
-          )}
+        {/* D21.4 — Home KPI row + Alerts row (dades reals del composador) */}
+        {homeDataError && (
+          <div
+            role="alert"
+            style={{
+              marginBottom: 12,
+              padding: '10px 14px',
+              borderRadius: 8,
+              fontSize: 14,
+              color: 'var(--danger-1, #b91c1c)',
+              background: 'var(--error-bg, #fef2f2)',
+              border: '1px solid var(--border-color)',
+            }}
+          >
+            {homeDataError}
+          </div>
+        )}
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }} aria-label="KPI row">
+          <HomeKpiCard
+            title="Net profit (30d)"
+            value={formatCurrency(homeData?.kpis?.netProfit30d)}
+            loading={homeDataLoading}
+          />
+          <HomeKpiCard
+            title="Revenue (30d)"
+            value={formatCurrency(homeData?.kpis?.revenue30d)}
+            loading={homeDataLoading}
+          />
+          <HomeKpiCard
+            title="Margin (30d)"
+            value={formatPercent(homeData?.kpis?.margin30d)}
+            loading={homeDataLoading}
+          />
+          <HomeKpiCard
+            title="Cash now"
+            value={formatCurrency(homeData?.kpis?.cashNow)}
+            loading={homeDataLoading}
+          />
+        </div>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }} aria-label="Alerts row">
+          <HomeAlertsPanel
+            title="Margin alerts"
+            items={homeData?.alerts?.margin ?? []}
+            type="margin"
+            emptyMessage="No margin alerts."
+          />
+          <HomeAlertsPanel
+            title="Stockout risk"
+            items={homeData?.alerts?.stockout ?? []}
+            type="stockout"
+            emptyMessage="No stockout risk."
+          />
         </div>
 
         {/* Requereix atenció — Projectes bloquejats */}
