@@ -383,6 +383,30 @@ Ordre estricte d’implementació:
 
 ---
 
+## 14. D21.4 — KPI row + Alerts row (implemented)
+
+**Implementat a D21.4:**
+
+- **KPI row:** 4 targetes amb dades reals del composador `useHomeDashboardData`: Net profit (30d), Revenue (30d), Margin (30d), Cash now. Component `HomeKpiCard` (`src/components/home/HomeKpiCard.jsx`): títol, valor formatat, estat loading ("…"), fallback "—" quan no hi ha dada. Format: EUR (Intl.NumberFormat ca-ES) per imports; margin en percentatge (ratio 0–1 del contracte); si margin no arriba, "—".
+- **Alerts row:** Dos panells amb `HomeAlertsPanel` (`src/components/home/HomeAlertsPanel.jsx`): Margin alerts i Stockout risk. Fins a 5 items per panell; empty state "No margin alerts." / "No stockout risk."; cada item = ASIN + mètrica clau (margin: marginDrop en %; stockout: daysOfStock en dies). Colors: coral (margin), amber (stockout) reutilitzant variables existents. Sense botons ni redireccions.
+- **Error global:** Si el composador retorna error, es mostra un bloc d’alerta sobre la KPI row; les targetes es renderitzen igual (podent mostrar "—" si no hi ha data).
+- **Pàgina:** `src/pages/Dashboard.jsx` — el render temporal/debug de D21.3 ha estat substituït per aquest MVP visual; la secció D21.4 es mostra dins del contingut existent del Dashboard.
+
+**Widgets que segueixen pendents (no tocats a D21.4):**
+
+- Performance row (Profit trend, Top ASINs)
+- Billing usage row
+- Projects row
+- Reorder candidates (bloquejat fins D19)
+- Layout complet D15 i polish avançat
+
+**Decisions de UI mínimes (KPI i Alerts):**
+
+- **KPI:** Un sol formatter de moneda (EUR, ca-ES) i un de percentatge (ratio 0–1); sense comparatives ni subtítols; "—" quan el valor és null o no finit.
+- **Alerts:** Màxim 5 ítems per panell; línia per ítem amb ASIN + mètrica (drop % o dies); vora del panell amb color segons tipus (margin/stockout); sense CTA ni botons en aquesta fase.
+
+---
+
 ## 14. D21.4 — KPI + Alerts MVP (implemented)
 
 **Implementat a D21.4:**

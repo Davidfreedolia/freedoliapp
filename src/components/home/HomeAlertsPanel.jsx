@@ -58,9 +58,9 @@ export default function HomeAlertsPanel({ title, items = [], type, emptyMessage 
         </div>
       ) : (
         <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
-          {list.map((item) => (
+          {list.map((item, index) => (
             <li
-              key={item.asin}
+              key={item.asin ?? `item-${index}`}
               style={{
                 padding: '6px 0',
                 borderBottom: '1px solid var(--border-color, #e5e7eb)',
