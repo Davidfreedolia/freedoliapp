@@ -76,6 +76,8 @@ import HomeKpiCard from '../components/home/HomeKpiCard'
 import HomeAlertsPanel from '../components/home/HomeAlertsPanel'
 import HomeProfitTrend from '../components/home/HomeProfitTrend'
 import HomeTopAsins from '../components/home/HomeTopAsins'
+import HomeBillingUsage from '../components/home/HomeBillingUsage'
+import HomeActiveProjects from '../components/home/HomeActiveProjects'
 
 const formatCurrency = (amount, currency = 'EUR') =>
   (amount != null && Number.isFinite(amount))
@@ -860,6 +862,18 @@ export default function Dashboard() {
           />
           <HomeTopAsins
             items={homeData?.performance?.topAsins}
+            loading={homeDataLoading}
+          />
+        </div>
+
+        {/* D21.6 — Operations row (Billing usage + Active projects) */}
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }} aria-label="Operations row">
+          <HomeBillingUsage
+            billingUsage={homeData?.operations?.billingUsage}
+            loading={homeDataLoading}
+          />
+          <HomeActiveProjects
+            projects={homeData?.projects?.active}
             loading={homeDataLoading}
           />
         </div>

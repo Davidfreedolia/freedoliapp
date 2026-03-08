@@ -425,3 +425,29 @@ Ordre estricte d’implementació:
 - Sense selector de dates al gràfic.
 - Sense enllaç a /app/profit des dels widgets (es pot afegir en fases posteriors).
 
+---
+
+## 16. D21.6 — Operations row (implemented)
+
+**Widgets implementats:**
+
+- **Billing usage:** Component `HomeBillingUsage` (`src/components/home/HomeBillingUsage.jsx`). Títol "Billing usage". Dades de `data.operations.billingUsage` (composador D21.3): `{ usage, billing }`. Només es mostren camps reals: plan, status, trial_ends_at (formatat), current_period_end_at (formatat), seats (used/limit), projects (used/limit). Files key/value; si un camp no existeix no es renderitza. Empty state: "No hi ha dades de facturació."
+- **Active sourcing projects:** Component `HomeActiveProjects` (`src/components/home/HomeActiveProjects.jsx`). Títol "Active sourcing projects". Dades de `data.projects.active` (useProjectsListState + filterActiveProjects al composador). Màxim 5 projectes; per cada un: nom, status, updated_at (formatat). Llista neta; empty state: "No hi ha projectes actius."
+
+**Fonts reals reutilitzades:**
+
+- `getWorkspaceUsage(supabase, orgId)` — exposat via `useWorkspaceUsage()` dins el composador; part de `billingUsage.usage` (projects used/limit, seats used/limit).
+- `useOrgBilling(activeOrgId)` — part de `billingUsage.billing` (plan, status, trial_ends_at, current_period_end_at des de `org_billing`).
+- `useProjectsListState()` — llista de projectes per org; el composador aplica `filterActiveProjects` (exclou status archived/cancelled, limit 10); la UI mostra màxim 5.
+
+**Camps finalment mostrats:**
+
+- Billing: Plan, Status, Trial ends, Period ends, Seats (used/limit), Projects (used/limit). Tots opcionals segons disponibilitat.
+- Projects: name, status, updated_at (data curta). Ordenació: la que ve de la query (created_at DESC); el filtre "active" no canvia l’ordre.
+
+**Limitacions honestes del MVP:**
+
+- No s’mostren features/entitlements ni nearLimits/limitsReached a la targeta; es poden afegir en fases posteriors si es vol.
+- No hi ha navegació ni botons (p. ex. anar a /app/billing o /app/projects).
+- Criteri "active project" és el del composador (status ≠ archived, ≠ cancelled); no es redefineix al frontend.
+
