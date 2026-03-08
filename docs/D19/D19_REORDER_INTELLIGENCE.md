@@ -248,3 +248,56 @@ En l’estat actual del motor, leadTimeSource és sempre `'fallback'`; per tant 
 - leadTimeSource és sempre `fallback`; no hi ha integració amb supplier/product config.
 - issues inclouen, quan cal: `missing_lead_time` (leadTimeSource fallback/unknown), `no_incoming_po_data` (incomingUnits no fiable o 0), `weak_daily_sales` (vendes < 0.5 u/dia). No es marquen (per ara) altres mancances com a incoming PO no filtrat per estat.
 - El widget Home mostra només una pista discreta "(low confidence)"; la resta de camps de qualitat queden disponibles per a futures vistes o alertes.
+
+---
+
+## Alerting integration (D19.4)
+
+### Helper creat
+
+**Fitxer:** `src/lib/inventory/getReorderAlerts.js`  
+**Funció:** `getReorderAlerts(supabase, orgId, options?)`  
+Options: `{ limit?: number }` (default 20).
+
+Reutilitza `getReorderCandidates`; no recalcula la lògica. Cada alerta deriva d’un candidat real retornat pel motor D19.
+
+### Contracte de sortida
+
+Cada element de l’array retornat:
+
+```js
+{
+  type: 'reorder',
+  severity: 'high' | 'medium' | 'low',
+  asin: string,
+  productName: string | null,
+  message: string,
+  reorderUnits: number,
+  daysUntilStockout: number,
+  confidence: string,
+  issues: string[],
+  source: 'reorder_intelligence'
+}
+```
+
+- **message:** text breu i accionable (ex.: "Reorder Product X: 50 units suggested in ~12 days").
+- **issues:** còpia de l’array del candidat; sempre array.
+
+### Regles de severitat
+
+- **high:** daysUntilStockout ≤ 7, o (daysUntilStockout ≤ 14 i reorderUnits > 0 i confidence ≠ low). Risc imminent o reorder urgent amb dades raonablement fiables.
+- **medium:** reorder necessari però stockout no immediat (dies > 14), o dies ≤ 14 amb confidence low. Certa incertesa o horitzó menys crític.
+- **low:** reorder suggerit amb baixa confiança o horitzó menys urgent (dies > 14 i confidence low).
+
+### Ordenació
+
+1. **severity** (high → medium → low).  
+2. **daysUntilStockout** ascendent (més imminent primer).  
+3. **reorderUnits** descendent (desempat).
+
+Es filtra candidats amb reorderUnits ≤ 0. Es respecta el `limit` sobre el resultat final.
+
+### Relació entre reorder candidates i reorder alerts
+
+- **Candidates** (`getReorderCandidates`): llista de productes que necessiten recompra, amb mètriques i confidence. Font única de veritat.
+- **Alerts** (`getReorderAlerts`): mateixos candidats transformats en alertes amb severity i message, per consum en capes d’alerting (futura barra global, agregador, etc.). No hi ha alertes sense base al motor D19.
