@@ -74,6 +74,8 @@ import { showToast } from '../components/Toast'
 import { useHomeDashboardData } from '../hooks/useHomeDashboardData'
 import HomeKpiCard from '../components/home/HomeKpiCard'
 import HomeAlertsPanel from '../components/home/HomeAlertsPanel'
+import HomeProfitTrend from '../components/home/HomeProfitTrend'
+import HomeTopAsins from '../components/home/HomeTopAsins'
 
 const formatCurrency = (amount, currency = 'EUR') =>
   (amount != null && Number.isFinite(amount))
@@ -847,6 +849,18 @@ export default function Dashboard() {
             items={homeData?.alerts?.stockout ?? []}
             type="stockout"
             emptyMessage="No stockout risk."
+          />
+        </div>
+
+        {/* D21.5 — Performance row (Profit trend + Top ASINs) */}
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }} aria-label="Performance row">
+          <HomeProfitTrend
+            data={homeData?.performance?.profitTrend}
+            loading={homeDataLoading}
+          />
+          <HomeTopAsins
+            items={homeData?.performance?.topAsins}
+            loading={homeDataLoading}
           />
         </div>
 

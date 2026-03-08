@@ -407,25 +407,21 @@ Ordre estricte d’implementació:
 
 ---
 
-## 14. D21.4 — KPI + Alerts MVP (implemented)
+## 15. D21.5 — Performance row (implemented)
 
-**Implementat a D21.4:**
+**Widgets implementats:**
 
-- **KPI row:** 4 targetes amb dades reals del composador: Net profit (30d), Revenue (30d), Margin (30d), Cash now. Format EUR (Intl.NumberFormat ca-ES, currency) per imports; margin com a percentatge (ratio del contracte, sense duplicar càlcul). Loading coherent (skeleton "…"); fallback "—" si no hi ha dada.
-- **Alerts row:** Dos panells (Margin alerts, Stockout risk). Fins a 5 items per panell; empty state curt ("No margin alerts." / "No stockout risk."). Cada item: ASIN + mètrica clau (margin: "drop X%"; stockout: "X days").
-- **Components nous:** `src/components/home/HomeKpiCard.jsx`, `src/components/home/HomeAlertsPanel.jsx`. Reutilitzen tokens existents (var(--card-bg), var(--border-color), var(--text-1), var(--text-2), var(--margin-alert-coral), var(--stockout-alert-amber)).
-- **Error global:** Si el composador retorna error, es mostra un bloc d’error únic a dalt; no es trenca la resta.
-- **Render temporal/debug de D21.3** substituït per aquest MVP visual; sense botons ni redireccions encara.
+- **Profit trend (30d):** Component `HomeProfitTrend` (`src/components/home/HomeProfitTrend.jsx`). Títol "Profit trend (30d)". Gràfic de línia (Recharts) amb eix X = date, eix Y = netProfit; mateixa shape que `/app/profit` (`getProfitTimeseries`): `[{ date, revenue, netProfit, margin, roi }]`. Finestra 30d provinent del composador; sense controls ni selector temporal. Estats: loading, empty ("Sense dades de tendència.").
+- **Top ASINs:** Component `HomeTopAsins` (`src/components/home/HomeTopAsins.jsx`). Màxim 5 ASINs; columnes: ASIN, profit (EUR), margin %. Dades del composador (`performance.topAsins`, ja ordenades per netProfit DESC des de `getWorkspaceProfit`). Empty state: "No hi ha dades de productes."
 
-**Widgets que segueixen pendents:**
+**Helpers reutilitzats:**
 
-- Performance row (Profit trend, Top ASINs)
-- Billing usage row
-- Projects row
-- Reorder candidates (bloquejat fins D19)
-- Layout complet D15, polish avançat, gràfics
+- `getProfitTimeseries(supabase, orgId, { dateFrom, dateTo })` — ja cridat dins `useHomeDashboardData`; resultat exposat com `data.performance.profitTrend`.
+- `getWorkspaceProfit(supabase, orgId, { dateFrom, dateTo })` — ja cridat dins el composador; els primers N resultats (ordenats per netProfit DESC) es mostren com `data.performance.topAsins`; a la UI es limiten a 5.
 
-**Decisions de UI mínimes (KPI i Alerts):**
+**Limitacions MVP:**
 
-- **KPI:** Valor principal únic per targeta; sense percentatges comparatius ni subtítols addicionals. Margin es deriva del contracte (ratio sum(netProfit)/sum(revenue)); si no és segur, es mostra "—" (no s’ha duplicat cap càlcul).
-- **Alerts:** Línies simples (ASIN + mètrica); colors coral (margin) i amber (stockout) alineats amb les franjes globals existents; màxim 5 items; sense CTA ni botons a D21.4.
+- Sense controls temporals (la finestra és fixa 30d).
+- Sense selector de dates al gràfic.
+- Sense enllaç a /app/profit des dels widgets (es pot afegir en fases posteriors).
+
