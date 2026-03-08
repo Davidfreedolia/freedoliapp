@@ -41,6 +41,11 @@ export default function HomeReorderCandidates({ reorder = {}, loading }) {
           <li key={row.asin} style={styles.row}>
             <div style={styles.label}>
               {row.productName && row.productName.trim() ? row.productName.trim() : row.asin || '—'}
+              {row.confidence === 'low' && (
+                <span style={styles.confidenceHint} title={Array.isArray(row.issues) ? row.issues.join(', ') : ''}>
+                  {' '}(low confidence)
+                </span>
+              )}
             </div>
             <div style={styles.meta}>
               <span title="Suggested reorder units">Reorder: {Number.isFinite(row.reorderUnits) ? row.reorderUnits : '—'}</span>
@@ -75,6 +80,7 @@ const styles = {
     borderBottom: '1px solid var(--border-color, #e5e7eb)',
   },
   label: { fontSize: '0.8125rem', fontWeight: 500, color: 'var(--text-1)' },
+  confidenceHint: { fontSize: '0.7rem', color: 'var(--text-2, #6b7280)', fontWeight: 400 },
   meta: {
     display: 'flex',
     flexWrap: 'wrap',

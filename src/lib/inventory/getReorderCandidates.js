@@ -1,11 +1,16 @@
 /**
- * D19.1 — Reorder Intelligence Engine.
+ * D19.1 / D19.3 — Reorder Intelligence Engine.
  * Calcula candidats a recompra amb dades reals. Read-only; no modifica inventory/profit/cashflow engines.
- * Fonts: v_product_units_sold_day (sales velocity), inventory (stock), purchase_orders (incoming), lead time fallback.
+ * D19.3: quality fields (coverageDays, demandDuringLeadTime, leadTimeSource, confidence, issues); sanitization; confidence rules.
  */
 const DEFAULT_LOOKBACK_DAYS = 30
 const DEFAULT_LEAD_TIME_DAYS = 30
 const DEFAULT_LIMIT = 10
+const MIN_DAILY_SALES_RELIABLE = 0.5
+const COVERAGE_DAYS_CAP = 999
+
+/** @typedef {'high'|'medium'|'low'} Confidence */
+/** @typedef {'configured'|'fallback'|'derived'|'unknown'} LeadTimeSource */
 
 /**
  * Obtenir ASINs únics del workspace (product_identifiers, org_id).
@@ -125,12 +130,47 @@ async function getIncomingUnits(supabase, orgId, projectId) {
 }
 
 /**
- * Candidats a recompra. Ordenats per daysUntilStockout asc, després reorderUnits desc.
+ * Confidence + issues from data. Rules (D19.3):
+ * - high: dailySales reliable (> MIN), stockOnHand finite, leadTime known/fallback, no critical issues.
+ * - medium: some fallback or weak data but recommendation still usable.
+ * - low: missing real lead time, no reliable incoming, or dailySales very weak.
+ * @param {number} dailySales
+ * @param {number} stockOnHand
+ * @param {number} incomingUnits
+ * @param {LeadTimeSource} leadTimeSource
+ * @returns {{ confidence: Confidence, issues: string[] }}
+ */
+function getConfidenceAndIssues(dailySales, stockOnHand, incomingUnits, leadTimeSource) {
+  const issues = []
+  if (leadTimeSource === 'fallback' || leadTimeSource === 'unknown') {
+    issues.push('missing_lead_time')
+  }
+  if (!Number.isFinite(incomingUnits) || incomingUnits === 0) {
+    issues.push('no_incoming_po_data')
+  }
+  if (Number.isFinite(dailySales) && dailySales < MIN_DAILY_SALES_RELIABLE && dailySales > 0) {
+    issues.push('weak_daily_sales')
+  }
+  const stockOk = Number.isFinite(stockOnHand) && stockOnHand >= 0
+  const salesReliable = Number.isFinite(dailySales) && dailySales >= MIN_DAILY_SALES_RELIABLE
+
+  let confidence = 'low'
+  if (salesReliable && stockOk && leadTimeSource !== 'unknown') {
+    confidence = issues.length === 0 ? 'high' : 'medium'
+  } else if (Number.isFinite(dailySales) && dailySales > 0 && stockOk) {
+    confidence = 'medium'
+  }
+  return { confidence, issues }
+}
+
+/**
+ * Candidats a recompra. Ordenació: 1) risc més imminent (daysUntilStockout asc), 2) confiança més alta (high > medium > low), 3) reorderUnits desc.
+ * Sanitization: reorderUnits ≥ 0; coverageDays cap (no Infinity); dailySales = 0 no genera candidat.
  *
  * @param {import('@supabase/supabase-js').SupabaseClient} supabase
  * @param {string} orgId
  * @param {{ limit?: number, lookbackDays?: number, leadTimeDays?: number }} [options]
- * @returns {Promise<Array<{ asin: string, productName: string | null, dailySales: number, stockOnHand: number, incomingUnits: number, leadTimeDays: number, reorderUnits: number, daysUntilStockout: number }>>}
+ * @returns {Promise<Array<{ asin: string, productName: string | null, dailySales: number, stockOnHand: number, incomingUnits: number, leadTimeDays: number, reorderUnits: number, daysUntilStockout: number, coverageDays: number, demandDuringLeadTime: number, leadTimeSource: LeadTimeSource, confidence: Confidence, issues: string[] }>>}
  */
 export async function getReorderCandidates(supabase, orgId, options = {}) {
   if (!orgId || typeof orgId !== 'string') return []
@@ -138,6 +178,7 @@ export async function getReorderCandidates(supabase, orgId, options = {}) {
   const limit = Math.max(1, Math.min(100, Number(options?.limit) ?? DEFAULT_LIMIT))
   const lookbackDays = Math.max(1, Math.min(365, Number(options?.lookbackDays) ?? DEFAULT_LOOKBACK_DAYS))
   const leadTimeFallback = Math.max(0, Number(options?.leadTimeDays) ?? DEFAULT_LEAD_TIME_DAYS)
+  const leadTimeSource = 'fallback'
 
   let asins = []
   try {
@@ -154,11 +195,17 @@ export async function getReorderCandidates(supabase, orgId, options = {}) {
       const { projectId, productName } = await resolveProduct(supabase, orgId, asin)
       if (!projectId) continue
 
-      const [dailySales, stockOnHand, incomingUnits] = await Promise.all([
+      const [dailySalesRaw, stockOnHandRaw, incomingUnitsRaw] = await Promise.all([
         getAverageDailyUnitsSold(supabase, orgId, projectId, lookbackDays),
         getCurrentStock(supabase, orgId, projectId),
         getIncomingUnits(supabase, orgId, projectId),
       ])
+
+      const dailySales = Number.isFinite(dailySalesRaw) ? Math.max(0, dailySalesRaw) : 0
+      const stockOnHand = Number.isFinite(stockOnHandRaw) ? Math.max(0, stockOnHandRaw) : 0
+      const incomingUnits = Number.isFinite(incomingUnitsRaw) ? Math.max(0, incomingUnitsRaw) : 0
+
+      if (dailySales <= 0) continue
 
       const leadTimeDays = leadTimeFallback
       const demandDuringLeadTime = dailySales * leadTimeDays
@@ -168,10 +215,12 @@ export async function getReorderCandidates(supabase, orgId, options = {}) {
       if (reorderNeeded <= 0) continue
 
       const reorderUnits = Math.max(0, Math.round(reorderNeeded))
-      const daysUntilStockout =
-        dailySales > 0 && Number.isFinite(dailySales)
-          ? Math.max(0, stockOnHand / dailySales)
-          : 0
+      const daysUntilStockout = Math.max(0, stockOnHand / dailySales)
+      let coverageDays = available / dailySales
+      if (!Number.isFinite(coverageDays) || coverageDays < 0) coverageDays = 0
+      if (coverageDays > COVERAGE_DAYS_CAP) coverageDays = COVERAGE_DAYS_CAP
+
+      const { confidence, issues } = getConfidenceAndIssues(dailySales, stockOnHand, incomingUnits, leadTimeSource)
 
       candidates.push({
         asin: (asin || '').trim(),
@@ -182,16 +231,25 @@ export async function getReorderCandidates(supabase, orgId, options = {}) {
         leadTimeDays,
         reorderUnits,
         daysUntilStockout,
+        coverageDays,
+        demandDuringLeadTime,
+        leadTimeSource,
+        confidence,
+        issues: Array.isArray(issues) ? issues : [],
       })
     } catch {
       continue
     }
   }
 
+  const confidenceOrder = { high: 0, medium: 1, low: 2 }
   candidates.sort((a, b) => {
-    const dA = a.daysUntilStockout ?? Infinity
-    const dB = b.daysUntilStockout ?? Infinity
+    const dA = a.daysUntilStockout ?? 0
+    const dB = b.daysUntilStockout ?? 0
     if (dA !== dB) return dA - dB
+    const cA = confidenceOrder[a.confidence] ?? 2
+    const cB = confidenceOrder[b.confidence] ?? 2
+    if (cA !== cB) return cA - cB
     return (b.reorderUnits ?? 0) - (a.reorderUnits ?? 0)
   })
 

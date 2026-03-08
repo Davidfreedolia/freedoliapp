@@ -172,7 +172,7 @@ Ordenació: 1) daysUntilStockout asc, 2) reorderUnits desc. Es retorna fins a `l
 | incoming_units | `purchase_orders` (org_id, project_id, items) | Suma item.quantity / item.qty / item.units; sense filtre d’estat de PO. |
 | lead_time_days | Fallback 30 | No s’usa supplier_quotes.lead_time_days ni cap altra font per producte. |
 
-### Output contract
+### Output contract (ampliat D19.3)
 
 ```js
 [
@@ -184,7 +184,12 @@ Ordenació: 1) daysUntilStockout asc, 2) reorderUnits desc. Es retorna fins a `l
     incomingUnits: number,
     leadTimeDays: number,
     reorderUnits: number,
-    daysUntilStockout: number
+    daysUntilStockout: number,
+    coverageDays: number,
+    demandDuringLeadTime: number,
+    leadTimeSource: 'configured' | 'fallback' | 'derived' | 'unknown',
+    confidence: 'high' | 'medium' | 'low',
+    issues: string[]
   }
 ]
 ```
@@ -204,4 +209,42 @@ El widget **Reorder candidates** a la Home consumeix el motor real `getReorderCa
 
 **Camps mostrats al widget:** productName (o ASIN si no hi ha nom), reorderUnits, daysUntilStockout (o "—" si no fiable), stockOnHand, incomingUnits. Màxim 5 files.
 
-**Estats:** loading; empty state "No reorder actions needed right now." quan no hi ha candidats; si el motor falla, el composador retorna `reorder.candidates = []` i es mostra el mateix empty state (no es trenca la resta de la Home).
+**Estats:** loading; empty state "No reorder actions needed right now." quan no hi ha candidats; si el motor falla, el composador retorna `reorder.candidates = []` i es mostra el mateix empty state (no es trenca la resta de la Home). D19.3: el widget pot mostrar la pista discreta "(low confidence)" quan el candidat té `confidence === 'low'`; els camps nous del contracte (coverageDays, confidence, issues) queden disponibles per a la UI.
+
+---
+
+## Hardening — Quality rules and confidence model (D19.3)
+
+### Contracte ampliat (output per candidat)
+
+Cada candidat retornat per `getReorderCandidates` inclou:
+
+- **Camps existents:** asin, productName, dailySales, stockOnHand, incomingUnits, leadTimeDays, reorderUnits, daysUntilStockout.
+- **Nous camps de qualitat:** coverageDays (dies de cobertura amb stock + incoming; cap a 999, mai Infinity), demandDuringLeadTime, leadTimeSource (`'configured' | 'fallback' | 'derived' | 'unknown'`), confidence (`'high' | 'medium' | 'low'`), issues (array de strings; sempre array).
+
+### Regles de confidence (aplicades al motor)
+
+- **high:** dailySales ≥ 0.5 (MIN_DAILY_SALES_RELIABLE), stockOnHand finit i ≥ 0, leadTimeSource ≠ unknown, i cap issue crític (sense lead_time_fallback o weak_daily_sales).
+- **medium:** dailySales > 0 i stockOnHand finit, però hi ha algun issue (p. ex. lead_time_fallback o weak_daily_sales) o dailySales < 0.5; la recomanació segueix sent usable.
+- **low:** falta lead time real, dailySales molt feble o nul, o dades incompletes; es mostra com a candidat amb confiança baixa per no amagar informació, però la UI pot marcar-ho (p. ex. "(low confidence)").
+
+En l’estat actual del motor, leadTimeSource és sempre `'fallback'`; per tant es pot tenir high només si no s’afegeix cap issue (p. ex. si es relaxa “lead_time_fallback” com a issue o es considera acceptable).
+
+### Política per dades incompletes
+
+- **Productes sense vendes recents (dailySales = 0):** no es consideren candidats; no es genera reorder. Evita recomanacions absurdes.
+- **reorderUnits:** mai negatiu; sempre Math.max(0, round(reorderNeeded)).
+- **coverageDays:** mai Infinity; es limita a COVERAGE_DAYS_CAP (999). Divisió per zero: si dailySales ≤ 0, el producte no entra com a candidat.
+- **Si un producte no es pot avaluar amb sentit:** no surt com a candidat (exemple: dailySales = 0). Si surt amb dades parcials útils però dubtoses, surt amb confidence = low i issues clars (p. ex. weak_daily_sales).
+
+### Ordenació final
+
+1. **Risc més imminent:** daysUntilStockout ascendent (els que abans queden sense stock primer).
+2. **Confiança més alta:** high abans que medium abans que low.
+3. **reorderUnits més altes:** descendent com a desempat.
+
+### Limitacions actuals honestes (post-hardening)
+
+- leadTimeSource és sempre `fallback`; no hi ha integració amb supplier/product config.
+- issues inclouen, quan cal: `missing_lead_time` (leadTimeSource fallback/unknown), `no_incoming_po_data` (incomingUnits no fiable o 0), `weak_daily_sales` (vendes < 0.5 u/dia). No es marquen (per ara) altres mancances com a incoming PO no filtrat per estat.
+- El widget Home mostra només una pista discreta "(low confidence)"; la resta de camps de qualitat queden disponibles per a futures vistes o alertes.
