@@ -800,83 +800,95 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* D21.4 — Home KPI row + Alerts row (dades reals del composador) */}
-        {homeDataError && (
-          <div
-            role="alert"
-            style={{
-              marginBottom: 12,
-              padding: '10px 14px',
-              borderRadius: 8,
-              fontSize: 14,
-              color: 'var(--danger-1, #b91c1c)',
-              background: 'var(--error-bg, #fef2f2)',
-              border: '1px solid var(--border-color)',
-            }}
-          >
-            {homeDataError}
+        {/* D21.7 — Home layout (D15): header + KPI + Alerts + Performance + Operations + reserved slot */}
+        <section style={styles.homeSection} aria-label="Home dashboard">
+          <header style={styles.homeHeader}>
+            <h1 style={styles.homeTitle}>{t('dashboard.modeA.title', 'Dashboard')}</h1>
+            <p style={styles.homeSubtitle}>{t('dashboard.modeA.subtitle', 'Resum del teu negoci')}</p>
+          </header>
+
+          {homeDataError && (
+            <div
+              role="alert"
+              style={{
+                marginBottom: 16,
+                padding: '10px 14px',
+                borderRadius: 8,
+                fontSize: 14,
+                color: 'var(--danger-1, #b91c1c)',
+                background: 'var(--error-bg, #fef2f2)',
+                border: '1px solid var(--border-color)',
+              }}
+            >
+              {homeDataError}
+            </div>
+          )}
+
+          <div style={styles.homeRow} aria-label="KPI row">
+            <HomeKpiCard
+              title="Net profit (30d)"
+              value={formatCurrency(homeData?.kpis?.netProfit30d)}
+              loading={homeDataLoading}
+            />
+            <HomeKpiCard
+              title="Revenue (30d)"
+              value={formatCurrency(homeData?.kpis?.revenue30d)}
+              loading={homeDataLoading}
+            />
+            <HomeKpiCard
+              title="Margin (30d)"
+              value={formatPercent(homeData?.kpis?.margin30d)}
+              loading={homeDataLoading}
+            />
+            <HomeKpiCard
+              title="Cash now"
+              value={formatCurrency(homeData?.kpis?.cashNow)}
+              loading={homeDataLoading}
+            />
           </div>
-        )}
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }} aria-label="KPI row">
-          <HomeKpiCard
-            title="Net profit (30d)"
-            value={formatCurrency(homeData?.kpis?.netProfit30d)}
-            loading={homeDataLoading}
-          />
-          <HomeKpiCard
-            title="Revenue (30d)"
-            value={formatCurrency(homeData?.kpis?.revenue30d)}
-            loading={homeDataLoading}
-          />
-          <HomeKpiCard
-            title="Margin (30d)"
-            value={formatPercent(homeData?.kpis?.margin30d)}
-            loading={homeDataLoading}
-          />
-          <HomeKpiCard
-            title="Cash now"
-            value={formatCurrency(homeData?.kpis?.cashNow)}
-            loading={homeDataLoading}
-          />
-        </div>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }} aria-label="Alerts row">
-          <HomeAlertsPanel
-            title="Margin alerts"
-            items={homeData?.alerts?.margin ?? []}
-            type="margin"
-            emptyMessage="No margin alerts."
-          />
-          <HomeAlertsPanel
-            title="Stockout risk"
-            items={homeData?.alerts?.stockout ?? []}
-            type="stockout"
-            emptyMessage="No stockout risk."
-          />
-        </div>
 
-        {/* D21.5 — Performance row (Profit trend + Top ASINs) */}
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }} aria-label="Performance row">
-          <HomeProfitTrend
-            data={homeData?.performance?.profitTrend}
-            loading={homeDataLoading}
-          />
-          <HomeTopAsins
-            items={homeData?.performance?.topAsins}
-            loading={homeDataLoading}
-          />
-        </div>
+          <div style={styles.homeRow} aria-label="Alerts row">
+            <HomeAlertsPanel
+              title="Margin alerts"
+              items={homeData?.alerts?.margin ?? []}
+              type="margin"
+              emptyMessage="No margin alerts."
+            />
+            <HomeAlertsPanel
+              title="Stockout risk"
+              items={homeData?.alerts?.stockout ?? []}
+              type="stockout"
+              emptyMessage="No stockout risk."
+            />
+          </div>
 
-        {/* D21.6 — Operations row (Billing usage + Active projects) */}
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }} aria-label="Operations row">
-          <HomeBillingUsage
-            billingUsage={homeData?.operations?.billingUsage}
-            loading={homeDataLoading}
-          />
-          <HomeActiveProjects
-            projects={homeData?.projects?.active}
-            loading={homeDataLoading}
-          />
-        </div>
+          <div style={styles.homeRow} aria-label="Performance row">
+            <HomeProfitTrend
+              data={homeData?.performance?.profitTrend}
+              loading={homeDataLoading}
+            />
+            <HomeTopAsins
+              items={homeData?.performance?.topAsins}
+              loading={homeDataLoading}
+            />
+          </div>
+
+          <div style={styles.homeRow} aria-label="Operations row">
+            <HomeBillingUsage
+              billingUsage={homeData?.operations?.billingUsage}
+              loading={homeDataLoading}
+            />
+            <HomeActiveProjects
+              projects={homeData?.projects?.active}
+              loading={homeDataLoading}
+            />
+          </div>
+
+          {/* D15 reserved slot — Reorder candidates (D19); no implementat; placeholder passiu */}
+          <div style={styles.homeReorderSlot} aria-hidden="true">
+            <span style={styles.homeReorderSlotText}>Reorder candidates — no disponible (D19)</span>
+          </div>
+        </section>
 
         {/* Requereix atenció — Projectes bloquejats */}
         {blockedProjects.length >= 1 && (
@@ -1858,6 +1870,42 @@ const styles = {
   content: {
     padding: '32px',
     overflowY: 'auto'
+  },
+  homeSection: {
+    marginBottom: 32,
+    maxWidth: 1200,
+  },
+  homeHeader: {
+    marginBottom: 24,
+  },
+  homeTitle: {
+    margin: 0,
+    fontSize: 22,
+    fontWeight: 600,
+    color: 'var(--text-1, #111827)',
+    letterSpacing: '-0.02em',
+  },
+  homeSubtitle: {
+    margin: '4px 0 0',
+    fontSize: 14,
+    color: 'var(--text-2, #6b7280)',
+  },
+  homeRow: {
+    display: 'flex',
+    gap: 16,
+    flexWrap: 'wrap',
+    marginBottom: 20,
+  },
+  homeReorderSlot: {
+    marginTop: 8,
+    padding: '10px 14px',
+    borderRadius: 8,
+    border: '1px dashed var(--border-color, #e5e7eb)',
+    background: 'var(--card-bg, #f9fafb)',
+  },
+  homeReorderSlotText: {
+    fontSize: 12,
+    color: 'var(--text-2, #6b7280)',
   },
   statsGrid: {
     display: 'grid',

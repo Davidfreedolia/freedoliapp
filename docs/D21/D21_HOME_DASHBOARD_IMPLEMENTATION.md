@@ -451,3 +451,35 @@ Ordre estricte d’implementació:
 - No hi ha navegació ni botons (p. ex. anar a /app/billing o /app/projects).
 - Criteri "active project" és el del composador (status ≠ archived, ≠ cancelled); no es redefineix al frontend.
 
+---
+
+## 17. D21.7 — Apply D15 layout (implemented)
+
+**Organització final de la Home (alineada amb D15):**
+
+- **A. Header / Welcome zone:** Títol principal (Dashboard) i subtítol (Resum del teu negoci) amb `styles.homeHeader`, `homeTitle`, `homeSubtitle`. Sense CTAs nous.
+- **B. KPI row:** Net profit (30d), Revenue (30d), Margin (30d), Cash now — sense canvis de dades; mateixos components `HomeKpiCard`.
+- **C. Alerts row:** Margin alerts, Stockout risk — `HomeAlertsPanel`; sense canvis.
+- **D. Performance row:** Profit trend, Top ASINs — `HomeProfitTrend`, `HomeTopAsins`.
+- **E. Operations row:** Billing usage, Active sourcing projects — `HomeBillingUsage`, `HomeActiveProjects`.
+- **F. Reserved slot (blocked):** Espai reservat per Reorder candidates (D19). Placeholder passiu i discret: text "Reorder candidates — no disponible (D19)" dins un bloc amb vora puntejada; no es promet funcionalitat; `aria-hidden="true"` per no confondre assistents.
+
+**Blocs alineats amb D15:**
+
+- Fila 1 (KPI) = D15 “Fila 1 — KPI row”.
+- Fila 2 (Alertes) = D15 “Fila 2 — Actionable widgets” (Margin Alerts, Stockout Risk).
+- Fila 3 (Rendiment) = D15 “Fila 3 — Performance widgets”.
+- Fila 4 (Operacions) = D15 “Fila 4 — Operational widgets” (Billing/Usage; Active projects com a bloc ample equivalent a “Fila 5 — Projects/sourcing” integrat aquí).
+- Slot Reorder = reservat segons D15/D19; no implementat.
+
+**Punts D15 pendents o adaptats:**
+
+- **Fila 0 (Global alert strips):** Ja es renderitzen a nivell app (`MarginCompressionAlertStrip`, `WorkspaceLimitAlert` a App.jsx); no duplicats a la Home.
+- **Shipments in progress:** D15 el llista a Fila 4; a D21.7 no s’inclou a la secció Operations (només Billing usage + Active projects); es pot afegir en fase posterior.
+- **CTAs de detall:** D15 diu “tots els widgets han de portar a una vista de detall”; a D21.7 no s’han afegit botons/enllaços nous (es permet en fases posteriors).
+- **Layout D15 complet:** Grid net, espaiats coherents (`homeRow` gap 16px, marginBottom 20px), secció amb maxWidth 1200; no s’ha implementat drag & drop ni personalització.
+
+**Estat del slot Reorder:**
+
+- **Blocked.** Placeholder visual discret; cap mock ni dades falses; dependència D19 documentada.
+
