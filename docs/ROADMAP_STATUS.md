@@ -194,6 +194,7 @@ Motor de recomanació de recompra: quan reordenar, quina quantitat, si hi ha pro
 - **D19** — Reorder Intelligence (pre-design fet; implementació pendent)
 - **D20** — Seller Decision Engine
 - **D21** — Custom Home Dashboard (Implementation)
+- **D22** — Operations Planning Views (planned; vistes Table/Kanban/Gantt; després de consolidar reorder alerts)
 
 **Nota:** D15 defineix l'arquitectura del dashboard. La implementació real començarà a D20.
 

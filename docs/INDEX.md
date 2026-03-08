@@ -116,6 +116,11 @@ Last verified against: (run: `git rev-parse --short HEAD`) — 2025-02-17
 - **D21 Home Dashboard Implementation** — `docs/D21/D21_HOME_DASHBOARD_IMPLEMENTATION.md`  
   Especificació d’implementació de la Home (D15): capa de composició sobre engines existents; principis no negociables; widgets MVP (KPI row, Alerts, Performance, Operations, Projects); Reorder candidates fora de scope fins D19; mapping engine→widget; file touch plan; risks; definition of done. Status: DRAFT.
 
+## D22 — Operations Planning Views (Planned)
+
+- **D22 Operations Planning Views** — `docs/D22/D22_OPERATIONS_PLANNING_VIEWS.md`
+  Fase futura: vistes seleccionables (Table, Kanban, Gantt) per visualitzar planificació operativa i reorder; fonts D16, D17, D19, POs; vista seleccionable per l'usuari. Status: PLANNED.
+
 ## D9 — Runbooks & Incident Playbooks
 - `docs/D9/D9__runbooks__v1.0.md` — status: draft
 
