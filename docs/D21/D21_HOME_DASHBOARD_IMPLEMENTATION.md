@@ -322,3 +322,61 @@ Ordre estricte d’implementació:
 4. **Performance row** — Profit trend (gràfic Recharts) i Top ASINs (taula/llista N primers); mateixes dades del data wiring.
 5. **Billing / Projects row** — Billing usage card (plan, seats, projects); Active sourcing projects (llista filtrada + limit, CTA a /app/projects).
 6. **Polish states** — Loading skeletons coherents, missatges d’error, empty states, navegació CTA; revisió de no duplicar càlculs i de finestres temporals consistents.
+
+---
+
+## 13. D21.3 — Data wiring skeleton (implemented)
+
+**Fitxer del composador:** `src/hooks/useHomeDashboardData.js`
+
+**Shape retornada:** (estable per la Home)
+
+```js
+{
+  loading: boolean,
+  error: string | null,
+  data: {
+    kpis: {
+      netProfit30d: number | null,
+      revenue30d: number | null,
+      margin30d: number | null,
+      cashNow: number | null,
+    },
+    alerts: {
+      margin: Array,
+      stockout: Array,
+    },
+    performance: {
+      profitTrend: Array,
+      topAsins: Array,
+    },
+    operations: {
+      billingUsage: { usage, billing } | null,
+    },
+    projects: {
+      active: Array,
+    },
+    blocked: {
+      reorderCandidates: true,
+    },
+  } | null
+}
+```
+
+**Dependències connectades a D21.3:**
+
+- `getWorkspaceProfit(supabase, orgId, { dateFrom, dateTo })` — finestra 30d; agregat a totals i topAsins.
+- `getProfitTimeseries(supabase, orgId, { dateFrom, dateTo })` — profitTrend.
+- `getMarginCompressionAlerts(supabase, orgId, { lookbackDays: 30, recentDays: 7 })` — alerts.margin.
+- `getStockoutAlerts(supabase, orgId, { lookbackDays: 30 })` — alerts.stockout.
+- `getCashflowForecast(supabase, orgId, { forecastDays: 30 })` — cashNow (primera entrada).
+- `useWorkspaceUsage()` — part de operations.billingUsage (usage).
+- `useOrgBilling(activeOrgId)` — part de operations.billingUsage (billing).
+- `useProjectsListState()` — projects.active després de filtre actius + limit 10.
+
+**Camps blocked o null:**
+
+- `blocked.reorderCandidates` — sempre `true`; motor D19 no implementat; cap mock.
+- `kpis.*` — poden ser `null` si no hi ha dades o error (per exemple profit no disponible per l’org).
+- `operations.billingUsage` — `null` si usage i billing no disponibles; sinó `{ usage, billing }`.
+- `cashNow` — `null` si la sèrie de cashflow és buida.
