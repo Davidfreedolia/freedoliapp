@@ -24,6 +24,10 @@ Last verified against: (run: `git rev-parse --short HEAD`) — 2025-02-17
 ## D10 — Product Core Architecture
 - `docs/D10_PRODUCT_CORE_ARCHITECTURE.md` — F10 Product Core (Product Brain, Profit Truth, Launch Pipeline, Portfolio Brain)
 
+## Architecture
+
+- `docs/ARCHITECTURE_LAYERS.md` — Layered system architecture and evolution rules
+
 ## D1 — Architecture Overview
 - `docs/D1/D1__architecture-overview__v1.0.md` — status: stable
 
@@ -120,6 +124,26 @@ Last verified against: (run: `git rev-parse --short HEAD`) — 2025-02-17
 
 - **D22 Operations Planning Views** — `docs/D22/D22_OPERATIONS_PLANNING_VIEWS.md`
   Fase futura: vistes seleccionables (Table, Kanban, Gantt) per visualitzar planificació operativa i reorder; fonts D16, D17, D19, POs; vista seleccionable per l'usuari. Status: PLANNED.
+
+## D25 — Multichannel Ingestion and Auth Boundary
+
+- **D25 Multichannel Ingestion and Auth Boundary** — `docs/D25/D25_MULTICHANNEL_INGESTION_AND_AUTH_BOUNDARY.md` — Multichannel ingestion model and auth boundary rules
+
+## D26 — Auth Providers & Login Strategy
+
+- **D26 Auth Providers and Login Strategy** — `docs/D26/D26_AUTH_PROVIDERS_AND_LOGIN_STRATEGY.md` — Authentication providers and login architecture
+
+## D27 — Login UX Evolution
+
+- **D27 Login UX Evolution** — `docs/D27/D27_LOGIN_UX_EVOLUTION.md` — Login screen evolution and identity provider UX
+
+## D28 — Identity Linking Model
+
+- **D28 Identity Linking Model** — `docs/D28/D28_IDENTITY_LINKING_MODEL.md` — Identity provider linking architecture
+
+## D29 — Global Supply Network Model
+
+- **D29 Global Supply Network Model** — `docs/D29/D29_GLOBAL_SUPPLY_NETWORK_MODEL.md` — Global supply and regional commerce architecture
 
 ## D9 — Runbooks & Incident Playbooks
 - `docs/D9/D9__runbooks__v1.0.md` — status: draft

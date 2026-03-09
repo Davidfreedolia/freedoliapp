@@ -1,119 +1,168 @@
-# D18 — Trial Registration Capture (Pre-Design)
+# D18 — Trial Registration Capture
 
-**Status:** pre-design (documentació i definició funcional; sense implementació)  
-**Objectiu:** Definir el flux de captació de dades del lead abans d’iniciar la prova gratuïta.
+## Status
+Draft
 
----
+Current implementation status:
+- table created
+- lead capture helper created
+- login entrypoint wired
+- duplicate protection added
+- workspace link added
 
-## 1. Objectiu
+## Objective
+Capture lead information before starting the trial or Stripe checkout.
 
-Abans d’activar la prova, FREEDOLIAPP ha de capturar dades mínimes del possible client per:
+The goal is to build a minimal SaaS funnel without breaking the current onboarding flow.
 
-- identificar el lead
-- qualificar-lo
-- millorar onboarding
-- activar futures accions comercials
+## Problem
 
----
+Current flow:
 
-## 2. Principi de producte
-
-El registre ha de ser:
-
-- curt
-- útil
-- obligatori abans de la prova
-- sense fricció absurda
-- amb onboarding progressiu després
-
----
-
-## 3. Camps obligatoris inicials
-
-- `full_name`
-- `email`
-- `company_name`
-- `country`
-- `primary_marketplace`
-- `seller_type` (FBA / FBM / Hybrid)
-- `business_stage`
-- `consent_checkbox`
-
----
-
-## 4. Camps opcionals o posteriors
-
-- `monthly_revenue_range`
-- `asin_count_range`
-- `current_tools`
-- `team_size`
-
----
-
-## 5. Flux canònic
-
-```text
 Landing
-  → CTA "Start free trial"
-  → Trial registration form
-  → account creation
-  → workspace creation
-  → onboarding wizard
-```
+→ Login / Signup
+→ Stripe checkout
+→ App
 
----
+Missing capability:
 
-## 6. Regles
+- Lead capture
+- Trial analytics
+- Conversion tracking
 
-- no entrar a la prova sense registre mínim
-- no convertir el formulari en una paret eterna
-- separar lead capture de l'onboarding profund
-- guardar sempre org_id + user_id + lead profile
+## Target Flow
 
----
+Landing
+→ Trial registration
+→ Trial workspace creation
+→ App access
+→ Stripe upgrade
 
-## 7. Model de dades proposat
+## Data Model (proposed)
 
-Definir taula o capa de persistència per: **trial_leads** (o equivalent).
+Table: trial_registrations
 
-| Camp | Tipus | Notes |
-|------|--------|--------|
-| `id` | uuid | PK |
-| `user_id` | uuid | nullable fins crear compte |
-| `org_id` | uuid | nullable inicialment si cal |
-| `full_name` | text | |
-| `email` | text | |
-| `company_name` | text | |
-| `country` | text | |
-| `primary_marketplace` | text | |
-| `seller_type` | text | FBA / FBM / Hybrid |
-| `business_stage` | text | |
-| `monthly_revenue_range` | text | nullable |
-| `asin_count_range` | text | nullable |
-| `current_tools` | text | nullable |
-| `consent_given` | boolean | |
-| `created_at` | timestamptz | |
+Fields:
 
----
+id (uuid)
+created_at (timestamp)
 
-## 8. Ús d’aquestes dades
+email (text)
+name (text)
+company_name (text)
 
-- CRM intern futur
-- onboarding personalitzat
-- segmentació de trials
-- detecció de leads bons
-- mètriques de conversió trial → paid
+source (text)
+utm_source (text)
+utm_campaign (text)
 
----
+status (enum)
 
-## 9. Relació amb billing i signup
+possible values:
+- started
+- workspace_created
+- converted
+- abandoned
 
-- **Trial registration** passa abans de billing.
-- **Billing** comença quan el trial està creat.
-- El **lead profile** no substitueix user profile ni org settings.
+## Non-Goals
 
----
+This phase does NOT:
 
-## 10. Resultat esperat
+- modify Stripe checkout
+- change billing engine
+- introduce CRM features
+- change onboarding wizard
+- D18 does not implement Google, Apple, Microsoft, or Amazon social login
+- D18 only prepares the lead capture layer so future identity providers can reuse it
 
-FREEDOLIAPP deixa de perdre informació comercial crítica en el punt d’entrada.
+## Constraints
+
+Must not break:
+
+billing engine
+Stripe checkout
+workspace creation flow
+
+## Implemented Contract
+
+### Lead capture entrypoint
+The current trial lead capture entrypoint is the Login flow.
+
+File:
+src/pages/Login.jsx
+
+Lead capture is triggered when the user starts email login or magic link flow.
+
+### Persistence
+Helper:
+src/lib/trials/registerTrialLead.js
+
+Behavior:
+- normalizes email with trim()
+- if email is empty, does nothing
+- checks latest trial_registrations record for same email
+- if a record exists in the last 24 hours, skips insert
+- otherwise inserts a new row with status = started
+- never blocks onboarding
+- never throws
+- failures only produce console.warn
+
+### Workspace linkage
+Helper:
+src/lib/workspace/createWorkspace.js
+
+Behavior:
+- after workspace creation, tries to update matching trial_registrations
+- matches by email
+- only updates rows where workspace_id is null
+- sets:
+  - status = workspace_created
+  - workspace_id = created org_id
+- this step is fire-and-forget and must not block workspace creation
+
+### Current lifecycle
+started
+→ workspace_created
+→ converted (future)
+
+## Identity / Signup Options (Future)
+
+Trial registration capture in D18 is independent from authentication method.
+
+This phase does not implement social login.
+
+However, future signup options should be documented as supported entry points for trial creation.
+
+### Recommended priority
+
+1. Email
+2. Google
+3. Microsoft
+4. Apple
+
+### Amazon Login
+
+Amazon login is not a priority identity provider for D18.
+
+Reason:
+Freedoliapp is a SaaS for Amazon sellers, but user identity and Amazon marketplace integration are separate concerns.
+
+Using Amazon as a primary login method may create confusion between:
+
+- SaaS account access
+- Amazon Seller account connection
+
+Therefore, Amazon login is considered optional and future-only.
+
+### Rule
+
+Any future social login must plug into the same D18 lead capture flow.
+
+That means:
+
+- lead is still captured first
+- workspace creation flow remains canonical
+- billing flow remains unchanged
+
+## Deliverable
+
+Documentation ready before implementation. Implementation as per Implemented Contract is in place.
