@@ -79,6 +79,7 @@ import HomeTopAsins from '../components/home/HomeTopAsins'
 import HomeBillingUsage from '../components/home/HomeBillingUsage'
 import HomeActiveProjects from '../components/home/HomeActiveProjects'
 import HomeReorderCandidates from '../components/home/HomeReorderCandidates'
+import HomeTopDecisions from '../components/home/HomeTopDecisions'
 
 const formatCurrency = (amount, currency = 'EUR') =>
   (amount != null && Number.isFinite(amount))
@@ -884,6 +885,9 @@ export default function Dashboard() {
               loading={homeDataLoading}
             />
           </div>
+
+          {/* D35/D36 — Top Decisions widget (Decision Inbox teaser) */}
+          <HomeTopDecisions />
 
           {/* D19.2 — Reorder candidates widget (motor real getReorderCandidates) */}
           <HomeReorderCandidates

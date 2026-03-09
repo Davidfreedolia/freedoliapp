@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { Send } from 'lucide-react'
 import { logSuccess, logError } from '../lib/auditLog'
 import { isDemoMode } from '../demo/demoMode'
+import { registerTrialLead } from '../lib/trials/registerTrialLead'
 import useT from '../hooks/useT'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
@@ -40,8 +41,22 @@ export default function Login() {
     return () => subscription.unsubscribe()
   }, [navigate])
 
+  const captureTrialLead = (userEmail) => {
+    if (!userEmail?.trim()) return
+    const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '')
+    registerTrialLead(supabase, {
+      email: userEmail.trim(),
+      name: undefined,
+      companyName: undefined,
+      source: 'landing',
+      utmSource: params.get('utm_source') || undefined,
+      utmCampaign: params.get('utm_campaign') || undefined
+    }).catch(() => {})
+  }
+
   const handleEmailLogin = async (e) => {
     e.preventDefault()
+    captureTrialLead(email)
     setLoading(true)
     setError(null)
 
@@ -70,6 +85,7 @@ export default function Login() {
 
   const handleMagicLink = async (e) => {
     e.preventDefault()
+    captureTrialLead(email)
     setLoading(true)
     setError(null)
 

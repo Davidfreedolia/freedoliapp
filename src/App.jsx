@@ -90,7 +90,10 @@ const AmazonImports = lazyWithErrorBoundary(() => import('./pages/AmazonImports'
 const Inventory = lazyWithErrorBoundary(() => import('./pages/Inventory'), 'Inventory')
 const Settings = lazyWithErrorBoundary(() => import('./pages/Settings'), 'Settings')
 const Analytics = lazyWithErrorBoundary(() => import('./pages/Analytics'), 'Analytics')
+const DecisionDashboard = lazyWithErrorBoundary(() => import('./pages/DecisionDashboard'), 'DecisionDashboard')
 const Profit = lazyWithErrorBoundary(() => import('./pages/Profit'), 'Profit')
+const Cashflow = lazyWithErrorBoundary(() => import('./pages/Cashflow'), 'Cashflow')
+const OperationsPlanning = lazyWithErrorBoundary(() => import('./pages/OperationsPlanning'), 'OperationsPlanning')
 const Suppliers = lazyWithErrorBoundary(() => import('./pages/Suppliers'), 'Suppliers')
 const Forwarders = lazyWithErrorBoundary(() => import('./pages/Forwarders'), 'Forwarders')
 const Warehouses = lazyWithErrorBoundary(() => import('./pages/Warehouses'), 'Warehouses')
@@ -103,8 +106,44 @@ const BillingOverSeat = lazyWithErrorBoundary(() => import('./pages/BillingOverS
 const BillingSettings = lazyWithErrorBoundary(() => import('./pages/BillingSettings'), 'BillingSettings')
 const Billing = lazyWithErrorBoundary(() => import('./pages/Billing'), 'Billing')
 const AmazonSnapshot = lazyWithErrorBoundary(() => import('./pages/AmazonSnapshot'), 'AmazonSnapshot')
+const AdminConsole = lazyWithErrorBoundary(() => import('./pages/AdminConsole'), 'AdminConsole')
+const Decisions = lazyWithErrorBoundary(() => import('./pages/Decisions'), 'Decisions')
 
 const ADMIN_EMAILS = new Set(['david@freedolia.com'])
+
+/** D23 — Protect admin route: only users whose email is in ADMIN_EMAILS can access. */
+function AdminGate({ children }) {
+  const [loading, setLoading] = useState(true)
+  const [allowed, setAllowed] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (cancelled) return
+      const email = session?.user?.email ?? ''
+      setAllowed(ADMIN_EMAILS.has(email))
+      setLoading(false)
+    }).catch(() => {
+      if (!cancelled) {
+        setAllowed(false)
+        setLoading(false)
+      }
+    })
+    return () => { cancelled = true }
+  }, [])
+
+  if (loading) {
+    return (
+      <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary, #6b7280)' }}>
+        Carregant…
+      </div>
+    )
+  }
+  if (!allowed) {
+    return <Navigate to="/app" replace />
+  }
+  return children
+}
 
 function OnboardingGate({ children }) {
   const { isWorkspaceReady, activeOrgId } = useWorkspace()
@@ -409,7 +448,12 @@ function App() {
                 <Route path="finances/amazon-imports" element={<AppPageWrap context="page:AmazonImports"><AmazonImports /></AppPageWrap>} />
                 <Route path="inventory" element={<AppPageWrap context="page:Inventory"><Inventory /></AppPageWrap>} />
                 <Route path="analytics" element={<AppPageWrap context="page:Analytics"><Analytics /></AppPageWrap>} />
+                <Route path="decision-dashboard" element={<AppPageWrap context="page:DecisionDashboard"><DecisionDashboard /></AppPageWrap>} />
                 <Route path="profit" element={<AppPageWrap context="page:Profit"><Profit /></AppPageWrap>} />
+                <Route path="cash" element={<AppPageWrap context="page:Cashflow"><Cashflow /></AppPageWrap>} />
+                <Route path="operations" element={<AppPageWrap context="page:OperationsPlanning"><OperationsPlanning /></AppPageWrap>} />
+                <Route path="decisions" element={<AppPageWrap context="page:Decisions"><Decisions /></AppPageWrap>} />
+                <Route path="admin" element={<AdminGate><AppPageWrap context="page:AdminConsole"><AdminConsole /></AppPageWrap></AdminGate>} />
                 <Route path="settings" element={<AppPageWrap context="page:Settings"><Settings /></AppPageWrap>} />
                 <Route path="settings/billing" element={<Navigate to="/app/billing" replace />} />
                 <Route path="billing" element={<AppPageWrap context="page:Billing"><Billing /></AppPageWrap>} />

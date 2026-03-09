@@ -116,6 +116,10 @@ Estat real del producte després de Profit Truth Engine, Margin Compression Aler
 | **D12 — Workspace Usage Engine** | ✅ |
 | **D13 — Profit Truth Engine** | ✅ |
 | **D14 — Margin Compression Alerts** | ✅ |
+| **D33 — Decision Engine Integration** | ✅ (Bridge + Reorder integration; doc D33) |
+| **D34 — Decision Scheduler** | ✅ (Edge Function `decision-scheduler`, cron, runtime validation; doc D34) |
+
+**Next phase pending:** Decision Inbox UI — surface decisions to the seller (list, acknowledge, resolve, dismiss). Without it, decisions are persisted but not visible to the end user.
 
 ---
 

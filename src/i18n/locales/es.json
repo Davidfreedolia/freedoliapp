@@ -183,10 +183,18 @@
     "inventory": "Inventario",
     "calendar": "Calendario",
     "analytics": "Analítica",
+    "decisionDashboard": "Decision Dashboard",
     "profit": "Profit",
+    "cashflow": "Cashflow",
+    "operationsPlanning": "Planificación operativa",
+    "decisions": "Decisiones",
     "settings": "Configuración"
   },
   "dashboard": {
+    "modeA": {
+      "title": "Dashboard",
+      "subtitle": "Resumen de tu negocio"
+    },
     "modeB": {
       "title": "Empieza tu primer producto Amazon",
       "subtitle": "Crea un producto y muévelo por el pipeline de lanzamiento.",

@@ -1,18 +1,21 @@
 import { useState, useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { 
-  LayoutDashboard, 
-  FolderKanban, 
-  Users, 
+import {
+  LayoutDashboard,
+  FolderKanban,
+  Users,
   Truck,
   Warehouse,
-  FileText, 
+  FileText,
   Receipt,
   Package,
   TrendingUp,
   DollarSign,
+  Wallet,
+  ClipboardList,
   Calendar as CalendarIcon,
+  Inbox,
   Settings,
   ChevronLeft,
   X,
@@ -64,8 +67,20 @@ const prefetchRoute = (path) => {
     case '/analytics':
       import('../pages/Analytics.jsx').catch(() => {})
       break
+    case '/decision-dashboard':
+      import('../pages/DecisionDashboard.jsx').catch(() => {})
+      break
+    case '/decisions':
+      import('../pages/Decisions.jsx').catch(() => {})
+      break
     case '/profit':
       import('../pages/Profit.jsx').catch(() => {})
+      break
+    case '/cash':
+      import('../pages/Cashflow.jsx').catch(() => {})
+      break
+    case '/operations':
+      import('../pages/OperationsPlanning.jsx').catch(() => {})
       break
     case '/settings':
       import('../pages/Settings.jsx').catch(() => {})
@@ -90,9 +105,13 @@ const menuItems = [
   { path: '/app/orders', icon: FileText, labelKey: 'sidebar.orders' },
   { path: '/app/finances', icon: Receipt, labelKey: 'sidebar.finances' },
   { path: '/app/inventory', icon: Package, labelKey: 'sidebar.inventory' },
+  { path: '/app/decisions', icon: Inbox, labelKey: 'sidebar.decisions' },
   { path: '/app/calendar', icon: CalendarIcon, labelKey: 'sidebar.calendar' },
   { path: '/app/analytics', icon: TrendingUp, labelKey: 'sidebar.analytics' },
+  { path: '/app/decision-dashboard', icon: TrendingUp, labelKey: 'sidebar.decisionDashboard' },
   { path: '/app/profit', icon: DollarSign, labelKey: 'sidebar.profit' },
+  { path: '/app/cash', icon: Wallet, labelKey: 'sidebar.cashflow' },
+  { path: '/app/operations', icon: ClipboardList, labelKey: 'sidebar.operationsPlanning' },
 ]
 
 export default function Sidebar() {

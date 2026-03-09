@@ -183,10 +183,18 @@
     "inventory": "Inventari",
     "calendar": "Calendari",
     "analytics": "Analítica",
+    "decisionDashboard": "Decision Dashboard",
     "profit": "Profit",
+    "cashflow": "Cashflow",
+    "operationsPlanning": "Planificació operativa",
+    "decisions": "Decisions",
     "settings": "Configuració"
   },
   "dashboard": {
+    "modeA": {
+      "title": "Dashboard",
+      "subtitle": "Resum del teu negoci"
+    },
     "modeB": {
       "title": "Comença el teu primer producte Amazon",
       "subtitle": "Crea un producte i mou-lo pel pipeline de llançament.",

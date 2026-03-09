@@ -145,6 +145,15 @@ Last verified against: (run: `git rev-parse --short HEAD`) — 2025-02-17
 
 - **D29 Global Supply Network Model** — `docs/D29/D29_GLOBAL_SUPPLY_NETWORK_MODEL.md` — Global supply and regional commerce architecture
 
+## Architecture (D30–D35 — Seller OS Foundation)
+
+- **D30 Product Identity Model** — `docs/ARCHITECTURE/D30_PRODUCT_IDENTITY_MODEL.md` — Canonical product, variant, bundle identity
+- **D31 Inventory Ledger Architecture** — `docs/ARCHITECTURE/D31_INVENTORY_LEDGER_ARCHITECTURE.md` — Ledger-based inventory and snapshots
+- **D32 Decision Engine Architecture** — `docs/ARCHITECTURE/D32_DECISION_ENGINE_ARCHITECTURE.md` — Decision layer and persistent schema
+- **D33 Decision Engine Integration** — `docs/ARCHITECTURE/D33_DECISION_ENGINE_INTEGRATION.md` — Integration contract and safe plan (engines → decisions)
+- **D34 Decision Scheduler** — `docs/ARCHITECTURE/D34_DECISION_SCHEDULER.md` — **Implemented.** Safe scheduled refresh of reorder decisions: Edge Function `decision-scheduler`, cron active, runtime validation done.
+- **D35 Decision Inbox** — `docs/ARCHITECTURE/D35_DECISION_INBOX.md` — Seller-facing inbox contract over persisted decisions (no UI implementation yet).
+
 ## D9 — Runbooks & Incident Playbooks
 - `docs/D9/D9__runbooks__v1.0.md` — status: draft
 
