@@ -4,6 +4,7 @@
  */
 import { getReorderAlerts } from '../../inventory/getReorderAlerts.js'
 import { createDecision } from '../decisionBridge.js'
+import { maybeCreateAutomationProposalForDecision } from '../../automation/maybeCreateAutomationProposalForDecision.js'
 
 const SOURCE_ENGINE = 'reorder_engine'
 const SEVERITY_TO_PRIORITY = { high: 100, medium: 50, low: 10 }
@@ -124,6 +125,11 @@ export async function syncReorderDecisions(supabase, orgId) {
     if (decisionId) {
       result.created += 1
       createdAsinsInRun.add(asin)
+      try {
+        await maybeCreateAutomationProposalForDecision(supabase, { orgId, decisionId })
+      } catch (e) {
+        console.error('syncReorderDecisions: automation proposal failed for decision', decisionId, e)
+      }
     } else {
       result.errors.push(`Failed to create decision for ASIN ${asin}`)
     }

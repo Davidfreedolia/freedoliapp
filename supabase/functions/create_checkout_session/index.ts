@@ -46,13 +46,18 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({ error: "Server configuration error" }, 500);
   }
 
-  const authHeader = req.headers.get("authorization") ?? "";
+  const authHeader = req.headers.get("authorization") ?? req.headers.get("Authorization") ?? "";
+  const bearerMatch = /^Bearer\s+(.+)$/i.exec(authHeader.trim());
+  const accessToken = bearerMatch?.[1]?.trim();
+  if (!accessToken) {
+    return jsonResponse({ error: "Missing or invalid Authorization header (expected: Bearer <token>)" }, 401);
+  }
+
   const supabaseUser = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    global: { headers: { Authorization: authHeader } },
     auth: { persistSession: false },
   });
 
-  const { data: userData, error: userErr } = await supabaseUser.auth.getUser();
+  const { data: userData, error: userErr } = await supabaseUser.auth.getUser(accessToken);
   if (userErr || !userData?.user) {
     return jsonResponse({ error: "Invalid JWT" }, 401);
   }
@@ -92,18 +97,17 @@ Deno.serve(async (req: Request) => {
   }
 
   // 1) Validate membership
-  const { data: membership, error: memErr } = await supabaseAdmin
+  const { data: membershipRows, error: memErr } = await supabaseAdmin
     .from("org_memberships")
-    .select("id")
+    .select("org_id, user_id, role")
     .eq("org_id", orgId)
     .eq("user_id", userId)
-    .maybeSingle();
+    .limit(1);
 
   if (memErr) {
-    console.error("Membership lookup error", memErr);
     return jsonResponse({ error: "Membership lookup failed" }, 500);
   }
-  if (!membership) {
+  if (!membershipRows || membershipRows.length === 0) {
     return jsonResponse({ error: "Forbidden" }, 403);
   }
 

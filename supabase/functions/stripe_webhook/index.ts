@@ -103,9 +103,118 @@ async function markWebhookError(id: string, message: string): Promise<void> {
   }
 }
 
+// D20 — Trial conversion tracking. Same contract as src/lib/trials/markTrialConverted.js
+const TRIAL_STATUS_PENDING = ["started", "workspace_created"];
+
+type TrialConvertResult = {
+  ok: boolean;
+  matched: boolean;
+  updated: boolean;
+  matchType: "workspace_id" | "email" | null;
+  trialRegistrationId: string | null;
+  error: string | null;
+};
+
+async function tryMarkTrialConverted(
+  supabase: ReturnType<typeof createClient>,
+  opts: { workspaceId?: string | null; email?: string | null; convertedAt?: string | null }
+): Promise<TrialConvertResult> {
+  const { workspaceId = null, email = null, convertedAt = null } = opts;
+  const convertedAtValue = convertedAt || nowIso();
+  const empty = (overrides: Partial<TrialConvertResult> = {}): TrialConvertResult => ({
+    ok: true,
+    matched: false,
+    updated: false,
+    matchType: null,
+    trialRegistrationId: null,
+    error: null,
+    ...overrides,
+  });
+
+  try {
+    let row: { id: string } | null = null;
+    let matchType: "workspace_id" | "email" | null = null;
+
+    if (workspaceId) {
+      const { data } = await supabase
+        .from("trial_registrations")
+        .select("id")
+        .eq("workspace_id", workspaceId)
+        .in("status", TRIAL_STATUS_PENDING)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (data) {
+        row = data;
+        matchType = "workspace_id";
+      }
+    }
+
+    if (!row && email) {
+      const normalizedEmail = String(email).trim().toLowerCase();
+      if (normalizedEmail) {
+        const { data: candidates } = await supabase
+          .from("trial_registrations")
+          .select("id, email")
+          .in("status", TRIAL_STATUS_PENDING)
+          .order("created_at", { ascending: false })
+          .limit(10);
+        const found = (candidates || []).find(
+          (c: { email?: string | null }) =>
+            c.email && String(c.email).trim().toLowerCase() === normalizedEmail
+        );
+        if (found) {
+          row = { id: (found as { id: string }).id };
+          matchType = "email";
+        }
+      }
+    }
+
+    if (!row) return empty();
+
+    const { error } = await supabase
+      .from("trial_registrations")
+      .update({ status: "converted", converted_at: convertedAtValue })
+      .eq("id", row.id);
+
+    if (error) {
+      console.warn("D20 trial conversion update failed", error);
+      return empty({
+        ok: false,
+        matched: true,
+        updated: false,
+        matchType,
+        trialRegistrationId: row.id,
+        error: error.message || String(error),
+      });
+    }
+
+    return empty({
+      matched: true,
+      updated: true,
+      matchType,
+      trialRegistrationId: row.id,
+    });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.warn("D20 trial conversion", msg);
+    return empty({ ok: false, error: msg });
+  }
+}
+
 function getMetadataOrgId(obj: { metadata?: { org_id?: string } } | any): string | null {
   const meta = (obj?.metadata ?? {}) as { org_id?: string };
   return meta.org_id ?? null;
+}
+
+function getMetadataUserId(obj: { metadata?: { user_id?: string } } | any): string | null {
+  const meta = (obj?.metadata ?? {}) as { user_id?: string };
+  return meta.user_id ?? null;
+}
+
+function getMetadataPlanCode(obj: { metadata?: { plan_code?: string } } | any): string | null {
+  const meta = (obj?.metadata ?? {}) as { plan_code?: string };
+  return meta.plan_code ?? null;
 }
 
 async function resolveOrgIdFromCustomer(customerId: string): Promise<string | null> {
@@ -386,6 +495,8 @@ async function handleCheckoutSessionCompleted(event: Stripe.Event): Promise<void
   const session = event.data.object as Stripe.Checkout.Session;
 
   const metadataOrgId = getMetadataOrgId(session as any);
+  const metadataUserId = getMetadataUserId(session as any);
+  const metadataPlanCode = getMetadataPlanCode(session as any);
   if (!metadataOrgId) {
     throw new Error("checkout.session.completed missing metadata.org_id");
   }
@@ -451,6 +562,10 @@ async function handleSubscriptionUpsert(event: Stripe.Event): Promise<void> {
   const sub = event.data.object as Stripe.Subscription;
   const customerId = String(sub.customer);
 
+  const metaOrgId = getMetadataOrgId(sub as any);
+  const metaUserId = getMetadataUserId(sub as any);
+  const metaPlanCode = getMetadataPlanCode(sub as any);
+
   const orgId = await resolveOrgIdFromEventObject(sub as any);
 
   // ensure billing customer row exists
@@ -504,6 +619,34 @@ async function handleSubscriptionUpsert(event: Stripe.Event): Promise<void> {
   }
 
   await refreshOrgEntitlements(orgId);
+
+  // D20 — trial conversion tracking (best-effort, never blocks)
+  try {
+    const { data: cust } = await supabaseAdmin
+      .from("billing_customers")
+      .select("email")
+      .eq("org_id", orgId)
+      .limit(1)
+      .maybeSingle();
+    const customerEmail = (cust as { email?: string | null } | null)?.email ?? null;
+    const result = await tryMarkTrialConverted(supabaseAdmin, {
+      workspaceId: orgId,
+      email: customerEmail,
+      convertedAt: nowIso(),
+    });
+    if (result.matched || result.error) {
+      console.log("D20 subscription trial conversion", {
+        event: event.type,
+        matched: result.matched,
+        updated: result.updated,
+        matchType: result.matchType,
+        trialRegistrationId: result.trialRegistrationId ?? undefined,
+        error: result.error ?? undefined,
+      });
+    }
+  } catch (_) {
+    console.warn("D20 trial conversion (subscription) failed");
+  }
 }
 
 async function handleInvoicePaid(event: Stripe.Event): Promise<void> {
@@ -574,6 +717,28 @@ async function handleInvoicePaid(event: Stripe.Event): Promise<void> {
   }
 
   await refreshOrgEntitlements(orgId);
+
+  // D20 — trial conversion tracking (best-effort, never blocks)
+  try {
+    const customerEmail = (inv as { customer_email?: string | null }).customer_email ?? null;
+    const result = await tryMarkTrialConverted(supabaseAdmin, {
+      workspaceId: orgId,
+      email: customerEmail,
+      convertedAt: nowIso(),
+    });
+    if (result.matched || result.error) {
+      console.log("D20 invoice.paid trial conversion", {
+        event: "invoice.paid",
+        matched: result.matched,
+        updated: result.updated,
+        matchType: result.matchType,
+        trialRegistrationId: result.trialRegistrationId ?? undefined,
+        error: result.error ?? undefined,
+      });
+    }
+  } catch (_) {
+    console.warn("D20 trial conversion (invoice.paid) failed");
+  }
 }
 
 async function handleInvoicePaymentFailed(event: Stripe.Event): Promise<void> {

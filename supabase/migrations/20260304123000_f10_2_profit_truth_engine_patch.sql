@@ -75,8 +75,13 @@ WHERE l.status IN ('posted', 'locked');
 
 -- -----------------------------------------------------------------------------
 -- 3a) v_product_units_sold_day: rename units_sold -> orders_count (placeholder)
+--     (PostgreSQL does not allow changing column names via REPLACE; drop first.)
 -- -----------------------------------------------------------------------------
-CREATE OR REPLACE VIEW public.v_product_units_sold_day AS
+DROP VIEW IF EXISTS public.v_product_profit_day CASCADE;
+DROP VIEW IF EXISTS public.v_product_cogs_day CASCADE;
+DROP VIEW IF EXISTS public.v_product_units_sold_day CASCADE;
+
+CREATE VIEW public.v_product_units_sold_day AS
 SELECT
   afe.org_id,
   pi.project_id AS product_id,
@@ -92,7 +97,7 @@ WHERE afe.event_type ILIKE '%order%' OR afe.event_type ILIKE '%sale%'
 GROUP BY afe.org_id, pi.project_id, coalesce(trim(lower(afe.meta->>'marketplace')), 'default'), afe.event_date;
 
 -- 3b) v_product_cogs_day: placeholder — no real WAC; return NULL cogs_amount / unit_cost_wac
-CREATE OR REPLACE VIEW public.v_product_cogs_day AS
+CREATE VIEW public.v_product_cogs_day AS
 SELECT
   u.org_id,
   u.product_id,
@@ -104,7 +109,7 @@ SELECT
 FROM public.v_product_units_sold_day u;
 
 -- 3c) v_product_profit_day: cogs = 0, units_sold removed (NULL); is_profit_incomplete
-CREATE OR REPLACE VIEW public.v_product_profit_day AS
+CREATE VIEW public.v_product_profit_day AS
 SELECT
   e.org_id,
   e.product_id,

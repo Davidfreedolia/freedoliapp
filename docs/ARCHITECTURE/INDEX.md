@@ -1,4 +1,4 @@
-# FREEDOLIAPP — Architecture Index (D32–D43)
+# FREEDOLIAPP — Architecture Index (D32–D43, D57)
 
 Status: Draft (living index)
 
@@ -129,6 +129,94 @@ This file is the **official index** for the architecture documents under `docs/A
   - Responsibilities and contracts between layers.
 - **Relations**:
   - Summarizes and cross-links D32–D39.
+
+### D57 — Decision Automation (Architecture)
+
+- **File**: `D57_DECISION_AUTOMATION.md`  
+- **Status**: documented (architecture only)  
+- **Objective**: Define the architecture for Decision Automation:
+  - Automation principles, levels (0–3), approval-gate model.
+  - Canonical flow: decision → proposal → approval gate → execution.
+  - Safety constraints, risk thresholds, context invalidation, idempotency.
+  - Data model: `automation_rules`, `automation_proposals`, `automation_approvals`, `automation_executions`, `automation_events`.
+  - No implementation in this phase.
+- **Relations**:
+  - Builds on D32–D36, D53–D56 (Decision System V1).
+  - Complements D38 (high-level automation concept) with full automation layer design.
+
+### D57.1 — Automation Data Model + RLS
+
+- **File**: `D57_1_AUTOMATION_DATA_MODEL.md`  
+- **Status**: implemented (schema + RLS only)  
+- **Objective**: Database and RLS for Decision Automation:
+  - Migration: `supabase/migrations/20260309000000_d57_1_automation_data_model.sql`.
+  - Tables: automation_rules, automation_proposals, automation_approvals, automation_executions, automation_events.
+  - Indexes, constraints (status/level/risk_band/validity/non-negative), strict org-scoped RLS.
+  - No execution logic, no UI, no workers.
+- **Relations**:
+  - Implements data model from D57.
+  - Prepares for D57.2 (proposal generation, approval workflow, etc.).
+
+### D57.2 — Automation Proposal Engine
+
+- **File**: `D57_2_AUTOMATION_PROPOSAL_ENGINE.md`  
+- **Status**: implemented  
+- **Objective**: Generate automation_proposals from eligible decisions:
+  - Helpers under `src/lib/automation/`: getAutomationRuleForAction, evaluateDecisionAutomationEligibility, buildAutomationProposalFromDecision, createAutomationProposal, maybeCreateAutomationProposalForDecision.
+  - Action types: prepare_reorder, create_internal_task, schedule_review.
+  - Eligibility, dedupe, simple risk and validity; proposal_created event.
+  - Integration: reorderDecisions.js (app) and _shared/decisionSchedulerSync.ts (scheduler). No execution, no approval UI.
+- **Relations**:
+  - Builds on D57.1 (tables). Prepares for D57.3 (approval workflow / execution layer).
+
+### D57.3 — Automation Approval Gate Model
+
+- **File**: `D57_3_AUTOMATION_APPROVAL_GATE_MODEL.md`  
+- **Status**: implemented  
+- **Objective**: Approval gate model for automation_proposals:
+  - createAutomationApprovalSteps (single / dual / role_constrained), integrate in createAutomationProposal and Deno scheduler.
+  - approveAutomationProposal, rejectAutomationProposal; validateApprovalActor, getPendingAutomationApprovals; proposalGateState (internal).
+  - Events: approval_requested, approval_granted, approval_rejected, proposal_approved, proposal_rejected.
+  - No execution, no new UI, no new edge functions or workers.
+- **Relations**:
+  - Builds on D57.1 and D57.2. Writes only to automation_approvals, automation_proposals, automation_events.
+
+### D57.4 — Automation Execution Readiness Gate
+
+- **File**: `D57_4_AUTOMATION_EXECUTION_READINESS_GATE.md`  
+- **Status**: implemented  
+- **Objective**: Revalidate approved proposals before (future) execution:
+  - evaluateAutomationProposalReadiness(supabase, { proposalId, orgId }) → ready | blocked | invalidated.
+  - Checks: proposal approved, not expired, decision exists and compatible, context min and context_hash, no conflicting newer proposal, action_type supported, rule active.
+  - Invalidation when expired/decision_closed/context_unavailable/context_mismatch/rule_disabled etc.; event proposal_invalidated (best-effort).
+  - Events: proposal_readiness_checked (when ready), proposal_invalidated. No execution, no workers.
+- **Relations**:
+  - Builds on D57.1–D57.3. Writes only to automation_proposals, automation_events.
+
+### D57.5 — Automation Execution Intent Layer
+
+- **File**: `D57_5_AUTOMATION_EXECUTION_INTENT_LAYER.md`  
+- **Status**: implemented  
+- **Objective**: Transform approved, readiness-validated proposals into formal execution intents:
+  - createAutomationExecutionIntent(supabase, { proposalId, orgId }) → created | duplicate | blocked | invalidated.
+  - Preconditions: proposal approved, readiness ready, no active execution for proposal, action_type supported, payload present.
+  - Insert to automation_executions (execution_status: queued, execution_mode: approved_trigger); proposal → queued_for_execution; event execution_requested (best-effort).
+  - Dedupe/idempotency: one active intent per proposal; failure behavior: no throw, blocked on error.
+- **Relations**:
+  - Builds on D57.1–D57.4. Writes only to automation_executions, automation_proposals, automation_events. No real execution, no workers, no cron.
+
+### D57.6 — Manual Execution Trigger
+
+- **File**: `D57_6_MANUAL_EXECUTION_TRIGGER.md`  
+- **Status**: implemented  
+- **Objective**: Manual run of a queued automation_execution for allowed action types only:
+  - runAutomationExecutionManually(supabase, { executionId, orgId, actorUserId }) → succeeded | failed | blocked | not_found.
+  - Only create_internal_task and schedule_review; no prepare_reorder, no PO/price/messages.
+  - Preconditions: execution queued, proposal queued_for_execution, readiness ready, action_type in MANUAL_EXECUTION_ACTION_TYPES.
+  - Execution flow: queued → running → succeeded | failed; proposal → executed | execution_failed; events execution_started, execution_succeeded | execution_failed.
+  - Soft execution when no internal task/review model exists (result_json only).
+- **Relations**:
+  - Builds on D57.1–D57.5. No autopilot, no cron, no new workers or edge functions.
 
 ---
 

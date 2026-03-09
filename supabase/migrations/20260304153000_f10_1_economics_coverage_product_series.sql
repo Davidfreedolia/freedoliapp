@@ -198,7 +198,10 @@ GRANT EXECUTE ON FUNCTION public.rpc_product_profit_kpi_range(uuid, uuid, date, 
 -- -----------------------------------------------------------------------------
 -- 3) rpc_product_profit_series: afegir refunds, ads, other_costs; is_profit_incomplete_day per cost_pool
 -- (coverage per dia per producte no implementat; is_profit_incomplete_day = true si no cost_pool per product)
+-- (PostgreSQL does not allow changing return type via REPLACE; drop first.)
 -- -----------------------------------------------------------------------------
+DROP FUNCTION IF EXISTS public.rpc_product_profit_series(uuid, uuid, date, date);
+
 CREATE OR REPLACE FUNCTION public.rpc_product_profit_series(
   p_org_id uuid,
   p_product_id uuid,

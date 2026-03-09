@@ -5,3 +5,12 @@
 # Security: validated via Stripe-Signature + STRIPE_WEBHOOK_SECRET in function code.
 [functions.stripe_webhook]
 verify_jwt = false
+
+# Checkout: gateway does not validate JWT; function validates Bearer token via auth.getUser(accessToken).
+[functions.create_checkout_session]
+verify_jwt = false
+
+# D34.1 — Decision Scheduler. Not public; requires x-scheduler-secret header (DECISION_SCHEDULER_SECRET).
+# Schedule: every 10 minutes (e.g. cron: "*/10 * * * *" via pg_cron or Dashboard).
+[functions.decision-scheduler]
+verify_jwt = false
