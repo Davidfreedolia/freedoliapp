@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { Send } from 'lucide-react'
+import { Send, LogIn, Apple } from 'lucide-react'
 import { logSuccess, logError } from '../lib/auditLog'
 import { isDemoMode } from '../demo/demoMode'
 import { registerTrialLead } from '../lib/trials/registerTrialLead'
@@ -52,6 +52,41 @@ export default function Login() {
       utmSource: params.get('utm_source') || undefined,
       utmCampaign: params.get('utm_campaign') || undefined
     }).catch(() => {})
+  }
+
+  const handleGoogleLogin = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+    try {
+      // No cal await sobre el redirect; Supabase gestionarà el flux OAuth.
+      await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`,
+        },
+      })
+    } catch (err) {
+      setError(err.message)
+      setLoading(false)
+    }
+  }
+
+  const handleAppleLogin = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+    try {
+      await supabase.auth.signInWithOAuth({
+        provider: 'apple',
+        options: {
+          redirectTo: `${window.location.origin}/`,
+        },
+      })
+    } catch (err) {
+      setError(err.message)
+      setLoading(false)
+    }
   }
 
   const handleEmailLogin = async (e) => {
@@ -143,7 +178,10 @@ export default function Login() {
                 type="button"
                 variant={!useMagicLink ? 'primary' : 'ghost'}
                 size="sm"
-                onClick={() => setUseMagicLink(false)}
+                onClick={() => {
+                  setUseMagicLink(false)
+                  setError(null)
+                }}
                 className="auth-card__toggleBtn"
               >
                 {t('login.passwordLabel')}
@@ -152,7 +190,10 @@ export default function Login() {
                 type="button"
                 variant={useMagicLink ? 'primary' : 'ghost'}
                 size="sm"
-                onClick={() => setUseMagicLink(true)}
+                onClick={() => {
+                  setUseMagicLink(true)
+                  setError(null)
+                }}
                 className="auth-card__toggleBtn"
               >
                 {t('login.magicLink')}
@@ -183,7 +224,16 @@ export default function Login() {
                     required
                   />
                   <p className="auth-card__forgot">
-                    <Link to="/login" className="auth-card__link">{t('login.forgotPassword')}</Link>
+                    <button
+                      type="button"
+                      className="auth-card__link"
+                      onClick={() => {
+                        setUseMagicLink(true)
+                        setError(null)
+                      }}
+                    >
+                      {t('login.forgotPassword')}
+                    </button>
                   </p>
                 </>
               )}
@@ -207,15 +257,51 @@ export default function Login() {
                     {t('login.magicLink')}
                   </>
                 ) : (
-                  t('login.button')
+                  <>
+                    <LogIn size={18} aria-hidden style={{ marginRight: 8 }} />
+                    {t('login.button')}
+                  </>
                 )}
               </Button>
+              <div className="auth-card__divider">
+                <span className="auth-card__dividerLine" />
+                <span className="auth-card__dividerLabel">{t('login.or')}</span>
+                <span className="auth-card__dividerLine" />
+              </div>
+              <Button
+                type="button"
+                variant="secondary"
+                size="md"
+                onClick={handleGoogleLogin}
+                disabled={loading}
+                className="auth-card__providerBtn"
+              >
+                <LogIn size={18} style={{ marginRight: 8 }} aria-hidden />
+                {t('login.continueWithGoogle')}
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="md"
+                onClick={handleAppleLogin}
+                disabled={loading}
+                className="auth-card__providerBtn"
+              >
+                <Apple size={18} style={{ marginRight: 8 }} aria-hidden />
+                {t('login.continueWithApple')}
+              </Button>
+              <p className="auth-card__consentNote">
+                By continuing, you agree to the{' '}
+                <Link to="/terms" className="auth-card__link">Terms of Service</Link>
+                {' '}and acknowledge the{' '}
+                <Link to="/privacy" className="auth-card__link">Privacy Policy</Link>.
+              </p>
             </form>
           </>
         )}
 
         <p className="auth-card__footer">
-          <Link to="/login" className="auth-card__link">{t('login.signupLink')}</Link>
+          <Link to="/" className="auth-card__link">{t('login.signupLink')}</Link>
         </p>
       </Card>
     </div>
