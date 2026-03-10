@@ -32,6 +32,7 @@ import { clearDemoData, generateDemoData, checkDemoExists } from '../lib/demoSee
 import Header from '../components/Header'
 import Button from '../components/Button'
 import GTINPoolSection from '../components/GTINPoolSection'
+import ConnectedAccounts from '../components/account/ConnectedAccounts'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
 import { showToast } from '../components/Toast'
@@ -505,6 +506,8 @@ export default function Settings() {
                 {saved ? <><Check size={16} /> {t('settings.saved')}</> : saving ? t('settings.saving') : <><Save size={16} /> {t('settings.save')}</>}
               </Button>
             </div>
+
+            <ConnectedAccounts />
 
             {/* Language Selector */}
             <div style={{

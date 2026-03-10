@@ -74,7 +74,10 @@
     "magicLink": "Send magic link",
     "magicLinkSent": "Sign-in link sent!",
     "magicLinkSubtext": "Check your email and click the link to sign in.",
-    "back": "Back"
+    "back": "Back",
+    "continueWithGoogle": "Continue with Google",
+    "continueWithApple": "Continue with Apple",
+    "or": "or"
   },
   "billing": {
     "banner": {
@@ -189,6 +192,16 @@
     "operationsPlanning": "Operations Planning",
     "decisions": "Decisions",
     "settings": "Settings"
+  },
+  "connectedAccounts": {
+    "title": "Connected accounts",
+    "description": "Link Google or Apple to sign in with multiple providers to the same FREEDOLIAPP account.",
+    "email": "Email",
+    "google": "Google",
+    "apple": "Apple",
+    "connected": "connected",
+    "connect": "Connect",
+    "connecting": "Connecting…"
   },
   "dashboard": {
     "modeA": {

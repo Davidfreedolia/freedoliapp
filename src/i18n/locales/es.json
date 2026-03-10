@@ -74,7 +74,10 @@
     "magicLink": "Enviar enlace mágico",
     "magicLinkSent": "Enlace de inicio de sesión enviado!",
     "magicLinkSubtext": "Revisa tu correo y haz clic en el enlace para iniciar sesión.",
-    "back": "Volver"
+    "back": "Volver",
+    "continueWithGoogle": "Iniciar sesión con Google",
+    "continueWithApple": "Iniciar sesión con Apple",
+    "or": "o"
   },
   "billing": {
     "banner": {
@@ -189,6 +192,16 @@
     "operationsPlanning": "Planificación operativa",
     "decisions": "Decisiones",
     "settings": "Configuración"
+  },
+  "connectedAccounts": {
+    "title": "Cuentas conectadas",
+    "description": "Vincula Google o Apple para iniciar sesión con varios proveedores en la misma cuenta de FREEDOLIAPP.",
+    "email": "Email",
+    "google": "Google",
+    "apple": "Apple",
+    "connected": "conectado",
+    "connect": "Conectar",
+    "connecting": "Conectando…"
   },
   "dashboard": {
     "modeA": {
