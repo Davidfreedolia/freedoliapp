@@ -79,6 +79,18 @@
     "continueWithApple": "Continue with Apple",
     "or": "or"
   },
+  "trial": {
+    "title": "Start your free trial",
+    "subtitle": "Use your work email to start a guided trial of FREEDOLIAPP.",
+    "emailLabel": "Work email",
+    "emailPlaceholder": "you@company.com",
+    "marketingConsent": "I'd like to receive onboarding and product emails about FREEDOLIAPP.",
+    "submit": "Start free trial",
+    "successTitle": "Check your inbox",
+    "successMessage": "We’ve sent you a sign-in link. Open your email and follow the link to continue the trial.",
+    "signInLink": "Already have an account? Sign in",
+    "invalidEmail": "Please enter a valid email address."
+  },
   "billing": {
     "banner": {
       "trialEnded": "Trial ended — upgrade to keep creating seats/connections and unlock Pro features.",

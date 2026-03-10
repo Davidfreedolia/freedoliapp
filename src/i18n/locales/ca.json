@@ -79,6 +79,18 @@
     "continueWithApple": "Inicia sessió amb Apple",
     "or": "o"
   },
+  "trial": {
+    "title": "Comença el teu trial gratuït",
+    "subtitle": "Fes servir el correu de feina per iniciar un trial guiat de FREEDOLIAPP.",
+    "emailLabel": "Correu de feina",
+    "emailPlaceholder": "tu@empresa.com",
+    "marketingConsent": "M'agradaria rebre correus d'onboarding i producte sobre FREEDOLIAPP.",
+    "submit": "Començar trial gratuït",
+    "successTitle": "Revisa la teva bústia",
+    "successMessage": "T'hem enviat un enllaç d'inici de sessió. Obre el correu i segueix l'enllaç per continuar el trial.",
+    "signInLink": "Ja tens compte? Inicia sessió",
+    "invalidEmail": "Introdueix un correu electrònic vàlid."
+  },
   "billing": {
     "banner": {
       "trialEnded": "El trial ha acabat — actualitzeu el pla per continuar creant places/connexions i desbloquejar funcionalitats Pro.",

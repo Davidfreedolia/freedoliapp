@@ -46,6 +46,13 @@ import './i18n'
 import Login from './pages/Login'
 import Landing from './pages/Landing'
 import ActivationWizard from './pages/ActivationWizard'
+import Trial from './pages/Trial'
+import LegalIndex from './pages/legal/LegalIndex'
+import Privacy from './pages/legal/Privacy'
+import Terms from './pages/legal/Terms'
+import Cookies from './pages/legal/Cookies'
+import DPA from './pages/legal/DPA'
+import CookieBanner from './components/legal/CookieBanner'
 
 // Lazy loading wrapper with error handling
 const lazyWithErrorBoundary = (importFn, pageName) => {
@@ -108,6 +115,10 @@ const Billing = lazyWithErrorBoundary(() => import('./pages/Billing'), 'Billing'
 const AmazonSnapshot = lazyWithErrorBoundary(() => import('./pages/AmazonSnapshot'), 'AmazonSnapshot')
 const AdminConsole = lazyWithErrorBoundary(() => import('./pages/AdminConsole'), 'AdminConsole')
 const Decisions = lazyWithErrorBoundary(() => import('./pages/Decisions'), 'Decisions')
+const AutomationInboxPage = lazyWithErrorBoundary(() => import('./pages/automations/AutomationInboxPage'), 'AutomationInboxPage')
+const AutomationProposalDetailPage = lazyWithErrorBoundary(() => import('./pages/automations/AutomationProposalDetailPage'), 'AutomationProposalDetailPage')
+const AutomationActivityPage = lazyWithErrorBoundary(() => import('./pages/automations/AutomationActivityPage'), 'AutomationActivityPage')
+const AutomationAnalyticsPage = lazyWithErrorBoundary(() => import('./pages/automations/AutomationAnalyticsPage'), 'AutomationAnalyticsPage')
 
 const ADMIN_EMAILS = new Set(['david@freedolia.com'])
 
@@ -210,7 +221,9 @@ function AppContent() {
     try {
       const data = await createStripeCheckoutSession(activeOrgId, 'growth')
       if (data?.url) window.location.href = data.url
-    } catch (_) {}
+    } catch (err) {
+      console.warn('Upgrade checkout failed', err)
+    }
   }
 
   const [billingState, setBillingState] = useState({
@@ -290,10 +303,6 @@ function AppContent() {
       const status = org.billing_status
       const trialEndsAt = org.trial_ends_at ? new Date(org.trial_ends_at) : null
       const now = new Date()
-
-      const billingOk =
-        status === 'active' ||
-        (status === 'trialing' && trialEndsAt && trialEndsAt > now)
 
       const locked =
         status === 'past_due' ||
@@ -408,16 +417,28 @@ function AppContent() {
   )
 }
 
+function CookieBannerWrapper() {
+  const location = useLocation()
+  return <CookieBanner locationPathname={location.pathname} />
+}
+
 function App() {
   return (
     <BrowserRouter>
       <AppProvider>
         <WorkspaceProvider>
           <OnboardingGate>
+            <CookieBannerWrapper />
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/landing" element={<Navigate to="/" replace />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/trial" element={<Trial />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/cookies" element={<Cookies />} />
+              <Route path="/dpa" element={<DPA />} />
+              <Route path="/legal" element={<LegalIndex />} />
               <Route path="/activation" element={<ProtectedRoute><ActivationWizard /></ProtectedRoute>} />
               <Route path="/dashboard" element={<Navigate to="/app" replace />} />
               <Route path="/projects/*" element={<RedirectToApp />} />
@@ -453,6 +474,10 @@ function App() {
                 <Route path="cash" element={<AppPageWrap context="page:Cashflow"><Cashflow /></AppPageWrap>} />
                 <Route path="operations" element={<AppPageWrap context="page:OperationsPlanning"><OperationsPlanning /></AppPageWrap>} />
                 <Route path="decisions" element={<AppPageWrap context="page:Decisions"><Decisions /></AppPageWrap>} />
+                <Route path="automations" element={<AppPageWrap context="page:AutomationInbox"><AutomationInboxPage /></AppPageWrap>} />
+                <Route path="automations/analytics" element={<AppPageWrap context="page:AutomationAnalytics"><AutomationAnalyticsPage /></AppPageWrap>} />
+                <Route path="automations/activity" element={<AppPageWrap context="page:AutomationActivity"><AutomationActivityPage /></AppPageWrap>} />
+                <Route path="automations/:proposalId" element={<AppPageWrap context="page:AutomationProposalDetail"><AutomationProposalDetailPage /></AppPageWrap>} />
                 <Route path="admin" element={<AdminGate><AppPageWrap context="page:AdminConsole"><AdminConsole /></AppPageWrap></AdminGate>} />
                 <Route path="settings" element={<AppPageWrap context="page:Settings"><Settings /></AppPageWrap>} />
                 <Route path="settings/billing" element={<Navigate to="/app/billing" replace />} />

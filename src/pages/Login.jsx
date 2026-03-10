@@ -301,7 +301,7 @@ export default function Login() {
         )}
 
         <p className="auth-card__footer">
-          <Link to="/" className="auth-card__link">{t('login.signupLink')}</Link>
+          <Link to="/trial" className="auth-card__link">{t('login.signupLink')}</Link>
         </p>
       </Card>
     </div>

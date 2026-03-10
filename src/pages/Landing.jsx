@@ -17,7 +17,7 @@ export default function Landing() {
         <h1 className="landing-hero__headline">{t('landing.hero.title')}</h1>
         <p className="landing-hero__subtitle">{t('landing.hero.subtitle')}</p>
         <div className="landing-hero__ctaRow">
-          <Link to="/login">
+          <Link to="/trial">
             <Button variant="primary" size="lg">
               {t('landing.hero.ctaPrimary')}
             </Button>
