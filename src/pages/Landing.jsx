@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { BarChart3, GitBranch, Wallet } from 'lucide-react'
 import LandingHeader from '../components/landing/LandingHeader'
 import LandingFooter from '../components/landing/LandingFooter'
@@ -8,6 +8,7 @@ import useT from '../hooks/useT'
 
 export default function Landing() {
   const t = useT()
+  const navigate = useNavigate()
 
   return (
     <div className="landing-shell">
@@ -17,16 +18,20 @@ export default function Landing() {
         <h1 className="landing-hero__headline">{t('landing.hero.title')}</h1>
         <p className="landing-hero__subtitle">{t('landing.hero.subtitle')}</p>
         <div className="landing-hero__ctaRow">
-          <Link to="/trial">
-            <Button variant="primary" size="lg">
-              {t('landing.hero.ctaPrimary')}
-            </Button>
-          </Link>
-          <Link to="/login">
-            <Button variant="secondary" size="lg">
-              {t('landing.hero.ctaSecondary')}
-            </Button>
-          </Link>
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={() => navigate('/trial')}
+          >
+            {t('landing.hero.ctaPrimary')}
+          </Button>
+          <Button
+            variant="secondary"
+            size="lg"
+            onClick={() => navigate('/login')}
+          >
+            {t('landing.hero.ctaSecondary')}
+          </Button>
         </div>
       </section>
 
