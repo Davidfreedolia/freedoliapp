@@ -1,5 +1,5 @@
 import React from 'react'
-import cookiesMd from '../../../../docs/LEGAL/COOKIE_POLICY.md?raw'
+import cookiesMd from '../../../docs/LEGAL/COOKIE_POLICY.md?raw'
 
 export default function Cookies() {
   return (

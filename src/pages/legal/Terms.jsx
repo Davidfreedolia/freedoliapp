@@ -1,5 +1,5 @@
 import React from 'react'
-import termsMd from '../../../../docs/LEGAL/TERMS_OF_SERVICE.md?raw'
+import termsMd from '../../../docs/LEGAL/TERMS_OF_SERVICE.md?raw'
 
 export default function Terms() {
   return (

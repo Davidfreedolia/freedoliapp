@@ -1,5 +1,5 @@
 import React from 'react'
-import dpaMd from '../../../../docs/LEGAL/DPA.md?raw'
+import dpaMd from '../../../docs/LEGAL/DPA.md?raw'
 
 export default function DPA() {
   return (

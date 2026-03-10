@@ -1,5 +1,5 @@
 import React from 'react'
-import privacyMd from '../../../../docs/LEGAL/PRIVACY_POLICY.md?raw'
+import privacyMd from '../../../docs/LEGAL/PRIVACY_POLICY.md?raw'
 
 export default function Privacy() {
   return (
