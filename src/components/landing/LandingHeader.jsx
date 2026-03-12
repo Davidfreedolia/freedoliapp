@@ -17,7 +17,7 @@ export default function LandingHeader() {
             {t('header.cta.signin')}
           </Button>
         </Link>
-        <Link to="/login">
+        <Link to="/trial">
           <Button variant="primary" size="sm">
             {t('header.cta.start')}
           </Button>

@@ -1,11 +1,15 @@
-export async function registerTrialLead(supabase, {
-  email,
-  name,
-  companyName,
-  source,
-  utmSource,
-  utmCampaign
-}) {
+export async function registerTrialLead(
+  supabase,
+  {
+    email,
+    name,
+    companyName,
+    source,
+    utmSource,
+    utmCampaign,
+    marketingConsent, // currently accepted but not persisted without schema support
+  },
+) {
   try {
     const normalizedEmail = typeof email === 'string' ? email.trim() : ''
     if (!normalizedEmail) return

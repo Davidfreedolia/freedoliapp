@@ -48,9 +48,9 @@ export default function Login() {
       email: userEmail.trim(),
       name: undefined,
       companyName: undefined,
-      source: 'landing',
+      source: 'login',
       utmSource: params.get('utm_source') || undefined,
-      utmCampaign: params.get('utm_campaign') || undefined
+      utmCampaign: params.get('utm_campaign') || undefined,
     }).catch(() => {})
   }
 

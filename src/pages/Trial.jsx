@@ -36,6 +36,7 @@ export default function Trial() {
         source: 'trial',
         utmSource: params.get('utm_source') || undefined,
         utmCampaign: params.get('utm_campaign') || undefined,
+        marketingConsent,
       })
 
       const { error: otpError } = await supabase.auth.signInWithOtp({
