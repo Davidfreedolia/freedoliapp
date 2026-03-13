@@ -978,7 +978,7 @@ export default function Projects() {
               className="projects-toolbar__new btn-primary"
             >
               <Plus size={18} />
-              Nou projecte
+              {t('common.createProject')}
             </Button>
           </div>
         </div>
@@ -989,7 +989,7 @@ export default function Projects() {
             ...styles.empty,
             backgroundColor: 'var(--surface-bg)'
           }}>
-            <p style={{ color: 'var(--muted-1)' }}>Carregant projectes…</p>
+            <p style={{ color: 'var(--muted-1)' }}>{t('common.loading')}</p>
           </div>
         ) : noOrg ? (
           <div style={{ ...styles.empty, backgroundColor: 'var(--surface-bg)' }}>

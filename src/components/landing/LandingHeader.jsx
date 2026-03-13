@@ -9,7 +9,11 @@ export default function LandingHeader() {
   return (
     <header className="landing-header">
       <Link to="/" className="landing-header__logo" aria-label="Freedoliapp home">
-        Freedoliapp
+        <img
+          src="/brand/freedoliapp/logo/logo_master.png"
+          alt="FREEDOLIAPP"
+          className="landing-header__logoImg"
+        />
       </Link>
       <nav className="landing-header__nav">
         <Link to="/login">

@@ -7,10 +7,13 @@
     "download": "Descargar",
     "markAsSent": "Marcar como enviado",
     "restore": "Restaurar",
-    "loading": "Cargando...",
+    "loading": "Cargando…",
+    "retry": "Reintentar",
     "error": "Error",
+    "errorGeneric": "Algo salió mal",
     "success": "Éxito",
     "optional": "Opcional",
+    "noData": "Aún no hay datos",
     "buttons": {
       "save": "Guardar",
       "cancel": "Cancelar",
@@ -31,10 +34,138 @@
   },
   "landing": {
     "hero": {
-      "title": "Conecta Amazon. Entiende tu beneficio real.",
-      "subtitle": "Importa settlements, sigue costes y márgenes y gestiona el pipeline de productos en un solo lugar.",
+      "title": "Gestiona tus operaciones de Amazon desde un solo lugar.",
+      "subtitle": "El sistema operativo para negocios de producto que gestionan proveedores, pedidos de compra, inventario y beneficio.",
       "ctaPrimary": "Empezar",
-      "ctaSecondary": "Iniciar sesión"
+      "ctaSecondary": "Iniciar sesión",
+      "cta_primary": "Empezar trial gratuito",
+      "cta_secondary": "Ver cómo funciona"
+    },
+    "screenshots": {
+      "hero_alt": "Dashboard de Freedoliapp con KPIs, alertas activas y gráfico de ingresos.",
+      "suppliers": {
+        "title": "Organiza los proveedores en un único espacio de trabajo.",
+        "description": "Concentra datos, condiciones y notas de proveedores en un solo lugar para que todo el equipo sepa a quién compráis y en qué condiciones.",
+        "alt": "Vista de la cuadrícula de proveedores de Freedoliapp con tarjetas y detalles clave."
+      },
+      "orders_workflow": {
+        "title": "Sigue los pedidos de compra desde el presupuesto hasta la entrega.",
+        "description": "Crea y sigue pedidos de compra a lo largo de producción y envío para que el stock llegue cuando lo necesitas.",
+        "alt": "Tarjetas de flujo de pedidos de compra de Freedoliapp con estados de progreso."
+      },
+      "decisions": {
+        "title": "Visualiza las decisiones que tocan ahora.",
+        "description": "Muestra alertas de stock, margen y caja para saber qué pedir, a quién y en qué cantidad.",
+        "alt": "Dashboard de decisiones de Freedoliapp con KPIs y tarjetas de decisiones."
+      }
+    },
+    "trust": {
+      "eyebrow": "Diseñado para operadores de Amazon serios",
+      "title": "Pensado para operaciones reales, no experimentos.",
+      "points": {
+        "fba_workflows": "Flujos FBA de Amazon que ya conoces.",
+        "fba_workflows_desc": "Pedidos de compra, envíos y flujos de inventario alineados con la realidad de los vendedores de Amazon.",
+        "supplier_management": "Gestión de proveedores en un solo lugar.",
+        "supplier_management_desc": "Centraliza datos, condiciones y comunicación con proveedores en lugar de dispersarlos entre chats y hojas de cálculo.",
+        "inventory_visibility": "Visibilidad de inventario en tiempo real.",
+        "inventory_visibility_desc": "Consulta stock actual y entrante por SKU para evitar roturas y sobrestock.",
+        "profit_tracking": "Seguimiento de beneficio que refleja la realidad.",
+        "profit_tracking_desc": "Combina costes, comisiones y ventas para conocer el beneficio real por producto y pedido."
+      }
+    },
+    "problem": {
+      "title": "Gestionar un negocio Amazon no debería requerir 10 herramientas distintas.",
+      "description": "La mayoría de equipos gestionan proveedores, pedidos e inventario entre hojas de cálculo, chats y correo. Los datos están dispersos y nadie confía del todo en los números.",
+      "items": {
+        "excel": "Hojas de Excel para inventario y pedidos de compra.",
+        "whatsapp": "Conversaciones de WhatsApp con proveedores.",
+        "shipping_docs": "Documentos de envío escondidos en adjuntos de correo.",
+        "email_threads": "Largos hilos de correo para aprobaciones.",
+        "inventory_spreadsheets": "Hojas separadas solo para seguir stock y beneficio."
+      }
+    },
+    "solution": {
+      "title": "La torre de control de las operaciones de Amazon.",
+      "description": "Freedoliapp centraliza proveedores, pedidos de compra, inventario y beneficio para que el equipo opere desde un único espacio de trabajo.",
+      "points": {
+        "visibility": "Visibilidad clara sobre proveedores, stock y pedidos.",
+        "workflows": "Flujos estructurados desde el presupuesto hasta las unidades entregadas.",
+        "profit": "Vistas operativas que siempre conectan con el beneficio."
+      }
+    },
+    "modules": {
+      "title": "Todo lo que necesita tu negocio Amazon en un solo lugar.",
+      "description": "Un único espacio para sourcing, pedidos, inventario y rentabilidad.",
+      "suppliers": {
+        "title": "Proveedores",
+        "desc": "Centraliza datos, condiciones y notas de todos los proveedores en una vista estructurada."
+      },
+      "purchase_orders": {
+        "title": "Pedidos de compra",
+        "desc": "Crea, aprueba y sigue POs para que producción y envíos se mantengan en plazo."
+      },
+      "inventory": {
+        "title": "Inventario",
+        "desc": "Consulta niveles de stock actual y entrante por SKU para planificar reposiciones con confianza."
+      },
+      "profit": {
+        "title": "Beneficio",
+        "desc": "Entiende la rentabilidad real por producto y pedido, no solo los ingresos."
+      },
+      "decisions": {
+        "title": "Decisiones operativas",
+        "desc": "Recibe recomendaciones claras sobre qué pedir a continuación, en qué cantidades y a qué proveedor."
+      }
+    },
+    "how_it_works": {
+      "title": "Cómo funciona Freedoliapp",
+      "steps": {
+        "connect_suppliers": {
+          "title": "Conecta los proveedores"
+        },
+        "create_pos": {
+          "title": "Crea pedidos de compra"
+        },
+        "track_inventory": {
+          "title": "Sigue el inventario"
+        },
+        "understand_profit": {
+          "title": "Entiende el beneficio"
+        },
+        "make_decisions": {
+          "title": "Toma mejores decisiones"
+        }
+      }
+    },
+    "assistant": {
+      "title": "Conoce a Freedoli, tu asistente operativo.",
+      "description": "Usa el asistente para explorar el producto, entender los números y encontrar el siguiente mejor paso.",
+      "actions": {
+        "show_product": "Enséñame el producto",
+        "how_it_works": "Cómo funciona",
+        "start_trial": "Empezar trial"
+      }
+    },
+    "resources": {
+      "title": "Recursos para operadores Amazon",
+      "description": "Guías, plantillas y herramientas para gestionar tus operaciones de Amazon con más control.",
+      "guides": {
+        "title": "Guías",
+        "desc": "Contenido en profundidad sobre gestión de proveedores, pedidos de compra, inventario y rentabilidad."
+      },
+      "templates": {
+        "title": "Plantillas",
+        "desc": "Hojas y documentos prácticos para empezar antes de moverlos a Freedoliapp."
+      },
+      "tools": {
+        "title": "Herramientas",
+        "desc": "Calculadoras y utilidades para operadores Amazon, como cálculo de beneficio y cobertura de inventario."
+      }
+    },
+    "final_cta": {
+      "title": "¿Listo para gestionar tus operaciones de Amazon desde un solo lugar?",
+      "description": "Empieza un trial gratuito y comprueba cómo Freedoliapp encaja con tus flujos actuales.",
+      "cta_primary": "Empezar trial gratuito"
     },
     "features": {
       "analytics": {
@@ -96,6 +227,28 @@
       "trialEnded": "El trial ha terminado — actualiza el plan para seguir creando plazas/conexiones y desbloquear funciones Pro.",
       "pastDue": "Problema de pago — actualiza la facturación para restaurar las acciones Pro.",
       "upgradeCta": "Actualizar plan"
+    },
+    "pageTitle": "Facturación",
+    "loading": "Cargando…",
+    "section": {
+      "alerts": "Alertas de facturación",
+      "currentPlan": "Plan actual",
+      "upgradePlan": "Actualizar plan",
+      "manageSubscription": "Gestionar suscripción",
+      "usage": "Uso",
+      "lockedFeatures": "Funcionalidades bloqueadas"
+    },
+    "actions": {
+      "upgradeTo": "Actualizar a {{planLabel}}",
+      "manageSubscription": "Gestionar suscripción"
+    },
+    "loadingUsage": "Cargando uso…",
+    "noUsageData": "Sin datos de uso.",
+    "errors": {
+      "couldNotStartCheckout": "No se ha podido iniciar el checkout",
+      "checkoutFailed": "El checkout ha fallado",
+      "noCustomer": "Todavía no hay cliente de facturación. Elige un plan primero.",
+      "portalFailed": "El portal de facturación ha fallado"
     }
   },
   "activation": {
@@ -205,6 +358,24 @@
     "decisions": "Decisiones",
     "settings": "Configuración"
   },
+  "nav": {
+    "dashboard": "Dashboard",
+    "projects": "Proyectos",
+    "suppliers": "Proveedores",
+    "forwarders": "Transitarios",
+    "warehouses": "Almacenes",
+    "orders": "Pedidos",
+    "finances": "Finanzas",
+    "inventory": "Inventario",
+    "calendar": "Calendario",
+    "analytics": "Analítica",
+    "decisionDashboard": "Decision Dashboard",
+    "profit": "Profit",
+    "cashflow": "Cashflow",
+    "operationsPlanning": "Planificación operativa",
+    "decisions": "Decisiones",
+    "settings": "Configuración"
+  },
   "connectedAccounts": {
     "title": "Cuentas conectadas",
     "description": "Vincula Google o Apple para iniciar sesión con varios proveedores en la misma cuenta de FREEDOLIAPP.",
@@ -215,7 +386,17 @@
     "connect": "Conectar",
     "connecting": "Conectando…"
   },
+  "common": {
+    "createProject": "Crear proyecto",
+    "createSupplier": "Crear proveedor",
+    "createOrder": "Crear orden"
+  },
   "dashboard": {
+    "firstValue": {
+      "title": "Bienvenido/a a Freedoliapp.",
+      "subtitle": "Empieza creando tu primer producto.",
+      "cta": "Crear primer producto"
+    },
     "modeA": {
       "title": "Dashboard",
       "subtitle": "Resumen de tu negocio"
@@ -568,6 +749,11 @@
       }
     }
   },
+  "topbar": {
+    "addNote": "Añadir nota",
+    "workspaceLabel": "Workspace: {{name}}",
+    "workspaceSwitcherAria": "Workspace actual: {{name}}. Haz clic para cambiar de workspace."
+  },
   "help": {
     "searchPlaceholder": "Buscar en el manual...",
     "title": "Ayuda y Documentación",
@@ -681,13 +867,28 @@
     "description": "Descripción",
     "descriptionPlaceholder": "Descripción breve del producto...",
     "projectPhases": "Fases del proyecto",
-    "createProject": "Crear Proyecto",
+    "createProject": "Crear proyecto",
     "creatingFolders": "Creando carpetas...",
     "empty": {
-      "title": "Empieza tu primer producto",
-      "subtitle": "Crea un producto y muévelo por viabilidad, presupuestos, muestras, PO y envío.",
-      "cta": "Crear producto"
+      "title": "Aún no tienes proyectos",
+      "subtitle": "Crea tu primer proyecto para empezar a gestionar tu negocio Amazon.",
+      "cta": "Crear proyecto"
     },
+  "suppliers": {
+    "empty": {
+      "title": "Todavía no tienes proveedores",
+      "subtitle": "Crea tu primer proveedor para empezar a gestionar el sourcing y la producción.",
+      "cta": "Crear proveedor"
+    }
+  },
+  "orders": {
+    "empty": {
+      "title": "Todavía no tienes órdenes",
+      "filteredTitle": "No se han encontrado órdenes",
+      "subtitle": "Crea tu primera orden para empezar a seguir la producción y el stock entrante.",
+      "cta": "Crear orden"
+    }
+  },
     "nextAction": {
       "open": "Abrir proyecto",
       "viability": "Revisar viabilidad",

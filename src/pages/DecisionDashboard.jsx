@@ -20,6 +20,7 @@ import {
   getDecisionAnalyticsSummary,
 } from '../lib/decisions/getDecisionDashboardData'
 import { useNavigate } from 'react-router-dom'
+import { isScreenshotMode } from '../lib/ui/screenshotMode'
 
 const WINDOW_OPTIONS = [
   { value: 7, label: 'Last 7 days' },
@@ -120,40 +121,42 @@ export default function DecisionDashboard() {
       />
 
       <div style={{ padding: isMobile ? 16 : 32, overflowY: 'auto' }}>
-        <AppToolbar style={{ marginBottom: 20 }}>
-          <AppToolbar.Left>
-            <div className="toolbar-group">
-              <select
-                value={windowDays}
-                onChange={(e) => setWindowDays(Number(e.target.value) || 30)}
-                style={{
-                  height: 'var(--btn-h-sm)',
-                  padding: '0 12px',
-                  borderRadius: 'var(--btn-radius)',
-                  border: '1px solid var(--btn-secondary-border)',
-                  backgroundColor: 'var(--btn-ghost-bg)',
-                  color: 'var(--btn-secondary-fg)',
-                  fontSize: 14,
-                  outline: 'none',
-                  cursor: 'pointer',
-                }}
-              >
-                {WINDOW_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </AppToolbar.Left>
-          <AppToolbar.Right>
-            <Button type="button" variant="secondary" size="sm" onClick={load}>
-              Refresh
-            </Button>
-          </AppToolbar.Right>
-        </AppToolbar>
+        {!isScreenshotMode() && (
+          <AppToolbar style={{ marginBottom: 20 }}>
+            <AppToolbar.Left>
+              <div className="toolbar-group">
+                <select
+                  value={windowDays}
+                  onChange={(e) => setWindowDays(Number(e.target.value) || 30)}
+                  style={{
+                    height: 'var(--btn-h-sm)',
+                    padding: '0 12px',
+                    borderRadius: 'var(--btn-radius)',
+                    border: '1px solid var(--btn-secondary-border)',
+                    backgroundColor: 'var(--btn-ghost-bg)',
+                    color: 'var(--btn-secondary-fg)',
+                    fontSize: 14,
+                    outline: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {WINDOW_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </AppToolbar.Left>
+            <AppToolbar.Right>
+              <Button type="button" variant="secondary" size="sm" onClick={load}>
+                Refresh
+              </Button>
+            </AppToolbar.Right>
+          </AppToolbar>
+        )}
 
-        {loading && (
+        {loading && !isScreenshotMode() && (
           <div style={{ padding: 32, textAlign: 'center', color: 'var(--text-secondary, #6b7280)' }}>
             Loading decision dashboard…
           </div>

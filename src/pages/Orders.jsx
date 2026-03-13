@@ -66,6 +66,7 @@ import JSZip from 'jszip'
 import { safeJsonArray } from '../lib/safeJson'
 import { safeArray } from '../lib/safeArray'
 import { formatError, notifyError } from '../lib/errorHandling'
+import { isScreenshotMode } from '../lib/ui/screenshotMode'
 
 // Estats de la PO
 const PO_STATUSES = {
@@ -84,7 +85,7 @@ export default function Orders() {
   const { darkMode } = useApp()
   // Removed unused navigate
   const { isMobile, isTablet } = useBreakpoint()
-  // Removed unused t
+  const t = useT()
   const [searchParams] = useSearchParams()
   
   const [orders, setOrders] = useState([])
@@ -132,6 +133,7 @@ export default function Orders() {
 
   // Abrir modal automáticamente si action=create en URL
   useEffect(() => {
+    if (isScreenshotMode()) return
     const action = searchParams.get('action')
     const projectId = searchParams.get('project')
     if (action === 'create' && projectId && projects.length > 0) {
@@ -145,6 +147,13 @@ export default function Orders() {
       }
     }
   }, [searchParams, projects])
+
+  // Keep menu closed in screenshot mode for stable captures
+  useEffect(() => {
+    if (isScreenshotMode() && menuOpen) {
+      setMenuOpen(null)
+    }
+  }, [menuOpen])
 
   const loadData = async () => {
     setLoading(true)
@@ -799,7 +808,7 @@ export default function Orders() {
               className="toolbar-cta"
             >
               <Plus size={18} />
-              Nova Comanda
+              {t('common.createOrder')}
             </Button>
           </div>
         </div>
@@ -845,34 +854,41 @@ export default function Orders() {
 
         {/* Orders Table */}
         {loading ? (
-          <div style={styles.loading}>Carregant...</div>
+          <div style={styles.loading}>{t('common.loading')}</div>
         ) : error ? (
           <div style={{ ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
             <AlertCircle size={48} color="#ef4444" />
             <h3 style={{ color: darkMode ? '#ffffff' : '#111827', margin: '0 0 8px', fontSize: '18px', fontWeight: '600' }}>
-              Error carregant les comandes
+              {t('common.errorGeneric')}
             </h3>
             <p style={{ color: darkMode ? '#9ca3af' : '#6b7280', margin: '0 0 24px' }}>
               {error}
             </p>
             <Button onClick={loadData}>
               <RefreshCw size={18} />
-              Reintentar
+              {t('common.retry')}
             </Button>
           </div>
         ) : filteredOrders.length === 0 ? (
           <div style={{ ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
             <FileText size={48} color="#d1d5db" />
-            <p style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
-              {searchTerm || filterStatus || filterProject ? 'No s\'han trobat comandes' : 'No hi ha comandes. Crea la primera!'}
+            <p style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontWeight: 600, marginTop: 12, marginBottom: 4 }}>
+              {searchTerm || filterStatus || filterProject
+                ? t('orders.empty.filteredTitle')
+                : t('orders.empty.title')}
             </p>
+            {!searchTerm && !filterStatus && !filterProject && (
+              <p style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: 14, marginTop: 0, marginBottom: 16 }}>
+                {t('orders.empty.subtitle')}
+              </p>
+            )}
             <Button 
               onClick={() => {
                 setShowModal(true)
               }} 
             >
               <Plus size={18} />
-              Nova Comanda
+              {t('common.createOrder')}
             </Button>
           </div>
         ) : (
@@ -938,7 +954,7 @@ export default function Orders() {
             {loadingDetail ? (
               <div style={styles.modalLoading}>
                 <Loader size={32} color="#4f46e5" className="spin" />
-                <p>Carregant detall...</p>
+                <p>{t('common.loading')}</p>
               </div>
             ) : selectedOrder && (
               <>

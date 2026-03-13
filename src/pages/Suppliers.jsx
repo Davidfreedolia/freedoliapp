@@ -38,6 +38,7 @@ import { showToast } from '../components/Toast'
 import Button from '../components/Button'
 import LayoutSwitcher from '../components/LayoutSwitcher'
 import { useLayoutPreference } from '../hooks/useLayoutPreference'
+import { isScreenshotMode } from '../lib/ui/screenshotMode'
 
 // Tipus de proveïdors
 const SUPPLIER_TYPES = [
@@ -109,6 +110,11 @@ export default function Suppliers() {
 
   // Close actions menu when clicking outside
   useEffect(() => {
+    if (isScreenshotMode() && menuOpen) {
+      setMenuOpen(null)
+      return
+    }
+
     const handleClickOutside = (event) => {
       if (menuOpen && !event.target.closest('[data-menu-container]')) {
         setMenuOpen(null)
@@ -522,7 +528,7 @@ export default function Suppliers() {
               onClick={handleNewSupplier} 
               className="toolbar-cta"
             >
-              <Plus size={18} /> Nou Proveïdor
+              <Plus size={18} /> {t('common.createSupplier')}
             </Button>
           </div>
         </div>
@@ -561,15 +567,18 @@ export default function Suppliers() {
 
         {/* Suppliers Grid */}
         {loading ? (
-          <div style={styles.loading}>Carregant...</div>
+          <div style={styles.loading}>{t('common.loading')}</div>
         ) : filteredSuppliers.length === 0 ? (
           <div style={{ ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
             <Users size={48} color="#d1d5db" />
-            <p style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
-              No hi ha proveïdors. Crea el primer!
+            <p style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontWeight: 600, marginTop: 12, marginBottom: 4 }}>
+              {t('suppliers.empty.title')}
+            </p>
+            <p style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: 14, marginTop: 0, marginBottom: 16 }}>
+              {t('suppliers.empty.subtitle')}
             </p>
             <Button onClick={handleNewSupplier}>
-              <Plus size={18} /> Afegir Proveïdor
+              <Plus size={18} /> {t('common.createSupplier')}
             </Button>
           </div>
         ) : (

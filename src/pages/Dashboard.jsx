@@ -80,6 +80,7 @@ import HomeBillingUsage from '../components/home/HomeBillingUsage'
 import HomeActiveProjects from '../components/home/HomeActiveProjects'
 import HomeReorderCandidates from '../components/home/HomeReorderCandidates'
 import HomeTopDecisions from '../components/home/HomeTopDecisions'
+import { isScreenshotMode } from '../lib/ui/screenshotMode'
 
 const formatCurrency = (amount, currency = 'EUR') =>
   (amount != null && Number.isFinite(amount))
@@ -89,6 +90,8 @@ const formatPercent = (ratio) =>
   (ratio != null && Number.isFinite(ratio))
     ? new Intl.NumberFormat('ca-ES', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(ratio)
     : '—'
+
+const FIRST_VALUE_KEY = 'freedoli_first_value_seen'
 
 export default function Dashboard() {
   const { stats, darkMode, setDarkMode, sidebarCollapsed, activeOrgId } = useApp()
@@ -151,6 +154,16 @@ export default function Dashboard() {
   const [alertsFilter, setAlertsFilter] = useState('all')
   const execMountedRef = useRef(true)
   const execLoadSeqRef = useRef(0)
+
+  const [showFirstValueBanner, setShowFirstValueBanner] = useState(() => {
+    if (typeof window === 'undefined') return false
+    if (isScreenshotMode()) return false
+    try {
+      return !localStorage.getItem(FIRST_VALUE_KEY)
+    } catch {
+      return true
+    }
+  })
 
   useEffect(() => {
     loadDashboardPreferences()
@@ -700,8 +713,8 @@ export default function Dashboard() {
 
   return (
     <div style={styles.container} className="page-dashboard">
-      {/* Edit Layout Controls - Only visible when editing, no duplicate topbar */}
-      {editLayout && !isMobile && (
+      {/* Edit Layout Controls - Only visible when editing, hidden in screenshot mode */}
+      {editLayout && !isMobile && !isScreenshotMode() && (
         <div style={{
           display: 'flex',
           justifyContent: 'flex-end',
@@ -750,6 +763,40 @@ export default function Dashboard() {
         ...styles.content,
         padding: isMobile ? '16px' : '32px'
       }}>
+        {showFirstValueBanner && (
+          <div
+            style={{
+              marginBottom: 24,
+              padding: '12px 16px',
+              borderRadius: 12,
+              border: '1px solid var(--border-1)',
+              background: darkMode ? '#0b1120' : '#eff6ff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 12,
+            }}
+          >
+            <div style={{ fontSize: 14, color: 'var(--text-1)' }}>
+              <strong>{t('dashboard.firstValue.title')}</strong>{' '}
+              <span>{t('dashboard.firstValue.subtitle')}</span>
+            </div>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => {
+                try {
+                  localStorage.setItem(FIRST_VALUE_KEY, '1')
+                } catch (_) {}
+                setShowFirstValueBanner(false)
+                navigate('/app/projects')
+              }}
+            >
+              <Plus size={16} style={{ marginRight: 6 }} />
+              {t('dashboard.firstValue.cta')}
+            </Button>
+          </div>
+        )}
         {dashboardModeLoading && (
           <div className="dash-onboard-shell">
             <p className="dash-onboard-header__subtitle">{t('common.loading')}</p>
@@ -789,8 +836,8 @@ export default function Dashboard() {
         )}
         {!dashboardModeLoading && dashboardHasData && (
           <>
-        {/* Edit Mode Badge */}
-        {editLayout && !isMobile && (
+        {/* Edit Mode Badge - hidden in screenshot mode */}
+        {editLayout && !isMobile && !isScreenshotMode() && (
           <div style={{
             ...styles.editModeBadge,
             backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6',
@@ -1042,10 +1089,12 @@ export default function Dashboard() {
 
         {/* Executive dashboard (C4): KPI row + Risk Radar + Money Focus */}
         {execLoading && (
-          <div style={{ padding: '16px 0', color: 'var(--muted-1)', fontSize: 14 }}>Loading executive dashboard…</div>
+          <div style={{ padding: '16px 0', color: 'var(--muted-1)', fontSize: 14 }}>{t('common.loading')}</div>
         )}
         {execError && (
-          <div style={{ padding: '16px 0', color: 'var(--danger-1)', fontSize: 14 }}>{execError}</div>
+          <div style={{ padding: '16px 0', color: 'var(--danger-1)', fontSize: 14 }}>
+            {execError || t('common.errorGeneric')}
+          </div>
         )}
         {!execLoading && !execError && execData.kpis != null && (
           <>
@@ -1878,11 +1927,11 @@ const styles = {
     overflowY: 'auto'
   },
   homeSection: {
-    marginBottom: 32,
+    marginBottom: 'var(--s-6)',
     maxWidth: 1200,
   },
   homeHeader: {
-    marginBottom: 24,
+    marginBottom: 'var(--s-6)',
   },
   homeTitle: {
     margin: 0,
@@ -1898,9 +1947,9 @@ const styles = {
   },
   homeRow: {
     display: 'flex',
-    gap: 16,
+    gap: 'var(--s-4)',
     flexWrap: 'wrap',
-    marginBottom: 20,
+    marginBottom: 'var(--s-5)',
   },
   homeReorderSlot: {
     marginTop: 8,

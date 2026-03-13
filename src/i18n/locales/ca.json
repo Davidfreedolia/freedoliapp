@@ -7,10 +7,13 @@
     "download": "Descarregar",
     "markAsSent": "Marcar com enviat",
     "restore": "Restaurar",
-    "loading": "Carregant...",
+    "loading": "Carregant…",
+    "retry": "Reintentar",
     "error": "Error",
+    "errorGeneric": "Alguna cosa ha fallat",
     "success": "Èxit",
     "optional": "Opcional",
+    "noData": "Encara no hi ha dades",
     "buttons": {
       "save": "Guardar",
       "cancel": "Cancel·lar",
@@ -31,10 +34,138 @@
   },
   "landing": {
     "hero": {
-      "title": "Connecta Amazon. Entén el teu benefici real.",
-      "subtitle": "Importa settlements, segueix costos i marges i gestiona el pipeline de productes en un sol lloc.",
+      "title": "Gestiona les teves operacions d'Amazon des d'un sol lloc.",
+      "subtitle": "El sistema operatiu per a negocis de producte que gestionen proveïdors, comandes de compra, inventari i benefici.",
       "ctaPrimary": "Començar",
-      "ctaSecondary": "Iniciar sessió"
+      "ctaSecondary": "Iniciar sessió",
+      "cta_primary": "Començar trial gratuït",
+      "cta_secondary": "Veure com funciona"
+    },
+    "screenshots": {
+      "hero_alt": "Dashboard de Freedoliapp amb KPIs, alertes actives i gràfic d'ingressos.",
+      "suppliers": {
+        "title": "Organitza els proveïdors en un únic espai de treball.",
+        "description": "Tingues dades, termes i notes de proveïdors en un sol lloc perquè tot l'equip sàpiga a qui compreu i en quines condicions.",
+        "alt": "Vista de la graella de proveïdors de Freedoliapp amb targetes i detalls clau."
+      },
+      "orders_workflow": {
+        "title": "Segueix les comandes de compra des del pressupost fins al lliurament.",
+        "description": "Crea i segueix comandes de compra al llarg de producció i enviament perquè l'estoc arribi quan el necessites.",
+        "alt": "Targetes de flux de comandes de compra de Freedoliapp amb estats de progrés."
+      },
+      "decisions": {
+        "title": "Visualitza les decisions que toquen ara.",
+        "description": "Mostra alertes d'estoc, marge i caixa per saber què has de demanar, a qui i en quina quantitat.",
+        "alt": "Dashboard de decisions de Freedoliapp amb KPIs i targetes de decisions."
+      }
+    },
+    "trust": {
+      "eyebrow": "Dissenyat per a operadors Amazon seriosos",
+      "title": "Pensat per a operacions reals, no experiments.",
+      "points": {
+        "fba_workflows": "Fluxos FBA d'Amazon que ja coneixes.",
+        "fba_workflows_desc": "Comandes de compra, enviaments i fluxos d'inventari alineats amb la realitat dels venedors d'Amazon.",
+        "supplier_management": "Gestió de proveïdors en un sol lloc.",
+        "supplier_management_desc": "Centralitza dades, termes i comunicació amb proveïdors en comptes de dispersar-los en xats i fulls de càlcul.",
+        "inventory_visibility": "Visibilitat d'inventari en temps real.",
+        "inventory_visibility_desc": "Veu estoc actual i pendent per SKU per evitar ruptures i sobreestoc.",
+        "profit_tracking": "Seguiment de benefici que reflecteix la realitat.",
+        "profit_tracking_desc": "Combina costos, comissions i vendes per conèixer el benefici real per producte i comanda."
+      }
+    },
+    "problem": {
+      "title": "Gestionar un negoci Amazon no hauria de requerir 10 eines diferents.",
+      "description": "La majoria d'equips gestionen proveïdors, comandes i inventari entre fulls de càlcul, xats i correus. Les dades estan disperses i ningú confia del tot en els números.",
+      "items": {
+        "excel": "Fulls d'Excel per a inventari i comandes de compra.",
+        "whatsapp": "Converses de WhatsApp amb proveïdors.",
+        "shipping_docs": "Documents d'enviament amagats en adjunts de correu.",
+        "email_threads": "Llargs fils de correu per a aprovacions.",
+        "inventory_spreadsheets": "Fulls separats només per seguir estoc i benefici."
+      }
+    },
+    "solution": {
+      "title": "La torre de control de les operacions d'Amazon.",
+      "description": "Freedoliapp centralitza proveïdors, comandes de compra, inventari i benefici perquè l'equip pugui operar des d'un únic espai de treball.",
+      "points": {
+        "visibility": "Visibilitat clara sobre proveïdors, estoc i comandes.",
+        "workflows": "Fluxos estructurats des del pressupost fins a les unitats lliurades.",
+        "profit": "Vistes operatives que sempre connecten amb el benefici."
+      }
+    },
+    "modules": {
+      "title": "Tot el que necessita el teu negoci Amazon en un sol lloc.",
+      "description": "Un únic espai per a sourcing, comandes, inventari i rendibilitat.",
+      "suppliers": {
+        "title": "Proveïdors",
+        "desc": "Tingues dades, termes i notes de tots els proveïdors en una vista estructurada."
+      },
+      "purchase_orders": {
+        "title": "Comandes de compra",
+        "desc": "Crea, aprova i segueix POs perquè producció i enviaments es mantinguin en termini."
+      },
+      "inventory": {
+        "title": "Inventari",
+        "desc": "Consulta nivells d'estoc actual i pendent per SKU per planificar reposicions amb confiança."
+      },
+      "profit": {
+        "title": "Benefici",
+        "desc": "Entén la rendibilitat real per producte i comanda, no només els ingressos."
+      },
+      "decisions": {
+        "title": "Decisions operatives",
+        "desc": "Rep recomanacions clares sobre què demanar a continuació, en quines quantitats i a quin proveïdor."
+      }
+    },
+    "how_it_works": {
+      "title": "Com funciona Freedoliapp",
+      "steps": {
+        "connect_suppliers": {
+          "title": "Connecta els proveïdors"
+        },
+        "create_pos": {
+          "title": "Crea comandes de compra"
+        },
+        "track_inventory": {
+          "title": "Segueix l'inventari"
+        },
+        "understand_profit": {
+          "title": "Entén el benefici"
+        },
+        "make_decisions": {
+          "title": "Pren millors decisions"
+        }
+      }
+    },
+    "assistant": {
+      "title": "Coneix en Freedoli, el teu assistent operatiu.",
+      "description": "Fes servir l'assistent per explorar el producte, entendre els números i trobar el següent millor pas.",
+      "actions": {
+        "show_product": "Mostra'm el producte",
+        "how_it_works": "Com funciona",
+        "start_trial": "Començar trial"
+      }
+    },
+    "resources": {
+      "title": "Recursos per a operadors Amazon",
+      "description": "Guies, plantilles i eines per gestionar les teves operacions d'Amazon amb més control.",
+      "guides": {
+        "title": "Guies",
+        "desc": "Contingut aprofundit sobre gestió de proveïdors, comandes de compra, inventari i rendibilitat."
+      },
+      "templates": {
+        "title": "Plantilles",
+        "desc": "Fulls i documents pràctics per començar abans de portar-los a Freedoliapp."
+      },
+      "tools": {
+        "title": "Eines",
+        "desc": "Calculadores i utilitats per a operadors Amazon, com càlcul de benefici i cobertura d'inventari."
+      }
+    },
+    "final_cta": {
+      "title": "Preparat per gestionar les operacions d'Amazon des d'un sol lloc?",
+      "description": "Comença un trial gratuït i comprova com Freedoliapp encaixa amb els teus fluxos actuals.",
+      "cta_primary": "Començar trial gratuït"
     },
     "features": {
       "analytics": {
@@ -96,6 +227,28 @@
       "trialEnded": "El trial ha acabat — actualitzeu el pla per continuar creant places/connexions i desbloquejar funcionalitats Pro.",
       "pastDue": "Problema de pagament — actualitzeu la facturació per restaurar les accions Pro.",
       "upgradeCta": "Actualitzar pla"
+    },
+    "pageTitle": "Facturació",
+    "loading": "Carregant…",
+    "section": {
+      "alerts": "Alertes de facturació",
+      "currentPlan": "Pla actual",
+      "upgradePlan": "Actualitzar pla",
+      "manageSubscription": "Gestionar subscripció",
+      "usage": "Ús",
+      "lockedFeatures": "Funcions bloquejades"
+    },
+    "actions": {
+      "upgradeTo": "Actualitzar a {{planLabel}}",
+      "manageSubscription": "Gestionar subscripció"
+    },
+    "loadingUsage": "Carregant ús…",
+    "noUsageData": "Sense dades d'ús.",
+    "errors": {
+      "couldNotStartCheckout": "No s'ha pogut iniciar el checkout",
+      "checkoutFailed": "El checkout ha fallat",
+      "noCustomer": "Encara no hi ha client de facturació. Tria un pla primer.",
+      "portalFailed": "El portal de facturació ha fallat"
     }
   },
   "activation": {
@@ -205,6 +358,24 @@
     "decisions": "Decisions",
     "settings": "Configuració"
   },
+  "nav": {
+    "dashboard": "Dashboard",
+    "projects": "Projectes",
+    "suppliers": "Proveïdors",
+    "forwarders": "Transitaris",
+    "warehouses": "Magatzems",
+    "orders": "Comandes",
+    "finances": "Finances",
+    "inventory": "Inventari",
+    "calendar": "Calendari",
+    "analytics": "Analítica",
+    "decisionDashboard": "Decision Dashboard",
+    "profit": "Profit",
+    "cashflow": "Cashflow",
+    "operationsPlanning": "Planificació operativa",
+    "decisions": "Decisions",
+    "settings": "Configuració"
+  },
   "connectedAccounts": {
     "title": "Comptes connectats",
     "description": "Vincula Google o Apple per iniciar sessió amb diversos providers al mateix compte de FREEDOLIAPP.",
@@ -215,7 +386,17 @@
     "connect": "Connectar",
     "connecting": "Connectant…"
   },
+  "common": {
+    "createProject": "Crear projecte",
+    "createSupplier": "Crear proveïdor",
+    "createOrder": "Crear comanda"
+  },
   "dashboard": {
+    "firstValue": {
+      "title": "Benvingut/da a Freedoliapp.",
+      "subtitle": "Comença creant el teu primer producte.",
+      "cta": "Crear primer producte"
+    },
     "modeA": {
       "title": "Dashboard",
       "subtitle": "Resum del teu negoci"
@@ -581,6 +762,11 @@
     "title": "Ajuda i Documentació",
     "noResults": "No s'han trobat resultats"
   },
+  "topbar": {
+    "addNote": "Afegir nota",
+    "workspaceLabel": "Workspace: {{name}}",
+    "workspaceSwitcherAria": "Workspace actual: {{name}}. Fes clic per canviar de workspace."
+  },
   "navbar": {
     "addNote": "Afegir nota",
     "notes": "Notes",
@@ -689,13 +875,28 @@
     "description": "Descripció",
     "descriptionPlaceholder": "Descripció breu del producte...",
     "projectPhases": "Fases del projecte",
-    "createProject": "Crear Projecte",
+    "createProject": "Crear projecte",
     "creatingFolders": "Creant carpetes...",
     "empty": {
-      "title": "Comença el teu primer producte",
-      "subtitle": "Crea un producte i mou-lo per viabilitat, pressupostos, mostres, PO i enviament.",
-      "cta": "Crear producte"
+      "title": "Encara no tens projectes",
+      "subtitle": "Crea el teu primer projecte per començar a gestionar el teu negoci Amazon.",
+      "cta": "Crear projecte"
     },
+  "suppliers": {
+    "empty": {
+      "title": "Encara no tens proveïdors",
+      "subtitle": "Crea el teu primer proveïdor per començar a gestionar el sourcing i la producció.",
+      "cta": "Crear proveïdor"
+    }
+  },
+  "orders": {
+    "empty": {
+      "title": "Encara no tens comandes",
+      "filteredTitle": "No s'han trobat comandes",
+      "subtitle": "Crea la teva primera comanda per començar a seguir la producció i l'estoc entrant.",
+      "cta": "Crear comanda"
+    }
+  },
     "nextAction": {
       "open": "Obrir projecte",
       "viability": "Revisar viabilitat",

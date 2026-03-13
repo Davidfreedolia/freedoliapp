@@ -97,21 +97,21 @@ const prefetchRoute = (path) => {
 const prefetchedRoutes = new Set()
 
 const menuItems = [
-  { path: '/app', icon: LayoutDashboard, labelKey: 'sidebar.dashboard' },
-  { path: '/app/projects', icon: FolderKanban, labelKey: 'sidebar.projects' },
-  { path: '/app/suppliers', icon: Users, labelKey: 'sidebar.suppliers' },
-  { path: '/app/forwarders', icon: Truck, labelKey: 'sidebar.forwarders' },
-  { path: '/app/warehouses', icon: Warehouse, labelKey: 'sidebar.warehouses' },
-  { path: '/app/orders', icon: FileText, labelKey: 'sidebar.orders' },
-  { path: '/app/finances', icon: Receipt, labelKey: 'sidebar.finances' },
-  { path: '/app/inventory', icon: Package, labelKey: 'sidebar.inventory' },
-  { path: '/app/decisions', icon: Inbox, labelKey: 'sidebar.decisions' },
-  { path: '/app/calendar', icon: CalendarIcon, labelKey: 'sidebar.calendar' },
-  { path: '/app/analytics', icon: TrendingUp, labelKey: 'sidebar.analytics' },
-  { path: '/app/decision-dashboard', icon: TrendingUp, labelKey: 'sidebar.decisionDashboard' },
-  { path: '/app/profit', icon: DollarSign, labelKey: 'sidebar.profit' },
-  { path: '/app/cash', icon: Wallet, labelKey: 'sidebar.cashflow' },
-  { path: '/app/operations', icon: ClipboardList, labelKey: 'sidebar.operationsPlanning' },
+  { path: '/app', icon: LayoutDashboard, labelKey: 'nav.dashboard' },
+  { path: '/app/projects', icon: FolderKanban, labelKey: 'nav.projects' },
+  { path: '/app/suppliers', icon: Users, labelKey: 'nav.suppliers' },
+  { path: '/app/forwarders', icon: Truck, labelKey: 'nav.forwarders' },
+  { path: '/app/warehouses', icon: Warehouse, labelKey: 'nav.warehouses' },
+  { path: '/app/orders', icon: FileText, labelKey: 'nav.orders' },
+  { path: '/app/finances', icon: Receipt, labelKey: 'nav.finances' },
+  { path: '/app/inventory', icon: Package, labelKey: 'nav.inventory' },
+  { path: '/app/decisions', icon: Inbox, labelKey: 'nav.decisions' },
+  { path: '/app/calendar', icon: CalendarIcon, labelKey: 'nav.calendar' },
+  { path: '/app/analytics', icon: TrendingUp, labelKey: 'nav.analytics' },
+  { path: '/app/decision-dashboard', icon: TrendingUp, labelKey: 'nav.decisionDashboard' },
+  { path: '/app/profit', icon: DollarSign, labelKey: 'nav.profit' },
+  { path: '/app/cash', icon: Wallet, labelKey: 'nav.cashflow' },
+  { path: '/app/operations', icon: ClipboardList, labelKey: 'nav.operationsPlanning' },
 ]
 
 export default function Sidebar() {
@@ -206,7 +206,11 @@ export default function Sidebar() {
             })}
           >
             <item.icon size={shouldCollapse ? 24 : 20} color="var(--nav-icon)" />
-            {!shouldCollapse && <span>{t(item.labelKey)}</span>}
+            {!shouldCollapse && (
+              <span style={styles.navItemLabel}>
+                {t(item.labelKey)}
+              </span>
+            )}
           </NavLink>
         ))}
       </nav>
@@ -240,7 +244,11 @@ prefetchedRoutes.add('/app/settings')
         })}
       >
         <Settings size={shouldCollapse ? 24 : 20} color="var(--nav-icon)" />
-        {!shouldCollapse && <span>{t('sidebar.settings')}</span>}
+        {!shouldCollapse && (
+          <span style={styles.navItemLabel}>
+            {t('nav.settings')}
+          </span>
+        )}
       </NavLink>
 
       {isDesktop && (
@@ -379,7 +387,14 @@ const styles = {
     textDecoration: 'none',
     fontSize: '14px',
     fontWeight: '500',
-    transition: 'all 0.2s ease'
+    transition: 'background-color 0.15s ease, color 0.15s ease'
+  },
+  navItemLabel: {
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    flex: 1,
+    minWidth: 0
   },
   mobileMenuButton: {
     position: 'fixed',

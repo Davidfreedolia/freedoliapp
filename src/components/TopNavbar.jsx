@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { StickyNote, HelpCircle } from 'lucide-react'
+import React, { useState, useEffect, useRef } from 'react'
+import { StickyNote, HelpCircle, ChevronDown } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useApp } from '../context/AppContext'
@@ -20,7 +20,7 @@ import DecisionBadge from './decisions/DecisionBadge'
 
 export default function TopNavbar({ sidebarWidth = 0 }) {
   const { darkMode, setDarkMode } = useApp()
-  const { activeOrgId } = useWorkspace()
+  const { activeOrgId, memberships, setActiveOrgId } = useWorkspace()
   const navigate = useNavigate()
   const location = useLocation()
   const { t, i18n } = useTranslation()
@@ -32,6 +32,8 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
   const [userEmail, setUserEmail] = useState('')
   const [userName, setUserName] = useState('')
   const [demoMode, setDemoMode] = useState(false)
+  const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false)
+  const workspaceMenuRef = useRef(null)
 
   // Load user info
   useEffect(() => {
@@ -53,6 +55,35 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
   useEffect(() => {
     getDemoMode().then(setDemoMode).catch(() => setDemoMode(false))
   }, [])
+
+  const workspaces = (memberships || []).map((m) => ({
+    id: m.org_id,
+    name: m.orgs?.name || 'Workspace',
+    role: m.role,
+  }))
+
+  const currentWorkspace = workspaces.find((w) => w.id === activeOrgId) || workspaces[0] || null
+
+  useEffect(() => {
+    if (!showWorkspaceMenu) return
+    const handleClickOutside = (event) => {
+      if (!workspaceMenuRef.current) return
+      if (!workspaceMenuRef.current.contains(event.target)) {
+        setShowWorkspaceMenu(false)
+      }
+    }
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setShowWorkspaceMenu(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [showWorkspaceMenu])
 
   // No mostrar navbar a login
   if (location.pathname === '/login') return null
@@ -105,8 +136,8 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
             size="sm"
             onClick={() => setShowNoteModal(true)}
             className="topbar-button topbar-notes"
-            title="Afegir nota"
-            aria-label="Afegir nota"
+            title={t('topbar.addNote')}
+            aria-label={t('topbar.addNote')}
           >
             <StickyNote size={18} />
             {!isMobile && <span style={{ marginLeft: '6px', fontSize: '14px' }}>+ {t('navbar.notes')}</span>}
@@ -132,7 +163,85 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
         </div>
 
         <div style={styles.rightSection}>
-          <span style={{ fontSize: 11, color: 'var(--muted-1)', marginRight: 6 }}>Workspace: Freedolia</span>
+          {currentWorkspace && (
+            workspaces.length <= 1 ? (
+              <span style={{ fontSize: 11, color: 'var(--muted-1)', marginRight: 6 }}>
+                {t('topbar.workspaceLabel', { name: currentWorkspace.name })}
+              </span>
+            ) : (
+              <div style={{ position: 'relative', marginRight: 6 }} ref={workspaceMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setShowWorkspaceMenu((open) => !open)}
+                  aria-haspopup="menu"
+                  aria-expanded={showWorkspaceMenu}
+                  aria-label={t('topbar.workspaceSwitcherAria', { name: currentWorkspace.name })}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    fontSize: 11,
+                    color: 'var(--muted-1)',
+                    padding: '4px 8px',
+                    borderRadius: 999,
+                    border: '1px solid var(--border-1)',
+                    background: 'var(--surface-bg-1)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <span>{t('topbar.workspaceLabel', { name: currentWorkspace.name })}</span>
+                  <ChevronDown size={12} aria-hidden />
+                </button>
+                {showWorkspaceMenu && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      right: 0,
+                      marginTop: 4,
+                      minWidth: 200,
+                      background: 'var(--surface-bg-2)',
+                      borderRadius: 8,
+                      border: '1px solid var(--border-1)',
+                      boxShadow: '0 8px 20px rgba(0,0,0,0.25)',
+                      zIndex: 20,
+                      padding: 4,
+                    }}
+                  >
+                    {workspaces.map((w) => (
+                      <button
+                        key={w.id}
+                        type="button"
+                        onClick={() => {
+                          setShowWorkspaceMenu(false)
+                          if (w.id !== activeOrgId) {
+                            setActiveOrgId(w.id)
+                          }
+                        }}
+                        style={{
+                          width: '100%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '6px 8px',
+                          fontSize: 12,
+                          background: w.id === activeOrgId ? 'var(--surface-bg-3)' : 'transparent',
+                          color: 'var(--text-1)',
+                          border: 'none',
+                          borderRadius: 6,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <span>{w.name}</span>
+                        <span style={{ fontSize: 10, textTransform: 'uppercase', color: 'var(--muted-2)' }}>
+                          {w.role}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          )}
           <span style={{
             fontSize: 11,
             padding: '4px 8px',

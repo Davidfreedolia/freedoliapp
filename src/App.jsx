@@ -38,6 +38,7 @@ import { useBreakpoint } from './hooks/useBreakpoint'
 import { useWorkspaceUsage } from './hooks/useWorkspaceUsage'
 import { createStripeCheckoutSession } from './lib/billingApi'
 import { isDemoMode } from './demo/demoMode'
+import { isScreenshotMode } from './lib/ui/screenshotMode'
 import { supabase, getCurrentUserId } from './lib/supabase'
 import { useOnboardingStatus } from './hooks/useOnboardingStatus'
 import './i18n'
@@ -45,6 +46,9 @@ import './i18n'
 // Login, Landing, Activation (no lazy)
 import Login from './pages/Login'
 import Landing from './pages/Landing'
+import AmazonFbaDashboard from './pages/seo/AmazonFbaDashboard'
+import PurchaseOrderManagement from './pages/seo/PurchaseOrderManagement'
+import SupplierManagementSystem from './pages/seo/SupplierManagementSystem'
 import ActivationWizard from './pages/ActivationWizard'
 import Trial from './pages/Trial'
 import LegalIndex from './pages/legal/LegalIndex'
@@ -422,6 +426,20 @@ function CookieBannerWrapper() {
   return <CookieBanner locationPathname={location.pathname} />
 }
 
+function ScreenshotModeBodyClass() {
+  const location = useLocation()
+
+  useEffect(() => {
+    if (isScreenshotMode()) {
+      document.body.classList.add('screenshot-mode')
+    } else {
+      document.body.classList.remove('screenshot-mode')
+    }
+  }, [location])
+
+  return null
+}
+
 function App() {
   return (
     <BrowserRouter>
@@ -429,9 +447,13 @@ function App() {
         <WorkspaceProvider>
           <OnboardingGate>
             <CookieBannerWrapper />
+            <ScreenshotModeBodyClass />
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/landing" element={<Navigate to="/" replace />} />
+              <Route path="/amazon-fba-dashboard" element={<AmazonFbaDashboard />} />
+              <Route path="/purchase-order-management" element={<PurchaseOrderManagement />} />
+              <Route path="/supplier-management-system" element={<SupplierManagementSystem />} />
               <Route path="/login" element={<Login />} />
               <Route path="/trial" element={<Trial />} />
               <Route path="/privacy" element={<Privacy />} />

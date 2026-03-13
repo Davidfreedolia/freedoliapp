@@ -12,6 +12,7 @@ import { supabase } from '../lib/supabase'
 import { showToast } from '../components/Toast'
 import FeatureLockedCard from '../components/billing/FeatureLockedCard'
 import LimitReachedBanner from '../components/billing/LimitReachedBanner'
+import { useTranslation } from 'react-i18next'
 
 const PLANS = [
   { id: 'growth', label: 'Growth' },
@@ -28,6 +29,7 @@ export default function Billing() {
   const [actionError, setActionError] = useState(null)
   const [entitlements, setEntitlements] = useState(null)
   const [entitlementsLoading, setEntitlementsLoading] = useState(false)
+  const { t } = useTranslation()
 
   useEffect(() => {
     if (!activeOrgId) {
@@ -67,11 +69,11 @@ export default function Billing() {
         window.location.href = data.url
         return
       }
-      const msg = 'Could not start checkout'
+      const msg = t('billing.errors.couldNotStartCheckout')
       setActionError(msg)
       showToast(msg, 'error')
     } catch (err) {
-      const msg = err?.message || 'Checkout failed'
+      const msg = err?.message || t('billing.errors.checkoutFailed')
       setActionError(msg)
       showToast(msg, 'error')
     } finally {
@@ -89,12 +91,12 @@ export default function Billing() {
         window.location.href = data.url
         return
       }
-      const msg = 'No billing customer yet. Choose a plan first.'
+      const msg = t('billing.errors.noCustomer')
       setActionError(msg)
       showToast(msg, 'info')
     } catch (err) {
       const isNoCustomer = err?.message?.includes('NO_CUSTOMER')
-      const msg = isNoCustomer ? 'No billing customer yet. Choose a plan first.' : (err?.message || 'Portal failed')
+      const msg = isNoCustomer ? t('billing.errors.noCustomer') : (err?.message || t('billing.errors.portalFailed'))
       setActionError(msg)
       showToast(msg, isNoCustomer ? 'info' : 'error')
     } finally {
@@ -108,20 +110,20 @@ export default function Billing() {
   if (loading) {
     return (
       <div style={{ padding: '24px' }}>
-        <Header title={<span><CreditCard size={22} /> Billing</span>} />
-        <p style={{ color: 'var(--text-secondary)' }}>Loading…</p>
+        <Header title={<span><CreditCard size={22} /> {t('billing.pageTitle')}</span>} />
+        <p style={{ color: 'var(--text-secondary)' }}>{t('billing.loading')}</p>
       </div>
     )
   }
 
   return (
     <div style={{ padding: '24px' }}>
-      <Header title={<span><CreditCard size={22} /> Billing</span>} />
+      <Header title={<span><CreditCard size={22} /> {t('billing.pageTitle')}</span>} />
 
       <div style={{ maxWidth: 560, marginTop: 16, display: 'flex', flexDirection: 'column', gap: 32 }}>
         {/* Billing alerts (D11.8 Slice 5) — UX only; data from useWorkspaceUsage (D12) */}
         <section>
-          <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>Billing alerts</h2>
+          <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>{t('billing.section.alerts')}</h2>
           <LimitReachedBanner
             resource="projects"
             used={usage?.projects?.used ?? 0}
@@ -140,7 +142,7 @@ export default function Billing() {
 
         {/* Block 1: Current Plan */}
         <section style={{ padding: '20px', border: '1px solid var(--border)', borderRadius: 8 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Current Plan</h2>
+          <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>{t('billing.section.currentPlan')}</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div>
               <div style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>Current plan</div>
@@ -165,7 +167,7 @@ export default function Billing() {
             </div>
           )}
           <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Upgrade plan</div>
+            <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{t('billing.section.upgradePlan')}</div>
             {PLANS.map((p) => (
               <Button
                 key={p.id}
@@ -174,26 +176,26 @@ export default function Billing() {
                 disabled={actionLoading != null}
                 onClick={() => handleUpgrade(p.id)}
               >
-                {actionLoading === p.id ? '…' : `Upgrade to ${p.label}`}
+                {actionLoading === p.id ? '…' : t('billing.actions.upgradeTo', { planLabel: p.label })}
               </Button>
             ))}
-            <div style={{ fontSize: 14, fontWeight: 600, marginTop: 8, marginBottom: 4 }}>Manage subscription</div>
+            <div style={{ fontSize: 14, fontWeight: 600, marginTop: 8, marginBottom: 4 }}>{t('billing.section.manageSubscription')}</div>
             <Button
               variant="secondary"
               size="md"
               disabled={actionLoading != null}
               onClick={handleManageSubscription}
             >
-              {actionLoading === 'portal' ? '…' : 'Manage subscription'}
+              {actionLoading === 'portal' ? '…' : t('billing.actions.manageSubscription')}
             </Button>
           </div>
         </section>
 
         {/* Block 2: Usage — single source: useWorkspaceUsage (D12 Slice 3) */}
         <section style={{ padding: '20px', border: '1px solid var(--border)', borderRadius: 8 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Usage</h2>
+          <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>{t('billing.section.usage')}</h2>
           {usageLoading ? (
-            <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>Loading usage…</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>{t('billing.loadingUsage')}</p>
           ) : usageError ? (
             <p style={{ fontSize: 14, color: 'var(--error-text, #b91c1c)' }} role="alert">{usageError}</p>
           ) : usage ? (
@@ -210,13 +212,13 @@ export default function Billing() {
               </div>
             </div>
           ) : (
-            <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>No usage data.</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>{t('billing.noUsageData')}</p>
           )}
         </section>
 
         {/* Block 3: Locked features (D11.8 Slice 4) — upsell via canonical hasOrgFeature */}
         <section style={{ padding: '20px', border: '1px solid var(--border)', borderRadius: 8 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Locked features</h2>
+          <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>{t('billing.section.lockedFeatures')}</h2>
           {entitlementsLoading ? (
             <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>Loading…</p>
           ) : (

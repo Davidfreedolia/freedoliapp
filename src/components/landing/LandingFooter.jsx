@@ -7,7 +7,14 @@ export default function LandingFooter() {
   return (
     <footer className="landing-footer">
       <div className="landing-footer__grid">
-        <div className="landing-footer__col">
+        <div className="landing-footer__col landing-footer__col--brand">
+          <div className="landing-footer__brand">
+            <img
+              src="/brand/freedoliapp/logo/wordmark.png"
+              alt="FREEDOLIAPP"
+              className="landing-footer__brandImg"
+            />
+          </div>
           <div className="landing-footer__colTitle">{t('landing.footer.product')}</div>
           <ul className="landing-footer__list">
             <li><a href="/">{t('landing.footer.features')}</a></li>

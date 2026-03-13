@@ -7,10 +7,13 @@
     "download": "Download",
     "markAsSent": "Mark as sent",
     "restore": "Restore",
-    "loading": "Loading...",
+    "loading": "Loading…",
+    "retry": "Retry",
     "error": "Error",
+    "errorGeneric": "Something went wrong",
     "success": "Success",
     "optional": "Optional",
+    "noData": "No data yet",
     "buttons": {
       "save": "Save",
       "cancel": "Cancel",
@@ -31,10 +34,138 @@
   },
   "landing": {
     "hero": {
-      "title": "Connect Amazon. Understand your real profit.",
-      "subtitle": "Import settlements, track costs and margins, and run your product pipeline in one place.",
+      "title": "Run your Amazon operations from one place.",
+      "subtitle": "The operating system for product businesses managing suppliers, purchase orders, inventory and profit.",
       "ctaPrimary": "Get started",
-      "ctaSecondary": "Log in"
+      "ctaSecondary": "Log in",
+      "cta_primary": "Start free trial",
+      "cta_secondary": "See how it works"
+    },
+    "screenshots": {
+      "hero_alt": "Freedoliapp dashboard with KPIs, active alerts and revenue trends.",
+      "suppliers": {
+        "title": "Organise suppliers in a single workspace.",
+        "description": "Keep supplier details, terms and communication in one place so your team always knows who you buy from and on what conditions.",
+        "alt": "Freedoliapp suppliers grid showing supplier cards and key details."
+      },
+      "orders_workflow": {
+        "title": "Track purchase orders from quote to delivery.",
+        "description": "Create and follow purchase orders through production and shipment so stock arrives when you need it.",
+        "alt": "Freedoliapp purchase order workflow cards with progress states."
+      },
+      "decisions": {
+        "title": "See the decisions that matter next.",
+        "description": "Surface stock, margin and cash alerts so you know what to order, from whom and in what quantities.",
+        "alt": "Freedoliapp decision dashboard with KPIs and decision cards."
+      }
+    },
+    "trust": {
+      "eyebrow": "Built for serious Amazon operators",
+      "title": "Designed for real operations, not experiments.",
+      "points": {
+        "fba_workflows": "Amazon FBA workflows you already know.",
+        "fba_workflows_desc": "Purchase orders, shipments and inventory flows that match how Amazon sellers actually operate.",
+        "supplier_management": "Supplier management in one place.",
+        "supplier_management_desc": "Centralise supplier data, terms and communication instead of spreading it across chats and spreadsheets.",
+        "inventory_visibility": "Live inventory visibility.",
+        "inventory_visibility_desc": "See current and incoming stock across SKUs so you can avoid stockouts and overstock.",
+        "profit_tracking": "Profit tracking that matches reality.",
+        "profit_tracking_desc": "Combine costs, fees and sales so you know true profitability by product and order."
+      }
+    },
+    "problem": {
+      "title": "Running an Amazon business shouldn\u2019t require 10 different tools.",
+      "description": "Most teams run suppliers, orders and inventory across spreadsheets, chats and email. Data is scattered, and nobody fully trusts the numbers.",
+      "items": {
+        "excel": "Excel sheets for inventory and purchase orders.",
+        "whatsapp": "WhatsApp threads with suppliers.",
+        "shipping_docs": "Shipping documents buried in email attachments.",
+        "email_threads": "Long email threads for approvals.",
+        "inventory_spreadsheets": "Separate spreadsheets just to track stock and profit."
+      }
+    },
+    "solution": {
+      "title": "The Amazon operations control tower.",
+      "description": "Freedoliapp centralises suppliers, purchase orders, inventory and profit so your team can run operations from a single workspace.",
+      "points": {
+        "visibility": "Clear visibility across suppliers, stock and orders.",
+        "workflows": "Structured workflows from quote to delivered units.",
+        "profit": "Operational views that always connect back to profit."
+      }
+    },
+    "modules": {
+      "title": "Everything your Amazon business needs in one place.",
+      "description": "A single workspace for sourcing, orders, inventory and profitability.",
+      "suppliers": {
+        "title": "Suppliers",
+        "desc": "Keep all supplier details, terms and notes in one structured view."
+      },
+      "purchase_orders": {
+        "title": "Purchase Orders",
+        "desc": "Create, approve and track POs so production and shipments stay on schedule."
+      },
+      "inventory": {
+        "title": "Inventory",
+        "desc": "See current and incoming stock levels across SKUs so you can plan replenishments with confidence."
+      },
+      "profit": {
+        "title": "Profit",
+        "desc": "Understand true profitability by product and order, not just top-line revenue."
+      },
+      "decisions": {
+        "title": "Operational Decisions",
+        "desc": "Get clear recommendations on what to order next, in what quantities and from which supplier."
+      }
+    },
+    "how_it_works": {
+      "title": "How Freedoliapp works",
+      "steps": {
+        "connect_suppliers": {
+          "title": "Connect suppliers"
+        },
+        "create_pos": {
+          "title": "Create purchase orders"
+        },
+        "track_inventory": {
+          "title": "Track inventory"
+        },
+        "understand_profit": {
+          "title": "Understand profit"
+        },
+        "make_decisions": {
+          "title": "Make better decisions"
+        }
+      }
+    },
+    "assistant": {
+      "title": "Meet Freedoli, your operational assistant.",
+      "description": "Use the assistant to explore the product, understand your numbers and find the next best action.",
+      "actions": {
+        "show_product": "Show me the product",
+        "how_it_works": "How it works",
+        "start_trial": "Start trial"
+      }
+    },
+    "resources": {
+      "title": "Resources for Amazon operators",
+      "description": "Guides, templates and tools to help you run your Amazon operations with more control.",
+      "guides": {
+        "title": "Guides",
+        "desc": "Deep dives into supplier management, purchase orders, inventory and profitability."
+      },
+      "templates": {
+        "title": "Templates",
+        "desc": "Practical spreadsheets and documents you can start with before moving into Freedoliapp."
+      },
+      "tools": {
+        "title": "Tools",
+        "desc": "Calculators and utilities for Amazon operators, such as profit and inventory coverage."
+      }
+    },
+    "final_cta": {
+      "title": "Ready to run your Amazon operations from one place?",
+      "description": "Start a free trial and see how Freedoliapp fits your current workflows.",
+      "cta_primary": "Start free trial"
     },
     "features": {
       "analytics": {
@@ -43,7 +174,7 @@
       },
       "pipeline": {
         "title": "Product pipeline",
-        "desc": "From viability to PO, samples and shipment — one clear workflow."
+        "desc": "From viability to PO, samples and shipment \u2014 one clear workflow."
       },
       "finance": {
         "title": "Financial clarity",
@@ -205,6 +336,24 @@
     "decisions": "Decisions",
     "settings": "Settings"
   },
+  "nav": {
+    "dashboard": "Dashboard",
+    "projects": "Projects",
+    "suppliers": "Suppliers",
+    "forwarders": "Forwarders",
+    "warehouses": "Warehouses",
+    "orders": "Orders",
+    "finances": "Finances",
+    "inventory": "Inventory",
+    "calendar": "Calendar",
+    "analytics": "Analytics",
+    "decisionDashboard": "Decision Dashboard",
+    "profit": "Profit",
+    "cashflow": "Cashflow",
+    "operationsPlanning": "Operations Planning",
+    "decisions": "Decisions",
+    "settings": "Settings"
+  },
   "connectedAccounts": {
     "title": "Connected accounts",
     "description": "Link Google or Apple to sign in with multiple providers to the same FREEDOLIAPP account.",
@@ -215,7 +364,17 @@
     "connect": "Connect",
     "connecting": "Connecting…"
   },
+  "common": {
+    "createProject": "Create project",
+    "createSupplier": "Create supplier",
+    "createOrder": "Create order"
+  },
   "dashboard": {
+    "firstValue": {
+      "title": "Welcome to Freedoliapp.",
+      "subtitle": "Start by creating your first product.",
+      "cta": "Create first product"
+    },
     "modeA": {
       "title": "Dashboard",
       "subtitle": "Overview of your business"
@@ -371,7 +530,34 @@
       "trialEnded": "Trial ended — upgrade to keep creating seats/connections and unlock Pro features.",
       "pastDue": "Payment issue — update billing to restore Pro actions.",
       "upgradeCta": "Upgrade"
+    },
+    "pageTitle": "Billing",
+    "loading": "Loading…",
+    "section": {
+      "alerts": "Billing alerts",
+      "currentPlan": "Current plan",
+      "upgradePlan": "Upgrade plan",
+      "manageSubscription": "Manage subscription",
+      "usage": "Usage",
+      "lockedFeatures": "Locked features"
+    },
+    "actions": {
+      "upgradeTo": "Upgrade to {{planLabel}}",
+      "manageSubscription": "Manage subscription"
+    },
+    "loadingUsage": "Loading usage…",
+    "noUsageData": "No usage data.",
+    "errors": {
+      "couldNotStartCheckout": "Could not start checkout",
+      "checkoutFailed": "Checkout failed",
+      "noCustomer": "No billing customer yet. Choose a plan first.",
+      "portalFailed": "Portal failed"
     }
+  },
+  "topbar": {
+    "addNote": "Add note",
+    "workspaceLabel": "Workspace: {{name}}",
+    "workspaceSwitcherAria": "Current workspace: {{name}}. Click to switch workspace."
   },
   "activation": {
     "title": "Activation wizard"
@@ -679,10 +865,25 @@
     "createProject": "Create Project",
     "creatingFolders": "Creating folders...",
     "empty": {
-      "title": "Start your first product",
-      "subtitle": "Create a product and move it through viability, quotes, samples, PO and shipment.",
-      "cta": "Create product"
+      "title": "No projects yet",
+      "subtitle": "Create your first project to start managing your Amazon business.",
+      "cta": "Create project"
     },
+  "suppliers": {
+    "empty": {
+      "title": "No suppliers yet",
+      "subtitle": "Create your first supplier to start managing your sourcing and production.",
+      "cta": "Create supplier"
+    }
+  },
+  "orders": {
+    "empty": {
+      "title": "No orders yet",
+      "filteredTitle": "No orders found",
+      "subtitle": "Create your first order to start tracking production and inbound inventory.",
+      "cta": "Create order"
+    }
+  },
     "nextAction": {
       "open": "Open project",
       "viability": "Check viability",
