@@ -67,6 +67,7 @@ import { safeJsonArray } from '../lib/safeJson'
 import { safeArray } from '../lib/safeArray'
 import { formatError, notifyError } from '../lib/errorHandling'
 import { isScreenshotMode } from '../lib/ui/screenshotMode'
+import { DataLoading, DataError } from '../components/dataStates'
 
 // Estats de la PO
 const PO_STATUSES = {
@@ -854,20 +855,12 @@ export default function Orders() {
 
         {/* Orders Table */}
         {loading ? (
-          <div style={styles.loading}>{t('common.loading')}</div>
+          <div style={{ ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff', padding: 64 }}>
+            <DataLoading message={t('common.loading')} />
+          </div>
         ) : error ? (
           <div style={{ ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <AlertCircle size={48} color="#ef4444" />
-            <h3 style={{ color: darkMode ? '#ffffff' : '#111827', margin: '0 0 8px', fontSize: '18px', fontWeight: '600' }}>
-              {t('common.errorGeneric')}
-            </h3>
-            <p style={{ color: darkMode ? '#9ca3af' : '#6b7280', margin: '0 0 24px' }}>
-              {error}
-            </p>
-            <Button onClick={loadData}>
-              <RefreshCw size={18} />
-              {t('common.retry')}
-            </Button>
+            <DataError message={error} onRetry={loadData} />
           </div>
         ) : filteredOrders.length === 0 ? (
           <div style={{ ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>

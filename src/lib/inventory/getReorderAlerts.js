@@ -82,6 +82,7 @@ export async function getReorderAlerts(supabase, orgId, options = {}) {
       type: 'reorder',
       severity: getSeverity(c),
       asin: c.asin ?? '',
+      project_id: c.projectId ?? null,
       productName: c.productName ?? null,
       message: getMessage(c),
       reorderUnits: c.reorderUnits ?? 0,

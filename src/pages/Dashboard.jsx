@@ -78,6 +78,7 @@ import HomeProfitTrend from '../components/home/HomeProfitTrend'
 import HomeTopAsins from '../components/home/HomeTopAsins'
 import HomeBillingUsage from '../components/home/HomeBillingUsage'
 import HomeActiveProjects from '../components/home/HomeActiveProjects'
+import { DataError } from '../components/dataStates'
 import HomeReorderCandidates from '../components/home/HomeReorderCandidates'
 import HomeTopDecisions from '../components/home/HomeTopDecisions'
 import { isScreenshotMode } from '../lib/ui/screenshotMode'
@@ -857,19 +858,8 @@ export default function Dashboard() {
           </header>
 
           {homeDataError && (
-            <div
-              role="alert"
-              style={{
-                marginBottom: 16,
-                padding: '10px 14px',
-                borderRadius: 8,
-                fontSize: 14,
-                color: 'var(--danger-1, #b91c1c)',
-                background: 'var(--error-bg, #fef2f2)',
-                border: '1px solid var(--border-color)',
-              }}
-            >
-              {homeDataError}
+            <div style={{ marginBottom: 16 }}>
+              <DataError message={homeDataError} />
             </div>
           )}
 

@@ -26,6 +26,8 @@ import Header from '../components/Header'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import Button from '../components/Button'
 import AppToolbar from '../components/ui/AppToolbar'
+import { DataLoading, DataError } from '../components/dataStates'
+import { useTranslation } from 'react-i18next'
 
 // Colors per categories
 const CATEGORY_COLORS = {
@@ -40,6 +42,7 @@ const CATEGORY_COLORS = {
 }
 
 export default function Analytics() {
+  const { t } = useTranslation()
   const { darkMode, activeOrgId } = useApp()
   const { isMobile } = useBreakpoint()
   
@@ -334,16 +337,12 @@ export default function Analytics() {
         </AppToolbar>
 
         {loading ? (
-          <div style={styles.loading}>Carregant analytics...</div>
+          <div style={{ padding: '2rem', textAlign: 'center' }}>
+            <DataLoading message={t('dataStates.loading', { defaultValue: 'Loading data…' })} />
+          </div>
         ) : error ? (
-          <div style={styles.errorContainer}>
-            <AlertCircle size={24} color="#ef4444" />
-            <h3 style={{ color: darkMode ? '#ffffff' : '#111827', margin: '8px 0' }}>Error carregant dades</h3>
-            <p style={{ color: '#6b7280', marginBottom: '16px' }}>{error}</p>
-            <Button variant="primary" size="sm" onClick={loadData} style={styles.retryButton}>
-              <RefreshCw size={16} />
-              Tornar a intentar
-            </Button>
+          <div style={{ padding: '2rem', textAlign: 'center' }}>
+            <DataError message={error} onRetry={loadData} />
           </div>
         ) : (
           <>

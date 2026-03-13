@@ -129,6 +129,11 @@ export function useHomeDashboardData() {
           blocked: false,
         },
       })
+
+      // V1: emit inventory_low_stock lifecycle events from reorder alerts (dedupe 24h per project)
+      import('../lib/lifecycleEvents/emitLowStock.js')
+        .then((m) => m.emitLowStockLifecycleEventsFromAlerts(supabase, activeOrgId))
+        .catch(() => {})
     } catch (err) {
       setAsyncError(err?.message ?? 'Error loading home data')
       setAsyncResult(null)

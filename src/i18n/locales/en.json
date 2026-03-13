@@ -26,6 +26,15 @@
       "details": "Details"
     }
   },
+  "dataStates": {
+    "loading": "Loading data…",
+    "errorGeneric": "Unable to load data",
+    "retry": "Try again",
+    "emptyGeneric": "No data available",
+    "emptyDecisions": "No open decisions",
+    "emptyInventory": "No inventory data available",
+    "emptyCashflow": "No forecast data. Connect data to see cashflow."
+  },
   "header": {
     "cta": {
       "signin": "Log in",
@@ -352,7 +361,17 @@
     "cashflow": "Cashflow",
     "operationsPlanning": "Operations Planning",
     "decisions": "Decisions",
-    "settings": "Settings"
+    "settings": "Settings",
+    "billing": "Billing",
+    "help": "Help",
+    "diagnostics": "Diagnostics",
+    "admin": "Admin",
+    "automations": "Automations",
+    "groupOperations": "Operations",
+    "groupInventory": "Inventory",
+    "groupFinance": "Finance",
+    "groupIntelligence": "Intelligence",
+    "groupSystem": "System"
   },
   "connectedAccounts": {
     "title": "Connected accounts",

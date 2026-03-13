@@ -26,6 +26,15 @@
       "details": "Detalls"
     }
   },
+  "dataStates": {
+    "loading": "Carregant dades…",
+    "errorGeneric": "No s'han pogut carregar les dades",
+    "retry": "Tornar a intentar",
+    "emptyGeneric": "No hi ha dades disponibles",
+    "emptyDecisions": "No hi ha decisions obertes",
+    "emptyInventory": "No hi ha dades d'inventari",
+    "emptyCashflow": "No hi ha dades de forecast. Connecta dades per veure el cashflow."
+  },
   "header": {
     "cta": {
       "signin": "Iniciar sessió",
@@ -374,7 +383,17 @@
     "cashflow": "Cashflow",
     "operationsPlanning": "Planificació operativa",
     "decisions": "Decisions",
-    "settings": "Configuració"
+    "settings": "Configuració",
+    "billing": "Facturació",
+    "help": "Ajuda",
+    "diagnostics": "Diagnòstics",
+    "admin": "Admin",
+    "automations": "Automatitzacions",
+    "groupOperations": "Operacions",
+    "groupInventory": "Inventari",
+    "groupFinance": "Finances",
+    "groupIntelligence": "Intel·ligència",
+    "groupSystem": "Sistema"
   },
   "connectedAccounts": {
     "title": "Comptes connectats",

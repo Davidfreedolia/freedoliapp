@@ -731,6 +731,11 @@ export const createPurchaseOrder = async (po) => {
     .select()
     .maybeSingle()
   if (error) throw error
+  if (data?.project_id && data?.org_id) {
+    import('./lifecycleEvents/record.js').then((m) =>
+      m.recordPoCreated({ projectId: data.project_id, orgId: data.org_id, poId: data.id, poNumber: data.po_number })
+    ).catch(() => {})
+  }
   return data
 }
 
@@ -1952,7 +1957,7 @@ export const upsertPoShipment = async (poId, payload) => {
     return authRequired()
   }
   const { user_id, org_id: _oid, ...cleanPayload } = payload || {}
-  const { data: poRow } = await supabase.from('purchase_orders').select('org_id').eq('id', poId).maybeSingle()
+  const { data: poRow } = await supabase.from('purchase_orders').select('org_id, project_id').eq('id', poId).maybeSingle()
   const orgId = payload?.org_id ?? poRow?.org_id
   if (!orgId) throw new Error('PO org context required for shipment')
   const existing = await getPoShipment(poId)
@@ -1962,6 +1967,7 @@ export const upsertPoShipment = async (poId, payload) => {
     user_id: userId,
     org_id: orgId
   }
+  let result
   if (existing) {
     const { data, error } = await supabase
       .from('po_shipments')
@@ -1970,15 +1976,23 @@ export const upsertPoShipment = async (poId, payload) => {
       .select()
       .maybeSingle()
     if (error) throw error
-    return data
+    result = data
+  } else {
+    const { data, error } = await supabase
+      .from('po_shipments')
+      .insert([shipmentData])
+      .select()
+      .maybeSingle()
+    if (error) throw error
+    result = data
   }
-  const { data, error } = await supabase
-    .from('po_shipments')
-    .insert([shipmentData])
-    .select()
-    .maybeSingle()
-  if (error) throw error
-  return data
+  const status = cleanPayload.status ?? result?.status
+  if (result && poRow?.project_id && (status === 'in_transit' || status === 'delivered')) {
+    import('./lifecycleEvents/record.js').then((m) =>
+      m.recordShipmentStatusChanged({ projectId: poRow.project_id, orgId: poRow.org_id, poId, status, shipmentId: result.id })
+    ).catch(() => {})
+  }
+  return result
 }
 
 export const setShipmentStatus = async (poId, status) => {
@@ -2007,6 +2021,14 @@ export const setShipmentStatus = async (poId, status) => {
     .maybeSingle()
   
   if (error) throw error
+  if (data && (status === 'in_transit' || status === 'delivered')) {
+    const { data: poRow } = await supabase.from('purchase_orders').select('project_id, org_id').eq('id', poId).maybeSingle()
+    if (poRow?.project_id && poRow?.org_id) {
+      import('./lifecycleEvents/record.js').then((m) =>
+        m.recordShipmentStatusChanged({ projectId: poRow.project_id, orgId: poRow.org_id, poId, status, shipmentId: data.id })
+      ).catch(() => {})
+    }
+  }
   return data
 }
 

@@ -32,6 +32,7 @@ import {
 import Header from '../components/Header'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
+import { DataLoading } from '../components/dataStates'
 import SupplierMemory from '../components/SupplierMemory'
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal'
 import { showToast } from '../components/Toast'
@@ -567,7 +568,9 @@ export default function Suppliers() {
 
         {/* Suppliers Grid */}
         {loading ? (
-          <div style={styles.loading}>{t('common.loading')}</div>
+          <div style={{ ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff', padding: 64 }}>
+            <DataLoading message={t('common.loading')} />
+          </div>
         ) : filteredSuppliers.length === 0 ? (
           <div style={{ ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
             <Users size={48} color="#d1d5db" />

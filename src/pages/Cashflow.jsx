@@ -20,6 +20,8 @@ import {
 } from 'recharts'
 import Header from '../components/Header'
 import Button from '../components/Button'
+import { DataState } from '../components/dataStates'
+import { useTranslation } from 'react-i18next'
 
 const formatCurrency = (amount, currency = 'EUR') =>
   new Intl.NumberFormat('ca-ES', { style: 'currency', currency }).format(amount ?? 0)
@@ -55,6 +57,7 @@ const styles = {
 }
 
 export default function Cashflow() {
+  const { t } = useTranslation()
   const { darkMode, activeOrgId } = useApp()
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
@@ -96,21 +99,15 @@ export default function Cashflow() {
         }
       />
       <div style={styles.content}>
-        {loading ? (
-          <div style={styles.loading}>Carregant forecast...</div>
-        ) : error ? (
-          <div style={styles.errorContainer}>
-            <AlertCircle size={24} color="#ef4444" />
-            <h3 style={{ color: darkMode ? '#ffffff' : '#111827', margin: 0 }}>Error</h3>
-            <p style={{ color: '#6b7280', margin: 0 }}>{error}</p>
-            <Button variant="primary" size="sm" onClick={loadData} style={{ marginTop: 8 }}>
-              <RefreshCw size={16} />
-              Tornar a intentar
-            </Button>
-          </div>
-        ) : data.length === 0 ? (
-          <div style={styles.empty}>No hi ha dades de forecast. Connecta dades per veure el cashflow.</div>
-        ) : (
+        <DataState
+          loading={loading}
+          error={error}
+          isEmpty={data.length === 0}
+          loadingMessage={t('dataStates.loading', { defaultValue: 'Loading data…' })}
+          errorMessage={error}
+          emptyMessage={t('dataStates.emptyCashflow', { defaultValue: 'No forecast data. Connect data to see cashflow.' })}
+          onRetry={loadData}
+        >
           <>
             <div style={styles.kpiRow}>
               <div style={styles.kpiCard}>
@@ -153,7 +150,7 @@ export default function Cashflow() {
               </div>
             </section>
           </>
-        )}
+        </DataState>
       </div>
     </div>
   )

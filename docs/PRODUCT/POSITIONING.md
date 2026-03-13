@@ -4,6 +4,8 @@ Status: Draft
 Owner: Product  
 Scope: Product definition (not UI, not marketing implementation)
 
+For strategy, competitor framing, and moat see **STRATEGIC_POSITIONING.md**.
+
 ---
 
 ## Product Category

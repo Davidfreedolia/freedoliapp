@@ -19,7 +19,12 @@ import {
   Settings,
   ChevronLeft,
   X,
-  Menu
+  Menu,
+  Workflow,
+  HelpCircle,
+  Bug,
+  ShieldCheck,
+  CreditCard
 } from 'lucide-react'
 import Button from './Button'
 import { useApp } from '../context/AppContext'
@@ -88,6 +93,21 @@ const prefetchRoute = (path) => {
     case '/calendar':
       import('../pages/Calendar.jsx').catch(() => {})
       break
+    case '/automations':
+      import('../pages/automations/AutomationInboxPage.jsx').catch(() => {})
+      break
+    case '/billing':
+      import('../pages/Billing.jsx').catch(() => {})
+      break
+    case '/help':
+      import('../pages/Help.jsx').catch(() => {})
+      break
+    case '/diagnostics':
+      import('../pages/Diagnostics.jsx').catch(() => {})
+      break
+    case '/admin':
+      import('../pages/AdminConsole.jsx').catch(() => {})
+      break
     default:
       break
   }
@@ -96,22 +116,62 @@ const prefetchRoute = (path) => {
 // Flag per evitar múltiples prefetches
 const prefetchedRoutes = new Set()
 
-const menuItems = [
-  { path: '/app', icon: LayoutDashboard, labelKey: 'nav.dashboard' },
-  { path: '/app/projects', icon: FolderKanban, labelKey: 'nav.projects' },
-  { path: '/app/suppliers', icon: Users, labelKey: 'nav.suppliers' },
-  { path: '/app/forwarders', icon: Truck, labelKey: 'nav.forwarders' },
-  { path: '/app/warehouses', icon: Warehouse, labelKey: 'nav.warehouses' },
-  { path: '/app/orders', icon: FileText, labelKey: 'nav.orders' },
-  { path: '/app/finances', icon: Receipt, labelKey: 'nav.finances' },
-  { path: '/app/inventory', icon: Package, labelKey: 'nav.inventory' },
-  { path: '/app/decisions', icon: Inbox, labelKey: 'nav.decisions' },
-  { path: '/app/calendar', icon: CalendarIcon, labelKey: 'nav.calendar' },
-  { path: '/app/analytics', icon: TrendingUp, labelKey: 'nav.analytics' },
-  { path: '/app/decision-dashboard', icon: TrendingUp, labelKey: 'nav.decisionDashboard' },
-  { path: '/app/profit', icon: DollarSign, labelKey: 'nav.profit' },
-  { path: '/app/cash', icon: Wallet, labelKey: 'nav.cashflow' },
-  { path: '/app/operations', icon: ClipboardList, labelKey: 'nav.operationsPlanning' },
+// Canonical app brand logo (single source of truth; see public/brand/freedoliapp/README.md)
+const BRAND_LOGO_URL = '/brand/freedoliapp/logo/logo_master.png'
+
+// Grouped sidebar: one coherent operating system (Operations, Inventory, Finance, Intelligence, System)
+const SIDEBAR_GROUPS = [
+  {
+    id: 'operations',
+    labelKey: 'nav.groupOperations',
+    items: [
+      { path: '/app', icon: LayoutDashboard, labelKey: 'nav.dashboard' },
+      { path: '/app/projects', icon: FolderKanban, labelKey: 'nav.projects' },
+      { path: '/app/suppliers', icon: Users, labelKey: 'nav.suppliers' },
+      { path: '/app/forwarders', icon: Truck, labelKey: 'nav.forwarders' },
+      { path: '/app/orders', icon: FileText, labelKey: 'nav.orders' },
+      { path: '/app/operations', icon: ClipboardList, labelKey: 'nav.operationsPlanning' },
+      { path: '/app/calendar', icon: CalendarIcon, labelKey: 'nav.calendar' },
+    ],
+  },
+  {
+    id: 'inventory',
+    labelKey: 'nav.groupInventory',
+    items: [
+      { path: '/app/inventory', icon: Package, labelKey: 'nav.inventory' },
+      { path: '/app/warehouses', icon: Warehouse, labelKey: 'nav.warehouses' },
+    ],
+  },
+  {
+    id: 'finance',
+    labelKey: 'nav.groupFinance',
+    items: [
+      { path: '/app/profit', icon: DollarSign, labelKey: 'nav.profit' },
+      { path: '/app/cash', icon: Wallet, labelKey: 'nav.cashflow' },
+      { path: '/app/finances', icon: Receipt, labelKey: 'nav.finances' },
+    ],
+  },
+  {
+    id: 'intelligence',
+    labelKey: 'nav.groupIntelligence',
+    items: [
+      { path: '/app/decision-dashboard', icon: TrendingUp, labelKey: 'nav.decisionDashboard' },
+      { path: '/app/decisions', icon: Inbox, labelKey: 'nav.decisions' },
+      { path: '/app/automations', icon: Workflow, labelKey: 'nav.automations' },
+      { path: '/app/analytics', icon: TrendingUp, labelKey: 'nav.analytics' },
+    ],
+  },
+  {
+    id: 'system',
+    labelKey: 'nav.groupSystem',
+    items: [
+      { path: '/app/billing', icon: CreditCard, labelKey: 'nav.billing' },
+      { path: '/app/settings', icon: Settings, labelKey: 'nav.settings' },
+      { path: '/app/help', icon: HelpCircle, labelKey: 'nav.help' },
+      { path: '/app/diagnostics', icon: Bug, labelKey: 'nav.diagnostics' },
+      { path: '/app/admin', icon: ShieldCheck, labelKey: 'nav.admin' },
+    ],
+  },
 ]
 
 export default function Sidebar() {
@@ -135,11 +195,8 @@ export default function Sidebar() {
     }
   }, [isDesktop])
 
-  const handleLogoError = (e) => {
-    if (darkMode && !logoError) {
-      setLogoError(true)
-      e.target.src = "/logo.png"
-    }
+  const handleLogoError = () => {
+    if (!logoError) setLogoError(true)
   }
 
   const handleCloseDrawer = () => {
@@ -154,8 +211,8 @@ export default function Sidebar() {
         position: 'relative'
       }}>
         <img 
-          src={logoError ? "/logo.png" : "/logo-dark.png"} 
-          alt="Freedolia" 
+          src={BRAND_LOGO_URL}
+          alt="Freedolia"
           onError={handleLogoError}
           style={{
             ...styles.logo,
@@ -172,84 +229,53 @@ export default function Sidebar() {
         )}
       </div>
 
-      {/* Menú */}
+      {/* Menú — grouped by product area */}
       <nav style={styles.nav} className="sidebar-scroll">
-        {menuItems.map(item => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            onClick={() => {
-              // Tancar drawer en mobile quan es clica un item
-              if (isMobile) {
-                setMobileOpen(false)
-              }
-            }}
-            onMouseEnter={() => {
-              // Prefetch rutes quan es fa hover (només una vegada per ruta)
-              if (!prefetchedRoutes.has(item.path) && item.path !== '/app') {
-                prefetchedRoutes.add(item.path)
-                prefetchRoute(item.path)
-              }
-              setHoveredPath(item.path)
-            }}
-            onMouseLeave={() => setHoveredPath(null)}
-            style={({ isActive }) => ({
-              ...styles.navItem,
-              backgroundColor: isActive
-                ? 'var(--nav-highlight-strong)'
-                : (hoveredPath === item.path ? 'var(--nav-highlight)' : 'transparent'),
-              color: isActive ? 'var(--nav-fg)' : 'var(--nav-fg-muted)',
-              borderLeft: 'none',
-              padding: shouldCollapse ? '12px 0' : '12px 16px',
-              borderRadius: shouldCollapse ? '12px' : '10px',
-              justifyContent: shouldCollapse ? 'center' : 'flex-start'
-            })}
-          >
-            <item.icon size={shouldCollapse ? 24 : 20} color="var(--nav-icon)" />
+        {SIDEBAR_GROUPS.map((group) => (
+          <div key={group.id} style={styles.group}>
             {!shouldCollapse && (
-              <span style={styles.navItemLabel}>
-                {t(item.labelKey)}
-              </span>
+              <div style={styles.groupHeader} aria-hidden="true">
+                {t(group.labelKey)}
+              </div>
             )}
-          </NavLink>
+            {group.items.map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                onClick={() => {
+                  if (isMobile) setMobileOpen(false)
+                }}
+                onMouseEnter={() => {
+                  if (!prefetchedRoutes.has(item.path) && item.path !== '/app') {
+                    prefetchedRoutes.add(item.path)
+                    prefetchRoute(item.path)
+                  }
+                  setHoveredPath(item.path)
+                }}
+                onMouseLeave={() => setHoveredPath(null)}
+                style={({ isActive }) => ({
+                  ...styles.navItem,
+                  backgroundColor: isActive
+                    ? 'var(--nav-highlight-strong)'
+                    : (hoveredPath === item.path ? 'var(--nav-highlight)' : 'transparent'),
+                  color: isActive ? 'var(--nav-fg)' : 'var(--nav-fg-muted)',
+                  borderLeft: 'none',
+                  padding: shouldCollapse ? '12px 0' : '12px 16px',
+                  borderRadius: shouldCollapse ? '12px' : '10px',
+                  justifyContent: shouldCollapse ? 'center' : 'flex-start'
+                })}
+              >
+                <item.icon size={shouldCollapse ? 24 : 20} color="var(--nav-icon)" />
+                {!shouldCollapse && (
+                  <span style={styles.navItemLabel}>
+                    {t(item.labelKey)}
+                  </span>
+                )}
+              </NavLink>
+            ))}
+          </div>
         ))}
       </nav>
-
-      <div className="sidebar-footer-sep" />
-      <NavLink
-        to="/app/settings"
-        onClick={() => {
-          if (isMobile) {
-            setMobileOpen(false)
-          }
-        }}
-        onMouseEnter={() => {
-          if (!prefetchedRoutes.has('/settings')) {
-prefetchedRoutes.add('/app/settings')
-                prefetchRoute('/settings')
-          }
-          setHoveredPath('/app/settings')
-        }}
-        onMouseLeave={() => setHoveredPath(null)}
-        style={({ isActive }) => ({
-          ...styles.navItem,
-          backgroundColor: isActive
-            ? 'var(--nav-highlight-strong)'
-            : (hoveredPath === '/app/settings' ? 'var(--nav-highlight)' : 'transparent'),
-          color: isActive ? 'var(--nav-fg)' : 'var(--nav-fg-muted)',
-          borderLeft: 'none',
-          padding: shouldCollapse ? '12px 0' : '12px 16px',
-          borderRadius: shouldCollapse ? '12px' : '10px',
-          justifyContent: shouldCollapse ? 'center' : 'flex-start'
-        })}
-      >
-        <Settings size={shouldCollapse ? 24 : 20} color="var(--nav-icon)" />
-        {!shouldCollapse && (
-          <span style={styles.navItemLabel}>
-            {t('nav.settings')}
-          </span>
-        )}
-      </NavLink>
 
       {isDesktop && (
         <div className="sidebar-toggle sidebar-collapse">
@@ -395,6 +421,18 @@ const styles = {
     textOverflow: 'ellipsis',
     flex: 1,
     minWidth: 0
+  },
+  group: {
+    marginBottom: '16px'
+  },
+  groupHeader: {
+    fontSize: '11px',
+    fontWeight: 600,
+    letterSpacing: '0.04em',
+    textTransform: 'uppercase',
+    color: 'var(--nav-fg-muted)',
+    padding: '8px 16px 6px',
+    marginBottom: '2px'
   },
   mobileMenuButton: {
     position: 'fixed',

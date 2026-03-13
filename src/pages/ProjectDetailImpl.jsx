@@ -16,7 +16,6 @@ import {
   AlertTriangle,
   ClipboardList,
   ShoppingCart,
-  Package,
   CheckCircle2,
   Clock,
   XCircle,
@@ -28,7 +27,6 @@ import {
   Receipt,
   DollarSign,
   StickyNote,
-  Search,
   Calculator,
   Factory,
   Rocket,
@@ -41,10 +39,7 @@ import {
 } from 'lucide-react'
 import Header from '../components/Header'
 import PageGutter from '../components/ui/PageGutter'
-import MarketplaceTag, { MarketplaceTagGroup } from '../components/MarketplaceTag'
-import StatusBadge from '../components/StatusBadge'
 import FileUploader from '../components/FileUploader'
-import ProjectDriveExplorer from '../components/projects/ProjectDriveExplorer'
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal'
 import CollapsibleSection from '../components/CollapsibleSection'
 import PhaseChecklist from '../components/projects/PhaseChecklist'
@@ -62,6 +57,11 @@ import { computeCommercialGate } from '../lib/phaseGates'
 import ProjectHeader from '../components/projects/ProjectHeader'
 import ProjectPhaseChecklist from '../components/projects/ProjectPhaseChecklist'
 import ProjectTabs from '../components/projects/ProjectTabs'
+import ProjectDetailHeader from '../features/projectDetail/components/ProjectDetailHeader'
+import ProjectDetailGateBanner from '../features/projectDetail/components/ProjectDetailGateBanner'
+import ProjectDetailActionBar from '../features/projectDetail/components/ProjectDetailActionBar'
+import ProjectDetailDiscardedBanner from '../features/projectDetail/components/ProjectDetailDiscardedBanner'
+import ProjectDetailRightPanel from '../features/projectDetail/components/ProjectDetailRightPanel'
 // Dynamic imports for components that import supabase statically to avoid circular dependencies during module initialization
 const IdentifiersSection = lazy(() => import('../components/IdentifiersSection'))
 const ProfitabilityCalculator = lazy(() => import('../components/ProfitabilityCalculator'))
@@ -1488,6 +1488,17 @@ ${t}
           org_id: project?.org_id
         })
 
+      if (project?.org_id) {
+        import('../lib/lifecycleEvents/record.js').then((m) =>
+          m.recordPhaseChanged({
+            projectId: id,
+            orgId: project.org_id,
+            phaseId: newPhase,
+            previousPhaseId: project.current_phase
+          })
+        ).catch(() => {})
+      }
+
       setEventsRefreshToken((t) => t + 1)
       await refreshProjects()
     } catch (err) {
@@ -2548,495 +2559,45 @@ ${t}
         </div>
 
         <div style={{ ...styles.content, padding: 0 }} className="project-detail-page__content">
-        {/* P-D1 — Project Header (legacy layout below new shell) */}
-        <div className="project-header project-header--canon ui-card" style={{
-          display: 'flex',
-          alignItems: 'stretch',
-          justifyContent: 'space-between',
-          gap: 8,
-          padding: '12px 16px',
-          marginBottom: 8,
-          background: 'var(--surface-bg)',
-          borderRadius: 'var(--radius-ui)',
-          width: '100%',
-          boxSizing: 'border-box'
-        }}>
-          {/* Left: Thumb + Title */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-            <div
-              className="project-header__thumb"
-              style={{
-                width: 48,
-                minWidth: 48,
-                height: 48,
-                borderRadius: 10,
-                overflow: 'hidden',
-                flex: '0 0 auto',
-                background: 'var(--surface-bg-2)',
-                border: '1px solid var(--border-1)',
-                display: 'grid',
-                placeItems: 'center'
-              }}
-              aria-label="Project thumbnail"
-            >
-              {effectiveThumbUrl ? (
-                <img
-                  src={effectiveThumbUrl}
-                  alt=""
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                  loading="lazy"
-                  onError={(e) => { e.currentTarget.style.display = 'none' }}
-                />
-              ) : (
-                <Package size={18} color="var(--muted-1)" />
-              )}
-                    </div>
+        <ProjectDetailHeader
+          project={project}
+          effectiveThumbUrl={effectiveThumbUrl}
+          marketplaceTags={marketplaceTags}
+          businessSnapshot={businessSnapshot}
+          stockSnapshot={stockSnapshot}
+          projectState={projectState}
+          phaseLabel={phaseLabel}
+          darkMode={darkMode}
+          onScrollToPhase={scrollToSection}
+        />
 
-            {/* Title + Meta */}
-            <div className="project-header__main" style={{ minWidth: 0 }}>
-              <h2 style={{ margin: 0, lineHeight: 1.3 }}>{project.name}</h2>
-              <div className="project-header__meta" style={{ marginTop: 0, opacity: 0.8 }}>
-                <strong>{project.project_code}</strong>
-                <span style={{ opacity: 0.6 }}> · </span>
-                <span>{project.sku_internal || '—'}</span>
-                </div>
+        <ProjectDetailGateBanner gate={gate} darkMode={darkMode} />
 
-              {/* Marketplace TAGS */}
-              <div style={{ marginTop: 5 }}>
-                <div className="project-card__marketplaces">
-                  <span className="project-card__marketplacesLabel">Marketplaces actius</span>
-                  <div className="project-card__marketplacesTags">
-                    <MarketplaceTagGroup>
-                      {(marketplaceTags || [{ marketplace_code: 'ES', is_primary: true, stock_state: 'none' }]).map((m) => (
-                        <MarketplaceTag
-                          key={`${m.marketplace_code}-${m.is_primary ? 'p' : 's'}`}
-                          code={m.marketplace_code}
-                          isPrimary={!!m.is_primary}
-                          stockState={(m.stock_state || 'none')}
-                        />
-                      ))}
-                    </MarketplaceTagGroup>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <ProjectDetailActionBar
+          isMobile={isMobile}
+          sectionSearchRef={sectionSearchRef}
+          sectionSearchTerm={sectionSearchTerm}
+          onSectionSearchChange={(value) => {
+            setSectionSearchTerm(value)
+            setShowSectionDropdown(value.trim().length > 0)
+          }}
+          onSectionSearchFocus={() => sectionSearchTerm.trim().length > 0 && setShowSectionDropdown(true)}
+          showSectionDropdown={showSectionDropdown}
+          filteredSections={filteredSections}
+          onScrollToSection={scrollToSection}
+          onSectionSearchKeyDown={handleSectionSearchKeyDown}
+          onCreatePO={handleCreatePO}
+          onCreateExpense={handleCreateExpense}
+          onAddDocument={handleAddDocument}
+          btnStateStyle={btnStateStyle}
+        />
 
-          {/* Right: Status + Phase */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <StatusBadge status={project.status} decision={project.decision} />
-            </div>
-            {businessSnapshot && (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2, minWidth: 0 }}>
-                <span
-                  style={{
-                    fontSize: 12,
-                    padding: '4px 8px',
-                    border: '1px solid var(--border-1)',
-                    background: 'var(--surface-bg-2)',
-                    borderRadius: 999,
-                    color: businessSnapshot.badge.tone === 'success' ? 'var(--success-1)' : businessSnapshot.badge.tone === 'warn' ? 'var(--warning-1)' : businessSnapshot.badge.tone === 'danger' ? 'var(--danger-1)' : 'var(--muted-1)',
-                    fontWeight: 600,
-                    whiteSpace: 'nowrap'
-                  }}
-                >
-                  {businessSnapshot.roi_percent != null ? `ROI ${Math.round(businessSnapshot.roi_percent)}% · ${businessSnapshot.badge.label}` : `— · ${businessSnapshot.badge.label}`}
-                </span>
-                <span style={{ fontSize: 11, color: 'var(--muted-1)' }}>
-                  Inv: €{businessSnapshot.invested_total.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                  {' · Unit: '}
-                  {businessSnapshot.unit_cost != null ? `€${businessSnapshot.unit_cost.toFixed(2)}` : '—'}
-                  {' · BE: '}
-                  {businessSnapshot.breakeven_units != null ? `${Math.round(businessSnapshot.breakeven_units)}u` : '—'}
-                </span>
-              </div>
-            )}
-            {stockSnapshot && (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2, minWidth: 0 }}>
-                <span
-                  style={{
-                    fontSize: 12,
-                    padding: '4px 8px',
-                    border: '1px solid var(--border-1)',
-                    background: 'var(--surface-bg-2)',
-                    borderRadius: 999,
-                    color: stockSnapshot.tone === 'success' ? 'var(--success-1)' : stockSnapshot.tone === 'warn' ? 'var(--warning-1)' : stockSnapshot.tone === 'danger' ? 'var(--danger-1)' : 'var(--muted-1)',
-                    fontWeight: 600,
-                    whiteSpace: 'nowrap'
-                  }}
-                >
-                  {stockSnapshot.badgeTextPrimary}
-                </span>
-                <span style={{ fontSize: 11, color: 'var(--muted-1)' }}>
-                  {stockSnapshot.badgeTextSecondary}
-                </span>
-              </div>
-            )}
-            <div style={{ minWidth: 0 }}>
-              {(() => {
-                const cur = project?.current_phase || 0
-                const ratio = projectState?.progress_ratio
-                const pct = ratio != null && Number.isFinite(ratio)
-                  ? Math.max(0, Math.min(100, Math.round(ratio <= 1 ? ratio * 100 : ratio)))
-                  : Math.max(0, Math.min(100, Math.round((cur / 7) * 100)))
-                const meta = getPhaseMeta(cur)
-                const isBlocked = !!projectState?.is_blocked
-                const blockedReason = (projectState?.blocked_reason ?? '').toString().trim()
-                return (
-                  <>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, opacity: 0.8, marginBottom: 4 }}>
-                      <span>{phaseLabel}</span>
-                      <span>{project.current_phase}/7 · {pct}%</span>
-                    </div>
-                    <div
-                      style={{
-                        width: '100%',
-                        height: 5,
-                        borderRadius: 999,
-                        background: 'var(--surface-bg-2)',
-                        border: '1px solid var(--border-1)',
-                        overflow: 'hidden',
-                      }}
-                      data-progress-track="true"
-                    >
-                      <div
-                        style={{
-                          height: '100%',
-                          width: `${pct}%`,
-                          borderRadius: 999,
-                          background: meta.color,
-                        }}
-                        data-progress-fill="true"
-                        data-phase-id={cur}
-                      />
-                    </div>
-                    {isBlocked && (
-                      <div style={{ marginTop: 6, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
-                        <span
-                          style={{
-                            fontSize: 12,
-                            padding: '4px 8px',
-                            border: '1px solid var(--danger-1)',
-                            background: 'var(--surface-bg-2)',
-                            borderRadius: 999,
-                            color: 'var(--danger-1)',
-                            fontWeight: 600,
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
-                          BLOCKED
-                        </span>
-                        {blockedReason ? (
-                          <div
-                            style={{
-                              fontSize: 11,
-                              color: 'var(--text-secondary)',
-                              maxWidth: '100%',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap',
-                            }}
-                            title={blockedReason}
-                          >
-                            {blockedReason}
-                          </div>
-                        ) : null}
-                      </div>
-                    )}
-                  </>
-                )
-              })()}
-              <div style={{ marginTop: 6, overflowX: 'auto' }}>
-                {(() => {
-                  const cur = project?.current_phase || 0
-                  const steps = [1, 2, 3, 4, 5, 6, 7]
-
-                  return (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'nowrap', minWidth: 'max-content' }}>
-                      {steps.map((phaseId, idx) => {
-                        const isDone = cur > phaseId
-                        const isCurrent = cur === phaseId
-
-                        return (
-                          <div key={phaseId} style={{ display: 'flex', alignItems: 'center', gap: 8, flex: idx === steps.length - 1 ? '0 0 auto' : '1 1 auto' }}>
-                            <span
-                              title={getPhaseMeta(phaseId).label}
-                              style={{
-                                width: 28,
-                                height: 28,
-                                borderRadius: 999,
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                background: 'var(--surface-bg)',
-                                border: '1px solid var(--border-1)'
-                              }}
-                            >
-                              <PhaseMark phaseId={phaseId} size={16} showLabel={false} />
-                  </span>
-
-                            {idx < steps.length - 1 ? (
-                              <span
-                                aria-hidden="true"
-                                style={{
-                                  height: 2,
-                                  flex: 1,
-                                  borderRadius: 999,
-                                  background: isDone ? 'var(--success-1)' : 'var(--border-1)',
-                                  opacity: isDone ? 0.9 : 0.6
-                                }}
-                              />
-                            ) : null}
-                  </div>
-                        )
-                      })}
-                </div>
-                  )
-                })()}
-            </div>
-            </div>
-          </div>
-        </div>
-
-        {(gate.gateId !== 'NONE' && (gate.status === 'warning' || gate.status === 'blocked')) && (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: 10,
-              padding: '10px 14px',
-              marginBottom: 8,
-              borderRadius: 'var(--radius-ui)',
-              border: '1px solid var(--border-1)',
-              background: 'var(--surface-bg-2)',
-              color: gate.tone === 'danger' ? 'var(--danger-1)' : 'var(--warning-1)'
-            }}
-          >
-            <span style={{ fontSize: 18 }} aria-hidden>{gate.status === 'blocked' ? '🔒' : '⚠'}</span>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 4 }}>
-                {gate.gateId} {gate.label}
-              </div>
-              {gate.reasons.length > 0 && (
-                <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, opacity: 0.9 }}>
-                  {gate.reasons.slice(0, 4).map((r, i) => (
-                    <li key={i}>{r}</li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
-        )}
-
-        <div className="project-actions actionbar--turquoise" style={{
-          display: 'flex',
-          flexDirection: isMobile ? 'column' : 'row',
-          justifyContent: 'space-between',
-          alignItems: 'stretch',
-          gap: isMobile ? 8 : 12,
-          padding: '8px 0',
-          marginBottom: 8,
-          width: '100%',
-          boxSizing: 'border-box'
-        }}>
-          {/* Left: Section Quick Search */}
-          <div 
-            ref={sectionSearchRef}
-            className="actionbar__search"
-            style={{ 
-              position: 'relative',
-              flex: isMobile ? '1 1 100%' : '0 0 auto'
-            }}
-          >
-            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <Search 
-                size={16} 
-                style={{ 
-                  position: 'absolute', 
-                  left: '10px', 
-                  color: 'var(--muted-1)',
-                  pointerEvents: 'none'
-                }} 
-              />
-              <input
-                type="text"
-                placeholder="Cerca secció..."
-                value={sectionSearchTerm}
-                onChange={(e) => {
-                  setSectionSearchTerm(e.target.value)
-                  setShowSectionDropdown(e.target.value.trim().length > 0)
-                }}
-                onFocus={() => {
-                  if (sectionSearchTerm.trim().length > 0) {
-                    setShowSectionDropdown(true)
-                  }
-                }}
-                onKeyDown={handleSectionSearchKeyDown}
-                style={{
-                  width: '100%',
-                  height: '34px',
-                  padding: '0 10px 0 34px',
-                  borderRadius: '10px',
-                  border: '1px solid var(--border-1)',
-                  background: 'var(--surface-bg)',
-                  color: 'var(--text-1)',
-                  fontSize: '13px',
-                  outline: 'none'
-                }}
-              />
-            </div>
-            {showSectionDropdown && filteredSections.length > 0 && (
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '100%',
-                  left: 0,
-                  right: 0,
-                  marginTop: '4px',
-                  background: 'var(--surface-bg)',
-                  border: '1px solid var(--border-1)',
-                  borderRadius: '10px',
-                  boxShadow: 'var(--shadow-soft)',
-                  zIndex: 1000,
-                  maxHeight: '200px',
-                  overflowY: 'auto'
-                }}
-              >
-                {filteredSections.map((section) => (
-                  <button
-                    key={section.id}
-                    type="button"
-                    onClick={() => scrollToSection(section.id)}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      textAlign: 'left',
-                      background: 'transparent',
-                      border: 'none',
-                      color: 'var(--text-1)',
-                      fontSize: '13px',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '2px'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = 'var(--surface-bg-2)'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent'
-                    }}
-                  >
-                    <span style={{ fontWeight: 600 }}>{section.name}</span>
-                    {section.description && (
-                      <span style={{ fontSize: '11px', color: 'var(--muted-1)' }}>
-                        {section.description}
-                      </span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-          
-          {/* Right: Action Buttons */}
-          <div className="actionbar__buttons" style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            gap: 8,
-            justifyContent: isMobile ? 'flex-start' : 'flex-end',
-            flex: isMobile ? '1 1 100%' : '0 0 auto'
-          }}>
-            <Button
-              variant="secondary"
-              size="sm"
-              disabled
-              style={btnStateStyle('inactive')}
-              className="btn-secondary"
-            >
-              Crear Proveïdor
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              disabled
-              style={btnStateStyle('inactive')}
-              className="btn-secondary"
-            >
-              Crear Transitari
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              disabled
-              style={btnStateStyle('inactive')}
-              className="btn-secondary"
-            >
-              Crear Magatzem
-            </Button>
-            <Button
-              variant="primary"
-              size="sm"
-              style={btnStateStyle('active')}
-              onClick={handleCreatePO}
-              className="btn-primary"
-            >
-              Crear Comanda (PO)
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              style={btnStateStyle('active')}
-              onClick={handleCreateExpense}
-              className="btn-secondary"
-            >
-              Crear Despesa
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              style={btnStateStyle('active')}
-              onClick={handleAddDocument}
-              className="btn-ghost"
-            >
-              + Document
-            </Button>
-          </div>
-        </div>
-
-        {/* Banner DISCARDED */}
-        {project.decision === 'DISCARDED' && (
-          <div style={{
-            ...styles.discardedBanner,
-            backgroundColor: darkMode ? '#7f1d1d' : '#fef2f2',
-            borderColor: '#ef4444'
-          }}>
-            <AlertCircle size={20} color="#ef4444" />
-            <div style={{ flex: 1 }}>
-              <strong style={{ color: '#ef4444', display: 'block', marginBottom: '4px' }}>
-                Aquest projecte ha estat descartat
-              </strong>
-              <span style={{ color: darkMode ? '#fca5a5' : '#991b1b', fontSize: '13px' }}>
-                {project.discarded_reason || 'No s\'ha proporcionat una raó.'}
-                {project.discarded_at && (
-                  <span style={{ display: 'block', marginTop: '4px' }}>
-                    Data: {new Date(project.discarded_at).toLocaleDateString('ca-ES')}
-                  </span>
-                )}
-              </span>
-            </div>
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={handleRestoreProject}
-              style={styles.restoreButton}
-            >
-              {t('common.restore')} Projecte
-            </Button>
-          </div>
-        )}
+        <ProjectDetailDiscardedBanner
+          project={project}
+          darkMode={darkMode}
+          onRestore={handleRestoreProject}
+          t={t}
+        />
 
         {showNotesPanel && (
           <div style={styles.notesOverlay} onClick={() => setShowNotesPanel(false)}>
@@ -3462,46 +3023,20 @@ ${t}
                 </div>
           </div>
 
-          <aside className="project-split__right">
-            <div className="project-split__sticky">
-              <div className="projects-split__panel projects-split__panel--drive">
-                <div className="projects-split__panelHeader" style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-                  <div style={{ minWidth: 0 }}>
-                    <div className="projects-panel__title">{projectTitle}</div>
-                    <div className="projects-panel__subtitle">{activeFolderLabel || '—'}</div>
-                </div>
-              </div>
-
-                {researchImport && (
-                  <div style={{ padding: '6px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                    <div style={{ fontSize: 13, color: 'var(--muted-1)' }}>
-                      Informe: <strong style={{ color: 'var(--text-1)' }}>{researchImport.asin}</strong> · {researchImport.decision}
-                </div>
-                    <Button variant="ghost" size="sm" onClick={copyResearchPayload}>
-                      Copiar payload
-                    </Button>
-                </div>
-              )}
-
-                <ProjectDriveExplorer
-                  projectId={id}
-                  darkMode={darkMode}
-                  onUploadComplete={handleUploadComplete}
-                  onActivePathChange={setActiveFolderLabel}
-                  fixedFolderId={phaseId === 1 ? researchStoragePrefix : null}
-                />
-                <Suspense fallback={<div style={{ padding: 8, fontSize: 12, color: 'var(--muted-1)' }}>Carregant timeline…</div>}>
-                  <ProjectEventsTimeline
-                    projectId={id}
-                    projectStatus={project?.status}
-                    darkMode={darkMode}
-                    phaseStyle={currentPhase}
-                    refreshToken={eventsRefreshToken}
-                  />
-                </Suspense>
-            </div>
-            </div>
-          </aside>
+          <ProjectDetailRightPanel
+            projectTitle={projectTitle}
+            activeFolderLabel={activeFolderLabel}
+            researchImport={researchImport}
+            onCopyResearchPayload={copyResearchPayload}
+            projectId={id}
+            darkMode={darkMode}
+            onUploadComplete={handleUploadComplete}
+            onActivePathChange={setActiveFolderLabel}
+            phaseId={phaseId}
+            project={project}
+            eventsRefreshToken={eventsRefreshToken}
+            currentPhase={currentPhase}
+          />
         </div>
         </div>
       </PageGutter>

@@ -13,7 +13,7 @@ const COMPANY_INFO = {
   country: 'España',
   email: 'info@freedolia.com', // Actualitzar amb email real
   phone: '', // Afegir si cal
-  logo: '/logo.png' // Path al logo
+  logo: '/brand/freedoliapp/logo/logo_master.png' // Canonical brand logo
 }
 
 // Funció per generar HTML del PO

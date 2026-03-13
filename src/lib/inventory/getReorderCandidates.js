@@ -224,6 +224,7 @@ export async function getReorderCandidates(supabase, orgId, options = {}) {
 
       candidates.push({
         asin: (asin || '').trim(),
+        projectId,
         productName: productName ?? null,
         dailySales,
         stockOnHand,

@@ -26,6 +26,15 @@
       "details": "Detalles"
     }
   },
+  "dataStates": {
+    "loading": "Cargando datos…",
+    "errorGeneric": "No se pudieron cargar los datos",
+    "retry": "Reintentar",
+    "emptyGeneric": "No hay datos disponibles",
+    "emptyDecisions": "No hay decisiones abiertas",
+    "emptyInventory": "No hay datos de inventario",
+    "emptyCashflow": "No hay datos de forecast. Conecta datos para ver el cashflow."
+  },
   "header": {
     "cta": {
       "signin": "Iniciar sesión",
@@ -374,7 +383,17 @@
     "cashflow": "Cashflow",
     "operationsPlanning": "Planificación operativa",
     "decisions": "Decisiones",
-    "settings": "Configuración"
+    "settings": "Configuración",
+    "billing": "Facturación",
+    "help": "Ayuda",
+    "diagnostics": "Diagnósticos",
+    "admin": "Admin",
+    "automations": "Automatizaciones",
+    "groupOperations": "Operaciones",
+    "groupInventory": "Inventario",
+    "groupFinance": "Finanzas",
+    "groupIntelligence": "Inteligencia",
+    "groupSystem": "Sistema"
   },
   "connectedAccounts": {
     "title": "Cuentas conectadas",

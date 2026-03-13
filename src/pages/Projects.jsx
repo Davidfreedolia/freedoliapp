@@ -32,6 +32,7 @@ import MarketplaceTag, { MarketplaceTagGroup } from '../components/MarketplaceTa
 import PhaseMark from '../components/Phase/PhaseMark'
 import ProjectCard from '../components/projects/ProjectCard'
 import useT from '../hooks/useT'
+import { DataLoading, DataError } from '../components/dataStates'
 
 export default function Projects() {
   const { refreshProjects, darkMode, activeOrgId } = useApp()
@@ -985,11 +986,8 @@ export default function Projects() {
 
         {/* Projects Grid */}
         {isLoadingProjects ? (
-          <div style={{
-            ...styles.empty,
-            backgroundColor: 'var(--surface-bg)'
-          }}>
-            <p style={{ color: 'var(--muted-1)' }}>{t('common.loading')}</p>
+          <div style={{ ...styles.empty, backgroundColor: 'var(--surface-bg)' }}>
+            <DataLoading message={t('common.loading')} />
           </div>
         ) : noOrg ? (
           <div style={{ ...styles.empty, backgroundColor: 'var(--surface-bg)' }}>
@@ -1001,10 +999,10 @@ export default function Projects() {
           </div>
         ) : loadError ? (
           <div style={{ ...styles.empty, backgroundColor: 'var(--surface-bg)' }}>
-            <p style={{ color: 'var(--muted-1)' }}>No s’han pogut carregar els projectes.</p>
-            <Button variant="secondary" onClick={() => loadProjects({ showSpinner: true })}>
-              Reintenta
-            </Button>
+            <DataError
+              message={t('dataStates.errorGeneric', { defaultValue: 'No s\'han pogut carregar les dades' })}
+              onRetry={() => loadProjects({ showSpinner: true })}
+            />
             {import.meta.env.DEV && listStateError && (listStateError?.status ?? listStateError?.message) && (
               <p style={{ marginTop: 12, fontSize: 12, color: 'var(--muted-1)', fontFamily: 'monospace' }}>
                 {[listStateError?.status, listStateError?.message].filter(Boolean).join(' — ')}

@@ -25,6 +25,8 @@ import { getModalStyles } from '../utils/responsiveStyles'
 import Button from '../components/Button'
 import LayoutSwitcher from '../components/LayoutSwitcher'
 import { useLayoutPreference } from '../hooks/useLayoutPreference'
+import { DataLoading, DataEmpty, DataError } from '../components/dataStates'
+import { useTranslation } from 'react-i18next'
 
 // Tipus de moviment
 const MOVEMENT_TYPES = {
@@ -40,6 +42,7 @@ const MOVEMENT_TYPES = {
 }
 
 export default function Inventory() {
+  const { t } = useTranslation()
   const { darkMode } = useApp()
   const { isMobile, isTablet } = useBreakpoint()
   const modalStyles = getModalStyles(isMobile, darkMode)
@@ -433,24 +436,16 @@ export default function Inventory() {
 
         {/* Inventory Table */}
         {loading ? (
-          <div style={{ padding: '64px', textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant inventari...</div>
+          <div style={{ padding: 64, ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
+            <DataLoading message={t('dataStates.loading')} />
+          </div>
         ) : error ? (
-          <div style={{ padding: '64px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', backgroundColor: darkMode ? '#15151f' : '#ffffff', borderRadius: '16px', border: '1px solid var(--border-color)' }}>
-            <AlertTriangle size={32} color="#ef4444" />
-            <h3 style={{ color: darkMode ? '#ffffff' : '#111827', margin: 0 }}>Error carregant dades</h3>
-            <p style={{ color: '#6b7280', margin: 0 }}>{error}</p>
-            <Button variant="primary" onClick={loadData}>
-              <RefreshCw size={16} />
-              Tornar a intentar
-            </Button>
+          <div style={{ ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff', border: '1px solid var(--border-color)' }}>
+            <DataError message={error} onRetry={loadData} />
           </div>
         ) : filteredInventory.length === 0 ? (
           <div style={{ ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <Package size={48} color="#d1d5db" />
-            <p style={{ color: '#6b7280' }}>No hi ha productes a l'inventari</p>
-            <Button onClick={handleNewItem}>
-              <Plus size={18} /> Afegir Producte
-            </Button>
+            <DataEmpty message={t('dataStates.emptyInventory')} icon={Package} action={<Button onClick={handleNewItem}><Plus size={18} /> Afegir Producte</Button>} />
           </div>
         ) : (
           <>
@@ -480,7 +475,6 @@ export default function Inventory() {
             )}
           </>
         )}
-      </div>
 
       {/* Modal Editar/Nou */}
       {showMovementModal && selectedItem && (
@@ -682,6 +676,7 @@ export default function Inventory() {
           </div>
         </div>
       )}
+      </div>
     </div>
   )
 }

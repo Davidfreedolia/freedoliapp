@@ -26,6 +26,8 @@ import {
 import Header from '../components/Header'
 import Button from '../components/Button'
 import AppToolbar from '../components/ui/AppToolbar'
+import { DataLoading, DataError } from '../components/dataStates'
+import { useTranslation } from 'react-i18next'
 
 function defaultDateRange() {
   const to = new Date()
@@ -44,6 +46,7 @@ const formatPercent = (ratio) =>
   Number.isFinite(ratio) ? new Intl.NumberFormat('ca-ES', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(ratio) : '—'
 
 export default function Profit() {
+  const { t } = useTranslation()
   const { darkMode, activeOrgId } = useApp()
   const defaults = defaultDateRange()
   const [dateFrom, setDateFrom] = useState(defaults.dateFrom)
@@ -344,16 +347,12 @@ export default function Profit() {
         </section>
 
         {loading ? (
-          <div style={styles.loading}>Carregant profit...</div>
+          <div style={{ padding: '2rem', textAlign: 'center' }}>
+            <DataLoading message={t('dataStates.loading', { defaultValue: 'Loading data…' })} />
+          </div>
         ) : error ? (
-          <div style={styles.errorContainer}>
-            <AlertCircle size={24} color="#ef4444" />
-            <h3 style={{ color: darkMode ? '#ffffff' : '#111827', margin: '8px 0' }}>Error carregant dades</h3>
-            <p style={{ color: '#6b7280', marginBottom: '16px' }}>{error}</p>
-            <Button variant="primary" size="sm" onClick={loadData} style={styles.retryButton}>
-              <RefreshCw size={16} />
-              Tornar a intentar
-            </Button>
+          <div style={{ padding: '2rem', textAlign: 'center' }}>
+            <DataError message={error} onRetry={loadData} />
           </div>
         ) : (
           <div style={styles.tableWrap}>
