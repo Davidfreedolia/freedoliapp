@@ -31,4 +31,4 @@ Do not rename files or change folder structure; the app expects these exact path
 
 ## Ensuring assets exist (pre-build)
 
-Run `node scripts/ensure-brand-assets.cjs` to create missing files as minimal placeholders so all canonical URLs resolve. Existing files are not overwritten.
+Run `node scripts/ensure-brand-assets.cjs` to create missing files as minimal placeholders so all canonical URLs resolve. Existing files are not overwritten. The script also copies canonical favicon and app icon to **root static paths** so conventional URLs resolve in production: `public/favicon.ico` (from `favicon_32.png`), `public/apple-touch-icon.png` (from `app_icon_256.png`). The build runs this script automatically.

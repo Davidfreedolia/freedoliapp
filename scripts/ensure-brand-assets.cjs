@@ -40,4 +40,16 @@ ASSETS.forEach((relativePath) => {
   }
 })
 
+// Root static files requested by browsers/crawlers (must exist so Vercel serves them, not SPA)
+const faviconSrc = path.join(ROOT, 'brand/freedoliapp/favicons/favicon_32.png')
+const appleTouchSrc = path.join(ROOT, 'brand/freedoliapp/icons/app_icon_256.png')
+if (fs.existsSync(faviconSrc)) {
+  fs.copyFileSync(faviconSrc, path.join(ROOT, 'favicon.ico'))
+  console.log('Root: favicon.ico (from canonical favicon_32.png)')
+}
+if (fs.existsSync(appleTouchSrc)) {
+  fs.copyFileSync(appleTouchSrc, path.join(ROOT, 'apple-touch-icon.png'))
+  console.log('Root: apple-touch-icon.png (from canonical app_icon_256.png)')
+}
+
 console.log('Done.')
