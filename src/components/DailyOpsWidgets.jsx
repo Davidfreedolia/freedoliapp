@@ -511,13 +511,14 @@ export function ShipmentsInTransitWidget({ darkMode, limit = 10 }) {
 export function ResearchNoDecisionWidget({ darkMode, limit = 10 }) {
   const navigate = useNavigate()
   const { t } = useTranslation()
+  const { activeOrgId } = useApp()
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
 
   const loadData = async () => {
     setLoading(true)
     try {
-      const projects = await getResearchNoDecision(limit)
+      const projects = await getResearchNoDecision(limit, activeOrgId ?? undefined)
       setData(projects || [])
     } catch (err) {
       console.error('Error carregant research no decision:', err)
@@ -628,13 +629,14 @@ export function ResearchNoDecisionWidget({ darkMode, limit = 10 }) {
 export function StaleTrackingWidget({ darkMode, limit = 10, staleDays = 7 }) {
   const navigate = useNavigate()
   const { t } = useTranslation()
+  const { activeOrgId } = useApp()
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
 
   const loadData = async () => {
     setLoading(true)
     try {
-      const pos = await getStaleTracking(limit, staleDays)
+      const pos = await getStaleTracking(limit, staleDays, activeOrgId ?? undefined)
       setData(pos || [])
     } catch (err) {
       console.error('Error carregant stale tracking:', err)
@@ -645,7 +647,7 @@ export function StaleTrackingWidget({ darkMode, limit = 10, staleDays = 7 }) {
   useEffect(() => {
     loadData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [staleDays])
+  }, [staleDays, activeOrgId])
 
   if (loading) {
     return (

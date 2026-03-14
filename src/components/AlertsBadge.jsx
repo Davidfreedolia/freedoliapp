@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AlertTriangle, X } from 'lucide-react'
+import { useApp } from '../context/AppContext'
 import { getAlerts, getDashboardPreferences } from '../lib/supabase'
 
 export default function AlertsBadge({ darkMode }) {
   const navigate = useNavigate()
+  const { activeOrgId } = useApp()
   const [alerts, setAlerts] = useState([])
   const [loading, setLoading] = useState(true)
   const [showTooltip, setShowTooltip] = useState(false)
@@ -12,7 +14,7 @@ export default function AlertsBadge({ darkMode }) {
   const loadAlerts = useCallback(async () => {
     setLoading(true)
     try {
-      const preferences = await getDashboardPreferences()
+      const preferences = await getDashboardPreferences(activeOrgId ?? undefined)
       const thresholds = preferences?.alert_thresholds || {
         manufacturerPackDays: 3,
         researchDays: 7
@@ -23,7 +25,7 @@ export default function AlertsBadge({ darkMode }) {
       console.error('Error loading alerts:', err)
     }
     setLoading(false)
-  }, [])
+  }, [activeOrgId])
 
   useEffect(() => {
     loadAlerts()

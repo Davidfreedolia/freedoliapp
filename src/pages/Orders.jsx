@@ -83,7 +83,7 @@ const PO_STATUSES = {
 }
 
 export default function Orders() {
-  const { darkMode } = useApp()
+  const { darkMode, activeOrgId } = useApp()
   // Removed unused navigate
   const { isMobile, isTablet } = useBreakpoint()
   const t = useT()
@@ -161,9 +161,9 @@ export default function Orders() {
     setError(null)
     try {
       const [ordersData, projectsData, suppliersData] = await Promise.all([
-        getPurchaseOrders().catch(() => []),
-        getProjects().catch(() => []),
-        getSuppliers().catch(() => [])
+        getPurchaseOrders(null, activeOrgId ?? undefined).catch(() => []),
+        getProjects(false, activeOrgId ?? undefined).catch(() => []),
+        getSuppliers(activeOrgId ?? undefined).catch(() => [])
       ])
       
       // Establecer datos básicos primero para que la página se muestre
@@ -377,10 +377,10 @@ export default function Orders() {
       // Obtenir dades necessàries
       const [project, supplier, companySettings] = await Promise.all([
         getProject(selectedOrder.project_id),
-        selectedOrder.supplier_id ? getSuppliers().then(suppliers => 
+        selectedOrder.supplier_id ? getSuppliers(activeOrgId ?? undefined).then(suppliers =>
           suppliers.find(s => s.id === selectedOrder.supplier_id)
         ) : Promise.resolve(null),
-        getCompanySettings()
+        getCompanySettings(activeOrgId ?? undefined)
       ])
 
       const fileNames = getManufacturerPackFileNames(selectedOrder.po_number)
@@ -499,7 +499,7 @@ export default function Orders() {
     try {
       const [fullOrder, companySettings] = await Promise.all([
         getPurchaseOrder(order.id),
-        getCompanySettings()
+        getCompanySettings(activeOrgId ?? undefined)
       ])
       const supplier = suppliers.find(s => s.id === order.supplier_id) || fullOrder.supplier
       await generatePOPdf(fullOrder, supplier, companySettings)

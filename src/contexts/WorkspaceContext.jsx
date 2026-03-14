@@ -2,7 +2,6 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { isDemoMode } from '../demo/demoMode'
-import { useApp } from '../context/AppContext'
 
 const STORAGE_KEY = 'freedoli_active_org_id'
 
@@ -10,7 +9,6 @@ const WorkspaceContext = createContext(null)
 
 export function WorkspaceProvider({ children }) {
   const navigate = useNavigate()
-  const { setActiveOrgId: setAppActiveOrgId } = useApp()
   const [activeOrgId, setActiveOrgIdState] = useState(() => {
     if (typeof window === 'undefined') return null
     try {
@@ -32,9 +30,8 @@ export function WorkspaceProvider({ children }) {
   const setActiveOrgId = useCallback((orgId) => {
     setActiveOrgIdState(orgId)
     persistActiveOrg(orgId)
-    setAppActiveOrgId(orgId)
     navigate('/app', { replace: true })
-  }, [navigate, persistActiveOrg, setAppActiveOrgId])
+  }, [navigate, persistActiveOrg])
 
   useEffect(() => {
     let cancelled = false
@@ -96,13 +93,12 @@ export function WorkspaceProvider({ children }) {
       if (!cancelled) {
         setActiveOrgIdState(chosen)
         persistActiveOrg(chosen)
-        setAppActiveOrgId(chosen)
         setIsWorkspaceReady(true)
       }
     }
     bootstrap()
     return () => { cancelled = true }
-  }, [setAppActiveOrgId])
+  }, [])
 
   const revalidateActiveOrg = useCallback(async () => {
     if (isDemoMode()) return
@@ -124,8 +120,7 @@ export function WorkspaceProvider({ children }) {
     const chosen = currentStored && isMemberOfStored ? currentStored : (list.find(m => m.role === 'owner')?.org_id ?? list[0].org_id)
     setActiveOrgIdState(chosen)
     persistActiveOrg(chosen)
-    setAppActiveOrgId(chosen)
-  }, [persistActiveOrg, setAppActiveOrgId])
+  }, [persistActiveOrg])
 
   const value = {
     activeOrgId,

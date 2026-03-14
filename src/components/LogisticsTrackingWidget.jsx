@@ -33,6 +33,7 @@ const LOGISTICS_STATUS_LABELS = {
 
 export default function LogisticsTrackingWidget({ darkMode, embedded = false, hideHeader = false }) {
   const navigate = useNavigate()
+  const { activeOrgId } = useApp()
   const [projects, setProjects] = useState([])
   const [ordersByProject, setOrdersByProject] = useState({})
   const [loading, setLoading] = useState(true)
@@ -40,20 +41,20 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false, hi
 
   useEffect(() => {
     loadData()
-  }, [])
+  }, [activeOrgId])
 
   const loadData = async () => {
     setLoading(true)
     try {
       // Carregar projectes actius (excloure DISCARDED)
-      const allProjects = await getProjects()
+      const allProjects = await getProjects(false, activeOrgId ?? undefined)
       const activeProjects = (allProjects || []).filter(p => 
         p.status === 'active' && p.decision !== 'DISCARDED'
       )
       setProjects(activeProjects)
 
       // Carregar comandes amb tracking
-      const orders = await getPurchaseOrders()
+      const orders = await getPurchaseOrders(null, activeOrgId ?? undefined)
       const ordersWithTracking = (orders || []).filter(o => 
         o.logistics_status && !['cancelled', 'received'].includes(o.status)
       )

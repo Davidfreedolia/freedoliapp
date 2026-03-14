@@ -44,7 +44,7 @@ export default function NewPOModal({
   projects,
   suppliers 
 }) {
-  const { darkMode } = useApp()
+  const { darkMode, activeOrgId } = useApp()
   const { isMobile } = useBreakpoint()
   const { t } = useTranslation()
   const modalStyles = getModalStyles(isMobile, darkMode)
@@ -75,7 +75,7 @@ export default function NewPOModal({
 
   const loadWarehouses = async () => {
     try {
-      const data = await getWarehouses()
+      const data = await getWarehouses(activeOrgId ?? undefined)
       setWarehouses(data || [])
     } catch (err) {
       console.error('Error carregant magatzems:', err)
@@ -84,7 +84,7 @@ export default function NewPOModal({
 
   const loadCompanySettings = async () => {
     try {
-      const data = await getCompanySettings()
+      const data = await getCompanySettings(activeOrgId ?? undefined)
       if (data) {
         setCompanySettings(data)
         setBuyerInfo({
@@ -327,7 +327,7 @@ export default function NewPOModal({
           project_id: poData.project_id
         })
       } else {
-        const newPO = await createPurchaseOrder(poData)
+        const newPO = await createPurchaseOrder(poData, activeOrgId ?? undefined)
         // Audit log: PO creat
         const { logSuccess } = await import('../lib/auditLog')
         await logSuccess('purchase_order', 'create', newPO.id, 'Purchase order created', {

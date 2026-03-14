@@ -36,10 +36,11 @@ import MarginCompressionAlertStrip from './components/profit/MarginCompressionAl
 import StockoutAlertStrip from './components/inventory/StockoutAlertStrip'
 import { useBreakpoint } from './hooks/useBreakpoint'
 import { useWorkspaceUsage } from './hooks/useWorkspaceUsage'
+import { useOrgBilling } from './hooks/useOrgBilling'
 import { createStripeCheckoutSession } from './lib/billingApi'
 import { isDemoMode } from './demo/demoMode'
 import { isScreenshotMode } from './lib/ui/screenshotMode'
-import { supabase, getCurrentUserId } from './lib/supabase'
+import { supabase } from './lib/supabase'
 import { useOnboardingStatus } from './hooks/useOnboardingStatus'
 import './i18n'
 
@@ -114,7 +115,6 @@ const DevSeed = lazyWithErrorBoundary(() => import('./pages/DevSeed'), 'DevSeed'
 const Help = lazyWithErrorBoundary(() => import('./pages/Help'), 'Help')
 const BillingLocked = lazyWithErrorBoundary(() => import('./pages/BillingLocked'), 'BillingLocked')
 const BillingOverSeat = lazyWithErrorBoundary(() => import('./pages/BillingOverSeat'), 'BillingOverSeat')
-const BillingSettings = lazyWithErrorBoundary(() => import('./pages/BillingSettings'), 'BillingSettings')
 const Billing = lazyWithErrorBoundary(() => import('./pages/Billing'), 'Billing')
 const AmazonSnapshot = lazyWithErrorBoundary(() => import('./pages/AmazonSnapshot'), 'AmazonSnapshot')
 const AdminConsole = lazyWithErrorBoundary(() => import('./pages/AdminConsole'), 'AdminConsole')
@@ -215,7 +215,8 @@ function AppContent() {
   const { sidebarCollapsed, darkMode } = useApp()
   const { lang } = useLang()
   const { isWorkspaceReady, activeOrgId } = useWorkspace()
-  const { usage } = useWorkspaceUsage()
+  const { usage, isLoading: usageLoading } = useWorkspaceUsage()
+  const { loading: billingLoading, billing, isTrialExpired } = useOrgBilling(activeOrgId ?? null)
   const { isMobile, isTablet } = useBreakpoint()
   const location = useLocation()
   const isProjectDetail = location.pathname.startsWith('/app/projects/') && location.pathname.split('/').length >= 4
@@ -240,100 +241,30 @@ function AppContent() {
   })
   const isBillingRoute = location.pathname === '/app/billing/locked' || location.pathname === '/app/billing/over-seat'
 
+  // S3.1.B4: Gate uses canonical usage + billing (useWorkspaceUsage, useOrgBilling) instead of orgs.billing_status / orgs.seat_limit.
   useEffect(() => {
     if (!isWorkspaceReady) return
-    let cancelled = false
-    async function run() {
-      if (isDemoMode()) {
-        if (!cancelled) {
-          setBillingState({
-            loading: false,
-            allowed: true,
-            org: null,
-            gate: null,
-            seatsUsed: 0,
-            error: null,
-          })
-        }
-        return
-      }
-      const userId = await getCurrentUserId()
-      if (!userId) {
-        if (!cancelled) {
-          setBillingState({
-            loading: false,
-            allowed: true,
-            org: null,
-            gate: null,
-            seatsUsed: 0,
-            error: null,
-          })
-        }
-        return
-      }
-      if (!activeOrgId) {
-        if (!cancelled) {
-          // Sense org activa: no bloquegem per billing; ho gestiona WorkspaceContext.
-          setBillingState({
-            loading: false,
-            allowed: true,
-            org: null,
-            gate: null,
-            seatsUsed: 0,
-            error: null,
-          })
-        }
-        return
-      }
-      const { data: org, error: orgErr } = await supabase.from('orgs').select('*').eq('id', activeOrgId).single()
-      if (orgErr || !org) {
-        if (!cancelled) {
-          // Error carregant billing/org: mostrar error lleu, però mai /billing/locked fals.
-          setBillingState({
-            loading: false,
-            allowed: true,
-            org: null,
-            gate: null,
-            seatsUsed: 0,
-            error: orgErr || new Error('Org not found'),
-          })
-        }
-        return
-      }
-      const { count } = await supabase.from('org_memberships').select('*', { count: 'exact', head: true }).eq('org_id', activeOrgId)
-      const seatsUsed = count ?? 0
-      const seatLimit = org.seat_limit ?? 1
-
-      const status = org.billing_status
-      const trialEndsAt = org.trial_ends_at ? new Date(org.trial_ends_at) : null
-      const now = new Date()
-
-      const locked =
-        status === 'past_due' ||
-        status === 'canceled' ||
-        (status === 'trialing' && trialEndsAt && trialEndsAt <= now)
-
-      const overSeat = seatsUsed > seatLimit
-
-      let allowed = false
-      let gate = null
-      if (locked) gate = 'locked'
-      else if (overSeat) gate = 'over_seat'
-      else allowed = true
-      if (!cancelled) {
-        setBillingState({
-          loading: false,
-          allowed,
-          org,
-          gate,
-          seatsUsed,
-          error: null,
-        })
-      }
+    if (isDemoMode()) {
+      setBillingState({ loading: false, allowed: true, org: null, gate: null, seatsUsed: 0, error: null })
+      return
     }
-    run()
-    return () => { cancelled = true }
-  }, [isWorkspaceReady, activeOrgId])
+    if (!activeOrgId) {
+      setBillingState({ loading: false, allowed: true, org: null, gate: null, seatsUsed: 0, error: null })
+      return
+    }
+    if (usageLoading || billingLoading) {
+      setBillingState((prev) => (prev.loading ? prev : { ...prev, loading: true }))
+      return
+    }
+    const locked = billing
+      ? (billing.status === 'past_due' || billing.status === 'canceled' || isTrialExpired)
+      : false
+    const overSeat = (usage?.limitsReached?.includes('seats')) === true
+    const allowed = !locked && !overSeat
+    const gate = locked ? 'locked' : overSeat ? 'over_seat' : null
+    const seatsUsed = usage?.seats?.used ?? 0
+    setBillingState({ loading: false, allowed, org: null, gate, seatsUsed, error: null })
+  }, [isWorkspaceReady, activeOrgId, usageLoading, billingLoading, usage, billing, isTrialExpired])
 
   const sidebarWidth = isMobile ? 0 : (isTablet ? 72 : (sidebarCollapsed ? 72 : 260))
 
@@ -443,8 +374,8 @@ function ScreenshotModeBodyClass() {
 function App() {
   return (
     <BrowserRouter>
-      <AppProvider>
-        <WorkspaceProvider>
+      <WorkspaceProvider>
+        <AppProvider>
           <OnboardingGate>
             <CookieBannerWrapper />
             <ScreenshotModeBodyClass />
@@ -515,8 +446,8 @@ function App() {
               <Route path="*" element={<Navigate to="/app" replace />} />
             </Routes>
           </OnboardingGate>
-        </WorkspaceProvider>
-      </AppProvider>
+        </AppProvider>
+      </WorkspaceProvider>
     </BrowserRouter>
   )
 }

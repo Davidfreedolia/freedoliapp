@@ -56,8 +56,8 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
 
       const [recurring, projs, supps] = await Promise.all([
         getRecurringExpenses(activeOrgId ?? undefined),
-        getProjects(),
-        getSuppliers()
+        getProjects(false, activeOrgId ?? undefined),
+        getSuppliers(activeOrgId ?? undefined)
       ])
       setRecurringExpenses(recurring || [])
       setProjects(projs || [])
@@ -94,7 +94,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
       const newSupplier = await createSupplier({
         name: newSupplierName.trim(),
         type: 'other'
-      })
+      }, activeOrgId ?? undefined)
       setSuppliers([...suppliers, newSupplier])
       setEditingRecurring({ ...editingRecurring, supplier_id: newSupplier.id })
       setShowSupplierModal(false)

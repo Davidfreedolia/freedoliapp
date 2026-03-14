@@ -25,7 +25,7 @@ const DAILY_OPS_WIDGETS = [
 ]
 
 export default function CustomizeDashboardModal({ isOpen, onClose, onSave }) {
-  const { darkMode } = useApp()
+  const { darkMode, activeOrgId } = useApp()
   const { isMobile } = useBreakpoint()
   const { t } = useTranslation()
   const modalStyles = getModalStyles(isMobile, darkMode)
@@ -64,7 +64,7 @@ export default function CustomizeDashboardModal({ isOpen, onClose, onSave }) {
   const loadPreferences = async () => {
     setLoading(true)
     try {
-      const prefs = await getDashboardPreferences()
+      const prefs = await getDashboardPreferences(activeOrgId ?? undefined)
       if (prefs?.widgets) {
         setWidgets({
           logistics_tracking: prefs.widgets.logistics_tracking !== false,

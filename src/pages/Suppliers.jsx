@@ -80,7 +80,7 @@ const COUNTRIES_CITIES = {
 }
 
 export default function Suppliers() {
-  const { darkMode, demoMode } = useApp()
+  const { darkMode, demoMode, activeOrgId } = useApp()
   const { isMobile, isTablet } = useBreakpoint()
   const modalStyles = getModalStyles(isMobile, darkMode)
   
@@ -133,7 +133,7 @@ export default function Suppliers() {
   const loadData = async () => {
     setLoading(true)
     try {
-      const data = await getSuppliers()
+      const data = await getSuppliers(activeOrgId ?? undefined)
       setSuppliers(data || [])
     } catch (err) {
       console.error('Error carregant proveïdors:', err)
@@ -225,7 +225,7 @@ export default function Suppliers() {
         await updateSupplier(editingSupplier.id, editingSupplier)
         showToast('Proveïdor actualitzat correctament', 'success')
       } else {
-        await createSupplier(editingSupplier)
+        await createSupplier(editingSupplier, activeOrgId ?? undefined)
         showToast('Proveïdor creat correctament', 'success')
       }
       await loadData()

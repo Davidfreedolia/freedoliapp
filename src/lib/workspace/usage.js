@@ -18,7 +18,7 @@ function percentUsed(used, limit) {
 
 /**
  * Get workspace usage for an org: projects and seats (used, limit, percent) plus limitsReached and nearLimits.
- * Uses existing entitlements layer; reads counts from projects and org_memberships.
+ * Uses existing entitlements layer; reads counts from projects and org_memberships (seats = active only, S3.2.B).
  *
  * @param {import('@supabase/supabase-js').SupabaseClient} supabase
  * @param {string} orgId
@@ -32,7 +32,7 @@ function percentUsed(used, limit) {
 export async function getWorkspaceUsage(supabase, orgId) {
   const [projectsRes, membersRes, entitlements] = await Promise.all([
     supabase.from('projects').select('*', { count: 'exact', head: true }).eq('org_id', orgId),
-    supabase.from('org_memberships').select('*', { count: 'exact', head: true }).eq('org_id', orgId),
+    supabase.from('org_memberships').select('*', { count: 'exact', head: true }).eq('org_id', orgId).eq('status', 'active'),
     getOrgEntitlements(supabase, orgId).catch(() => null),
   ])
 

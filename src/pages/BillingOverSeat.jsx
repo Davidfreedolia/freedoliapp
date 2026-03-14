@@ -32,7 +32,7 @@ export default function BillingOverSeat() {
     let cancelled = false
     Promise.all([
       supabase.from('orgs').select('*').eq('id', activeOrgId).single(),
-      supabase.from('org_memberships').select('*', { count: 'exact', head: true }).eq('org_id', activeOrgId),
+      supabase.from('org_memberships').select('*', { count: 'exact', head: true }).eq('org_id', activeOrgId).eq('status', 'active'),
     ]).then(([orgRes, countRes]) => {
       if (cancelled) return
       setOrg(orgRes.data ?? null)

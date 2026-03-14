@@ -5,6 +5,7 @@ import { generateManufacturerPack } from '../lib/generateManufacturerPack'
 import { getCompanySettings, updateManufacturerPackGenerated, markManufacturerPackAsSent } from '../lib/supabase'
 import { logAudit } from '../lib/auditLog'
 import Button from './Button'
+import { useApp } from '../context/AppContext'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
 
@@ -23,6 +24,7 @@ export default function ManufacturerPackModal({
   onRefresh
 }) {
   const { t } = useTranslation()
+  const { activeOrgId } = useApp()
   const { isMobile } = useBreakpoint()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -50,7 +52,7 @@ export default function ManufacturerPackModal({
 
   const loadCompanySettings = async () => {
     try {
-      const settings = await getCompanySettings()
+      const settings = await getCompanySettings(activeOrgId ?? undefined)
       setCompanySettings(settings)
     } catch (err) {
       console.error('Error carregant company settings:', err)

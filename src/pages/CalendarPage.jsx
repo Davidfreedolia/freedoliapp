@@ -45,7 +45,7 @@ const VIEWS = {
 }
 
 export default function CalendarPage() {
-  const { darkMode, projects: contextProjects } = useApp()
+  const { darkMode, projects: contextProjects, activeOrgId } = useApp()
   const navigate = useNavigate()
   const { isMobile } = useBreakpoint()
   const { t, i18n } = useTranslation()
@@ -101,7 +101,7 @@ export default function CalendarPage() {
         setProjects(contextProjects)
       } else {
         try {
-          const projectsData = await getProjects()
+          const projectsData = await getProjects(false, activeOrgId ?? undefined)
           setProjects(projectsData || [])
         } catch (err) {
           console.error('Error loading projects:', err)

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, CheckCircle2, Clock, Calendar, X, Trash2 } from 'lucide-react'
+import { useApp } from '../context/AppContext'
 import { getTasks, createTask, updateTask, deleteTask, markTaskDone, snoozeTask } from '../lib/supabase'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { format } from 'date-fns'
@@ -8,6 +9,7 @@ import { es } from 'date-fns/locale'
 
 export default function TasksSection({ entityType, entityId, darkMode }) {
   const { t } = useTranslation()
+  const { activeOrgId } = useApp()
   const { isMobile } = useBreakpoint()
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
@@ -22,7 +24,7 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
 
   useEffect(() => {
     loadTasks()
-  }, [entityType, entityId])
+  }, [entityType, entityId, activeOrgId])
 
   const loadTasks = async () => {
     setLoading(true)
@@ -30,7 +32,8 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
       const data = await getTasks({
         entityType,
         entityId,
-        status: 'open'
+        status: 'open',
+        ...(activeOrgId ? { org_id: activeOrgId } : {})
       })
       setTasks(data || [])
     } catch (err) {

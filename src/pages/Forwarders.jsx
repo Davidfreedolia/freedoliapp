@@ -67,7 +67,7 @@ const PAYMENT_TERMS = [
 const INCOTERMS = ['EXW', 'FOB', 'CIF', 'CFR', 'DDP', 'DAP', 'FCA', 'CPT']
 
 export default function Forwarders() {
-  const { darkMode, demoMode } = useApp()
+  const { darkMode, demoMode, activeOrgId } = useApp()
   const { isMobile, isTablet } = useBreakpoint()
   const modalStyles = getModalStyles(isMobile, darkMode)
   
@@ -131,8 +131,8 @@ export default function Forwarders() {
       }
       
       const [forwardersData, warehousesData] = await Promise.all([
-        getSuppliersByType('freight'),
-        getWarehouses()
+        getSuppliersByType('freight', activeOrgId ?? undefined),
+        getWarehouses(activeOrgId ?? undefined)
       ])
       setForwarders(forwardersData || [])
       setWarehouses(warehousesData || [])
@@ -460,7 +460,7 @@ export default function Forwarders() {
       } else {
         // Ensure type is set when creating
         const createData = { ...editingForwarder, type: 'freight' }
-        const result = await createSupplier(createData)
+        const result = await createSupplier(createData, activeOrgId ?? undefined)
         if (!result) {
           throw new Error('No es va rebre resposta de la creació')
         }

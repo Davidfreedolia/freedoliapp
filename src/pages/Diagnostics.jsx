@@ -30,7 +30,7 @@ const CHECK_STATUS = {
 }
 
 export default function Diagnostics() {
-  const { darkMode } = useApp()
+  const { darkMode, activeOrgId } = useApp()
   const navigate = useNavigate()
   const { t } = useTranslation()
   const [checks, setChecks] = useState({})
@@ -260,8 +260,8 @@ export default function Diagnostics() {
     let testTaskId = null
 
     try {
-      // Get projects for task creation
-      const projects = await getProjects()
+      // Get projects for task creation (S2.5: org-scoped)
+      const projects = await getProjects(false, activeOrgId ?? undefined)
       const testProject = projects?.[0]
 
       if (!testProject) {
@@ -285,8 +285,8 @@ export default function Diagnostics() {
       if (!created.due_date) throw new Error('due_date not set')
       addLog('✅ Task created', 'success')
 
-      // List
-      const tasks = await getTasks()
+      // List (S2.5: org-scoped when activeOrgId available)
+      const tasks = await getTasks(activeOrgId ? { org_id: activeOrgId } : {})
       const found = tasks?.find(t => t.id === testTaskId)
       if (!found) throw new Error('Created task not found')
       addLog('✅ Task listed', 'success')
@@ -294,7 +294,7 @@ export default function Diagnostics() {
       // Update (snooze)
       const newDueDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
       await updateTask(testTaskId, { due_date: newDueDate })
-      const updated = await getTasks()
+      const updated = await getTasks(activeOrgId ? { org_id: activeOrgId } : {})
       const foundUpdated = updated?.find(t => t.id === testTaskId)
       if (foundUpdated?.due_date !== newDueDate) {
         throw new Error('due_date not updated')
@@ -303,14 +303,14 @@ export default function Diagnostics() {
 
       // Mark done
       await updateTask(testTaskId, { status: 'done' })
-      const doneTasks = await getTasks({ status: 'done' })
+      const doneTasks = await getTasks(activeOrgId ? { status: 'done', org_id: activeOrgId } : { status: 'done' })
       const foundDone = doneTasks?.find(t => t.id === testTaskId)
       if (!foundDone) throw new Error('Task not marked as done')
       addLog('✅ Task marked as done', 'success')
 
       // Delete
       await deleteTask(testTaskId)
-      const afterDelete = await getTasks()
+      const afterDelete = await getTasks(activeOrgId ? { org_id: activeOrgId } : {})
       const stillExists = afterDelete?.find(t => t.id === testTaskId)
       if (stillExists) throw new Error('Task still exists after delete')
       addLog('✅ Task deleted', 'success')
@@ -334,10 +334,10 @@ export default function Diagnostics() {
   const checkCalendar = async () => {
     updateCheck('calendar', CHECK_STATUS.RUNNING)
     try {
-      const events = await getCalendarEvents({
-        types: ['task', 'shipment', 'manufacturer', 'quote'],
-        showCompleted: false
-      })
+      const events = await getCalendarEvents(
+        { types: ['task', 'shipment', 'manufacturer', 'quote'], showCompleted: false },
+        activeOrgId ?? undefined
+      )
 
       if (!Array.isArray(events)) {
         throw new Error('Events is not an array')

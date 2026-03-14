@@ -33,7 +33,7 @@ import { safeJsonArray } from '../lib/safeJson'
 export default function Briefing() {
   const { projectId } = useParams()
   const navigate = useNavigate()
-  const { darkMode } = useApp()
+  const { darkMode, activeOrgId } = useApp()
   const { isMobile } = useBreakpoint()
   
   const [project, setProject] = useState(null)
@@ -109,7 +109,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
     try {
       const [projectData, settings] = await Promise.all([
         getProject(projectId),
-        getCompanySettings()
+        getCompanySettings(activeOrgId ?? undefined)
       ])
       
       setProject(projectData)

@@ -43,7 +43,7 @@ const MOVEMENT_TYPES = {
 
 export default function Inventory() {
   const { t } = useTranslation()
-  const { darkMode } = useApp()
+  const { darkMode, activeOrgId } = useApp()
   const { isMobile, isTablet } = useBreakpoint()
   const modalStyles = getModalStyles(isMobile, darkMode)
   
@@ -78,7 +78,7 @@ export default function Inventory() {
       const userId = await getCurrentUserId()
       
       // Carregar projectes (usar funció que ja filtra per user_id)
-      const projectsData = await getProjects(true) // includeDiscarded = true
+      const projectsData = await getProjects(true, activeOrgId ?? undefined)
       setProjects(projectsData || [])
 
       // Carregar inventari

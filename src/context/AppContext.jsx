@@ -3,6 +3,7 @@ import { supabase, getProjects, getDashboardStats, getCompanySettings, updateCom
 import { generateDemoData, checkDemoExists, checkRealDataExists } from '../lib/demoSeed'
 import { showToast } from '../components/Toast'
 import { safeJsonParse } from '../lib/safeJson'
+import { useWorkspace } from '../contexts/WorkspaceContext'
 
 const AppContext = createContext()
 
@@ -24,7 +25,7 @@ export function AppProvider({ children }) {
   const [loading, setLoading] = useState(true)
   const [demoMode, setDemoMode] = useState(false)
   /** Org activa (workspace) — font canònica per queries multi-tenant; es estableix des d’AppContent (billingState.org). */
-  const [activeOrgId, setActiveOrgId] = useState(null)
+  const { activeOrgId, isWorkspaceReady, setActiveOrgId } = useWorkspace()
 
   const isInvalidRefreshTokenError = (err) => {
     const message = err?.message || ''
@@ -59,26 +60,23 @@ export function AppProvider({ children }) {
     return true
   }
 
-  // Carregar dades inicials
+  // Global data: reload when workspace is ready and activeOrgId changes (S2.2)
   useEffect(() => {
-    let mounted = true
-    
-    const initialize = async () => {
-      await loadInitialData()
-      // Auto-seed demo data if enabled (only once)
-      if (!window._demoSeedInitialized) {
-        window._demoSeedInitialized = true
-        await autoSeedDemoData()
-      }
+    if (!isWorkspaceReady) return
+    if (!activeOrgId) {
+      setProjects([])
+      setStats(EMPTY_STATS)
+      setLoading(false)
+      return
     }
-    
-    if (mounted) {
-      initialize()
-    }
-    
-    return () => {
-      mounted = false
-    }
+    loadInitialData(activeOrgId)
+  }, [activeOrgId, isWorkspaceReady])
+
+  // Auto-seed demo data once on app load (DEV only)
+  useEffect(() => {
+    if (window._demoSeedInitialized) return
+    window._demoSeedInitialized = true
+    autoSeedDemoData()
   }, [])
 
   // Auto-seed demo data on app load (only in DEV environment)
@@ -101,8 +99,8 @@ export function AppProvider({ children }) {
         return
       }
 
-      // Get company settings to check demo_mode
-      const settings = await getCompanySettings()
+      // Get company settings to check demo_mode (S2.5: org-scoped when available)
+      const settings = await getCompanySettings(activeOrgId ?? undefined)
       const isDemoMode = settings?.demo_mode !== false // Default to true if not set
       
       // If demo_mode is false, skip
@@ -146,7 +144,7 @@ export function AppProvider({ children }) {
           if (!window._demoDataRefreshScheduled) {
             window._demoDataRefreshScheduled = true
             setTimeout(() => {
-              loadInitialData()
+              if (activeOrgId) loadInitialData(activeOrgId)
               window._demoDataRefreshScheduled = false
             }, 1000)
           }
@@ -170,7 +168,8 @@ export function AppProvider({ children }) {
     document.body.classList.toggle('dark', darkMode)
   }, [darkMode])
 
-  const loadInitialData = async () => {
+  const loadInitialData = async (orgId) => {
+    if (!orgId) return
     setLoading(true)
     try {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession()
@@ -185,18 +184,16 @@ export function AppProvider({ children }) {
         return
       }
 
-      // Load demo mode first and clear cache
-      const settings = await getCompanySettings()
+      const settings = await getCompanySettings(orgId ?? undefined)
       const currentDemoMode = settings?.demo_mode || false
       setDemoMode(currentDemoMode)
-      
-      // Clear demo mode cache to ensure fresh data
+
       const { clearDemoModeCache } = await import('../lib/demoModeFilter')
       clearDemoModeCache()
-      
+
       const [projectsData, statsData] = await Promise.all([
-        getProjects(),
-        getDashboardStats()
+        getProjects(false, orgId),
+        getDashboardStats(orgId)
       ])
       setProjects(projectsData || [])
       setStats(statsData)
@@ -227,9 +224,8 @@ export function AppProvider({ children }) {
       const { clearDemoModeCache } = await import('../lib/demoModeFilter')
       clearDemoModeCache()
       
-      // Reload all data
-      await loadInitialData()
-      
+      if (activeOrgId) await loadInitialData(activeOrgId)
+
       // Force page reload to ensure all components refresh
       // CRITICAL: This ensures no stale cache and all queries refetch with new demoMode
       window.location.reload()
@@ -241,10 +237,11 @@ export function AppProvider({ children }) {
 
 
   const refreshProjects = async () => {
+    if (!activeOrgId) return
     try {
-      const data = await getProjects()
+      const data = await getProjects(false, activeOrgId)
       setProjects(data || [])
-      const statsData = await getDashboardStats()
+      const statsData = await getDashboardStats(activeOrgId)
       setStats(statsData)
     } catch (err) {
       const handled = await handleAuthFailure(err)

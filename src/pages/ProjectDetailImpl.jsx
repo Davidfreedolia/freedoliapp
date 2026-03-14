@@ -313,7 +313,7 @@ function PhaseSection({ phaseId, currentPhaseId, phaseStyle, darkMode, children 
 function ProjectDetailInner({ useApp }) {
   const { id: rawId } = useParams()
   const navigate = useNavigate()
-  const { darkMode, refreshProjects, demoMode } = useApp()
+  const { darkMode, refreshProjects, demoMode, activeOrgId } = useApp()
   const { isMobile, isTablet } = useBreakpoint()
   const { t } = useTranslation()
   const identifiersSectionRef = useRef(null)
@@ -438,7 +438,7 @@ function ProjectDetailInner({ useApp }) {
         return
       }
       
-      const data = await getProject(id)
+      const data = await getProject(id, activeOrgId ?? undefined)
       if (!data) {
         if (mountedRef.current && seq === loadSeqRef.current) {
         setError('Projecte no trobat')
@@ -1001,9 +1001,9 @@ ${t}
       setLoading(false)
       setError('ID de projecte no vàlid')
     }
-  }, [id])
+  }, [id, activeOrgId])
 
-  // Business snapshot (ROI, unit cost, breakeven) for header
+  // Business snapshot (ROI, unit cost, breakeven) for header (S2.7: org-scoped when activeOrgId)
   useEffect(() => {
     if (!id || !project) {
       setBusinessSnapshot(null)
@@ -1016,13 +1016,13 @@ ${t}
       const { computeProjectBusinessSnapshot } = await import('../lib/businessSnapshot')
       const userId = await getCurrentUserId()
       const demoMode = await getDemoMode()
+      const orgIdFilter = project?.org_id ?? activeOrgId ?? null
       if (cancelled) return
+      let poQuery = supabase.from('purchase_orders').select('project_id,total_amount,items').eq('project_id', id)
+      if (orgIdFilter) poQuery = poQuery.eq('org_id', orgIdFilter)
+      else poQuery = poQuery.eq('user_id', userId)
       const [poRes, expRes, incRes] = await Promise.all([
-        supabase
-          .from('purchase_orders')
-          .select('project_id,total_amount,items')
-          .eq('project_id', id)
-          .eq('user_id', userId),
+        poQuery,
         supabase
           .from('expenses')
           .select('project_id,amount')
@@ -1042,9 +1042,9 @@ ${t}
       setBusinessSnapshot(snapshot)
     })()
     return () => { cancelled = true }
-  }, [id, project])
+  }, [id, project, activeOrgId])
 
-  // Stock signal for header (try-chain: inventory -> project_stock, then sales 30d, POs)
+  // Stock signal for header (try-chain: inventory -> project_stock, then sales 30d, POs) (S2.7: org-scoped when activeOrgId)
   useEffect(() => {
     if (!id || !project) {
       setStockSnapshot(null)
@@ -1057,22 +1057,21 @@ ${t}
       const { computeProjectStockSignal } = await import('../lib/stockSignal')
       const userId = await getCurrentUserId()
       const demoMode = await getDemoMode()
+      const orgIdFilter = project?.org_id ?? activeOrgId ?? null
       if (cancelled) return
       const thirtyDaysAgo = new Date()
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
       const thirtyDaysIso = thirtyDaysAgo.toISOString()
 
       let stockRows = []
-      // Stock source: inventory (org-scoped). project_stock has been removed.
       for (const { table, columns } of [
         { table: 'inventory', columns: 'project_id,total_units,quantity,qty,units' }
       ]) {
         try {
-          const { data, error } = await supabase
-            .from(table)
-            .select(columns)
-            .eq('user_id', userId)
-            .eq('project_id', id)
+          let invQuery = supabase.from(table).select(columns).eq('project_id', id)
+          if (orgIdFilter) invQuery = invQuery.eq('org_id', orgIdFilter)
+          else invQuery = invQuery.eq('user_id', userId)
+          const { data, error } = await invQuery
           if (!error && data) {
             stockRows = data
             break
@@ -1085,7 +1084,6 @@ ${t}
         }
       }
 
-      // sales: org-scoped only (org_id). Schema: project_id, units_sold, sale_date, created_at, net_revenue. No user_id/is_demo.
       let salesRows = []
       const orgId = project?.org_id ?? null
       if (orgId) {
@@ -1111,11 +1109,10 @@ ${t}
 
       let poRows = []
       try {
-        const { data, error } = await supabase
-          .from('purchase_orders')
-          .select('project_id,items')
-          .eq('user_id', userId)
-          .eq('project_id', id)
+        let poQuery = supabase.from('purchase_orders').select('project_id,items').eq('project_id', id)
+        if (orgIdFilter) poQuery = poQuery.eq('org_id', orgIdFilter)
+        else poQuery = poQuery.eq('user_id', userId)
+        const { data, error } = await poQuery
         if (!error && data) poRows = data || []
       } catch (_) {}
 
@@ -1129,7 +1126,7 @@ ${t}
       setStockSnapshot(snapshot)
     })()
     return () => { cancelled = true }
-  }, [id, project])
+  }, [id, project, activeOrgId])
 
   useEffect(() => {
     if (!id) return
@@ -1288,7 +1285,7 @@ ${t}
         if (!createForm.name?.trim()) {
           throw new Error('El nom és obligatori')
         }
-        await createSupplier(createForm)
+        await createSupplier(createForm, project?.org_id ?? activeOrgId ?? undefined)
         const { showToast } = await import('../components/Toast')
         showToast('Proveïdor creat correctament', 'success')
       }
@@ -1304,7 +1301,7 @@ ${t}
         if (!createForm.name?.trim()) {
           throw new Error('El nom és obligatori')
         }
-        await createForwarder(createForm)
+        await createForwarder(createForm, project?.org_id ?? activeOrgId ?? undefined)
         const { showToast } = await import('../components/Toast')
         showToast('Transitari creat correctament', 'success')
       }
@@ -1319,6 +1316,8 @@ ${t}
           throw new Error('Categoria no vàlida')
         }
         const amount = Math.abs(parseFloat(createForm.amount))
+        // S2.11: link expense to workspace so financial reports are correct in multi-org
+        const orgId = project?.org_id ?? activeOrgId ?? null
         const { error } = await supabaseClient.from('expenses').insert([{
           project_id: createForm.project_id || null,
           category_id: createForm.category_id,
@@ -1329,7 +1328,8 @@ ${t}
           expense_date: createForm.date,
           payment_status: createForm.payment_status,
           notes: createForm.notes,
-          user_id: userId
+          user_id: userId,
+          ...(orgId && { org_id: orgId })
         }])
         if (error) throw error
         const { showToast } = await import('../components/Toast')
@@ -1397,7 +1397,8 @@ ${t}
             fromPhase: currentPhase,
             toPhase: newPhase,
             project,
-            supabaseClient
+            supabaseClient,
+            orgId: project?.org_id ?? activeOrgId ?? undefined
           })
 
           if (!ok) {

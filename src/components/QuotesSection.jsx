@@ -25,6 +25,7 @@ import {
 } from '../lib/supabase'
 import { resolveProjectsBucket } from '../lib/projectsBucket'
 import { calculateQuickProfitability } from '../lib/profitability'
+import { useApp } from '../context/AppContext'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import DecisionLog from './DecisionLog'
 import PlannedVsActual from './PlannedVsActual'
@@ -36,6 +37,7 @@ const INCOTERMS = ['EXW', 'FCA', 'FAS', 'FOB', 'CFR', 'CIF', 'CPT', 'CIP', 'DAP'
 export default function QuotesSection({ projectId, darkMode }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { activeOrgId } = useApp()
   const [quotes, setQuotes] = useState([])
   const [suppliers, setSuppliers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -70,9 +72,9 @@ export default function QuotesSection({ projectId, darkMode }) {
     setLoading(true)
     try {
       const [quotesData, suppliersData, profitability] = await Promise.all([
-        getSupplierQuotes(projectId),
-        getSuppliers(),
-        getProjectProfitability(projectId)
+        getSupplierQuotes(projectId, activeOrgId ?? undefined),
+        getSuppliers(activeOrgId ?? undefined),
+        getProjectProfitability(projectId, activeOrgId ?? undefined)
       ])
       setQuotes(quotesData || [])
       setSuppliers(suppliersData || [])
@@ -84,7 +86,7 @@ export default function QuotesSection({ projectId, darkMode }) {
       console.error('Error loading quotes:', err)
     }
     setLoading(false)
-  }, [projectId])
+  }, [projectId, activeOrgId])
 
   useEffect(() => {
     if (projectId) {
@@ -198,7 +200,7 @@ export default function QuotesSection({ projectId, darkMode }) {
         notes: newQuote.notes || null,
         shipping_estimate: newQuote.shipping_estimate ? parseFloat(newQuote.shipping_estimate) : null,
         price_breaks: validBreaks
-      })
+      }, activeOrgId ?? undefined)
       
       setNewQuote({
         supplier_id: '',
@@ -257,7 +259,7 @@ export default function QuotesSection({ projectId, darkMode }) {
     const name = window.prompt('Nom del proveïdor:', defaultName)
     if (!name || !name.trim()) return
     try {
-      const newSupplier = await createSupplier({ name: name.trim(), type: 'other' })
+      const newSupplier = await createSupplier({ name: name.trim(), type: 'other' }, activeOrgId ?? undefined)
       await loadData()
       setNewQuote(prev => ({ ...prev, supplier_id: newSupplier.id }))
       if (lastImportedSupplierName) setLastImportedSupplierName(null)
@@ -325,7 +327,7 @@ export default function QuotesSection({ projectId, darkMode }) {
         shipping_estimate: null,
         notes: null,
         price_breaks: [{ min_qty: Number.isFinite(moqVal) ? moqVal : 1, unit_price: String(unitPrice) }]
-      })
+      }, activeOrgId ?? undefined)
       setManualDraft(null)
       await loadData()
     } catch (err) {
@@ -1205,7 +1207,7 @@ export default function QuotesSection({ projectId, darkMode }) {
                       name: (supplierPrefill.name || '').trim(),
                       type: 'other',
                       notes: (supplierPrefill.notes || '').trim() || undefined
-                    })
+                    }, activeOrgId ?? undefined)
                     if (supplier?.id) await handleSupplierCreated(supplier)
                     else {
                       setShowCreateSupplierModal(false)

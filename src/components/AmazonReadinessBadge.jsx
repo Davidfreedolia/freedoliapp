@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { CheckCircle2, AlertCircle, XCircle, Plus, Barcode, Shield } from 'lucide-react'
+import { useApp } from '../context/AppContext'
 import { getProductIdentifiers, getPurchaseOrders } from '../lib/supabase'
 import { getButtonStyles, useButtonState } from '../utils/buttonStyles'
 
@@ -11,6 +12,7 @@ export default function AmazonReadinessBadge({
   onMarkExempt,
   phaseId
 }) {
+  const { activeOrgId } = useApp()
   const [readiness, setReadiness] = useState(null) // null = loading, { status, message, action }
   const [loading, setLoading] = useState(true)
   const assignButtonState = useButtonState()
@@ -42,7 +44,7 @@ export default function AmazonReadinessBadge({
       const hasAmazonSku = !!(identifiers?.sku)
 
       // Obtener POs del proyecto
-      const pos = await getPurchaseOrders(projectId)
+      const pos = await getPurchaseOrders(projectId, activeOrgId ?? undefined)
       const hasPO = pos && pos.length > 0
 
       // Calcular estado según requisitos:

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { CheckCircle2, XCircle, Clock, AlertTriangle, Save, X } from 'lucide-react'
+import { useApp } from '../context/AppContext'
 import { getDecisionLog, createDecisionLog, updateDecisionLog } from '../lib/supabase'
 
 const DECISION_OPTIONS = [
@@ -38,6 +39,7 @@ const REASON_OPTIONS = {
 }
 
 export default function DecisionLog({ entityType, entityId, darkMode, requiredReason = false, allowedDecisions = null }) {
+  const { activeOrgId } = useApp()
   const [decision, setDecision] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -64,7 +66,7 @@ export default function DecisionLog({ entityType, entityId, darkMode, requiredRe
       console.error('Error loading decision:', err)
     }
     setLoading(false)
-  }, [entityType, entityId])
+  }, [entityType, entityId, activeOrgId])
 
   useEffect(() => {
     if (entityId) {

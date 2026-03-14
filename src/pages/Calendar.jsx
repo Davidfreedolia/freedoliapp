@@ -19,7 +19,7 @@ const localizer = momentLocalizer(moment)
 moment.locale('ca')
 
 export default function CalendarPage() {
-  const { darkMode } = useApp()
+  const { darkMode, activeOrgId } = useApp()
   const navigate = useNavigate()
   const { isMobile } = useBreakpoint()
   const { t, i18n } = useTranslation()
@@ -55,7 +55,7 @@ export default function CalendarPage() {
 
   const loadProjects = async () => {
     try {
-      const projs = await getProjects()
+      const projs = await getProjects(false, activeOrgId ?? undefined)
       setProjects(projs || [])
     } catch (err) {
       console.error('Error loading projects:', err)
@@ -64,7 +64,7 @@ export default function CalendarPage() {
 
   const loadFilters = async () => {
     try {
-      const prefs = await getDashboardPreferences()
+      const prefs = await getDashboardPreferences(activeOrgId ?? undefined)
       if (prefs?.calendar_preferences) {
         setFilters({
           ...filters,
@@ -79,7 +79,7 @@ export default function CalendarPage() {
   const loadEvents = async () => {
     setLoading(true)
     try {
-      const calendarEvents = await getCalendarEvents(filters)
+      const calendarEvents = await getCalendarEvents(filters, activeOrgId ?? undefined)
       setEvents(calendarEvents || [])
     } catch (err) {
       console.error('Error loading calendar events:', err)

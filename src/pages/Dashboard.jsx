@@ -425,7 +425,7 @@ export default function Dashboard() {
   const loadOrdersInProgress = async () => {
     setLoadingOrders(true)
     try {
-      const orders = await getPurchaseOrders().catch(() => [])
+      const orders = await getPurchaseOrders(null, activeOrgId ?? undefined).catch(() => [])
       // Filtrar comandes que estan en curs (no cancel·lades ni completades)
       const inProgress = safeArray(orders).filter(order => 
         order?.status && !['cancelled', 'received'].includes(order.status)
@@ -474,7 +474,7 @@ export default function Dashboard() {
     
     setLoadingPreferences(true)
     try {
-      const prefs = await getDashboardPreferences()
+      const prefs = await getDashboardPreferences(activeOrgId ?? undefined)
       if (prefs?.widgets) {
         setDashboardWidgets({
           logistics_tracking: prefs.widgets.logistics_tracking !== false,

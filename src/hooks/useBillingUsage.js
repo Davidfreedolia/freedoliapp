@@ -1,6 +1,6 @@
 /**
  * D11.8 Slice 3 — Billing usage (seats, projects) from canonical model.
- * Usage: counts from org_memberships and projects.
+ * Usage: counts from org_memberships (active only, S3.2.B) and projects.
  * Limits: from billing_org_entitlements via getOrgEntitlements + getOrgFeatureLimit (projects.max, team.seats).
  * No hardcoded limits; no mocks.
  *
@@ -47,7 +47,8 @@ export function useBillingUsage(orgId) {
           supabase
             .from('org_memberships')
             .select('*', { count: 'exact', head: true })
-            .eq('org_id', orgId),
+            .eq('org_id', orgId)
+            .eq('status', 'active'),
           supabase
             .from('projects')
             .select('*', { count: 'exact', head: true })

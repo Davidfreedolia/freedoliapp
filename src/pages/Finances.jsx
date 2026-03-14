@@ -375,8 +375,8 @@ export default function Finances() {
             category:finance_categories(id, name, color, icon)
           `)
           .order('income_date', { ascending: false }),
-        getProjects(),
-        getSuppliers(),
+        getProjects(false, activeOrgId ?? undefined),
+        getSuppliers(activeOrgId ?? undefined),
         supabase
           .from('finance_views')
           .select('*')

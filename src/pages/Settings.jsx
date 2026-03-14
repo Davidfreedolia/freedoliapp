@@ -28,6 +28,7 @@ import {
 import { useApp } from '../context/AppContext'
 import { getCompanySettings, updateCompanySettings, uploadCompanyLogo, deleteCompanyLogo, supabase, getAuditLogs, updateLanguage, getCurrentUserId } from '../lib/supabase'
 import { getOrgEntitlements, assertOrgWithinLimit } from '../lib/billing/entitlements'
+import { createStripePortalSession, createStripeCheckoutSession } from '../lib/billingApi'
 import { clearDemoData, generateDemoData, checkDemoExists } from '../lib/demoSeed'
 import Header from '../components/Header'
 import Button from '../components/Button'
@@ -39,7 +40,7 @@ import { showToast } from '../components/Toast'
 import { useNavigate } from 'react-router-dom'
 
 export default function Settings() {
-  const { darkMode, refreshProjects, demoMode, toggleDemoMode } = useApp()
+  const { darkMode, refreshProjects, demoMode, toggleDemoMode, activeOrgId } = useApp()
   const { t, i18n } = useTranslation()
   const { isMobile } = useBreakpoint()
   const navigate = useNavigate()
@@ -95,39 +96,40 @@ export default function Settings() {
     loadLanguage()
   }, [])
 
+  // S3.1.B2: Use canonical active workspace (activeOrgId) instead of inferring from first membership.
   const loadWorkspace = async () => {
     setWorkspaceLoading(true)
     try {
-      const userId = await getCurrentUserId()
-      if (!userId) {
+      if (!activeOrgId) {
+        setOrg(null)
+        setSeatsUsed(0)
+        setMembers([])
         setWorkspaceLoading(false)
         return
       }
-      const { data: membershipRow, error: memErr } = await supabase
-        .from('org_memberships')
-        .select('*, orgs(*)')
-        .eq('user_id', userId)
-        .limit(1)
+      const { data: orgRow, error: orgErr } = await supabase
+        .from('orgs')
+        .select('*')
+        .eq('id', activeOrgId)
         .maybeSingle()
-      if (memErr || !membershipRow) {
+      if (orgErr || !orgRow) {
+        setOrg(null)
+        setSeatsUsed(0)
+        setMembers([])
         setWorkspaceLoading(false)
         return
       }
-      const currentOrg = membershipRow.orgs ?? membershipRow.org ?? null
-      if (!currentOrg) {
-        setWorkspaceLoading(false)
-        return
-      }
-      setOrg(currentOrg)
+      setOrg(orgRow)
       const { count } = await supabase
         .from('org_memberships')
         .select('*', { count: 'exact', head: true })
-        .eq('org_id', currentOrg.id)
+        .eq('org_id', activeOrgId)
+        .eq('status', 'active')
       setSeatsUsed(count ?? 0)
       const { data: membersData } = await supabase
         .from('org_memberships')
         .select('user_id, role')
-        .eq('org_id', currentOrg.id)
+        .eq('org_id', activeOrgId)
       setMembers(membersData ?? [])
     } catch (err) {
       console.error('Error loading workspace:', err)
@@ -139,11 +141,11 @@ export default function Settings() {
     if (activeTab === 'workspace') {
       loadWorkspace()
     }
-  }, [activeTab])
+  }, [activeTab, activeOrgId])
 
   const loadLanguage = async () => {
     try {
-      const settings = await getCompanySettings()
+      const settings = await getCompanySettings(activeOrgId ?? undefined)
       if (settings?.language && ['ca', 'en', 'es'].includes(settings.language)) {
         setCurrentLanguage(settings.language)
         i18n.changeLanguage(settings.language)
@@ -165,7 +167,7 @@ export default function Settings() {
     try {
       const userId = await getCurrentUserId()
       const [companyRes, signaturesRes] = await Promise.all([
-        getCompanySettings(),
+        getCompanySettings(activeOrgId ?? undefined),
         supabase.from('signatures').select('*').eq('user_id', userId).order('created_at', { ascending: true })
       ])
       if (companyRes) setCompanyData(companyRes)
@@ -366,33 +368,29 @@ export default function Settings() {
     setAddingMember(false)
   }
 
+  // S3.1.B3: Use canonical billingApi (stripe-portal-session / stripe-checkout-session) instead of legacy stripe_create_*.
   const handleManageBilling = async () => {
     if (!org?.id || billingLoading) return
     setBillingLoading(true)
     try {
-      const { data: portalData, error: portalError } = await supabase.functions.invoke('stripe_create_portal', {
-        body: { org_id: org.id }
-      })
-      if (portalData?.url) {
-        window.location.href = portalData.url
-        return
+      try {
+        const portalData = await createStripePortalSession(org.id)
+        if (portalData?.url) {
+          window.location.href = portalData.url
+          return
+        }
+      } catch (_) {
+        // Portal failed (e.g. no customer); try checkout
       }
-      const noCustomer = portalError?.message?.includes('No customer') || portalData?.error === 'No customer yet'
-      if (noCustomer || !portalData?.url) {
-        const { data: checkoutData, error: checkoutErr } = await supabase.functions.invoke('stripe_create_checkout', {
-          body: { org_id: org.id }
-        })
+      try {
+        const checkoutData = await createStripeCheckoutSession(org.id, 'growth')
         if (checkoutData?.url) {
           window.location.href = checkoutData.url
           return
         }
-        console.error('Checkout failed', checkoutErr)
-      } else {
-        console.error('Portal failed', portalError)
+      } catch (_) {
+        // Checkout failed
       }
-      showToast('Billing unavailable', 'error')
-    } catch (err) {
-      console.error('Billing error', err)
       showToast('Billing unavailable', 'error')
     } finally {
       setBillingLoading(false)

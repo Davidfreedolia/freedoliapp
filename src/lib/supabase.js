@@ -292,25 +292,25 @@ export const getProjects = async (includeDiscarded = false, activeOrgId = null) 
   return projects
 }
 
-export const getProject = async (id) => {
-  // Dynamic imports to avoid circular dependencies
+// S2.7: org-scoped when orgId provided; legacy user_id fallback when not
+export const getProject = async (id, orgId = null) => {
   const { isDemoMode, mockGetProject } = await import('../demo/demoMode')
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
-  
-  // Legacy demo mode check (for backward compatibility)
+
   if (isDemoMode() && !demoMode) {
     return await mockGetProject(id)
   }
-  
-  const userId = await getCurrentUserId()
-  if (!userId) return null
-  const { data, error } = await supabase
-    .from('projects')
-    .select('*')
-    .eq('id', id)
-    .eq('user_id', userId)
-    .maybeSingle()
+
+  let query = supabase.from('projects').select('*').eq('id', id)
+  if (orgId) {
+    query = query.eq('org_id', orgId)
+  } else {
+    const userId = await getCurrentUserId()
+    if (!userId) return null
+    query = query.eq('user_id', userId)
+  }
+  const { data, error } = await query.maybeSingle()
   if (error) throw error
   return data
 }
@@ -477,18 +477,26 @@ export const deleteProject = async (id) => {
   return true
 }
 
-// PROVEÏDORS
-export const getSuppliers = async () => {
-  // Dynamic imports to avoid circular dependencies
+// PROVEÏDORS (S2.4: org-scoped when orgId provided)
+export const getSuppliers = async (orgId = null) => {
   const { isDemoMode, mockGetSuppliers } = await import('../demo/demoMode')
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
-  
-  // Legacy demo mode check (for backward compatibility)
+
   if (isDemoMode() && !demoMode) {
     return await mockGetSuppliers()
   }
-  
+
+  if (orgId) {
+    const { data, error } = await supabase
+      .from('suppliers')
+      .select('*')
+      .eq('org_id', orgId)
+      .order('name', { ascending: true })
+    if (error) throw error
+    return data
+  }
+
   const userId = await getCurrentUserId()
   const { data, error } = await supabase
     .from('suppliers')
@@ -509,7 +517,12 @@ export const getSupplier = async (id) => {
   return data
 }
 
-export const createSupplier = async (supplier) => {
+/**
+ * Create a supplier. S2.9: workspace-aware — pass orgId so the supplier is created in the correct tenant.
+ * @param {Object} supplier - Supplier payload (name, type, etc.)
+ * @param {string|null} orgId - Optional. Active workspace org_id. If provided, enforced on insert.
+ */
+export const createSupplier = async (supplier, orgId = null) => {
   // Get demo mode setting
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
@@ -520,6 +533,17 @@ export const createSupplier = async (supplier) => {
   if (!userId) {
     return authRequired()
   }
+
+  // S2.9: include org_id when provided for tenant-scoped insert
+  if (!orgId && supplierData.org_id == null) {
+    console.warn('[createSupplier] No org_id provided; supplier may be created without workspace context. Pass activeOrgId from callers.')
+  }
+  const payload = { ...supplierData, user_id: userId }
+  if (orgId != null) {
+    payload.org_id = orgId
+  } else if (supplierData.org_id != null) {
+    payload.org_id = supplierData.org_id
+  }
   
   // Use getSupabaseClient directly to avoid Proxy issues in production
   const client = getSupabaseClient()
@@ -529,10 +553,7 @@ export const createSupplier = async (supplier) => {
   
   const { data, error } = await client
     .from('suppliers')
-    .insert([{
-      ...supplierData,
-      user_id: userId
-    }])
+    .insert([payload])
     .select()
     .maybeSingle()
   
@@ -596,65 +617,61 @@ export const deleteSupplier = async (id) => {
   return true
 }
 
-// Obtenir proveïdors per tipus
-export const getSuppliersByType = async (type) => {
+// Obtenir proveïdors per tipus (S2.5: org-scoped when orgId provided)
+export const getSuppliersByType = async (type, orgId = null) => {
   // Get demo mode setting
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
   
-  const userId = await getCurrentUserId()
-  
-  // Use getSupabaseClient directly to avoid Proxy issues in production
   const client = getSupabaseClient()
   if (!client || typeof client.from !== 'function') {
     throw new Error('Supabase client not available')
   }
   
-  const { data, error } = await client
-    .from('suppliers')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('type', type)
-    .order('name', { ascending: true })
-  
+  let query = client.from('suppliers').select('*').eq('type', type).order('name', { ascending: true })
+  if (orgId) {
+    query = query.eq('org_id', orgId)
+  } else {
+    const userId = await getCurrentUserId()
+    query = query.eq('user_id', userId)
+  }
+  const { data, error } = await query
   if (error) throw error
   return data || []
 }
 
 // TRANSITARIS (ara és un tipus de supplier)
 export const getForwarders = async () => getSuppliersByType('freight')
-export const createForwarder = async (forwarder) =>
-  createSupplier({ ...forwarder, type: 'freight' })
+export const createForwarder = async (forwarder, orgId = null) =>
+  createSupplier({ ...forwarder, type: 'freight' }, orgId)
 
-// PURCHASE ORDERS
-export const getPurchaseOrders = async (projectId = null) => {
-  // Dynamic imports to avoid circular dependencies
+// PURCHASE ORDERS (S2.4: org-scoped when orgId provided)
+export const getPurchaseOrders = async (projectId = null, orgId = null) => {
   const { isDemoMode, mockGetPurchaseOrders } = await import('../demo/demoMode')
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
-  
-  // Legacy demo mode check (for backward compatibility)
+
   if (isDemoMode() && !demoMode) {
     const data = await mockGetPurchaseOrders()
-    if (projectId) {
-      return data.filter(po => po.project_id === projectId)
-    }
+    if (projectId) return data.filter(po => po.project_id === projectId)
     return data
   }
-  
-  const userId = await getCurrentUserId()
+
   let query = supabase
     .from('purchase_orders')
-    .select(
-      `
+    .select(`
       *,
       supplier:suppliers(name, contact_name, email),
       project:projects(name, project_code, sku)
-    `
-    )
-    .eq('user_id', userId)
+    `)
     .order('created_at', { ascending: false })
 
+  if (orgId) {
+    query = query.eq('org_id', orgId)
+  } else {
+    const userId = await getCurrentUserId()
+    query = query.eq('user_id', userId)
+  }
   if (projectId) query = query.eq('project_id', projectId)
 
   const { data, error } = await query
@@ -686,13 +703,30 @@ export const getPurchaseOrder = async (id) => {
   return data
 }
 
-export const createPurchaseOrder = async (po) => {
+/**
+ * Create a purchase order. S2.9: workspace-aware — prefer passing orgId so the PO is created in the correct tenant.
+ * @param {Object} po - PO payload (project_id, supplier_id, etc.)
+ * @param {string|null} orgId - Optional. Active workspace org_id. If provided, enforced on insert.
+ */
+export const createPurchaseOrder = async (po, orgId = null) => {
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
 
   const { user_id, ...poData } = po
   const userId = await getCurrentUserId()
   if (!userId) return authRequired()
+
+  // S2.9: resolve org_id for tenant-scoped insert
+  const effectiveOrgId = orgId ?? poData.org_id
+  if (!effectiveOrgId && (orgId === undefined || orgId === null)) {
+    console.warn('[createPurchaseOrder] No org_id provided; PO may be created without workspace context. Pass activeOrgId from callers.')
+  }
+  if (effectiveOrgId != null) {
+    if (poData.org_id != null && poData.org_id !== effectiveOrgId) {
+      console.warn('[createPurchaseOrder] poData.org_id differs from passed orgId; using passed orgId:', effectiveOrgId)
+    }
+    poData.org_id = effectiveOrgId
+  }
 
   const raw = poData.buyer_info
   const isEmpty =
@@ -701,7 +735,7 @@ export const createPurchaseOrder = async (po) => {
     (typeof raw === 'string' && (raw.trim() === '' || raw.trim() === '{}')) ||
     (typeof raw === 'object' && !Array.isArray(raw) && Object.keys(raw).length === 0)
   if (isEmpty) {
-    const settings = await getCompanySettings()
+    const settings = await getCompanySettings(effectiveOrgId ?? undefined)
     if (settings) {
       poData.buyer_info = {
         company_name: settings.company_name ?? '',
@@ -917,77 +951,98 @@ export const deletePayment = async (id) => {
   return true
 }
 
-// ESTADÍSTIQUES DASHBOARD
-export const getDashboardStats = async () => {
-  // Dynamic imports to avoid circular dependencies
+// ESTADÍSTIQUES DASHBOARD (org-scoped when activeOrgId provided; S2.2)
+export const getDashboardStats = async (activeOrgId = null) => {
   const { isDemoMode, mockGetDashboardStats } = await import('../demo/demoMode')
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
-  
-  // Legacy demo mode check (for backward compatibility)
+
   if (isDemoMode() && !demoMode) {
     return await mockGetDashboardStats()
   }
-  
-  const userId = await getCurrentUserId()
-  if (!userId) {
+
+  const empty = {
+    totalProjects: 0,
+    activeProjects: 0,
+    completedProjects: 0,
+    discardedProjects: 0,
+    totalInvested: 0,
+  }
+
+  if (activeOrgId) {
+    const { data: projects, error } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('org_id', activeOrgId)
+      .order('created_at', { ascending: false })
+    if (error) {
+      console.error('Error fetching projects for dashboard stats:', error)
+      return empty
+    }
+    const activeProjects = (projects || []).filter((p) =>
+      p.status === 'active' && (!p.decision || p.decision !== 'DISCARDED')
+    ).length
+    const completedProjects = (projects || []).filter((p) =>
+      p.status === 'completed' && (!p.decision || p.decision !== 'DISCARDED')
+    ).length
+    const totalProjects = (projects || []).filter((p) =>
+      !p.decision || p.decision !== 'DISCARDED'
+    ).length
+    const discardedProjects = (projects || []).filter((p) =>
+      p.decision === 'DISCARDED'
+    ).length
+    let paymentsQuery = supabase.from('payments').select('amount, currency, type').eq('status', 'completed')
+    paymentsQuery = paymentsQuery.eq('org_id', activeOrgId)
+    const { data: payments, error: paymentsError } = await paymentsQuery
+    if (paymentsError) console.error('Error fetching payments for dashboard stats:', paymentsError)
+    const totalInvested = (payments || []).reduce((sum, p) => {
+      if (p.currency === 'EUR') return sum + (p.amount || 0)
+      if (p.currency === 'USD') return sum + (p.amount || 0) * 0.92
+      return sum
+    }, 0)
     return {
-      totalProjects: 0,
-      activeProjects: 0,
-      completedProjects: 0,
-      discardedProjects: 0,
-      totalInvested: 0,
+      totalProjects,
+      activeProjects,
+      completedProjects,
+      discardedProjects,
+      totalInvested,
     }
   }
+
+  const userId = await getCurrentUserId()
+  if (!userId) return empty
+
   const { data: projects, error } = await supabase
     .from('projects')
     .select('*')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
-  
   if (error) {
-    console.error('Error fetching projects for dashboard stats:', error);
-    // Fallback to empty data or re-throw if critical
-    return {
-      totalProjects: 0,
-      activeProjects: 0,
-      completedProjects: 0,
-      discardedProjects: 0,
-      totalInvested: 0,
-    };
+    console.error('Error fetching projects for dashboard stats:', error)
+    return empty
   }
-
-  // Excloure DISCARDED dels stats (if decision column exists)
-  const activeProjects = projects?.filter((p) => 
+  const activeProjects = (projects || []).filter((p) =>
     p.status === 'active' && (!p.decision || p.decision !== 'DISCARDED')
-  ).length || 0
-  const completedProjects = projects?.filter((p) => 
+  ).length
+  const completedProjects = (projects || []).filter((p) =>
     p.status === 'completed' && (!p.decision || p.decision !== 'DISCARDED')
-  ).length || 0
-  const totalProjects = projects?.filter((p) => 
-    (!p.decision || p.decision !== 'DISCARDED')
-  ).length || 0
-  const discardedProjects = projects?.filter((p) => 
+  ).length
+  const totalProjects = (projects || []).filter((p) =>
+    !p.decision || p.decision !== 'DISCARDED'
+  ).length
+  const discardedProjects = (projects || []).filter((p) =>
     p.decision === 'DISCARDED'
-  ).length || 0
-
+  ).length
   const { data: payments, error: paymentsError } = await supabase
     .from('payments')
     .select('amount, currency, type')
     .eq('status', 'completed')
-  
-  // Si hay error en payments, continuar con 0 (no crítico para stats)
-  if (paymentsError) {
-    console.error('Error fetching payments for dashboard stats:', paymentsError)
-  }
-
-  const totalInvested =
-    (payments || [])?.reduce((sum, p) => {
-      if (p.currency === 'EUR') return sum + (p.amount || 0)
-      if (p.currency === 'USD') return sum + (p.amount || 0) * 0.92
-      return sum
-    }, 0) || 0
-
+  if (paymentsError) console.error('Error fetching payments for dashboard stats:', paymentsError)
+  const totalInvested = (payments || []).reduce((sum, p) => {
+    if (p.currency === 'EUR') return sum + (p.amount || 0)
+    if (p.currency === 'USD') return sum + (p.amount || 0) * 0.92
+    return sum
+  }, 0)
   return {
     totalProjects,
     activeProjects,
@@ -1864,30 +1919,27 @@ export const getShipmentsInTransit = async (limit = 10) => {
   }
 }
 
-export const getResearchNoDecision = async (limit = 10) => {
-  // Dynamic import to avoid circular dependency
+export const getResearchNoDecision = async (limit = 10, orgId = null) => {
   const { isDemoMode, mockGetResearchNoDecision } = await import('../demo/demoMode')
-  
-  // Demo mode: return mock data
   if (isDemoMode()) {
     return await mockGetResearchNoDecision(limit)
   }
-  
-  const userId = await getCurrentUserId()
-  
+
   try {
-    // Use select('*') to avoid issues if decision column doesn't exist
-    const { data, error } = await supabase
+    let query = supabase
       .from('projects')
       .select('*')
-      .eq('user_id', userId)
       .eq('current_phase', 1)
       .order('created_at', { ascending: false })
-      .limit(limit * 2) // Get more to filter after
-    
+      .limit(limit * 2)
+    if (orgId) {
+      query = query.eq('org_id', orgId)
+    } else {
+      const userId = await getCurrentUserId()
+      query = query.eq('user_id', userId)
+    }
+    const { data, error } = await query
     if (error) throw error
-    
-    // Filter client-side: no decision or HOLD (handle if decision column doesn't exist)
     return (data || []).filter(p => !p.decision || p.decision === 'HOLD').slice(0, limit)
   } catch (err) {
     console.error('Error in getResearchNoDecision:', err)
@@ -1895,21 +1947,16 @@ export const getResearchNoDecision = async (limit = 10) => {
   }
 }
 
-export const getStaleTracking = async (limit = 10, staleDays = 7) => {
-  // Dynamic import to avoid circular dependency
+export const getStaleTracking = async (limit = 10, staleDays = 7, orgId = null) => {
   const { isDemoMode, mockGetStaleTracking } = await import('../demo/demoMode')
-  
-  // Demo mode: return mock data
   if (isDemoMode()) {
     return await mockGetStaleTracking(limit, staleDays)
   }
-  
-  const userId = await getCurrentUserId()
-  
+
   const cutoffDate = new Date()
   cutoffDate.setDate(cutoffDate.getDate() - staleDays)
-  
-  const { data, error } = await supabase
+
+  let query = supabase
     .from('purchase_orders')
     .select(`
       id,
@@ -1922,14 +1969,19 @@ export const getStaleTracking = async (limit = 10, staleDays = 7) => {
         sku_internal
       )
     `)
-    .eq('user_id', userId)
     .not('tracking_number', 'is', null)
     .lt('updated_at', cutoffDate.toISOString())
     .order('updated_at', { ascending: true })
     .limit(limit)
-  
+  if (orgId) {
+    query = query.eq('org_id', orgId)
+  } else {
+    const userId = await getCurrentUserId()
+    query = query.eq('user_id', userId)
+  }
+  const { data, error } = await query
   if (error) throw error
-  
+
   return (data || []).map(po => {
     const daysStale = Math.floor((new Date() - new Date(po.updated_at)) / (1000 * 60 * 60 * 24))
     return {
@@ -2118,11 +2170,21 @@ export const deleteWarehouse = async (id) => {
   return true
 }
 
-// CONFIGURACIÓ EMPRESA
-export const getCompanySettings = async () => {
+// CONFIGURACIÓ EMPRESA (S2.4: org-scoped when orgId provided)
+export const getCompanySettings = async (orgId = null) => {
   const { isDemoMode } = await import('../demo/demoMode')
   if (isDemoMode()) {
     return { demo_mode: false }
+  }
+  if (orgId) {
+    const { data, error } = await supabase
+      .from('company_settings')
+      .select('*')
+      .eq('org_id', orgId)
+      .limit(1)
+      .maybeSingle()
+    if (error && error.code !== 'PGRST116') throw error
+    return data
   }
   const userId = await getCurrentUserId()
   if (!userId) return null
@@ -2157,9 +2219,21 @@ export const updateCompanySettings = async (settings) => {
     return data
   }
 
+  // S2.9: when creating, include org_id if user has an org (per-tenant company settings)
+  let insertPayload = { ...settingsData, user_id: userId }
+  const { data: mem } = await supabase
+    .from('org_memberships')
+    .select('org_id')
+    .eq('user_id', userId)
+    .limit(1)
+    .maybeSingle()
+  if (mem?.org_id) {
+    insertPayload.org_id = mem.org_id
+  }
+
   const { data, error } = await supabase
     .from('company_settings')
-    .insert([{ ...settingsData, user_id: userId }])
+    .insert([insertPayload])
     .select()
     .maybeSingle()
   if (error) throw error
@@ -2233,8 +2307,18 @@ export const deleteCompanyLogo = async () => {
   await updateCompanySettings({ ...existing, logo_url: null })
 }
 
-// DASHBOARD PREFERENCES
-export const getDashboardPreferences = async () => {
+// DASHBOARD PREFERENCES (S2.4: org-scoped when orgId provided)
+export const getDashboardPreferences = async (orgId = null) => {
+  if (orgId) {
+    const { data, error } = await supabase
+      .from('dashboard_preferences')
+      .select('*')
+      .eq('org_id', orgId)
+      .limit(1)
+      .maybeSingle()
+    if (error && error.code !== 'PGRST116') throw error
+    return data
+  }
   const userId = await getCurrentUserId()
   const { data, error } = await supabase
     .from('dashboard_preferences')
@@ -2537,24 +2621,25 @@ export const getAuditLogs = async (limit = 50, statusFilter = null) => {
 // PROFITABILITY CALCULATOR
 // ============================================
 
-export const getProjectProfitability = async (projectId) => {
-  // Dynamic import to avoid circular dependency
+export const getProjectProfitability = async (projectId, orgId = null) => {
   const { isDemoMode } = await import('../demo/demoMode')
-  
-  // Demo mode: return mock data
   if (isDemoMode()) {
     const { mockGetProjectProfitability } = await import('../demo/demoMode')
     return await mockGetProjectProfitability(projectId)
   }
-  
-  const userId = await getCurrentUserId()
-  const { data, error } = await supabase
+
+  let query = supabase
     .from('project_profitability_basic')
     .select('*')
     .eq('project_id', projectId)
-    .eq('user_id', userId)
-    .maybeSingle()
-  if (error && error.code !== 'PGRST116') throw error // PGRST116 = no rows found
+  if (orgId) {
+    query = query.eq('org_id', orgId)
+  } else {
+    const userId = await getCurrentUserId()
+    query = query.eq('user_id', userId)
+  }
+  const { data, error } = await query.maybeSingle()
+  if (error && error.code !== 'PGRST116') throw error
   return data
 }
 
@@ -2883,29 +2968,23 @@ export const bulkMarkShipmentsDelivered = async (poIds) => {
 }
 
 // SUPPLIER QUOTES
-// Get all calendar events (tasks, shipments, manufacturer packs, quotes)
-export const getCalendarEvents = async (filters = {}) => {
-  // Get demo mode setting
+// Get all calendar events (tasks, shipments, manufacturer packs, quotes) — S2.4: org-scoped when orgId provided
+export const getCalendarEvents = async (filters = {}, orgId = null) => {
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
-  
-  // STRICT: Only return demo events if demoMode is explicitly true
-  // No fallback, no mock data when demoMode is false
+
   if (demoMode === true) {
-    // Only use mock events if demoMode is explicitly true
-    // Dynamic import to avoid circular dependency
     const { mockGetCalendarEvents } = await import('../demo/demoMode')
     return await mockGetCalendarEvents(filters)
   }
-  
-  // When demoMode is false, only return real events from database
+
   const userId = await getCurrentUserId()
   const events = []
-  
+
   try {
-    // 1) Tasks
     if (filters.types?.includes('task') !== false) {
       const taskFilters = { ...filters }
+      if (orgId) taskFilters.org_id = orgId
       if (!filters.showCompleted) {
         taskFilters.status = 'open'
       }
@@ -2938,9 +3017,8 @@ export const getCalendarEvents = async (filters = {}) => {
       }
     }
     
-    // 2) Shipments
     if (filters.types?.includes('shipment') !== false) {
-      const { data: shipments, error: shipmentsError } = await supabase
+      let shipmentsQuery = supabase
         .from('po_shipments')
         .select(`
           *,
@@ -2950,7 +3028,8 @@ export const getCalendarEvents = async (filters = {}) => {
             projects(id, name)
           )
         `)
-      
+      if (orgId) shipmentsQuery = shipmentsQuery.eq('org_id', orgId)
+      const { data: shipments, error: shipmentsError } = await shipmentsQuery
       if (!shipmentsError && shipments) {
         shipments.forEach(shipment => {
           const po = shipment.purchase_orders
@@ -2993,9 +3072,8 @@ export const getCalendarEvents = async (filters = {}) => {
       }
     }
     
-    // 3) Manufacturer packs
     if (filters.types?.includes('manufacturer') !== false) {
-      const { data: pos, error: posError } = await supabase
+      let posQuery = supabase
         .from('purchase_orders')
         .select(`
           id,
@@ -3004,8 +3082,10 @@ export const getCalendarEvents = async (filters = {}) => {
           manufacturer_pack_sent_at,
           projects(id, name)
         `)
-        .eq('user_id', userId)
         .not('manufacturer_pack_generated_at', 'is', null)
+      if (orgId) posQuery = posQuery.eq('org_id', orgId)
+      else posQuery = posQuery.eq('user_id', userId)
+      const { data: pos, error: posError } = await posQuery
       
       if (!posError && pos) {
         pos.forEach(po => {
@@ -3044,18 +3124,18 @@ export const getCalendarEvents = async (filters = {}) => {
       }
     }
     
-    // 4) Quotes (only if validity_date column exists)
     if (filters.types?.includes('quote') !== false) {
       try {
-        const { data: quotes, error: quotesError } = await supabase
+        let quotesQuery = supabase
           .from('supplier_quotes')
           .select(`
             *,
             projects(id, name),
             suppliers(id, name)
           `)
-          .eq('user_id', userId)
-        
+        if (orgId) quotesQuery = quotesQuery.eq('org_id', orgId)
+        else quotesQuery = quotesQuery.eq('user_id', userId)
+        const { data: quotes, error: quotesError } = await quotesQuery
         if (quotesError) {
           // If column doesn't exist, skip quotes
           if (quotesError.code === '42703') {
@@ -3087,9 +3167,8 @@ export const getCalendarEvents = async (filters = {}) => {
       }
     }
     
-    // 5) Purchase Orders (PO dates)
     if (filters.types?.includes('purchase_order') !== false) {
-      const { data: pos, error: posError } = await supabase
+      let poDatesQuery = supabase
         .from('purchase_orders')
         .select(`
           id,
@@ -3098,8 +3177,9 @@ export const getCalendarEvents = async (filters = {}) => {
           expected_delivery_date,
           projects(id, name)
         `)
-        .eq('user_id', userId)
-      
+      if (orgId) poDatesQuery = poDatesQuery.eq('org_id', orgId)
+      else poDatesQuery = poDatesQuery.eq('user_id', userId)
+      const { data: pos, error: posError } = await poDatesQuery
       if (!posError && pos) {
         pos.forEach(po => {
           // Order date event
@@ -3149,9 +3229,8 @@ export const getCalendarEvents = async (filters = {}) => {
   }
 }
 
-export const getSupplierQuotes = async (projectId) => {
-  const userId = await getCurrentUserId()
-  const { data, error } = await supabase
+export const getSupplierQuotes = async (projectId, orgId = null) => {
+  let query = supabase
     .from('supplier_quotes')
     .select(`
       *,
@@ -3166,17 +3245,21 @@ export const getSupplierQuotes = async (projectId) => {
         unit_price
       )
     `)
-    .eq('user_id', userId)
     .eq('project_id', projectId)
     .order('created_at', { ascending: false })
-  
+  if (orgId) {
+    query = query.eq('org_id', orgId)
+  } else {
+    const userId = await getCurrentUserId()
+    query = query.eq('user_id', userId)
+  }
+  const { data, error } = await query
   if (error) throw error
   return data || []
 }
 
-export const getSupplierQuote = async (quoteId) => {
-  const userId = await getCurrentUserId()
-  const { data, error } = await supabase
+export const getSupplierQuote = async (quoteId, orgId = null) => {
+  let query = supabase
     .from('supplier_quotes')
     .select(`
       *,
@@ -3192,27 +3275,44 @@ export const getSupplierQuote = async (quoteId) => {
       )
     `)
     .eq('id', quoteId)
-    .eq('user_id', userId)
-    .maybeSingle()
-  
+  if (orgId) {
+    query = query.eq('org_id', orgId)
+  } else {
+    const userId = await getCurrentUserId()
+    query = query.eq('user_id', userId)
+  }
+  const { data, error } = await query.maybeSingle()
   if (error) throw error
   return data
 }
 
-export const createSupplierQuote = async (quote) => {
+/**
+ * Create a supplier quote. S2.9: workspace-aware — pass orgId so the quote is created in the correct tenant.
+ * @param {Object} quote - Quote payload (project_id, supplier_id, price_breaks, etc.)
+ * @param {string|null} orgId - Optional. Active workspace org_id. If provided, enforced on insert.
+ */
+export const createSupplierQuote = async (quote, orgId = null) => {
   const { user_id, price_breaks, ...quoteData } = quote
   const userId = await getCurrentUserId()
   if (!userId) {
     return authRequired()
   }
+
+  // S2.9: include org_id when provided for tenant-scoped insert
+  if (!orgId && quoteData.org_id == null) {
+    console.warn('[createSupplierQuote] No org_id provided; quote may be created without workspace context. Pass activeOrgId from callers.')
+  }
+  const insertPayload = { ...quoteData, user_id: userId }
+  if (orgId != null) {
+    insertPayload.org_id = orgId
+  } else if (quoteData.org_id != null) {
+    insertPayload.org_id = quoteData.org_id
+  }
   
   // Insert quote
   const { data: quoteResult, error: quoteError } = await supabase
     .from('supplier_quotes')
-    .insert([{
-      ...quoteData,
-      user_id: userId
-    }])
+    .insert([insertPayload])
     .select()
     .maybeSingle()
   
@@ -3383,6 +3483,8 @@ export const createSamplePurchaseOrder = async ({
   if (!userId) return authRequired()
   const sku = await getProjectSku(project_id)
   const poNumber = await generatePONumber(sku ? `${sku}-S` : 'sample')
+  const { data: proj } = await supabase.from('projects').select('org_id').eq('id', project_id).maybeSingle()
+  const sampleOrgId = proj?.org_id ?? null
   const po = await createPurchaseOrder({
     project_id,
     supplier_id,
@@ -3393,25 +3495,28 @@ export const createSamplePurchaseOrder = async ({
     incoterm: incoterm || null,
     order_date: new Date().toISOString().split('T')[0],
     status: 'draft'
-  })
+  }, sampleOrgId)
   if (!po?.id) throw new Error('No s\'ha pogut crear la PO')
   await updateSupplierSampleRequest(sample_request_id, { po_id: po.id })
   return po
 }
 
-// DECISION LOG
-export const getDecisionLog = async (entityType, entityId) => {
-  const userId = await getCurrentUserId()
-  const { data, error } = await supabase
+// DECISION LOG (S2.4: org-scoped when orgId provided)
+export const getDecisionLog = async (entityType, entityId, orgId = null) => {
+  let query = supabase
     .from('decision_log')
     .select('*')
-    .eq('user_id', userId)
     .eq('entity_type', entityType)
     .eq('entity_id', entityId)
     .order('created_at', { ascending: false })
     .limit(1)
-    .maybeSingle()
-  
+  if (orgId) {
+    query = query.eq('org_id', orgId)
+  } else {
+    const userId = await getCurrentUserId()
+    query = query.eq('user_id', userId)
+  }
+  const { data, error } = await query.maybeSingle()
   if (error) throw error
   return data
 }

@@ -79,12 +79,14 @@ const isSnapshotComplete = (snapshot) => {
   return price > 0 && weight > 0 && hasCategory && hasSize && hasBrand
 }
 
+// S2.7: orgId passed for org-scoped reads; supabaseClient kept for any legacy usage but not passed to orgId-expecting APIs
 export const validatePhaseTransition = async ({
   projectId,
   fromPhase,
   toPhase,
   project,
-  supabaseClient
+  supabaseClient,
+  orgId = null
 }) => {
   const missing = []
 
@@ -124,12 +126,12 @@ export const validatePhaseTransition = async ({
 
         let documents = null
         try {
-          documents = await getDocuments(projectId, supabaseClient)
+          documents = await getDocuments(projectId)
         } catch (err) {}
 
         let estimates = null
         try {
-          estimates = await getSupplierPriceEstimates(projectId, supabaseClient)
+          estimates = await getSupplierPriceEstimates(projectId)
         } catch (err) {}
 
         const hasAnalysisDoc = documents ? hasDocCategory(documents, 'analysis') : false
@@ -150,7 +152,7 @@ export const validatePhaseTransition = async ({
 
         let profitability = null
         try {
-          profitability = await getProjectProfitability(projectId, supabaseClient)
+          profitability = await getProjectProfitability(projectId, orgId ?? undefined)
         } catch (err) {}
 
         if (!profitability) {
@@ -184,7 +186,7 @@ export const validatePhaseTransition = async ({
       case '3->4': {
         let quotes = null
         try {
-          quotes = await getSupplierQuotes(projectId, supabaseClient)
+          quotes = await getSupplierQuotes(projectId, orgId ?? undefined)
         } catch (err) {
           missing.push('Pressupost de proveïdor')
         }
@@ -205,7 +207,7 @@ export const validatePhaseTransition = async ({
       case '4->5': {
         let documents = null
         try {
-          documents = await getDocuments(projectId, supabaseClient)
+          documents = await getDocuments(projectId)
         } catch (err) {
           missing.push('Document de mostra')
         }
@@ -219,8 +221,9 @@ export const validatePhaseTransition = async ({
           tasks = await getTasks({
             status: 'done',
             entityType: 'project',
-            entityId: projectId
-          }, supabaseClient)
+            entityId: projectId,
+            ...(orgId ? { org_id: orgId } : {})
+          })
         } catch (err) {
           missing.push('Tasques de validació de mostra')
         }
@@ -233,7 +236,7 @@ export const validatePhaseTransition = async ({
       case '5->6': {
         let purchaseOrders = null
         try {
-          purchaseOrders = await getPurchaseOrders(projectId, supabaseClient)
+          purchaseOrders = await getPurchaseOrders(projectId, orgId ?? undefined)
         } catch (err) {
           missing.push('Comanda de compra')
         }
@@ -249,7 +252,7 @@ export const validatePhaseTransition = async ({
 
         let documents = null
         try {
-          documents = await getDocuments(projectId, supabaseClient)
+          documents = await getDocuments(projectId)
         } catch (err) {
           missing.push('Document de PO')
         }
@@ -262,7 +265,7 @@ export const validatePhaseTransition = async ({
       case '6->7': {
         let identifiers = null
         try {
-          identifiers = await getProductIdentifiers(projectId, supabaseClient)
+          identifiers = await getProductIdentifiers(projectId)
         } catch (err) {
           missing.push('Identificadors de producte')
         }
@@ -275,7 +278,7 @@ export const validatePhaseTransition = async ({
 
         let documents = null
         try {
-          documents = await getDocuments(projectId, supabaseClient)
+          documents = await getDocuments(projectId)
         } catch (err) {
           missing.push('Document de listing')
         }
