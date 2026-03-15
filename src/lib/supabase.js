@@ -315,7 +315,7 @@ export const getProject = async (id, orgId = null) => {
   return data
 }
 
-export const createProject = async (project) => {
+export const createProject = async (project, activeOrgId = null) => {
   // Get demo mode setting
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
@@ -329,17 +329,11 @@ export const createProject = async (project) => {
   const { user_id, ...projectData } = project
 
   // D11.7 — Resolve org and enforce projects.max limit (billing_org_entitlements)
-  let orgId = projectData.org_id
+  const orgId = projectData.org_id ?? activeOrgId ?? null
   if (!orgId) {
-    const { data: mem } = await supabase
-      .from('org_memberships')
-      .select('org_id')
-      .eq('user_id', userId)
-      .limit(1)
-      .maybeSingle()
-    orgId = mem?.org_id ?? null
+    throw new Error('missing_org_context: project requires org_id in payload or activeOrgId')
   }
-  if (orgId) {
+  {
     const { getOrgEntitlements, assertOrgActive, assertOrgWithinLimit } = await import('./billing/entitlements.js')
     const entitlements = await getOrgEntitlements(supabase, orgId)
     assertOrgActive(entitlements)
@@ -816,21 +810,19 @@ export const getDocuments = async (projectId) => {
   return data || []
 }
 
-export const createDocument = async (doc) => {
+export const createDocument = async (doc, activeOrgId = null) => {
   const { user_id, org_id: payloadOrgId, ...docData } = doc
   const userId = await getCurrentUserId()
   if (!userId) return authRequired()
 
-  let orgId = payloadOrgId
+  let orgId = payloadOrgId ?? activeOrgId ?? null
   if (!orgId && docData.project_id) {
     const { data: proj } = await supabase.from('projects').select('org_id').eq('id', docData.project_id).maybeSingle()
     orgId = proj?.org_id
   }
   if (!orgId) {
-    const { data: om } = await supabase.from('org_memberships').select('org_id').eq('user_id', userId).limit(1).maybeSingle()
-    orgId = om?.org_id
+    throw new Error('missing_org_context: document requires org_id in payload, activeOrgId, or a project_id that resolves to an org')
   }
-  if (!orgId) throw new Error('No org context for document')
 
   const insertData = { ...docData, user_id: userId, org_id: orgId }
 
@@ -904,20 +896,19 @@ export const getPayments = async (projectId = null, activeOrgId = null) => {
   return data
 }
 
-export const createPayment = async (payment) => {
+export const createPayment = async (payment, activeOrgId = null) => {
   const { user_id, ...paymentData } = payment
   const userId = await getCurrentUserId()
   if (!userId) {
     return authRequired()
   }
-  let orgId = paymentData.org_id
+  let orgId = paymentData.org_id ?? activeOrgId ?? null
   if (!orgId && paymentData.project_id) {
     const { data: proj } = await supabase.from('projects').select('org_id').eq('id', paymentData.project_id).maybeSingle()
     orgId = proj?.org_id
   }
   if (!orgId) {
-    const { data: membership } = await supabase.from('org_memberships').select('org_id').eq('user_id', userId).order('created_at', { ascending: true }).limit(1).maybeSingle()
-    orgId = membership?.org_id
+    throw new Error('missing_org_context: payment requires org_id in payload, activeOrgId, or a project_id that resolves to an org')
   }
   const { data, error } = await supabase
     .from('payments')
@@ -1597,7 +1588,7 @@ export const getPoAmazonReadiness = async (purchaseOrderId) => {
   return data
 }
 
-export const upsertPoAmazonReadiness = async (purchaseOrderId, projectId, readinessData) => {
+export const upsertPoAmazonReadiness = async (purchaseOrderId, projectId, readinessData, activeOrgId = null) => {
   const { isDemoMode } = await import('../demo/demoMode')
   if (isDemoMode() || String(purchaseOrderId).startsWith('demo-')) {
     return null
@@ -1608,12 +1599,10 @@ export const upsertPoAmazonReadiness = async (purchaseOrderId, projectId, readin
     return authRequired()
   }
   const { data: poRow } = await supabase.from('purchase_orders').select('org_id').eq('id', purchaseOrderId).maybeSingle()
-  let orgId = payloadOrgId ?? poRow?.org_id
+  const orgId = payloadOrgId ?? poRow?.org_id ?? activeOrgId ?? null
   if (!orgId) {
-    const { data: mem } = await supabase.from('org_memberships').select('org_id').eq('user_id', userId).order('created_at', { ascending: true }).limit(1).maybeSingle()
-    orgId = mem?.org_id
+    throw new Error('missing_org_context: upsertPoAmazonReadiness requires org_id in payload, purchase order with org_id, or activeOrgId')
   }
-  if (!orgId) throw new Error('Org context required for amazon readiness')
   const { data: result, error } = await supabase
     .from('po_amazon_readiness')
     .upsert({
@@ -2116,17 +2105,15 @@ export const getWarehouse = async (id) => {
   return data
 }
 
-export const createWarehouse = async (warehouse) => {
+export const createWarehouse = async (warehouse, activeOrgId = null) => {
   const { user_id, org_id: payloadOrgId, ...warehouseData } = warehouse
   const userId = await getCurrentUserId()
   if (!userId) return authRequired()
 
-  let orgId = payloadOrgId
+  const orgId = payloadOrgId ?? activeOrgId ?? null
   if (!orgId) {
-    const { data: om } = await supabase.from('org_memberships').select('org_id').eq('user_id', userId).limit(1).maybeSingle()
-    orgId = om?.org_id
+    throw new Error('missing_org_context: warehouse requires org_id in payload or activeOrgId')
   }
-  if (!orgId) throw new Error('No org context for warehouse')
 
   const { data, error } = await supabase
     .from('warehouses')
@@ -2198,7 +2185,7 @@ export const getCompanySettings = async (orgId = null) => {
   return data
 }
 
-export const updateCompanySettings = async (settings) => {
+export const updateCompanySettings = async (settings, activeOrgId = null) => {
   // Eliminar user_id si ve del client (seguretat: sempre s'assigna automàticament)
   const { user_id, ...settingsData } = settings
   const userId = await getCurrentUserId()
@@ -2219,17 +2206,12 @@ export const updateCompanySettings = async (settings) => {
     return data
   }
 
-  // S2.9: when creating, include org_id if user has an org (per-tenant company settings)
-  let insertPayload = { ...settingsData, user_id: userId }
-  const { data: mem } = await supabase
-    .from('org_memberships')
-    .select('org_id')
-    .eq('user_id', userId)
-    .limit(1)
-    .maybeSingle()
-  if (mem?.org_id) {
-    insertPayload.org_id = mem.org_id
+  // S2.9 / S3.2.C.11: insert path — org_id only from payload or activeOrgId
+  const orgId = settingsData.org_id ?? activeOrgId ?? null
+  if (!orgId) {
+    throw new Error('missing_org_context: company_settings insert requires org_id in payload or activeOrgId')
   }
+  const insertPayload = { ...settingsData, user_id: userId, org_id: orgId }
 
   const { data, error } = await supabase
     .from('company_settings')
@@ -2742,22 +2724,20 @@ export const getOpenTasks = async (limit = 10, activeOrgId = null) => {
   return data || []
 }
 
-export const createTask = async (task) => {
+export const createTask = async (task, activeOrgId = null) => {
   const { user_id, org_id: taskOrgId, ...taskData } = task
   const userId = await getCurrentUserId()
   if (!userId) {
     return authRequired()
   }
-  let orgId = taskOrgId
+  let orgId = taskOrgId ?? activeOrgId ?? null
   if (!orgId && task.entity_type === 'project' && task.entity_id) {
     const { data: proj } = await supabase.from('projects').select('org_id').eq('id', task.entity_id).maybeSingle()
     orgId = proj?.org_id
   }
   if (!orgId) {
-    const { data: om } = await supabase.from('org_memberships').select('org_id').eq('user_id', userId).limit(1).maybeSingle()
-    orgId = om?.org_id
+    throw new Error('missing_org_context: task requires org_id in payload, activeOrgId, or entity_type/entity_id that resolves to an org')
   }
-  if (!orgId) throw new Error('No org context for task')
 
   const { data, error } = await supabase
     .from('tasks')
@@ -3743,7 +3723,7 @@ export const getStickyNotes = async (filters = {}) => {
   return data || []
 }
 
-export const createStickyNote = async (note) => {
+export const createStickyNote = async (note, activeOrgId = null) => {
   const { isDemoMode } = await import('../demo/demoMode')
   if (isDemoMode()) {
     return { id: `demo-note-${Date.now()}`, ...note }
@@ -3753,16 +3733,14 @@ export const createStickyNote = async (note) => {
   if (!userId) {
     return authRequired()
   }
-  let orgId = noteOrgId
+  let orgId = noteOrgId ?? activeOrgId ?? null
   if (!orgId && note.project_id) {
     const { data: proj } = await supabase.from('projects').select('org_id').eq('id', note.project_id).maybeSingle()
     orgId = proj?.org_id
   }
   if (!orgId) {
-    const { data: om } = await supabase.from('org_memberships').select('org_id').eq('user_id', userId).limit(1).maybeSingle()
-    orgId = om?.org_id
+    throw new Error('missing_org_context: sticky note requires org_id in payload, activeOrgId, or a project_id that resolves to an org')
   }
-  if (!orgId) throw new Error('No org context for sticky note')
 
   const { data, error } = await supabase
     .from('sticky_notes')
@@ -3825,7 +3803,7 @@ export const markStickyNoteDone = async (id) => {
 }
 
 // Convert sticky note to task
-export const convertStickyNoteToTask = async (stickyNoteId, options = {}) => {
+export const convertStickyNoteToTask = async (stickyNoteId, options = {}, activeOrgId = null) => {
   const { isDemoMode } = await import('../demo/demoMode')
   if (isDemoMode() || String(stickyNoteId).startsWith('demo-')) {
     return null
@@ -3850,23 +3828,21 @@ export const convertStickyNoteToTask = async (stickyNoteId, options = {}) => {
     throw new Error('ALREADY_LINKED')
   }
   
-  // Create task from sticky note (org_id from sticky note)
+  // Create task from sticky note (org_id from sticky note, project, or activeOrgId)
   const taskTitle = stickyNote.title || stickyNote.content.split('\n')[0].substring(0, 100) || 'Task from note'
   const taskNotes = stickyNote.content
   const taskDueDate = stickyNote.due_date || options.dueDate || new Date().toISOString().split('T')[0]
   const taskPriority = stickyNote.priority || 'normal'
   const entityType = options.entity_type || 'project'
   const entityId = options.entity_id ?? stickyNote.project_id ?? null
-  let orgId = stickyNote.org_id
+  let orgId = stickyNote.org_id ?? activeOrgId ?? null
   if (!orgId && stickyNote.project_id) {
     const { data: proj } = await supabase.from('projects').select('org_id').eq('id', stickyNote.project_id).maybeSingle()
     orgId = proj?.org_id
   }
   if (!orgId) {
-    const { data: om } = await supabase.from('org_memberships').select('org_id').eq('user_id', userId).limit(1).maybeSingle()
-    orgId = om?.org_id
+    throw new Error('missing_org_context: convertStickyNoteToTask requires sticky note org_id, project_id that resolves to an org, or activeOrgId')
   }
-  if (!orgId) throw new Error('No org context for task from sticky')
 
   const { data: task, error: taskError } = await supabase
     .from('tasks')
@@ -4550,23 +4526,21 @@ export const getRecurringExpenses = async (activeOrgId = null) => {
 /**
  * Create recurring expense
  */
-export const createRecurringExpense = async (recurringExpense) => {
+export const createRecurringExpense = async (recurringExpense, activeOrgId = null) => {
   const userId = await getCurrentUserId()
   if (!userId) {
     return authRequired()
   }
   const { user_id, org_id: noteOrgId, category, project, supplier, ...data } = recurringExpense
 
-  let orgId = noteOrgId
+  let orgId = noteOrgId ?? activeOrgId ?? null
   if (!orgId && data.project_id) {
     const { data: proj } = await supabase.from('projects').select('org_id').eq('id', data.project_id).maybeSingle()
     orgId = proj?.org_id
   }
   if (!orgId) {
-    const { data: om } = await supabase.from('org_memberships').select('org_id').eq('user_id', userId).limit(1).maybeSingle()
-    orgId = om?.org_id
+    throw new Error('missing_org_context: recurring expense requires org_id in payload, activeOrgId, or a project_id that resolves to an org')
   }
-  if (!orgId) throw new Error('No org context for recurring expense')
 
   const validData = {
     description: data.description,
@@ -4843,12 +4817,10 @@ export const getOrCreateGlobalProject = async (activeOrgId = null) => {
   if (!userId) {
     return authRequired()
   }
-  let orgId = activeOrgId
-  if (!orgId) {
-    const { data: om } = await supabase.from('org_memberships').select('org_id').eq('user_id', userId).limit(1).maybeSingle()
-    orgId = om?.org_id
+  if (!activeOrgId) {
+    throw new Error('missing_org_context: getOrCreateGlobalProject requires activeOrgId')
   }
-  if (!orgId) throw new Error('No org context for global project')
+  const orgId = activeOrgId
 
   const { data: existing } = await supabase
     .from('projects')

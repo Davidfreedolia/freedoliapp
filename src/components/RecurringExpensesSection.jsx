@@ -288,7 +288,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
         await updateRecurringExpense(editingRecurring.id, editingRecurring)
         showToast('Despesa recurrent actualitzada', 'success')
       } else {
-        await createRecurringExpense({ ...editingRecurring, ...(activeOrgId ? { org_id: activeOrgId } : {}) })
+        await createRecurringExpense({ ...editingRecurring, ...(activeOrgId ? { org_id: activeOrgId } : {}) }, activeOrgId ?? undefined)
         showToast('Despesa recurrent creada', 'success')
       }
       await loadData()

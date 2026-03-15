@@ -55,7 +55,7 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
         due_date: newTask.due_date || null,
         priority: newTask.priority,
         status: 'open'
-      })
+      }, activeOrgId ?? undefined)
       setNewTask({ title: '', notes: '', due_date: '', priority: 'normal' })
       setShowAddForm(false)
       await loadTasks()

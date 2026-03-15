@@ -279,7 +279,7 @@ export default function Warehouses() {
         await updateWarehouse(editingWarehouse.id, editingWarehouse)
         showToast('Magatzem actualitzat correctament', 'success')
       } else {
-        await createWarehouse({ ...editingWarehouse, ...(activeOrgId ? { org_id: activeOrgId } : {}) })
+        await createWarehouse({ ...editingWarehouse, ...(activeOrgId ? { org_id: activeOrgId } : {}) }, activeOrgId ?? undefined)
         showToast('Magatzem creat correctament', 'success')
       }
       await loadData()
@@ -372,7 +372,7 @@ export default function Warehouses() {
             contact_email: '',
             notes: `Codi: ${amazonWarehouse.code}`,
             ...(activeOrgId ? { org_id: activeOrgId } : {})
-          })
+          }, activeOrgId ?? undefined)
         }
       }
 

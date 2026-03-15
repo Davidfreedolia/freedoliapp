@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useWorkspace } from '../contexts/WorkspaceContext'
+import { useBillingUsage } from '../hooks/useBillingUsage'
 import { useLang } from '../i18n/useLang'
 import { t } from '../i18n/t'
 import { supabase } from '../lib/supabase'
@@ -12,6 +13,7 @@ export default function BillingOverSeat() {
   const navigate = useNavigate()
   const { lang } = useLang()
   const { activeOrgId, memberships } = useWorkspace()
+  const { seatsLimit: canonicalSeatsLimit } = useBillingUsage(activeOrgId ?? null)
   const [org, setOrg] = useState(location.state?.org ?? null)
   const [seatsUsed, setSeatsUsed] = useState(location.state?.seatsUsed ?? 0)
   const [loading, setLoading] = useState(!location.state?.org)
@@ -58,7 +60,8 @@ export default function BillingOverSeat() {
     }
   }
 
-  const seatLimit = org?.seat_limit ?? 1
+  // S3.3.I: seat limit from canonical billing usage; fallback to org while loading/unavailable
+  const seatLimit = canonicalSeatsLimit ?? org?.seat_limit ?? 1
 
   if (loading) {
     return (

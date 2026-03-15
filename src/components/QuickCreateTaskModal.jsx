@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { getButtonStyles, useButtonState } from '../utils/buttonStyles'
 
 export default function QuickCreateTaskModal({ isOpen, onClose, onSave, defaultDate, projects = [] }) {
-  const { darkMode } = useApp()
+  const { darkMode, activeOrgId } = useApp()
   const { isMobile } = useBreakpoint()
   const { t } = useTranslation()
   const modalStyles = getModalStyles(isMobile, darkMode)
@@ -47,7 +47,7 @@ export default function QuickCreateTaskModal({ isOpen, onClose, onSave, defaultD
         entity_id: formData.project_id || null // Allow null for global tasks
       }
 
-      const task = await createTask(taskData)
+      const task = await createTask(taskData, activeOrgId ?? undefined)
       
       showToast(t('calendar.taskCreated', 'Tasca creada correctament'), 'success')
       onSave(task)

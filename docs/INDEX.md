@@ -60,7 +60,9 @@ Scope: Index of main documents and their roles.
 - **`D0/D0_PRODUCT_STRATEGY_AND_ROADMAP.md`** — *Initial product strategy and high-level roadmap.*  
   - **Status:** current (historical but still relevant for context)
 - **`ROADMAP_STATUS.md`** — *Current roadmap status and phase tracking.*  
-  - **Status:** current
+  - **Status:** current (historical FASE 2 / D-series; see ROADMAP for live implementation status)
+- **`ROADMAP/IMPLEMENTATION_STATUS.md`** — *Canonical live implementation status tracker (S2/S3 phases, closed/pending/parked). First checkpoint for phase status.*  
+  - **Status:** canonical
 - **`PRODUCT/LEAD_SYSTEM.md`** — *Lead system architecture stub (lead → trial → workspace → customer).*  
   - **Status:** partial (trial_registrations + UTM + dedupe + workspace linking)
 - **`PRODUCT/ONBOARDING_FLOW.md`** — *Onboarding flow stub (first-time experience and workspace creation).*  

@@ -526,7 +526,7 @@ export default function Forwarders() {
         await updateWarehouse(editingWarehouse.id, editingWarehouse)
         showToast('Magatzem actualitzat correctament', 'success')
       } else {
-        await createWarehouse(editingWarehouse)
+        await createWarehouse(editingWarehouse, activeOrgId ?? undefined)
         showToast('Magatzem creat correctament', 'success')
       }
       await loadData()

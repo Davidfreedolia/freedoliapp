@@ -197,7 +197,7 @@ export default function NewProjectModal({ isOpen, onClose, onSuccess }) {
       }
       if (activeOrgId) payload.org_id = activeOrgId
       payload.thumb_url = finalThumbUrl
-      const newProject = await createProject(payload)
+      const newProject = await createProject(payload, activeOrgId ?? undefined)
 
       // Audit log: projecte creat
       await logSuccess('project', 'create', newProject.id, 'Project created successfully', {

@@ -111,7 +111,7 @@ export function AppProvider({ children }) {
 
       // If demo_mode is not set, set it to true by default
       if (settings?.demo_mode === undefined || settings?.demo_mode === null) {
-        await updateCompanySettings({ demo_mode: true })
+        await updateCompanySettings({ demo_mode: true }, activeOrgId ?? undefined)
         console.log('Demo mode enabled by default')
       }
 
@@ -217,7 +217,7 @@ export function AppProvider({ children }) {
         console.info('[demoMode] Toggling to:', newValue)
       }
       
-      await updateCompanySettings({ demo_mode: newValue })
+      await updateCompanySettings({ demo_mode: newValue }, activeOrgId ?? undefined)
       setDemoMode(newValue)
       
       // Clear cache and reload data

@@ -54,14 +54,14 @@ export function useNotes() {
         context_id: initialData.context_id || null,
         minimized: false,
         z_index: Date.now() // Timestamp com z-index per portar al davant
-      })
+      }, activeOrgId ?? undefined)
       await loadNotes()
       return newNote
     } catch (err) {
       console.error('Error creating note:', err)
       throw err
     }
-  }, [loadNotes])
+  }, [loadNotes, activeOrgId])
 
   // Actualitzar nota (posició, contingut, etc.)
   const updateNote = useCallback(async (id, updates) => {

@@ -1293,7 +1293,7 @@ ${t}
         if (!createForm.name?.trim()) {
           throw new Error('El nom és obligatori')
         }
-        await createWarehouse(createForm)
+        await createWarehouse(createForm, project?.org_id ?? activeOrgId ?? undefined)
         const { showToast } = await import('../components/Toast')
         showToast('Magatzem creat correctament', 'success')
       }

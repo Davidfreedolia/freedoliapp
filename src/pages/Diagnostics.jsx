@@ -128,7 +128,7 @@ export default function Diagnostics() {
         pinned: true,
         status: 'open'
       }
-      const created = await createStickyNote(testNote)
+      const created = await createStickyNote(testNote, activeOrgId ?? undefined)
       addLog('✅ Sticky note created', 'success')
 
       // List
@@ -181,12 +181,12 @@ export default function Diagnostics() {
         status: 'open',
         priority: 'normal'
       }
-      const created = await createStickyNote(testNote)
+      const created = await createStickyNote(testNote, activeOrgId ?? undefined)
       testNoteId = created.id
       addLog('✅ Sticky note created for conversion', 'success')
 
       // Convert to task
-      const { task } = await convertStickyNoteToTask(testNoteId)
+      const { task } = await convertStickyNoteToTask(testNoteId, {}, activeOrgId ?? undefined)
       testTaskId = task.id
       addLog('✅ Sticky note converted to task', 'success')
 
@@ -215,7 +215,7 @@ export default function Diagnostics() {
 
       // Verify: no duplicates (try to convert again should fail)
       try {
-        await convertStickyNoteToTask(testNoteId)
+        await convertStickyNoteToTask(testNoteId, {}, activeOrgId ?? undefined)
         throw new Error('Should not allow duplicate conversion')
       } catch (dupErr) {
         if (dupErr.message.includes('ALREADY_LINKED') || dupErr.message.includes('already linked')) {
@@ -280,7 +280,7 @@ export default function Diagnostics() {
         entity_type: 'project',
         entity_id: testProject.id
       }
-      const created = await createTask(testTask)
+      const created = await createTask(testTask, activeOrgId ?? undefined)
       testTaskId = created.id
       if (!created.due_date) throw new Error('due_date not set')
       addLog('✅ Task created', 'success')

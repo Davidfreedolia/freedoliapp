@@ -239,7 +239,7 @@ export default function Orders() {
       if (!readiness && poId && projectId) {
         finalReadiness = await upsertPoAmazonReadiness(poId, projectId, {
           needs_fnsku: true
-        })
+        }, activeOrgId ?? undefined)
       }
       
       setAmazonReadiness(finalReadiness)
@@ -1150,7 +1150,7 @@ export default function Orders() {
                         readyStatus={amazonReadyStatus}
                         onUpdate={async (data) => {
                           if (selectedOrder?.id && selectedOrder?.project_id) {
-                            const updated = await upsertPoAmazonReadiness(selectedOrder.id, selectedOrder.project_id, data)
+                            const updated = await upsertPoAmazonReadiness(selectedOrder.id, selectedOrder.project_id, data, activeOrgId ?? undefined)
                             setAmazonReadiness(updated)
                             // Recalcular estat
                             const identifiers = await getProductIdentifiers(selectedOrder.project_id)

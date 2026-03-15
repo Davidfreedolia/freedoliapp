@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { X, StickyNote } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useApp } from '../context/AppContext'
 import { createStickyNote } from '../lib/supabase'
 import { showToast } from './Toast'
 import Button from './Button'
@@ -18,6 +19,7 @@ const COLORS = [
 
 export default function AddStickyNoteModal({ isOpen, onClose, onSuccess, darkMode }) {
   const { t } = useTranslation()
+  const { activeOrgId } = useApp()
   const { isMobile } = useBreakpoint()
   const modalStyles = getModalStyles(isMobile, darkMode)
   const [newNote, setNewNote] = useState({ content: '', title: '', color: 'yellow' })
@@ -44,7 +46,7 @@ export default function AddStickyNoteModal({ isOpen, onClose, onSuccess, darkMod
         position_y: Math.random() * (window.innerHeight - 300) + 50,
         minimized: false,
         z_index: Date.now()
-      })
+      }, activeOrgId ?? undefined)
       showToast('Nota creada correctament', 'success')
       setNewNote({ content: '', title: '', color: 'yellow' })
       onSuccess?.()

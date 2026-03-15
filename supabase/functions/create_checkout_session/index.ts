@@ -96,12 +96,13 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({ error: "Invalid interval" }, 400);
   }
 
-  // 1) Validate membership
+  // 1) Validate membership (S3.3.B: active only)
   const { data: membershipRows, error: memErr } = await supabaseAdmin
     .from("org_memberships")
     .select("org_id, user_id, role")
     .eq("org_id", orgId)
     .eq("user_id", userId)
+    .eq("status", "active")
     .limit(1);
 
   if (memErr) {

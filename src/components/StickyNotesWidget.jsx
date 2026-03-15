@@ -64,7 +64,7 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
         pinned: true,
         status: 'open',
         ...(activeOrgId ? { org_id: activeOrgId } : {})
-      })
+      }, activeOrgId ?? undefined)
       setNewNote({ content: '', title: '', color: 'yellow' })
       setShowAddForm(false)
       loadNotes()
@@ -132,7 +132,7 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
         return
       }
       
-      const { task } = await convertStickyNoteToTask(note.id)
+      const { task } = await convertStickyNoteToTask(note.id, {}, activeOrgId ?? undefined)
       loadNotes()
       // C) mostrar toast "Task created"
       showToast(t('stickyNotes.taskCreated', 'Tasca creada correctament'), 'success')

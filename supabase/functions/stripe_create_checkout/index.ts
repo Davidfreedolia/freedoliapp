@@ -73,6 +73,7 @@ Deno.serve(async (req: Request) => {
     .select("role")
     .eq("org_id", orgId)
     .eq("user_id", userId)
+    .eq("status", "active")
     .maybeSingle();
 
   if (memErr || !membership) {

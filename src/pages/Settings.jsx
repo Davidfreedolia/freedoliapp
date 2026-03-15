@@ -35,6 +35,7 @@ import Button from '../components/Button'
 import GTINPoolSection from '../components/GTINPoolSection'
 import ConnectedAccounts from '../components/account/ConnectedAccounts'
 import { useBreakpoint } from '../hooks/useBreakpoint'
+import { useBillingUsage } from '../hooks/useBillingUsage'
 import { getModalStyles } from '../utils/responsiveStyles'
 import { showToast } from '../components/Toast'
 import { useNavigate } from 'react-router-dom'
@@ -44,6 +45,7 @@ export default function Settings() {
   const { t, i18n } = useTranslation()
   const { isMobile } = useBreakpoint()
   const navigate = useNavigate()
+  const { seatsLimit: canonicalSeatsLimit } = useBillingUsage(activeOrgId ?? null)
   
   const [activeTab, setActiveTab] = useState('company')
   const [currentLanguage, setCurrentLanguage] = useState(i18n.language || 'ca')
@@ -228,7 +230,7 @@ export default function Settings() {
   const handleSave = async () => {
     setSaving(true)
     try {
-      await updateCompanySettings(companyData)
+      await updateCompanySettings(companyData, activeOrgId ?? undefined)
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
     } catch (err) {
@@ -340,7 +342,8 @@ export default function Settings() {
     }
   }
 
-  const seatLimit = org?.seat_limit ?? null
+  // S3.3.H: seat limit from canonical billing usage (entitlements); fallback to org while loading
+  const seatLimit = canonicalSeatsLimit ?? org?.seat_limit ?? null
   const seatLimitReached = seatLimit != null && seatsUsed >= seatLimit
 
   const handleAddMember = async () => {
@@ -648,7 +651,7 @@ export default function Settings() {
                     setResettingDemo(true)
                     try {
                       // Activar demo_mode
-                      await updateCompanySettings({ demo_mode: true })
+                      await updateCompanySettings({ demo_mode: true }, activeOrgId ?? undefined)
                       setDemoMode(true)
                       
                       // Check if demo data already exists
@@ -1113,7 +1116,7 @@ export default function Settings() {
                     </div>
                     <div>
                       <div style={{ fontSize: '12px', color: 'var(--muted-1)', marginBottom: '4px' }}>Seat limit</div>
-                      <div style={{ fontSize: '14px', fontWeight: 600, color: darkMode ? '#e5e7eb' : '#111827' }}>{org.seat_limit ?? '—'}</div>
+                      <div style={{ fontSize: '14px', fontWeight: 600, color: darkMode ? '#e5e7eb' : '#111827' }}>{seatLimit ?? '—'}</div>
                     </div>
                   </div>
                   {(org.stripe_customer_id || org.stripe_subscription_id) && (

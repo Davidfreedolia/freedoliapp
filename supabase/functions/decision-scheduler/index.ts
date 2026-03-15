@@ -47,10 +47,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
     log("scheduler_start");
 
-    const { data: orgs, error: orgError } = await supabaseAdmin
-      .from("orgs")
-      .select("id")
-      .in("billing_status", ["trialing", "active"]);
+    // S3.3.M: same billing-access semantics as RLS (org_billing_allows_access: prefer org_billing.status, fallback orgs.billing_status)
+    const { data: orgIds, error: orgError } = await supabaseAdmin.rpc("get_org_ids_billing_allows_access");
 
     if (orgError) {
       log("scheduler_error", { error: orgError.message });
@@ -60,7 +58,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       );
     }
 
-    const orgList = (orgs || []) as { id: string }[];
+    const orgList = ((orgIds as string[] | null) || []).map((id) => ({ id }));
     let totalCreated = 0;
     const errors: string[] = [];
 

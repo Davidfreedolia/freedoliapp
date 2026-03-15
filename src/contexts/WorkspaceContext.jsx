@@ -58,6 +58,7 @@ export function WorkspaceProvider({ children }) {
         .from('org_memberships')
         .select('org_id, role, created_at, orgs(id, name)')
         .eq('user_id', session.user.id)
+        .eq('status', 'active')
         .order('created_at', { ascending: true })
       if (error) {
         if (!cancelled) {
@@ -108,6 +109,7 @@ export function WorkspaceProvider({ children }) {
       .from('org_memberships')
       .select('org_id, role, created_at')
       .eq('user_id', session.user.id)
+      .eq('status', 'active')
       .order('created_at', { ascending: true })
     const list = rows || []
     if (list.length === 0) return
