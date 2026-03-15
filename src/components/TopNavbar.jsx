@@ -17,6 +17,7 @@ import { useBreakpoint } from '../hooks/useBreakpoint'
 import { useWorkspace } from '../contexts/WorkspaceContext'
 import Button from './Button'
 import DecisionBadge from './decisions/DecisionBadge'
+import BusinessAlertsBadge from './alerts/BusinessAlertsBadge'
 
 export default function TopNavbar({ sidebarWidth = 0 }) {
   const { darkMode, setDarkMode } = useApp()
@@ -253,6 +254,7 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
           }}>
             {demoMode ? 'DEMO' : 'LIVE'}
           </span>
+          <BusinessAlertsBadge />
           <DecisionBadge />
           <HeaderPreferencesWidget />
           <HeaderUserWidget

@@ -18,10 +18,10 @@ This file is the **canonical live status tracker** for implementation phases. It
 
 ## Current executive summary
 
-- **Architectural focus:** Multi-tenant and billing/seat hardening (S3.x). **S3.3 is now operationally consolidated.** Membership lifecycle, active-seat semantics, first-membership fallback removal, billing RLS/edge active-membership enforcement, seat-limit source alignment (DB + UI), and billing-status gating alignment (org_billing_allows_access + decision-scheduler) are in place. The most dangerous split-brain and active-membership inconsistencies within S3.3 were addressed.
-- **Stabilized:** S2 multi-tenant baseline; S3.2 membership schema and active-seat semantics; S3.2.C first-membership fallback removal; S3.3.B edge-function active-membership checks; S3.3.D billing RLS active-membership; S3.3.F org_add_member seat-limit alignment with trigger; S3.3.H/I Settings and BillingOverSeat seat-limit UI; S3.3.K org_billing_allows_access canonical fallback (prefer org_billing.status); S3.3.M/N decision-scheduler aligned to same billing-access helper, no duplicated logic.
-- **Remaining (controlled debt / future work):** Not all billing architecture is globally canonical. `billing_org_entitlements` is written by webhook but not used by RLS for gating; `orgs.seat_limit` is never updated by webhook. These are known, tracked items for future phases, not half-done S3.3 fixes.
-- **Current next approved phase:** None formally opened. **S3.4.A — Admin Console / Membership Governance** remains **PARKED** (planned, not active); no implementation yet.
+- **Architectural focus:** Multi-tenant and billing/seat hardening (S3.x). **S3.3 is now operationally consolidated.** **FASE 3 — Alertes de negoci is CLOSED.** Membership lifecycle, active-seat semantics, billing RLS/edge alignment, seat-limit and billing-status gating are in place. Business alerts V1: motor (run_alert_engine), API/hook, UI Bell + drawer (F2, O1, S1, O2); prefix biz:; manual invocation; no auto-resolve.
+- **Stabilized:** S2 multi-tenant baseline; S3.2 membership and active-seat semantics; S3.3 billing/access alignment; FASE 3.1–3.5 (audit, motor, API, UI, doc closure).
+- **Remaining (controlled debt / future work):** Billing: `billing_org_entitlements` not used for RLS gating; `orgs.seat_limit` never updated by webhook. FASE 3: motor not auto-invoked; F6 severity not patched; i18n/entity links not done. Tracked for future phases only.
+- **Current next approved phase:** None formally opened. **S3.4.A — Admin Console / Membership Governance** remains **PARKED** (planned, not active).
 
 ---
 
@@ -49,6 +49,12 @@ This file is the **canonical live status tracker** for implementation phases. It
 | **S3.3.M** | Decision Scheduler Billing Status Alignment | CLOSED | Scheduler selects orgs via get_org_ids_billing_allows_access() instead of orgs.billing_status. | RPC get_org_ids_billing_allows_access(); decision-scheduler/index.ts calls it. Migration 20260315160000_s3_3m. | |
 | **S3.3.N** | Billing Access Logic Deduplication | CLOSED | get_org_ids_billing_allows_access() reuses org_billing_allows_access(id); no duplicated logic. | Migration 20260315170000_s3_3n. Single source of “billing allows access” in DB. | |
 | **S3.4.A** | Admin Console / Membership Governance | PARKED | Invitations, invitation expiry, membership/user/account states, admin visibility into billing/seat/user status. | **Not implemented.** Planned for future phase. | Do not implement in current S3.x scope. |
+| **FASE 3** | Alertes de negoci | CLOSED | 3.1–3.5 tancats: audit RLS/definicions, motor F2/O1/S1/O2, API/hook, UI Bell+drawer, doc. | Contracte biz:; run_alert_engine; useBusinessAlerts; BusinessAlertsBadge. FASE_3_5_DOCUMENTACIO_I_TANCAMENT.md. | V1: invocació manual; sense auto-resolve; F6 no tocat. |
+| **FASE 3.1** | Alertes — Auditoria RLS i definicions | CLOSED | RLS, convenció dedupe_key (biz:), contracte definicions. | FASE_3_1_ALERTES_RLS_DEFINICIONS_AUDIT.md. READY per 3.2. | Només auditoria; sense canvis de codi. |
+| **FASE 3.2** | Motor d'alertes de negoci | CLOSED | RPC run_alert_engine(org_id); F2, O1, S1, O2; escriptura a alerts amb biz:. | Migration 20260315180000_f3_2_run_alert_engine.sql. | Invocació manual; sense UI ni auto-resolve. |
+| **FASE 3.3** | API / helpers per a la UI d’alertes | CLOSED | Lectura, comptatge, acknowledge/resolve, runEngine; filtre biz:; hook useBusinessAlerts. | src/lib/alerts/businessAlertsApi.js; src/hooks/useBusinessAlerts.js. | Sense Bell ni Drawer (3.4). |
+| **FASE 3.4** | UI Bell + comptador + Drawer | CLOSED | BusinessAlertsBadge al TopNavbar; comptador; drawer amb llista, Acknowledge/Resolve; useBusinessAlerts. | src/components/alerts/BusinessAlertsBadge.jsx; TopNavbar.jsx. | Només alertes biz:; sense barreja OPS/SHIPMENT. |
+| **FASE 3.5** | Documentació i tancament | CLOSED | Consolidació doc; contracte final; limitacions V1; riscos/debt; cauteles. | FASE_3_5_DOCUMENTACIO_I_TANCAMENT.md. Només documentació. | FASE 3 formalment tancada. |
 
 ---
 
@@ -194,12 +200,49 @@ This file is the **canonical live status tracker** for implementation phases. It
 - **Not done:** Invitations; invitation expiry; membership/user/account states; admin visibility into billing/seat/user status. No implementation.
 - **Note:** Do not implement in current S3.x scope; reopen when phase is approved.
 
+### FASE 3 — Alertes de negoci
+
+- **Status:** CLOSED.
+- **Confirmed done:** 3.1: Auditoria RLS i definicions; convenció dedupe_key biz:; contracte F2/O1/S1/O2 (FASE_3_1_ALERTES_RLS_DEFINICIONS_AUDIT.md). 3.2: RPC `run_alert_engine(p_org_id)`; F2, O1, S1, O2; escriptura a `alerts` amb biz: (migració 20260315180000_f3_2). 3.3: businessAlertsApi.js + useBusinessAlerts; filtre biz:; acknowledge/resolve/runEngine. 3.4: BusinessAlertsBadge al TopNavbar; drawer amb llista, Acknowledge/Resolve. 3.5: Documentació i tancament (FASE_3_5_DOCUMENTACIO_I_TANCAMENT.md): contracte final, limitacions V1, riscos/debt, cauteles.
+- **Limitacions V1 (expressament fora):** Invocació manual del motor; sense auto-resolve; sense nous canals; sense unificació amb OPS/SHIPMENT; F6 severity no tocat. Dependències futures (no activades): cron/scheduler per al motor; nous tipus; patch F6; i18n; enllaços a entitat.
+
+### FASE 3.1 — Auditoria RLS i definicions
+
+- **Status:** CLOSED.
+- **Confirmed done:** Auditoria d’alerts/alert_definitions, RLS, RPCs ack/resolve/mute; convenció dedupe_key; proposta de contaminació (prefix biz:); contracte mínim per al motor. Decisió READY per 3.2.
+- **Note:** Només document; sense canvis de codi.
+
+### FASE 3.2 — Motor d'alertes de negoci
+
+- **Status:** CLOSED.
+- **Confirmed done:** Migració 20260315180000_f3_2_run_alert_engine.sql; funció run_alert_engine(org_id); comprovacions F2, O1, S1, O2; INSERT a alerts amb ON CONFLICT; severity dins ('low','medium','high','critical'); document FASE_3_2_MOTOR_ALERTES_IMPLEMENTATION.md.
+- **Not done:** UI; auto-resolve; cron; no s’ha executat la migració en entorn real ni invocat des del client.
+
+### FASE 3.3 — API / helpers per a la UI d'alertes
+
+- **Status:** CLOSED.
+- **Confirmed done:** businessAlertsApi.js: getBusinessAlerts (filtrat dedupe_key LIKE 'biz:%'), getBusinessAlertsCount, alertAcknowledge, alertResolve, runBusinessAlertEngine. useBusinessAlerts(orgId): alerts, count, loading, error, refetch, acknowledge(id), resolve(id), runEngine(). Tot org-scoped; sense contaminació OPS/SHIPMENT.
+- **Not done:** Bell UI; Drawer UI (implementats a 3.4).
+
+### FASE 3.4 — UI Bell + comptador + Drawer
+
+- **Status:** CLOSED.
+- **Confirmed done:** BusinessAlertsBadge (icona AlertTriangle, badge amb count) al TopNavbar (davant de DecisionBadge). Drawer: capçalera "Business alerts", llista d’alertes (títol, message truncat, severity dot), botons Acknowledge i Resolve per fila; loading/empty/error; refetch en obrir i després d’accions (via hook). Consum de useBusinessAlerts(activeOrgId); només alertes biz: (sense OPS/SHIPMENT).
+- **Not done:** runEngine no exposat a la UI (opcional per a fase futura).
+
+### FASE 3.5 — Documentació i tancament
+
+- **Status:** CLOSED.
+- **Confirmed done:** Document FASE_3_5_DOCUMENTACIO_I_TANCAMENT.md: contracte final de FASE 3, limitacions V1, riscos i control debt explícits, cauteles post-tancament, dependències futures anotades però no activades. Actualització del tracker: FASE 3 i 3.5 marcats CLOSED; resum executiu actualitzat.
+- **Not done:** Cap canvi de codi, motor, API ni UI; només tancament documental.
+
 ---
 
 ## Current open risks
 
 1. **billing_org_entitlements not used for RLS gating:** Webhook writes entitlements; RLS and org_billing_allows_access do not read them for access decisions. Entitlements drive app usage/gate and UI; DB gating uses org_billing (prefer) + orgs fallback. Controlled debt for a future phase.
 2. **orgs.seat_limit never updated by webhook:** Stripe webhook updates only billing_org_entitlements. orgs.seat_limit remains default 1 unless updated elsewhere. UI and RPC use canonical/plan-based source with fallback; display aligned. Any other consumer still reading orgs.seat_limit would see stale value.
+3. **FASE 3 (alertes de negoci) controlled debt:** Motor invocat només manualment; F6 (run_ops_health_checks) pot escriure severity no vàlida a `alerts` (no patchejat). Documentat a FASE_3_5_DOCUMENTACIO_I_TANCAMENT.md; no bloqueja tancament.
 
 ---
 
