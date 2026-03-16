@@ -16,12 +16,21 @@ This file is the **canonical live status tracker** for implementation phases. It
 
 ---
 
-## Current executive summary
+## Current position
 
-- **Architectural focus:** Multi-tenant and billing/seat hardening (S3.x). **S3.3 is now operationally consolidated.** **FASE 3 — Alertes de negoci is CLOSED.** Membership lifecycle, active-seat semantics, billing RLS/edge alignment, seat-limit and billing-status gating are in place. Business alerts V1: motor (run_alert_engine), API/hook, UI Bell + drawer (F2, O1, S1, O2); prefix biz:; manual invocation; no auto-resolve.
-- **Stabilized:** S2 multi-tenant baseline; S3.2 membership and active-seat semantics; S3.3 billing/access alignment; FASE 3.1–3.5 (audit, motor, API, UI, doc closure).
-- **Remaining (controlled debt / future work):** Billing: `billing_org_entitlements` not used for RLS gating; `orgs.seat_limit` never updated by webhook. FASE 3: motor not auto-invoked; F6 severity not patched; i18n/entity links not done. Tracked for future phases only.
-- **Current next approved phase:** None formally opened. **S3.4.A — Admin Console / Membership Governance** remains **PARKED** (planned, not active).
+- **Fases internes tancades:**  
+  - **FASE 3 — Business alerts**: motor, API/hook i UI Bell+Drawer consolidades.  
+  - **FASE 4 — Tasks / inbox / origins / gates alignment**: model de tasks canònic, linkage `source`/`source_ref_*`, inbox `/app/inbox`, gates ↔ tasks documentats i alineats.  
+  - **FASE 5 — Finance canonical model / profit / cashflow**: ledger + FX canònics, contractes de P&L i cashflow fixats, profit engine alineat amb ledger, UI de Profit V1 honestada.  
+  - **FASE 6 — Future prep**: contractes futurs per COGS/landed cost, realized cashflow UI, Admin Console i profit coverage, més estratègia de finances/dashboard legacy.
+- **Estat interior del producte:**  
+  El backend / arquitectura interna està **molt avançat** (multi-tenant, billing, tasks/gates, alerts, ledger/FX, profit engine, cashflow contract, governance). No falta una altra mega fase interior abans de producte/UI.
+- **Bloc actiu real:**  
+  L’únic bloc actiu és **P0 — Blockers reals i preparació immediata**, amb:
+  - **P0.1 — Multi-tenant cleanup de superfícies visibles.**  
+  - **P0.2 — Purchase Orders hardening.**  
+  - **P0.3 — Roadmap / documentation reset.**  
+  Després de P0.1 + P0.2 el següent pas natural és entrar de ple en **P1 — producte visible / UI / UX**.
 
 ---
 
@@ -55,6 +64,14 @@ This file is the **canonical live status tracker** for implementation phases. It
 | **FASE 3.3** | API / helpers per a la UI d’alertes | CLOSED | Lectura, comptatge, acknowledge/resolve, runEngine; filtre biz:; hook useBusinessAlerts. | src/lib/alerts/businessAlertsApi.js; src/hooks/useBusinessAlerts.js. | Sense Bell ni Drawer (3.4). |
 | **FASE 3.4** | UI Bell + comptador + Drawer | CLOSED | BusinessAlertsBadge al TopNavbar; comptador; drawer amb llista, Acknowledge/Resolve; useBusinessAlerts. | src/components/alerts/BusinessAlertsBadge.jsx; TopNavbar.jsx. | Només alertes biz:; sense barreja OPS/SHIPMENT. |
 | **FASE 3.5** | Documentació i tancament | CLOSED | Consolidació doc; contracte final; limitacions V1; riscos/debt; cauteles. | FASE_3_5_DOCUMENTACIO_I_TANCAMENT.md. Només documentació. | FASE 3 formalment tancada. |
+| **FASE 4** | Tasques / accions canòniques | CLOSED | 4.1–4.4 tancades: contracte de tasks, linkage origins, inbox canònica, lifecycle net, gates ↔ tasks alineats i documentats. | tasks + source_linkage; createOrGetTaskFromOrigin; UI alert/decision/gate; canonical task inbox /app/inbox; lifecycle open/done; minimal origin navigation per decisions; contracte gates/blocking-state documentat. | FASE_4_1_*, FASE_4_2_*, FASE_4_3_*, FASE_4_4_*. |
+| **FASE 4.1** | Contracte task/action canònic | CLOSED | 4.1.A audit; 4.1.B contract de dades. Tancament doc/contracte únic; sense implementació. | FASE_4_1_CANONICAL_TASK_ACTION_CONTRACT_AUDIT.md; FASE_4_1_B_TASK_ACTION_DATA_CONTRACT.md. | Contracte tancat; 4.2 pendent. |
+| **FASE 4.2** | Linkage alert/decision/gate → task | CLOSED | Migració source + source_ref; UI: alerts, decisions, Dashboard (project_gate), BillingOverSeat (workspace_gate). | Migration 20260316120000_f4_2; supabase.js; BusinessAlertsBadge; DecisionBadge; Dashboard; BillingOverSeat. | Dedupe per origin; project_gate al Dashboard; workspace_gate a BillingOverSeat. |
+| **FASE 4.3.A** | Canonical task inbox audit | CLOSED (audit) | Auditoria surfaces de dades i UI de tasks; lifecycle; legacy/solapaments; multi-tenant; gaps per 4.3.B. | FASE_4_3_A_CANONICAL_TASK_INBOX_AUDIT.md. Només auditoria; sense implementació. | Verdict: base real parcial (TasksWidget); no existeix inbox única; següent mínim = 4.3.B. |
+| **FASE 4.3.B** | Canonical task inbox — UI + mínim | CLOSED | Pàgina /app/inbox; filtres status i source; visibilitat source; org_id obligatori; getOpenTasks sense org retorna []; Diagnostics task check skip sense org. | TaskInbox.jsx; getTasks(filters.source); TasksWidget “View all”; Sidebar; FASE_4_3_B_CANONICAL_TASK_INBOX_IMPLEMENTATION.md. | Inbox canònica usable; no RLS, no calendar, no source_ref nav. |
+| **FASE 4.3.C** | Task lifecycle / closure semantics audit | CLOSED (audit) | Auditoria lifecycle: status (open/done/snoozed), transicions, snoozed no escrit, dedupe, UI, tenancy. | FASE_4_3_C_TASK_LIFECYCLE_CLOSURE_SEMANTICS_AUDIT.md. | Verdict: contracte parcial; snoozed = deute; següent opcional 4.3.D. |
+| **FASE 5** | Finance canonical model / profit / cashflow | CLOSED | 5.1–5.5 tancades: data model financer auditat; P&L i cashflow canònics fixats; profit engine alineat; UI Profit V1 honestada; exports trimestrals sobre ledger+FX. | `financial_ledger` + `org_settings` + `exchange_rates_daily` + profit truth engine (F10.2) com a base canònica; `Finances.jsx` i taules legacy marcades fora del core. | FASE_5_1_*, FASE_5_2_*, FASE_5_3_*, FASE_5_4_*, FASE_5_5_*. |
+| **FASE 6** | Future prep / governance / legacy finances | CLOSED | 6.1–6.5 tancades: contracte futur de COGS/landed cost; contracte futur de realized cashflow UI; contracte futur d’Admin Console; contracte de coverage/completeness de profit; estratègia de finances/dashboard legacy. | Fases purament documentals (no-code) que preparen el futur sense activar-lo; S3.4.A continua PARKED a nivell d’implementació. | FASE_6_1_*, FASE_6_2_*, FASE_6_3_*, FASE_6_4_*, FASE_6_5_*. |
 
 ---
 
@@ -236,13 +253,62 @@ This file is the **canonical live status tracker** for implementation phases. It
 - **Confirmed done:** Document FASE_3_5_DOCUMENTACIO_I_TANCAMENT.md: contracte final de FASE 3, limitacions V1, riscos i control debt explícits, cauteles post-tancament, dependències futures anotades però no activades. Actualització del tracker: FASE 3 i 3.5 marcats CLOSED; resum executiu actualitzat.
 - **Not done:** Cap canvi de codi, motor, API ni UI; només tancament documental.
 
+### FASE 4 — Tasques / accions canòniques
+
+- **Status:** CLOSED.
+- **Confirmed done:** 4.1–4.4 tancades: contracte task/action canònic (tasks vs project_tasks); linkage `source` + `source_ref_type` + `source_ref_id`; Task Inbox canònica a `/app/inbox`; lifecycle net `open` / `done`; gates/blocking-state documentats i alineats amb tasks.
+- **Not done:** No scheduler/automation de tasks; no navegació generitzada per `source_ref_*`; `project_tasks` continua com a engine legacy per `project_gate`; Admin Console segueix PARKED (S3.4.A).
+
+### FASE 4.1 — Contracte task/action canònic
+
+- **Status:** CLOSED (documentation/contract only; no implementation).
+- **4.1.A completed:** FASE_4_1_CANONICAL_TASK_ACTION_CONTRACT_AUDIT.md: canonical model (tasks vs project_tasks), repo state, contract gaps, decisions, out-of-scope.
+- **4.1.B completed:** FASE_4_1_B_TASK_ACTION_DATA_CONTRACT.md: semantic field contract (source, entity_type, entity_id); allowed source set (manual, sticky_note, alert, decision, gate); minimal linkage (source_ref_type, source_ref_id); dedupe and tenancy rules; in-scope use cases for 4.2; exit criteria met.
+- **Not done:** No schema, code, or UI changes; implementation deferred to 4.2.
+
+### FASE 4.2 — Linkage alert/decision/gate → task
+
+- **Status:** CLOSED (4.2.A gate contract fix applied).
+- **Confirmed done:** One migration: tasks.source expanded; source_ref_type, source_ref_id added; entity_type includes org; index for origin dedupe. Service: findOpenTaskByOrigin, createOrGetTaskFromOrigin. Alert → task: BusinessAlertsBadge. Decision → task: DecisionNotificationItem / DecisionBadge. **Gate → task (contract-correct):** Dashboard "Requereix atenció" (blocked projects): "Create unblock task" per project with `source_ref_type='project_gate'`, `source_ref_id=project:{projectId}`. **4.2.A:** BillingOverSeat is not a project_gate; action removed from BillingOverSeat and implemented on Dashboard blocked list only. Org safety: activeOrgId required; no first-membership.
+- **Not done:** No automation; no scheduler; no decision success toast in dropdown. BillingOverSeat has "Create unblock task" with `workspace_gate` (truthful; not the project gate use case). See FASE_4_2_TASK_ACTION_LINKAGE_IMPLEMENTATION.md.
+
+### FASE 4.3.A — Canonical task inbox audit
+
+- **Status:** CLOSED (audit only; no implementation).
+- **Confirmed done:** FASE_4_3_A_CANONICAL_TASK_INBOX_AUDIT.md. Exhaustive list of task data surfaces (getTasks, getOpenTasks, findOpenTaskByOrigin, getCalendarEvents, TasksSection, TasksWidget, phaseGates, Diagnostics); current UI surfaces (Dashboard/TasksWidget, Orders/TasksSection, Calendar.jsx vs CalendarPage); lifecycle (open/done/snooze; RLS user_id); legacy/overlap (project_tasks, sticky notes, Calendar.jsx unmounted); multi-tenant (org_id must be passed by app; RLS is user_id). Verdict: partial base (TasksWidget); no single canonical inbox; minimum opening for 4.3.B documented.
+- **Not done:** No code or UI changes; 4.3.B implemented separately.
+
+### FASE 4.3.B — Canonical task inbox (UI contract + minimal implementation)
+
+- **Status:** CLOSED.
+- **Confirmed done:** Pàgina dedicada Task Inbox a `/app/inbox` (TaskInbox.jsx). Llegeix `tasks` amb `getTasks({ org_id: activeOrgId })`; filtres mínims status (open/done/all) i source (all/manual/sticky_note/alert/decision/gate). UI mostra title, status, due_date, entity context, **source** (badge), accions Mark done, Snooze +1d/+3d, Open entity; bulk Mark done i Snooze. getTasks accepta `filters.source`; getOpenTasks retorna [] si no hi ha activeOrgId. Diagnostics: skip task check si !activeOrgId; totes les crides getTasks amb org_id. Enllaç “View all” al TasksWidget; entrada Sidebar (nav.taskInbox); ruta a App.jsx. i18n tasks.inbox.* i nav.taskInbox (en, ca, es). FASE_4_3_B_CANONICAL_TASK_INBOX_IMPLEMENTATION.md.
+- **Not done:** No RLS changes; no calendar unification; no navegació per source_ref_type/source_ref_id; no analytics, comments, assignacions, SLA, histories, automatismes.
+
+### FASE 4.3.C — Task lifecycle / closure semantics audit
+
+- **Status:** CLOSED (audit only; no implementation).
+- **Confirmed done:** FASE_4_3_C_TASK_LIFECYCLE_CLOSURE_SEMANTICS_AUDIT.md. Contracte real de status (open/done/snoozed a schema i índex; només open/done escrits); transicions (create, mark done, snooze, delete, bulk); avaluació snoozed (present a schema/índex/findOpenTaskByOrigin, cap mutació el fa servir = deute controlat); lectures que depenen de status; dedupe/lifecycle; semàntica UI; multi-tenant en camins de lifecycle. Verdict: contracte parcialment acceptable; següent mínim = subbloc opcional 4.3.D lifecycle semantics cleanup (decisió snoozed, opcional completed_at).
+- **Not done:** No code or schema changes; 4.3.D implementat posteriorment com a cleanup mínim (vegeu 4.3.D).
+
+### FASE 4.3.D — Task lifecycle semantics cleanup
+
+- **Status:** CLOSED.
+- **Confirmed done:** Migration 20260317120000_f4_3_d_tasks_status_cleanup.sql: normalitza qualsevol `status = 'snoozed'` a `open`; elimina tots els CHECK constraints existents sobre `tasks.status` i en crea un de nou `tasks_status_check` amb contracte `status IN ('open', 'done')`; actualitza l'índex `idx_tasks_origin_open` perquè consideri només `status = 'open'` com a actiu per a dedupe d'origen. Helper `findOpenTaskByOrigin` ara busca exclusivament tasques amb `status = 'open'`. Contracte canònic simplificat a dos estats: open / done; snooze = open + due_date futura.
+- **Not done:** No RLS; no canvis de UI ni de comportament de snooze; no ús de completed_at.
+
 ---
 
-## Current open risks
+## Controlled debt (non-blocking)
 
-1. **billing_org_entitlements not used for RLS gating:** Webhook writes entitlements; RLS and org_billing_allows_access do not read them for access decisions. Entitlements drive app usage/gate and UI; DB gating uses org_billing (prefer) + orgs fallback. Controlled debt for a future phase.
-2. **orgs.seat_limit never updated by webhook:** Stripe webhook updates only billing_org_entitlements. orgs.seat_limit remains default 1 unless updated elsewhere. UI and RPC use canonical/plan-based source with fallback; display aligned. Any other consumer still reading orgs.seat_limit would see stale value.
-3. **FASE 3 (alertes de negoci) controlled debt:** Motor invocat només manualment; F6 (run_ops_health_checks) pot escriure severity no vàlida a `alerts` (no patchejat). Documentat a FASE_3_5_DOCUMENTACIO_I_TANCAMENT.md; no bloqueja tancament.
+- **Legacy project gate engine:** `project_tasks` continua existint com a engine legacy de `project_gate`; el contracte canònic de tasks/gates ja el tracta com a supporting-only.
+- **BillingLocked hard gate:** `BillingLocked` continua sense unblock task; es considera un gate dur que requereix resolució de billing directa.
+- **phaseGates.js:** continua com a validació complementària, no com a gate engine primari.
+- **Tasks RLS:** `tasks` manté RLS per `user_id` en lloc de `org_id`; l’app força org-safety des de frontend/serveis; és deute conegut.
+- **Finances legacy:** `Finances.jsx`, `expenses`, `incomes`, `recurring_expenses`, `finance_categories`, `payments` continuen com a món legacy; el core financer canònic és ledger+FX+profit engine+exports.
+- **COGS / landed cost:** continuen parcials / no activats; els contractes futurs (Fase 6.1 i 6.4) estan fixats, però no s’han activat càlculs ni UI.
+- **Cashflow UI:** `Cashflow.jsx` continua sent forecast (`getCashflowForecast`), no una UI de cashflow realitzat sobre ledger.
+- **Dashboard heurístics:** KPIs com `getDashboardStats` i altres agregats sobre `payments` continuen existint com a mètriques heurístiques, no com a reporting financer oficial.
+- **Admin Console:** la consola d’admin (S3.4.A) encara no està implementada; només existeix el contracte futur (FASE 6.3).
 
 ---
 
@@ -250,7 +316,46 @@ This file is the **canonical live status tracker** for implementation phases. It
 
 | Item | Scope note | Status |
 |------|------------|--------|
-| **S3.4.A — Admin Console / Membership Governance** | Invitations; invitation expiry; membership/user/account states; admin visibility into billing/seat/user status. | PARKED — no implementation yet. |
+| **S3.4.A — Admin Console / Membership Governance** | Invitations; invitation expiry; membership/user/account states; admin visibility into billing/seat/user status. | PARKED — no implementation yet (only contract documented in FASE 6.3). |
+
+---
+
+## Roadmap blocs (P0 / P1 / P2 / P3)
+
+### P0 — Blockers reals (actiu)
+
+- **P0.1 — Multi-tenant cleanup de superfícies visibles**  
+  Netejar qualsevol rastre de paths o UI visibles que no respectin el contracte multi-tenant actual (S2/S3), sense reobrir models o RLS.
+- **P0.2 — Purchase Orders hardening**  
+  Endurir els fluxos de `purchase_orders` (validacions, UX, coherència amb ledger/export) sobre el model ja existent.
+- **P0.3 — Roadmap / documentation reset**  
+  Mantenir alineats aquest tracker i `ROADMAP_CURRENT_POSITION` amb l’estat real del repo.
+
+### P1 — Producte visible / UI / UX
+
+- Dashboard usable de veritat (widgets, estat org, alertes, tasks).
+- Projects i project detail productitzats (flows principals clars).
+- Flows visibles consistents (del lead fins a operativa bàsica).
+- Onboarding + demo flow comercial (Amazon-first o similar).
+
+### P2 — Millores fortes
+
+- Analytics net (sobre el model canònic).
+- Realized cashflow UI (sobre `amount_base_cash`/`cash_at`).
+- Observabilitat mínima (logs, mètriques bàsiques, health).
+- Encapsular finances legacy darrere surfaces canòniques.
+- Governance/admin millor (read models i superfícies d’admin).
+- Responsive i polish fort (layouts, interaccions, accessibilitat bàsica).
+
+### P3 — Futur / expansió
+
+- Admin Console completa.
+- COGS complet (cost pool + WAC activats).
+- Automatitzacions avançades (decision/alerts/tasks).
+- Connectors nous (Shopify, altres marketplaces).
+- Assistant layer.
+- Listing intelligence.
+- Expansió de plataforma (més sistemes i fluxos).
 
 ---
 

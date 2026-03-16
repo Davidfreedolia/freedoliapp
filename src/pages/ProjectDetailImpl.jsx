@@ -1011,16 +1011,12 @@ ${t}
     }
     let cancelled = false
     ;(async () => {
-      const { supabase, getCurrentUserId } = await import('../lib/supabase')
-      const { getDemoMode } = await import('../lib/demoModeFilter')
+      const { supabase } = await import('../lib/supabase')
       const { computeProjectBusinessSnapshot } = await import('../lib/businessSnapshot')
-      const userId = await getCurrentUserId()
-      const demoMode = await getDemoMode()
       const orgIdFilter = project?.org_id ?? activeOrgId ?? null
       if (cancelled) return
       let poQuery = supabase.from('purchase_orders').select('project_id,total_amount,items').eq('project_id', id)
       if (orgIdFilter) poQuery = poQuery.eq('org_id', orgIdFilter)
-      else poQuery = poQuery.eq('user_id', userId)
       const [poRes, expRes, incRes] = await Promise.all([
         poQuery,
         supabase
@@ -1052,11 +1048,8 @@ ${t}
     }
     let cancelled = false
     ;(async () => {
-      const { supabase, getCurrentUserId } = await import('../lib/supabase')
-      const { getDemoMode } = await import('../lib/demoModeFilter')
+      const { supabase } = await import('../lib/supabase')
       const { computeProjectStockSignal } = await import('../lib/stockSignal')
-      const userId = await getCurrentUserId()
-      const demoMode = await getDemoMode()
       const orgIdFilter = project?.org_id ?? activeOrgId ?? null
       if (cancelled) return
       const thirtyDaysAgo = new Date()
@@ -1070,7 +1063,6 @@ ${t}
         try {
           let invQuery = supabase.from(table).select(columns).eq('project_id', id)
           if (orgIdFilter) invQuery = invQuery.eq('org_id', orgIdFilter)
-          else invQuery = invQuery.eq('user_id', userId)
           const { data, error } = await invQuery
           if (!error && data) {
             stockRows = data
@@ -1111,7 +1103,6 @@ ${t}
       try {
         let poQuery = supabase.from('purchase_orders').select('project_id,items').eq('project_id', id)
         if (orgIdFilter) poQuery = poQuery.eq('org_id', orgIdFilter)
-        else poQuery = poQuery.eq('user_id', userId)
         const { data, error } = await poQuery
         if (!error && data) poRows = data || []
       } catch (_) {}

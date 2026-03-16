@@ -1,7 +1,14 @@
-# FREEDOLIAPP — ROADMAP STATUS
+# FREEDOLIAPP — ROADMAP STATUS (HISTÒRIC / SUPERSEDED)
 
-**Última actualització:** Post FASE 2 CBA (documentació tancada).  
-**Responsable:** Product Owner.
+> ⚠️ **IMPORTANT:** Aquest document és un **snapshot històric** post FASE 2 CBA.  
+> Ja **no és** el tracker viu de roadmap ni d’implementació.
+>
+> Per a la informació canònica actual, fes servir:
+> - `docs/ROADMAP/IMPLEMENTATION_STATUS.md` — tracker viu d’implementació (fases S2/S3/FASE 3–6).  
+> - `docs/ROADMAP/ROADMAP_CURRENT_POSITION.md` — posició executiva actual del roadmap.
+
+**Última actualització històrica:** Post FASE 2 CBA (documentació tancada).  
+**Responsable original:** Product Owner.
 
 ---
 

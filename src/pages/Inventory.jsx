@@ -18,7 +18,7 @@ import {
   MoreVertical
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { supabase, getCurrentUserId, getProjects } from '../lib/supabase'
+import { supabase, getProjects } from '../lib/supabase'
 import Header from '../components/Header'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
@@ -69,23 +69,28 @@ export default function Inventory() {
 
   useEffect(() => {
     loadData()
-  }, [])
+  }, [activeOrgId])
 
   const loadData = async () => {
     setLoading(true)
     setError(null)
     try {
-      const userId = await getCurrentUserId()
+      if (!activeOrgId) {
+        setProjects([])
+        setInventory([])
+        setMovements([])
+        setLoading(false)
+        return
+      }
       
-      // Carregar projectes (usar funció que ja filtra per user_id)
-      const projectsData = await getProjects(true, activeOrgId ?? undefined)
+      const projectsData = await getProjects(true, activeOrgId)
       setProjects(projectsData || [])
 
       // Carregar inventari
       const { data: inventoryData, error: inventoryError } = await supabase
         .from('inventory')
         .select('*, project:projects(name, project_code)')
-        .eq('user_id', userId)
+        .eq('org_id', activeOrgId)
         .order('created_at', { ascending: false })
       if (inventoryError) throw inventoryError
       setInventory(inventoryData || [])
@@ -94,7 +99,7 @@ export default function Inventory() {
       const { data: movementsData, error: movementsError } = await supabase
         .from('inventory_movements')
         .select('*, inventory:inventory(sku, product_name)')
-        .eq('user_id', userId)
+        .eq('org_id', activeOrgId)
         .order('created_at', { ascending: false })
         .limit(50)
       if (movementsError) throw movementsError

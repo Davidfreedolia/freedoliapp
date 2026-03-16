@@ -17,7 +17,7 @@ import {
   AlertCircle
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { supabase, getCurrentUserId } from '../lib/supabase'
+import { supabase } from '../lib/supabase'
 import { getUnassignedGtinCodes, getProjectsMissingGtin, getProjects } from '../lib/supabase'
 import { getOrgEntitlements, hasOrgFeature } from '../lib/billing/entitlements'
 import { isDemoMode } from '../demo/demoMode'
@@ -93,7 +93,6 @@ export default function Analytics() {
         setLoading(false)
         return
       }
-      const userId = await getCurrentUserId()
       const startDate = new Date()
       startDate.setDate(startDate.getDate() - parseInt(dateRange))
       const startDateStr = startDate.toISOString().split('T')[0]
@@ -167,7 +166,7 @@ export default function Analytics() {
         let ordersQuery = supabase
           .from('purchase_orders')
           .select('*')
-          .eq('user_id', userId)
+          .eq('org_id', activeOrgId)
           .gte('order_date', startDateStr)
         if (filterProject) ordersQuery = ordersQuery.eq('project_id', filterProject)
         const { data: ordersRes, error: ordersError } = await ordersQuery
@@ -178,7 +177,7 @@ export default function Analytics() {
         let inventoryQuery = supabase
           .from('inventory')
           .select('*')
-          .eq('user_id', userId)
+          .eq('org_id', activeOrgId)
         if (filterProject) inventoryQuery = inventoryQuery.eq('project_id', filterProject)
         const { data: inventoryRes, error: inventoryError } = await inventoryQuery
         if (inventoryError) throw inventoryError

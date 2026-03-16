@@ -651,6 +651,12 @@ export const getPurchaseOrders = async (projectId = null, orgId = null) => {
     return data
   }
 
+  // P0.1/P0.2: org-scoped only. When no orgId is provided, return [] instead of
+  // falling back to user_id-based views.
+  if (!orgId) {
+    return []
+  }
+
   let query = supabase
     .from('purchase_orders')
     .select(`
@@ -660,12 +666,7 @@ export const getPurchaseOrders = async (projectId = null, orgId = null) => {
     `)
     .order('created_at', { ascending: false })
 
-  if (orgId) {
-    query = query.eq('org_id', orgId)
-  } else {
-    const userId = await getCurrentUserId()
-    query = query.eq('user_id', userId)
-  }
+  query = query.eq('org_id', orgId)
   if (projectId) query = query.eq('project_id', projectId)
 
   const { data, error } = await query
@@ -753,6 +754,29 @@ export const createPurchaseOrder = async (po, orgId = null) => {
     }
   }
 
+  // Normalize items/total server-side to match DB trigger and avoid trusting UI totals.
+  let itemsArray = []
+  if (poData.items != null) {
+    if (typeof poData.items === 'string') {
+      try {
+        itemsArray = JSON.parse(poData.items)
+      } catch {
+        itemsArray = []
+      }
+    } else if (Array.isArray(poData.items)) {
+      itemsArray = poData.items
+    }
+  }
+  const safeItems = Array.isArray(itemsArray) ? itemsArray : []
+  const computedTotal = safeItems.reduce((sum, item) => {
+    const qty = parseFloat(item?.qty ?? 0) || 0
+    const price = parseFloat(item?.unit_price ?? 0) || 0
+    return sum + qty * price
+  }, 0)
+
+  poData.items = safeItems
+  poData.total_amount = computedTotal
+
   const { data, error } = await supabase
     .from('purchase_orders')
     .insert([{ ...poData }])
@@ -768,19 +792,84 @@ export const createPurchaseOrder = async (po, orgId = null) => {
 }
 
 export const updatePurchaseOrder = async (id, updates) => {
-  // Eliminar user_id si ve del client (no es pot canviar)
-  const { user_id, ...updateData } = updates
+  // Eliminar user_id/org_id si venen del client (no es poden canviar via client)
+  const { user_id, org_id: _ignoredOrgId, ...updateData } = updates
   const userId = await getCurrentUserId()
   if (!userId) {
     return authRequired()
   }
   
-  // El trigger de la BD actualitzarà logistics_updated_at automàticament
-  // quan canvien logistics_status o tracking_number, però per seguretat
-  // també el gestionem al client si cal
+  // Carregar PO actual per aplicar contracte d'immutabilitat mínim:
+  // - draft: editable (estructura, items, totals).
+  // - no-draft: només camps operatius (status, logistics_status, tracking_number, notes, delivery_*).
+  const { data: current, error: loadError } = await supabase
+    .from('purchase_orders')
+    .select('id, org_id, status, po_number, project_id, supplier_id, order_date, currency, incoterm, items')
+    .eq('id', id)
+    .maybeSingle()
+  if (loadError) throw loadError
+  if (!current) {
+    throw new Error('purchase_order_not_found')
+  }
+
+  // Server-side recomputació de totals a partir d'items.
+  let itemsArray = []
+  if (updateData.items != null) {
+    if (typeof updateData.items === 'string') {
+      try {
+        itemsArray = JSON.parse(updateData.items)
+      } catch {
+        itemsArray = []
+      }
+    } else if (Array.isArray(updateData.items)) {
+      itemsArray = updateData.items
+    }
+  } else {
+    // Si no s'envien items nous, conservar els existents
+    try {
+      itemsArray = Array.isArray(current.items)
+        ? current.items
+        : JSON.parse(current.items || '[]')
+    } catch {
+      itemsArray = []
+    }
+  }
+  const safeItems = Array.isArray(itemsArray) ? itemsArray : []
+  const computedTotal = safeItems.reduce((sum, item) => {
+    const qty = parseFloat(item?.qty ?? 0) || 0
+    const price = parseFloat(item?.unit_price ?? 0) || 0
+    return sum + qty * price
+  }, 0)
+
+  // Aplicar contracte de camps editables segons status actual
+  const isDraft = current.status === 'draft' || current.status == null
+  const nextData = { ...updateData }
+
+  // Sempre usem el total i items normalitzats calculats aquí
+  nextData.items = safeItems
+  nextData.total_amount = computedTotal
+
+  if (!isDraft) {
+    const allowedKeys = new Set([
+      'status',
+      'logistics_status',
+      'tracking_number',
+      'notes',
+      'delivery_address',
+      'delivery_contact',
+      'delivery_phone',
+      'delivery_email',
+    ])
+    for (const key of Object.keys(nextData)) {
+      if (!allowedKeys.has(key)) {
+        throw new Error('immutable_field_after_draft: ' + key)
+      }
+    }
+  }
+
   const { data, error } = await supabase
     .from('purchase_orders')
-    .update({ ...updateData, updated_at: new Date().toISOString() })
+    .update({ ...nextData, updated_at: new Date().toISOString() })
     .eq('id', id)
     .select()
     .maybeSingle()
@@ -789,6 +878,20 @@ export const updatePurchaseOrder = async (id, updates) => {
 }
 
 export const deletePurchaseOrder = async (id) => {
+  // Només permetre eliminar POs en esborrany o cancel·lades.
+  const { data: current, error: loadError } = await supabase
+    .from('purchase_orders')
+    .select('status')
+    .eq('id', id)
+    .maybeSingle()
+  if (loadError) throw loadError
+  if (!current) {
+    return true
+  }
+  if (current.status && !['draft', 'cancelled'].includes(current.status)) {
+    throw new Error('cannot_delete_purchase_order_in_status_' + current.status)
+  }
+
   const { error } = await supabase
     .from('purchase_orders')
     .delete()
@@ -2677,6 +2780,9 @@ export const getTasks = async (filters = {}) => {
     if (filters.entityId) {
       filtered = filtered.filter(t => t.entity_id === filters.entityId)
     }
+    if (filters.source) {
+      filtered = filtered.filter(t => (t.source || 'manual') === filters.source)
+    }
     return filtered
   }
   
@@ -2700,6 +2806,9 @@ export const getTasks = async (filters = {}) => {
   if (filters.entityId) {
     query = query.eq('entity_id', filters.entityId)
   }
+  if (filters.source) {
+    query = query.eq('source', filters.source)
+  }
   
   const { data, error } = await query
   if (error) throw error
@@ -2709,6 +2818,8 @@ export const getTasks = async (filters = {}) => {
 export const getOpenTasks = async (limit = 10, activeOrgId = null) => {
   const userId = await getCurrentUserId()
   if (!userId) return []
+  // FASE 4.3.B: org correctness — do not return tasks when org context is missing
+  if (!activeOrgId) return []
   let query = supabase
     .from('tasks')
     .select('*')
@@ -2716,9 +2827,7 @@ export const getOpenTasks = async (limit = 10, activeOrgId = null) => {
     .order('due_date', { ascending: true, nullsLast: true })
     .order('priority', { ascending: false })
     .limit(limit)
-  if (activeOrgId) {
-    query = query.eq('org_id', activeOrgId)
-  }
+  query = query.eq('org_id', activeOrgId)
   const { data, error } = await query
   if (error) throw error
   return data || []
@@ -2809,6 +2918,49 @@ export const snoozeTask = async (id, days = 3) => {
     status: 'open',
     due_date: newDueDate 
   })
+}
+
+// FASE 4.2 / 4.3.D — origin-based dedupe: find open task for same org + source + source_ref
+/**
+ * @param {string} orgId
+ * @param {{ source: string, source_ref_type: string, source_ref_id: string }} origin
+ * @returns {Promise<object | null>} existing open task or null
+ */
+export const findOpenTaskByOrigin = async (orgId, origin) => {
+  if (!orgId || !origin?.source_ref_type || !origin?.source_ref_id) return null
+  const { data, error } = await supabase
+    .from('tasks')
+    .select('id, title, status, created_at')
+    .eq('org_id', orgId)
+    .eq('source', origin.source)
+    .eq('source_ref_type', origin.source_ref_type)
+    .eq('source_ref_id', origin.source_ref_id)
+    .eq('status', 'open')
+    .limit(1)
+    .maybeSingle()
+  if (error) throw error
+  return data
+}
+
+/**
+ * Create a canonical task from an operational origin, or return existing open task (dedupe by origin).
+ * @param {string} activeOrgId
+ * @param {{ source: string, source_ref_type: string, source_ref_id: string }} origin
+ * @param {{ title: string, entity_type?: string, entity_id?: string, notes?: string }} payload
+ * @returns {Promise<{ task: object, created: boolean }>}
+ */
+export const createOrGetTaskFromOrigin = async (activeOrgId, origin, payload) => {
+  const existing = await findOpenTaskByOrigin(activeOrgId, origin)
+  if (existing) return { task: existing, created: false }
+  const task = await createTask({
+    ...payload,
+    source: origin.source,
+    source_ref_type: origin.source_ref_type,
+    source_ref_id: origin.source_ref_id,
+    entity_type: payload.entity_type ?? 'org',
+    entity_id: payload.entity_id ?? activeOrgId,
+  }, activeOrgId)
+  return { task, created: true }
 }
 
 // Bulk actions for tasks

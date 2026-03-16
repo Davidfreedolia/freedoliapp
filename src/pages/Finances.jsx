@@ -1072,6 +1072,31 @@ export default function Finances() {
 
   const toolbarRowStyle = styles.toolbarRow
 
+  if (activeOrgId && demoMode === false) {
+    return (
+      <div style={styles.container}>
+        <Header
+          title={
+            <span className="page-title-with-icon">
+              <Receipt size={22} />
+              Finances
+            </span>
+          }
+        />
+        <div style={styles.content}>
+          <div style={styles.legacyWarning}>
+            <AlertCircle size={32} color="#f59e0b" />
+            <h3 style={{ marginTop: 12, marginBottom: 8 }}>Finances V0 legacy (per-user)</h3>
+            <p style={{ maxWidth: 520, fontSize: 14, lineHeight: 1.5 }}>
+              Aquesta pantalla és una vista financera antiga basada en <code>user_id</code> i no està adaptada al model multi-tenant actual.
+              Es manté només com a referència històrica i queda desactivada en aquest bloc. Fes servir el ledger canònic i els exports trimestrals per a dades de veritat.
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div style={styles.container}>
       <Header
@@ -2554,6 +2579,21 @@ function QAPanel({ darkMode, onDebugReceiptsChange }) {
 const styles = {
   container: { flex: 1, display: 'flex', flexDirection: 'column' },
   content: { padding: '16px', overflowY: 'auto' },
+  legacyWarning: {
+    marginTop: '48px',
+    padding: '32px',
+    borderRadius: '16px',
+    border: '1px solid var(--border-color)',
+    maxWidth: 640,
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    textAlign: 'left',
+    backgroundColor: 'var(--surface-bg-2)',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: 8,
+  },
   toolbarContainer: {
     display: 'flex',
     flexDirection: 'column',

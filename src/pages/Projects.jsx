@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import { PHASE_STYLES, getPhaseMeta } from '../utils/phaseStyles'
 import { useApp } from '../context/AppContext'
-import { deleteProject, supabase, getCurrentUserId } from '../lib/supabase'
+import { deleteProject, supabase } from '../lib/supabase'
 import { getDemoMode } from '../lib/demoModeFilter'
 import { computeProjectBusinessSnapshot } from '../lib/businessSnapshot'
 import { computeProjectStockSignal } from '../lib/stockSignal'
@@ -267,14 +267,18 @@ export default function Projects() {
     }
     let cancelled = false
     ;(async () => {
-      const userId = await getCurrentUserId()
-      const demoMode = await getDemoMode()
+      if (!activeOrgId) {
+        if (!cancelled && mountedRef.current && seq === businessLoadSeqRef.current) {
+          setBusinessByProjectId({})
+        }
+        return
+      }
       if (cancelled || !mountedRef.current || seq !== businessLoadSeqRef.current) return
       const [poRes, expRes, incRes] = await Promise.all([
         supabase
           .from('purchase_orders')
           .select('project_id,total_amount,items')
-          .eq('user_id', userId)
+          .eq('org_id', activeOrgId)
           .in('project_id', ids),
         supabase
           .from('expenses')
@@ -307,7 +311,7 @@ export default function Projects() {
       }
     })()
     return () => { cancelled = true }
-  }, [projects])
+  }, [projects, activeOrgId])
 
   // Stock signal: try-chain (inventory / project_stock / inventory_movements) + sales 30d + POs
   useEffect(() => {
@@ -323,8 +327,12 @@ export default function Projects() {
     }
     let cancelled = false
     ;(async () => {
-      const userId = await getCurrentUserId()
-      const demoMode = await getDemoMode()
+      if (!activeOrgId) {
+        if (!cancelled && mountedRef.current && seq === stockLoadSeqRef.current) {
+          setStockByProjectId({})
+        }
+        return
+      }
       if (cancelled || !mountedRef.current || seq !== stockLoadSeqRef.current) return
 
       let stockRowsByProject = {}
@@ -334,14 +342,14 @@ export default function Projects() {
 
       // Stock source: inventory (org-scoped). project_stock has been removed.
       const stockTables = [
-        { table: 'inventory', columns: 'project_id,total_units,quantity,qty,units' }
+        { table: 'inventory', columns: 'project_id,total_units,quantity,qty,units,org_id' }
       ]
       for (const { table, columns } of stockTables) {
         try {
           const { data, error } = await supabase
             .from(table)
             .select(columns)
-            .eq('user_id', userId)
+            .eq('org_id', activeOrgId)
             .in('project_id', ids)
           if (error) throw error
           const rows = data || []
@@ -392,7 +400,7 @@ export default function Projects() {
         const { data, error } = await supabase
           .from('purchase_orders')
           .select('project_id,items')
-          .eq('user_id', userId)
+          .eq('org_id', activeOrgId)
           .in('project_id', ids)
         if (!error && data) {
           for (const r of data) {

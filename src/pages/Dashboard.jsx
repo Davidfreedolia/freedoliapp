@@ -39,9 +39,8 @@ import {
   StickyNote
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { getPurchaseOrders, getDashboardPreferences, getPosNotReady, getProjectsMissingGtin, getUnassignedGtinCodes, getPosWaitingManufacturer, updateDashboardPreferences, getCurrentUserId } from '../lib/supabase'
+import { getPurchaseOrders, getDashboardPreferences, getPosNotReady, getProjectsMissingGtin, getUnassignedGtinCodes, getPosWaitingManufacturer, updateDashboardPreferences, createOrGetTaskFromOrigin } from '../lib/supabase'
 import { supabase } from '../lib/supabase'
-import { getDemoMode } from '../lib/demoModeFilter'
 import { computeProjectBusinessSnapshot } from '../lib/businessSnapshot'
 import { computeProjectStockSignal } from '../lib/stockSignal'
 import { computeCommercialGate } from '../lib/phaseGates'
@@ -105,6 +104,7 @@ export default function Dashboard() {
   const { loading: homeDataLoading, error: homeDataError, data: homeData } = useHomeDashboardData()
   const [showNewProjectModal, setShowNewProjectModal] = useState(false)
   const [showCustomizeModal, setShowCustomizeModal] = useState(false)
+  const [unblockTaskProjectId, setUnblockTaskProjectId] = useState(null)
   const [ordersInProgress, setOrdersInProgress] = useState([])
   const [loadingOrders, setLoadingOrders] = useState(true)
   const [financialData, setFinancialData] = useState([])
@@ -210,9 +210,6 @@ export default function Dashboard() {
         }
         if (cancelled || !execMountedRef.current) return
 
-        const userId = await getCurrentUserId()
-        const demoMode = await getDemoMode()
-
         const { data: projects } = await supabase
           .from('projects')
           .select('*')
@@ -245,7 +242,7 @@ export default function Dashboard() {
             const { data, error } = await supabase
               .from(table)
               .select(columns)
-              .eq('user_id', userId)
+              .eq('org_id', activeOrgId)
               .in('project_id', ids)
             if (error) throw error
             const rows = data || []
@@ -289,7 +286,7 @@ export default function Dashboard() {
         }
 
         const [poRes, expRes, incRes] = await Promise.all([
-          supabase.from('purchase_orders').select('project_id,total_amount,items').eq('user_id', userId).in('project_id', ids),
+          supabase.from('purchase_orders').select('project_id,total_amount,items').eq('org_id', activeOrgId).in('project_id', ids),
           supabase.from('expenses').select('project_id,amount').in('project_id', ids),
           supabase.from('incomes').select('project_id,amount,created_at').in('project_id', ids).gte('created_at', thirtyDaysIso)
         ])
@@ -605,6 +602,24 @@ export default function Dashboard() {
 
   const handlePreferencesSave = (newWidgets) => {
     setDashboardWidgets(newWidgets)
+  }
+
+  const handleCreateUnblockTask = async (project) => {
+    if (!activeOrgId || !project?.id) return
+    setUnblockTaskProjectId(project.id)
+    try {
+      const title = `Unblock: ${(project.name || 'Project').slice(0, 80)}`
+      const { created } = await createOrGetTaskFromOrigin(
+        activeOrgId,
+        { source: 'gate', source_ref_type: 'project_gate', source_ref_id: `project:${project.id}` },
+        { title, entity_type: 'project', entity_id: project.id }
+      )
+      showToast(created ? 'Task created.' : 'Task already exists.', 'success')
+    } catch (err) {
+      showToast(err?.message || 'Failed to create task', 'error')
+    } finally {
+      setUnblockTaskProjectId(null)
+    }
   }
 
   const loadFinancialData = async () => {
@@ -974,6 +989,24 @@ export default function Dashboard() {
                         {reason}
                       </div>
                     ) : null}
+                    <div style={{ marginTop: 6 }}>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.preventDefault(); handleCreateUnblockTask(p) }}
+                        disabled={unblockTaskProjectId === p.id}
+                        style={{
+                          fontSize: 11,
+                          padding: '4px 8px',
+                          border: '1px solid var(--border-1)',
+                          borderRadius: 6,
+                          background: 'var(--surface-bg-2)',
+                          color: 'var(--text-1)',
+                          cursor: unblockTaskProjectId === p.id ? 'wait' : 'pointer',
+                        }}
+                      >
+                        {unblockTaskProjectId === p.id ? '…' : 'Create unblock task'}
+                      </button>
+                    </div>
                   </li>
                 )
               })}
