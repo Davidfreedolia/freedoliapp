@@ -19,7 +19,6 @@ import { deleteProject, supabase } from '../lib/supabase'
 import { getDemoMode } from '../lib/demoModeFilter'
 import { computeProjectBusinessSnapshot } from '../lib/businessSnapshot'
 import { computeProjectStockSignal } from '../lib/stockSignal'
-import { computeCommercialGate } from '../lib/phaseGates'
 import Header from '../components/Header'
 import NewProjectModal from '../components/NewProjectModal'
 import Button from '../components/Button'
@@ -575,14 +574,6 @@ export default function Projects() {
                   <span>SKU: {highlightText(skuValue, searchTerm)}</span>
                   <span style={{ opacity: 0.7 }}> · </span>
                   <span>Created: {createdLabel}</span>
-                  <span style={{ opacity: 0.7 }}> · </span>
-                  <span>Docs: {docsCount}</span>
-                  {asinValue ? (
-                    <>
-                      <span style={{ opacity: 0.7 }}> · </span>
-                      <span>ASIN: {highlightText(asinValue, searchTerm)}</span>
-                    </>
-                  ) : null}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                   <PhaseMark phaseId={currentPhaseId} size={16} />
@@ -591,7 +582,7 @@ export default function Projects() {
                     if (!snap) return null
                     const { roi_percent, badge } = snap
                     const toneVar = badge.tone === 'success' ? 'var(--success-1)' : badge.tone === 'warn' ? 'var(--warning-1)' : badge.tone === 'danger' ? 'var(--danger-1)' : 'var(--muted-1)'
-                    const label = roi_percent != null ? `ROI ${Math.round(roi_percent)}% · ${badge.label}` : `— · ${badge.label}`
+                    const label = roi_percent != null ? `ROI ${Math.round(roi_percent)}%` : badge.label
                     return (
                       <span
                         style={{
@@ -604,7 +595,7 @@ export default function Projects() {
                           fontWeight: 600,
                           whiteSpace: 'nowrap'
                         }}
-                        title={`Invertit: ${snap.invested_total.toFixed(0)} · Unit: ${snap.unit_cost != null ? snap.unit_cost.toFixed(2) : '—'}`}
+                        title={`Invertit: ${snap.invested_total.toFixed(0)} · Unit: ${snap.unit_cost != null ? snap.unit_cost.toFixed(2) : '—'} · ${badge.label}`}
                       >
                         {label}
                       </span>
@@ -629,32 +620,6 @@ export default function Projects() {
                         title={stock.badgeTextSecondary}
                       >
                         {stock.badgeTextPrimary}
-                      </span>
-                    )
-                  })()}
-                  {(() => {
-                    const b = businessByProjectId[project.id]
-                    const s = stockByProjectId[project.id]
-                    const phaseId = project.phase ?? project.phase_id ?? project.current_phase
-                    const gate = computeCommercialGate({ phaseId, businessSnapshot: b, stockSnapshot: s })
-                    if (gate.gateId === 'NONE') return null
-                    const toneVar = gate.tone === 'success' ? 'var(--success-1)' : gate.tone === 'warn' ? 'var(--warning-1)' : gate.tone === 'danger' ? 'var(--danger-1)' : 'var(--muted-1)'
-                    const shortId = gate.gateId === 'PRODUCTION' ? 'PROD' : gate.gateId === 'LISTING' ? 'LIST' : 'LIVE'
-                    return (
-                      <span
-                        style={{
-                          fontSize: 11,
-                          padding: '4px 8px',
-                          border: '1px solid var(--border-1)',
-                          background: 'var(--surface-bg-2)',
-                          borderRadius: 999,
-                          color: toneVar,
-                          fontWeight: 600,
-                          whiteSpace: 'nowrap'
-                        }}
-                        title={gate.reasons.length ? gate.reasons.join(' · ') : ''}
-                      >
-                        {shortId}: {gate.label}
                       </span>
                     )
                   })()}
@@ -825,6 +790,9 @@ export default function Projects() {
         />
 
         <div style={{ ...styles.content, padding: 0 }}>
+        <p style={{ margin: '4px 0 16px', fontSize: 13, color: 'var(--text-2)' }}>
+          Aquest és el catàleg de tots els teus productes/projectes. Obre un projecte per veure’n el detall i les fases.
+        </p>
         {/* Toolbar */}
         <div style={styles.toolbar} className="toolbar-row projects-toolbar__row">
           <div style={styles.toolbarLeft} className="toolbar-group">

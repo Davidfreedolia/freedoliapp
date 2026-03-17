@@ -153,7 +153,12 @@ export default function Login() {
       <Card className="auth-card">
         <div className="auth-card__header">
           <h1 className="auth-card__title">{t('login.title')}</h1>
-          <p className="auth-card__subtitle">{t('login.subtitle')}</p>
+          <p className="auth-card__subtitle">
+            {t('login.subtitle')}
+          </p>
+          <p className="auth-card__subtitle auth-card__subtitle--secondary">
+            {t('login.subtitle_existing')}
+          </p>
         </div>
 
         {magicLinkSent ? (

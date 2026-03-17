@@ -68,6 +68,8 @@ import { safeArray } from '../lib/safeArray'
 import { formatError, notifyError } from '../lib/errorHandling'
 import { isScreenshotMode } from '../lib/ui/screenshotMode'
 import { DataLoading, DataError } from '../components/dataStates'
+import { showToast } from '../components/Toast'
+import useT from '../hooks/useT'
 
 // Estats de la PO
 const PO_STATUSES = {
@@ -84,7 +86,7 @@ const PO_STATUSES = {
 
 export default function Orders() {
   const { darkMode, activeOrgId } = useApp()
-  // Removed unused navigate
+  const navigate = useNavigate()
   const { isMobile, isTablet } = useBreakpoint()
   const t = useT()
   const [searchParams] = useSearchParams()
@@ -745,6 +747,9 @@ export default function Orders() {
         ...styles.content,
         padding: isMobile ? '16px' : '32px'
       }}>
+        <p style={{ margin: '0 0 16px', fontSize: 13, color: darkMode ? '#9ca3af' : '#4b5563' }}>
+          Aquí continues l&apos;operativa del projecte: crea i segueix les POs lligades als teus projectes, amb logística i documents.
+        </p>
         {/* Toolbar */}
         <div style={styles.toolbar} className="toolbar-row">
           <div style={styles.searchGroup} className="toolbar-group">
@@ -959,6 +964,24 @@ export default function Orders() {
                     </h2>
                     <p style={{ margin: '4px 0 0', color: '#6b7280', fontSize: '14px' }}>
                       {selectedOrder.project?.name}
+                      {selectedOrder.project_id && (
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/app/projects/${selectedOrder.project_id}`)}
+                          style={{
+                            marginLeft: 8,
+                            fontSize: '13px',
+                            color: '#4f46e5',
+                            textDecoration: 'underline',
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: 0
+                          }}
+                        >
+                          Veure projecte
+                        </button>
+                      )}
                     </p>
                   </div>
                   <div style={styles.detailHeaderRight}>
@@ -1022,7 +1045,25 @@ export default function Orders() {
                       <h4 style={styles.detailSectionTitle}>🏭 Proveïdor</h4>
                       <div style={styles.detailRow}>
                         <span style={styles.detailLabel}>Nom:</span>
-                        <span style={{ color: darkMode ? '#ffffff' : '#111827', fontWeight: '500' }}>{selectedOrder.supplier?.name}</span>
+                        {selectedOrder.supplier?.name ? (
+                          <button
+                            type="button"
+                            onClick={() => navigate('/app/suppliers')}
+                            style={{
+                              color: darkMode ? '#e5e7eb' : '#111827',
+                              fontWeight: 500,
+                              background: 'none',
+                              border: 'none',
+                              padding: 0,
+                              cursor: 'pointer',
+                              textDecoration: 'underline'
+                            }}
+                          >
+                            {selectedOrder.supplier.name}
+                          </button>
+                        ) : (
+                          <span style={{ color: darkMode ? '#ffffff' : '#111827', fontWeight: '500' }}>-</span>
+                        )}
                       </div>
                       <div style={styles.detailRow}>
                         <span style={styles.detailLabel}>Contacte:</span>
@@ -1120,16 +1161,6 @@ export default function Orders() {
                     </div>
                   )}
 
-                  {/* Notes */}
-                  {selectedOrder.notes && (
-                    <div style={styles.detailSection}>
-                      <h4 style={styles.detailSectionTitle}>📝 Notes</h4>
-                      <p style={{ margin: 0, color: darkMode ? '#ffffff' : '#111827', whiteSpace: 'pre-wrap' }}>
-                        {selectedOrder.notes}
-                      </p>
-                    </div>
-                  )}
-
                   {/* Amazon Ready Section */}
                   <div style={styles.detailSection}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
@@ -1185,7 +1216,15 @@ export default function Orders() {
                     />
                   </div>
 
-                  {/* Generate Manufacturer Pack */}
+                  {/* Shipment Tracking */}
+                  <div style={styles.detailSection}>
+                    <ShipmentTrackingSection 
+                      po={selectedOrder} 
+                      darkMode={darkMode}
+                    />
+                  </div>
+
+                  {/* Manufacturer Pack (single block) */}
                   <div style={styles.detailSection}>
                     <h4 style={styles.detailSectionTitle}>📦 Manufacturer Pack</h4>
                     <p style={{ 
@@ -1197,27 +1236,7 @@ export default function Orders() {
                     </p>
                     <Button
                       variant="primary"
-                      onClick={() => setShowManufacturerPackModal(true)}
-                    >
-                      <Package size={18} />
-                      Generate Manufacturer Pack
-                    </Button>
-                  </div>
-
-                  {/* Manufacturer Pack */}
-                  <div style={styles.detailSection}>
-                    <h4 style={styles.detailSectionTitle}>📦 Manufacturer Pack</h4>
-                    <p style={{ 
-                      fontSize: '13px', 
-                      color: darkMode ? '#9ca3af' : '#6b7280',
-                      marginBottom: '12px'
-                    }}>
-                      Generate a complete pack with PO, labels, packing list and carton labels for the manufacturer
-                    </p>
-                    <Button
-                      variant="primary"
                       onClick={async () => {
-                        // Carregar identifiers per al pack
                         if (selectedOrder?.project_id) {
                           try {
                             const ids = await getProductIdentifiers(selectedOrder.project_id)
@@ -1229,7 +1248,7 @@ export default function Orders() {
                         setShowManufacturerPackModal(true)
                       }}
                     >
-                      <Package size={16} />
+                      <Package size={18} />
                       Generate Manufacturer Pack
                     </Button>
                   </div>
@@ -1245,13 +1264,15 @@ export default function Orders() {
                     </Button>
                   </div>
 
-                  {/* Shipment Tracking Section */}
-                  <div style={styles.detailSection}>
-                    <ShipmentTrackingSection 
-                      po={selectedOrder} 
-                      darkMode={darkMode}
-                    />
-                  </div>
+                  {/* Notes */}
+                  {selectedOrder.notes && (
+                    <div style={styles.detailSection}>
+                      <h4 style={styles.detailSectionTitle}>📝 Notes</h4>
+                      <p style={{ margin: 0, color: darkMode ? '#ffffff' : '#111827', whiteSpace: 'pre-wrap' }}>
+                        {selectedOrder.notes}
+                      </p>
+                    </div>
+                  )}
 
                   {/* Tasks Section */}
                   {selectedOrder && (

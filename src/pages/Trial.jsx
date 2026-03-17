@@ -61,7 +61,12 @@ export default function Trial() {
       <Card className="auth-card">
         <div className="auth-card__header">
           <h1 className="auth-card__title">{t('trial.title')}</h1>
-          <p className="auth-card__subtitle">{t('trial.subtitle')}</p>
+          <p className="auth-card__subtitle">
+            {t('trial.subtitle')}
+          </p>
+          <p className="auth-card__subtitle auth-card__subtitle--secondary">
+            {t('trial.subtitle_flow_hint')}
+          </p>
         </div>
 
         {success ? (

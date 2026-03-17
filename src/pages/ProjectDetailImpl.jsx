@@ -2551,45 +2551,50 @@ ${t}
         </div>
 
         <div style={{ ...styles.content, padding: 0 }} className="project-detail-page__content">
-        <ProjectDetailHeader
-          project={project}
-          effectiveThumbUrl={effectiveThumbUrl}
-          marketplaceTags={marketplaceTags}
-          businessSnapshot={businessSnapshot}
-          stockSnapshot={stockSnapshot}
-          projectState={projectState}
-          phaseLabel={phaseLabel}
-          darkMode={darkMode}
-          onScrollToPhase={scrollToSection}
-        />
+        <section
+          aria-label="Project summary"
+          style={styles.hero}
+        >
+          <ProjectDetailHeader
+            project={project}
+            effectiveThumbUrl={effectiveThumbUrl}
+            marketplaceTags={marketplaceTags}
+            businessSnapshot={businessSnapshot}
+            stockSnapshot={stockSnapshot}
+            projectState={projectState}
+            phaseLabel={phaseLabel}
+            darkMode={darkMode}
+            onScrollToPhase={scrollToSection}
+          />
 
-        <ProjectDetailGateBanner gate={gate} darkMode={darkMode} />
+          <ProjectDetailGateBanner gate={gate} darkMode={darkMode} />
 
-        <ProjectDetailActionBar
-          isMobile={isMobile}
-          sectionSearchRef={sectionSearchRef}
-          sectionSearchTerm={sectionSearchTerm}
-          onSectionSearchChange={(value) => {
-            setSectionSearchTerm(value)
-            setShowSectionDropdown(value.trim().length > 0)
-          }}
-          onSectionSearchFocus={() => sectionSearchTerm.trim().length > 0 && setShowSectionDropdown(true)}
-          showSectionDropdown={showSectionDropdown}
-          filteredSections={filteredSections}
-          onScrollToSection={scrollToSection}
-          onSectionSearchKeyDown={handleSectionSearchKeyDown}
-          onCreatePO={handleCreatePO}
-          onCreateExpense={handleCreateExpense}
-          onAddDocument={handleAddDocument}
-          btnStateStyle={btnStateStyle}
-        />
+          <ProjectDetailActionBar
+            isMobile={isMobile}
+            sectionSearchRef={sectionSearchRef}
+            sectionSearchTerm={sectionSearchTerm}
+            onSectionSearchChange={(value) => {
+              setSectionSearchTerm(value)
+              setShowSectionDropdown(value.trim().length > 0)
+            }}
+            onSectionSearchFocus={() => sectionSearchTerm.trim().length > 0 && setShowSectionDropdown(true)}
+            showSectionDropdown={showSectionDropdown}
+            filteredSections={filteredSections}
+            onScrollToSection={scrollToSection}
+            onSectionSearchKeyDown={handleSectionSearchKeyDown}
+            onCreatePO={handleCreatePO}
+            onCreateExpense={handleCreateExpense}
+            onAddDocument={handleAddDocument}
+            btnStateStyle={btnStateStyle}
+          />
 
-        <ProjectDetailDiscardedBanner
-          project={project}
-          darkMode={darkMode}
-          onRestore={handleRestoreProject}
-          t={t}
-        />
+          <ProjectDetailDiscardedBanner
+            project={project}
+            darkMode={darkMode}
+            onRestore={handleRestoreProject}
+            t={t}
+          />
+        </section>
 
         {showNotesPanel && (
           <div style={styles.notesOverlay} onClick={() => setShowNotesPanel(false)}>
@@ -2949,69 +2954,80 @@ ${t}
             </Button>
           </div>
 
+          {/* Overview / Execution — workflow, procurement, logistics, execution (phases 3–7) */}
+          <section id="overview" aria-label="Overview / Execution" style={styles.overviewDiscoverySection}>
+            <h2 style={styles.overviewDiscoveryHeading}>
+              Overview / Execution
+            </h2>
+            <PhaseSection
+              phaseId={3}
+              currentPhaseId={phaseId}
+              phaseStyle={getPhaseStyleForUI(3)}
+              darkMode={darkMode}
+            >
+              {renderPhaseContent(3)}
+            </PhaseSection>
 
-        <PhaseSection
-          phaseId={1}
-          currentPhaseId={phaseId}
-          phaseStyle={getPhaseStyleForUI(1)}
-          darkMode={darkMode}
-        >
-          {renderPhaseContent(1)}
-        </PhaseSection>
+            <PhaseSection
+              phaseId={4}
+              currentPhaseId={phaseId}
+              phaseStyle={getPhaseStyleForUI(4)}
+              darkMode={darkMode}
+            >
+              {renderPhaseContent(4)}
+            </PhaseSection>
 
-        <PhaseSection
-          phaseId={2}
-          currentPhaseId={phaseId}
-          phaseStyle={getPhaseStyleForUI(2)}
-          darkMode={darkMode}
-        >
-          {renderPhaseContent(2)}
-        </PhaseSection>
+            <PhaseSection
+              phaseId={5}
+              currentPhaseId={phaseId}
+              phaseStyle={getPhaseStyleForUI(5)}
+              darkMode={darkMode}
+            >
+              {renderPhaseContent(5)}
+            </PhaseSection>
 
-        <PhaseSection
-          phaseId={3}
-          currentPhaseId={phaseId}
-          phaseStyle={getPhaseStyleForUI(3)}
-          darkMode={darkMode}
-        >
-          {renderPhaseContent(3)}
-        </PhaseSection>
+            <PhaseSection
+              phaseId={6}
+              currentPhaseId={phaseId}
+              phaseStyle={getPhaseStyleForUI(6)}
+              darkMode={darkMode}
+            >
+              {renderPhaseContent(6)}
+            </PhaseSection>
 
-        <PhaseSection
-          phaseId={4}
-          currentPhaseId={phaseId}
-          phaseStyle={getPhaseStyleForUI(4)}
-          darkMode={darkMode}
-        >
-          {renderPhaseContent(4)}
-        </PhaseSection>
+            <PhaseSection
+              phaseId={7}
+              currentPhaseId={phaseId}
+              phaseStyle={getPhaseStyleForUI(7)}
+              darkMode={darkMode}
+            >
+              {renderPhaseContent(7)}
+            </PhaseSection>
+          </section>
 
-        <PhaseSection
-          phaseId={5}
-          currentPhaseId={phaseId}
-          phaseStyle={getPhaseStyleForUI(5)}
-          darkMode={darkMode}
-        >
-          {renderPhaseContent(5)}
-        </PhaseSection>
+          {/* Discovery — research + viability (phases 1–2) */}
+          <section id="discovery" aria-label="Discovery" style={styles.overviewDiscoverySection}>
+            <h2 style={styles.overviewDiscoveryHeading}>
+              Discovery
+            </h2>
+            <PhaseSection
+              phaseId={1}
+              currentPhaseId={phaseId}
+              phaseStyle={getPhaseStyleForUI(1)}
+              darkMode={darkMode}
+            >
+              {renderPhaseContent(1)}
+            </PhaseSection>
 
-        <PhaseSection
-          phaseId={6}
-          currentPhaseId={phaseId}
-          phaseStyle={getPhaseStyleForUI(6)}
-          darkMode={darkMode}
-        >
-          {renderPhaseContent(6)}
-        </PhaseSection>
-
-        <PhaseSection
-          phaseId={7}
-          currentPhaseId={phaseId}
-          phaseStyle={getPhaseStyleForUI(7)}
-          darkMode={darkMode}
-        >
-          {renderPhaseContent(7)}
-        </PhaseSection>
+            <PhaseSection
+              phaseId={2}
+              currentPhaseId={phaseId}
+              phaseStyle={getPhaseStyleForUI(2)}
+              darkMode={darkMode}
+            >
+              {renderPhaseContent(2)}
+            </PhaseSection>
+          </section>
                 </div>
           </div>
 
@@ -3064,6 +3080,23 @@ const styles = {
   content: {
     padding: '32px',
     overflowY: 'auto'
+  },
+  hero: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 12,
+    marginBottom: 24
+  },
+  overviewDiscoverySection: {
+    marginBottom: 32
+  },
+  overviewDiscoveryHeading: {
+    margin: '0 0 16px 0',
+    fontSize: 18,
+    fontWeight: 600,
+    color: 'var(--text-1)',
+    paddingBottom: 8,
+    borderBottom: '1px solid var(--border-1)'
   },
   phaseSection: {
     borderRadius: '14px',

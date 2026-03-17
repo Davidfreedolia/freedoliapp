@@ -17,6 +17,7 @@ import {
   Filter,
   MoreVertical
 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { supabase, getProjects } from '../lib/supabase'
 import Header from '../components/Header'
@@ -44,6 +45,7 @@ const MOVEMENT_TYPES = {
 export default function Inventory() {
   const { t } = useTranslation()
   const { darkMode, activeOrgId } = useApp()
+  const navigate = useNavigate()
   const { isMobile, isTablet } = useBreakpoint()
   const modalStyles = getModalStyles(isMobile, darkMode)
   
@@ -286,7 +288,19 @@ export default function Inventory() {
             {item.product_name}
           </div>
           {item.project && (
-            <span style={styles.projectBadge}>{item.project.name}</span>
+            <button
+              type="button"
+              onClick={() => item.project_id && navigate(`/app/projects/${item.project_id}`)}
+              style={{
+                ...styles.projectBadge,
+                cursor: item.project_id ? 'pointer' : 'default',
+                textDecoration: item.project_id ? 'underline' : 'none',
+                background: 'none',
+                border: 'none'
+              }}
+            >
+              {item.project.name}
+            </button>
           )}
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', marginBottom: '12px', fontSize: '13px' }}>
@@ -310,12 +324,32 @@ export default function Inventory() {
           </span>
           {!isPreview && (
             <div style={{ display: 'flex', gap: '8px' }}>
-              <Button variant="ghost" size="sm" onClick={() => { setSelectedItem(item); setShowMovementModal(true) }} style={styles.actionButton}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => { setSelectedItem(item); setShowMovementModal(true) }}
+                style={styles.actionButton}
+              >
                 <Plus size={14} />
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => showHistory(item)} style={styles.actionButton}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => showHistory(item)}
+                style={styles.actionButton}
+              >
                 <History size={14} />
               </Button>
+              {item.project_id && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate(`/app/orders?project=${item.project_id}`)}
+                  style={styles.actionButton}
+                >
+                  Veure POs
+                </Button>
+              )}
             </div>
           )}
         </div>

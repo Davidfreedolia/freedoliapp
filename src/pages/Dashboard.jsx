@@ -9,44 +9,25 @@ import GridLayout from 'react-grid-layout'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
 import { 
-  FolderKanban, 
-  PlayCircle, 
-  CheckCircle2, 
-  Wallet,
   ArrowRight,
-  Users,
-  Truck,
-  Warehouse,
-  Plus,
-  Package,
-  FileText,
-  Factory,
-  TrendingUp,
-  LineChart,
-  BarChart3,
-  Table2,
-  Sun,
-  Moon,
   Bell,
+  Factory,
+  FileText,
+  Package,
+  Plus,
   Rocket,
-  Settings,
-  Barcode,
-  AlertTriangle,
-  Save,
-  X,
-  Sliders,
-  Check,
-  StickyNote
+  Truck,
+  TrendingUp,
+  AlertTriangle
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { getPurchaseOrders, getDashboardPreferences, getPosNotReady, getProjectsMissingGtin, getUnassignedGtinCodes, getPosWaitingManufacturer, updateDashboardPreferences, createOrGetTaskFromOrigin } from '../lib/supabase'
+import { getPurchaseOrders, getDashboardPreferences, getPosNotReady, getPosWaitingManufacturer, createOrGetTaskFromOrigin } from '../lib/supabase'
 import { supabase } from '../lib/supabase'
 import { computeProjectBusinessSnapshot } from '../lib/businessSnapshot'
 import { computeProjectStockSignal } from '../lib/stockSignal'
 import { computeCommercialGate } from '../lib/phaseGates'
 import { buildProjectAlerts, ALERT_SEVERITY, scoreAlert } from '../lib/businessAlerts'
 import NewProjectModal from '../components/NewProjectModal'
-import LogisticsTrackingWidget from '../components/LogisticsTrackingWidget'
 import CustomizeDashboardModal from '../components/CustomizeDashboardModal'
 import {
   WaitingManufacturerWidget,
@@ -56,7 +37,6 @@ import {
   StaleTrackingWidget
 } from '../components/DailyOpsWidgets'
 import TasksWidget from '../components/TasksWidget'
-import AlertsBadge from '../components/AlertsBadge'
 import SafeWidget from '../components/SafeWidget'
 import Button from '../components/Button'
 import Card from '../components/ui/Card'
@@ -72,11 +52,8 @@ import {
 import { showToast } from '../components/Toast'
 import { useHomeDashboardData } from '../hooks/useHomeDashboardData'
 import HomeKpiCard from '../components/home/HomeKpiCard'
-import HomeAlertsPanel from '../components/home/HomeAlertsPanel'
 import HomeProfitTrend from '../components/home/HomeProfitTrend'
 import HomeTopAsins from '../components/home/HomeTopAsins'
-import HomeBillingUsage from '../components/home/HomeBillingUsage'
-import HomeActiveProjects from '../components/home/HomeActiveProjects'
 import { DataError } from '../components/dataStates'
 import HomeReorderCandidates from '../components/home/HomeReorderCandidates'
 import HomeTopDecisions from '../components/home/HomeTopDecisions'
@@ -107,7 +84,6 @@ export default function Dashboard() {
   const [unblockTaskProjectId, setUnblockTaskProjectId] = useState(null)
   const [ordersInProgress, setOrdersInProgress] = useState([])
   const [loadingOrders, setLoadingOrders] = useState(true)
-  const [financialData, setFinancialData] = useState([])
   const [posNotReady, setPosNotReady] = useState([])
   const [loadingPosNotReady, setLoadingPosNotReady] = useState(true)
   const [dashboardWidgets, setDashboardWidgets] = useState({
@@ -134,14 +110,11 @@ export default function Dashboard() {
   ])
   const [staleDays, setStaleDays] = useState(7)
   const [loadingPreferences, setLoadingPreferences] = useState(true)
-  const [gtinCoverage, setGtinCoverage] = useState({ missingGtin: 0, availableCodes: 0 })
-  const [loadingGtinCoverage, setLoadingGtinCoverage] = useState(true)
   const [posWaitingManufacturer, setPosWaitingManufacturer] = useState([])
   const [loadingWaitingManufacturer, setLoadingWaitingManufacturer] = useState(true)
   const [editLayout, setEditLayout] = useState(false)
   const [layout, setLayout] = useState([])
   const [gridWidth, setGridWidth] = useState(1200)
-  const [financeView, setFinanceView] = useState('bar')
 
   // Executive dashboard (C4)
   const [execLoading, setExecLoading] = useState(true)
@@ -169,8 +142,6 @@ export default function Dashboard() {
   useEffect(() => {
     loadDashboardPreferences()
     loadOrdersInProgress()
-    loadFinancialData()
-    loadGtinCoverage()
     loadPosNotReady()
     loadPosWaitingManufacturer()
 
@@ -402,23 +373,6 @@ export default function Dashboard() {
     return () => window.removeEventListener('resize', calculateWidth)
   }, [isMobile, isTablet, sidebarCollapsed])
 
-  const loadGtinCoverage = async () => {
-    setLoadingGtinCoverage(true)
-    try {
-      const [missingGtin, availableCodes] = await Promise.all([
-        getProjectsMissingGtin(activeOrgId),
-        getUnassignedGtinCodes(activeOrgId)
-      ])
-      setGtinCoverage({
-        missingGtin: missingGtin?.length || 0,
-        availableCodes: availableCodes?.length || 0
-      })
-    } catch (err) {
-      console.error('Error carregant GTIN coverage:', err)
-    }
-    setLoadingGtinCoverage(false)
-  }
-
   const loadOrdersInProgress = async () => {
     setLoadingOrders(true)
     try {
@@ -622,88 +576,6 @@ export default function Dashboard() {
     }
   }
 
-  const loadFinancialData = async () => {
-    try {
-      const [expensesRes, incomesRes] = await Promise.all([
-        supabase.from('expenses').select('amount, expense_date').order('expense_date', { ascending: false }),
-        supabase.from('incomes').select('amount, income_date').order('income_date', { ascending: false })
-      ])
-      
-      const expenses = expensesRes.data || []
-      const incomes = incomesRes.data || []
-      
-      // Agrupar per mes
-      const monthly = {}
-      expenses.forEach(e => {
-        if (e.expense_date) {
-          const month = e.expense_date.substring(0, 7) // YYYY-MM
-          if (!monthly[month]) monthly[month] = { income: 0, expenses: 0 }
-          monthly[month].expenses += parseFloat(e.amount || 0)
-        }
-      })
-      incomes.forEach(i => {
-        if (i.income_date) {
-          const month = i.income_date.substring(0, 7) // YYYY-MM
-          if (!monthly[month]) monthly[month] = { income: 0, expenses: 0 }
-          monthly[month].income += parseFloat(i.amount || 0)
-        }
-      })
-      
-      const sorted = Object.keys(monthly).sort().slice(-6) // Últims 6 mesos
-      setFinancialData(sorted.map(month => ({
-        month,
-        ...monthly[month],
-        profit: monthly[month].income - monthly[month].expenses
-      })))
-    } catch (err) {
-      console.error('Error carregant dades financeres:', err)
-    }
-  }
-
-  // Removed unused recentProjects
-
-  const totalProjects = stats.totalProjects || 0
-  const activeProjects = stats.activeProjects || 0
-  const completedProjects = stats.completedProjects || 0
-  const pendingProjects = Math.max(totalProjects - completedProjects - activeProjects, 0)
-  const safeTotal = totalProjects > 0 ? totalProjects : 1
-
-  const statCards = [
-    {
-      label: 'Total Projectes',
-      value: totalProjects,
-      icon: FolderKanban,
-      iconClass: 'dash-stat-icon--projects',
-      ringClass: 'dash-ring--projects',
-      ringType: 'total'
-    },
-    {
-      label: 'Actius',
-      value: activeProjects,
-      icon: PlayCircle,
-      iconClass: 'dash-stat-icon--active',
-      ringClass: 'dash-ring--active',
-      ringType: 'active'
-    },
-    {
-      label: 'Completats',
-      value: completedProjects,
-      icon: CheckCircle2,
-      iconClass: 'dash-stat-icon--done',
-      ringClass: 'dash-ring--done',
-      ringType: 'done'
-    },
-    {
-      label: 'Invertit',
-      value: `${stats.totalInvested.toLocaleString('ca-ES', { minimumFractionDigits: 2 })} €`,
-      icon: Wallet,
-      iconClass: 'dash-stat-icon--money',
-      ringClass: 'dash-ring--money',
-      ringType: 'money'
-    }
-  ]
-  
-  // Contador de projectes descartats (clicable)
   const discardedCount = stats.discardedProjects || 0
 
   const getOrderStatusInfo = (status) => {
@@ -721,60 +593,8 @@ export default function Dashboard() {
     return statuses[status] || statuses.draft
   }
 
-
-  // Gràfica de finances senzilla
-  const maxValue = financialData.length > 0
-    ? Math.max(...financialData.map(d => Math.max(d.income, d.expenses)), 1)
-    : 1
-
   return (
     <div style={styles.container} className="page-dashboard">
-      {/* Edit Layout Controls - Only visible when editing, hidden in screenshot mode */}
-      {editLayout && !isMobile && !isScreenshotMode() && (
-        <div style={{
-          display: 'flex',
-          justifyContent: 'flex-end',
-          padding: '16px 32px',
-          gap: '12px',
-          backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-          borderBottom: `1px solid ${darkMode ? '#1f1f2e' : '#e5e7eb'}`
-        }}>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={handleToggleEditMode}
-            style={styles.iconButton}
-            title={t('dashboard.done')}
-          >
-            <Check size={20} />
-          </Button>
-          
-          {/* Reset Layout */}
-          {editLayout && !isMobile && (
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleResetLayout}
-              style={styles.iconButton}
-              title="Restaurar layout per defecte"
-            >
-              <X size={20} color="#ffffff" />
-            </Button>
-          )}
-          
-          {/* Personalitzar Dashboard - Using Sliders icon to avoid duplicate Settings */}
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => setShowCustomizeModal(true)}
-            style={styles.iconButton}
-            title="Personalitzar Dashboard"
-          >
-            <Sliders size={20} color="var(--text-1)" />
-          </Button>
-        </div>
-      )}
-
       <div style={{
         ...styles.content,
         padding: isMobile ? '16px' : '32px'
@@ -796,6 +616,10 @@ export default function Dashboard() {
             <div style={{ fontSize: 14, color: 'var(--text-1)' }}>
               <strong>{t('dashboard.firstValue.title')}</strong>{' '}
               <span>{t('dashboard.firstValue.subtitle')}</span>
+              <br />
+              <span style={{ fontSize: 13, color: 'var(--muted-1)' }}>
+                {t('dashboard.firstValue.checklist')}
+              </span>
             </div>
             <Button
               variant="primary"
@@ -852,343 +676,79 @@ export default function Dashboard() {
         )}
         {!dashboardModeLoading && dashboardHasData && (
           <>
-        {/* Edit Mode Badge - hidden in screenshot mode */}
-        {editLayout && !isMobile && !isScreenshotMode() && (
-          <div style={{
-            ...styles.editModeBadge,
-            backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6',
-            borderColor: 'var(--brand-primary)',
-            color: darkMode ? '#ffffff' : '#111827'
-          }}>
-            <Sliders size={14} color="var(--brand-primary)" />
-            <span>{t('dashboard.editMode')}</span>
-          </div>
-        )}
-
-        {/* D21.7 — Home layout (D15): header + KPI + Alerts + Performance + Operations + reserved slot */}
-        <section style={styles.homeSection} aria-label="Home dashboard">
-          <header style={styles.homeHeader}>
-            <h1 style={styles.homeTitle}>{t('dashboard.modeA.title', 'Dashboard')}</h1>
-            <p style={styles.homeSubtitle}>{t('dashboard.modeA.subtitle', 'Resum del teu negoci')}</p>
-          </header>
-
           {homeDataError && (
             <div style={{ marginBottom: 16 }}>
               <DataError message={homeDataError} />
             </div>
           )}
 
-          <div style={styles.homeRow} aria-label="KPI row">
-            <HomeKpiCard
-              title="Net profit (30d)"
-              value={formatCurrency(homeData?.kpis?.netProfit30d)}
-              loading={homeDataLoading}
-            />
-            <HomeKpiCard
-              title="Revenue (30d)"
-              value={formatCurrency(homeData?.kpis?.revenue30d)}
-              loading={homeDataLoading}
-            />
-            <HomeKpiCard
-              title="Margin (30d)"
-              value={formatPercent(homeData?.kpis?.margin30d)}
-              loading={homeDataLoading}
-            />
-            <HomeKpiCard
-              title="Cash now"
-              value={formatCurrency(homeData?.kpis?.cashNow)}
-              loading={homeDataLoading}
-            />
-          </div>
-
-          <div style={styles.homeRow} aria-label="Alerts row">
-            <HomeAlertsPanel
-              title="Margin alerts"
-              items={homeData?.alerts?.margin ?? []}
-              type="margin"
-              emptyMessage="No margin alerts."
-            />
-            <HomeAlertsPanel
-              title="Stockout risk"
-              items={homeData?.alerts?.stockout ?? []}
-              type="stockout"
-              emptyMessage="No stockout risk."
-            />
-          </div>
-
-          <div style={styles.homeRow} aria-label="Performance row">
-            <HomeProfitTrend
-              data={homeData?.performance?.profitTrend}
-              loading={homeDataLoading}
-            />
-            <HomeTopAsins
-              items={homeData?.performance?.topAsins}
-              loading={homeDataLoading}
-            />
-          </div>
-
-          <div style={styles.homeRow} aria-label="Operations row">
-            <HomeBillingUsage
-              billingUsage={homeData?.operations?.billingUsage}
-              loading={homeDataLoading}
-            />
-            <HomeActiveProjects
-              projects={homeData?.projects?.active}
-              loading={homeDataLoading}
-            />
-          </div>
-
-          {/* D35/D36 — Top Decisions widget (Decision Inbox teaser) */}
-          <HomeTopDecisions />
-
-          {/* D19.2 — Reorder candidates widget (motor real getReorderCandidates) */}
-          <HomeReorderCandidates
-            reorder={homeData?.reorder}
-            loading={homeDataLoading}
-          />
-        </section>
-
-        {/* Requereix atenció — Projectes bloquejats */}
-        {blockedProjects.length >= 1 && (
-          <div style={{
-            marginBottom: 16,
-            padding: '12px 16px',
-            borderRadius: 'var(--radius-ui)',
-            border: '1px solid var(--border-1)',
-            background: 'var(--surface-bg-2)'
-          }}>
-            <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 2, color: 'var(--text-1)' }}>Requereix atenció</div>
-            <div style={{ fontSize: 12, color: 'var(--muted-1)', marginBottom: 10 }}>Projectes bloquejats</div>
-            <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
-              {blockedProjects.slice(0, 5).map((p) => {
-                const ratio = p?.progress_ratio
-                const pct = ratio != null && Number.isFinite(ratio)
-                  ? Math.max(0, Math.min(100, Math.round(ratio <= 1 ? ratio * 100 : ratio)))
-                  : 0
-                const reason = (p?.blocked_reason ?? '').toString().trim()
-                return (
-                  <li key={p.id} style={{ padding: '6px 0', borderBottom: '1px solid var(--border-1)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
-                      <Link to={`/app/projects/${p.id}`} style={{ fontWeight: 500, color: 'var(--text-1)', textDecoration: 'none', minWidth: 0, flex: '1 1 auto' }}>
-                        {p.name || '—'}
-                      </Link>
-                      <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--muted-1)', flexShrink: 0 }}>{pct}%</span>
-                    </div>
-                    {reason ? (
-                      <div
-                        style={{
-                          fontSize: 11,
-                          color: 'var(--text-secondary)',
-                          marginTop: 2,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap'
-                        }}
-                        title={reason}
-                      >
-                        {reason}
-                      </div>
-                    ) : null}
-                    <div style={{ marginTop: 6 }}>
-                      <button
-                        type="button"
-                        onClick={(e) => { e.preventDefault(); handleCreateUnblockTask(p) }}
-                        disabled={unblockTaskProjectId === p.id}
-                        style={{
-                          fontSize: 11,
-                          padding: '4px 8px',
-                          border: '1px solid var(--border-1)',
-                          borderRadius: 6,
-                          background: 'var(--surface-bg-2)',
-                          color: 'var(--text-1)',
-                          cursor: unblockTaskProjectId === p.id ? 'wait' : 'pointer',
-                        }}
-                      >
-                        {unblockTaskProjectId === p.id ? '…' : 'Create unblock task'}
-                      </button>
-                    </div>
-                  </li>
-                )
-              })}
-            </ul>
-            {blockedProjects.length > 5 && (
-              <div style={{ marginTop: 8, fontSize: 12 }}>
-                <Link to="/app/projects" style={{ color: 'var(--primary-1)', fontWeight: 500 }}>Veure tots a Projectes</Link>
-              </div>
-            )}
-          </div>
-        )}
-        
-        {/* Stats Grid */}
-        <div className="dash-top-row" style={styles.statsGrid}>
-          {statCards.map((stat, index) => {
-            const ringStyle = stat.ringType === 'total'
-              ? {
-                  '--a': `${activeProjects / safeTotal}turn`,
-                  '--d': `${completedProjects / safeTotal}turn`,
-                  '--p': `${pendingProjects / safeTotal}turn`
-                }
-              : {
-                  '--p': `${stat.ringType === 'active'
-                    ? activeProjects / safeTotal
-                    : stat.ringType === 'done'
-                      ? completedProjects / safeTotal
-                      : 0.6}turn`
-                }
-
-            return (
-              <div
-                key={index}
-                className={`dash-stat-card ${darkMode ? 'dash-stat-card--dark' : 'dash-stat-card--light'}`}
-              >
-                <div className={`dash-stat-icon ${stat.iconClass || ''}`.trim()}>
-                  <stat.icon size={18} />
-                </div>
-                <div className="dash-stat-info" style={styles.statInfo}>
-                  <span className="dash-stat-value">{stat.value}</span>
-                  <span className="dash-stat-label">{stat.label}</span>
-                </div>
-                <div
-                  className={`dash-ring ${stat.ringClass || ''} ${stat.ringType === 'total' ? 'dash-ring--total' : ''}`.trim()}
-                  style={ringStyle}
-                  aria-hidden="true"
-                />
-              </div>
-            )
-          })}
-          {!loadingGtinCoverage && (
-            <>
-              <div className={`dash-stat-card ${darkMode ? 'dash-stat-card--dark' : 'dash-stat-card--light'}`}>
-                <div className="dash-stat-icon dash-stat-icon--barcode">
-                  <Barcode size={18} />
-                </div>
-                <div className="dash-stat-info" style={styles.statInfo}>
-                  <span className="dash-stat-value">{gtinCoverage.missingGtin}</span>
-                  <span className="dash-stat-label">SKUs sense GTIN</span>
-                </div>
-              </div>
-              <div className={`dash-stat-card ${darkMode ? 'dash-stat-card--dark' : 'dash-stat-card--light'}`}>
-                <div className="dash-stat-icon dash-stat-icon--barcode">
-                  <Barcode size={18} />
-                </div>
-                <div className="dash-stat-info" style={styles.statInfo}>
-                  <span className="dash-stat-value">{gtinCoverage.availableCodes}</span>
-                  <span className="dash-stat-label">Codis al pool</span>
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* Discarded Projects Counter */}
-        {discardedCount > 0 && (
-          <div style={{
-            ...styles.discardedCounter,
-            backgroundColor: darkMode ? '#15151f' : '#ffffff',
-            borderColor: darkMode ? '#374151' : '#e5e7eb'
-          }}>
-            <AlertTriangle size={16} color="var(--muted-1)" />
-            <span style={{
-              fontSize: '13px',
-              color: 'var(--muted-1)'
-            }}>
-              Projectes descartats: {discardedCount}
-            </span>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => navigate('/app/projects?showDiscarded=true')}
-              className="dashboard-view-all"
-            >
-              Veure →
-            </Button>
-          </div>
-        )}
-
-        {/* Dashboard tagline (C6) */}
-        <p style={{ margin: '0 0 12px 0', fontSize: 14, opacity: 0.85, color: 'var(--muted-1)' }}>
-          Operational control for your Amazon business.
-        </p>
-
-        {/* Executive dashboard (C4): KPI row + Risk Radar + Money Focus */}
-        {execLoading && (
-          <div style={{ padding: '16px 0', color: 'var(--muted-1)', fontSize: 14 }}>{t('common.loading')}</div>
-        )}
-        {execError && (
-          <div style={{ padding: '16px 0', color: 'var(--danger-1)', fontSize: 14 }}>
-            {execError || t('common.errorGeneric')}
-          </div>
-        )}
-        {!execLoading && !execError && execData.kpis != null && (
-          <>
-            {totalProjects === 0 && (
-              <div style={{
-                padding: '16px',
-                marginBottom: 16,
-                borderRadius: 'var(--radius-ui)',
-                border: '1px solid var(--border-1)',
-                background: 'var(--surface-bg-2)',
-                color: 'var(--muted-1)',
-                fontSize: 14
-              }}>
-                No active projects yet. Create your first project to start tracking ROI, stock and gates.
-              </div>
-            )}
-            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)',
-                gap: 12,
-                flex: 1,
-                minWidth: 0
-              }}>
-              <div style={{
-                padding: '12px 16px',
-                borderRadius: 'var(--radius-ui)',
-                border: '1px solid var(--border-1)',
-                background: 'var(--surface-bg-2)'
-              }}>
-                <div style={{ fontSize: 11, color: 'var(--muted-1)', marginBottom: 4 }}>Invested</div>
-                <div style={{ fontSize: 18, fontWeight: 600 }}>€{(execData.kpis.invested_total_all || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
-              </div>
-              <div style={{
-                padding: '12px 16px',
-                borderRadius: 'var(--radius-ui)',
-                border: '1px solid var(--border-1)',
-                background: 'var(--surface-bg-2)'
-              }}>
-                <div style={{ fontSize: 11, color: 'var(--muted-1)', marginBottom: 4 }}>Income (30d)</div>
-                <div style={{ fontSize: 18, fontWeight: 600 }}>€{(execData.kpis.income_30d_all || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
-              </div>
-              <div style={{
-                padding: '12px 16px',
-                borderRadius: 'var(--radius-ui)',
-                border: '1px solid var(--border-1)',
-                background: 'var(--surface-bg-2)'
-              }}>
-                <div style={{ fontSize: 11, color: 'var(--muted-1)', marginBottom: 4 }}>ROI weighted</div>
-                <div style={{ fontSize: 18, fontWeight: 600 }}>{execData.kpis.weighted_roi_pct != null ? `${execData.kpis.weighted_roi_pct.toFixed(1)}%` : '—'}</div>
-              </div>
-              <div style={{
-                padding: '12px 16px',
-                borderRadius: 'var(--radius-ui)',
-                border: '1px solid var(--border-1)',
-                background: 'var(--surface-bg-2)'
-              }}>
-                <div style={{ fontSize: 11, color: 'var(--muted-1)', marginBottom: 4 }}>At risk</div>
-                <div style={{ fontSize: 18, fontWeight: 600 }}>{execData.kpis.at_risk_count ?? 0}</div>
-              </div>
-              </div>
-              {/* Quick Actions (C6) */}
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                <Button variant="primary" size="sm" onClick={() => navigate('/app/projects')}>New Project</Button>
-                <Button variant="secondary" size="sm" onClick={() => navigate('/app/orders')}>New PO</Button>
-                <Button variant="ghost" size="sm" onClick={() => navigate('/app/settings')}>Settings</Button>
-              </div>
+          {/* 1. Hero / Executive summary */}
+          <section style={styles.homeSection} aria-label="Hero">
+            <header style={styles.homeHeader}>
+              <h1 style={styles.homeTitle}>{t('dashboard.modeA.title', 'Dashboard')}</h1>
+              <p style={styles.homeSubtitle}>{t('dashboard.modeA.subtitle', 'Resum del teu negoci')}</p>
+            </header>
+            <div style={styles.homeRow} aria-label="KPI row">
+              <HomeKpiCard
+                title="Net profit (30d)"
+                value={formatCurrency(homeData?.kpis?.netProfit30d)}
+                loading={homeDataLoading}
+              />
+              <HomeKpiCard
+                title="Revenue (30d)"
+                value={formatCurrency(homeData?.kpis?.revenue30d)}
+                loading={homeDataLoading}
+              />
+              <HomeKpiCard
+                title="Margin (30d)"
+                value={formatPercent(homeData?.kpis?.margin30d)}
+                loading={homeDataLoading}
+              />
+              <HomeKpiCard
+                title="Cash now"
+                value={formatCurrency(homeData?.kpis?.cashNow)}
+                loading={homeDataLoading}
+              />
             </div>
+            <div style={{ ...styles.homeRow, alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+              <Button variant="primary" size="sm" onClick={() => setShowNewProjectModal(true)}>
+                <Plus size={16} style={{ marginRight: 6 }} />
+                {tCommon('dashboard.modeB.cta.createProduct')}
+              </Button>
+              <Button variant="secondary" size="sm" onClick={() => navigate('/app/orders')}>
+                {t('dashboard.newPO', 'New PO')}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => navigate('/app/decisions')}>
+                {t('dashboard.viewDecisionsInbox', 'View Decisions Inbox')}
+              </Button>
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--muted-1)', marginTop: 8, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+              <span>Active projects: {stats.activeProjects ?? 0}</span>
+              {discardedCount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => navigate('/app/projects?showDiscarded=true')}
+                  style={{ background: 'none', border: 'none', color: 'var(--primary-1)', cursor: 'pointer', fontWeight: 500 }}
+                >
+                  Discarded: {discardedCount} →
+                </button>
+              )}
+            </div>
+          </section>
 
-            {/* Alerts Panel (C5) */}
-            {execData.alerts && (
+          {/* 2. Atenció immediata — una sola capa d'alerts + projectes bloquejats */}
+          <section style={{ marginBottom: 24 }} aria-label="Atenció immediata">
+            <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 600, color: 'var(--text-1)' }}>
+              <Bell size={18} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+              {t('dashboard.attentionTitle', 'Atenció immediata')}
+            </h2>
+            {execLoading && (
+              <div style={{ padding: '12px 0', color: 'var(--muted-1)', fontSize: 14 }}>{t('common.loading')}</div>
+            )}
+            {execError && (
+              <div style={{ padding: '12px 0', color: 'var(--danger-1)', fontSize: 14 }}>{execError || t('common.errorGeneric')}</div>
+            )}
+            {!execLoading && !execError && execData.alerts && (
               <div style={{
                 marginBottom: 16,
                 padding: '12px 16px',
@@ -1196,42 +756,13 @@ export default function Dashboard() {
                 border: '1px solid var(--border-1)',
                 background: 'var(--surface-bg-2)'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 12, marginBottom: 12 }}>
-                  <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
-                    <Bell size={18} style={{ verticalAlign: 'middle', marginRight: 6 }} />
-                    Alerts
-                  </h2>
-                  <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: 'var(--danger-1)', color: '#fff', fontWeight: 600 }}>Critical: {execData.alerts.counts.criticalCount}</span>
-                  <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: 'var(--warning-1)', color: '#fff', fontWeight: 600 }}>Warning: {execData.alerts.counts.warningCount}</span>
-                  <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: 'var(--muted-1)', color: 'var(--surface-bg)', fontWeight: 600 }}>Info: {execData.alerts.counts.infoCount}</span>
-                </div>
-                <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
-                  {['all', 'critical', 'warning'].map((f) => (
-                    <button
-                      key={f}
-                      type="button"
-                      onClick={() => setAlertsFilter(f)}
-                      style={{
-                        fontSize: 12,
-                        padding: '6px 12px',
-                        border: '1px solid var(--border-1)',
-                        borderRadius: 'var(--radius-ui)',
-                        background: alertsFilter === f ? 'var(--surface-bg)' : 'transparent',
-                        color: alertsFilter === f ? 'var(--text-1)' : 'var(--muted-1)',
-                        cursor: 'pointer',
-                        fontWeight: alertsFilter === f ? 600 : 400
-                      }}
-                    >
-                      {f === 'all' ? 'All' : f === 'critical' ? 'Critical' : 'Warning'}
-                    </button>
-                  ))}
-                </div>
-                {execData.alerts.counts.criticalCount === 0 && execData.alerts.counts.warningCount === 0 && execData.alerts.counts.infoCount === 0 ? (
-                  <div style={{ padding: '16px 0', color: 'var(--muted-1)', fontSize: 13 }}>No alerts. You're unusually safe today.</div>
+                {(execData.alerts.counts.criticalCount + execData.alerts.counts.warningCount + execData.alerts.counts.infoCount) === 0 ? (
+                  <div style={{ padding: '8px 0', color: 'var(--muted-1)', fontSize: 13 }}>{t('dashboard.noAlerts', 'No alerts. You\'re unusually safe today.')}</div>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {execData.alerts.all
                       .filter(a => alertsFilter === 'all' || (alertsFilter === 'critical' && a.severity === 'critical') || (alertsFilter === 'warning' && a.severity === 'warning'))
+                      .slice(0, 10)
                       .map((alert) => (
                         <div
                           key={alert.id}
@@ -1239,7 +770,7 @@ export default function Dashboard() {
                             display: 'flex',
                             alignItems: 'center',
                             gap: 12,
-                            padding: '10px 12px',
+                            padding: '8px 12px',
                             border: '1px solid var(--border-1)',
                             borderRadius: 'var(--radius-ui)',
                             background: 'var(--surface-bg)'
@@ -1265,149 +796,81 @@ export default function Dashboard() {
                       ))}
                   </div>
                 )}
+                <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+                  {['all', 'critical', 'warning'].map((f) => (
+                    <button
+                      key={f}
+                      type="button"
+                      onClick={() => setAlertsFilter(f)}
+                      style={{
+                        fontSize: 12,
+                        padding: '4px 10px',
+                        border: '1px solid var(--border-1)',
+                        borderRadius: 'var(--radius-ui)',
+                        background: alertsFilter === f ? 'var(--surface-bg)' : 'transparent',
+                        color: alertsFilter === f ? 'var(--text-1)' : 'var(--muted-1)',
+                        cursor: 'pointer',
+                        fontWeight: alertsFilter === f ? 600 : 400
+                      }}
+                    >
+                      {f === 'all' ? 'All' : f === 'critical' ? 'Critical' : 'Warning'}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
+            {blockedProjects.length >= 1 && (
+              <div style={{
+                padding: '12px 16px',
+                borderRadius: 'var(--radius-ui)',
+                border: '1px solid var(--border-1)',
+                background: 'var(--surface-bg-2)'
+              }}>
+                <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8, color: 'var(--text-1)' }}>{t('dashboard.blockedProjects', 'Projectes bloquejats')}</div>
+                <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+                  {blockedProjects.slice(0, 5).map((p) => {
+                    const ratio = p?.progress_ratio
+                    const pct = ratio != null && Number.isFinite(ratio) ? Math.max(0, Math.min(100, Math.round(ratio <= 1 ? ratio * 100 : ratio))) : 0
+                    const reason = (p?.blocked_reason ?? '').toString().trim()
+                    return (
+                      <li key={p.id} style={{ padding: '6px 0', borderBottom: '1px solid var(--border-1)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
+                          <Link to={`/app/projects/${p.id}`} style={{ fontWeight: 500, color: 'var(--text-1)', textDecoration: 'none', minWidth: 0, flex: '1 1 auto' }}>
+                            {p.name || '—'}
+                          </Link>
+                          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--muted-1)', flexShrink: 0 }}>{pct}%</span>
+                        </div>
+                        {reason && (
+                          <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={reason}>{reason}</div>
+                        )}
+                        <div style={{ marginTop: 6 }}>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.preventDefault(); handleCreateUnblockTask(p) }}
+                            disabled={unblockTaskProjectId === p.id}
+                            style={{ fontSize: 11, padding: '4px 8px', border: '1px solid var(--border-1)', borderRadius: 6, background: 'var(--surface-bg-2)', color: 'var(--text-1)', cursor: unblockTaskProjectId === p.id ? 'wait' : 'pointer' }}
+                          >
+                            {unblockTaskProjectId === p.id ? '…' : t('dashboard.createUnblockTask', 'Create unblock task')}
+                          </button>
+                        </div>
+                      </li>
+                    )
+                  })}
+                </ul>
+                {blockedProjects.length > 5 && (
+                  <div style={{ marginTop: 8, fontSize: 12 }}>
+                    <Link to="/app/projects" style={{ color: 'var(--primary-1)', fontWeight: 500 }}>{t('dashboard.viewAllProjects', 'Veure tots a Projectes')}</Link>
+                  </div>
+                )}
+              </div>
+            )}
+          </section>
 
-            <div style={{
-              ...styles.section,
-              backgroundColor: darkMode ? '#15151f' : '#ffffff',
-              marginBottom: 16
-            }}>
-              <h2 style={{ ...styles.sectionTitle, color: darkMode ? '#ffffff' : '#111827', marginBottom: 12 }}>
-                <AlertTriangle size={20} style={{ verticalAlign: 'middle', marginRight: 8 }} />
-                Risk Radar
-              </h2>
-              {execData.risk.length === 0 ? (
-                <div style={styles.empty}><p>No risks detected.</p></div>
-              ) : (
-                <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-                    <thead>
-                      <tr style={{ borderBottom: '1px solid var(--border-1)' }}>
-                        <th style={{ textAlign: 'left', padding: '8px 12px' }}>Project</th>
-                        <th style={{ textAlign: 'left', padding: '8px 12px' }}>Gate</th>
-                        <th style={{ textAlign: 'left', padding: '8px 12px' }}>ROI</th>
-                        <th style={{ textAlign: 'left', padding: '8px 12px' }}>Stock</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {execData.risk.map((row) => (
-                        <tr key={row.project.id} style={{ borderBottom: '1px solid var(--border-1)' }}>
-                          <td style={{ padding: '8px 12px' }}>
-                            <Link to={`/app/projects/${row.project.id}`} style={{ color: 'var(--text-1)', fontWeight: 500 }}>
-                              {row.project.name}{row.project.sku ? ` · ${row.project.sku}` : ''}
-                            </Link>
-                          </td>
-                          <td style={{ padding: '8px 12px' }}>
-                            {row.gate.gateId !== 'NONE' && (
-                              <span style={{
-                                fontSize: 11,
-                                padding: '4px 8px',
-                                border: '1px solid var(--border-1)',
-                                background: 'var(--surface-bg-2)',
-                                borderRadius: 999,
-                                color: row.gate.tone === 'success' ? 'var(--success-1)' : row.gate.tone === 'warn' ? 'var(--warning-1)' : row.gate.tone === 'danger' ? 'var(--danger-1)' : 'var(--muted-1)',
-                                fontWeight: 600
-                              }}>
-                                {row.gate.gateId === 'PRODUCTION' ? 'PROD' : row.gate.gateId === 'LISTING' ? 'LIST' : 'LIVE'}: {row.gate.label}
-                              </span>
-                            )}
-                          </td>
-                          <td style={{ padding: '8px 12px' }}>
-                            {row.business && (
-                              <span style={{
-                                fontSize: 11,
-                                padding: '4px 8px',
-                                border: '1px solid var(--border-1)',
-                                background: 'var(--surface-bg-2)',
-                                borderRadius: 999,
-                                color: row.business.badge?.tone === 'success' ? 'var(--success-1)' : row.business.badge?.tone === 'warn' ? 'var(--warning-1)' : row.business.badge?.tone === 'danger' ? 'var(--danger-1)' : 'var(--muted-1)',
-                                fontWeight: 600
-                              }}>
-                                {row.business.roi_percent != null ? `ROI ${Math.round(row.business.roi_percent)}%` : '—'}
-                              </span>
-                            )}
-                          </td>
-                          <td style={{ padding: '8px 12px' }}>
-                            {row.stock && (
-                              <span style={{
-                                fontSize: 11,
-                                padding: '4px 8px',
-                                border: '1px solid var(--border-1)',
-                                background: 'var(--surface-bg-2)',
-                                borderRadius: 999,
-                                color: row.stock.tone === 'success' ? 'var(--success-1)' : row.stock.tone === 'warn' ? 'var(--warning-1)' : row.stock.tone === 'danger' ? 'var(--danger-1)' : 'var(--muted-1)',
-                                fontWeight: 600
-                              }}>
-                                {row.stock.badgeTextPrimary}
-                                {row.stock.badgeTextSecondary && row.stock.badgeTextSecondary !== '—' ? ` · ${row.stock.badgeTextSecondary}` : ''}
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-
-            <div style={{
-              ...styles.section,
-              backgroundColor: darkMode ? '#15151f' : '#ffffff',
-              marginBottom: 16
-            }}>
-              <h2 style={{ ...styles.sectionTitle, color: darkMode ? '#ffffff' : '#111827', marginBottom: 12 }}>
-                <TrendingUp size={20} style={{ verticalAlign: 'middle', marginRight: 8 }} />
-                Money Focus
-              </h2>
-              {execData.focus.length === 0 ? (
-                <div style={styles.empty}><p>No scale-ready projects yet.</p></div>
-              ) : (
-                <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-                    <thead>
-                      <tr style={{ borderBottom: '1px solid var(--border-1)' }}>
-                        <th style={{ textAlign: 'left', padding: '8px 12px' }}>Project</th>
-                        <th style={{ textAlign: 'left', padding: '8px 12px' }}>ROI</th>
-                        <th style={{ textAlign: 'left', padding: '8px 12px' }}>Stock</th>
-                        <th style={{ textAlign: 'left', padding: '8px 12px' }}>Invested</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {execData.focus.map((row) => (
-                        <tr key={row.project.id} style={{ borderBottom: '1px solid var(--border-1)' }}>
-                          <td style={{ padding: '8px 12px' }}>
-                            <Link to={`/app/projects/${row.project.id}`} style={{ color: 'var(--text-1)', fontWeight: 500 }}>
-                              {row.project.name}{row.project.sku ? ` · ${row.project.sku}` : ''}
-                            </Link>
-                          </td>
-                          <td style={{ padding: '8px 12px' }}>
-                            <span style={{
-                              fontSize: 11,
-                              padding: '4px 8px',
-                              border: '1px solid var(--border-1)',
-                              background: 'var(--surface-bg-2)',
-                              borderRadius: 999,
-                              color: 'var(--success-1)',
-                              fontWeight: 600
-                            }}>
-                              ROI {Math.round(row.business?.roi_percent ?? 0)}%
-                            </span>
-                          </td>
-                          <td style={{ padding: '8px 12px' }}>{row.stock?.badgeTextPrimary ?? '—'}</td>
-                          <td style={{ padding: '8px 12px' }}>€{(row.business?.invested_total ?? 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </>
-        )}
-
-        {/* Comandes en curs + Tracking Logístic */}
+          {/* 3. Operativa del dia */}
+          <section style={{ marginBottom: 24 }} aria-label="Operativa del dia">
+            <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 600, color: 'var(--text-1)' }}>
+              {t('dashboard.operativaTitle', 'Operativa del dia')}
+            </h2>
         {dashboardWidgets.orders_in_progress && (
           <SafeWidget widgetName="Orders In Progress" darkMode={darkMode}>
             <div
@@ -1609,104 +1072,73 @@ export default function Dashboard() {
           )}
         </div>
         )}
+          </section>
 
-        {/* Gràfica de finances */}
-        {dashboardWidgets.finance_chart && financialData.length > 0 && (
-          <SafeWidget widgetName="Finance Chart" darkMode={darkMode}>
-          <div style={{
-            ...styles.section,
-            backgroundColor: darkMode ? '#15151f' : '#ffffff'
-          }}>
-            <div style={styles.sectionHeader}>
-              <h2 style={{
-                ...styles.sectionTitle,
-                color: darkMode ? '#ffffff' : '#111827'
-              }}>
-                <TrendingUp size={20} />
-                Analítica de Finances
-              </h2>
-              <div className="finance-toggle">
-                <Button
-                  variant={financeView === 'line' ? 'secondary' : 'ghost'}
-                  size="sm"
-                  onClick={() => setFinanceView('line')}
-                >
-                  <LineChart size={16} />
-                </Button>
-                <Button
-                  variant={financeView === 'bar' ? 'secondary' : 'ghost'}
-                  size="sm"
-                  onClick={() => setFinanceView('bar')}
-                >
-                  <BarChart3 size={16} />
-                </Button>
-                <Button
-                  variant={financeView === 'table' ? 'secondary' : 'ghost'}
-                  size="sm"
-                  onClick={() => setFinanceView('table')}
-                >
-                  <Table2 size={16} />
-                </Button>
-              </div>
+          {/* 4. Next actions */}
+          <section style={{ marginBottom: 24 }} aria-label="Next actions">
+            <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 600, color: 'var(--text-1)' }}>
+              {t('dashboard.nextActionsTitle', 'Next actions')}
+            </h2>
+            <div style={styles.homeRow}>
+              <HomeReorderCandidates reorder={homeData?.reorder} loading={homeDataLoading} />
+              <HomeTopDecisions />
             </div>
-            {financeView === 'bar' ? (
+          </section>
+
+          {/* 5. Performance / portfolio snapshot */}
+          <section style={{ marginBottom: 24 }} aria-label="Performance">
+            <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 600, color: 'var(--text-1)' }}>
+              <TrendingUp size={18} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+              {t('dashboard.performanceTitle', 'Performance')}
+            </h2>
+            <div style={styles.homeRow}>
+              <HomeProfitTrend data={homeData?.performance?.profitTrend} loading={homeDataLoading} />
+              <HomeTopAsins items={homeData?.performance?.topAsins} loading={homeDataLoading} />
+            </div>
+            {!execLoading && !execError && (execData.risk?.length > 0 || execData.focus?.length > 0) && (
               <div style={{
-                ...styles.chartContainer,
-                overflowX: isMobile ? 'auto' : 'visible',
-                width: '100%'
+                marginTop: 16,
+                padding: '12px 16px',
+                borderRadius: 'var(--radius-ui)',
+                border: '1px solid var(--border-1)',
+                background: 'var(--surface-bg-2)'
               }}>
-                <div style={{
-                  ...styles.chartBars,
-                  minWidth: isMobile ? '400px' : 'auto'
-                }}>
-                  {financialData.map((data, index) => (
-                    <div key={index} style={styles.chartBarGroup}>
-                      <div style={styles.barLabels}>
-                        <div style={{
-                          ...styles.bar,
-                          height: `${(data.income / maxValue) * 100}%`,
-                          backgroundColor: 'var(--brand-green)'
-                        }} />
-                        <div style={{
-                          ...styles.bar,
-                          height: `${(data.expenses / maxValue) * 100}%`,
-                          backgroundColor: 'var(--brand-primary)',
-                          marginTop: '4px'
-                        }} />
-                      </div>
-                      <div style={styles.barLabel}>
-                        {new Date(data.month + '-01').toLocaleDateString('ca-ES', { month: 'short', year: '2-digit' })}
-                      </div>
-                      <div style={styles.barValues}>
-                        <span style={{ color: 'var(--brand-green)', fontSize: '11px' }}>
-                          +{data.income.toLocaleString('ca-ES', { maximumFractionDigits: 0 })}€
-                        </span>
-                        <span style={{ color: 'var(--brand-primary)', fontSize: '11px' }}>
-                          -{data.expenses.toLocaleString('ca-ES', { maximumFractionDigits: 0 })}€
-                        </span>
-                      </div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--muted-1)', marginBottom: 8 }}>{t('dashboard.portfolioSnapshot', 'Portfolio snapshot')}</div>
+                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
+                  {execData.risk.length > 0 && (
+                    <div>
+                      <div style={{ fontSize: 11, color: 'var(--muted-1)', marginBottom: 4 }}>At risk ({execData.risk.length})</div>
+                      <ul style={{ margin: 0, padding: 0, listStyle: 'none', fontSize: 13 }}>
+                        {execData.risk.slice(0, 3).map((row) => (
+                          <li key={row.project.id} style={{ padding: '4px 0', borderBottom: '1px solid var(--border-1)' }}>
+                            <Link to={`/app/projects/${row.project.id}`} style={{ color: 'var(--text-1)' }}>{row.project.name}</Link>
+                            {row.gate?.gateId && row.gate.gateId !== 'NONE' && (
+                              <span style={{ marginLeft: 6, fontSize: 11, color: 'var(--muted-1)' }}>{row.gate.label}</span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                  ))}
-                </div>
-                <div style={styles.chartLegend}>
-                  <div style={styles.legendItem}>
-                    <div style={{ ...styles.legendColor, backgroundColor: 'var(--brand-green)' }} />
-                    <span>Ingressos</span>
-                  </div>
-                  <div style={styles.legendItem}>
-                    <div style={{ ...styles.legendColor, backgroundColor: 'var(--brand-primary)' }} />
-                    <span>Despeses</span>
-                  </div>
+                  )}
+                  {execData.focus.length > 0 && (
+                    <div>
+                      <div style={{ fontSize: 11, color: 'var(--muted-1)', marginBottom: 4 }}>Scale focus ({execData.focus.length})</div>
+                      <ul style={{ margin: 0, padding: 0, listStyle: 'none', fontSize: 13 }}>
+                        {execData.focus.slice(0, 3).map((row) => (
+                          <li key={row.project.id} style={{ padding: '4px 0', borderBottom: '1px solid var(--border-1)' }}>
+                            <Link to={`/app/projects/${row.project.id}`} style={{ color: 'var(--text-1)' }}>{row.project.name}</Link>
+                            <span style={{ marginLeft: 6, fontSize: 11, color: 'var(--success-1)' }}>ROI {Math.round(row.business?.roi_percent ?? 0)}%</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               </div>
-            ) : (
-              <div className="finance-placeholder">Coming soon</div>
             )}
-          </div>
-          </SafeWidget>
-        )}
+          </section>
 
-        {/* Daily Ops Widgets with Grid Layout (Desktop/Tablet) */}
+        {/* Daily Ops Widgets with Grid Layout (Desktop/Tablet) — hidden for P1.1 */}
         {false && (
           <div style={{ marginTop: '32px' }}>
             <GridLayout

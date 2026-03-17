@@ -377,6 +377,9 @@ export default function ActivationWizard() {
                 {t('activation.welcome.baseCurrencyMissing')}
               </p>
             )}
+            <p className="wizard-subtitle wizard-subtitle--hint">
+              {t('activation.welcome.flowHint')}
+            </p>
             <div className="wizard-footer">
               <div className="wizard-footer__left" />
               <div className="wizard-footer__right">
@@ -399,11 +402,17 @@ export default function ActivationWizard() {
                 <div className="wizard-tool-card__title">
                   {t('activation.choosePath.amazonLabel')}
                 </div>
+                <p className="wizard-tool-card__subtitle">
+                  {t('activation.choosePath.amazonDescription')}
+                </p>
               </div>
               <div className="wizard-tool-card" onClick={handleChooseSetup}>
                 <div className="wizard-tool-card__title">
                   {t('activation.choosePath.setupLabel')}
                 </div>
+                <p className="wizard-tool-card__subtitle">
+                  {t('activation.choosePath.setupDescription')}
+                </p>
               </div>
             </div>
           </div>
