@@ -27,7 +27,7 @@ import {
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { getCompanySettings, updateCompanySettings, uploadCompanyLogo, deleteCompanyLogo, supabase, getAuditLogs, updateLanguage, getCurrentUserId } from '../lib/supabase'
-import { getOrgEntitlements, assertOrgWithinLimit } from '../lib/billing/entitlements'
+import { getOrgEntitlements, assertOrgWithinLimit, hasOrgFeature, getOrgFeatureLimit } from '../lib/billing/entitlements'
 import { createStripePortalSession, createStripeCheckoutSession } from '../lib/billingApi'
 import { clearDemoData, generateDemoData, checkDemoExists } from '../lib/demoSeed'
 import Header from '../components/Header'
@@ -92,6 +92,10 @@ export default function Settings() {
   const [addMemberUserId, setAddMemberUserId] = useState('')
   const [addingMember, setAddingMember] = useState(false)
   const [billingLoading, setBillingLoading] = useState(false)
+  const [workspaceEntitlements, setWorkspaceEntitlements] = useState(null)
+  const [workspaceEntitlementsLoading, setWorkspaceEntitlementsLoading] = useState(false)
+  const [workspaceEntitlementsError, setWorkspaceEntitlementsError] = useState(null)
+  const [updatingMemberId, setUpdatingMemberId] = useState(null)
 
   useEffect(() => {
     loadSettings()
@@ -106,6 +110,7 @@ export default function Settings() {
         setOrg(null)
         setSeatsUsed(0)
         setMembers([])
+        setWorkspaceEntitlements(null)
         setWorkspaceLoading(false)
         return
       }
@@ -118,6 +123,7 @@ export default function Settings() {
         setOrg(null)
         setSeatsUsed(0)
         setMembers([])
+        setWorkspaceEntitlements(null)
         setWorkspaceLoading(false)
         return
       }
@@ -130,9 +136,23 @@ export default function Settings() {
       setSeatsUsed(count ?? 0)
       const { data: membersData } = await supabase
         .from('org_memberships')
-        .select('user_id, role')
+        .select('user_id, role, status')
         .eq('org_id', activeOrgId)
       setMembers(membersData ?? [])
+
+      // Entitlements for this workspace (features & limits)
+      setWorkspaceEntitlementsLoading(true)
+      setWorkspaceEntitlementsError(null)
+      try {
+        const ent = await getOrgEntitlements(supabase, activeOrgId)
+        setWorkspaceEntitlements(ent)
+      } catch (err) {
+        console.warn('Error loading workspace entitlements:', err)
+        setWorkspaceEntitlements(null)
+        setWorkspaceEntitlementsError(err?.message || 'Failed to load entitlements')
+      } finally {
+        setWorkspaceEntitlementsLoading(false)
+      }
     } catch (err) {
       console.error('Error loading workspace:', err)
     }
@@ -346,6 +366,38 @@ export default function Settings() {
   const seatLimit = canonicalSeatsLimit ?? org?.seat_limit ?? null
   const seatLimitReached = seatLimit != null && seatsUsed >= seatLimit
 
+  const handleUpdateMemberStatus = async (member, nextStatus) => {
+    if (!org?.id || !member?.user_id || updatingMemberId) return
+    setUpdatingMemberId(member.user_id)
+    try {
+      const { error } = await supabase.rpc('membership_set_status', {
+        p_org_id: org.id,
+        p_user_id: member.user_id,
+        p_new_status: nextStatus
+      })
+      if (error) throw error
+      showToast(
+        nextStatus === 'active'
+          ? 'Member reactivated.'
+          : nextStatus === 'suspended'
+            ? 'Member suspended.'
+            : nextStatus === 'removed'
+              ? 'Member removed.'
+              : 'Membership updated.',
+        'success'
+      )
+      loadWorkspace()
+    } catch (err) {
+      console.error('Error updating member status:', err)
+      showToast(err?.message || 'Error updating member.', 'error')
+    }
+    setUpdatingMemberId(null)
+  }
+
+  const workspacePlanLimitSeats = workspaceEntitlements
+    ? getOrgFeatureLimit(workspaceEntitlements, 'team.seats') ?? workspaceEntitlements.seat_limit ?? null
+    : null
+
   const handleAddMember = async () => {
     const uid = addMemberUserId.trim()
     if (!uid || !org) return
@@ -357,11 +409,17 @@ export default function Settings() {
     try {
       const entitlements = await getOrgEntitlements(supabase, org.id)
       assertOrgWithinLimit(entitlements, 'team.seats', seatsUsed)
-      const { error } = await supabase
-        .from('org_memberships')
-        .insert({ org_id: org.id, user_id: uid, role: 'member' })
+      const { data, error } = await supabase.rpc('org_add_member', {
+        p_org_id: org.id,
+        p_user_id: uid,
+        p_role: 'member'
+      })
       if (error) throw error
-      showToast('Member added.', 'success')
+      if (data === 'already_member') {
+        showToast('User is already a member.', 'info')
+      } else {
+        showToast('Member added.', 'success')
+      }
       setAddMemberUserId('')
       loadWorkspace()
     } catch (err) {
@@ -1152,12 +1210,73 @@ export default function Settings() {
                     <p style={{ color: 'var(--muted-1)', margin: '0 0 16px', fontSize: 14 }}>No members yet.</p>
                   ) : (
                     <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                      {members.map((m) => (
-                        <li key={m.user_id} style={{ fontSize: 14, color: darkMode ? '#e5e7eb' : '#374151' }}>
-                          <code style={{ fontSize: 12, background: darkMode ? '#15151f' : '#fff', padding: '4px 8px', borderRadius: 6 }}>{String(m.user_id).slice(0, 8)}…</code>
-                          <span style={{ marginLeft: 8, color: 'var(--muted-1)' }}>({m.role})</span>
-                        </li>
-                      ))}
+                      {members.map((m) => {
+                        const statusLabel = m.status || 'unknown'
+                        const isActive = statusLabel === 'active'
+                        const isSuspended = statusLabel === 'suspended'
+                        return (
+                          <li
+                            key={m.user_id}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: 12,
+                              fontSize: 14,
+                              color: darkMode ? '#e5e7eb' : '#374151'
+                            }}
+                          >
+                            <div>
+                              <code
+                                style={{
+                                  fontSize: 12,
+                                  background: darkMode ? '#15151f' : '#fff',
+                                  padding: '4px 8px',
+                                  borderRadius: 6
+                                }}
+                              >
+                                {String(m.user_id).slice(0, 8)}…
+                              </code>
+                              <span style={{ marginLeft: 8, color: 'var(--muted-1)' }}>({m.role})</span>
+                              <span
+                                style={{
+                                  marginLeft: 8,
+                                  padding: '2px 8px',
+                                  borderRadius: 999,
+                                  fontSize: 11,
+                                  textTransform: 'capitalize',
+                                  backgroundColor: isActive ? '#22c55e15' : isSuspended ? '#f9731615' : '#6b728015',
+                                  color: isActive ? '#16a34a' : isSuspended ? '#ea580c' : '#6b7280'
+                                }}
+                              >
+                                {statusLabel}
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              {isActive && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleUpdateMemberStatus(m, 'suspended')}
+                                  disabled={updatingMemberId === m.user_id}
+                                >
+                                  {updatingMemberId === m.user_id ? 'Updating…' : 'Suspend'}
+                                </Button>
+                              )}
+                              {isSuspended && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleUpdateMemberStatus(m, 'active')}
+                                  disabled={updatingMemberId === m.user_id}
+                                >
+                                  {updatingMemberId === m.user_id ? 'Updating…' : 'Reactivate'}
+                                </Button>
+                              )}
+                            </div>
+                          </li>
+                        )
+                      })}
                     </ul>
                   )}
                   {seatLimitReached && (
@@ -1188,6 +1307,50 @@ export default function Settings() {
                       {addingMember ? 'Adding…' : 'Add member'}
                     </Button>
                   </div>
+                </div>
+
+                {/* Entitlements / Features overview */}
+                <div style={{
+                  ...styles.subsection,
+                  marginTop: '24px',
+                  padding: '20px',
+                  borderRadius: '12px',
+                  border: '1px solid var(--border-color)',
+                  backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
+                }}>
+                  <h3 style={{ ...styles.subsectionTitle, color: darkMode ? '#ffffff' : '#111827', marginBottom: '12px' }}>
+                    <Database size={16} /> Plan & features
+                  </h3>
+                  {workspaceEntitlementsLoading ? (
+                    <p style={{ color: 'var(--muted-1)', fontSize: 14 }}>Loading entitlements…</p>
+                  ) : workspaceEntitlementsError ? (
+                    <p style={{ color: 'var(--danger-1)', fontSize: 14 }}>
+                      {workspaceEntitlementsError}
+                    </p>
+                  ) : !workspaceEntitlements ? (
+                    <p style={{ color: 'var(--muted-1)', fontSize: 14 }}>
+                      No entitlements information available for this workspace.
+                    </p>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 14 }}>
+                      <div>
+                        <span style={{ color: 'var(--muted-1)', marginRight: 8 }}>Seats limit (plan)</span>
+                        <strong>{workspacePlanLimitSeats != null ? workspacePlanLimitSeats : '—'}</strong>
+                      </div>
+                      <div>
+                        <span style={{ color: 'var(--muted-1)', marginRight: 8 }}>Amazon ingest</span>
+                        <strong>{hasOrgFeature(workspaceEntitlements, 'amazon_ingest') ? 'Enabled' : 'Not enabled'}</strong>
+                      </div>
+                      <div>
+                        <span style={{ color: 'var(--muted-1)', marginRight: 8 }}>Analytics</span>
+                        <strong>{hasOrgFeature(workspaceEntitlements, 'analytics') ? 'Enabled' : 'Not enabled'}</strong>
+                      </div>
+                      <div>
+                        <span style={{ color: 'var(--muted-1)', marginRight: 8 }}>Profit engine</span>
+                        <strong>{hasOrgFeature(workspaceEntitlements, 'profit_engine') ? 'Enabled' : 'Not enabled'}</strong>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </>
             )}

@@ -11,16 +11,25 @@ ALTER TABLE public.custom_cities
   ADD COLUMN IF NOT EXISTS org_id uuid;
 
 -- 2) Backfill: user_id → org_memberships → org_id (one org per user, arbitrary)
-UPDATE public.custom_cities c
-SET org_id = (
-  SELECT m.org_id
-  FROM public.org_memberships m
-  WHERE m.user_id = c.user_id
-  ORDER BY m.created_at ASC
-  LIMIT 1
-)
-WHERE c.org_id IS NULL
-  AND c.user_id IS NOT NULL;
+-- Guard: only if custom_cities has user_id (remote may already have migrated without it)
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'custom_cities' AND column_name = 'user_id'
+  ) THEN
+    UPDATE public.custom_cities c
+    SET org_id = (
+      SELECT m.org_id
+      FROM public.org_memberships m
+      WHERE m.user_id = c.user_id
+      ORDER BY m.created_at ASC
+      LIMIT 1
+    )
+    WHERE c.org_id IS NULL
+      AND c.user_id IS NOT NULL;
+  END IF;
+END $$;
 
 -- 3) Validate: ensure no rows remain with org_id NULL (optional cleanup)
 -- Rows with user_id not in any org will keep org_id NULL; we enforce NOT NULL only if safe.

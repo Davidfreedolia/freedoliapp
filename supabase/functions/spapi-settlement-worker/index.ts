@@ -349,8 +349,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
           const parseResult = Papa.parse<Record<string, string>>(csvText, { header: true, skipEmptyLines: true, delimiter: "\t" });
           const rows = parseResult.data || [];
           const fileSha256 = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(reportIdStr)).then((h) => Array.from(new Uint8Array(h)).map((b) => b.toString(16).padStart(2, "0")).join(""));
-          const { data: existingJob } = await supabaseAdmin.from("amazon_import_jobs").select("id, status").eq("org_id", orgId).eq("file_sha256", fileSha256).maybeSingle();
-          const existing = existingJob as { id: string; status: string } | null;
+          const { data: existingJob } = await supabaseAdmin.from("amazon_import_jobs").select("id, status, attempt_count, last_error").eq("org_id", orgId).eq("file_sha256", fileSha256).maybeSingle();
+          const existing = existingJob as { id: string; status: string; attempt_count?: number; last_error?: string | null } | null;
           let jobId: string;
           if (existing?.id) {
             jobId = existing.id;
@@ -360,11 +360,28 @@ Deno.serve(async (req: Request): Promise<Response> => {
               continue;
             }
             if (existing.status === "parsed" || existing.status === "failed") {
+              const jobAttempts = existing.attempt_count ?? 0;
+              if (jobAttempts >= 5) {
+                await insertRun(orgId, reportPk, "post", "failed", "Job skipped after 5 failed attempts");
+                continue;
+              }
+              await supabaseAdmin.from("amazon_import_jobs").update({
+                status: "posting",
+                attempt_count: jobAttempts + 1,
+                started_at: new Date().toISOString(),
+                finished_at: null,
+                last_error: null,
+              }).eq("id", jobId);
               await insertRun(orgId, reportPk, "post", "started", "Posting to ledger (retry)");
               const { data: postData, error: postErr } = await supabaseAdmin.rpc("post_amazon_job_to_ledger_backend", { p_org_id: orgId, p_job_id: jobId });
               if (postErr) throw postErr;
               await supabaseAdmin.from("spapi_reports").update({ status: "posted", last_error: null, failed_attempts: 0, updated_at: new Date().toISOString() }).eq("id", reportPk);
               await insertRun(orgId, reportPk, "post", "done", "Posted", { posted_count: Array.isArray(postData)?.[0]?.posted_count ?? 0 });
+              await supabaseAdmin.from("amazon_import_jobs").update({
+                status: "done",
+                finished_at: new Date().toISOString(),
+                last_error: null,
+              }).eq("id", jobId);
               continue;
             }
             if (existing.status === "parsing" || existing.status === "posting") continue;
@@ -380,6 +397,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
               report_type: "settlement",
               status: "parsing",
               created_by: conn.created_by,
+              attempt_count: 1,
+              started_at: new Date().toISOString(),
+              finished_at: null,
+              last_error: null,
             });
           }
 
@@ -435,6 +456,11 @@ Deno.serve(async (req: Request): Promise<Response> => {
           if (postErr) throw postErr;
           await supabaseAdmin.from("spapi_reports").update({ status: "posted", last_error: null, failed_attempts: 0, updated_at: new Date().toISOString() }).eq("id", reportPk);
           await insertRun(orgId, reportPk, "post", "done", "Posted", { posted_count: Array.isArray(postData)?.[0]?.posted_count ?? 0 });
+          await supabaseAdmin.from("amazon_import_jobs").update({
+            status: "done",
+            finished_at: new Date().toISOString(),
+            last_error: null,
+          }).eq("id", jobId);
           }
         } catch (reportErr) {
           const errMsg = (reportErr as Error).message;
@@ -451,6 +477,14 @@ Deno.serve(async (req: Request): Promise<Response> => {
           await insertRun(orgId, reportPk, "download", "failed", errMsg).catch(() => {});
           await insertRun(orgId, reportPk, "parse", "failed", errMsg).catch(() => {});
           await insertRun(orgId, reportPk, "post", "failed", errMsg).catch(() => {});
+          if (jobId) {
+            await supabaseAdmin.from("amazon_import_jobs").update({
+              status: "failed",
+              attempt_count: supabaseAdmin.rpc ? undefined : undefined,
+              last_error: errMsg.slice(0, 500),
+              finished_at: new Date().toISOString(),
+            }).eq("id", jobId).catch(() => {});
+          }
           await logOpsEvent({
             org_id: orgId,
             source: "edge",
