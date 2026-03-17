@@ -29,6 +29,8 @@ El backend/arquitectura interna està **molt avançat**; no cal una altra mega f
 - Contractes multi-tenant i billing (S2/S3.x) — només es toquen en fases específiques, no com a “refactor espontani”.
 - FASE 3, 4, 5 i 6 — considerades **CLOSED**:  
   qualsevol treball futur en aquests dominis ha de respectar els contractes existents i obrir subfases noves si cal.
+- **P0 — Blockers reals i preparació immediata — CLOSED.**  
+- **P1 — Producte visible / UI / UX — CLOSED.**
 
 ---
 
@@ -48,37 +50,34 @@ Aquests punts són **deute controlat**, no blockers immediats:
 
 ---
 
-## 4. Bloc actiu actual (P0)
+## 4. Posició actual de producte (post P1)
 
-L’únic bloc actiu real ara mateix és **P0 — Blockers reals i preparació immediata**:
+- **P0 — Blockers reals i preparació immediata:** tancat (multi-tenant visible cleanup, PO hardening i reset documental completats i reflectits).  
+- **P1 — Producte visible / UI / UX:** tancat amb totes les subfases P1.1–P1.5 marcades CLOSED al tracker.
 
-- **P0.1 — Multi-tenant cleanup de superfícies visibles**  
-  Netejar qualsevol UI/surface visible que no reflecteixi correctament el contracte multi-tenant vigent (S2/S3), sense reobrir models ni RLS.
+En conseqüència:
 
-- **P0.2 — Purchase Orders hardening**  
-  Endurir els fluxos de `purchase_orders` (validacions, UX, coherència amb ledger/export) sobre l’esquema actual.
+- El producte és **visible, coherent i demo-worthy**.  
+- El veredicte actual és: **pilot-ready with caveats**.  
+- Les caveats reals per a pilots són:
+  - **Onboarding** encara millor amb acompanyament: el recorregut d’entrada funciona però es recomana pilot guiat, no self-serve pur.  
+  - **Amazon-first** massa tècnic per self-serve massiu: el camí Amazon snapshot requereix context i suport per a orgs no tècniques.
 
-- **P0.3 — Roadmap / documentation reset**  
-  Mantenir alineats aquest document i `IMPLEMENTATION_STATUS.md` amb l’estat real del repo i del producte.
-
-Després de **P0.1 + P0.2**, el punt d’entrada natural és **P1 — Producte visible / UI / UX**.
+No s’obre una nova mega fase de producte; el següent bloc és **operatiu**: **Pilot Preparation / Pilot Execution** (playbook curt, selecció de 1–3 orgs pilot, execució controlada i feedback).
 
 ---
 
 ## 5. Roadmap canònic (P0 / P1 / P2 / P3)
 
-### P0 — Blockers reals (actiu)
+### P0 — Blockers reals (tancat)
 
-- Multi-tenant visible cleanup.
-- Purchase Orders hardening.
-- Roadmap/documentation reset.
+- **Status:** CLOSED.  
+- **Scope:** Multi-tenant visible cleanup, Purchase Orders hardening, roadmap/documentation reset.
 
-### P1 — Producte visible / UI / UX
+### P1 — Producte visible / UI / UX (tancat)
 
-- Dashboard usable de veritat.
-- Projects i project detail productitzats.
-- Flows visibles consistents (end-to-end).
-- Onboarding + demo flow comercial.
+- **Status:** CLOSED.  
+- **Resultat:** Dashboard V1 usable, Projects/ProjectDetail productitzats, flows visibles Project → PO → Inventory, onboarding/demo flow comercial, i polish/consistència visual sobre superfícies clau.
 
 ### P2 — Millores fortes
 

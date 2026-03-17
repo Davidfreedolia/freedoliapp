@@ -88,6 +88,8 @@ Scope: Index of main documents and their roles.
   - **Status:** operational rule
 - **`OPERATIONS/LEGAL_COMPLIANCE_PLAN.md`** — *Plan for legal and privacy compliance before public launch.*  
   - **Status:** active roadmap
+ - **`OPERATIONS/PILOT_PLAYBOOK_V1.md`** — *Pilot playbook curt i canònic per a pilots controlats.*  
+   - **Status:** operational rule (pilot-ready amb caveats)
 
 ---
 

@@ -23,14 +23,19 @@ This file is the **canonical live status tracker** for implementation phases. It
   - **FASE 4 — Tasks / inbox / origins / gates alignment**: model de tasks canònic, linkage `source`/`source_ref_*`, inbox `/app/inbox`, gates ↔ tasks documentats i alineats.  
   - **FASE 5 — Finance canonical model / profit / cashflow**: ledger + FX canònics, contractes de P&L i cashflow fixats, profit engine alineat amb ledger, UI de Profit V1 honestada.  
   - **FASE 6 — Future prep**: contractes futurs per COGS/landed cost, realized cashflow UI, Admin Console i profit coverage, més estratègia de finances/dashboard legacy.
-- **Estat interior del producte:**  
-  El backend / arquitectura interna està **molt avançat** (multi-tenant, billing, tasks/gates, alerts, ledger/FX, profit engine, cashflow contract, governance). No falta una altra mega fase interior abans de producte/UI.
-- **Bloc actiu real:**  
-  L’únic bloc actiu és **P0 — Blockers reals i preparació immediata**, amb:
-  - **P0.1 — Multi-tenant cleanup de superfícies visibles.**  
-  - **P0.2 — Purchase Orders hardening.**  
-  - **P0.3 — Roadmap / documentation reset.**  
-  Després de P0.1 + P0.2 el següent pas natural és entrar de ple en **P1 — producte visible / UI / UX**.
+- **Blocs P0/P1:**  
+  - **P0 — Blockers reals i preparació immediata:** treball completat (multi-tenant visible cleanup, PO hardening i reset documental reflectits al repo).  
+  - **P1 — Producte visible / UI / UX:**  
+    - **P1.1 Dashboard V1 = CLOSED**  
+    - **P1.2 Projects / ProjectDetail = CLOSED**  
+    - **P1.3 Operations flow visible = CLOSED**  
+    - **P1.4 Onboarding / demo flow = CLOSED**  
+    - **P1.5 Visual consistency / polish = CLOSED**
+- **Estat actual del producte visible:**  
+  - **Status:** *pilot-ready with caveats*  
+  - Producte visible, coherent i demo-worthy; apte per **pilot controlat i acompanyat**, no per self-serve massiu.
+- **Següent bloc:**  
+  - No s’obre una nova mega fase de producte, sinó un bloc operatiu: **Pilot Preparation / Pilot Execution** (playbook curt, selecció d’1–3 orgs pilot, execució controlada i recollida de feedback).
 
 ---
 
@@ -322,21 +327,23 @@ This file is the **canonical live status tracker** for implementation phases. It
 
 ## Roadmap blocs (P0 / P1 / P2 / P3)
 
-### P0 — Blockers reals (actiu)
+### P0 — Blockers reals
 
-- **P0.1 — Multi-tenant cleanup de superfícies visibles**  
-  Netejar qualsevol rastre de paths o UI visibles que no respectin el contracte multi-tenant actual (S2/S3), sense reobrir models o RLS.
-- **P0.2 — Purchase Orders hardening**  
-  Endurir els fluxos de `purchase_orders` (validacions, UX, coherència amb ledger/export) sobre el model ja existent.
-- **P0.3 — Roadmap / documentation reset**  
-  Mantenir alineats aquest tracker i `ROADMAP_CURRENT_POSITION` amb l’estat real del repo.
+- **Status:** CLOSED (multi-tenant visible cleanup, PO hardening i reset documental aplicats).  
+- **Scope original:**  
+  - **P0.1 — Multi-tenant cleanup de superfícies visibles**  
+  - **P0.2 — Purchase Orders hardening**  
+  - **P0.3 — Roadmap / documentation reset**
 
 ### P1 — Producte visible / UI / UX
 
-- Dashboard usable de veritat (widgets, estat org, alertes, tasks).
-- Projects i project detail productitzats (flows principals clars).
-- Flows visibles consistents (del lead fins a operativa bàsica).
-- Onboarding + demo flow comercial (Amazon-first o similar).
+- **Status:** CLOSED  
+- **Scope realitzat:**  
+  - **P1.1 — Dashboard V1:** dashboard usable de veritat (widgets, estat org, alertes, tasks).  
+  - **P1.2 — Projects / ProjectDetail:** projectes i detall productitzats, amb flows principals clars.  
+  - **P1.3 — Operations flow visible:** connexions visibles entre Projects, Orders, Suppliers i Inventory.  
+  - **P1.4 — Onboarding / demo flow comercial:** recorregut d’entrada i demo entendible per prospects.  
+  - **P1.5 — Visual consistency / polish:** passades de consistència visual i polish sobre superfícies clau.
 
 ### P2 — Millores fortes
 
