@@ -777,11 +777,12 @@ export default function Dashboard() {
                           }}
                         >
                           <span style={{
-                            fontSize: 10,
-                            padding: '2px 6px',
-                            borderRadius: 4,
+                            fontSize: 11,
+                            padding: '3px 8px',
+                            borderRadius: 999,
                             fontWeight: 600,
                             textTransform: 'uppercase',
+                            letterSpacing: '0.2px',
                             color: alert.tone === 'danger' ? 'var(--danger-1)' : alert.tone === 'warn' ? 'var(--warning-1)' : 'var(--muted-1)',
                             border: `1px solid ${alert.tone === 'danger' ? 'var(--danger-1)' : alert.tone === 'warn' ? 'var(--warning-1)' : 'var(--muted-1)'}`
                           }}>

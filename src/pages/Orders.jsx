@@ -67,7 +67,7 @@ import { safeJsonArray } from '../lib/safeJson'
 import { safeArray } from '../lib/safeArray'
 import { formatError, notifyError } from '../lib/errorHandling'
 import { isScreenshotMode } from '../lib/ui/screenshotMode'
-import { DataLoading, DataError } from '../components/dataStates'
+import { DataLoading, DataError, DataEmpty } from '../components/dataStates'
 import { showToast } from '../components/Toast'
 import useT from '../hooks/useT'
 
@@ -640,9 +640,11 @@ export default function Orders() {
             alignItems: 'center',
             gap: '6px',
             padding: '4px 10px',
-            borderRadius: '6px',
+            borderRadius: '999px',
             fontSize: '12px',
             fontWeight: '500',
+            letterSpacing: '0.2px',
+            textTransform: 'capitalize',
             backgroundColor: `${status.color}15`,
             color: status.color
           }}>
@@ -869,25 +871,24 @@ export default function Orders() {
           </div>
         ) : filteredOrders.length === 0 ? (
           <div style={{ ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <FileText size={48} color="#d1d5db" />
-            <p style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontWeight: 600, marginTop: 12, marginBottom: 4 }}>
-              {searchTerm || filterStatus || filterProject
-                ? t('orders.empty.filteredTitle')
-                : t('orders.empty.title')}
-            </p>
-            {!searchTerm && !filterStatus && !filterProject && (
-              <p style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: 14, marginTop: 0, marginBottom: 16 }}>
-                {t('orders.empty.subtitle')}
-              </p>
-            )}
-            <Button 
-              onClick={() => {
-                setShowModal(true)
-              }} 
-            >
-              <Plus size={18} />
-              {t('common.createOrder')}
-            </Button>
+            <DataEmpty
+              icon={FileText}
+              message={
+                searchTerm || filterStatus || filterProject
+                  ? t('orders.empty.filteredTitle')
+                  : t('orders.empty.title')
+              }
+              action={
+                <Button
+                  onClick={() => {
+                    setShowModal(true)
+                  }}
+                >
+                  <Plus size={18} />
+                  {t('common.createOrder')}
+                </Button>
+              }
+            />
           </div>
         ) : (
           <>

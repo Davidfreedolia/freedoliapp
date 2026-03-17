@@ -31,7 +31,7 @@ import MarketplaceTag, { MarketplaceTagGroup } from '../components/MarketplaceTa
 import PhaseMark from '../components/Phase/PhaseMark'
 import ProjectCard from '../components/projects/ProjectCard'
 import useT from '../hooks/useT'
-import { DataLoading, DataError } from '../components/dataStates'
+import { DataLoading, DataError, DataEmpty } from '../components/dataStates'
 
 export default function Projects() {
   const { refreshProjects, darkMode, activeOrgId } = useApp()
@@ -986,23 +986,20 @@ export default function Projects() {
             )}
           </div>
         ) : filteredProjects.length === 0 ? (
-          <div className="projects-shell">
-            <div className="projects-empty">
-              <p className="projects-empty__title">
-                {t('projects.empty.title')}
-              </p>
-              <p className="projects-empty__subtitle">
-                {t('projects.empty.subtitle')}
-              </p>
-              <Button
-                variant="primary"
-                size="md"
-                onClick={() => setShowModal(true)}
-              >
-                <Plus size={18} />
-                {t('projects.empty.cta')}
-              </Button>
-            </div>
+          <div style={{ ...styles.empty, backgroundColor: 'var(--surface-bg)' }}>
+            <DataEmpty
+              message={t('projects.empty.title')}
+              action={
+                <Button
+                  variant="primary"
+                  size="md"
+                  onClick={() => setShowModal(true)}
+                >
+                  <Plus size={18} />
+                  {t('projects.empty.cta')}
+                </Button>
+              }
+            />
           </div>
         ) : (
           <div className="projects-shell">

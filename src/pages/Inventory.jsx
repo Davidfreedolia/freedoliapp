@@ -314,9 +314,11 @@ export default function Inventory() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{
             padding: '4px 10px',
-            borderRadius: '6px',
+            borderRadius: '999px',
             fontSize: '12px',
             fontWeight: '500',
+            letterSpacing: '0.2px',
+            textTransform: 'capitalize',
             backgroundColor: `${stockStatus.color}15`,
             color: stockStatus.color
           }}>

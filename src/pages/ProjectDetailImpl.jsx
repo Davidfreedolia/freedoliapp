@@ -3102,8 +3102,8 @@ const styles = {
     borderRadius: '14px',
     border: '1px solid',
     borderTopWidth: '1px',
-    padding: '10px 12px',
-    marginBottom: '12px'
+    padding: '14px 16px',
+    marginBottom: '16px'
   },
   phaseSectionHeader: {
     width: '100%',

@@ -32,7 +32,7 @@ import {
 import Header from '../components/Header'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { getModalStyles } from '../utils/responsiveStyles'
-import { DataLoading } from '../components/dataStates'
+import { DataLoading, DataEmpty } from '../components/dataStates'
 import SupplierMemory from '../components/SupplierMemory'
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal'
 import { showToast } from '../components/Toast'
@@ -573,16 +573,15 @@ export default function Suppliers() {
           </div>
         ) : filteredSuppliers.length === 0 ? (
           <div style={{ ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <Users size={48} color="#d1d5db" />
-            <p style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontWeight: 600, marginTop: 12, marginBottom: 4 }}>
-              {t('suppliers.empty.title')}
-            </p>
-            <p style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: 14, marginTop: 0, marginBottom: 16 }}>
-              {t('suppliers.empty.subtitle')}
-            </p>
-            <Button onClick={handleNewSupplier}>
-              <Plus size={18} /> {t('common.createSupplier')}
-            </Button>
+            <DataEmpty
+              icon={Users}
+              message={t('suppliers.empty.title')}
+              action={
+                <Button onClick={handleNewSupplier}>
+                  <Plus size={18} /> {t('common.createSupplier')}
+                </Button>
+              }
+            />
           </div>
         ) : (
           <>
