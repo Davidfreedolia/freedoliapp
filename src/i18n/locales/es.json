@@ -295,7 +295,10 @@
       "processing": "Procesando datos",
       "writing": "Escribiendo ledger",
       "idle": "Iniciando import…",
-      "done": "Import completado."
+      "done": "Import completado.",
+      "errorGeneric": "No hemos podido completar la importación. Puedes volver a intentarlo o continuar al resumen con los datos que ya haya.",
+      "retry": "Volver a intentar la importación",
+      "skipToSnapshot": "Continuar al resumen"
     },
     "snapshot": {
       "title": "Tu snapshot",
@@ -377,6 +380,7 @@
     "finances": "Finanzas",
     "inventory": "Inventario",
     "calendar": "Calendario",
+    "taskInbox": "Bandeja de tareas",
     "analytics": "Analítica",
     "decisionDashboard": "Decision Dashboard",
     "profit": "Profit",
@@ -812,7 +816,25 @@
     "overdue_plural": "Vencido hace {{days}} días",
     "dueToday": "Vence hoy",
     "dueTomorrow": "Vence mañana",
-    "dueInDays": "Vence en {{days}} días"
+    "dueInDays": "Vence en {{days}} días",
+    "inbox": {
+      "title": "Bandeja de tareas",
+      "noWorkspace": "Selecciona un workspace para ver las tareas.",
+      "filters": "Filtros",
+      "filterStatusAll": "Todos los estados",
+      "filterStatusOpen": "Abierto",
+      "filterStatusDone": "Hecho",
+      "filterSourceAll": "Todas las fuentes",
+      "sourceManual": "Manual",
+      "sourceStickyNote": "Nota adhesiva",
+      "sourceAlert": "Alerta",
+      "sourceDecision": "Decisión",
+      "sourceGate": "Puerta",
+      "empty": "Ninguna tarea coincide con los filtros.",
+      "openEntity": "Abrir entidad",
+      "viewAll": "Ver todo",
+      "openDecision": "Abrir decisión"
+    }
   },
   "settings": {
     "title": "Configuración",

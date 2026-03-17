@@ -38,6 +38,7 @@ export default function ActivationWizard() {
   const [snapshot, setSnapshot] = useState(null) // { revenue, fees, net, cashImpact, hasData }
   const [snapshotLoading, setSnapshotLoading] = useState(false)
   const [activationPath, setActivationPath] = useState('setup')
+  const [importError, setImportError] = useState(null)
 
   const t = useT()
 
@@ -176,6 +177,7 @@ export default function ActivationWizard() {
     let pollTimer
 
     async function run() {
+      setImportError(null)
       setImportStatus('requesting')
       try {
         const entitlements = await getOrgEntitlements(supabase, activeOrgId)
@@ -184,6 +186,7 @@ export default function ActivationWizard() {
             setImportStatus('done')
             setImportDone(true)
             showToast('Importació Amazon no disponible al teu pla', 'error')
+            setImportError('amazon_ingest_not_available')
           }
           return
         }
@@ -199,6 +202,7 @@ export default function ActivationWizard() {
           setImportStatus('done')
           setImportDone(true)
           showToast(err?.message || 'Error requesting import', 'error')
+          setImportError('request_failed')
         }
         return
       }
@@ -470,6 +474,10 @@ export default function ActivationWizard() {
         {step === STEP_AMAZON_IMPORT && (
           <div className="wizard-body">
             <h1 className="wizard-title">{t('activation.import.title')}</h1>
+            <p className="wizard-subtitle">
+              Importarem els últims 30 dies de moviments Amazon (ingressos i comissions)
+              per construir un primer resum de rendiment. Aquest pas pot trigar uns minuts.
+            </p>
             <ul className="wizard-subtitle">
               <li>
                 {importStatus === 'requesting'
@@ -492,6 +500,37 @@ export default function ActivationWizard() {
                   : t('activation.import.idle')}
               </li>
             </ul>
+            {importError && (
+              <div style={{ marginTop: 16 }}>
+                <p className="wizard-subtitle" style={{ color: 'var(--color-danger)', fontSize: 14 }}>
+                  {t('activation.import.errorGeneric')}
+                </p>
+                <div className="wizard-footer">
+                  <div className="wizard-footer__left">
+                    <Button
+                      variant="secondary"
+                      size="md"
+                      onClick={() => {
+                        // restart import step to trigger effect again
+                        setImportDone(false)
+                        setStep(STEP_AMAZON_IMPORT)
+                      }}
+                    >
+                      {t('activation.import.retry')}
+                    </Button>
+                  </div>
+                  <div className="wizard-footer__right">
+                    <Button
+                      variant="primary"
+                      size="md"
+                      onClick={() => setStep(STEP_AMAZON_SNAPSHOT)}
+                    >
+                      {t('activation.import.skipToSnapshot')}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

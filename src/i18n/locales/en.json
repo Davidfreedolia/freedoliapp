@@ -273,7 +273,10 @@
       "processing": "Processing data",
       "writing": "Writing ledger",
       "idle": "Starting import…",
-      "done": "Import complete."
+      "done": "Import complete.",
+      "errorGeneric": "We couldn't complete the import. You can try again or continue with the snapshot using any data already available.",
+      "retry": "Try import again",
+      "skipToSnapshot": "Continue to snapshot"
     },
     "snapshot": {
       "title": "Your snapshot",
@@ -355,6 +358,7 @@
     "finances": "Finances",
     "inventory": "Inventory",
     "calendar": "Calendar",
+    "taskInbox": "Task Inbox",
     "analytics": "Analytics",
     "decisionDashboard": "Decision Dashboard",
     "profit": "Profit",
@@ -807,7 +811,25 @@
     "overdue_plural": "Overdue {{days}} days",
     "dueToday": "Due today",
     "dueTomorrow": "Due tomorrow",
-    "dueInDays": "Due in {{days}} days"
+    "dueInDays": "Due in {{days}} days",
+    "inbox": {
+      "title": "Task Inbox",
+      "noWorkspace": "Select a workspace to view tasks.",
+      "filters": "Filters",
+      "filterStatusAll": "All statuses",
+      "filterStatusOpen": "Open",
+      "filterStatusDone": "Done",
+      "filterSourceAll": "All sources",
+      "sourceManual": "Manual",
+      "sourceStickyNote": "Sticky note",
+      "sourceAlert": "Alert",
+      "sourceDecision": "Decision",
+      "sourceGate": "Gate",
+      "empty": "No tasks match the filters.",
+      "openEntity": "Open entity",
+      "viewAll": "View all",
+      "openDecision": "Open decision"
+    }
   },
   "settings": {
     "title": "Settings",

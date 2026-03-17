@@ -295,7 +295,10 @@
       "processing": "Processant dades",
       "writing": "Escrivint ledger",
       "idle": "Iniciant import…",
-      "done": "Import completat."
+      "done": "Import completat.",
+      "errorGeneric": "No hem pogut completar la importació. Pots tornar-ho a provar o continuar al resum amb les dades que ja hi hagi.",
+      "retry": "Torna a intentar la importació",
+      "skipToSnapshot": "Continuar al resum"
     },
     "snapshot": {
       "title": "El teu snapshot",
@@ -377,6 +380,7 @@
     "finances": "Finances",
     "inventory": "Inventari",
     "calendar": "Calendari",
+    "taskInbox": "Safata de tasques",
     "analytics": "Analítica",
     "decisionDashboard": "Decision Dashboard",
     "profit": "Profit",
@@ -820,7 +824,25 @@
     "overdue_plural": "Vençut fa {{days}} dies",
     "dueToday": "Venç avui",
     "dueTomorrow": "Venç demà",
-    "dueInDays": "Venç en {{days}} dies"
+    "dueInDays": "Venç en {{days}} dies",
+    "inbox": {
+      "title": "Safata de tasques",
+      "noWorkspace": "Selecciona un workspace per veure les tasques.",
+      "filters": "Filtres",
+      "filterStatusAll": "Tots els estats",
+      "filterStatusOpen": "Obert",
+      "filterStatusDone": "Fet",
+      "filterSourceAll": "Totes les fonts",
+      "sourceManual": "Manual",
+      "sourceStickyNote": "Nota adhesiva",
+      "sourceAlert": "Alerta",
+      "sourceDecision": "Decisió",
+      "sourceGate": "Porta",
+      "empty": "Cap tasca coincideix amb els filtres.",
+      "openEntity": "Obrir entitat",
+      "viewAll": "Veure tot",
+      "openDecision": "Obrir decisió"
+    }
   },
   "settings": {
     "title": "Configuració",
