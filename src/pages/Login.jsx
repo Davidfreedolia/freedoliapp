@@ -128,7 +128,8 @@ export default function Login() {
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
+          // P0.ACCESS — ensure magic link lands on a valid, explicit auth route
+          emailRedirectTo: `${window.location.origin}/login`,
         },
       })
 

@@ -116,10 +116,16 @@ export default function BillingLocked() {
         {isOwnerAdmin ? (
           <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
             {hasCustomer ? (
-              <button type="button" onClick={handlePortal} disabled={actionLoading}
-                style={{ padding: '12px 20px', borderRadius: 8, background: 'var(--danger-1)', color: '#fff', border: 'none', fontWeight: 600, cursor: actionLoading ? 'not-allowed' : 'pointer' }}>
-                {actionLoading ? t(lang, 'billingLocked_opening') : t(lang, 'billingLocked_manageSubscription')}
-              </button>
+              <>
+                <button type="button" onClick={handlePortal} disabled={actionLoading}
+                  style={{ padding: '12px 20px', borderRadius: 8, background: 'var(--danger-1)', color: '#fff', border: 'none', fontWeight: 600, cursor: actionLoading ? 'not-allowed' : 'pointer' }}>
+                  {actionLoading ? t(lang, 'billingLocked_opening') : t(lang, 'billingLocked_manageSubscription')}
+                </button>
+                <button type="button" onClick={handleCheckout} disabled={actionLoading}
+                  style={{ padding: '10px 16px', borderRadius: 8, background: 'transparent', border: '1px solid var(--border-1)', cursor: actionLoading ? 'not-allowed' : 'pointer', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                  {actionLoading ? t(lang, 'billingLocked_opening') : t(lang, 'billingLocked_startSubscription')}
+                </button>
+              </>
             ) : (
               <button type="button" onClick={handleCheckout} disabled={actionLoading}
                 style={{ padding: '12px 20px', borderRadius: 8, background: 'var(--primary-1)', color: '#fff', border: 'none', fontWeight: 600, cursor: actionLoading ? 'not-allowed' : 'pointer' }}>
@@ -135,3 +141,7 @@ export default function BillingLocked() {
     </div>
   )
 }
+
+
+
+

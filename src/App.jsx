@@ -166,9 +166,22 @@ function OnboardingGate({ children }) {
   const location = useLocation()
   const { loading, requiresOnboarding } = useOnboardingStatus(activeOrgId || null)
 
-  // Esperem que workspace i hook estiguin llestos
+  // Esperem que workspace i hook estiguin llestos (mai retornem blank)
   if (!isWorkspaceReady || loading) {
-    return children
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'var(--page-bg)',
+        color: 'var(--text-secondary, #6b7280)',
+        padding: '24px',
+        textAlign: 'center'
+      }}>
+        Carregant…
+      </div>
+    )
   }
 
   const path = location.pathname
@@ -460,3 +473,4 @@ function App() {
 }
 
 export default App
+

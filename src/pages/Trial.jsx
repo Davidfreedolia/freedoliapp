@@ -42,7 +42,7 @@ export default function Trial() {
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email: trimmed,
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
+          emailRedirectTo: `${window.location.origin}/login`,
         },
       })
       if (otpError) {
@@ -125,4 +125,5 @@ export default function Trial() {
     </div>
   )
 }
+
 
