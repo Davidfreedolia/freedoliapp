@@ -29,17 +29,31 @@ export function linkTrialRegistrationAfterWorkspaceCreated(supabase, { userEmail
  * @returns {Promise<{ id: string, name: string } | null>} Created org or null on failure.
  */
 export async function createWorkspace(supabase, { name, userEmail, userId }) {
-  if (!name || !userId) return null
+  if (!name || !userId) {
+    console.error('[createWorkspace] missing required name/userId', { name, userId, userEmail: userEmail || null })
+    return null
+  }
 
   // P0.RLS — use backend RPC to create org + owner membership atomically under RLS.
+  console.log('[createWorkspace] about to call RPC create_workspace_for_user', {
+    name,
+    userId,
+    userEmail: userEmail || null
+  })
   const { data, error } = await supabase.rpc('create_workspace_for_user', {
     p_name: name,
     p_user_id: userId,
     p_user_email: userEmail || null
   })
 
+  if (error) {
+    console.error('[createWorkspace] RPC returned error', error)
+  }
+  console.log('[createWorkspace] RPC returned data', data)
+
   const org = (Array.isArray(data) && data[0]) || null
   if (error || !org?.id) {
+    console.error('[createWorkspace] error || !org?.id', { hasError: Boolean(error), org })
     return null
   }
 

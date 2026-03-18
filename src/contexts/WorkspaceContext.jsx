@@ -37,7 +37,9 @@ export function WorkspaceProvider({ children }) {
   useEffect(() => {
     let cancelled = false
     async function bootstrap() {
+      console.log('[WorkspaceBootstrap] bootstrap() entry')
       if (isDemoMode()) {
+        console.log('[WorkspaceBootstrap] demo mode branch')
         if (!cancelled) {
           setMemberships([])
           setActiveOrgIdState(null)
@@ -47,7 +49,12 @@ export function WorkspaceProvider({ children }) {
         return
       }
       const { data: { session } } = await supabase.auth.getSession()
+      console.log('[WorkspaceBootstrap] after getSession()', {
+        hasSessionUser: Boolean(session?.user),
+        userId: session?.user?.id
+      })
       if (!session?.user) {
+        console.log('[WorkspaceBootstrap] no session user branch')
         if (!cancelled) {
           setMemberships([])
           setActiveOrgIdState(null)
@@ -62,6 +69,7 @@ export function WorkspaceProvider({ children }) {
         .eq('status', 'active')
         .order('created_at', { ascending: true })
       if (error) {
+        console.error('[WorkspaceBootstrap] org_memberships query error', error)
         if (!cancelled) {
           setMemberships([])
           setActiveOrgIdState(null)
@@ -71,6 +79,7 @@ export function WorkspaceProvider({ children }) {
       }
       const list = rows || []
       if (!cancelled) setMemberships(list)
+      console.log('[WorkspaceBootstrap] memberships loaded', { count: list.length })
 
       // P0.CRITICAL — first-user workspace onboarding unblock:
       // If the authenticated user has no active memberships, auto-create a workspace (org + owner membership)
@@ -84,6 +93,11 @@ export function WorkspaceProvider({ children }) {
             user?.user_metadata?.full_name ||
             (userEmail ? userEmail.split('@')[0] : 'Workspace')
 
+          console.log('[WorkspaceBootstrap] about to call createWorkspace()', {
+            userId,
+            userEmail: userEmail || null,
+            derivedName
+          })
           const org = await createWorkspace(supabase, {
             name: derivedName || 'Workspace',
             userEmail,
@@ -92,6 +106,10 @@ export function WorkspaceProvider({ children }) {
 
           if (!cancelled) {
             if (org?.id) {
+              console.log('[WorkspaceBootstrap] createWorkspace() returned org', {
+                orgId: org.id,
+                orgName: org.name
+              })
               const createdMembership = {
                 org_id: org.id,
                 role: 'owner',
@@ -102,6 +120,7 @@ export function WorkspaceProvider({ children }) {
               setActiveOrgIdState(org.id)
               persistActiveOrg(org.id)
             } else {
+              console.error('[WorkspaceBootstrap] createWorkspace() returned null', { userId, userEmail })
               setMemberships([])
               setActiveOrgIdState(null)
               persistActiveOrg(null)
@@ -109,6 +128,7 @@ export function WorkspaceProvider({ children }) {
             setIsWorkspaceReady(true)
           }
         } catch (_) {
+          console.error('[WorkspaceBootstrap] createWorkspace() threw', _)
           if (!cancelled) {
             setMemberships([])
             setActiveOrgIdState(null)
