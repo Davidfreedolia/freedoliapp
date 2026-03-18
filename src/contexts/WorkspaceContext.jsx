@@ -49,19 +49,27 @@ export function WorkspaceProvider({ children }) {
         }
         return
       }
-      const { data: { session } } = await supabase.auth.getSession()
+      let session = (await supabase.auth.getSession()).data.session
       console.log('[WorkspaceBootstrap] after getSession()', {
         hasSessionUser: Boolean(session?.user),
         userId: session?.user?.id
       })
       if (!session?.user) {
         console.log('[WorkspaceBootstrap] no session user branch')
-        if (!cancelled) {
-          setMemberships([])
-          setActiveOrgIdState(null)
-          setIsWorkspaceReady(true)
+        // Minimal race fix: right after login Supabase may still be hydrating.
+        // Give it a short window before finalizing an "empty ready" state.
+        await new Promise((r) => setTimeout(r, 750))
+        if (cancelled) return
+
+        session = (await supabase.auth.getSession()).data.session
+        if (!session?.user) {
+          if (!cancelled) {
+            setMemberships([])
+            setActiveOrgIdState(null)
+            setIsWorkspaceReady(true)
+          }
+          return
         }
-        return
       }
       const { data: rows, error } = await supabase
         .from('org_memberships')
