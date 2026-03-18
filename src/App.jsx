@@ -215,7 +215,7 @@ function OnboardingGate({ children }) {
     return <Navigate to="/app" replace />
   }
 
-  if (!requiresOnboarding && path === '/activation') {
+  if (!requiresOnboarding && path === '/activation' && activeOrgId) {
     console.log('[DiagWhiteScreen][OnboardingGate] render -> Navigate /app (onboarding done, path=/activation)', {
       isWorkspaceReady,
       activeOrgId,
