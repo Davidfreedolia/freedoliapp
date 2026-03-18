@@ -123,6 +123,7 @@ const AutomationInboxPage = lazyWithErrorBoundary(() => import('./pages/automati
 const AutomationProposalDetailPage = lazyWithErrorBoundary(() => import('./pages/automations/AutomationProposalDetailPage'), 'AutomationProposalDetailPage')
 const AutomationActivityPage = lazyWithErrorBoundary(() => import('./pages/automations/AutomationActivityPage'), 'AutomationActivityPage')
 const AutomationAnalyticsPage = lazyWithErrorBoundary(() => import('./pages/automations/AutomationAnalyticsPage'), 'AutomationAnalyticsPage')
+const TaskInbox = lazyWithErrorBoundary(() => import('./pages/TaskInbox'), 'TaskInbox')
 
 const ADMIN_EMAILS = new Set(['david@freedolia.com'])
 
@@ -165,7 +166,7 @@ function OnboardingGate({ children }) {
   const location = useLocation()
   const { loading, requiresOnboarding } = useOnboardingStatus(activeOrgId || null)
 
-  // No fem res fins que workspace i hook estiguin llestos
+  // Esperem que workspace i hook estiguin llestos
   if (!isWorkspaceReady || loading) {
     return children
   }
@@ -173,6 +174,11 @@ function OnboardingGate({ children }) {
   const path = location.pathname
   const hasAmazonActivationFlag =
     typeof sessionStorage !== 'undefined' && sessionStorage.getItem('activation_amazon_path')
+
+  // P0.CRITICAL — si hi ha usuari però cap org activa, no deixem entrar a /app sense passar per activation.
+  if (!activeOrgId && path.startsWith('/app') && path !== '/activation') {
+    return <Navigate to="/activation" replace />
+  }
 
   // Usuari autenticat + org carregada + onboarding complet → root envia a /app
   if (!requiresOnboarding && path === '/' && activeOrgId) {
@@ -437,6 +443,7 @@ function App() {
                 <Route path="billing" element={<AppPageWrap context="page:Billing"><Billing /></AppPageWrap>} />
                 <Route path="help" element={<AppPageWrap context="page:Help"><Help /></AppPageWrap>} />
                 <Route path="calendar" element={<AppPageWrap context="page:Calendar"><Calendar /></AppPageWrap>} />
+                <Route path="inbox" element={<AppPageWrap context="page:TaskInbox"><TaskInbox /></AppPageWrap>} />
                 <Route path="diagnostics" element={<AppPageWrap context="page:Diagnostics"><Diagnostics /></AppPageWrap>} />
                 <Route path="dev/seed" element={<AppPageWrap context="page:DevSeed"><DevSeed /></AppPageWrap>} />
                 <Route path="billing/locked" element={<BillingLocked />} />

@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { isDemoMode } from '../demo/demoMode'
+import { createWorkspace } from '../lib/workspace/createWorkspace'
 
 const STORAGE_KEY = 'freedoli_active_org_id'
 
@@ -71,11 +72,49 @@ export function WorkspaceProvider({ children }) {
       const list = rows || []
       if (!cancelled) setMemberships(list)
 
+      // P0.CRITICAL — first-user workspace onboarding unblock:
+      // If the authenticated user has no active memberships, auto-create a workspace (org + owner membership)
+      // so that activeOrgId is never null for a real user session.
       if (list.length === 0) {
-        if (!cancelled) {
-          setActiveOrgIdState(null)
-          persistActiveOrg(null)
-          setIsWorkspaceReady(true)
+        try {
+          const user = session.user
+          const userEmail = user?.email || ''
+          const userId = user?.id
+          const derivedName =
+            user?.user_metadata?.full_name ||
+            (userEmail ? userEmail.split('@')[0] : 'Workspace')
+
+          const org = await createWorkspace(supabase, {
+            name: derivedName || 'Workspace',
+            userEmail,
+            userId,
+          })
+
+          if (!cancelled) {
+            if (org?.id) {
+              const createdMembership = {
+                org_id: org.id,
+                role: 'owner',
+                created_at: new Date().toISOString(),
+                orgs: { id: org.id, name: org.name },
+              }
+              setMemberships([createdMembership])
+              setActiveOrgIdState(org.id)
+              persistActiveOrg(org.id)
+            } else {
+              setMemberships([])
+              setActiveOrgIdState(null)
+              persistActiveOrg(null)
+            }
+            setIsWorkspaceReady(true)
+          }
+        } catch (_) {
+          if (!cancelled) {
+            setMemberships([])
+            setActiveOrgIdState(null)
+            persistActiveOrg(null)
+            setIsWorkspaceReady(true)
+          }
         }
         return
       }
