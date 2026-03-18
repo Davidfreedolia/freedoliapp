@@ -5,6 +5,7 @@ import { isDemoMode } from '../demo/demoMode'
 import { createWorkspace } from '../lib/workspace/createWorkspace'
 
 const STORAGE_KEY = 'freedoli_active_org_id'
+const STORAGE_USER_KEY = 'freedoli_active_org_user_id'
 
 const WorkspaceContext = createContext(null)
 
@@ -119,11 +120,17 @@ export function WorkspaceProvider({ children }) {
               setMemberships([createdMembership])
               setActiveOrgIdState(org.id)
               persistActiveOrg(org.id)
+              try {
+                localStorage.setItem(STORAGE_USER_KEY, userId)
+              } catch (_) {}
             } else {
               console.error('[WorkspaceBootstrap] createWorkspace() returned null', { userId, userEmail })
               setMemberships([])
               setActiveOrgIdState(null)
               persistActiveOrg(null)
+              try {
+                localStorage.removeItem(STORAGE_USER_KEY)
+              } catch (_) {}
             }
             setIsWorkspaceReady(true)
           }
@@ -133,6 +140,9 @@ export function WorkspaceProvider({ children }) {
             setMemberships([])
             setActiveOrgIdState(null)
             persistActiveOrg(null)
+            try {
+              localStorage.removeItem(STORAGE_USER_KEY)
+            } catch (_) {}
             setIsWorkspaceReady(true)
           }
         }
@@ -142,7 +152,12 @@ export function WorkspaceProvider({ children }) {
       let currentStored = null
       try {
         const s = localStorage.getItem(STORAGE_KEY)
-        if (s && /^[0-9a-f-]{36}$/i.test(s)) currentStored = s
+        const storedUserId = localStorage.getItem(STORAGE_USER_KEY)
+        if (
+          storedUserId === session.user.id &&
+          s &&
+          /^[0-9a-f-]{36}$/i.test(s)
+        ) currentStored = s
       } catch (_) {}
       const isMemberOfStored = list.some(m => m.org_id === currentStored)
       let chosen = currentStored && isMemberOfStored ? currentStored : null
@@ -153,6 +168,9 @@ export function WorkspaceProvider({ children }) {
       if (!cancelled) {
         setActiveOrgIdState(chosen)
         persistActiveOrg(chosen)
+        try {
+          localStorage.setItem(STORAGE_USER_KEY, session.user.id)
+        } catch (_) {}
         setIsWorkspaceReady(true)
       }
     }
@@ -175,12 +193,20 @@ export function WorkspaceProvider({ children }) {
     let currentStored = null
     try {
       const s = localStorage.getItem(STORAGE_KEY)
-      if (s && /^[0-9a-f-]{36}$/i.test(s)) currentStored = s
+      const storedUserId = localStorage.getItem(STORAGE_USER_KEY)
+      if (
+        storedUserId === session.user.id &&
+        s &&
+        /^[0-9a-f-]{36}$/i.test(s)
+      ) currentStored = s
     } catch (_) {}
     const isMemberOfStored = list.some(m => m.org_id === currentStored)
     const chosen = currentStored && isMemberOfStored ? currentStored : (list.find(m => m.role === 'owner')?.org_id ?? list[0].org_id)
     setActiveOrgIdState(chosen)
     persistActiveOrg(chosen)
+    try {
+      localStorage.setItem(STORAGE_USER_KEY, session.user.id)
+    } catch (_) {}
   }, [persistActiveOrg])
 
   const value = {
