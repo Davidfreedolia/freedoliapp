@@ -165,9 +165,16 @@ function OnboardingGate({ children }) {
   const { isWorkspaceReady, activeOrgId } = useWorkspace()
   const location = useLocation()
   const { loading, requiresOnboarding } = useOnboardingStatus(activeOrgId || null)
+  const path = location.pathname
 
   // Esperem que workspace i hook estiguin llestos (mai retornem blank)
   if (!isWorkspaceReady || loading) {
+    console.log('[DiagWhiteScreen][OnboardingGate] render -> loading branch', {
+      isWorkspaceReady,
+      activeOrgId,
+      path,
+      hook: { loading, requiresOnboarding },
+    })
     return (
       <div style={{
         minHeight: '100vh',
@@ -184,37 +191,80 @@ function OnboardingGate({ children }) {
     )
   }
 
-  const path = location.pathname
   const hasAmazonActivationFlag =
     typeof sessionStorage !== 'undefined' && sessionStorage.getItem('activation_amazon_path')
 
   // P0.CRITICAL — si hi ha usuari però cap org activa, no deixem entrar a /app sense passar per activation.
   if (!activeOrgId && path.startsWith('/app') && path !== '/activation') {
+    console.log('[DiagWhiteScreen][OnboardingGate] render -> Navigate /activation (no activeOrgId)', {
+      isWorkspaceReady,
+      activeOrgId,
+      path,
+    })
     return <Navigate to="/activation" replace />
   }
 
   // Usuari autenticat + org carregada + onboarding complet → root envia a /app
   if (!requiresOnboarding && path === '/' && activeOrgId) {
+    console.log('[DiagWhiteScreen][OnboardingGate] render -> Navigate /app (onboarding done, path=/)', {
+      isWorkspaceReady,
+      activeOrgId,
+      path,
+      requiresOnboarding,
+    })
     return <Navigate to="/app" replace />
   }
 
   if (!requiresOnboarding && path === '/activation') {
+    console.log('[DiagWhiteScreen][OnboardingGate] render -> Navigate /app (onboarding done, path=/activation)', {
+      isWorkspaceReady,
+      activeOrgId,
+      path,
+      requiresOnboarding,
+    })
     return <Navigate to="/app" replace />
   }
 
   // Encara cal onboarding: redirigir a /activation només quan entri a /app amb el flag d'Amazon
   if (requiresOnboarding) {
     if (path === '/activation') {
+      console.log('[DiagWhiteScreen][OnboardingGate] render -> return children (requiresOnboarding && path=/activation)', {
+        isWorkspaceReady,
+        activeOrgId,
+        path,
+        requiresOnboarding,
+      })
       return children
     }
     if (path.startsWith('/app') && hasAmazonActivationFlag) {
+      console.log('[DiagWhiteScreen][OnboardingGate] render -> Navigate /activation (requiresOnboarding, path starts /app, hasAmazonActivationFlag)', {
+        isWorkspaceReady,
+        activeOrgId,
+        path,
+        requiresOnboarding,
+        hasAmazonActivationFlag,
+      })
       return <Navigate to="/activation" replace />
     }
     if (path !== '/activation') {
+      console.log('[DiagWhiteScreen][OnboardingGate] render -> Navigate /activation (requiresOnboarding, path !== /activation)', {
+        isWorkspaceReady,
+        activeOrgId,
+        path,
+        requiresOnboarding,
+        hasAmazonActivationFlag,
+      })
       return <Navigate to="/activation" replace />
     }
   }
 
+  console.log('[DiagWhiteScreen][OnboardingGate] render -> return children (fallthrough)', {
+    isWorkspaceReady,
+    activeOrgId,
+    path,
+    hook: { loading, requiresOnboarding },
+    hasAmazonActivationFlag,
+  })
   return children
 }
 
@@ -288,6 +338,12 @@ function AppContent() {
   const sidebarWidth = isMobile ? 0 : (isTablet ? 72 : (sidebarCollapsed ? 72 : 260))
 
   if (!isWorkspaceReady || billingState.loading) {
+    console.log('[DiagWhiteScreen][AppContent] render -> loader branch', {
+      path: location.pathname,
+      isWorkspaceReady,
+      activeOrgId,
+      billingState: { loading: billingState.loading, allowed: billingState.allowed, gate: billingState.gate, error: Boolean(billingState.error) },
+    })
     return (
       <div style={{
         minHeight: '100vh',
@@ -301,6 +357,11 @@ function AppContent() {
     )
   }
   if (billingState.error && !isBillingRoute) {
+    console.log('[DiagWhiteScreen][AppContent] render -> billing error branch', {
+      path: location.pathname,
+      isBillingRoute,
+      billingState: { loading: billingState.loading, allowed: billingState.allowed, gate: billingState.gate, error: String(billingState.error?.message ?? billingState.error) },
+    })
     return (
       <div style={{
         minHeight: '100vh',
@@ -320,6 +381,11 @@ function AppContent() {
     )
   }
   if (isBillingRoute) {
+    console.log('[DiagWhiteScreen][AppContent] render -> billing route branch (render Outlet inside Suspense)', {
+      path: location.pathname,
+      activeOrgId,
+      billingState: { loading: billingState.loading, allowed: billingState.allowed, gate: billingState.gate },
+    })
     return (
       <>
         <Suspense fallback={<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--page-bg)' }}><span style={{ color: 'var(--text-secondary)' }}>{t(lang, 'common_loading')}</span></div>}>
@@ -331,11 +397,23 @@ function AppContent() {
   }
   if (!billingState.allowed) {
     const to = billingState.gate === 'over_seat' ? '/app/billing/over-seat' : '/app/billing/locked'
+    console.log('[DiagWhiteScreen][AppContent] render -> Navigate billing lock (not allowed)', {
+      path: location.pathname,
+      to,
+      activeOrgId,
+      billingState: { allowed: billingState.allowed, gate: billingState.gate, seatsUsed: billingState.seatsUsed },
+    })
     return (
       <Navigate to={to} replace state={{ org: billingState.org, seatsUsed: billingState.seatsUsed }} />
     )
   }
 
+  console.log('[DiagWhiteScreen][AppContent] render -> main layout branch (render Outlet inside Suspense)', {
+    path: location.pathname,
+    isWorkspaceReady,
+    activeOrgId,
+    billingState: { loading: billingState.loading, allowed: billingState.allowed, gate: billingState.gate },
+  })
   return (
     <div style={{
       display: 'flex',
