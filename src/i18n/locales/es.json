@@ -24,7 +24,17 @@
       "open": "Abrir",
       "createProduct": "Crear producto",
       "details": "Detalles"
-    }
+    },
+    "createProject": "Crear proyecto",
+    "createSupplier": "Crear proveedor",
+    "createOrder": "Crear orden",
+    "close": "Cerrar",
+    "creating": "Creando...",
+    "total": "Total",
+    "all": "Todos",
+    "and": "y",
+    "more": "más",
+    "actions": "Acciones"
   },
   "dataStates": {
     "loading": "Cargando datos…",
@@ -203,6 +213,56 @@
       "terms": "Términos"
     }
   },
+  "guidance": {
+    "nextStepTitle": "Siguiente paso recomendado",
+    "dashboard": {
+      "createProject": "Crea tu primer producto para iniciar el pipeline de lanzamiento.",
+      "openOrCreatePO": "Tienes productos; crea un pedido de compra o abre un proyecto para avanzar.",
+      "reviewActivity": "Revisa los pedidos en curso o los proyectos que necesitan atención."
+    },
+    "projects": {
+      "openOrCreateOrder": "Abre un proyecto para revisar las fases o crea un pedido para un producto ya validado."
+    },
+    "orders": {
+      "createOrLink": "Crea un pedido de compra o enlázalo a un proyecto para seguir la producción."
+    },
+    "projectDetail": {
+      "recommended": "Recomendado"
+    }
+  },
+  "assistant": {
+    "title": "Asistente",
+    "context": {
+      "dashboard": "Panel",
+      "projects": "Proyectos",
+      "projectDetail": "Detalle del proyecto",
+      "orders": "Pedidos",
+      "app": "App"
+    },
+    "quick": {
+      "whatCanIDo": "¿Qué puedo hacer aquí?",
+      "nextStep": "¿Cuál es el siguiente paso?",
+      "whereOrders": "¿Dónde están los pedidos?",
+      "flow": "Flujo proyecto → PO → inventario"
+    },
+    "placeholder": "Pregunta algo...",
+    "answers": {
+      "what_can_i_do": "En esta pantalla puedes navegar y actuar según el contexto: crear o abrir proyectos, pedidos, revisar fases y viabilidad. Usa los botones de la barra lateral o las acciones de cada sección.",
+      "next_step": "El siguiente paso depende de tu estado: si no tienes proyectos, crea uno; si tienes, abre pedidos o revisa la actividad. En el panel y en cada pantalla hay una recomendación.",
+      "where_orders": "Los pedidos de compra (PO) están en la sección Pedidos. Accede desde la barra lateral o desde el panel.",
+      "where_viability": "La viabilidad y el margen están dentro de cada proyecto, en la pestaña de viabilidad (Profitability). Abre un proyecto y busca «Viabilidad» o «Margen».",
+      "where_projects": "Los proyectos están en la sección Proyectos. Accede desde la barra lateral o desde el panel.",
+      "what_means_state": "Los estados de las PO (borrador, confirmada, enviada, etc.) y términos como FNSKU están en el manual de ayuda. Abre «Ayuda» en la barra superior y busca «Pedidos» o «Amazon readiness».",
+      "flow_project_po": "El flujo es: (1) Crear proyecto en Proyectos, (2) Completar fases (viabilidad, readiness), (3) Crear PO en Pedidos y enlazarla al proyecto, (4) Seguir inventario y envíos. Puedes ir a Proyectos o Pedidos desde aquí.",
+      "po_blocked": "Si una PO está bloqueada, revisa: estado del pedido, Amazon readiness del producto, tareas pendientes y envíos. Abre Pedidos y el detalle de la PO para ver alertas y tareas.",
+      "what_missing_phase": "Para avanzar de fase hay que completar las condiciones de la fase actual: datos de producto, viabilidad, readiness Amazon, tareas. En la vista del proyecto se muestra lo pendiente."
+    },
+    "linkLabel": {
+      "orders": "Abrir Pedidos",
+      "projects": "Abrir Proyectos"
+    },
+    "noMatch": "No he encontrado una respuesta exacta. Prueba «¿Qué puedo hacer aquí?» o «¿Cuál es el siguiente paso?», o abre el manual de ayuda."
+  },
   "login": {
     "title": "Freedoliapp",
     "subtitle": "Inicia sesión para continuar",
@@ -261,6 +321,7 @@
     }
   },
   "activation": {
+    "title": "Asistente de activación",
     "steps": {
       "welcome": "Bienvenida",
       "connect": "Conectar",
@@ -273,7 +334,8 @@
       "subtitle": "Usaremos este workspace para tus proyectos y billing.",
       "noOrg": "No hay ninguna organización seleccionada. Vuelve atrás y selecciona un workspace.",
       "baseCurrency": "Moneda base: {{currency}}",
-      "baseCurrencyMissing": "Puedes definir la moneda y marketplace más adelante en Configuración."
+      "baseCurrencyMissing": "Puedes definir la moneda y marketplace más adelante en Configuración.",
+      "flowHint": "A continuación conectarás Amazon, importarás los últimos 30 días y revisarás el resumen. Puedes cambiarlo más adelante en Configuración."
     },
     "choosePath": {
       "title": "Elige el camino",
@@ -409,15 +471,11 @@
     "connect": "Conectar",
     "connecting": "Conectando…"
   },
-  "common": {
-    "createProject": "Crear proyecto",
-    "createSupplier": "Crear proveedor",
-    "createOrder": "Crear orden"
-  },
   "dashboard": {
     "firstValue": {
       "title": "Bienvenido/a a Freedoliapp.",
       "subtitle": "Empieza creando tu primer producto.",
+      "checklist": "Crea un producto → Comprueba la viabilidad → Haz tu primer pedido.",
       "cta": "Crear primer producto"
     },
     "modeA": {
@@ -889,15 +947,6 @@
       "releaseError": "Error liberando GTIN",
       "confirmRelease": "¿Estás seguro de que quieres liberar este GTIN? Se podrá asignar a otro proyecto."
     }
-  },
-  "common": {
-    "close": "Cerrar",
-    "creating": "Creando...",
-    "total": "Total",
-    "all": "Todos",
-    "and": "y",
-    "more": "más",
-    "actions": "Acciones"
   },
   "projects": {
     "newProject": "Nuevo Proyecto",

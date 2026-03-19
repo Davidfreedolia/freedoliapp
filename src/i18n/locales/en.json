@@ -24,7 +24,17 @@
       "open": "Open",
       "createProduct": "Create product",
       "details": "Details"
-    }
+    },
+    "createProject": "Create project",
+    "createSupplier": "Create supplier",
+    "createOrder": "Create order",
+    "close": "Close",
+    "creating": "Creating...",
+    "total": "Total",
+    "all": "All",
+    "and": "and",
+    "more": "more",
+    "actions": "Actions"
   },
   "dataStates": {
     "loading": "Loading data…",
@@ -203,6 +213,56 @@
       "terms": "Terms"
     }
   },
+  "guidance": {
+    "nextStepTitle": "Recommended next step",
+    "dashboard": {
+      "createProject": "Create your first product to start the launch pipeline.",
+      "openOrCreatePO": "You have products; create a purchase order or open a project to move forward.",
+      "reviewActivity": "Review orders in progress or projects that need attention."
+    },
+    "projects": {
+      "openOrCreateOrder": "Open a project to review phases or create an order for an already validated product."
+    },
+    "orders": {
+      "createOrLink": "Create a purchase order or link it to a project to track production."
+    },
+    "projectDetail": {
+      "recommended": "Recommended"
+    }
+  },
+  "assistant": {
+    "title": "Assistant",
+    "context": {
+      "dashboard": "Dashboard",
+      "projects": "Projects",
+      "projectDetail": "Project detail",
+      "orders": "Orders",
+      "app": "App"
+    },
+    "quick": {
+      "whatCanIDo": "What can I do here?",
+      "nextStep": "What's the next step?",
+      "whereOrders": "Where are orders?",
+      "flow": "Flow project → PO → inventory"
+    },
+    "placeholder": "Ask something...",
+    "answers": {
+      "what_can_i_do": "This screen lets you navigate and act by context: create or open projects, orders, review phases and viability. Use the sidebar buttons or each section's actions.",
+      "next_step": "The next step depends on your state: if you have no projects, create one; if you do, open orders or review activity. Dashboard and each screen show a recommendation.",
+      "where_orders": "Purchase orders (POs) are in the Orders section. Access from the sidebar or Dashboard.",
+      "where_viability": "Viability and margin are inside each project, in the viability/profitability tab. Open a project and look for «Viability» or «Margin».",
+      "where_projects": "Projects are in the Projects section. Access from the sidebar or Dashboard.",
+      "what_means_state": "PO statuses (draft, confirmed, shipped, etc.) and terms like FNSKU are in the help manual. Open «Help» in the top bar and search for «Orders» or «Amazon readiness».",
+      "flow_project_po": "The flow is: (1) Create a project in Projects, (2) Complete phases (viability, readiness), (3) Create a PO in Orders and link it to the project, (4) Track inventory and shipments. You can go to Projects or Orders from here.",
+      "po_blocked": "If a PO is blocked, check: order status, product Amazon readiness, pending tasks, and shipments. Open Orders and the PO detail to see alerts and tasks.",
+      "what_missing_phase": "To advance a phase you need to complete the current phase gates: product data, viability, Amazon readiness, tasks. The project view shows what's pending."
+    },
+    "linkLabel": {
+      "orders": "Open Orders",
+      "projects": "Open Projects"
+    },
+    "noMatch": "No exact answer found. Try «What can I do here?» or «What's the next step?», or open the help manual."
+  },
   "login": {
     "title": "Freedoliapp",
     "subtitle": "Sign in to continue",
@@ -239,6 +299,7 @@
     }
   },
   "activation": {
+    "title": "Activation wizard",
     "steps": {
       "welcome": "Welcome",
       "connect": "Connect",
@@ -251,7 +312,8 @@
       "subtitle": "We'll use this workspace for your projects and billing.",
       "noOrg": "No organization selected. Go back and pick a workspace.",
       "baseCurrency": "Base currency: {{currency}}",
-      "baseCurrencyMissing": "You can set currency and marketplace later in Settings."
+      "baseCurrencyMissing": "You can set currency and marketplace later in Settings.",
+      "flowHint": "Next you’ll connect Amazon, import the last 30 days, and review your snapshot. You can change this later in Settings."
     },
     "choosePath": {
       "title": "Choose your path",
@@ -387,15 +449,11 @@
     "connect": "Connect",
     "connecting": "Connecting…"
   },
-  "common": {
-    "createProject": "Create project",
-    "createSupplier": "Create supplier",
-    "createOrder": "Create order"
-  },
   "dashboard": {
     "firstValue": {
       "title": "Welcome to Freedoliapp.",
       "subtitle": "Start by creating your first product.",
+      "checklist": "Create a product → Check viability → Place your first order.",
       "cta": "Create first product"
     },
     "modeA": {
@@ -581,9 +639,6 @@
     "addNote": "Add note",
     "workspaceLabel": "Workspace: {{name}}",
     "workspaceSwitcherAria": "Current workspace: {{name}}. Click to switch workspace."
-  },
-  "activation": {
-    "title": "Activation wizard"
   },
   "help": {
     "profitability": {
@@ -884,15 +939,6 @@
       "releaseError": "Error releasing GTIN",
       "confirmRelease": "Are you sure you want to release this GTIN? It can be assigned to another project."
     }
-  },
-  "common": {
-    "close": "Close",
-    "creating": "Creating...",
-    "total": "Total",
-    "all": "All",
-    "and": "and",
-    "more": "more",
-    "actions": "Actions"
   },
   "projects": {
     "newProject": "New Project",

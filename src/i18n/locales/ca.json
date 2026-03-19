@@ -24,7 +24,17 @@
       "open": "Obrir",
       "createProduct": "Crear producte",
       "details": "Detalls"
-    }
+    },
+    "createProject": "Crear projecte",
+    "createSupplier": "Crear proveïdor",
+    "createOrder": "Crear comanda",
+    "close": "Tancar",
+    "creating": "Creant...",
+    "total": "Total",
+    "all": "Tots",
+    "and": "i",
+    "more": "més",
+    "actions": "Accions"
   },
   "dataStates": {
     "loading": "Carregant dades…",
@@ -203,6 +213,56 @@
       "terms": "Termes"
     }
   },
+  "guidance": {
+    "nextStepTitle": "Següent pas recomanat",
+    "dashboard": {
+      "createProject": "Crea el teu primer producte per començar el pipeline de llançament.",
+      "openOrCreatePO": "Tens productes; crea una comanda de compra o obre un projecte per avançar.",
+      "reviewActivity": "Revisa les comandes en curs o els projectes que necessiten atenció."
+    },
+    "projects": {
+      "openOrCreateOrder": "Obre un projecte per revisar les fases o crea una comanda per un producte ja validat."
+    },
+    "orders": {
+      "createOrLink": "Crea una comanda de compra o enllaça-la a un projecte per seguir la producció."
+    },
+    "projectDetail": {
+      "recommended": "Recomanat"
+    }
+  },
+  "assistant": {
+    "title": "Assistent",
+    "context": {
+      "dashboard": "Dashboard",
+      "projects": "Projectes",
+      "projectDetail": "Detall del projecte",
+      "orders": "Comandes",
+      "app": "App"
+    },
+    "quick": {
+      "whatCanIDo": "Què puc fer aquí?",
+      "nextStep": "Quin és el següent pas?",
+      "whereOrders": "On trobo les comandes?",
+      "flow": "Flow projecte → PO → inventari"
+    },
+    "placeholder": "Pregunta alguna cosa...",
+    "answers": {
+      "what_can_i_do": "Aquesta pantalla et permet navegar i actuar segons el context: crear o obrir projectes, comandes, revisar fases i viabilitat. Fes servir els botons de la barra lateral o les accions de cada secció.",
+      "next_step": "El següent pas depèn del teu estat: si no tens projectes, crea’n un; si en tens, obre comandes o revisa l’activitat. A Dashboard i a cada pantalla hi ha una recomanació.",
+      "where_orders": "Les comandes de compra (PO) es gestionen a la secció Comandes. Accedeix des de la barra lateral o des del Dashboard.",
+      "where_viability": "La viabilitat i el marge es veuen dins de cada projecte, a la pestanya o secció de viabilitat (Profitability). Obre un projecte i busca «Viabilitat» o «Marge».",
+      "where_projects": "Els projectes estan a la secció Projectes. Accedeix des de la barra lateral o des del Dashboard.",
+      "what_means_state": "Els estats de les PO (esborrany, confirmada, enviada, etc.) i termes com FNSKU estan explicats al manual d’ajuda. Obre «Ajuda» a la barra superior i busca «Comandes» o «Amazon readiness».",
+      "flow_project_po": "El flux és: (1) Crear projecte a Projectes, (2) Completar fases (viabilitat, readiness), (3) Crear PO a Comandes i enllaçar-la al projecte, (4) Seguir inventari i enviaments. Pots anar a Projectes o Comandes des d’aquí.",
+      "po_blocked": "Si una PO està bloquejada, revisa: estat de la comanda, Amazon readiness del producte, tasques pendents i enviaments. Obre Comandes i el detall de la PO per veure alertes i tasques.",
+      "what_missing_phase": "Per avançar de fase cal completar les condicions de la fase actual (gates): dades de producte, viabilitat, readiness Amazon, tasques. A la vista del projecte es mostren els punts pendents."
+    },
+    "linkLabel": {
+      "orders": "Obrir Comandes",
+      "projects": "Obrir Projectes"
+    },
+    "noMatch": "No he trobat una resposta exacta. Prova «Què puc fer aquí?» o «Quin és el següent pas?», o obre el manual d’ajuda."
+  },
   "login": {
     "title": "Freedoliapp",
     "subtitle": "Inicia sessió per continuar",
@@ -261,6 +321,7 @@
     }
   },
   "activation": {
+    "title": "Assistent d'activació",
     "steps": {
       "welcome": "Benvinguda",
       "connect": "Connectar",
@@ -273,7 +334,8 @@
       "subtitle": "Farem servir aquest workspace per als teus projectes i billing.",
       "noOrg": "No hi ha cap organització seleccionada. Torna enrere i selecciona un workspace.",
       "baseCurrency": "Moneda base: {{currency}}",
-      "baseCurrencyMissing": "Pots definir la moneda i marketplace més endavant a Configuració."
+      "baseCurrencyMissing": "Pots definir la moneda i marketplace més endavant a Configuració.",
+      "flowHint": "Tot seguit connectaràs Amazon, importaràs els últims 30 dies i revisaràs el resum. Pots canviar-ho més endavant a Configuració."
     },
     "choosePath": {
       "title": "Tria el camí",
@@ -409,15 +471,11 @@
     "connect": "Connectar",
     "connecting": "Connectant…"
   },
-  "common": {
-    "createProject": "Crear projecte",
-    "createSupplier": "Crear proveïdor",
-    "createOrder": "Crear comanda"
-  },
   "dashboard": {
     "firstValue": {
       "title": "Benvingut/da a Freedoliapp.",
       "subtitle": "Comença creant el teu primer producte.",
+      "checklist": "Crea un producte → Comprova la viabilitat → Fes la primera comanda.",
       "cta": "Crear primer producte"
     },
     "modeA": {
@@ -591,9 +649,6 @@
       "pastDue": "Hi ha un problema de pagament — actualitza la facturació per restaurar les accions Pro.",
       "upgradeCta": "Actualitzar pla"
     }
-  },
-  "activation": {
-    "title": "Activation wizard"
   },
   "help": {
     "profitability": {
@@ -897,15 +952,6 @@
       "releaseError": "Error alliberant GTIN",
       "confirmRelease": "Estàs segur que vols alliberar aquest GTIN? Es podrà assignar a un altre projecte."
     }
-  },
-  "common": {
-    "close": "Tancar",
-    "creating": "Creant...",
-    "total": "Total",
-    "all": "Tots",
-    "and": "i",
-    "more": "més",
-    "actions": "Accions"
   },
   "projects": {
     "newProject": "Nou Projecte",
