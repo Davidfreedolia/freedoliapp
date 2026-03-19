@@ -70,8 +70,9 @@ export function WorkspaceProvider({ children }) {
           if (!cancelled) {
             setMemberships([])
             setActiveOrgIdState(null)
-            // IMPORTANT: do not mark workspace as ready without a stable session.
-            // We'll re-run bootstrap when auth state becomes valid.
+            // Unauthenticated: mark ready so landing/login render (no infinite loader).
+            // Post-login: onAuthStateChange will re-run bootstrap and set activeOrgId.
+            setIsWorkspaceReady(true)
           }
           return
         }
