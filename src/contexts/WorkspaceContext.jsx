@@ -37,7 +37,11 @@ export function WorkspaceProvider({ children }) {
 
   useEffect(() => {
     let cancelled = false
+    let bootstrapInFlight = false
     async function bootstrap() {
+      if (bootstrapInFlight) return
+      bootstrapInFlight = true
+      try {
       console.log('[WorkspaceBootstrap] bootstrap() entry')
       if (isDemoMode()) {
         console.log('[WorkspaceBootstrap] demo mode branch')
@@ -66,7 +70,8 @@ export function WorkspaceProvider({ children }) {
           if (!cancelled) {
             setMemberships([])
             setActiveOrgIdState(null)
-            setIsWorkspaceReady(true)
+            // IMPORTANT: do not mark workspace as ready without a stable session.
+            // We'll re-run bootstrap when auth state becomes valid.
           }
           return
         }
@@ -181,9 +186,32 @@ export function WorkspaceProvider({ children }) {
         } catch (_) {}
         setIsWorkspaceReady(true)
       }
+      } finally {
+        bootstrapInFlight = false
+      }
     }
     bootstrap()
-    return () => { cancelled = true }
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (cancelled) return
+      const hasSessionUser = Boolean(session?.user)
+      // Re-run only when we receive an authenticated session state.
+      if (
+        hasSessionUser &&
+        ['SIGNED_IN', 'INITIAL_SESSION', 'TOKEN_REFRESHED'].includes(event)
+      ) {
+        console.log('[WorkspaceBootstrap] auth state change -> re-run bootstrap', {
+          event,
+          userId: session?.user?.id,
+        })
+        bootstrap()
+      }
+    })
+    return () => {
+      cancelled = true
+      subscription.unsubscribe()
+    }
   }, [])
 
   const revalidateActiveOrg = useCallback(async () => {
