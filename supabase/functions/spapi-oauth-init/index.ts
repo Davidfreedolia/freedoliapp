@@ -4,6 +4,18 @@
  */
 import { createState } from "../_shared/spapiState.ts";
 
+const corsHeaders: Record<string, string> = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-authorization",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
+const jsonHeaders = {
+  "Content-Type": "application/json",
+  ...corsHeaders,
+};
+
 const LWA_CLIENT_ID = Deno.env.get("LWA_CLIENT_ID");
 const LWA_REDIRECT_URI = Deno.env.get("LWA_REDIRECT_URI");
 const LWA_CLIENT_SECRET = Deno.env.get("LWA_CLIENT_SECRET");
@@ -16,10 +28,14 @@ const CONSENT_BY_REGION: Record<string, string> = {
 };
 
 Deno.serve(async (req: Request): Promise<Response> => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: corsHeaders });
+  }
+
   if (req.method !== "POST") {
     return new Response(JSON.stringify({ error: "Method not allowed" }), {
       status: 405,
-      headers: { "Content-Type": "application/json" },
+      headers: jsonHeaders,
     });
   }
 
@@ -27,14 +43,14 @@ Deno.serve(async (req: Request): Promise<Response> => {
   if (!authHeader?.startsWith("Bearer ")) {
     return new Response(JSON.stringify({ error: "Authorization required" }), {
       status: 401,
-      headers: { "Content-Type": "application/json" },
+      headers: jsonHeaders,
     });
   }
 
   if (!LWA_CLIENT_ID || !LWA_REDIRECT_URI || !LWA_CLIENT_SECRET || !OAUTH_STATE_SECRET) {
     return new Response(JSON.stringify({ error: "SP-API OAuth not configured" }), {
       status: 503,
-      headers: { "Content-Type": "application/json" },
+      headers: jsonHeaders,
     });
   }
 
@@ -44,7 +60,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
   } catch {
     return new Response(JSON.stringify({ error: "Invalid JSON" }), {
       status: 400,
-      headers: { "Content-Type": "application/json" },
+      headers: jsonHeaders,
     });
   }
 
@@ -56,7 +72,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
   if (!orgId || !userId) {
     return new Response(JSON.stringify({ error: "org_id and user_id required" }), {
       status: 400,
-      headers: { "Content-Type": "application/json" },
+      headers: jsonHeaders,
     });
   }
 
@@ -78,6 +94,6 @@ Deno.serve(async (req: Request): Promise<Response> => {
       consent_url: consentUrl,
       redirect_uri: LWA_REDIRECT_URI,
     }),
-    { status: 200, headers: { "Content-Type": "application/json" } }
+    { status: 200, headers: jsonHeaders }
   );
 });
