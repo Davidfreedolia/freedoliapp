@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { LogIn } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { registerTrialLead } from '../lib/trials/registerTrialLead'
+import { getAppBaseUrl } from '../lib/config/getAppBaseUrl'
 import useT from '../hooks/useT'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
@@ -42,7 +44,7 @@ export default function Trial() {
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email: trimmed,
         options: {
-          emailRedirectTo: `${window.location.origin}/login`,
+          emailRedirectTo: `${getAppBaseUrl()}/login`,
         },
       })
       if (otpError) {
@@ -52,6 +54,23 @@ export default function Trial() {
     } catch (err) {
       setError(err.message || String(err))
     } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleGoogleLogin = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+    try {
+      await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${getAppBaseUrl()}/`,
+        },
+      })
+    } catch (err) {
+      setError(err.message)
       setLoading(false)
     }
   }
@@ -109,6 +128,22 @@ export default function Trial() {
             >
               {t('trial.submit')}
             </Button>
+            <div className="auth-card__divider">
+              <span className="auth-card__dividerLine" />
+              <span className="auth-card__dividerLabel">{t('login.or')}</span>
+              <span className="auth-card__dividerLine" />
+            </div>
+            <Button
+              type="button"
+              variant="secondary"
+              size="md"
+              onClick={handleGoogleLogin}
+              disabled={loading}
+              className="auth-card__providerBtn"
+            >
+              <LogIn size={18} style={{ marginRight: 8 }} aria-hidden />
+              {t('login.continueWithGoogle')}
+            </Button>
           </form>
         )}
 
@@ -125,5 +160,8 @@ export default function Trial() {
     </div>
   )
 }
+
+
+
 
 
