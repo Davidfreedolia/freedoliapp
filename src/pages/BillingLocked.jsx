@@ -6,6 +6,7 @@ import { t } from '../i18n/t'
 import { supabase } from '../lib/supabase'
 import { createStripeCheckoutSession, createStripePortalSession } from '../lib/billingApi'
 import { showToast } from '../components/Toast'
+import AppLanguageControl from '../components/AppLanguageControl'
 import { useOrgBilling } from '../hooks/useOrgBilling'
 
 export default function BillingLocked() {
@@ -66,9 +67,16 @@ export default function BillingLocked() {
   const hasCustomer = !!billing?.stripe_customer_id
   const statusLabel = status === 'past_due' ? t(lang, 'billingLocked_statusPastDue') : status === 'canceled' ? t(lang, 'billingLocked_statusCanceled') : t(lang, 'billingLocked_statusInactive')
 
+  const langCorner = (
+    <div style={{ position: 'fixed', top: 12, right: 12, zIndex: 50 }}>
+      <AppLanguageControl />
+    </div>
+  )
+
   if (loading || billingLoading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--page-bg)' }}>
+        {langCorner}
         <span style={{ color: 'var(--text-secondary)' }}>{t(lang, 'common_loading')}</span>
       </div>
     )
@@ -97,6 +105,7 @@ export default function BillingLocked() {
   if (!org) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--page-bg)' }}>
+        {langCorner}
         <div style={{ textAlign: 'center' }}>
           <p style={{ color: 'var(--text-secondary)', marginBottom: 16 }}>{t(lang, 'common_workspaceNotFound')}</p>
           <button type="button" onClick={() => navigate('/app')} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border-1)', cursor: 'pointer' }}>{t(lang, 'common_backToApp')}</button>
@@ -107,6 +116,7 @@ export default function BillingLocked() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, backgroundColor: 'var(--page-bg)' }}>
+      {langCorner}
       <div style={{ maxWidth: 420, width: '100%', padding: 32, background: 'var(--surface-bg-2)', border: '1px solid var(--border-1)', borderRadius: 12, textAlign: 'center' }}>
         <h1 style={{ margin: '0 0 8px', fontSize: 22, fontWeight: 600, color: 'var(--danger-1)' }}>{t(lang, 'billingLocked_title')}</h1>
         <p style={{ margin: 0, fontSize: 14, color: 'var(--text-secondary)' }}>{t(lang, 'billingLocked_status', { status: statusLabel })}</p>

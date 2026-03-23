@@ -34,8 +34,34 @@ This file is the **canonical live status tracker** for implementation phases. It
 - **Estat actual del producte visible:**  
   - **Status:** *pilot-ready with caveats*  
   - Producte visible, coherent i demo-worthy; apte per **pilot controlat i acompanyat**, no per self-serve massiu.
-- **Següent bloc:**  
-  - No s’obre una nova mega fase de producte, sinó un bloc operatiu: **Pilot Preparation / Pilot Execution** (playbook curt, selecció d’1–3 orgs pilot, execució controlada i recollida de feedback).
+
+### Parallel roadmap tracks (product framing — March 2026)
+
+**Regla de treball:** L’**execució** al repositori segueix sent **un bloc actiu cada vegada** (mode estricte). El **roadmap** pot descriure **vies paral·leles** sense obligar a implementar-les fusionades. **Amazon no està aparcat ni desprioritzat**: és una **línia crítica** separada perquè el seu desbloqueig depèn sobretot de **setup extern i burocràcia del portal Amazon**, mentre el producte pot avançar en paral·lel dins del repo.
+
+#### Track A — Amazon Production Readiness (crítica / dependent de l’exterior)
+
+- **Paper:** SP-API i el flux Amazon-first continuen sent **dependència core** del producte; aquest track és el camí cap a **connexió i dades reals en producció** quan el compte i l’aplicació de venedor ho permetin.
+- **Estat actual (documentat):**
+  - **Sandbox only**; l’oferta **no és encara publicable** com a producte final d’integració producció.
+  - **Tax interviews** incompletes (requisits del portal).
+  - **Solution type** / perfil d’aplicació **incomplet** on apliqui.
+  - **Camí producció / públic encara no desbloquejat** al portal Amazon (Seller Central / Developer) segons el procés vigent.
+  - **SP-API continua sent dependència crítica de producte** — desbloquejar aquest track no és opcional a mitjà termini; separar-lo del dia a dia del repo **no** en redueix la prioritat estratègica.
+
+#### Track B — Product Continuity (paral·lela al repo)
+
+- **Pla canònic d’execució (ordre B2–B7, dependències UI/idioma/assistent):** `docs/ROADMAP/TRACK_B_CANONICAL_PLAN.md`.  
+- **B2 (definició sistema UI app):** tancat a nivell documentació repo — `docs/PRODUCT/CANONICAL_UI_SYSTEM.md` (patrons + famílies de pantalla + Pencil); tokens base segueixen referenciats a `docs/PRODUCT/VISUAL_IDENTITY_SYSTEM_V1.md`. **B6** = harmonització visual massiva al codi, no reobre B2 salvo decisió explícita.  
+- **B3 (canonització idioma app):** tancat a nivell documentació + auditoria repo — `docs/PRODUCT/CANONICAL_APP_LANGUAGE_POLICY_B3.md` (català font; es/en traduccions; regles; **no** selector B4 ni refactor massiu). **No** es reclama consistència lingüística a producció fins implementació posterior.  
+- **Paper:** Mantenir **accés, onboarding i valor visible** mentre Track A avança fora del codi.
+- **Estat actual (documentat):**
+  - **Access / auth:** blockers majors **reduïts** (p. ex. Google OAuth operatiu com a login+signup; entrada trial alineada amb el mateix patró OAuth on escau).
+  - **Activation / wizard:** pas final del wizard reenfocat a **“activació completa”** (sense targetes “coming soon” duplicades; un sol CTA al dashboard) i **refetch d’`org_activation`** en canvi de ruta per evitar rebot a `/activation` després de completar; **validació producció pilotada encara pendent**.
+  - **In-app assistant:** V1 al repo (panel + intents, sense LLM). El **paper canònic in-app** (helper conversacional dins l’app, no onboarding) queda **definit** a `docs/SYSTEMS/ASSISTANT_LAYER.md`; la **productització** (comportament “AI real” amb model/eines) és **separada** i **no** es dona per feta.
+  - **Lectura:** el producte **pot seguir avançant** en Track B **mentre** Track A es desbloqueja al portal Amazon.
+
+- **Següent bloc (execució única):** Es continua triant **un sol bloc actiu** per torn (p. ex. un tall concret de **Track B** — tancament activation / gates / producte — **o** un pas de **Track A** al portal Amazon, **o** una verificació tècnica puntual SP-API/infra després de desplegaments). No s’obre una mega fase nova; el marc operatiu **Pilot Preparation / Pilot Execution** segueix vàlid darrere les caveats de pilot, ara explicitades també en funció dels dos tracks.
 
 ---
 
@@ -77,6 +103,7 @@ This file is the **canonical live status tracker** for implementation phases. It
 | **FASE 4.3.C** | Task lifecycle / closure semantics audit | CLOSED (audit) | Auditoria lifecycle: status (open/done/snoozed), transicions, snoozed no escrit, dedupe, UI, tenancy. | FASE_4_3_C_TASK_LIFECYCLE_CLOSURE_SEMANTICS_AUDIT.md. | Verdict: contracte parcial; snoozed = deute; següent opcional 4.3.D. |
 | **FASE 5** | Finance canonical model / profit / cashflow | CLOSED | 5.1–5.5 tancades: data model financer auditat; P&L i cashflow canònics fixats; profit engine alineat; UI Profit V1 honestada; exports trimestrals sobre ledger+FX. | `financial_ledger` + `org_settings` + `exchange_rates_daily` + profit truth engine (F10.2) com a base canònica; `Finances.jsx` i taules legacy marcades fora del core. | FASE_5_1_*, FASE_5_2_*, FASE_5_3_*, FASE_5_4_*, FASE_5_5_*. |
 | **FASE 6** | Future prep / governance / legacy finances | CLOSED | 6.1–6.5 tancades: contracte futur de COGS/landed cost; contracte futur de realized cashflow UI; contracte futur d’Admin Console; contracte de coverage/completeness de profit; estratègia de finances/dashboard legacy. | Fases purament documentals (no-code) que preparen el futur sense activar-lo; S3.4.A continua PARKED a nivell d’implementació. | FASE_6_1_*, FASE_6_2_*, FASE_6_3_*, FASE_6_4_*, FASE_6_5_*. |
+| **R0.4** | In-app Assistant V1 | CLOSED | Panel assistent des de navbar; intents/FAQ; matching client; context de pantalla; sense LLM ni backend nou. | AssistantPanel; assistantIntents.js; entrada a TopNavbar; i18n assistant.* (ca, en, es). | R0_4_IN_APP_ASSISTANT_AUDIT_REPORT.md (contracte); R0_4_IN_APP_ASSISTANT_IMPLEMENTATION_REPORT.md. |
 
 ---
 

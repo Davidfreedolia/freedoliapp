@@ -3,19 +3,7 @@
  * Informational only; real enforcement stays in guards / gating engine.
  */
 import Button from '../ui/Button'
-
-const TEXTS = {
-  projects: {
-    title: 'Projects',
-    message: 'You reached the limit of projects.',
-    cta: 'Upgrade your plan to create more projects.',
-  },
-  seats: {
-    title: 'Seats',
-    message: 'Your workspace exceeded the seat limit.',
-    cta: 'Upgrade your plan to add more team members.',
-  },
-}
+import useT from '../../hooks/useT'
 
 /**
  * @param {object} props
@@ -26,9 +14,13 @@ const TEXTS = {
  * @param {boolean} [props.upgradeDisabled]
  */
 export default function LimitReachedBanner({ resource, used, limit, onUpgrade, upgradeDisabled = false }) {
+  const t = useT()
   if (limit == null || used < limit) return null
 
-  const { title, message, cta } = TEXTS[resource] || TEXTS.projects
+  const res = resource === 'seats' ? 'seats' : 'projects'
+  const title = t(`billing.limits.limitReached.${res}.title`)
+  const message = t(`billing.limits.limitReached.${res}.message`)
+  const cta = t(`billing.limits.limitReached.${res}.cta`)
 
   return (
     <div
@@ -45,7 +37,7 @@ export default function LimitReachedBanner({ resource, used, limit, onUpgrade, u
       <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: '0 0 10px 0', lineHeight: 1.4 }}>{message}</p>
       <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: '0 0 12px 0', lineHeight: 1.4 }}>{cta}</p>
       <Button variant="primary" size="sm" onClick={onUpgrade} disabled={upgradeDisabled}>
-        Upgrade
+        {t('billing.limits.upgrade')}
       </Button>
     </div>
   )

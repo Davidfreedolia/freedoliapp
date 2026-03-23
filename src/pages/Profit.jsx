@@ -198,9 +198,10 @@ export default function Profit() {
         title={
           <span className="page-title-with-icon">
             <DollarSign size={22} />
-            Profit
+            Profit (V1)
           </span>
         }
+        description="Vista de profit per producte i workspace basada en ledger V1. Alguns costos (COGS i despeses operatives completes) poden no estar totalment inclosos encara."
       />
       <div style={styles.content}>
         <AppToolbar style={styles.toolbar} className="toolbar-row">

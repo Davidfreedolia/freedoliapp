@@ -10,6 +10,14 @@ verify_jwt = false
 [functions.create_checkout_session]
 verify_jwt = false
 
+# P0.ACCESS.2 — Billing checkout/portal: allow browser preflight (OPTIONS) without JWT.
+# Function code validates Bearer token on POST.
+[functions.stripe-checkout-session]
+verify_jwt = false
+
+[functions.stripe-portal-session]
+verify_jwt = false
+
 # D34.1 — Decision Scheduler. Not public; requires x-scheduler-secret header (DECISION_SCHEDULER_SECRET).
 # Schedule: every 10 minutes (e.g. cron: "*/10 * * * *" via pg_cron or Dashboard).
 [functions.decision-scheduler]

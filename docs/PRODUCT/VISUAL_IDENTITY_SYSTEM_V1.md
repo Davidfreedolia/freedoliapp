@@ -5,6 +5,8 @@ Owner: Product / Design
 Scope: Landing + Application UI  
 Last update: 2026
 
+**Vegeu també (sistema UI producte app — Track B B2):** `docs/PRODUCT/CANONICAL_UI_SYSTEM.md` — patrons de layout, interacció, famílies de pantalla i regles operatives; aquest document aporta **tokens i to base** (color, tipus, icones).
+
 ---
 
 # 1 — Brand Personality

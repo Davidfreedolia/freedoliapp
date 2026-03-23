@@ -5,12 +5,19 @@ import Button from '../components/Button'
 import { supabase } from '../lib/supabase'
 import { useApp } from '../context/AppContext'
 import { showToast } from '../components/Toast'
+import { useTranslation } from 'react-i18next'
 
 const currentYear = new Date().getFullYear()
 const currentQuarter = Math.floor((new Date().getMonth() / 3)) + 1
 
 export default function FinanceExports() {
+  const { t } = useTranslation()
   const { darkMode } = useApp()
+  const dash = '—'
+
+  const jobStatusLabel = (raw) => t(`financeExports.jobStatus.${raw}`, { defaultValue: raw || dash })
+  const periodStatusLabel = (raw) =>
+    t(`financeExports.periodStatus.${raw}`, { defaultValue: raw || dash })
   const [year, setYear] = useState(currentYear)
   const [quarter, setQuarter] = useState(currentQuarter)
   const [jobs, setJobs] = useState([])
@@ -28,12 +35,12 @@ export default function FinanceExports() {
       setJobs(data || [])
     } catch (err) {
       console.error('Error carregant jobs trimestrals:', err)
-      showToast(err.message || 'Error carregant exportacions trimestrals', 'error')
+      showToast(err.message || t('financeExports.toastLoadError'), 'error')
     } finally {
       setLoading(false)
       setReloading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     loadJobs()
@@ -57,14 +64,14 @@ export default function FinanceExports() {
       if (error) throw error
       const row = Array.isArray(data) ? data[0] : data
       if (row?.job_id) {
-        showToast('Quarterly pack en cua de generació', 'success')
+        showToast(t('financeExports.toastQueued'), 'success')
         await loadJobs()
       } else {
-        showToast('No s\'ha pogut crear el job d\'exportació', 'error')
+        showToast(t('financeExports.toastCreateJobError'), 'error')
       }
     } catch (err) {
       console.error('Error generant quarter pack:', err)
-      showToast(err.message || 'Error generant l\'export trimestral', 'error')
+      showToast(err.message || t('financeExports.toastGenerateError'), 'error')
     } finally {
       setGenerating(false)
     }
@@ -79,13 +86,13 @@ export default function FinanceExports() {
       if (error) throw error
       const row = Array.isArray(data) ? data[0] : data
       if (!row?.signed_url) {
-        showToast('No s\'ha pogut obtenir el link de descàrrega', 'error')
+        showToast(t('financeExports.toastDownloadUrlError'), 'error')
         return
       }
       window.open(row.signed_url, '_blank', 'noopener,noreferrer')
     } catch (err) {
       console.error('Error obtenint signed URL:', err)
-      showToast(err.message || 'Error obtenint el link de descàrrega', 'error')
+      showToast(err.message || t('financeExports.toastDownloadError'), 'error')
     }
   }
 
@@ -107,8 +114,8 @@ export default function FinanceExports() {
   return (
     <div style={containerStyle}>
       <Header
-        title="Quarterly exports"
-        description="Genera i descarrega packs trimestrals (P&L, cashflow, ledger i reconciliation)."
+        title={t('financeExports.pageTitle')}
+        description={t('financeExports.pageDescription')}
         icon={Calendar}
       />
 
@@ -116,7 +123,7 @@ export default function FinanceExports() {
       <div style={{ ...cardStyle, display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
           <div>
-            <label style={{ fontSize: 12, color: '#6b7280', display: 'block', marginBottom: 4 }}>Year</label>
+            <label style={{ fontSize: 12, color: '#6b7280', display: 'block', marginBottom: 4 }}>{t('financeExports.year')}</label>
             <input
               type="number"
               value={year}
@@ -130,7 +137,7 @@ export default function FinanceExports() {
             />
           </div>
           <div>
-            <label style={{ fontSize: 12, color: '#6b7280', display: 'block', marginBottom: 4 }}>Quarter</label>
+            <label style={{ fontSize: 12, color: '#6b7280', display: 'block', marginBottom: 4 }}>{t('financeExports.quarter')}</label>
             <select
               value={quarter}
               onChange={e => setQuarter(parseInt(e.target.value, 10))}
@@ -156,7 +163,7 @@ export default function FinanceExports() {
             disabled={reloading}
           >
             <RefreshCw size={14} />
-            Refresh
+            {t('financeExports.refresh')}
           </Button>
           <Button
             variant="primary"
@@ -165,7 +172,7 @@ export default function FinanceExports() {
             disabled={generating}
           >
             <Calendar size={16} />
-            {generating ? 'Generating…' : 'Generate quarterly pack'}
+            {generating ? t('financeExports.generating') : t('financeExports.generatePack')}
           </Button>
         </div>
       </div>
@@ -173,29 +180,29 @@ export default function FinanceExports() {
       {/* Jobs table */}
       <div style={cardStyle}>
         <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 600, color: darkMode ? '#e5e7eb' : '#374151' }}>
-          Recent export jobs
+          {t('financeExports.recentJobsTitle')}
         </h3>
         {loading ? (
           <div style={{ padding: '24px', fontSize: 13, color: '#6b7280' }}>
-            Carregant jobs...
+            {t('financeExports.loadingJobs')}
           </div>
         ) : jobs.length === 0 ? (
           <div style={{ padding: '24px', fontSize: 13, color: '#6b7280' }}>
-            Encara no hi ha exportacions trimestrals creades.
+            {t('financeExports.emptyJobs')}
           </div>
         ) : (
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
               <thead>
                 <tr>
-                  <th style={thStyle}>Year</th>
-                  <th style={thStyle}>Quarter</th>
-                  <th style={thStyle}>Period</th>
-                  <th style={thStyle}>Base currency</th>
-                  <th style={thStyle}>Status</th>
-                  <th style={thStyle}>Created at</th>
-                  <th style={thStyle}>Error</th>
-                  <th style={thStyle}>Actions</th>
+                  <th style={thStyle}>{t('financeExports.colYear')}</th>
+                  <th style={thStyle}>{t('financeExports.colQuarter')}</th>
+                  <th style={thStyle}>{t('financeExports.colPeriod')}</th>
+                  <th style={thStyle}>{t('financeExports.colBaseCurrency')}</th>
+                  <th style={thStyle}>{t('financeExports.colStatus')}</th>
+                  <th style={thStyle}>{t('financeExports.colCreatedAt')}</th>
+                  <th style={thStyle}>{t('financeExports.colError')}</th>
+                  <th style={thStyle}>{t('financeExports.colActions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -203,12 +210,12 @@ export default function FinanceExports() {
                   <tr key={job.id}>
                     <td style={tdStyle}>{job.year}</td>
                     <td style={tdStyle}>Q{job.quarter}</td>
-                    <td style={tdStyle}>{job.period_status}</td>
+                    <td style={tdStyle}>{periodStatusLabel(job.period_status)}</td>
                     <td style={tdStyle}>{job.base_currency}</td>
-                    <td style={tdStyle}>{job.status}</td>
-                    <td style={tdStyle}>{job.created_at ? new Date(job.created_at).toLocaleString() : '—'}</td>
+                    <td style={tdStyle}>{jobStatusLabel(job.status)}</td>
+                    <td style={tdStyle}>{job.created_at ? new Date(job.created_at).toLocaleString() : dash}</td>
                     <td style={{ ...tdStyle, color: job.error ? '#ef4444' : '#6b7280' }}>
-                      {job.error || '—'}
+                      {job.error || dash}
                     </td>
                     <td style={tdStyle}>
                       <Button
@@ -219,7 +226,7 @@ export default function FinanceExports() {
                         style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
                       >
                         <Download size={14} />
-                        Download
+                        {t('financeExports.download')}
                       </Button>
                     </td>
                   </tr>

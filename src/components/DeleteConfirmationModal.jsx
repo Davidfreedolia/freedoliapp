@@ -1,4 +1,5 @@
 import { X, AlertTriangle } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import Button from './Button'
 
 export default function DeleteConfirmationModal({
@@ -7,11 +8,16 @@ export default function DeleteConfirmationModal({
   onConfirm,
   entityName,
   entityType,
+  /** Translated noun for title (e.g. warehouse / magatzem). Falls back to entityType. */
+  entityLabel,
   isDeleting = false,
   darkMode = false,
   showUsageWarning = false
 }) {
+  const { t } = useTranslation()
   if (!isOpen) return null
+
+  const titleEntity = entityLabel ?? entityType
 
   const styles = {
     overlay: {
@@ -134,9 +140,9 @@ export default function DeleteConfirmationModal({
         <div style={styles.header}>
           <h3 style={styles.title}>
             <AlertTriangle size={20} color="#ef4444" />
-            Eliminar {entityType}
+            {t('deleteModal.title', { entity: titleEntity })}
           </h3>
-          <Button variant="ghost" onClick={onClose} disabled={isDeleting} aria-label="Tancar">
+          <Button variant="ghost" onClick={onClose} disabled={isDeleting} aria-label={t('deleteModal.closeAria')}>
             <X size={20} />
           </Button>
         </div>
@@ -146,22 +152,14 @@ export default function DeleteConfirmationModal({
             <AlertTriangle size={20} style={styles.warningIcon} />
             <div style={styles.warningText}>
               <div style={{ marginBottom: '8px' }}>
-                Estàs a punt d'eliminar: <span style={styles.entityName}>{entityName}</span>
+                {t('deleteModal.aboutToDelete')} <span style={styles.entityName}>{entityName}</span>
               </div>
-              <div style={{ marginBottom: showUsageWarning ? '8px' : '0' }}>
-                Aquesta acció no es pot desfer.
-              </div>
-              {showUsageWarning && (
-                <div>
-                  Si està en ús (comandes, despeses, projectes), l'eliminació pot fallar.
-                </div>
-              )}
+              <div style={{ marginBottom: showUsageWarning ? '8px' : '0' }}>{t('deleteModal.irreversible')}</div>
+              {showUsageWarning && <div>{t('deleteModal.usageHint')}</div>}
             </div>
           </div>
 
-          <div style={styles.message}>
-            Vols continuar amb l'eliminació?
-          </div>
+          <div style={styles.message}>{t('deleteModal.confirmPrompt')}</div>
         </div>
 
         <div style={styles.footer}>
@@ -174,7 +172,7 @@ export default function DeleteConfirmationModal({
               ...(isDeleting ? styles.buttonDisabled : {})
             }}
           >
-            Cancel·lar
+            {t('common.cancel')}
           </button>
           <button
             onClick={onConfirm}
@@ -185,7 +183,7 @@ export default function DeleteConfirmationModal({
               ...(isDeleting ? styles.buttonDisabled : {})
             }}
           >
-            {isDeleting ? 'Eliminant...' : 'Sí, eliminar'}
+            {isDeleting ? t('deleteModal.deleting') : t('deleteModal.confirm')}
           </button>
         </div>
       </div>

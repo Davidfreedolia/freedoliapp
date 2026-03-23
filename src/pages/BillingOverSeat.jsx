@@ -4,9 +4,10 @@ import { useWorkspace } from '../contexts/WorkspaceContext'
 import { useBillingUsage } from '../hooks/useBillingUsage'
 import { useLang } from '../i18n/useLang'
 import { t } from '../i18n/t'
-import { supabase } from '../lib/supabase'
+import { supabase, createOrGetTaskFromOrigin } from '../lib/supabase'
 import { createStripePortalSession } from '../lib/billingApi'
 import { showToast } from '../components/Toast'
+import AppLanguageControl from '../components/AppLanguageControl'
 
 export default function BillingOverSeat() {
   const location = useLocation()
@@ -18,6 +19,7 @@ export default function BillingOverSeat() {
   const [seatsUsed, setSeatsUsed] = useState(location.state?.seatsUsed ?? 0)
   const [loading, setLoading] = useState(!location.state?.org)
   const [actionLoading, setActionLoading] = useState(false)
+  const [unblockTaskLoading, setUnblockTaskLoading] = useState(false)
 
   const isOwnerAdmin = memberships.some(
     (m) => m.org_id === activeOrgId && (m.role === 'owner' || m.role === 'admin')
@@ -60,12 +62,36 @@ export default function BillingOverSeat() {
     }
   }
 
+  const handleCreateUnblockTask = async () => {
+    if (!activeOrgId || unblockTaskLoading) return
+    setUnblockTaskLoading(true)
+    try {
+      const { created } = await createOrGetTaskFromOrigin(
+        activeOrgId,
+        { source: 'gate', source_ref_type: 'workspace_gate', source_ref_id: `over_seat:${activeOrgId}` },
+        { title: 'Unblock: upgrade or free seat to continue', entity_type: 'org', entity_id: activeOrgId }
+      )
+      showToast(created ? 'Task created.' : 'Task already exists.', 'success')
+    } catch (err) {
+      showToast(err?.message || 'Failed to create task', 'error')
+    } finally {
+      setUnblockTaskLoading(false)
+    }
+  }
+
   // S3.3.I: seat limit from canonical billing usage; fallback to org while loading/unavailable
   const seatLimit = canonicalSeatsLimit ?? org?.seat_limit ?? 1
+
+  const langCorner = (
+    <div style={{ position: 'fixed', top: 12, right: 12, zIndex: 50 }}>
+      <AppLanguageControl />
+    </div>
+  )
 
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--page-bg)' }}>
+        {langCorner}
         <span style={{ color: 'var(--text-secondary)' }}>{t(lang, 'common_loading')}</span>
       </div>
     )
@@ -74,6 +100,7 @@ export default function BillingOverSeat() {
   if (!org) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--page-bg)' }}>
+        {langCorner}
         <div style={{ textAlign: 'center' }}>
           <p style={{ color: 'var(--text-secondary)', marginBottom: 16 }}>{t(lang, 'common_workspaceNotFound')}</p>
           <button type="button" onClick={() => navigate('/app')} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border-1)', cursor: 'pointer' }}>
@@ -95,6 +122,7 @@ export default function BillingOverSeat() {
         backgroundColor: 'var(--page-bg)',
       }}
     >
+      {langCorner}
       <div
         style={{
           maxWidth: 420,
@@ -133,6 +161,14 @@ export default function BillingOverSeat() {
               }}
             >
               {actionLoading ? t(lang, 'billingOverSeat_opening') : t(lang, 'billingOverSeat_openPortal')}
+            </button>
+            <button
+              type="button"
+              onClick={handleCreateUnblockTask}
+              disabled={unblockTaskLoading}
+              style={{ padding: '10px 16px', background: 'transparent', border: '1px solid var(--border-1)', borderRadius: 8, cursor: unblockTaskLoading ? 'not-allowed' : 'pointer', color: 'var(--text-secondary)' }}
+            >
+              {unblockTaskLoading ? '…' : 'Create unblock task'}
             </button>
             <button
               type="button"

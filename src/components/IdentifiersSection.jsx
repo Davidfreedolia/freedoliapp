@@ -280,7 +280,7 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({
         ...styles.section,
         ...sectionSurfaceStyle
       }}>
-        <div style={styles.loading}>Carregant identificadors...</div>
+        <div style={styles.loading}>{t('identifiersSection.loading')}</div>
       </div>
     )
   }

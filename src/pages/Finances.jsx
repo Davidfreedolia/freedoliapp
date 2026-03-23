@@ -1082,6 +1082,25 @@ export default function Finances() {
               Finances
             </span>
           }
+          actions={
+            <>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => window.location.assign('/app/finances/amazon-imports')}
+                style={{ marginRight: 8 }}
+              >
+                {t('nav.amazonImports')}
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => window.location.assign('/app/finances/exports')}
+              >
+                {t('nav.financeExports')}
+              </Button>
+            </>
+          }
         />
         <div style={styles.content}>
           <div style={styles.legacyWarning}>
@@ -1091,6 +1110,25 @@ export default function Finances() {
               Aquesta pantalla és una vista financera antiga basada en <code>user_id</code> i no està adaptada al model multi-tenant actual.
               Es manté només com a referència històrica i queda desactivada en aquest bloc. Fes servir el ledger canònic i els exports trimestrals per a dades de veritat.
             </p>
+            <p style={{ maxWidth: 520, fontSize: 14, lineHeight: 1.5, marginTop: 12 }}>
+              {t('financesPage.legacy.amazonImportsHint')}
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 16 }}>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => window.location.assign('/app/finances/amazon-imports')}
+              >
+                {t('nav.amazonImports')}
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => window.location.assign('/app/finances/exports')}
+              >
+                {t('nav.financeExports')}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -1114,14 +1152,14 @@ export default function Finances() {
               onClick={() => window.location.assign('/app/finances/amazon-imports')}
               style={{ marginRight: 8 }}
             >
-              Amazon Imports
+              {t('nav.amazonImports')}
             </Button>
             <Button
               variant="secondary"
               size="sm"
               onClick={() => window.location.assign('/app/finances/exports')}
             >
-              Quarterly exports
+              {t('nav.financeExports')}
             </Button>
           </>
         }

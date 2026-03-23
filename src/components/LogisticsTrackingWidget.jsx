@@ -13,25 +13,19 @@ import {
 import { useApp } from '../context/AppContext'
 import { getProjects, getPurchaseOrders } from '../lib/supabase'
 import Button from './Button'
+import useT from '../hooks/useT'
 
-// Estats del flux logístic (simplificat per dashboard)
-const LOGISTICS_STAGES = [
-  { id: 'production', name: 'Producció', icon: Factory, color: 'var(--brand-primary)', colorSoft: 'var(--brand-primary-soft)' },
-  { id: 'pickup', name: 'Recollida', icon: Truck, color: 'var(--brand-amber)', colorSoft: 'var(--brand-amber-soft)' },
-  { id: 'in_transit', name: 'En trànsit', icon: Ship, color: 'var(--brand-amber)', colorSoft: 'var(--brand-amber-soft)' },
-  { id: 'customs', name: 'Duanes', icon: Package, color: 'var(--brand-amber)', colorSoft: 'var(--brand-amber-soft)' },
-  { id: 'amazon_fba', name: 'Amazon FBA', icon: Warehouse, color: 'var(--brand-green)', colorSoft: 'var(--brand-green-soft)' }
+// Logistics pipeline stages (labels: logisticsWidget.stages.*)
+const LOGISTICS_STAGE_DEFS = [
+  { id: 'production', icon: Factory, color: 'var(--brand-primary)', colorSoft: 'var(--brand-primary-soft)' },
+  { id: 'pickup', icon: Truck, color: 'var(--brand-amber)', colorSoft: 'var(--brand-amber-soft)' },
+  { id: 'in_transit', icon: Ship, color: 'var(--brand-amber)', colorSoft: 'var(--brand-amber-soft)' },
+  { id: 'customs', icon: Package, color: 'var(--brand-amber)', colorSoft: 'var(--brand-amber-soft)' },
+  { id: 'amazon_fba', icon: Warehouse, color: 'var(--brand-green)', colorSoft: 'var(--brand-green-soft)' }
 ]
 
-const LOGISTICS_STATUS_LABELS = {
-  production: 'Producció',
-  pickup: 'Recollida',
-  in_transit: 'En trànsit',
-  customs: 'Duanes',
-  amazon_fba: 'Amazon FBA'
-}
-
 export default function LogisticsTrackingWidget({ darkMode, embedded = false, hideHeader = false }) {
+  const t = useT()
   const navigate = useNavigate()
   const { activeOrgId } = useApp()
   const [projects, setProjects] = useState([])
@@ -77,17 +71,17 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false, hi
   }
 
   const getStatusInfo = (status) => {
-    const stage = LOGISTICS_STAGES.find(s => s.id === status)
+    const stage = LOGISTICS_STAGE_DEFS.find(s => s.id === status)
     if (!stage) {
-      return { name: status || 'Pendent', color: 'var(--muted-1)', colorSoft: 'var(--surface-2)', icon: Clock }
+      return { name: t('logisticsWidget.pendingFallback'), color: 'var(--muted-1)', colorSoft: 'var(--surface-2)', icon: Clock }
     }
-    return stage
+    return { ...stage, name: t(`logisticsWidget.stages.${stage.id}`) }
   }
 
   const getProgressPercentage = (status) => {
-    const index = LOGISTICS_STAGES.findIndex(s => s.id === status)
+    const index = LOGISTICS_STAGE_DEFS.findIndex(s => s.id === status)
     if (index === -1) return 0
-    return ((index + 1) / LOGISTICS_STAGES.length) * 100
+    return ((index + 1) / LOGISTICS_STAGE_DEFS.length) * 100
   }
 
   // Calcular dies des de l'última actualització
@@ -135,11 +129,11 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false, hi
             color: 'var(--text-1)'
           }}>
             <Truck size={20} />
-            Tracking Logístic
+            {t('logisticsWidget.title')}
           </h2>
           </div>
         )}
-        <div style={styles.loading}>Carregant...</div>
+        <div style={styles.loading}>{t('logisticsWidget.loading')}</div>
       </div>
     )
   }
@@ -159,7 +153,7 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false, hi
             color: 'var(--text-1)'
           }}>
             <Truck size={20} />
-            Tracking Logístic
+            {t('logisticsWidget.title')}
           </h2>
           <Button
             variant="secondary"
@@ -167,12 +161,12 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false, hi
             onClick={() => navigate('/app/orders')}
             className="tracking-view-all"
           >
-            Veure totes <ArrowRight size={16} />
+            {t('logisticsWidget.viewAll')} <ArrowRight size={16} />
           </Button>
           </div>
         )}
         <div style={styles.empty}>
-          <p>{showOnlyStale ? 'No hi ha comandes pendents d\'actualització' : 'No hi ha comandes amb tracking actiu'}</p>
+          <p>{showOnlyStale ? t('logisticsWidget.emptyStale') : t('logisticsWidget.emptyDefault')}</p>
         </div>
       </div>
     )
@@ -190,7 +184,7 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false, hi
           color: 'var(--text-1)'
         }}>
           <Truck size={20} />
-          Tracking Logístic
+          {t('logisticsWidget.title')}
         </h2>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <Button
@@ -200,7 +194,7 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false, hi
             className={`tracking-filter-button ${showOnlyStale ? 'is-active' : ''}`}
           >
             <AlertTriangle size={14} />
-            Només pendents
+            {t('logisticsWidget.staleOnly')}
           </Button>
           <Button
             variant="secondary"
@@ -208,7 +202,7 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false, hi
             onClick={() => navigate('/app/orders')}
             className="tracking-view-all"
           >
-            Veure totes <ArrowRight size={16} />
+            {t('logisticsWidget.viewAll')} <ArrowRight size={16} />
           </Button>
         </div>
         </div>
@@ -241,13 +235,13 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false, hi
                       {!embedded && updateStatus === 'stale' && (
                         <span className="status-pill pill--danger" style={styles.updateBadge}>
                           <AlertTriangle size={12} />
-                          Stale
+                          {t('logisticsWidget.badgeStale')}
                         </span>
                       )}
                       {!embedded && updateStatus === 'needs_update' && (
                         <span className="status-pill pill--warn" style={styles.updateBadge}>
                           <AlertTriangle size={12} />
-                          Needs update
+                          {t('logisticsWidget.badgeNeedsUpdate')}
                         </span>
                       )}
                   </div>
@@ -262,7 +256,7 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false, hi
                       ...styles.lastUpdateText,
                       color: 'var(--muted-1)'
                     }}>
-                      Última actualització: fa {daysSinceUpdate} {daysSinceUpdate === 1 ? 'dia' : 'dies'}
+                      {t('logisticsWidget.lastUpdated', { count: daysSinceUpdate, days: daysSinceUpdate })}
                     </span>
                   )}
                 </div>
@@ -281,9 +275,9 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false, hi
               {/* Barra de progrés */}
               <div style={styles.progressContainer} className="tracking-timeline">
                 <div style={styles.stagesIndicator} className="tracking-stages">
-                  {LOGISTICS_STAGES.map((stage, idx) => {
+                  {LOGISTICS_STAGE_DEFS.map((stage, idx) => {
                     const StageIcon = stage.icon
-                    const isCompleted = idx < LOGISTICS_STAGES.findIndex(s => s.id === order.logistics_status)
+                    const isCompleted = idx < LOGISTICS_STAGE_DEFS.findIndex(s => s.id === order.logistics_status)
                     const isCurrent = stage.id === order.logistics_status
                     
                     return (
@@ -295,7 +289,7 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false, hi
                         }}>
                           <StageIcon size={10} color={isCompleted || isCurrent ? stage.color : 'var(--muted-1)'} />
                         </div>
-                        {!embedded && idx < LOGISTICS_STAGES.length - 1 && (
+                        {!embedded && idx < LOGISTICS_STAGE_DEFS.length - 1 && (
                           <div style={{
                             ...styles.stageConnector,
                             backgroundColor: isCompleted ? stage.color : 'var(--border-1)'
@@ -310,7 +304,7 @@ export default function LogisticsTrackingWidget({ darkMode, embedded = false, hi
               {/* Tracking number */}
               {order.tracking_number && (
                 <div style={styles.trackingInfo}>
-                  <span style={styles.trackingLabel}>Tracking:</span>
+                  <span style={styles.trackingLabel}>{t('logisticsWidget.trackingLabel')}</span>
                   <span style={{
                     ...styles.trackingNumber,
                     color: 'var(--muted-1)'

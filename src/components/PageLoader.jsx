@@ -1,10 +1,11 @@
 import { Loader } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 /**
- * Component de càrrega simple per Suspense fallback
- * Compatible amb darkMode
+ * Simple Suspense fallback — copy follows active UI language (Catalan-first defaults).
  */
 export default function PageLoader({ darkMode = false }) {
+  const { t } = useTranslation()
   return (
     <div style={{
       display: 'flex',
@@ -22,7 +23,7 @@ export default function PageLoader({ darkMode = false }) {
         fontSize: '14px',
         fontWeight: '500'
       }}>
-        Loading...
+        {t('common.loading')}
       </span>
       <style>{`
         @keyframes spin {

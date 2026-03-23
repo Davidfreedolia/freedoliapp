@@ -59,14 +59,14 @@ const AMAZON_FBA_WAREHOUSES = [
   { code: 'PHX6', name: 'Amazon FBA Arizona (PHX6)', city: 'Phoenix', country: 'USA', address: 'Phoenix, AZ' },
 ]
 
-// Tipus de magatzem
+// Tipus de magatzem (només metadades; el nom visible ve de i18n: warehousesPage.types.*)
 const WAREHOUSE_TYPES = [
-  { id: 'amazon_fba', name: 'Amazon FBA', icon: '📦', color: '#ff9900' },
-  { id: 'amazon_fbm', name: 'Amazon FBM', icon: '📦', color: '#ff9900' },
-  { id: 'forwarder', name: 'Transitari', icon: '🚚', color: '#3b82f6' },
-  { id: '3pl', name: '3PL (Third Party)', icon: '🏢', color: '#8b5cf6' },
-  { id: 'own', name: 'Magatzem Propi', icon: '🏠', color: '#22c55e' },
-  { id: 'custom', name: 'Personalitzat', icon: '🏭', color: '#6b7280' }
+  { id: 'amazon_fba', icon: '📦', color: '#ff9900' },
+  { id: 'amazon_fbm', icon: '📦', color: '#ff9900' },
+  { id: 'forwarder', icon: '🚚', color: '#3b82f6' },
+  { id: '3pl', icon: '🏢', color: '#8b5cf6' },
+  { id: 'own', icon: '🏠', color: '#22c55e' },
+  { id: 'custom', icon: '🏭', color: '#6b7280' }
 ]
 
 export default function Warehouses() {
@@ -149,7 +149,7 @@ export default function Warehouses() {
 
   // Obtenir info del tipus
   const getTypeInfo = (typeId) => {
-    return WAREHOUSE_TYPES.find(t => t.id === typeId) || WAREHOUSE_TYPES[2]
+    return WAREHOUSE_TYPES.find((wt) => wt.id === typeId) || WAREHOUSE_TYPES[2]
   }
 
   const renderWarehouseCard = (warehouse, { isPreview = false, enablePreviewSelect = false } = {}) => {
@@ -167,7 +167,7 @@ export default function Warehouses() {
             backgroundColor: `${typeInfo.color}15`,
             color: typeInfo.color
           }}>
-            {typeInfo.icon} {typeInfo.name}
+            {typeInfo.icon} {t(`warehousesPage.types.${typeInfo.id}`)}
           </span>
           {!isPreview && (
             <div 
@@ -204,7 +204,7 @@ export default function Warehouses() {
                     }}
                     style={styles.menuItem}
                   >
-                    <Edit size={14} /> Editar
+                    <Edit size={14} /> {t('warehousesPage.menuEdit')}
                   </Button>
                   <Button
                     variant="danger"
@@ -215,7 +215,7 @@ export default function Warehouses() {
                     }}
                     style={styles.menuItemDanger}
                   >
-                    <Trash2 size={14} /> Eliminar
+                    <Trash2 size={14} /> {t('warehousesPage.menuDelete')}
                   </Button>
                 </div>
               )}
@@ -270,24 +270,24 @@ export default function Warehouses() {
 
   const handleSaveWarehouse = async () => {
     if (!editingWarehouse.name || !editingWarehouse.name.trim()) {
-      showToast('El nom és obligatori', 'error')
+      showToast(t('warehousesPage.toastNameRequired'), 'error')
       return
     }
     setSaving(true)
     try {
       if (editingWarehouse.id) {
         await updateWarehouse(editingWarehouse.id, editingWarehouse)
-        showToast('Magatzem actualitzat correctament', 'success')
+        showToast(t('warehousesPage.toastUpdated'), 'success')
       } else {
         await createWarehouse({ ...editingWarehouse, ...(activeOrgId ? { org_id: activeOrgId } : {}) }, activeOrgId ?? undefined)
-        showToast('Magatzem creat correctament', 'success')
+        showToast(t('warehousesPage.toastCreated'), 'success')
       }
       await loadData()
       setShowModal(false)
       setEditingWarehouse(null)
     } catch (err) {
       console.error('Error guardant magatzem:', err)
-      showToast(`Error guardant magatzem: ${err.message || 'Error desconegut'}`, 'error')
+      showToast(t('warehousesPage.toastSaveError', { message: err.message || t('common.errorGeneric') }), 'error')
     } finally {
       setSaving(false)
     }
@@ -296,7 +296,7 @@ export default function Warehouses() {
   const handleDeleteWarehouse = async (warehouse) => {
     // Check demo mode
     if (demoMode) {
-      showToast('En mode demo no es poden eliminar dades', 'error')
+      showToast(t('warehousesPage.toastDemoDelete'), 'error')
       return
     }
     
@@ -312,7 +312,7 @@ export default function Warehouses() {
     
     try {
       await deleteWarehouse(warehouse.id)
-      showToast('Eliminat correctament', 'success')
+      showToast(t('warehousesPage.toastDeleted'), 'success')
       await loadData()
       setDeleteModal({ isOpen: false, warehouse: null, isDeleting: false })
     } catch (err) {
@@ -320,9 +320,9 @@ export default function Warehouses() {
       
       // Check for FK constraint violation (PostgreSQL error code 23503)
       if (err.code === '23503' || err.message?.includes('foreign key') || err.message?.includes('violates foreign key')) {
-        showToast('No es pot eliminar perquè està en ús (comandes/despeses/projectes). Elimina o desvincula els elements relacionats primer.', 'error')
+        showToast(t('warehousesPage.toastDeleteFk'), 'error')
       } else {
-        showToast('Error eliminant magatzem: ' + (err.message || 'Error desconegut'), 'error')
+        showToast(t('warehousesPage.toastDeleteError', { message: err.message || t('common.errorGeneric') }), 'error')
       }
       
       setDeleteModal(prev => ({ ...prev, isDeleting: false }))
@@ -379,13 +379,13 @@ export default function Warehouses() {
       await loadData()
       setShowAmazonModal(false)
       if (newCodes.length > 0) {
-        showToast(`${newCodes.length} magatzem(s) Amazon afegit(s) correctament`, 'success')
+        showToast(t('warehousesPage.toastAmazonAdded', { count: newCodes.length }), 'success')
       } else {
-        showToast('Tots els magatzems Amazon seleccionats ja existeixen', 'info')
+        showToast(t('warehousesPage.toastAmazonAllExist'), 'info')
       }
     } catch (err) {
       console.error('Error afegint magatzems Amazon:', err)
-      showToast(`Error afegint magatzems Amazon: ${err.message || 'Error desconegut'}`, 'error')
+      showToast(t('warehousesPage.toastAmazonError', { message: err.message || t('common.errorGeneric') }), 'error')
     } finally {
       setSaving(false)
     }
@@ -404,7 +404,7 @@ export default function Warehouses() {
         title={
           <span className="page-title-with-icon">
             <Warehouse size={22} />
-            Magatzems
+            {t('warehousesPage.pageTitle')}
           </span>
         }
       />
@@ -429,7 +429,7 @@ export default function Warehouses() {
           </div>
 
           <div style={styles.filters} className="toolbar-group">
-            <div className="toolbar-filterSelect" title="Filtre per tipus">
+            <div className="toolbar-filterSelect" title={t('warehousesPage.filterByTypeTitle')}>
               <span className="toolbar-filterSelect__icon" aria-hidden="true">
                 <Filter size={16} />
               </span>
@@ -437,9 +437,9 @@ export default function Warehouses() {
                 value={filterType || ''}
                 onChange={e => setFilterType(e.target.value || null)}
               >
-                <option value="">Tots els tipus</option>
-                {WAREHOUSE_TYPES.map(type => (
-                  <option key={type.id} value={type.id}>{type.icon} {type.name}</option>
+                <option value="">{t('warehousesPage.filterAllTypes')}</option>
+                {WAREHOUSE_TYPES.map((wt) => (
+                  <option key={wt.id} value={wt.id}>{wt.icon} {t(`warehousesPage.types.${wt.id}`)}</option>
                 ))}
               </select>
             </div>
@@ -455,7 +455,7 @@ export default function Warehouses() {
           <div style={styles.toolbarRight} className="toolbar-group">
             <Button size="sm" onClick={handleOpenAmazonModal} style={styles.amazonButton}>
               <Package size={18} />
-              Afegir Amazon FBA
+              {t('warehousesPage.addAmazonFba')}
             </Button>
             <Button
               size="sm"
@@ -463,7 +463,7 @@ export default function Warehouses() {
               className="toolbar-cta"
             >
               <Plus size={18} />
-              Nou Magatzem
+              {t('warehousesPage.newWarehouse')}
             </Button>
           </div>
         </div>
@@ -474,37 +474,37 @@ export default function Warehouses() {
             <Warehouse size={24} color="#4f46e5" />
             <div>
               <span style={styles.statValue}>{warehouses.length}</span>
-              <span style={styles.statLabel}>Total Magatzems</span>
+              <span style={styles.statLabel}>{t('warehousesPage.totalWarehouses')}</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
             <Package size={24} color="#ff9900" />
             <div>
               <span style={{...styles.statValue, color: '#ff9900'}}>{warehouses.filter(w => w.type === 'amazon_fba').length}</span>
-              <span style={styles.statLabel}>Amazon FBA</span>
+              <span style={styles.statLabel}>{t('warehousesPage.amazonFbaStat')}</span>
             </div>
           </div>
         </div>
 
         {/* Warehouses Grid */}
         {loading ? (
-          <div style={styles.loading}>Carregant...</div>
+          <div style={styles.loading}>{t('common.loading')}</div>
         ) : filteredWarehouses.length === 0 ? (
           <div style={{ ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
             <Warehouse size={48} color="#d1d5db" />
             <p style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
-              {searchTerm || filterType ? 'No s\'han trobat magatzems' : 'No hi ha magatzems. Afegeix els d\'Amazon o crea un personalitzat!'}
+              {searchTerm || filterType ? t('warehousesPage.emptyFiltered') : t('warehousesPage.emptyDefault')}
             </p>
             <div style={{ display: 'flex', gap: '12px' }}>
               <Button onClick={handleOpenAmazonModal} style={styles.amazonButton}>
                 <Package size={18} />
-                Afegir Amazon FBA
+                {t('warehousesPage.addAmazonFba')}
               </Button>
               <Button 
                 onClick={handleNewWarehouse} 
               >
                 <Plus size={18} />
-                Crear Magatzem
+                {t('warehousesPage.createWarehouse')}
               </Button>
             </div>
           </div>
@@ -533,7 +533,7 @@ export default function Warehouses() {
                   {selectedWarehouse ? (
                     renderWarehouseCard(selectedWarehouse, { isPreview: true })
                   ) : (
-                    <div style={styles.splitEmpty}>Selecciona un magatzem</div>
+                    <div style={styles.splitEmpty}>{t('warehousesPage.selectWarehouse')}</div>
                   )}
                 </div>
               </div>
@@ -548,7 +548,7 @@ export default function Warehouses() {
           <div style={{ ...styles.modal, ...modalStyles.modal }} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeader}>
               <h3 style={{ ...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827' }}>
-                {editingWarehouse.id ? 'Editar Magatzem' : 'Nou Magatzem'}
+                {editingWarehouse.id ? t('warehousesPage.editWarehouse') : t('warehousesPage.newWarehouse')}
               </h3>
               <Button variant="ghost" size="sm" onClick={() => setShowModal(false)} style={styles.closeButton}>
                 <X size={20} />
@@ -558,44 +558,46 @@ export default function Warehouses() {
             <div style={styles.modalBody}>
               <div style={styles.formGrid}>
                 <div style={styles.formGroup}>
-                  <label style={styles.label}>Nom *</label>
+                  <label style={styles.label}>{t('warehousesPage.form.name')}</label>
                   <input type="text" value={editingWarehouse.name} onChange={e => setEditingWarehouse({...editingWarehouse, name: e.target.value})}
                     style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
                 </div>
                 <div style={styles.formGroup}>
-                  <label style={styles.label}>Tipus</label>
+                  <label style={styles.label}>{t('warehousesPage.form.type')}</label>
                   <select value={editingWarehouse.type} onChange={e => setEditingWarehouse({...editingWarehouse, type: e.target.value})}
                     style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }}>
-                    {WAREHOUSE_TYPES.map(t => <option key={t.id} value={t.id}>{t.icon} {t.name}</option>)}
+                    {WAREHOUSE_TYPES.map((wt) => (
+                      <option key={wt.id} value={wt.id}>{wt.icon} {t(`warehousesPage.types.${wt.id}`)}</option>
+                    ))}
                   </select>
                 </div>
                 <div style={{ ...styles.formGroup, gridColumn: 'span 2' }}>
-                  <label style={styles.label}>Adreça</label>
+                  <label style={styles.label}>{t('warehousesPage.form.address')}</label>
                   <textarea value={editingWarehouse.address} onChange={e => setEditingWarehouse({...editingWarehouse, address: e.target.value})} rows={2}
                     style={{ ...styles.input, ...styles.textarea, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
                 </div>
                 <div style={styles.formGroup}>
-                  <label style={styles.label}>Ciutat</label>
+                  <label style={styles.label}>{t('warehousesPage.form.city')}</label>
                   <input type="text" value={editingWarehouse.city} onChange={e => setEditingWarehouse({...editingWarehouse, city: e.target.value})}
                     style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
                 </div>
                 <div style={styles.formGroup}>
-                  <label style={styles.label}>País</label>
+                  <label style={styles.label}>{t('warehousesPage.form.country')}</label>
                   <input type="text" value={editingWarehouse.country} onChange={e => setEditingWarehouse({...editingWarehouse, country: e.target.value})}
                     style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
                 </div>
                 <div style={styles.formGroup}>
-                  <label style={styles.label}>Persona contacte</label>
+                  <label style={styles.label}>{t('warehousesPage.form.contactName')}</label>
                   <input type="text" value={editingWarehouse.contact_name} onChange={e => setEditingWarehouse({...editingWarehouse, contact_name: e.target.value})}
                     style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
                 </div>
                 <div style={styles.formGroup}>
-                  <label style={styles.label}>Telèfon</label>
+                  <label style={styles.label}>{t('warehousesPage.form.phone')}</label>
                   <input type="tel" value={editingWarehouse.contact_phone} onChange={e => setEditingWarehouse({...editingWarehouse, contact_phone: e.target.value})}
                     style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
                 </div>
                 <div style={{ ...styles.formGroup, gridColumn: 'span 2' }}>
-                  <label style={styles.label}>Email</label>
+                  <label style={styles.label}>{t('warehousesPage.form.email')}</label>
                   <input type="email" value={editingWarehouse.contact_email} onChange={e => setEditingWarehouse({...editingWarehouse, contact_email: e.target.value})}
                     style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
                 </div>
@@ -614,7 +616,7 @@ export default function Warehouses() {
                 onClick={handleSaveWarehouse}
                 disabled={saving}
               >
-                {saving ? 'Guardant...' : <><Save size={16} /> {editingWarehouse.id ? 'Actualitzar' : 'Crear'}</>}
+                {saving ? t('common.saving') : <><Save size={16} /> {editingWarehouse.id ? t('warehousesPage.updateWarehouse') : t('warehousesPage.createWarehouseAction')}</>}
               </Button>
             </div>
           </div>
@@ -627,7 +629,7 @@ export default function Warehouses() {
           <div style={{ ...styles.modal, ...styles.amazonModal, ...modalStyles.modal, maxWidth: isMobile ? '100%' : '700px' }} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeader}>
               <h3 style={{ ...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827' }}>
-                📦 Afegir Magatzems Amazon FBA
+                📦 {t('warehousesPage.modalAmazonTitle')}
               </h3>
               <Button variant="ghost" size="sm" onClick={() => setShowAmazonModal(false)} style={styles.closeButton}>
                 <X size={20} />
@@ -636,7 +638,7 @@ export default function Warehouses() {
 
             <div style={{ ...styles.modalBody, maxHeight: '60vh', overflowY: 'auto' }}>
               <p style={{ color: '#6b7280', fontSize: '13px', marginBottom: '16px' }}>
-                Selecciona els magatzems Amazon FBA que vols afegir:
+                {t('warehousesPage.modalAmazonHint')}
               </p>
               
               {Object.entries(amazonByCountry).map(([country, whs]) => (
@@ -666,7 +668,7 @@ export default function Warehouses() {
 
             <div style={styles.modalFooter}>
               <span style={{ color: '#6b7280', fontSize: '13px' }}>
-                {selectedAmazonWarehouses.length} seleccionats
+                {t('warehousesPage.selectedCount', { count: selectedAmazonWarehouses.length })}
               </span>
               <div style={{ display: 'flex', gap: '12px' }}>
                 <Button
@@ -680,7 +682,7 @@ export default function Warehouses() {
                   onClick={handleSaveAmazonWarehouses}
                   disabled={saving}
                 >
-                  {saving ? 'Guardant...' : <><Save size={16} /> Afegir seleccionats</>}
+                  {saving ? t('common.saving') : <><Save size={16} /> {t('warehousesPage.addSelected')}</>}
                 </Button>
               </div>
             </div>
@@ -695,6 +697,7 @@ export default function Warehouses() {
         onConfirm={handleConfirmDelete}
         entityName={deleteModal.warehouse?.name || ''}
         entityType="magatzem"
+        entityLabel={t('warehousesPage.deleteEntityNoun')}
         isDeleting={deleteModal.isDeleting}
         darkMode={darkMode}
         showUsageWarning={true}

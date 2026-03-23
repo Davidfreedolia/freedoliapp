@@ -3,6 +3,7 @@ import { CheckCircle, AlertTriangle } from 'lucide-react'
 import { validatePhaseTransition } from '../../modules/projects/phaseGates'
 import supabase from '../../lib/supabase'
 import { getPhaseStyle } from '../../utils/phaseStyles'
+import useT from '../../hooks/useT'
 
 const REQUIREMENTS_BY_PHASE = {
   1: [
@@ -90,6 +91,7 @@ export default function PhaseChecklist({
   onProgressUpdate,
   id
 }) {
+  const t = useT()
   const [missingItems, setMissingItems] = useState([])
   const [loading, setLoading] = useState(false)
   const phaseStyle = useMemo(() => getPhaseStyle(currentPhase), [currentPhase])
@@ -171,12 +173,12 @@ export default function PhaseChecklist({
         color: darkMode ? '#ffffff' : '#111827',
         marginBottom: '8px'
       }}>
-        Checklist de fase
+        {t('projects.phaseChecklist.title')}
       </div>
 
       {loading && (
         <div style={{ fontSize: '13px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
-          Carregant requisits...
+          {t('projects.phaseChecklist.loadingRequirements')}
         </div>
       )}
 
@@ -189,7 +191,7 @@ export default function PhaseChecklist({
           fontSize: '14px'
         }}>
           <CheckCircle size={16} />
-          Tot llest per avançar
+          {t('projects.phaseChecklist.allReady')}
         </div>
       )}
 

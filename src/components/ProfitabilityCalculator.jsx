@@ -4,6 +4,7 @@ import supabase, { getProductIdentifiers, upsertProductIdentifiers } from '../li
 import { calculateQuickProfitability } from '../lib/profitability'
 import HelpIcon from './HelpIcon'
 import { useApp } from '../context/AppContext'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Calculadora de profitabilitat ràpida (Nivell 1.5)
@@ -15,6 +16,7 @@ const ProfitabilityCalculator = React.forwardRef(function ProfitabilityCalculato
   ref
 ) {
   const { activeOrgId } = useApp()
+  const { t } = useTranslation()
   const VIABILITY_STORAGE_PREFIX = 'project_viability_'
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -512,7 +514,7 @@ const ProfitabilityCalculator = React.forwardRef(function ProfitabilityCalculato
     return (
       <div style={styles.card}>
         <div style={{ textAlign: 'center', padding: '40px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
-          Carregant calculadora...
+          {t('profitabilityWidget.loading')}
         </div>
       </div>
     )

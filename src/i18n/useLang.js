@@ -1,28 +1,26 @@
 /**
- * PAS 5 — lang for billing UI. Default ca; no selector UI for now.
+ * UI language hook — aligned with i18next + `languageStorage` (canonical key `freedoliapp.lang`).
+ * Catalan-first: unknown codes fall back via `normalizeLang` → `ca`.
+ * Prefer `i18n.changeLanguage(code)` or `<AppLanguageControl />` for switches; persistence is automatic.
  */
-import { useState, useCallback } from 'react'
-
-const STORAGE_KEY = 'freedoli_lang'
-const DEFAULT_LANG = 'ca'
-const SUPPORTED = ['ca', 'en', 'es']
-
-function getStoredLang() {
-  try {
-    const s = localStorage.getItem(STORAGE_KEY)
-    if (s && SUPPORTED.includes(s)) return s
-  } catch (_) {}
-  return DEFAULT_LANG
-}
+import { useCallback, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
+import { normalizeLang, SUPPORTED_UI_LANGS } from './languageStorage'
 
 export function useLang() {
-  const [lang, setLangState] = useState(getStoredLang)
-  const setLang = useCallback((l) => {
-    if (!SUPPORTED.includes(l)) return
-    setLangState(l)
-    try {
-      localStorage.setItem(STORAGE_KEY, l)
-    } catch (_) {}
-  }, [])
+  const { i18n } = useTranslation()
+  const lang = useMemo(
+    () => normalizeLang(i18n.resolvedLanguage || i18n.language),
+    [i18n.resolvedLanguage, i18n.language]
+  )
+
+  const setLang = useCallback(
+    (l) => {
+      if (!SUPPORTED_UI_LANGS.includes(l)) return
+      i18n.changeLanguage(l)
+    },
+    [i18n]
+  )
+
   return { lang, setLang }
 }

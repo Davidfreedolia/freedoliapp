@@ -27,6 +27,7 @@
     },
     "createProject": "Crear proyecto",
     "createSupplier": "Crear proveedor",
+    "create": "Crear",
     "createOrder": "Crear orden",
     "close": "Cerrar",
     "creating": "Creando...",
@@ -34,7 +35,15 @@
     "all": "Todos",
     "and": "y",
     "more": "más",
-    "actions": "Acciones"
+    "actions": "Acciones",
+    "saving": "Guardando…"
+  },
+  "shell": {
+    "notFoundTitle": "Página no encontrada",
+    "notFoundBack": "Volver al panel",
+    "lazyLoadTitle": "Error al cargar la página",
+    "lazyLoadMessage": "No se ha podido cargar {{page}}.",
+    "reload": "Recargar"
   },
   "dataStates": {
     "loading": "Cargando datos…",
@@ -44,6 +53,227 @@
     "emptyDecisions": "No hay decisiones abiertas",
     "emptyInventory": "No hay datos de inventario",
     "emptyCashflow": "No hay datos de forecast. Conecta datos para ver el cashflow."
+  },
+  "projectDetailLifecycle": {
+    "title": "Eventos recientes del ciclo de vida",
+    "error": "No se pudieron cargar los eventos",
+    "empty": "No hay eventos recientes",
+    "phaseLabel": "Fase {{id}}",
+    "events": {
+      "project_phase_changed": "Fase cambiada",
+      "purchase_order_created": "Pedido de compra creado",
+      "shipment_in_transit": "Envío en tránsito",
+      "shipment_delivered": "Envío entregado",
+      "inventory_low_stock": "Stock bajo"
+    }
+  },
+  "projectTimeline": {
+    "title": "Cronología",
+    "addEvent": "Añadir evento",
+    "lockedTooltip": "Reabre el proyecto para editar la cronología",
+    "empty": "No hay eventos",
+    "colDate": "Fecha",
+    "colTitle": "Título",
+    "colType": "Tipo",
+    "colNotes": "Notas",
+    "types": {
+      "milestone": "Hito",
+      "meeting": "Reunión",
+      "deadline": "Fecha límite",
+      "delivery": "Entrega",
+      "other": "Otro"
+    },
+    "toastUpdated": "Evento actualizado",
+    "toastCreated": "Evento creado",
+    "toastDeleted": "Evento eliminado",
+    "saveError": "Error al guardar el evento: {{message}}",
+    "deleteError": "Error al eliminar el evento: {{message}}",
+    "unknownError": "Error desconocido",
+    "modalEdit": "Editar evento",
+    "modalNew": "Nuevo evento",
+    "labelTitle": "Título *",
+    "titlePlaceholder": "Título del evento",
+    "labelType": "Tipo",
+    "labelDate": "Fecha *",
+    "labelNotes": "Notas",
+    "notesPlaceholder": "Notas opcionales",
+    "menuEdit": "Editar",
+    "menuDelete": "Eliminar",
+    "deleteEntityNoun": "evento"
+  },
+  "profitabilityWidget": {
+    "loading": "Cargando calculadora…"
+  },
+  "supplierMemory": {
+    "loading": "Cargando métricas…"
+  },
+  "quickSupplier": {
+    "loadingEstimates": "Cargando estimaciones…"
+  },
+  "identifiersSection": {
+    "loading": "Cargando identificadores…"
+  },
+  "financeExports": {
+    "loadingJobs": "Cargando exportaciones…",
+    "recentJobsTitle": "Exportaciones recientes",
+    "pageTitle": "Exportaciones trimestrales",
+    "pageDescription": "Genera y descarga packs trimestrales (P&L, cashflow, ledger y conciliación).",
+    "year": "Año",
+    "quarter": "Trimestre",
+    "refresh": "Actualizar",
+    "generatePack": "Generar pack trimestral",
+    "generating": "Generando…",
+    "emptyJobs": "Aún no hay exportaciones trimestrales creadas.",
+    "colYear": "Año",
+    "colQuarter": "Trimestre",
+    "colPeriod": "Período",
+    "colBaseCurrency": "Moneda base",
+    "colStatus": "Estado",
+    "colCreatedAt": "Creado el",
+    "colError": "Error",
+    "colActions": "Acciones",
+    "download": "Descargar",
+    "toastLoadError": "Error al cargar exportaciones trimestrales",
+    "toastQueued": "Pack trimestral en cola de generación",
+    "toastCreateJobError": "No se pudo crear el job de exportación",
+    "toastGenerateError": "Error al generar la exportación trimestral",
+    "toastDownloadUrlError": "No se pudo obtener el enlace de descarga",
+    "toastDownloadError": "Error al obtener el enlace de descarga",
+    "jobStatus": {
+      "queued": "En cola",
+      "running": "En curso",
+      "done": "Listo",
+      "failed": "Fallida"
+    },
+    "periodStatus": {
+      "open": "Período abierto",
+      "locked": "Período cerrado"
+    }
+  },
+  "automations": {
+    "execution": {
+      "title": "Ejecución",
+      "triggerButton": "Iniciar ejecución",
+      "empty": "Aún no hay ejecuciones.",
+      "missingActor": "Falta el usuario que ejecuta la acción",
+      "succeeded": "Ejecución completada correctamente",
+      "failed": "La ejecución ha fallado",
+      "blocked": "Ejecución bloqueada: {{reason}}",
+      "unknownReason": "desconocido",
+      "duplicateIntent": "Ya existe una intención de ejecución (en cola o en curso)",
+      "triggerFailed": "No se pudo iniciar la ejecución",
+      "modeLine": "Modo: {{mode}}",
+      "startFinishLine": "Inicio: {{start}} · Fin: {{finish}}",
+      "errorLabel": "Error",
+      "resultLabel": "Resultado",
+      "retryButton": "Reintentar ejecución",
+      "retryFailed": "El reintento falló",
+      "status": {
+        "queued": "En cola",
+        "running": "En ejecución",
+        "succeeded": "Completada",
+        "failed": "Fallida",
+        "partially_succeeded": "Completada parcialmente",
+        "canceled": "Cancelada",
+        "rolled_back": "Revertida"
+      },
+      "mode": {
+        "manual_trigger": "Disparador manual",
+        "approved_trigger": "Disparador aprobado",
+        "automatic_trigger": "Disparador automático"
+      }
+    }
+  },
+  "suppliersPage": {
+    "deleteEntityNoun": "proveedor"
+  },
+  "forwardersPage": {
+    "deleteEntityForwarder": "transitario",
+    "deleteEntityWarehouse": "almacén"
+  },
+  "receiptUploader": {
+    "deleteEntityNoun": "recibo",
+    "noExpenseHint": "Selecciona un gasto para adjuntar recibos.",
+    "toastDeleted": "Recibo eliminado correctamente",
+    "toastDeleteError": "Error al eliminar el recibo: {{message}}"
+  },
+  "deleteModal": {
+    "title": "Eliminar {{entity}}",
+    "aboutToDelete": "Estás a punto de eliminar:",
+    "irreversible": "Esta acción no se puede deshacer.",
+    "usageHint": "Si está en uso (pedidos, gastos, proyectos), la eliminación puede fallar.",
+    "confirmPrompt": "¿Quieres continuar con la eliminación?",
+    "deleting": "Eliminando…",
+    "confirm": "Sí, eliminar",
+    "closeAria": "Cerrar"
+  },
+  "warehousesPage": {
+    "deleteEntityNoun": "almacén",
+    "pageTitle": "Almacenes",
+    "searchPlaceholder": "Buscar almacenes…",
+    "filterByTypeTitle": "Filtrar por tipo",
+    "filterAllTypes": "Todos los tipos",
+    "menuEdit": "Editar",
+    "menuDelete": "Eliminar",
+    "form": {
+      "name": "Nombre *",
+      "type": "Tipo",
+      "address": "Dirección",
+      "city": "Ciudad",
+      "country": "País",
+      "contactName": "Persona de contacto",
+      "phone": "Teléfono",
+      "email": "Correo electrónico"
+    },
+    "types": {
+      "amazon_fba": "Amazon FBA",
+      "amazon_fbm": "Amazon FBM",
+      "forwarder": "Transitario",
+      "3pl": "3PL (tercero)",
+      "own": "Almacén propio",
+      "custom": "Personalizado"
+    },
+    "toastNameRequired": "El nombre es obligatorio",
+    "toastUpdated": "Almacén actualizado correctamente",
+    "toastCreated": "Almacén creado correctamente",
+    "toastSaveError": "Error al guardar el almacén: {{message}}",
+    "toastDemoDelete": "En modo demo no se pueden eliminar datos",
+    "toastDeleted": "Eliminado correctamente",
+    "toastDeleteFk": "No se puede eliminar porque está en uso (pedidos/gastos/proyectos). Elimina o desvincula los elementos relacionados primero.",
+    "toastDeleteError": "Error al eliminar el almacén: {{message}}",
+    "toastAmazonAdded": "Se añadieron {{count}} almacén(es) Amazon correctamente",
+    "toastAmazonAllExist": "Todos los almacenes Amazon seleccionados ya existen",
+    "toastAmazonError": "Error al añadir almacenes Amazon: {{message}}",
+    "addAmazonFba": "Añadir Amazon FBA",
+    "newWarehouse": "Nuevo almacén",
+    "totalWarehouses": "Total almacenes",
+    "amazonFbaStat": "Amazon FBA",
+    "emptyFiltered": "No se encontraron almacenes",
+    "emptyDefault": "Aún no hay almacenes. Añade los de Amazon o crea uno personalizado.",
+    "createWarehouse": "Crear almacén",
+    "selectWarehouse": "Selecciona un almacén",
+    "editWarehouse": "Editar almacén",
+    "modalAmazonTitle": "Añadir almacenes Amazon FBA",
+    "modalAmazonHint": "Selecciona los almacenes Amazon FBA que quieres añadir:",
+    "addSelected": "Añadir seleccionados",
+    "selectedCount": "{{count}} seleccionados",
+    "updateWarehouse": "Actualizar",
+    "createWarehouseAction": "Crear"
+  },
+  "inventoryPage": {
+    "addProduct": "Añadir producto",
+    "selectProduct": "Selecciona un producto"
+  },
+  "home": {
+    "profitTrend": {
+      "title": "Tendencia de beneficio (30d)",
+      "empty": "Sin datos de tendencia."
+    }
+  },
+  "financesPage": {
+    "legacy": {
+      "amazonImportsHint": "Abre Importaciones Amazon para conectar Seller Central (SP-API) o subir CSVs de settlements. Tu plan puede limitar importaciones automáticas; en esa pantalla verás el estado real."
+    }
   },
   "header": {
     "cta": {
@@ -318,6 +548,32 @@
       "checkoutFailed": "El checkout ha fallado",
       "noCustomer": "Todavía no hay cliente de facturación. Elige un plan primero.",
       "portalFailed": "El portal de facturación ha fallado"
+    },
+    "limits": {
+      "limitReached": {
+        "projects": {
+          "title": "Proyectos",
+          "message": "Has alcanzado el límite de proyectos.",
+          "cta": "Actualiza el plan para crear más proyectos."
+        },
+        "seats": {
+          "title": "Plazas",
+          "message": "El workspace ha superado el límite de plazas.",
+          "cta": "Actualiza el plan para añadir más miembros."
+        }
+      },
+      "workspaceAlert": {
+        "projects": {
+          "message": "Límite de proyectos alcanzado.",
+          "cta": "Actualiza el plan para crear más proyectos."
+        },
+        "seats": {
+          "message": "El workspace ha superado el límite de plazas.",
+          "cta": "Actualiza el plan para añadir más miembros."
+        }
+      },
+      "upgrade": "Actualizar plan",
+      "dismissAria": "Cerrar"
     }
   },
   "activation": {
@@ -327,7 +583,7 @@
       "connect": "Conectar",
       "import": "Importar",
       "snapshot": "Snapshot",
-      "moreTools": "Más herramientas"
+      "moreTools": "Finalizar"
     },
     "welcome": {
       "title": "Confirma tu organización",
@@ -341,7 +597,19 @@
       "title": "Elige el camino",
       "subtitle": "¿Cómo quieres empezar?",
       "amazonLabel": "Conectar Amazon e importar datos reales",
-      "setupLabel": "Empezar en modo Setup (sin Amazon todavía)"
+      "amazonDescription": "Autoriza Seller Central e importa los últimos 30 días de settlements para ver un primer resumen.",
+      "setupLabel": "Empezar en modo Setup (sin Amazon todavía)",
+      "setupDescription": "Planifica productos y costes sin conectar Amazon. Podrás conectarlo después en Configuración."
+    },
+    "toasts": {
+      "spapiConnected": "Conexión Amazon SP-API completada",
+      "spapiErrorPrefix": "SP-API:",
+      "invalidSession": "Sesión no válida",
+      "oauthStartFailed": "No se pudo iniciar OAuth",
+      "amazonIngestUnavailable": "La importación de Amazon no está disponible en tu plan",
+      "importRequestError": "Error al solicitar la importación",
+      "saveActivationError": "Error al guardar la activación",
+      "genericError": "Algo ha salido mal"
     },
     "connect": {
       "title": "Conectar Amazon",
@@ -353,6 +621,7 @@
     },
     "import": {
       "title": "Importar últimos 30 días",
+      "intro": "Importaremos los últimos 30 días de movimientos de Amazon (ingresos y comisiones) para construir un primer resumen de rendimiento. Este paso puede tardar unos minutos.",
       "requesting": "Solicitando informe a Amazon",
       "processing": "Procesando datos",
       "writing": "Escribiendo ledger",
@@ -370,12 +639,49 @@
       "net": "Neto",
       "cashImpact": "Impacto en caja"
     },
-    "moreTools": {
-      "title": "Conecta más herramientas (opcional)",
-      "subtitle": "Puedes conectar más herramientas más adelante desde Configuración.",
-      "drive": "Google Drive (próximamente)",
-      "outlook": "Outlook / Office 365 (próximamente)",
-      "slack": "Notificaciones Slack (próximamente)"
+    "complete": {
+      "title": "Activación completada",
+      "subtitle": "Tu workspace está listo. Puedes empezar a trabajar en la app.",
+      "cta": "Ir al dashboard"
+    },
+    "setupDone": {
+      "title": "Modo setup",
+      "subtitle": "Puedes crear productos y proyectos, planificar costes y preparar el lanzamiento. Puedes conectar Amazon más adelante en Configuración."
+    },
+    "guidance": {
+      "noOrg": {
+        "title": "Workspace no disponible",
+        "description": "No hay organización activa. Vuelve atrás, elige un workspace desde la app o inicia sesión de nuevo si la sesión está incompleta."
+      },
+      "confirmOrg": {
+        "title": "Qué hacer ahora",
+        "description": "Confirma que este workspace es el correcto. A continuación elegirás si conectar Amazon ahora o empezar en modo setup sin Amazon."
+      },
+      "choosePath": {
+        "title": "Cómo quieres empezar",
+        "description": "Ruta Amazon: autorizar tu cuenta de vendedor e importar settlements recientes. Ruta setup: sin Amazon por ahora—planifica productos y costes y conecta Amazon luego en Configuración."
+      },
+      "amazonConnect": {
+        "title": "Qué pasará después",
+        "description": "Saldrás un momento de Freedoliapp para iniciar sesión en Amazon y aprobar el acceso. Al volver podrás seguir con la importación."
+      },
+      "amazonImport": {
+        "title": "Mientras se ejecuta",
+        "description": "Solicitamos y procesamos los últimos 30 días de actividad de settlements. Puede tardar unos minutos.",
+        "descriptionError": "Algo falló. Puedes reintentar la importación o continuar al resumen con los datos que ya haya en el ledger."
+      },
+      "amazonSnapshot": {
+        "title": "Cómo leer los números",
+        "description": "Las cifras vienen de movimientos del ledger (últimos 30 días) ya contabilizados. Sin actividad aún es normal—puedes terminar y explorar el dashboard."
+      },
+      "setupDone": {
+        "title": "Qué viene después",
+        "description": "Continúa al paso final para guardar la activación y abrir el dashboard. Luego crea tu primer producto o proyecto cuando quieras."
+      },
+      "complete": {
+        "title": "Listo para empezar",
+        "description": "Pulsa el botón de abajo para guardar la activación y entrar en la app. Podrás cambiar la configuración del workspace cuando lo necesites."
+      }
     }
   },
   "snapshot": {
@@ -440,6 +746,8 @@
     "warehouses": "Almacenes",
     "orders": "Pedidos",
     "finances": "Finanzas",
+    "amazonImports": "Importaciones Amazon",
+    "financeExports": "Exportaciones trimestrales",
     "inventory": "Inventario",
     "calendar": "Calendario",
     "taskInbox": "Bandeja de tareas",
@@ -460,16 +768,6 @@
     "groupFinance": "Finanzas",
     "groupIntelligence": "Inteligencia",
     "groupSystem": "Sistema"
-  },
-  "connectedAccounts": {
-    "title": "Cuentas conectadas",
-    "description": "Vincula Google o Apple para iniciar sesión con varios proveedores en la misma cuenta de FREEDOLIAPP.",
-    "email": "Email",
-    "google": "Google",
-    "apple": "Apple",
-    "connected": "conectado",
-    "connect": "Conectar",
-    "connecting": "Conectando…"
   },
   "dashboard": {
     "firstValue": {
@@ -830,10 +1128,23 @@
       }
     }
   },
+  "gate": {
+    "onboardingStatusErrorTitle": "No hemos podido comprobar el estado de activación del workspace.",
+    "onboardingStatusErrorHint": "Inténtalo de nuevo. Si sigue fallando, puede ser un problema de red o de permisos.",
+    "billingStateErrorTitle": "No se ha podido cargar el estado de facturación."
+  },
   "topbar": {
     "addNote": "Añadir nota",
     "workspaceLabel": "Workspace: {{name}}",
-    "workspaceSwitcherAria": "Workspace actual: {{name}}. Haz clic para cambiar de workspace."
+    "workspaceSwitcherAria": "Workspace actual: {{name}}. Haz clic para cambiar de workspace.",
+    "demoBadge": "DEMO",
+    "liveBadge": "LIVE",
+    "themeLabelDay": "DÍA",
+    "themeLabelNight": "NOCHE",
+    "themeAriaToLight": "Activar modo día",
+    "themeAriaToDark": "Activar modo noche",
+    "themeTitleLight": "Modo día",
+    "themeTitleDark": "Modo noche"
   },
   "help": {
     "searchPlaceholder": "Buscar en el manual...",
@@ -894,6 +1205,119 @@
       "openDecision": "Abrir decisión"
     }
   },
+  "orders": {
+    "empty": {
+      "title": "Todavía no tienes órdenes",
+      "filteredTitle": "No se han encontrado órdenes",
+      "subtitle": "Crea tu primera orden para empezar a seguir la producción y el stock entrante.",
+      "cta": "Crear orden"
+    },
+    "pageTitle": "Órdenes de compra (PO)",
+    "intro": "Continúa aquí la operativa del proyecto: crea y sigue las PO vinculadas a tus proyectos, con logística y documentos.",
+    "searchPlaceholder": "Buscar órdenes…",
+    "filterStatusTitle": "Filtrar por estado",
+    "filterProjectTitle": "Filtrar por proyecto",
+    "allStatuses": "Todos los estados",
+    "allProjects": "Todos los proyectos",
+    "stats": {
+      "totalPOs": "Total PO",
+      "pending": "Pendientes",
+      "inProgress": "En curso",
+      "completed": "Completadas",
+      "totalValue": "Valor total"
+    },
+    "status": {
+      "draft": "Borrador",
+      "sent": "Enviada",
+      "confirmed": "Confirmada",
+      "partial_paid": "Pagada parcialmente",
+      "paid": "Pagada",
+      "in_production": "En producción",
+      "shipped": "Enviada",
+      "received": "Recibida",
+      "cancelled": "Cancelada"
+    },
+    "card": {
+      "supplier": "Proveedor",
+      "date": "Fecha",
+      "view": "Ver",
+      "pdf": "PDF",
+      "markPackSent": "Marcar pack como enviado",
+      "sent": "Enviado",
+      "edit": "Editar",
+      "delete": "Eliminar"
+    },
+    "splitSelectPrompt": "Selecciona una orden",
+    "viewProject": "Ver proyecto",
+    "confirmDelete": "¿Eliminar la orden {{poNumber}}?",
+    "toasts": {
+      "noProject": "La orden no tiene proyecto asociado.",
+      "missingFnsku": "El proyecto no tiene FNSKU. Añádelo en la sección Identificadores del proyecto.",
+      "packMarkedSent": "Pack marcado como enviado",
+      "unknownError": "Error desconocido",
+      "manufacturerPackSuccess": "Manufacturer pack generado y descargado",
+      "errorPrefix": "Error:"
+    },
+    "detail": {
+      "whySupplier": "Por qué se eligió este proveedor",
+      "manufacturerPackHelp": "Genera todos los documentos para enviar al fabricante (PO, etiquetas, packing list, etiquetas de cartón).",
+      "generateManufacturerPack": "Generar manufacturer pack"
+    }
+  },
+  "amazonReadiness": {
+    "loading": "Cargando…",
+    "status": {
+      "ready": "Listo para Amazon",
+      "partial": "Parcialmente listo",
+      "notReady": "No listo para Amazon"
+    },
+    "messages": {
+      "discovery": "En Discovery, define el ASIN competidor y completa el snapshot para validar la viabilidad.",
+      "noGtin": "Falta GTIN o exención de GTIN. Asigna un EAN/UPC o marca el producto como exento según aprobación de Amazon.",
+      "noAmazonSku": "Falta el SKU de Amazon. Asígnalo en la sección de identificadores.",
+      "partialNoPoExempt": "El producto ya tiene exención de GTIN y SKU de Amazon pero falta una orden de compra (PO).",
+      "partialNoPo": "El producto ya tiene GTIN y SKU de Amazon pero falta una orden de compra (PO).",
+      "ready": "Este producto cumple los requisitos básicos para Amazon.",
+      "fallback": "Faltan requisitos para Amazon. Revisa GTIN, SKU de Amazon y órdenes.",
+      "loadError": "Error al cargar datos."
+    },
+    "actions": {
+      "completeCompetitorAsin": "Completar ASIN competidor",
+      "assignGtin": "Asignar GTIN",
+      "markExempt": "Marcar como exento",
+      "assignAmazonSku": "Asignar SKU Amazon",
+      "createPo": "Crear PO",
+      "reviewIdentifiers": "Revisar identificadores"
+    }
+  },
+  "logisticsWidget": {
+    "title": "Seguimiento logístico",
+    "loading": "Cargando…",
+    "viewAll": "Ver todas",
+    "staleOnly": "Solo pendientes",
+    "emptyDefault": "No hay órdenes con seguimiento activo",
+    "emptyStale": "No hay órdenes pendientes de actualizar",
+    "badgeStale": "Obsoleto",
+    "badgeNeedsUpdate": "Requiere actualización",
+    "lastUpdated": "Última actualización: hace {{days}} día",
+    "lastUpdated_plural": "Última actualización: hace {{days}} días",
+    "trackingLabel": "Tracking:",
+    "stages": {
+      "production": "Producción",
+      "pickup": "Recogida",
+      "in_transit": "En tránsito",
+      "customs": "Aduanas",
+      "amazon_fba": "Amazon FBA"
+    },
+    "pendingFallback": "Pendiente"
+  },
+  "floatingNotes": {
+    "confirmDelete": "¿Eliminar esta nota?",
+    "minimize": "Minimizar",
+    "maximize": "Maximizar",
+    "delete": "Eliminar",
+    "placeholder": "Escribe tu nota…"
+  },
   "settings": {
     "title": "Configuración",
     "loading": "Cargando...",
@@ -904,6 +1328,8 @@
     "errorSavingSignature": "Error guardando la firma",
     "selectImage": "Selecciona una imagen",
     "nameAndImageRequired": "Nombre e imagen de firma son obligatorios",
+    "languageSectionTitle": "Idioma de la interfaz",
+    "languageSelectLabel": "Selecciona el idioma",
     "openManual": "Abrir Manual de uso",
     "demoModeEnabled": "Modo demo activado",
     "demoModeDisabled": "Modo demo desactivado",
@@ -964,19 +1390,16 @@
       "subtitle": "Crea tu primer proyecto para empezar a gestionar tu negocio Amazon.",
       "cta": "Crear proyecto"
     },
+    "phaseChecklist": {
+      "title": "Checklist de fase",
+      "loadingRequirements": "Cargando requisitos…",
+      "allReady": "Todo listo para avanzar"
+    },
   "suppliers": {
     "empty": {
       "title": "Todavía no tienes proveedores",
       "subtitle": "Crea tu primer proveedor para empezar a gestionar el sourcing y la producción.",
       "cta": "Crear proveedor"
-    }
-  },
-  "orders": {
-    "empty": {
-      "title": "Todavía no tienes órdenes",
-      "filteredTitle": "No se han encontrado órdenes",
-      "subtitle": "Crea tu primera orden para empezar a seguir la producción y el stock entrante.",
-      "cta": "Crear orden"
     }
   },
     "nextAction": {

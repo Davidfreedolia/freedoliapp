@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { TrendingUp, TrendingDown, Clock, DollarSign, CheckCircle2, AlertTriangle } from 'lucide-react'
 import { getSupplierMetrics, generateSupplierBadges } from '../lib/supplierMemory'
 import { supabase, getCurrentUserId } from '../lib/supabase'
 
 export default function SupplierMemory({ supplierId, darkMode }) {
+  const { t } = useTranslation()
   const [metrics, setMetrics] = useState(null)
   const [badges, setBadges] = useState([])
   const [loading, setLoading] = useState(true)
@@ -36,7 +38,7 @@ export default function SupplierMemory({ supplierId, darkMode }) {
         border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
         marginTop: '16px'
       }}>
-        <div style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '13px' }}>Loading metrics...</div>
+        <div style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '13px' }}>{t('supplierMemory.loading')}</div>
       </div>
     )
   }

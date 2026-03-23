@@ -50,8 +50,8 @@ Scope: Index of main documents and their roles.
   - **Status:** active roadmap
 - **`SYSTEMS/SHOPIFY_INTEGRATION.md`** — *Shopify connector system (products, orders, inventory sync).*  
   - **Status:** active roadmap
-- **`SYSTEMS/ASSISTANT_LAYER.md`** — *Assistant / copilot layer system.*  
-  - **Status:** active roadmap
+- **`SYSTEMS/ASSISTANT_LAYER.md`** — *Assistant: canonical in-app role (product definition) + alignment stub; repo V1 rule-based.*  
+  - **Status:** canonical role documented; conversational productization not claimed shipped
 
 ---
 
@@ -63,6 +63,8 @@ Scope: Index of main documents and their roles.
   - **Status:** canonical (live tracker)
 - **`ROADMAP/ROADMAP_CURRENT_POSITION.md`** — *Current executive roadmap position (blocs P0/P1/P2/P3, estat tancat de FASE 3–6, bloc actiu real).*  
   - **Status:** canonical (executive snapshot)
+- **`ROADMAP/TRACK_B_CANONICAL_PLAN.md`** — *Track B — Product Continuity: canonical block order (B2–B7), UI definition vs harmonization, language policy vs selector, assistant surface deps.*  
+  - **Status:** canonical planning (documentation)
 - **`ROADMAP_STATUS.md`** — *Historical roadmap status snapshot (post FASE 2 CBA); kept for context only.*  
   - **Status:** historical / superseded
 - **`PRODUCT/LEAD_SYSTEM.md`** — *Lead system architecture stub (lead → trial → workspace → customer).*  
@@ -71,6 +73,12 @@ Scope: Index of main documents and their roles.
   - **Status:** partial (ActivationWizard + Amazon-first onboarding; general SaaS pending)
 - **`PRODUCT/TRIAL_WORKSPACE_FUNNEL.md`** — *Lead → Trial → Workspace → Customer funnel overview.*  
   - **Status:** active roadmap
+- **`PRODUCT/CANONICAL_UI_SYSTEM.md`** — *Track B B2: canonical app UI system (visual direction, principles, layout/interaction patterns, screen families, do/don’t, Pencil readiness); tokens: VISUAL_IDENTITY_SYSTEM_V1.*  
+  - **Status:** canonical planning (documentation)
+- **`PRODUCT/CANONICAL_APP_LANGUAGE_POLICY_B3.md`** — *Track B B3: canonical app language policy (Catalan source, es/en translations), governance rules, scope vs B4, repo i18n audit.*  
+  - **Status:** canonical planning + audit (documentation)
+- **`PRODUCT/B5_ASSISTANT_IN_APP_UX_SURFACE.md`** — *Track B B5: canonical assistant **in-app UX surface** (entry points, drawer model, internal zones, tone in UI, context strip, scope vs agents, screen examples, hand-off to B6/backend).*  
+  - **Status:** canonical planning (documentation); implementation separate
 
 ---
 

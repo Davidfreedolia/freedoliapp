@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { useWorkspace } from '../../contexts/WorkspaceContext'
 import { getDecisionNotifications } from '../../lib/decisions/getDecisionNotifications'
 import { trackDecisionViewed } from '../../lib/decisions/trackDecisionViewed'
+import { createOrGetTaskFromOrigin } from '../../lib/supabase'
 import DecisionDropdown from './DecisionDropdown'
 
 export default function DecisionBadge() {
@@ -70,6 +71,16 @@ export default function DecisionBadge() {
     navigate(`/app/decisions?id=${encodeURIComponent(item.id)}`)
   }
 
+  const handleCreateTask = useCallback(async (item) => {
+    if (!activeOrgId || !item?.id) return
+    const title = (item.title || 'Follow up: decision').slice(0, 255)
+    await createOrGetTaskFromOrigin(
+      activeOrgId,
+      { source: 'decision', source_ref_type: 'decision', source_ref_id: item.id },
+      { title, entity_type: 'org', entity_id: activeOrgId }
+    )
+  }, [activeOrgId])
+
   const count = items.length
 
   return (
@@ -125,6 +136,7 @@ export default function DecisionBadge() {
           error={error}
           onItemClick={handleItemClick}
           onClose={() => setOpen(false)}
+          onCreateTask={handleCreateTask}
         />
       )}
     </div>

@@ -531,7 +531,7 @@ export default function GTINPoolSection({ darkMode }) {
 
       {/* Taula */}
       {loading ? (
-        <div style={styles.loading}>Carregant...</div>
+        <div style={styles.loading}>{t('common.loading')}</div>
       ) : filteredGtins.length === 0 ? (
         <div style={{
           ...styles.empty,

@@ -260,6 +260,13 @@ export default function Diagnostics() {
     let testTaskId = null
 
     try {
+      // FASE 4.3.B: org correctness — do not run task CRUD when org context is missing
+      if (!activeOrgId) {
+        addLog('⚠ Tasks check skipped: no active workspace (org-scoped)', 'warning')
+        updateCheck('tasks', CHECK_STATUS.WARNING, null, 'No active workspace', '/app')
+        return
+      }
+
       // Get projects for task creation (S2.5: org-scoped)
       const projects = await getProjects(false, activeOrgId ?? undefined)
       const testProject = projects?.[0]
@@ -285,8 +292,8 @@ export default function Diagnostics() {
       if (!created.due_date) throw new Error('due_date not set')
       addLog('✅ Task created', 'success')
 
-      // List (S2.5: org-scoped when activeOrgId available)
-      const tasks = await getTasks(activeOrgId ? { org_id: activeOrgId } : {})
+      // List (org_id required)
+      const tasks = await getTasks({ org_id: activeOrgId })
       const found = tasks?.find(t => t.id === testTaskId)
       if (!found) throw new Error('Created task not found')
       addLog('✅ Task listed', 'success')
@@ -303,14 +310,14 @@ export default function Diagnostics() {
 
       // Mark done
       await updateTask(testTaskId, { status: 'done' })
-      const doneTasks = await getTasks(activeOrgId ? { status: 'done', org_id: activeOrgId } : { status: 'done' })
+      const doneTasks = await getTasks({ status: 'done', org_id: activeOrgId })
       const foundDone = doneTasks?.find(t => t.id === testTaskId)
       if (!foundDone) throw new Error('Task not marked as done')
       addLog('✅ Task marked as done', 'success')
 
       // Delete
       await deleteTask(testTaskId)
-      const afterDelete = await getTasks(activeOrgId ? { org_id: activeOrgId } : {})
+      const afterDelete = await getTasks({ org_id: activeOrgId })
       const stillExists = afterDelete?.find(t => t.id === testTaskId)
       if (stillExists) throw new Error('Task still exists after delete')
       addLog('✅ Task deleted', 'success')

@@ -8,7 +8,7 @@
 
 ## Current authentication model
 
-- **Session retrieval:** `supabase.auth.getSession()` is used in `App.jsx`, `AppContext.jsx`, `ProtectedRoute.jsx`, `TopNavbar.jsx`, `WorkspaceContext.jsx`, `Diagnostics.jsx`, and `Login.jsx`. `supabase.auth.getUser()` is used in `supabase.js`, `getPendingAutomationApprovals.js`, `validateApprovalActor.js`, `ReceiptUploader.jsx`, and `ConnectedAccounts.jsx`.
+- **Session retrieval:** `supabase.auth.getSession()` is used in `App.jsx`, `AppContext.jsx`, `ProtectedRoute.jsx`, `TopNavbar.jsx`, `WorkspaceContext.jsx`, `Diagnostics.jsx`, and `Login.jsx`. `supabase.auth.getUser()` is used in `supabase.js`, `getPendingAutomationApprovals.js`, `validateApprovalActor.js`, and `ReceiptUploader.jsx`.
 - **User identity:** The authenticated user is taken from `session?.user` or `data?.user`; there is no separate “current user” service. Components and hooks that need the user typically call `getSession()` or `getUser()` or rely on `getCurrentUserId()` from `src/lib/supabase.js` (which uses `getUser()`).
 - **User → org resolution:** This happens in **WorkspaceContext** only. On bootstrap, it loads `org_memberships` filtered by `user_id = session.user.id`, then chooses the active org from: (1) stored `freedoli_active_org_id` in localStorage if still in the list, (2) else first org where `role === 'owner'`, (3) else first membership. There is no server-side “current org” token; the frontend is the single place that resolves “which org the user is in.”
 

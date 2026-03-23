@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Plus, Trash2, Copy, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import {
   getSupplierPriceEstimates,
@@ -18,6 +19,7 @@ const SOURCES = [
 const CURRENCIES = ['EUR', 'USD', 'CNY', 'GBP']
 
 export default function QuickSupplierPriceEstimate({ projectId, darkMode, onCopyToProfitability }) {
+  const { t } = useTranslation()
   const [estimates, setEstimates] = useState([])
   const [loading, setLoading] = useState(true)
   const [showAddForm, setShowAddForm] = useState(false)
@@ -322,7 +324,7 @@ export default function QuickSupplierPriceEstimate({ projectId, darkMode, onCopy
   if (loading) {
     return (
       <div style={styles.container}>
-        <div style={styles.loading}>Carregant estimacions...</div>
+        <div style={styles.loading}>{t('quickSupplier.loadingEstimates')}</div>
       </div>
     )
   }

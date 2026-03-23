@@ -8,11 +8,13 @@ const SITE_URL = Deno.env.get("SITE_URL") || Deno.env.get("APP_BASE_URL") || "ht
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
+// Legacy single-price fallback (kept to avoid prod misconfig hard-break)
+const STRIPE_PRICE_ID_CORE = Deno.env.get("STRIPE_PRICE_ID_CORE") || "";
 
 const PRICE_IDS: Record<string, string> = {
-  growth: Deno.env.get("STRIPE_PRICE_GROWTH") || "",
-  pro: Deno.env.get("STRIPE_PRICE_PRO") || "",
-  agency: Deno.env.get("STRIPE_PRICE_AGENCY") || "",
+  growth: Deno.env.get("STRIPE_PRICE_GROWTH") || STRIPE_PRICE_ID_CORE || "",
+  pro: Deno.env.get("STRIPE_PRICE_PRO") || STRIPE_PRICE_ID_CORE || "",
+  agency: Deno.env.get("STRIPE_PRICE_AGENCY") || STRIPE_PRICE_ID_CORE || "",
 };
 
 const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2023-10-16" });

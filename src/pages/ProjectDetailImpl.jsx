@@ -40,7 +40,6 @@ import {
 import Header from '../components/Header'
 import PageGutter from '../components/ui/PageGutter'
 import FileUploader from '../components/FileUploader'
-import DeleteConfirmationModal from '../components/DeleteConfirmationModal'
 import CollapsibleSection from '../components/CollapsibleSection'
 import PhaseChecklist from '../components/projects/PhaseChecklist'
 import { useBreakpoint } from '../hooks/useBreakpoint'
@@ -2543,6 +2542,9 @@ ${t}
           <div className="project-detail-grid">
             <div className="project-detail-left">
               <ProjectPhaseChecklist phase={phaseId} />
+              <p style={{ margin: '8px 0 0', fontSize: 13, color: 'var(--muted-1)' }}>
+                {t('guidance.projectDetail.recommended')}: <strong style={{ color: 'var(--text-1)' }}>{phaseLabel}</strong>
+              </p>
             </div>
             <div className="project-detail-right">
               <ProjectTabs projectId={id} darkMode={darkMode} />

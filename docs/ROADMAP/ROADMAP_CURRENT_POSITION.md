@@ -63,7 +63,16 @@ En conseqüència:
   - **Onboarding** encara millor amb acompanyament: el recorregut d’entrada funciona però es recomana pilot guiat, no self-serve pur.  
   - **Amazon-first** massa tècnic per self-serve massiu: el camí Amazon snapshot requereix context i suport per a orgs no tècniques.
 
-No s’obre una nova mega fase de producte; el següent bloc és **operatiu**: **Pilot Preparation / Pilot Execution** (playbook curt, selecció de 1–3 orgs pilot, execució controlada i feedback).
+### 4.1 Dos tracks en paral·lel (marc roadmap)
+
+El detall viu és al tracker: **`docs/ROADMAP/IMPLEMENTATION_STATUS.md`** (secció *Parallel roadmap tracks*).
+
+- **Track A — Amazon Production Readiness:** línia **crítica**; estat portal = sandbox / no publicable / requisits fiscals i de solució incomplets / camí producció encara no desbloquejat; **SP-API segueix sent dependència core** (no s’aparca).
+- **Track B — Product Continuity:** ordre canònic de blocs (B2–B7), separació **definició UI** vs **harmonització massiva**, i **política d’idioma abans del selector**, a **`docs/ROADMAP/TRACK_B_CANONICAL_PLAN.md`**. **B2** — `docs/PRODUCT/CANONICAL_UI_SYSTEM.md`. **B3** — política d’idioma (català font; es/en traduccions) + auditoria repo: **`docs/PRODUCT/CANONICAL_APP_LANGUAGE_POLICY_B3.md`**. Tancat a nivell repo/doc: tancament wizard/activation + rol assistent (`ASSISTANT_LAYER.md`). Auth/access millorat (p. ex. Google OAuth); revisió pilot/producció encara recomanada; implementació assistent conversacional **pendent**; **el producte pot avançar en paral·lel** mentre Amazon es desbloqueja al portal.
+
+**Regla:** execució **un bloc cada vegada**; roadmap amb tracks paral·lels; **Amazon no desprioritzat**, només separat com a readiness extern.
+
+No s’obre una nova mega fase de producte; el següent marc operatiu és **Pilot Preparation / Pilot Execution**, dins les caveats anteriors i els dos tracks.
 
 ---
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { CheckCircle2, Clock, MoreVertical, Calendar, ArrowRight, AlertCircle } from 'lucide-react'
 import { getOpenTasks, markTaskDone, snoozeTask, bulkMarkTasksDone, bulkSnoozeTasks } from '../lib/supabase'
@@ -77,6 +77,13 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
         break
       default:
         break
+    }
+  }
+
+  const handleOpenDecisionOrigin = (task) => {
+    if (!task?.source_ref_type || !task?.source_ref_id) return
+    if (task.source === 'decision' && task.source_ref_type === 'decision') {
+      navigate(`/app/decisions?id=${encodeURIComponent(task.source_ref_id)}`)
     }
   }
 
@@ -187,13 +194,38 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
             ...widgetStyles.title,
             color: darkMode ? '#ffffff' : '#111827'
           }}>
-            Tasks
+            {t('dashboard.tasks.title')}
           </h3>
+          <Link
+            to="/app/inbox"
+            style={{
+              marginLeft: 'auto',
+              fontSize: '12px',
+              color: darkMode ? '#818cf8' : '#6366f1',
+              textDecoration: 'none',
+              fontWeight: 500
+            }}
+          >
+            {t('tasks.inbox.viewAll')}
+          </Link>
         </div>
         <div style={widgetStyles.empty}>
           <p style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
             {t('dashboard.tasks.empty')}
           </p>
+          <Link
+            to="/app/inbox"
+            style={{
+              fontSize: '12px',
+              color: darkMode ? '#818cf8' : '#6366f1',
+              textDecoration: 'none',
+              fontWeight: 500,
+              marginTop: '8px',
+              display: 'inline-block'
+            }}
+          >
+            {t('tasks.inbox.viewAll')}
+          </Link>
         </div>
       </div>
     )
@@ -212,6 +244,18 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
         }}>
             {t('dashboard.tasks.title')} ({tasks.length})
         </h3>
+        <Link
+          to="/app/inbox"
+          style={{
+            marginLeft: 'auto',
+            fontSize: '12px',
+            color: darkMode ? '#818cf8' : '#6366f1',
+            textDecoration: 'none',
+            fontWeight: 500
+          }}
+        >
+          {t('tasks.inbox.viewAll')}
+        </Link>
         {tasks.length > 0 && (
           <button
             onClick={handleSelectAll}
@@ -393,7 +437,7 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
                     color: '#ffffff',
                     opacity: actionLoading === task.id ? 0.6 : 1
                   }}
-                  title="Mark done"
+                  title={t('tasks.markDone')}
                 >
                   <CheckCircle2 size={14} />
                 </button>
@@ -407,7 +451,7 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
                     opacity: actionLoading === task.id ? 0.6 : 1,
                     fontSize: '11px'
                   }}
-                  title="Snooze +1d"
+                  title={t('tasks.snooze1d')}
                 >
                   +1d
                 </button>
@@ -433,10 +477,26 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
                     color: darkMode ? '#9ca3af' : '#6b7280',
                     border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`
                   }}
-                  title="Open entity"
+                  title={t('tasks.inbox.openEntity')}
                 >
                   <ArrowRight size={14} />
                 </button>
+                {task.source === 'decision' && task.source_ref_type === 'decision' && task.source_ref_id && (
+                  <button
+                    onClick={() => handleOpenDecisionOrigin(task)}
+                    style={{
+                      ...widgetStyles.actionButton,
+                      backgroundColor: 'transparent',
+                      color: darkMode ? '#818cf8' : '#6366f1',
+                      border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`,
+                      fontSize: '11px',
+                      padding: '4px 8px'
+                    }}
+                    title={t('tasks.inbox.openDecision')}
+                  >
+                    {t('tasks.inbox.openDecision')}
+                  </button>
+                )}
               </div>
             </div>
           )

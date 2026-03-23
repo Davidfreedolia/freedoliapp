@@ -58,6 +58,7 @@ import { DataError } from '../components/dataStates'
 import HomeReorderCandidates from '../components/home/HomeReorderCandidates'
 import HomeTopDecisions from '../components/home/HomeTopDecisions'
 import { isScreenshotMode } from '../lib/ui/screenshotMode'
+import NextStepCard from '../components/assistant/NextStepCard'
 
 const formatCurrency = (amount, currency = 'EUR') =>
   (amount != null && Number.isFinite(amount))
@@ -735,6 +736,44 @@ export default function Dashboard() {
               )}
             </div>
           </section>
+
+          {/* R0.3 — Next-step guidance */}
+          {(() => {
+            const hasProjects = (stats.activeProjects ?? 0) > 0
+            const hasOrders = (ordersInProgress?.length ?? 0) > 0 || (posNotReady?.length ?? 0) > 0
+            if (!hasProjects) {
+              return (
+                <NextStepCard
+                  title={t('guidance.nextStepTitle')}
+                  description={t('guidance.dashboard.createProject')}
+                  ctaLabel={tCommon('dashboard.modeB.cta.createProduct')}
+                  ctaOnClick={() => setShowNewProjectModal(true)}
+                />
+              )
+            }
+            if (hasOrders) {
+              return (
+                <NextStepCard
+                  title={t('guidance.nextStepTitle')}
+                  description={t('guidance.dashboard.reviewActivity')}
+                  ctaLabel={t('dashboard.newPO', 'New PO')}
+                  ctaOnClick={() => navigate('/app/orders')}
+                  secondaryCtaLabel={tCommon('common.buttons.open')}
+                  secondaryCtaOnClick={() => navigate('/app/projects')}
+                />
+              )
+            }
+            return (
+              <NextStepCard
+                title={t('guidance.nextStepTitle')}
+                description={t('guidance.dashboard.openOrCreatePO')}
+                ctaLabel={t('dashboard.newPO', 'New PO')}
+                ctaOnClick={() => navigate('/app/orders')}
+                secondaryCtaLabel={tCommon('common.buttons.open')}
+                secondaryCtaOnClick={() => navigate('/app/projects')}
+              />
+            )
+          })()}
 
           {/* 2. Atenció immediata — una sola capa d'alerts + projectes bloquejats */}
           <section style={{ marginBottom: 24 }} aria-label="Atenció immediata">

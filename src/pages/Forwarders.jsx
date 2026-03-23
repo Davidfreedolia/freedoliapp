@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { 
   Plus, 
   Search, 
@@ -935,6 +936,13 @@ export default function Forwarders() {
         onConfirm={handleConfirmDelete}
         entityName={deleteModal.entity?.name || ''}
         entityType={deleteModal.entityType === 'forwarder' ? 'transitari' : 'magatzem'}
+        entityLabel={
+          deleteModal.entityType === 'forwarder'
+            ? t('forwardersPage.deleteEntityForwarder')
+            : deleteModal.entityType === 'warehouse'
+              ? t('forwardersPage.deleteEntityWarehouse')
+              : undefined
+        }
         isDeleting={deleteModal.isDeleting}
         darkMode={darkMode}
         showUsageWarning={true}

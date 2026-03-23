@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { X, Minimize2, Maximize2 } from 'lucide-react'
 import { useNotes } from '../hooks/useNotes'
 import { useApp } from '../context/AppContext'
+import useT from '../hooks/useT'
 
 const COLORS = {
   yellow: { bg: '#fef3c7', border: '#fbbf24', text: '#78350f' },
@@ -95,7 +96,7 @@ export default function FloatingNotesLayer() {
 
   // Eliminar
   const handleDelete = async (noteId) => {
-    if (confirm('Segur que vols eliminar aquesta nota?')) {
+    if (confirm(t('floatingNotes.confirmDelete'))) {
       await removeNote(noteId)
     }
   }
@@ -139,7 +140,7 @@ export default function FloatingNotesLayer() {
                     toggleMinimize(note.id)
                   }}
                   style={styles.iconButton}
-                  title={isMinimized ? 'Maximitzar' : 'Minimitzar'}
+                  title={isMinimized ? t('floatingNotes.maximize') : t('floatingNotes.minimize')}
                 >
                   {isMinimized ? <Maximize2 size={14} /> : <Minimize2 size={14} />}
                 </button>
@@ -149,7 +150,7 @@ export default function FloatingNotesLayer() {
                     handleDelete(note.id)
                   }}
                   style={styles.iconButton}
-                  title="Eliminar"
+                  title={t('floatingNotes.delete')}
                 >
                   <X size={14} />
                 </button>
@@ -165,7 +166,7 @@ export default function FloatingNotesLayer() {
                   onClick={(e) => e.stopPropagation()}
                   onMouseDown={(e) => e.stopPropagation()}
                   style={styles.textarea}
-                  placeholder="Escriu la teva nota..."
+                  placeholder={t('floatingNotes.placeholder')}
                   rows={6}
                 />
               </div>

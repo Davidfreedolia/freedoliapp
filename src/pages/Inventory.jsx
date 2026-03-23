@@ -486,7 +486,7 @@ export default function Inventory() {
           </div>
         ) : filteredInventory.length === 0 ? (
           <div style={{ ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <DataEmpty message={t('dataStates.emptyInventory')} icon={Package} action={<Button onClick={handleNewItem}><Plus size={18} /> Afegir Producte</Button>} />
+            <DataEmpty message={t('dataStates.emptyInventory')} icon={Package} action={<Button onClick={handleNewItem}><Plus size={18} /> {t('inventoryPage.addProduct')}</Button>} />
           </div>
         ) : (
           <>
@@ -509,7 +509,7 @@ export default function Inventory() {
                   {selectedInventoryItem ? (
                     renderInventoryCard(selectedInventoryItem, { isPreview: true })
                   ) : (
-                    <div style={styles.splitEmpty}>Selecciona un producte</div>
+                    <div style={styles.splitEmpty}>{t('inventoryPage.selectProduct')}</div>
                   )}
                 </div>
               </div>

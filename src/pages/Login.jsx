@@ -5,6 +5,7 @@ import { Send, LogIn, Apple } from 'lucide-react'
 import { logSuccess, logError } from '../lib/auditLog'
 import { isDemoMode } from '../demo/demoMode'
 import { registerTrialLead } from '../lib/trials/registerTrialLead'
+import { getAppBaseUrl } from '../lib/config/getAppBaseUrl'
 import useT from '../hooks/useT'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
@@ -22,19 +23,20 @@ export default function Login() {
 
   useEffect(() => {
     if (isDemoMode()) {
-      navigate('/app', { replace: true })
+      navigate('/', { replace: true })
       return
     }
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate('/app', { replace: true })
+        // P0.ACCESS.2 — use a stable entry route; gates decide /activation vs /app vs billing lock
+        navigate('/', { replace: true })
       }
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
-        navigate('/app', { replace: true })
+        navigate('/', { replace: true })
       }
     })
 
@@ -63,7 +65,7 @@ export default function Login() {
       await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/`,
+          redirectTo: `${getAppBaseUrl()}/`,
         },
       })
     } catch (err) {
@@ -80,7 +82,7 @@ export default function Login() {
       await supabase.auth.signInWithOAuth({
         provider: 'apple',
         options: {
-          redirectTo: `${window.location.origin}/`,
+          redirectTo: `${getAppBaseUrl()}/`,
         },
       })
     } catch (err) {
@@ -108,7 +110,7 @@ export default function Login() {
           email: email,
           method: 'password'
         })
-        navigate('/app', { replace: true })
+        navigate('/', { replace: true })
       }
     } catch (err) {
       await logError('user', 'login', err, { email: email, method: 'password' })
@@ -129,7 +131,7 @@ export default function Login() {
         email,
         options: {
           // P0.ACCESS — ensure magic link lands on a valid, explicit auth route
-          emailRedirectTo: `${window.location.origin}/login`,
+          emailRedirectTo: `${getAppBaseUrl()}/login`,
         },
       })
 
@@ -313,3 +315,5 @@ export default function Login() {
     </div>
   )
 }
+
+

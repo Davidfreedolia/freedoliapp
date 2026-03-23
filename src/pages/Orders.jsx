@@ -69,26 +69,33 @@ import { formatError, notifyError } from '../lib/errorHandling'
 import { isScreenshotMode } from '../lib/ui/screenshotMode'
 import { DataLoading, DataError, DataEmpty } from '../components/dataStates'
 import { showToast } from '../components/Toast'
-import useT from '../hooks/useT'
+import { useTranslation } from 'react-i18next'
+import NextStepCard from '../components/assistant/NextStepCard'
 
-// Estats de la PO
-const PO_STATUSES = {
-  draft: { name: 'Esborrany', color: '#6b7280', icon: Edit },
-  sent: { name: 'Enviat', color: '#3b82f6', icon: Send },
-  confirmed: { name: 'Confirmat', color: '#8b5cf6', icon: CheckCircle },
-  partial_paid: { name: 'Pagat parcial', color: '#f59e0b', icon: DollarSign },
-  paid: { name: 'Pagat', color: '#22c55e', icon: DollarSign },
-  in_production: { name: 'En producció', color: '#ec4899', icon: Package },
-  shipped: { name: 'Enviat', color: '#06b6d4', icon: Truck },
-  received: { name: 'Rebut', color: '#10b981', icon: CheckCircle },
-  cancelled: { name: 'Cancel·lat', color: '#ef4444', icon: AlertCircle }
+// PO status visuals (labels from i18n: orders.status.*)
+const PO_STATUS_META = {
+  draft: { color: '#6b7280', icon: Edit },
+  sent: { color: '#3b82f6', icon: Send },
+  confirmed: { color: '#8b5cf6', icon: CheckCircle },
+  partial_paid: { color: '#f59e0b', icon: DollarSign },
+  paid: { color: '#22c55e', icon: DollarSign },
+  in_production: { color: '#ec4899', icon: Package },
+  shipped: { color: '#06b6d4', icon: Truck },
+  received: { color: '#10b981', icon: CheckCircle },
+  cancelled: { color: '#ef4444', icon: AlertCircle }
 }
 
 export default function Orders() {
   const { darkMode, activeOrgId } = useApp()
   const navigate = useNavigate()
   const { isMobile, isTablet } = useBreakpoint()
-  const t = useT()
+  const { t, i18n } = useTranslation()
+  const resolveLocale = () => {
+    const lng = (i18n.language || 'ca').split('-')[0]
+    if (lng === 'en') return 'en-US'
+    if (lng === 'es') return 'es-ES'
+    return 'ca-ES'
+  }
   const [searchParams] = useSearchParams()
   
   const [orders, setOrders] = useState([])
@@ -295,7 +302,7 @@ export default function Orders() {
   // Generar etiquetes FNSKU
   const handleGenerateLabels = async () => {
     if (!selectedOrder?.project_id) {
-      showToast('Error: La comanda no té projecte associat', 'error')
+      showToast(`${t('orders.toasts.errorPrefix')} ${t('orders.toasts.noProject')}`, 'error')
       return
     }
 
@@ -303,7 +310,7 @@ export default function Orders() {
       // Obtenir identificadors del projecte
       const identifiers = await getProductIdentifiers(selectedOrder.project_id)
       if (!identifiers || !identifiers.fnsku) {
-        showToast('Error: El projecte no té FNSKU informat. Afegeix-lo a la secció d\'Identificadors del projecte.', 'error')
+        showToast(`${t('orders.toasts.errorPrefix')} ${t('orders.toasts.missingFnsku')}`, 'error')
         return
       }
 
@@ -482,7 +489,7 @@ export default function Orders() {
       a.click()
       URL.revokeObjectURL(url)
 
-      showToast('Manufacturer Pack generat i descarregat correctament', 'success')
+      showToast(t('orders.toasts.manufacturerPackSuccess'), 'success')
 
       // Recarregar readiness si s'han generat labels
       if (includeFnskuLabels && amazonReadiness?.needs_fnsku !== false) {
@@ -573,7 +580,7 @@ export default function Orders() {
   }
 
   const handleDeleteOrder = async (order) => {
-    if (!confirm(`Segur que vols eliminar la comanda ${order.po_number}?`)) return
+    if (!confirm(t('orders.confirmDelete', { poNumber: order.po_number }))) return
     try {
       await deletePurchaseOrder(order.id)
       await loadData()
@@ -592,7 +599,7 @@ export default function Orders() {
   const formatDate = (dateString) => {
     try {
       if (!dateString) return '-'
-      return new Date(dateString).toLocaleDateString('ca-ES')
+      return new Date(dateString).toLocaleDateString(resolveLocale())
     } catch (err) {
       if (import.meta.env.DEV) {
         console.error('Error formatting date:', err)
@@ -603,7 +610,7 @@ export default function Orders() {
 
   const formatCurrency = (amount, currency = 'USD') => {
     try {
-      return new Intl.NumberFormat('ca-ES', {
+      return new Intl.NumberFormat(resolveLocale(), {
         style: 'currency',
         currency: currency || 'USD'
       }).format(amount || 0)
@@ -614,7 +621,11 @@ export default function Orders() {
   }
 
   const renderOrderCard = (order, { isPreview = false, enablePreviewSelect = false } = {}) => {
-    const status = PO_STATUSES[order.status] || PO_STATUSES.draft
+    const statusKey = PO_STATUS_META[order.status] ? order.status : 'draft'
+    const status = {
+      ...PO_STATUS_META[statusKey],
+      name: t(`orders.status.${statusKey}`)
+    }
     const StatusIcon = status.icon
 
     return (
@@ -653,8 +664,8 @@ export default function Orders() {
           </span>
         </div>
         <div style={styles.orderCardBody}>
-          <div>Proveïdor: {order.supplier?.name || '-'}</div>
-          <div>Data: {formatDate(order.order_date)}</div>
+          <div>{t('orders.card.supplier')}: {order.supplier?.name || '-'}</div>
+          <div>{t('orders.card.date')}: {formatDate(order.order_date)}</div>
           <div style={{ fontWeight: '600', color: darkMode ? '#ffffff' : '#111827' }}>
             {formatCurrency(order.total_amount, order.currency)}
           </div>
@@ -667,7 +678,7 @@ export default function Orders() {
               onClick={() => handleViewOrder(order)}
             >
               <Eye size={14} />
-              Veure
+              {t('orders.card.view')}
             </Button>
             <Button
               variant="ghost"
@@ -687,15 +698,15 @@ export default function Orders() {
                     const { quickMarkPackAsSent } = await import('../lib/supabase')
                     const { showToast } = await import('../components/Toast')
                     await quickMarkPackAsSent(order.id)
-                    showToast('Pack marked as sent', 'success')
+                    showToast(t('orders.toasts.packMarkedSent'), 'success')
                     await loadData()
                   } catch (err) {
                     const { showToast } = await import('../components/Toast')
-                    showToast('Error: ' + (err.message || 'Unknown error'), 'error')
+                    showToast(`${t('orders.toasts.errorPrefix')} ${err.message || t('orders.toasts.unknownError')}`, 'error')
                   }
                 }}
               >
-                ✓ Sent
+                ✓ {t('orders.card.sent')}
               </Button>
             )}
             <div style={{ position: 'relative' }}>
@@ -715,7 +726,7 @@ export default function Orders() {
                     onClick={() => { setEditingOrder(order); setShowModal(true); setMenuOpen(null) }}
                     style={styles.menuItem}
                   >
-                    <Edit size={14} /> Editar
+                    <Edit size={14} /> {t('orders.card.edit')}
                   </Button>
                   <Button
                     variant="danger"
@@ -723,7 +734,7 @@ export default function Orders() {
                     onClick={() => handleDeleteOrder(order)}
                     style={styles.menuItemDanger}
                   >
-                    <Trash2 size={14} /> Eliminar
+                    <Trash2 size={14} /> {t('orders.card.delete')}
                   </Button>
                 </div>
               )}
@@ -740,7 +751,7 @@ export default function Orders() {
         title={
           <span className="page-title-with-icon">
             <FileText size={22} />
-            Comandes (PO)
+            {t('orders.pageTitle')}
           </span>
         }
       />
@@ -750,7 +761,7 @@ export default function Orders() {
         padding: isMobile ? '16px' : '32px'
       }}>
         <p style={{ margin: '0 0 16px', fontSize: 13, color: darkMode ? '#9ca3af' : '#4b5563' }}>
-          Aquí continues l&apos;operativa del projecte: crea i segueix les POs lligades als teus projectes, amb logística i documents.
+          {t('orders.intro')}
         </p>
         {/* Toolbar */}
         <div style={styles.toolbar} className="toolbar-row">
@@ -759,7 +770,7 @@ export default function Orders() {
               <Search size={18} color="#9ca3af" />
               <input
                 type="text"
-                placeholder="Buscar comandes..."
+                placeholder={t('orders.searchPlaceholder')}
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 style={styles.searchInput}
@@ -768,7 +779,7 @@ export default function Orders() {
           </div>
 
           <div style={styles.filters} className="toolbar-group">
-            <div className="toolbar-filterSelect" title="Filtre per estat">
+            <div className="toolbar-filterSelect" title={t('orders.filterStatusTitle')}>
               <span className="toolbar-filterSelect__icon" aria-hidden="true">
                 <Filter size={16} />
               </span>
@@ -776,14 +787,14 @@ export default function Orders() {
                 value={filterStatus || ''}
                 onChange={e => setFilterStatus(e.target.value || null)}
               >
-                <option value="">Tots els estats</option>
-                {Object.entries(PO_STATUSES).map(([key, val]) => (
-                  <option key={key} value={key}>{val.name}</option>
+                <option value="">{t('orders.allStatuses')}</option>
+                {Object.keys(PO_STATUS_META).map((key) => (
+                  <option key={key} value={key}>{t(`orders.status.${key}`)}</option>
                 ))}
               </select>
             </div>
 
-            <div className="toolbar-filterSelect" title="Filtre per projecte">
+            <div className="toolbar-filterSelect" title={t('orders.filterProjectTitle')}>
               <span className="toolbar-filterSelect__icon" aria-hidden="true">
                 <Filter size={16} />
               </span>
@@ -791,7 +802,7 @@ export default function Orders() {
                 value={filterProject || ''}
                 onChange={e => setFilterProject(e.target.value || null)}
               >
-                <option value="">Tots els projectes</option>
+                <option value="">{t('orders.allProjects')}</option>
                 {projects.map(p => (
                   <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
@@ -827,35 +838,35 @@ export default function Orders() {
             <FileText size={24} color="#4f46e5" />
             <div>
               <span style={styles.statValue}>{stats.total}</span>
-              <span style={styles.statLabel}>Total POs</span>
+              <span style={styles.statLabel}>{t('orders.stats.totalPOs')}</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
             <Clock size={24} color="#f59e0b" />
             <div>
               <span style={{ ...styles.statValue, color: '#f59e0b' }}>{stats.pending}</span>
-              <span style={styles.statLabel}>Pendents</span>
+              <span style={styles.statLabel}>{t('orders.stats.pending')}</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
             <Package size={24} color="#8b5cf6" />
             <div>
               <span style={{ ...styles.statValue, color: '#8b5cf6' }}>{stats.inProgress}</span>
-              <span style={styles.statLabel}>En curs</span>
+              <span style={styles.statLabel}>{t('orders.stats.inProgress')}</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
             <CheckCircle size={24} color="#22c55e" />
             <div>
               <span style={{ ...styles.statValue, color: '#22c55e' }}>{stats.completed}</span>
-              <span style={styles.statLabel}>Completades</span>
+              <span style={styles.statLabel}>{t('orders.stats.completed')}</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
             <DollarSign size={24} color="#4f46e5" />
             <div>
               <span style={styles.statValue}>{formatCurrency(stats.totalValue)}</span>
-              <span style={styles.statLabel}>Valor total</span>
+              <span style={styles.statLabel}>{t('orders.stats.totalValue')}</span>
             </div>
           </div>
         </div>
@@ -892,6 +903,14 @@ export default function Orders() {
           </div>
         ) : (
           <>
+            <NextStepCard
+              title={t('guidance.nextStepTitle')}
+              description={t('guidance.orders.createOrLink')}
+              ctaLabel={t('orders.empty.cta')}
+              ctaOnClick={() => setShowModal(true)}
+              secondaryCtaLabel={t('nav.projects')}
+              secondaryCtaOnClick={() => navigate('/app/projects')}
+            />
             {effectiveLayout === 'grid' && (
               <div style={styles.ordersGrid}>
                 {filteredOrders.map(order => renderOrderCard(order))}
@@ -911,7 +930,7 @@ export default function Orders() {
                   {selectedOrderCard ? (
                     renderOrderCard(selectedOrderCard, { isPreview: true })
                   ) : (
-                    <div style={styles.splitEmpty}>Selecciona una comanda</div>
+                    <div style={styles.splitEmpty}>{t('orders.splitSelectPrompt')}</div>
                   )}
                 </div>
               </div>
@@ -980,7 +999,7 @@ export default function Orders() {
                             padding: 0
                           }}
                         >
-                          Veure projecte
+                          {t('orders.viewProject')}
                         </button>
                       )}
                     </p>
@@ -991,12 +1010,12 @@ export default function Orders() {
                       onChange={e => handleStatusChange(selectedOrder.id, e.target.value)}
                       style={{
                         ...styles.statusSelect,
-                        backgroundColor: `${PO_STATUSES[selectedOrder.status]?.color}15`,
-                        color: PO_STATUSES[selectedOrder.status]?.color
+                        backgroundColor: `${PO_STATUS_META[selectedOrder.status]?.color || PO_STATUS_META.draft.color}15`,
+                        color: PO_STATUS_META[selectedOrder.status]?.color || PO_STATUS_META.draft.color
                       }}
                     >
-                      {Object.entries(PO_STATUSES).map(([key, val]) => (
-                        <option key={key} value={key}>{val.name}</option>
+                      {Object.keys(PO_STATUS_META).map((key) => (
+                        <option key={key} value={key}>{t(`orders.status.${key}`)}</option>
                       ))}
                     </select>
                     <Button
@@ -1233,7 +1252,7 @@ export default function Orders() {
                       color: darkMode ? '#9ca3af' : '#6b7280',
                       marginBottom: '12px'
                     }}>
-                      Generate all documents needed to send to the manufacturer (PO, labels, packing list, carton labels)
+                      {t('orders.detail.manufacturerPackHelp')}
                     </p>
                     <Button
                       variant="primary"
@@ -1250,7 +1269,7 @@ export default function Orders() {
                       }}
                     >
                       <Package size={18} />
-                      Generate Manufacturer Pack
+                      {t('orders.detail.generateManufacturerPack')}
                     </Button>
                   </div>
 
@@ -1295,7 +1314,7 @@ export default function Orders() {
                         fontWeight: '600',
                         color: darkMode ? '#ffffff' : '#111827'
                       }}>
-                        Why this supplier was chosen
+                        {t('orders.detail.whySupplier')}
                       </h4>
                       <DecisionLog 
                         entityType="purchase_order" 

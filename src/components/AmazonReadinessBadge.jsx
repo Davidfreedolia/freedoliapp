@@ -3,6 +3,7 @@ import { CheckCircle2, AlertCircle, XCircle, Plus, Barcode, Shield } from 'lucid
 import { useApp } from '../context/AppContext'
 import { getProductIdentifiers, getPurchaseOrders } from '../lib/supabase'
 import { getButtonStyles, useButtonState } from '../utils/buttonStyles'
+import useT from '../hooks/useT'
 
 export default function AmazonReadinessBadge({
   projectId,
@@ -12,6 +13,7 @@ export default function AmazonReadinessBadge({
   onMarkExempt,
   phaseId
 }) {
+  const t = useT()
   const { activeOrgId } = useApp()
   const [readiness, setReadiness] = useState(null) // null = loading, { status, message, action }
   const [loading, setLoading] = useState(true)
@@ -21,7 +23,7 @@ export default function AmazonReadinessBadge({
 
   useEffect(() => {
     loadReadiness()
-  }, [projectId])
+  }, [projectId, phaseId, t, activeOrgId])
 
   const loadReadiness = async () => {
     setLoading(true)
@@ -29,8 +31,8 @@ export default function AmazonReadinessBadge({
       if (phaseId <= 2) {
         setReadiness({
           status: 'not_ready',
-          message: "En Discovery cal definir l'ASIN competidor i completar el snapshot per validar la viabilitat.",
-          action: { type: 'discovery_asin', label: 'Completar ASIN competidor' }
+          message: t('amazonReadiness.messages.discovery'),
+          action: { type: 'discovery_asin', label: t('amazonReadiness.actions.completeCompetitorAsin') }
         })
         return
       }
@@ -55,38 +57,38 @@ export default function AmazonReadinessBadge({
       
       if (!hasGtinOrExempt) {
         status = 'not_ready'
-        message = "Falta GTIN o exempció de GTIN. Pots assignar un EAN/UPC o marcar el producte com a exempt segons aprovació d'Amazon."
+        message = t('amazonReadiness.messages.noGtin')
         action = { 
           type: 'no_gtin', 
-          label: 'Assignar GTIN',
-          secondaryLabel: 'Marcar com a Exempt',
+          label: t('amazonReadiness.actions.assignGtin'),
+          secondaryLabel: t('amazonReadiness.actions.markExempt'),
           hasSecondary: true
         }
       } else if (!hasAmazonSku) {
         status = 'not_ready'
-        message = "Falta el SKU Amazon. Assigna un SKU Amazon a la secció d'identificadors."
-        action = { type: 'assign_gtin', label: 'Assignar SKU Amazon' }
+        message = t('amazonReadiness.messages.noAmazonSku')
+        action = { type: 'assign_gtin', label: t('amazonReadiness.actions.assignAmazonSku') }
       } else if (!hasPO) {
         status = 'partial'
         message = hasGtinExempt 
-          ? "El producte ja té exempció de GTIN i SKU Amazon però falta una comanda (PO)."
-          : "El producte ja té GTIN i SKU Amazon però falta una comanda (PO)."
-        action = { type: 'create_po', label: 'Crear PO' }
+          ? t('amazonReadiness.messages.partialNoPoExempt')
+          : t('amazonReadiness.messages.partialNoPo')
+        action = { type: 'create_po', label: t('amazonReadiness.actions.createPo') }
       } else if (hasGtinOrExempt && hasAmazonSku && hasPO) {
         status = 'ready'
-        message = "Aquest producte compleix els requisits bàsics per Amazon."
+        message = t('amazonReadiness.messages.ready')
         action = null
       } else {
         // Fallback: no debería llegar aquí, pero por seguridad
         status = 'not_ready'
-        message = "Falten requisits per Amazon. Revisa GTIN, SKU Amazon i comandes."
-        action = { type: 'assign_gtin', label: 'Revisar identificadors' }
+        message = t('amazonReadiness.messages.fallback')
+        action = { type: 'assign_gtin', label: t('amazonReadiness.actions.reviewIdentifiers') }
       }
 
       setReadiness({ status, message, action })
     } catch (err) {
       console.error('Error carregant Amazon Readiness:', err)
-      setReadiness({ status: 'not_ready', message: 'Error carregant dades.', action: null })
+      setReadiness({ status: 'not_ready', message: t('amazonReadiness.messages.loadError'), action: null })
     } finally {
       setLoading(false)
     }
@@ -101,7 +103,7 @@ export default function AmazonReadinessBadge({
         border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
         marginBottom: '24px'
       }}>
-        <div style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '14px' }}>Carregant...</div>
+        <div style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '14px' }}>{t('amazonReadiness.loading')}</div>
       </div>
     )
   }
@@ -115,21 +117,21 @@ export default function AmazonReadinessBadge({
       bgColor: darkMode ? '#1a3a2a' : '#f0fdf4',
       borderColor: '#22c55e',
       icon: CheckCircle2,
-      label: 'Amazon Ready'
+      label: t('amazonReadiness.status.ready')
     },
     partial: {
       color: '#f59e0b',
       bgColor: darkMode ? '#3a2e1a' : '#fffbeb',
       borderColor: '#f59e0b',
       icon: AlertCircle,
-      label: 'Parcialment preparat'
+      label: t('amazonReadiness.status.partial')
     },
     not_ready: {
       color: '#ef4444',
       bgColor: darkMode ? '#3a1a1a' : '#fef2f2',
       borderColor: '#ef4444',
       icon: XCircle,
-      label: 'No preparat per Amazon'
+      label: t('amazonReadiness.status.notReady')
     }
   }
 

@@ -7,6 +7,7 @@ import { showToast } from '../components/Toast'
 import Button from '../components/ui/Button'
 import Card from '../components/ui/Card'
 import Stepper from '../components/ui/Stepper'
+import NextStepCard from '../components/assistant/NextStepCard'
 import useT from '../hooks/useT'
 
 const STEP_CONFIRM_ORG = 1
@@ -115,14 +116,14 @@ export default function ActivationWizard() {
     const message = params.get('message')
     if (spapi === 'success') {
       sessionStorage.removeItem(ACTIVATION_AMAZON_PATH_KEY)
-      showToast('Connexió Amazon SP-API connectada', 'success')
+      showToast(t('activation.toasts.spapiConnected'), 'success')
       loadSpapiConnections()
       window.history.replaceState({}, '', window.location.pathname)
     } else if (spapi === 'error' && message) {
-      showToast(`SP-API: ${decodeURIComponent(message)}`, 'error')
+      showToast(`${t('activation.toasts.spapiErrorPrefix')} ${decodeURIComponent(message)}`, 'error')
       window.history.replaceState({}, '', window.location.pathname)
     }
-  }, [loadSpapiConnections])
+  }, [loadSpapiConnections, t])
 
   const handleChooseSetup = () => {
     setActivationPath('setup')
@@ -141,7 +142,7 @@ export default function ActivationWizard() {
     try {
       const userId = await getCurrentUserId()
       if (!userId) {
-        showToast('Sessió no vàlida', 'error')
+        showToast(t('activation.toasts.invalidSession'), 'error')
         return
       }
       const { data, error } = await supabase.functions.invoke('spapi-oauth-init', {
@@ -153,7 +154,7 @@ export default function ActivationWizard() {
       const state = data?.state
       const redirectUri = data?.redirect_uri
       if (!consentUrl || !state) {
-        showToast('No s\'ha pogut iniciar OAuth', 'error')
+        showToast(t('activation.toasts.oauthStartFailed'), 'error')
         return
       }
       sessionStorage.setItem(SPAPI_STATE_KEY, state)
@@ -161,7 +162,7 @@ export default function ActivationWizard() {
       window.location.href = consentUrl
     } catch (err) {
       console.error('SP-API init error:', err)
-      showToast(err?.message || 'Error connectant amb Amazon SP-API', 'error')
+      showToast(err?.message || t('activation.toasts.genericError'), 'error')
     } finally {
       setConnecting(false)
     }
@@ -185,7 +186,7 @@ export default function ActivationWizard() {
           if (!cancelled) {
             setImportStatus('done')
             setImportDone(true)
-            showToast('Importació Amazon no disponible al teu pla', 'error')
+            showToast(t('activation.toasts.amazonIngestUnavailable'), 'error')
             setImportError('amazon_ingest_not_available')
           }
           return
@@ -201,7 +202,7 @@ export default function ActivationWizard() {
         if (!cancelled) {
           setImportStatus('done')
           setImportDone(true)
-          showToast(err?.message || 'Error requesting import', 'error')
+          showToast(err?.message || t('activation.toasts.importRequestError'), 'error')
           setImportError('request_failed')
         }
         return
@@ -241,7 +242,7 @@ export default function ActivationWizard() {
       cancelled = true
       if (pollTimer) clearTimeout(pollTimer)
     }
-  }, [step, activeOrgId, activeConnection?.id])
+  }, [step, activeOrgId, activeConnection?.id, t])
 
   // Step 6: load snapshot (last 30 days)
   useEffect(() => {
@@ -303,8 +304,8 @@ export default function ActivationWizard() {
           navigate('/app', { replace: true })
           return
         }
-        setSubmitError(error.message || 'Error saving activation')
-        showToast(error.message || 'Error saving activation', 'error')
+        setSubmitError(error.message || t('activation.toasts.saveActivationError'))
+        showToast(error.message || t('activation.toasts.saveActivationError'), 'error')
         return
       }
       sessionStorage.removeItem(ACTIVATION_AMAZON_PATH_KEY)
@@ -314,8 +315,8 @@ export default function ActivationWizard() {
         navigate('/app', { replace: true })
       }
     } catch (err) {
-      setSubmitError(err?.message || 'Error')
-      showToast(err?.message || 'Error', 'error')
+      setSubmitError(err?.message || t('activation.toasts.genericError'))
+      showToast(err?.message || t('activation.toasts.genericError'), 'error')
     } finally {
       setSubmitLoading(false)
     }
@@ -327,6 +328,10 @@ export default function ActivationWizard() {
         <Card elevated className="wizard-card">
           <h1 className="wizard-title">{t('activation.welcome.title')}</h1>
           <p className="wizard-subtitle">{t('activation.welcome.noOrg')}</p>
+          <NextStepCard
+            title={t('activation.guidance.noOrg.title')}
+            description={t('activation.guidance.noOrg.description')}
+          />
         </Card>
       </div>
     )
@@ -384,6 +389,10 @@ export default function ActivationWizard() {
             <p className="wizard-subtitle wizard-subtitle--hint">
               {t('activation.welcome.flowHint')}
             </p>
+            <NextStepCard
+              title={t('activation.guidance.confirmOrg.title')}
+              description={t('activation.guidance.confirmOrg.description')}
+            />
             <div className="wizard-footer">
               <div className="wizard-footer__left" />
               <div className="wizard-footer__right">
@@ -401,6 +410,10 @@ export default function ActivationWizard() {
             <p className="wizard-subtitle">
               {t('activation.choosePath.subtitle')}
             </p>
+            <NextStepCard
+              title={t('activation.guidance.choosePath.title')}
+              description={t('activation.guidance.choosePath.description')}
+            />
             <div className="wizard-tool-grid" style={{ marginBottom: 0 }}>
               <div className="wizard-tool-card" onClick={handleChooseAmazon}>
                 <div className="wizard-tool-card__title">
@@ -425,6 +438,10 @@ export default function ActivationWizard() {
         {step === STEP_AMAZON_CONNECT && (
           <div className="wizard-body">
             <h1 className="wizard-title">{t('activation.connect.title')}</h1>
+            <NextStepCard
+              title={t('activation.guidance.amazonConnect.title')}
+              description={t('activation.guidance.amazonConnect.description')}
+            />
             {activeConnection ? (
               <>
                 <p className="wizard-subtitle">
@@ -475,9 +492,16 @@ export default function ActivationWizard() {
           <div className="wizard-body">
             <h1 className="wizard-title">{t('activation.import.title')}</h1>
             <p className="wizard-subtitle">
-              Importarem els últims 30 dies de moviments Amazon (ingressos i comissions)
-              per construir un primer resum de rendiment. Aquest pas pot trigar uns minuts.
+              {t('activation.import.intro')}
             </p>
+            <NextStepCard
+              title={t('activation.guidance.amazonImport.title')}
+              description={
+                importError
+                  ? t('activation.guidance.amazonImport.descriptionError')
+                  : t('activation.guidance.amazonImport.description')
+              }
+            />
             <ul className="wizard-subtitle">
               <li>
                 {importStatus === 'requesting'
@@ -537,6 +561,10 @@ export default function ActivationWizard() {
         {step === STEP_AMAZON_SNAPSHOT && (
           <div className="wizard-body">
             <h1 className="wizard-title">{t('activation.snapshot.title')}</h1>
+            <NextStepCard
+              title={t('activation.guidance.amazonSnapshot.title')}
+              description={t('activation.guidance.amazonSnapshot.description')}
+            />
             {snapshotLoading && (
               <p className="wizard-subtitle">{t('common.loading')}</p>
             )}
@@ -600,11 +628,14 @@ export default function ActivationWizard() {
 
         {step === STEP_SETUP_DONE && (
           <div className="wizard-body">
-            <h1 className="wizard-title">Setup mode activated</h1>
+            <h1 className="wizard-title">{t('activation.setupDone.title')}</h1>
             <p className="wizard-subtitle">
-              You can create products and projects, plan costs and prepare your launch.
-              You can connect Amazon later in Settings.
+              {t('activation.setupDone.subtitle')}
             </p>
+            <NextStepCard
+              title={t('activation.guidance.setupDone.title')}
+              description={t('activation.guidance.setupDone.description')}
+            />
             {submitError && (
               <p className="wizard-subtitle" style={{ color: 'var(--color-danger)', fontSize: 14 }}>
                 {submitError}
@@ -637,54 +668,30 @@ export default function ActivationWizard() {
 
         {step === STEP_MORE_TOOLS && (
           <div className="wizard-body">
-            <h1 className="wizard-title">{t('activation.moreTools.title')}</h1>
+            <h1 className="wizard-title">{t('activation.complete.title')}</h1>
             <p className="wizard-subtitle">
-              {t('activation.moreTools.subtitle')}
+              {t('activation.complete.subtitle')}
             </p>
-            <div className="wizard-tool-grid">
-              <div className="wizard-tool-card">
-                <div className="wizard-tool-card__title">Google Drive</div>
-                <span className="wizard-tool-card__badge">
-                  Coming soon
-                </span>
-              </div>
-              <div className="wizard-tool-card">
-                <div className="wizard-tool-card__title">Outlook / Office 365</div>
-                <span className="wizard-tool-card__badge">
-                  Coming soon
-                </span>
-              </div>
-              <div className="wizard-tool-card">
-                <div className="wizard-tool-card__title">Slack</div>
-                <span className="wizard-tool-card__badge">
-                  Coming soon
-                </span>
-              </div>
-            </div>
+            <NextStepCard
+              title={t('activation.guidance.complete.title')}
+              description={t('activation.guidance.complete.description')}
+            />
             {submitError && (
               <p className="wizard-subtitle" style={{ color: 'var(--color-danger)', fontSize: 14 }}>
                 {submitError}
               </p>
             )}
             <div className="wizard-footer">
-              <div className="wizard-footer__left">
-                <Button
-                  variant="secondary"
-                  size="md"
-                  disabled={submitLoading}
-                  onClick={() => handleEnterDashboard(activationPath)}
-                >
-                  {t('common.buttons.skipForNow')}
-                </Button>
-              </div>
+              <div className="wizard-footer__left" />
               <div className="wizard-footer__right">
                 <Button
                   variant="primary"
                   size="md"
                   disabled={submitLoading}
+                  loading={submitLoading}
                   onClick={() => handleEnterDashboard(activationPath)}
                 >
-                  {submitLoading ? 'Saving...' : 'Enter Dashboard'}
+                  {t('activation.complete.cta')}
                 </Button>
               </div>
             </div>

@@ -1,13 +1,6 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { getRecentLifecycleEvents } from '../../../lib/lifecycleEvents'
-
-const EVENT_TYPE_LABELS = {
-  project_phase_changed: 'Phase changed',
-  purchase_order_created: 'PO created',
-  shipment_in_transit: 'Shipment in transit',
-  shipment_delivered: 'Shipment delivered',
-  inventory_low_stock: 'Low stock'
-}
 
 function formatTimestamp(iso) {
   if (!iso) return '—'
@@ -29,6 +22,7 @@ function formatTimestamp(iso) {
  * Renders inside Project Detail right panel. Loading / empty / error handled lightly.
  */
 export default function ProjectDetailLifecycleEventsBlock({ projectId }) {
+  const { t } = useTranslation()
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -88,24 +82,26 @@ export default function ProjectDetailLifecycleEventsBlock({ projectId }) {
 
   return (
     <div style={blockStyle}>
-      <div style={titleStyle}>Recent lifecycle events</div>
+      <div style={titleStyle}>{t('projectDetailLifecycle.title')}</div>
       {loading && (
-        <div style={metaStyle}>Loading…</div>
+        <div style={metaStyle}>{t('common.loading')}</div>
       )}
       {error && !loading && (
-        <div style={metaStyle}>Unable to load events</div>
+        <div style={metaStyle}>{t('projectDetailLifecycle.error')}</div>
       )}
       {!loading && !error && events.length === 0 && (
-        <div style={metaStyle}>No recent lifecycle events</div>
+        <div style={metaStyle}>{t('projectDetailLifecycle.empty')}</div>
       )}
       {!loading && !error && events.length > 0 && (
         <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
           {events.map((ev) => (
             <li key={ev.id} style={itemStyle}>
-              <span>{EVENT_TYPE_LABELS[ev.event_type] ?? ev.event_type}</span>
+              <span>
+                {t(`projectDetailLifecycle.events.${ev.event_type}`, { defaultValue: ev.event_type })}
+              </span>
               {(ev.lifecycle_stage || ev.phase_id) && (
                 <span style={metaStyle}>
-                  {ev.lifecycle_stage ?? `Phase ${ev.phase_id}`}
+                  {ev.lifecycle_stage ?? t('projectDetailLifecycle.phaseLabel', { id: ev.phase_id })}
                 </span>
               )}
               <span style={metaStyle}>{formatTimestamp(ev.created_at)}</span>

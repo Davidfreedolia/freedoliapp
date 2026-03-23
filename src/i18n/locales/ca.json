@@ -27,6 +27,7 @@
     },
     "createProject": "Crear projecte",
     "createSupplier": "Crear proveïdor",
+    "create": "Crear",
     "createOrder": "Crear comanda",
     "close": "Tancar",
     "creating": "Creant...",
@@ -34,7 +35,15 @@
     "all": "Tots",
     "and": "i",
     "more": "més",
-    "actions": "Accions"
+    "actions": "Accions",
+    "saving": "Guardant…"
+  },
+  "shell": {
+    "notFoundTitle": "Pàgina no trobada",
+    "notFoundBack": "Torna al dashboard",
+    "lazyLoadTitle": "Error en carregar la pàgina",
+    "lazyLoadMessage": "No s'ha pogut carregar {{page}}.",
+    "reload": "Recarregar"
   },
   "dataStates": {
     "loading": "Carregant dades…",
@@ -44,6 +53,227 @@
     "emptyDecisions": "No hi ha decisions obertes",
     "emptyInventory": "No hi ha dades d'inventari",
     "emptyCashflow": "No hi ha dades de forecast. Connecta dades per veure el cashflow."
+  },
+  "projectDetailLifecycle": {
+    "title": "Esdeveniments de cicle de vida recents",
+    "error": "No s'han pogut carregar els esdeveniments",
+    "empty": "No hi ha esdeveniments recents",
+    "phaseLabel": "Fase {{id}}",
+    "events": {
+      "project_phase_changed": "Fase canviada",
+      "purchase_order_created": "Comanda de compra creada",
+      "shipment_in_transit": "Enviament en trànsit",
+      "shipment_delivered": "Enviament lliurat",
+      "inventory_low_stock": "Estoc baix"
+    }
+  },
+  "projectTimeline": {
+    "title": "Cronologia",
+    "addEvent": "Afegir esdeveniment",
+    "lockedTooltip": "Reobre el projecte per editar la cronologia",
+    "empty": "No hi ha esdeveniments",
+    "colDate": "Data",
+    "colTitle": "Títol",
+    "colType": "Tipus",
+    "colNotes": "Notes",
+    "types": {
+      "milestone": "Fita",
+      "meeting": "Reunió",
+      "deadline": "Termini",
+      "delivery": "Lliurament",
+      "other": "Altres"
+    },
+    "toastUpdated": "Esdeveniment actualitzat",
+    "toastCreated": "Esdeveniment creat",
+    "toastDeleted": "Esdeveniment eliminat",
+    "saveError": "Error en guardar l'esdeveniment: {{message}}",
+    "deleteError": "Error en eliminar l'esdeveniment: {{message}}",
+    "unknownError": "Error desconegut",
+    "modalEdit": "Editar esdeveniment",
+    "modalNew": "Nou esdeveniment",
+    "labelTitle": "Títol *",
+    "titlePlaceholder": "Títol de l'esdeveniment",
+    "labelType": "Tipus",
+    "labelDate": "Data *",
+    "labelNotes": "Notes",
+    "notesPlaceholder": "Notes opcionals",
+    "menuEdit": "Editar",
+    "menuDelete": "Eliminar",
+    "deleteEntityNoun": "esdeveniment"
+  },
+  "profitabilityWidget": {
+    "loading": "Carregant calculadora…"
+  },
+  "supplierMemory": {
+    "loading": "Carregant mètriques…"
+  },
+  "quickSupplier": {
+    "loadingEstimates": "Carregant estimacions…"
+  },
+  "identifiersSection": {
+    "loading": "Carregant identificadors…"
+  },
+  "financeExports": {
+    "loadingJobs": "Carregant exportacions…",
+    "recentJobsTitle": "Exportacions recents",
+    "pageTitle": "Exports trimestrals",
+    "pageDescription": "Genera i descarrega packs trimestrals (P&L, cashflow, ledger i conciliació).",
+    "year": "Any",
+    "quarter": "Trimestre",
+    "refresh": "Actualitzar",
+    "generatePack": "Generar pack trimestral",
+    "generating": "Generant…",
+    "emptyJobs": "Encara no hi ha exportacions trimestrals creades.",
+    "colYear": "Any",
+    "colQuarter": "Trimestre",
+    "colPeriod": "Període",
+    "colBaseCurrency": "Moneda base",
+    "colStatus": "Estat",
+    "colCreatedAt": "Data de creació",
+    "colError": "Error",
+    "colActions": "Accions",
+    "download": "Descarregar",
+    "toastLoadError": "Error en carregar les exportacions trimestrals",
+    "toastQueued": "Pack trimestral en cua de generació",
+    "toastCreateJobError": "No s'ha pogut crear el job d'exportació",
+    "toastGenerateError": "Error en generar l'exportació trimestral",
+    "toastDownloadUrlError": "No s'ha pogut obtenir l'enllaç de descàrrega",
+    "toastDownloadError": "Error en obtenir l'enllaç de descàrrega",
+    "jobStatus": {
+      "queued": "En cua",
+      "running": "En curs",
+      "done": "Llest",
+      "failed": "Fallida"
+    },
+    "periodStatus": {
+      "open": "Període obert",
+      "locked": "Període tancat"
+    }
+  },
+  "automations": {
+    "execution": {
+      "title": "Execució",
+      "triggerButton": "Iniciar execució",
+      "empty": "Encara no hi ha cap execució.",
+      "missingActor": "Falta l'usuari que executa l'acció",
+      "succeeded": "Execució completada correctament",
+      "failed": "L'execució ha fallat",
+      "blocked": "Execució bloquejada: {{reason}}",
+      "unknownReason": "desconegut",
+      "duplicateIntent": "Ja existeix una intenció d'execució (en cua o en curs)",
+      "triggerFailed": "No s'ha pogut iniciar l'execució",
+      "modeLine": "Mode: {{mode}}",
+      "startFinishLine": "Inici: {{start}} · Fi: {{finish}}",
+      "errorLabel": "Error",
+      "resultLabel": "Resultat",
+      "retryButton": "Reintentar execució",
+      "retryFailed": "Ha fallat el reintent",
+      "status": {
+        "queued": "En cua",
+        "running": "En execució",
+        "succeeded": "Completada",
+        "failed": "Fallida",
+        "partially_succeeded": "Completada parcialment",
+        "canceled": "Cancel·lada",
+        "rolled_back": "Revertida"
+      },
+      "mode": {
+        "manual_trigger": "Disparador manual",
+        "approved_trigger": "Disparador aprovat",
+        "automatic_trigger": "Disparador automàtic"
+      }
+    }
+  },
+  "suppliersPage": {
+    "deleteEntityNoun": "proveïdor"
+  },
+  "forwardersPage": {
+    "deleteEntityForwarder": "transitari",
+    "deleteEntityWarehouse": "magatzem"
+  },
+  "receiptUploader": {
+    "deleteEntityNoun": "rebut",
+    "noExpenseHint": "Selecciona una despesa per adjuntar rebuts.",
+    "toastDeleted": "Rebut eliminat correctament",
+    "toastDeleteError": "Error en eliminar el rebut: {{message}}"
+  },
+  "deleteModal": {
+    "title": "Eliminar {{entity}}",
+    "aboutToDelete": "Estàs a punt d'eliminar:",
+    "irreversible": "Aquesta acció no es pot desfer.",
+    "usageHint": "Si està en ús (comandes, despeses, projectes), l'eliminació pot fallar.",
+    "confirmPrompt": "Vols continuar amb l'eliminació?",
+    "deleting": "Eliminant…",
+    "confirm": "Sí, eliminar",
+    "closeAria": "Tancar"
+  },
+  "warehousesPage": {
+    "deleteEntityNoun": "magatzem",
+    "pageTitle": "Magatzems",
+    "searchPlaceholder": "Cercar magatzems…",
+    "filterByTypeTitle": "Filtre per tipus",
+    "filterAllTypes": "Tots els tipus",
+    "menuEdit": "Editar",
+    "menuDelete": "Eliminar",
+    "form": {
+      "name": "Nom *",
+      "type": "Tipus",
+      "address": "Adreça",
+      "city": "Ciutat",
+      "country": "País",
+      "contactName": "Persona de contacte",
+      "phone": "Telèfon",
+      "email": "Correu electrònic"
+    },
+    "types": {
+      "amazon_fba": "Amazon FBA",
+      "amazon_fbm": "Amazon FBM",
+      "forwarder": "Transitari",
+      "3pl": "3PL (tercer)",
+      "own": "Magatzem propi",
+      "custom": "Personalitzat"
+    },
+    "toastNameRequired": "El nom és obligatori",
+    "toastUpdated": "Magatzem actualitzat correctament",
+    "toastCreated": "Magatzem creat correctament",
+    "toastSaveError": "Error en guardar el magatzem: {{message}}",
+    "toastDemoDelete": "En mode demo no es poden eliminar dades",
+    "toastDeleted": "S'ha eliminat correctament",
+    "toastDeleteFk": "No es pot eliminar perquè està en ús (comandes/despeses/projectes). Elimina o desvincula els elements relacionats primer.",
+    "toastDeleteError": "Error en eliminar el magatzem: {{message}}",
+    "toastAmazonAdded": "S'han afegit {{count}} magatzem(s) Amazon correctament",
+    "toastAmazonAllExist": "Tots els magatzems Amazon seleccionats ja existeixen",
+    "toastAmazonError": "Error en afegir magatzems Amazon: {{message}}",
+    "addAmazonFba": "Afegir Amazon FBA",
+    "newWarehouse": "Nou magatzem",
+    "totalWarehouses": "Total magatzems",
+    "amazonFbaStat": "Amazon FBA",
+    "emptyFiltered": "No s'han trobat magatzems",
+    "emptyDefault": "No hi ha magatzems. Afegeix els d'Amazon o crea'n un de personalitzat!",
+    "createWarehouse": "Crear magatzem",
+    "selectWarehouse": "Selecciona un magatzem",
+    "editWarehouse": "Editar magatzem",
+    "modalAmazonTitle": "Afegir magatzems Amazon FBA",
+    "modalAmazonHint": "Selecciona els magatzems Amazon FBA que vols afegir:",
+    "addSelected": "Afegir seleccionats",
+    "selectedCount": "{{count}} seleccionats",
+    "updateWarehouse": "Actualitzar",
+    "createWarehouseAction": "Crear"
+  },
+  "inventoryPage": {
+    "addProduct": "Afegir producte",
+    "selectProduct": "Selecciona un producte"
+  },
+  "home": {
+    "profitTrend": {
+      "title": "Tendència de benefici (30d)",
+      "empty": "Sense dades de tendència."
+    }
+  },
+  "financesPage": {
+    "legacy": {
+      "amazonImportsHint": "Obre Imports Amazon per connectar Seller Central (SP-API) o pujar CSVs de settlements. El teu pla pot limitar importacions automàtiques; en aquella pantalla veuràs l’estat real."
+    }
   },
   "header": {
     "cta": {
@@ -318,6 +548,32 @@
       "checkoutFailed": "El checkout ha fallat",
       "noCustomer": "Encara no hi ha client de facturació. Tria un pla primer.",
       "portalFailed": "El portal de facturació ha fallat"
+    },
+    "limits": {
+      "limitReached": {
+        "projects": {
+          "title": "Projectes",
+          "message": "Has arribat al límit de projectes.",
+          "cta": "Actualitza el pla per crear més projectes."
+        },
+        "seats": {
+          "title": "Places",
+          "message": "El workspace ha superat el límit de places.",
+          "cta": "Actualitza el pla per afegir més membres."
+        }
+      },
+      "workspaceAlert": {
+        "projects": {
+          "message": "S'ha assolit el límit de projectes.",
+          "cta": "Actualitza el pla per crear més projectes."
+        },
+        "seats": {
+          "message": "El workspace ha superat el límit de places.",
+          "cta": "Actualitza el pla per afegir més membres."
+        }
+      },
+      "upgrade": "Actualitzar pla",
+      "dismissAria": "Tancar"
     }
   },
   "activation": {
@@ -327,7 +583,7 @@
       "connect": "Connectar",
       "import": "Importar",
       "snapshot": "Snapshot",
-      "moreTools": "Més eines"
+      "moreTools": "Final"
     },
     "welcome": {
       "title": "Confirma la teva organització",
@@ -341,7 +597,19 @@
       "title": "Tria el camí",
       "subtitle": "Com vols començar?",
       "amazonLabel": "Connectar Amazon i importar dades reals",
-      "setupLabel": "Començar en mode Setup (sense Amazon encara)"
+      "amazonDescription": "Autoritza Seller Central i importa els últims 30 dies de settlements per veure un primer resum.",
+      "setupLabel": "Començar en mode Setup (sense Amazon encara)",
+      "setupDescription": "Planifica productes i costos sense connectar Amazon. Podràs connectar-ho després a Configuració."
+    },
+    "toasts": {
+      "spapiConnected": "Connexió Amazon SP-API completada",
+      "spapiErrorPrefix": "SP-API:",
+      "invalidSession": "Sessió no vàlida",
+      "oauthStartFailed": "No s'ha pogut iniciar OAuth",
+      "amazonIngestUnavailable": "La importació d'Amazon no està disponible al teu pla",
+      "importRequestError": "Error en sol·licitar la importació",
+      "saveActivationError": "Error en desar l'activació",
+      "genericError": "Alguna cosa ha fallat"
     },
     "connect": {
       "title": "Connectar Amazon",
@@ -353,6 +621,7 @@
     },
     "import": {
       "title": "Importar últims 30 dies",
+      "intro": "Importarem els últims 30 dies de moviments Amazon (ingressos i comissions) per construir un primer resum de rendiment. Aquest pas pot trigar uns minuts.",
       "requesting": "Demanant informe a Amazon",
       "processing": "Processant dades",
       "writing": "Escrivint ledger",
@@ -370,12 +639,49 @@
       "net": "Net",
       "cashImpact": "Impacte en caixa"
     },
-    "moreTools": {
-      "title": "Connecta més eines (opcional)",
-      "subtitle": "Pots connectar més eines més endavant des de Configuració.",
-      "drive": "Google Drive (properament)",
-      "outlook": "Outlook / Office 365 (properament)",
-      "slack": "Notificacions Slack (properament)"
+    "complete": {
+      "title": "Activació completada",
+      "subtitle": "El teu workspace està llest. Pots començar a treballar a l’app.",
+      "cta": "Anar al dashboard"
+    },
+    "setupDone": {
+      "title": "Mode setup",
+      "subtitle": "Pots crear productes i projectes, planificar costos i preparar el llançament. Pots connectar Amazon més endavant a Configuració."
+    },
+    "guidance": {
+      "noOrg": {
+        "title": "Workspace no disponible",
+        "description": "No hi ha cap organització activa. Torna enrere, tria un workspace des de l’app o torna a iniciar sessió si la sessió està incompleta."
+      },
+      "confirmOrg": {
+        "title": "Què fer ara",
+        "description": "Confirma que aquest workspace és el correcte. Tot seguit triaràs si connectar Amazon ara o començar en mode setup sense Amazon."
+      },
+      "choosePath": {
+        "title": "Com vols començar",
+        "description": "Camí Amazon: autoritzar el compte de venedor i importar settlements recents. Camí setup: sense Amazon per ara—planifica productes i costos i connecta Amazon després a Configuració."
+      },
+      "amazonConnect": {
+        "title": "Què passarà després",
+        "description": "Sortiràs un moment de Freedoliapp per iniciar sessió a Amazon i aprovar l’accés. En tornar, podràs seguir amb la importació."
+      },
+      "amazonImport": {
+        "title": "Mentres s’executa",
+        "description": "Es demanen i processen els últims 30 dies d’activitat de settlements. Pot trigar uns minuts.",
+        "descriptionError": "S’ha produït un error. Pots tornar a intentar la importació o continuar al resum amb les dades que ja hi hagi al ledger."
+      },
+      "amazonSnapshot": {
+        "title": "Com llegir els números",
+        "description": "Els valors venen de moviments del ledger (últims 30 dies) en estat comptable. Sense activitat encara és normal—pots acabar i explorar el dashboard."
+      },
+      "setupDone": {
+        "title": "I després",
+        "description": "Continua al pas final per desar l’activació i obrir el dashboard. Després, crea el primer producte o projecte quan vulguis."
+      },
+      "complete": {
+        "title": "A punt per començar",
+        "description": "Prem el botó de sota per desar l’activació i entrar a l’app. Podràs canviar la configuració del workspace quan ho necessitis."
+      }
     }
   },
   "snapshot": {
@@ -440,6 +746,8 @@
     "warehouses": "Magatzems",
     "orders": "Comandes",
     "finances": "Finances",
+    "amazonImports": "Imports Amazon",
+    "financeExports": "Exports trimestrals",
     "inventory": "Inventari",
     "calendar": "Calendari",
     "taskInbox": "Safata de tasques",
@@ -460,16 +768,6 @@
     "groupFinance": "Finances",
     "groupIntelligence": "Intel·ligència",
     "groupSystem": "Sistema"
-  },
-  "connectedAccounts": {
-    "title": "Comptes connectats",
-    "description": "Vincula Google o Apple per iniciar sessió amb diversos providers al mateix compte de FREEDOLIAPP.",
-    "email": "Email",
-    "google": "Google",
-    "apple": "Apple",
-    "connected": "connectat",
-    "connect": "Connectar",
-    "connecting": "Connectant…"
   },
   "dashboard": {
     "firstValue": {
@@ -642,13 +940,6 @@
   },
   "demo": {
     "banner": "Les dades són simulades"
-  },
-  "billing": {
-    "banner": {
-      "trialEnded": "S'ha acabat el trial — actualitza per seguir creant places/connexions i desbloquejar funcionalitats Pro.",
-      "pastDue": "Hi ha un problema de pagament — actualitza la facturació per restaurar les accions Pro.",
-      "upgradeCta": "Actualitzar pla"
-    }
   },
   "help": {
     "profitability": {
@@ -840,10 +1131,23 @@
     "title": "Ajuda i Documentació",
     "noResults": "No s'han trobat resultats"
   },
+  "gate": {
+    "onboardingStatusErrorTitle": "No hem pogut comprovar l'estat d'activació del workspace.",
+    "onboardingStatusErrorHint": "Torna-ho a intentar. Si el problema continua, pot ser un problema de xarxa o de permisos.",
+    "billingStateErrorTitle": "No s'ha pogut carregar l'estat de billing."
+  },
   "topbar": {
     "addNote": "Afegir nota",
     "workspaceLabel": "Workspace: {{name}}",
-    "workspaceSwitcherAria": "Workspace actual: {{name}}. Fes clic per canviar de workspace."
+    "workspaceSwitcherAria": "Workspace actual: {{name}}. Fes clic per canviar de workspace.",
+    "demoBadge": "DEMO",
+    "liveBadge": "LIVE",
+    "themeLabelDay": "DIA",
+    "themeLabelNight": "NIT",
+    "themeAriaToLight": "Activar mode dia",
+    "themeAriaToDark": "Activar mode nit",
+    "themeTitleLight": "Mode dia",
+    "themeTitleDark": "Mode nit"
   },
   "navbar": {
     "addNote": "Afegir nota",
@@ -899,6 +1203,119 @@
       "openDecision": "Obrir decisió"
     }
   },
+  "orders": {
+    "empty": {
+      "title": "Encara no tens comandes",
+      "filteredTitle": "No s'han trobat comandes",
+      "subtitle": "Crea la teva primera comanda per començar a seguir la producció i l'estoc entrant.",
+      "cta": "Crear comanda"
+    },
+    "pageTitle": "Comandes (PO)",
+    "intro": "Aquí continues l'operativa del projecte: crea i segueix les PO lligades als teus projectes, amb logística i documents.",
+    "searchPlaceholder": "Cercar comandes…",
+    "filterStatusTitle": "Filtre per estat",
+    "filterProjectTitle": "Filtre per projecte",
+    "allStatuses": "Tots els estats",
+    "allProjects": "Tots els projectes",
+    "stats": {
+      "totalPOs": "Total PO",
+      "pending": "Pendents",
+      "inProgress": "En curs",
+      "completed": "Completades",
+      "totalValue": "Valor total"
+    },
+    "status": {
+      "draft": "Esborrany",
+      "sent": "Enviat",
+      "confirmed": "Confirmat",
+      "partial_paid": "Pagat parcial",
+      "paid": "Pagat",
+      "in_production": "En producció",
+      "shipped": "Enviat",
+      "received": "Rebut",
+      "cancelled": "Cancel·lat"
+    },
+    "card": {
+      "supplier": "Proveïdor",
+      "date": "Data",
+      "view": "Veure",
+      "pdf": "PDF",
+      "markPackSent": "Marcar pack com enviat",
+      "sent": "Enviat",
+      "edit": "Editar",
+      "delete": "Eliminar"
+    },
+    "splitSelectPrompt": "Selecciona una comanda",
+    "viewProject": "Veure projecte",
+    "confirmDelete": "Segur que vols eliminar la comanda {{poNumber}}?",
+    "toasts": {
+      "noProject": "La comanda no té projecte associat.",
+      "missingFnsku": "El projecte no té FNSKU informat. Afegeix-lo a la secció d'Identificadors del projecte.",
+      "packMarkedSent": "Pack marcat com enviat",
+      "unknownError": "Error desconegut",
+      "manufacturerPackSuccess": "Manufacturer pack generat i descarregat correctament",
+      "errorPrefix": "Error:"
+    },
+    "detail": {
+      "whySupplier": "Per què s'ha triat aquest proveïdor",
+      "manufacturerPackHelp": "Genera tots els documents per enviar al fabricant (PO, etiquetes, packing list, etiquetes de cartró).",
+      "generateManufacturerPack": "Generar manufacturer pack"
+    }
+  },
+  "amazonReadiness": {
+    "loading": "Carregant…",
+    "status": {
+      "ready": "Preparat per Amazon",
+      "partial": "Parcialment preparat",
+      "notReady": "No preparat per Amazon"
+    },
+    "messages": {
+      "discovery": "En Discovery cal definir l'ASIN competidor i completar el snapshot per validar la viabilitat.",
+      "noGtin": "Falta GTIN o exempció de GTIN. Pots assignar un EAN/UPC o marcar el producte com a exempt segons aprovació d'Amazon.",
+      "noAmazonSku": "Falta el SKU Amazon. Assigna un SKU Amazon a la secció d'identificadors.",
+      "partialNoPoExempt": "El producte ja té exempció de GTIN i SKU Amazon però falta una comanda (PO).",
+      "partialNoPo": "El producte ja té GTIN i SKU Amazon però falta una comanda (PO).",
+      "ready": "Aquest producte compleix els requisits bàsics per Amazon.",
+      "fallback": "Falten requisits per Amazon. Revisa GTIN, SKU Amazon i comandes.",
+      "loadError": "Error carregant dades."
+    },
+    "actions": {
+      "completeCompetitorAsin": "Completar ASIN competidor",
+      "assignGtin": "Assignar GTIN",
+      "markExempt": "Marcar com a exempt",
+      "assignAmazonSku": "Assignar SKU Amazon",
+      "createPo": "Crear PO",
+      "reviewIdentifiers": "Revisar identificadors"
+    }
+  },
+  "logisticsWidget": {
+    "title": "Seguiment logístic",
+    "loading": "Carregant…",
+    "viewAll": "Veure totes",
+    "staleOnly": "Només pendents",
+    "emptyDefault": "No hi ha comandes amb seguiment actiu",
+    "emptyStale": "No hi ha comandes pendents d'actualització",
+    "badgeStale": "Sense actualitzar",
+    "badgeNeedsUpdate": "Cal actualitzar",
+    "lastUpdated": "Última actualització: fa {{days}} dia",
+    "lastUpdated_plural": "Última actualització: fa {{days}} dies",
+    "trackingLabel": "Tracking:",
+    "stages": {
+      "production": "Producció",
+      "pickup": "Recollida",
+      "in_transit": "En trànsit",
+      "customs": "Duanes",
+      "amazon_fba": "Amazon FBA"
+    },
+    "pendingFallback": "Pendent"
+  },
+  "floatingNotes": {
+    "confirmDelete": "Segur que vols eliminar aquesta nota?",
+    "minimize": "Minimitzar",
+    "maximize": "Maximitzar",
+    "delete": "Eliminar",
+    "placeholder": "Escriu la teva nota…"
+  },
   "settings": {
     "title": "Configuració",
     "loading": "Carregant...",
@@ -909,6 +1326,8 @@
     "errorSavingSignature": "Error guardant la signatura",
     "selectImage": "Selecciona una imatge",
     "nameAndImageRequired": "Nom i imatge de signatura són obligatoris",
+    "languageSectionTitle": "Idioma de la interfície",
+    "languageSelectLabel": "Selecciona l'idioma",
     "openManual": "Obrir Manual d'ús",
     "demoModeEnabled": "Mode demo activat",
     "demoModeDisabled": "Mode demo desactivat",
@@ -969,19 +1388,16 @@
       "subtitle": "Crea el teu primer projecte per començar a gestionar el teu negoci Amazon.",
       "cta": "Crear projecte"
     },
+    "phaseChecklist": {
+      "title": "Checklist de fase",
+      "loadingRequirements": "Carregant requisits…",
+      "allReady": "Tot llest per avançar"
+    },
   "suppliers": {
     "empty": {
       "title": "Encara no tens proveïdors",
       "subtitle": "Crea el teu primer proveïdor per començar a gestionar el sourcing i la producció.",
       "cta": "Crear proveïdor"
-    }
-  },
-  "orders": {
-    "empty": {
-      "title": "Encara no tens comandes",
-      "filteredTitle": "No s'han trobat comandes",
-      "subtitle": "Crea la teva primera comanda per començar a seguir la producció i l'estoc entrant.",
-      "cta": "Crear comanda"
     }
   },
     "nextAction": {

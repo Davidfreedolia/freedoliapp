@@ -6,6 +6,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { AlertTriangle } from 'lucide-react'
 import { useWorkspace } from '../../contexts/WorkspaceContext'
 import { useBusinessAlerts } from '../../hooks/useBusinessAlerts'
+import { createOrGetTaskFromOrigin } from '../../lib/supabase'
 
 const SEVERITY_COLOR = {
   critical: 'var(--danger-1, #dc2626)',
@@ -14,9 +15,10 @@ const SEVERITY_COLOR = {
   low: 'var(--muted-2, #6b7280)',
 }
 
-function AlertRow({ alert, onAcknowledge, onResolve }) {
+function AlertRow({ alert, activeOrgId, onAcknowledge, onResolve, onCreateTaskResult }) {
   const [acking, setAcking] = useState(false)
   const [resolving, setResolving] = useState(false)
+  const [creatingTask, setCreatingTask] = useState(false)
   const color = SEVERITY_COLOR[alert.severity] || SEVERITY_COLOR.low
   const message = (alert.message || '').slice(0, 80) + ((alert.message || '').length > 80 ? '…' : '')
 
@@ -31,6 +33,26 @@ function AlertRow({ alert, onAcknowledge, onResolve }) {
     setResolving(true)
     await onResolve(alert.id)
     setResolving(false)
+  }
+  const handleCreateTask = async (e) => {
+    e.stopPropagation()
+    if (!activeOrgId || creatingTask) return
+    setCreatingTask(true)
+    try {
+      const title = (alert.title || 'Follow up: alert').slice(0, 255)
+      const entityType = alert.entity_type && ['project', 'purchase_order', 'supplier', 'shipment', 'org'].includes(alert.entity_type) ? alert.entity_type : 'org'
+      const entityId = alert.entity_id || activeOrgId
+      const { task, created } = await createOrGetTaskFromOrigin(
+        activeOrgId,
+        { source: 'alert', source_ref_type: 'alert', source_ref_id: alert.id },
+        { title, entity_type: entityType, entity_id: entityId }
+      )
+      onCreateTaskResult?.({ task, created })
+    } catch (err) {
+      onCreateTaskResult?.({ error: err?.message })
+    } finally {
+      setCreatingTask(false)
+    }
   }
 
   return (
@@ -84,6 +106,22 @@ function AlertRow({ alert, onAcknowledge, onResolve }) {
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         <button
           type="button"
+          onClick={handleCreateTask}
+          disabled={creatingTask}
+          style={{
+            fontSize: 11,
+            padding: '4px 8px',
+            border: '1px solid var(--border-1)',
+            borderRadius: 6,
+            background: 'var(--surface-bg-2)',
+            color: 'var(--text-1)',
+            cursor: creatingTask ? 'wait' : 'pointer',
+          }}
+        >
+          {creatingTask ? '…' : 'Create task'}
+        </button>
+        <button
+          type="button"
           onClick={handleAck}
           disabled={acking || alert.status === 'acknowledged'}
           style={{
@@ -125,7 +163,23 @@ export default function BusinessAlertsBadge() {
     listLimit: 25,
   })
   const [open, setOpen] = useState(false)
+  const [taskMessage, setTaskMessage] = useState(null)
   const rootRef = useRef(null)
+
+  const handleCreateTaskResult = (result) => {
+    if (result?.error) {
+      setTaskMessage({ type: 'error', text: result.error })
+    } else if (result?.created) {
+      setTaskMessage({ type: 'success', text: 'Task created.' })
+    } else {
+      setTaskMessage({ type: 'success', text: 'Task already exists.' })
+    }
+  }
+  useEffect(() => {
+    if (!taskMessage) return
+    const t = setTimeout(() => setTaskMessage(null), 3000)
+    return () => clearTimeout(t)
+  }, [taskMessage])
 
   useEffect(() => {
     if (open && activeOrgId) refetch()
@@ -266,14 +320,30 @@ export default function BusinessAlertsBadge() {
                 No business alerts.
               </div>
             )}
+            {taskMessage && (
+              <div
+                style={{
+                  padding: '6px 8px',
+                  marginBottom: 6,
+                  fontSize: 11,
+                  borderRadius: 6,
+                  background: taskMessage.type === 'error' ? 'var(--danger-1, #dc2626)' : 'var(--success-1, #16a34a)',
+                  color: '#fff',
+                }}
+              >
+                {taskMessage.text}
+              </div>
+            )}
             {!loading && !error && alerts?.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
                 {alerts.map((a) => (
                   <AlertRow
                     key={a.id}
                     alert={a}
+                    activeOrgId={activeOrgId}
                     onAcknowledge={acknowledge}
                     onResolve={resolve}
+                    onCreateTaskResult={handleCreateTaskResult}
                   />
                 ))}
               </div>

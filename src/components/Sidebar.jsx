@@ -24,7 +24,8 @@ import {
   HelpCircle,
   Bug,
   ShieldCheck,
-  CreditCard
+  CreditCard,
+  Link2
 } from 'lucide-react'
 import Button from './Button'
 import { useApp } from '../context/AppContext'
@@ -93,6 +94,9 @@ const prefetchRoute = (path) => {
     case '/calendar':
       import('../pages/Calendar.jsx').catch(() => {})
       break
+    case '/inbox':
+      import('../pages/TaskInbox.jsx').catch(() => {})
+      break
     case '/automations':
       import('../pages/automations/AutomationInboxPage.jsx').catch(() => {})
       break
@@ -132,6 +136,7 @@ const SIDEBAR_GROUPS = [
       { path: '/app/orders', icon: FileText, labelKey: 'nav.orders' },
       { path: '/app/operations', icon: ClipboardList, labelKey: 'nav.operationsPlanning' },
       { path: '/app/calendar', icon: CalendarIcon, labelKey: 'nav.calendar' },
+      { path: '/app/inbox', icon: Inbox, labelKey: 'nav.taskInbox' },
     ],
   },
   {
@@ -148,7 +153,8 @@ const SIDEBAR_GROUPS = [
     items: [
       { path: '/app/profit', icon: DollarSign, labelKey: 'nav.profit' },
       { path: '/app/cash', icon: Wallet, labelKey: 'nav.cashflow' },
-      { path: '/app/finances', icon: Receipt, labelKey: 'nav.finances' },
+      { path: '/app/finances', icon: Receipt, labelKey: 'nav.finances', end: true },
+      { path: '/app/finances/amazon-imports', icon: Link2, labelKey: 'nav.amazonImports' },
     ],
   },
   {
@@ -242,6 +248,7 @@ export default function Sidebar() {
               <NavLink
                 key={item.path}
                 to={item.path}
+                end={item.end === true}
                 onClick={() => {
                   if (isMobile) setMobileOpen(false)
                 }}

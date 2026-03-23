@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Upload, FileText, Image, AlertCircle, Eye, Trash2, Edit, MoreVertical, X, Save, Loader, RefreshCw } from 'lucide-react'
 import { uploadReceipt, deleteReceipt, getExpenseAttachments, getAttachmentSignedUrl, updateAttachmentName, replaceReceipt, validateReceiptFile } from '../lib/supabase'
 import { showToast } from './Toast'
@@ -12,6 +13,7 @@ export default function ReceiptUploader({
   onAttachmentsChanged,
   darkMode 
 }) {
+  const { t } = useTranslation()
   const fileInputRef = useRef(null)
   const dropzoneRef = useRef(null)
   const [uploading, setUploading] = useState(false)
@@ -323,7 +325,10 @@ export default function ReceiptUploader({
       if (import.meta.env.DEV) {
         console.error('Error deleting attachment:', err)
       }
-      showToast('Error eliminant receipt: ' + (err.message || 'Error desconegut'), 'error')
+      showToast(
+        t('receiptUploader.toastDeleteError', { message: err.message || t('common.errorGeneric') }),
+        'error'
+      )
     } finally {
       setDeleting(false)
     }
@@ -1131,11 +1136,12 @@ export default function ReceiptUploader({
       )}
 
       <DeleteConfirmationModal
-        show={showDeleteModal}
+        isOpen={showDeleteModal}
         onClose={handleCancelDelete}
         onConfirm={handleConfirmDelete}
-        itemName={attachmentToDelete?.file_name || ''}
-        entityType="Receipt"
+        entityName={attachmentToDelete?.file_name || ''}
+        entityType="receipt"
+        entityLabel={t('receiptUploader.deleteEntityNoun')}
         isDeleting={deleting}
         darkMode={darkMode}
       />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { StickyNote, HelpCircle, ChevronDown } from 'lucide-react'
+import { StickyNote, HelpCircle, MessageCircle, ChevronDown } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useApp } from '../context/AppContext'
@@ -18,6 +18,8 @@ import { useWorkspace } from '../contexts/WorkspaceContext'
 import Button from './Button'
 import DecisionBadge from './decisions/DecisionBadge'
 import BusinessAlertsBadge from './alerts/BusinessAlertsBadge'
+import AssistantPanel from './assistant/AssistantPanel'
+import AppLanguageControl from './AppLanguageControl'
 
 export default function TopNavbar({ sidebarWidth = 0 }) {
   const { darkMode, setDarkMode } = useApp()
@@ -29,6 +31,7 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
   const { refresh } = useNotes()
   const [showNoteModal, setShowNoteModal] = useState(false)
   const [showHelpModal, setShowHelpModal] = useState(false)
+  const [showAssistantPanel, setShowAssistantPanel] = useState(false)
   const [showAvatarSelector, setShowAvatarSelector] = useState(false)
   const [userEmail, setUserEmail] = useState('')
   const [userName, setUserName] = useState('')
@@ -147,6 +150,18 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
           <Button
             variant="ghost"
             size="sm"
+            onClick={() => setShowAssistantPanel(true)}
+            className="topbar-button topbar-assistant"
+            title={t('assistant.title')}
+            aria-label={t('assistant.title')}
+          >
+            <MessageCircle size={18} />
+            {!isMobile && <span style={{ marginLeft: '6px', fontSize: '14px' }}>{t('assistant.title')}</span>}
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => setShowHelpModal(true)}
             className="topbar-button topbar-help"
             title={t('navbar.help')}
@@ -252,10 +267,11 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
             color: demoMode ? 'var(--warning-1)' : 'var(--success-1)',
             fontWeight: 600
           }}>
-            {demoMode ? 'DEMO' : 'LIVE'}
+            {demoMode ? t('topbar.demoBadge') : t('topbar.liveBadge')}
           </span>
           <BusinessAlertsBadge />
           <DecisionBadge />
+          <AppLanguageControl />
           <HeaderPreferencesWidget />
           <HeaderUserWidget
             userEmail={userEmail}
@@ -282,6 +298,13 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
         isOpen={showHelpModal}
         onClose={() => setShowHelpModal(false)}
         darkMode={darkMode}
+      />
+
+      {/* R0.4 — In-app Assistant panel */}
+      <AssistantPanel
+        isOpen={showAssistantPanel}
+        onClose={() => setShowAssistantPanel(false)}
+        pathname={location.pathname}
       />
 
       {/* Avatar Selector */}

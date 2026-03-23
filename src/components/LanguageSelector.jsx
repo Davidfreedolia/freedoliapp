@@ -17,7 +17,6 @@ export default function LanguageSelector({ isOpen, onClose }) {
 
   const handleLanguageChange = async (langCode) => {
     await i18n.changeLanguage(langCode)
-    localStorage.setItem('freedoliapp.lang', langCode)
     onClose()
   }
 

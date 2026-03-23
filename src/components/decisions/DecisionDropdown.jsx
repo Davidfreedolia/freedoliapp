@@ -1,7 +1,7 @@
 import React from 'react'
 import DecisionNotificationItem from './DecisionNotificationItem'
 
-export default function DecisionDropdown({ items, loading, error, onItemClick, onClose }) {
+export default function DecisionDropdown({ items, loading, error, onItemClick, onClose, onCreateTask }) {
   return (
     <div
       style={{
@@ -98,7 +98,7 @@ export default function DecisionDropdown({ items, loading, error, onItemClick, o
         {!loading && !error && items && items.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {items.map((item) => (
-              <DecisionNotificationItem key={item.id} item={item} onClick={onItemClick} />
+              <DecisionNotificationItem key={item.id} item={item} onClick={onItemClick} onCreateTask={onCreateTask} />
             ))}
           </div>
         )}

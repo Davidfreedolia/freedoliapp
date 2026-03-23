@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { DEMO_USER_UUID } from '../utils/demoConstants'
 import { RECEIPTS_BUCKET, COMPANY_ASSETS_BUCKET } from './storageBuckets'
+import { persistLanguage } from '../i18n/languageStorage'
 
 // IMPORTANT: No static imports of demoMode, auditLog, or demoModeFilter to avoid circular dependencies.
 // All imports from these modules must be dynamic (inside functions).
@@ -2332,8 +2333,7 @@ export const updateLanguage = async (language) => {
     return authRequired()
   }
   
-  // Guardar a localStorage immediatament
-  localStorage.setItem('freedolia_language', language)
+  persistLanguage(language)
   
   // Guardar a company_settings
   try {

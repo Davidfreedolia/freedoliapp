@@ -33,12 +33,12 @@ import { clearDemoData, generateDemoData, checkDemoExists } from '../lib/demoSee
 import Header from '../components/Header'
 import Button from '../components/Button'
 import GTINPoolSection from '../components/GTINPoolSection'
-import ConnectedAccounts from '../components/account/ConnectedAccounts'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { useBillingUsage } from '../hooks/useBillingUsage'
 import { getModalStyles } from '../utils/responsiveStyles'
 import { showToast } from '../components/Toast'
 import { useNavigate } from 'react-router-dom'
+import { normalizeLang, UI_LANGUAGE_OPTIONS } from '../i18n/languageStorage'
 
 export default function Settings() {
   const { darkMode, refreshProjects, demoMode, toggleDemoMode, activeOrgId } = useApp()
@@ -48,7 +48,7 @@ export default function Settings() {
   const { seatsLimit: canonicalSeatsLimit } = useBillingUsage(activeOrgId ?? null)
   
   const [activeTab, setActiveTab] = useState('company')
-  const [currentLanguage, setCurrentLanguage] = useState(i18n.language || 'ca')
+  const [currentLanguage, setCurrentLanguage] = useState(() => normalizeLang(i18n.language))
   const [auditLogs, setAuditLogs] = useState([])
   const [statusFilter, setStatusFilter] = useState(null)
   const [loadingLogs, setLoadingLogs] = useState(false)
@@ -101,6 +101,12 @@ export default function Settings() {
     loadSettings()
     loadLanguage()
   }, [])
+
+  useEffect(() => {
+    const onLang = (lng) => setCurrentLanguage(normalizeLang(lng))
+    i18n.on('languageChanged', onLang)
+    return () => i18n.off('languageChanged', onLang)
+  }, [i18n])
 
   // S3.1.B2: Use canonical active workspace (activeOrgId) instead of inferring from first membership.
   const loadWorkspace = async () => {
@@ -165,13 +171,20 @@ export default function Settings() {
     }
   }, [activeTab, activeOrgId])
 
+  useEffect(() => {
+    const onLang = (lng) => setCurrentLanguage(normalizeLang(lng))
+    i18n.on('languageChanged', onLang)
+    return () => {
+      i18n.off('languageChanged', onLang)
+    }
+  }, [i18n])
+
   const loadLanguage = async () => {
     try {
       const settings = await getCompanySettings(activeOrgId ?? undefined)
       if (settings?.language && ['ca', 'en', 'es'].includes(settings.language)) {
         setCurrentLanguage(settings.language)
-        i18n.changeLanguage(settings.language)
-        localStorage.setItem('freedolia_language', settings.language)
+        await i18n.changeLanguage(settings.language)
       }
     } catch (err) {
       console.warn('Error carregant idioma:', err)
@@ -566,8 +579,6 @@ export default function Settings() {
               </Button>
             </div>
 
-            <ConnectedAccounts />
-
             {/* Language Selector */}
             <div style={{
               ...styles.subsection,
@@ -583,14 +594,14 @@ export default function Settings() {
                 marginBottom: '16px'
               }}>
                 <Globe size={16} />
-                Idioma / Language
+                {t('settings.languageSectionTitle')}
               </h3>
               <div style={styles.formGroup}>
                 <label style={{
                   ...styles.label,
                   color: darkMode ? '#e5e7eb' : '#374151'
                 }}>
-                  Selecciona l'idioma
+                  {t('settings.languageSelectLabel')}
                 </label>
                 <select
                   value={currentLanguage}
@@ -608,9 +619,9 @@ export default function Settings() {
                     maxWidth: '300px'
                   }}
                 >
-                  <option value="ca">Català</option>
-                  <option value="en">English</option>
-                  <option value="es">Español</option>
+                  {UI_LANGUAGE_OPTIONS.map((opt) => (
+                    <option key={opt.code} value={opt.code}>{opt.nativeName}</option>
+                  ))}
                 </select>
               </div>
             </div>

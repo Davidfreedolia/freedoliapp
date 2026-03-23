@@ -32,6 +32,7 @@ import PhaseMark from '../components/Phase/PhaseMark'
 import ProjectCard from '../components/projects/ProjectCard'
 import useT from '../hooks/useT'
 import { DataLoading, DataError, DataEmpty } from '../components/dataStates'
+import NextStepCard from '../components/assistant/NextStepCard'
 
 export default function Projects() {
   const { refreshProjects, darkMode, activeOrgId } = useApp()
@@ -1002,13 +1003,23 @@ export default function Projects() {
             />
           </div>
         ) : (
-          <div className="projects-shell">
-            <div className="projects-grid">
-              {filteredProjects.map((project) => (
-                <ProjectCard key={project.id} project={project} />
-              ))}
+          <>
+            <NextStepCard
+              title={t('guidance.nextStepTitle')}
+              description={t('guidance.projects.openOrCreateOrder')}
+              ctaLabel={t('projects.empty.cta')}
+              ctaOnClick={() => setShowModal(true)}
+              secondaryCtaLabel={t('common.buttons.createOrder', 'Crear comanda')}
+              secondaryCtaOnClick={() => navigate('/app/orders')}
+            />
+            <div className="projects-shell">
+              <div className="projects-grid">
+                {filteredProjects.map((project) => (
+                  <ProjectCard key={project.id} project={project} />
+                ))}
+              </div>
             </div>
-          </div>
+          </>
         )}
         </div>
       </PageGutter>

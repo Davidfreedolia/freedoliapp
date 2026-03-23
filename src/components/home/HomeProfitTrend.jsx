@@ -12,6 +12,7 @@ import {
   CartesianGrid,
   Tooltip,
 } from 'recharts'
+import { useTranslation } from 'react-i18next'
 
 const formatCurrency = (amount) =>
   (amount != null && Number.isFinite(amount))
@@ -19,13 +20,14 @@ const formatCurrency = (amount) =>
     : '—'
 
 export default function HomeProfitTrend({ data = [], loading }) {
+  const { t } = useTranslation()
   const list = Array.isArray(data) ? data : []
 
   if (loading) {
     return (
       <div style={styles.wrap}>
-        <div style={styles.title}>Profit trend (30d)</div>
-        <div style={styles.placeholder}>Carregant…</div>
+        <div style={styles.title}>{t('home.profitTrend.title')}</div>
+        <div style={styles.placeholder}>{t('common.loading')}</div>
       </div>
     )
   }
@@ -33,15 +35,15 @@ export default function HomeProfitTrend({ data = [], loading }) {
   if (list.length === 0) {
     return (
       <div style={styles.wrap}>
-        <div style={styles.title}>Profit trend (30d)</div>
-        <div style={styles.placeholder}>Sense dades de tendència.</div>
+        <div style={styles.title}>{t('home.profitTrend.title')}</div>
+        <div style={styles.placeholder}>{t('home.profitTrend.empty')}</div>
       </div>
     )
   }
 
   return (
     <div style={styles.wrap}>
-      <div style={styles.title}>Profit trend (30d)</div>
+      <div style={styles.title}>{t('home.profitTrend.title')}</div>
       <div style={styles.chartWrap}>
         <ResponsiveContainer width="100%" height={220}>
           <LineChart data={list} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>

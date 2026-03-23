@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Navigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { isDemoMode } from '../demo/demoMode'
 
@@ -81,7 +82,7 @@ export default function ProtectedRoute({ children }) {
         justifyContent: 'center',
         backgroundColor: '#f8f9fc',
       }}>
-        <div style={{ fontSize: '16px', color: '#6b7280' }}>Carregant...</div>
+        <div style={{ fontSize: '16px', color: '#6b7280' }}>{t('common.loading')}</div>
       </div>
     )
   }

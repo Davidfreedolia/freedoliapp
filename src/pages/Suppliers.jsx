@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { 
   Plus, 
   Search, 
@@ -80,6 +81,7 @@ const COUNTRIES_CITIES = {
 }
 
 export default function Suppliers() {
+  const { t } = useTranslation()
   const { darkMode, demoMode, activeOrgId } = useApp()
   const { isMobile, isTablet } = useBreakpoint()
   const modalStyles = getModalStyles(isMobile, darkMode)
@@ -899,6 +901,7 @@ export default function Suppliers() {
         onConfirm={handleConfirmDelete}
         entityName={deleteModal.supplier?.name || ''}
         entityType="proveïdor"
+        entityLabel={t('suppliersPage.deleteEntityNoun')}
         isDeleting={deleteModal.isDeleting}
         darkMode={darkMode}
         showUsageWarning={true}

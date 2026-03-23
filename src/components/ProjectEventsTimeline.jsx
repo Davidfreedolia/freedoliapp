@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Plus, X, Edit, Trash2, MoreVertical, Calendar } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useApp } from '../context/AppContext'
@@ -6,13 +7,7 @@ import { useBreakpoint } from '../hooks/useBreakpoint'
 import DeleteConfirmationModal from './DeleteConfirmationModal'
 import { getPhaseSurfaceStyles } from '../utils/phaseStyles'
 
-const EVENT_TYPES = [
-  { value: 'milestone', label: 'Milestone' },
-  { value: 'meeting', label: 'Meeting' },
-  { value: 'deadline', label: 'Deadline' },
-  { value: 'delivery', label: 'Delivery' },
-  { value: 'other', label: 'Other' }
-]
+const EVENT_TYPE_VALUES = ['milestone', 'meeting', 'deadline', 'delivery', 'other']
 
 /**
  * Format date to YYYY-MM-DD for input
@@ -44,8 +39,17 @@ function formatDateDisplay(dateStr) {
 }
 
 export default function ProjectEventsTimeline({ projectId, projectStatus, darkMode, phaseStyle, refreshToken }) {
+  const { t } = useTranslation()
   const { demoMode } = useApp()
   const { isMobile } = useBreakpoint()
+  const eventTypeOptions = useMemo(
+    () =>
+      EVENT_TYPE_VALUES.map((value) => ({
+        value,
+        label: t(`projectTimeline.types.${value}`)
+      })),
+    [t]
+  )
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
   const [showAddModal, setShowAddModal] = useState(false)
@@ -134,14 +138,14 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
           .eq('id', editingEvent.id)
 
         if (error) throw error
-        showToast('Evento actualizado', 'success')
+        showToast(t('projectTimeline.toastUpdated'), 'success')
       } else {
         const { error } = await supabase
           .from('project_events')
           .insert([eventData])
 
         if (error) throw error
-        showToast('Evento creado', 'success')
+        showToast(t('projectTimeline.toastCreated'), 'success')
       }
 
       setShowAddModal(false)
@@ -150,7 +154,12 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
     } catch (err) {
       console.error('Error saving event:', err)
       const { showToast } = await import('./Toast')
-      showToast('Error guardando evento: ' + (err.message || 'Error desconocido'), 'error')
+      showToast(
+        t('projectTimeline.saveError', {
+          message: err.message || t('projectTimeline.unknownError')
+        }),
+        'error'
+      )
     } finally {
       setSaving(false)
     }
@@ -174,13 +183,18 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
 
       if (error) throw error
 
-      showToast('Evento eliminado', 'success')
+      showToast(t('projectTimeline.toastDeleted'), 'success')
       setDeleteModal({ isOpen: false, event: null })
       await loadEvents()
     } catch (err) {
       console.error('Error deleting event:', err)
       const { showToast } = await import('./Toast')
-      showToast('Error eliminando evento: ' + (err.message || 'Error desconocido'), 'error')
+      showToast(
+        t('projectTimeline.deleteError', {
+          message: err.message || t('projectTimeline.unknownError')
+        }),
+        'error'
+      )
       setDeleteModal({ isOpen: false, event: null })
     }
   }
@@ -457,35 +471,35 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
       <div style={styles.header}>
         <h3 style={{ ...styles.title, color: darkMode ? '#ffffff' : '#111827' }}>
           <Calendar size={18} />
-          Timeline
+          {t('projectTimeline.title')}
         </h3>
         <button
           onClick={handleAddEvent}
           disabled={isLocked}
-          title={isLocked ? 'Reopen the project to edit timeline' : ''}
+          title={isLocked ? t('projectTimeline.lockedTooltip') : ''}
           style={{
             ...styles.addButton,
             ...(isLocked ? styles.addButtonDisabled : {})
           }}
         >
           <Plus size={16} />
-          Afegir esdeveniment
+          {t('projectTimeline.addEvent')}
         </button>
       </div>
 
       {loading ? (
-        <div style={styles.loading}>Carregant...</div>
+        <div style={styles.loading}>{t('common.loading')}</div>
       ) : events.length === 0 ? (
-        <div style={styles.empty}>No hi ha esdeveniments</div>
+        <div style={styles.empty}>{t('projectTimeline.empty')}</div>
       ) : (
         <div style={{ overflowX: 'auto' }}>
           <table style={styles.table}>
             <thead style={styles.tableHeader}>
               <tr>
-                <th style={styles.tableHeaderCell}>Data</th>
-                <th style={styles.tableHeaderCell}>Títol</th>
-                <th style={styles.tableHeaderCell}>Tipus</th>
-                <th style={styles.tableHeaderCell}>Notes</th>
+                <th style={styles.tableHeaderCell}>{t('projectTimeline.colDate')}</th>
+                <th style={styles.tableHeaderCell}>{t('projectTimeline.colTitle')}</th>
+                <th style={styles.tableHeaderCell}>{t('projectTimeline.colType')}</th>
+                <th style={styles.tableHeaderCell}>{t('projectTimeline.colNotes')}</th>
                 {!isLocked && <th style={styles.tableHeaderCell}></th>}
               </tr>
             </thead>
@@ -500,7 +514,7 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
                   </td>
                   <td style={styles.tableCell}>
                     <span style={styles.typeBadge}>
-                      {EVENT_TYPES.find(t => t.value === event.type)?.label || event.type}
+                      {eventTypeOptions.find((opt) => opt.value === event.type)?.label || event.type}
                     </span>
                   </td>
                   <td style={styles.tableCell}>
@@ -528,7 +542,7 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
                               }}
                             >
                               <Edit size={14} />
-                              Editar
+                              {t('projectTimeline.menuEdit')}
                             </button>
                             <button
                               onClick={() => handleDeleteClick(event)}
@@ -541,7 +555,7 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
                               }}
                             >
                               <Trash2 size={14} />
-                              Eliminar
+                              {t('projectTimeline.menuDelete')}
                             </button>
                           </div>
                         )}
@@ -561,7 +575,7 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
           <div style={styles.modal} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeader}>
               <h3 style={styles.modalTitle}>
-                {editingEvent ? 'Editar esdeveniment' : 'Nou esdeveniment'}
+                {editingEvent ? t('projectTimeline.modalEdit') : t('projectTimeline.modalNew')}
               </h3>
               <button
                 onClick={() => !saving && setShowAddModal(false)}
@@ -573,23 +587,23 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
             </div>
             <div style={styles.modalBody}>
               <div style={styles.formGroup}>
-                <label style={styles.label}>Títol *</label>
+                <label style={styles.label}>{t('projectTimeline.labelTitle')}</label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={e => setFormData({ ...formData, title: e.target.value })}
                   style={styles.input}
-                  placeholder="Títol de l'esdeveniment"
+                  placeholder={t('projectTimeline.titlePlaceholder')}
                 />
               </div>
               <div style={styles.formGroup}>
-                <label style={styles.label}>Tipus</label>
+                <label style={styles.label}>{t('projectTimeline.labelType')}</label>
                 <select
                   value={formData.type}
                   onChange={e => setFormData({ ...formData, type: e.target.value })}
                   style={styles.select}
                 >
-                  {EVENT_TYPES.map(type => (
+                  {eventTypeOptions.map((type) => (
                     <option key={type.value} value={type.value}>
                       {type.label}
                     </option>
@@ -597,7 +611,7 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
                 </select>
               </div>
               <div style={styles.formGroup}>
-                <label style={styles.label}>Data *</label>
+                <label style={styles.label}>{t('projectTimeline.labelDate')}</label>
                 <input
                   type="date"
                   value={formData.event_date}
@@ -606,12 +620,12 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
                 />
               </div>
               <div style={styles.formGroup}>
-                <label style={styles.label}>Notes</label>
+                <label style={styles.label}>{t('projectTimeline.labelNotes')}</label>
                 <textarea
                   value={formData.notes}
                   onChange={e => setFormData({ ...formData, notes: e.target.value })}
                   style={styles.textarea}
-                  placeholder="Notes opcionals"
+                  placeholder={t('projectTimeline.notesPlaceholder')}
                 />
               </div>
             </div>
@@ -625,7 +639,7 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
                   ...(saving ? styles.buttonDisabled : {})
                 }}
               >
-                Cancel·lar
+                {t('common.cancel')}
               </button>
               <button
                 onClick={handleSaveEvent}
@@ -636,7 +650,7 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
                   ...((saving || !formData.title.trim() || !formData.event_date) ? styles.buttonDisabled : {})
                 }}
               >
-                {saving ? 'Guardant...' : (editingEvent ? 'Guardar' : 'Crear')}
+                {saving ? t('common.saving') : editingEvent ? t('common.save') : t('common.create')}
               </button>
             </div>
           </div>
@@ -650,6 +664,7 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
         onConfirm={handleConfirmDelete}
         entityName={deleteModal.event?.title || ''}
         entityType="esdeveniment"
+        entityLabel={t('projectTimeline.deleteEntityNoun')}
         darkMode={darkMode}
       />
     </div>

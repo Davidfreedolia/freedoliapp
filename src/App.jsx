@@ -1,27 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate, Outlet } from 'react-router-dom'
-
-function RedirectToApp() {
-  const { pathname } = useLocation()
-  return <Navigate to={`/app${pathname}`} replace />
-}
-
-/** Quan estem dins /app/* i cap ruta fa match, mostrem això en lloc de redirigir a /app (evita loop). */
-function NotFoundInApp() {
-  const location = useLocation()
-  const navigate = useNavigate()
-  return (
-    <div style={{ padding: '2rem', textAlign: 'center' }}>
-      <h2>Pàgina no trobada</h2>
-      <p><code>{location.pathname}</code></p>
-      <button type="button" onClick={() => navigate('/app')}>Torna al Dashboard</button>
-    </div>
-  )
-}
 import React, { Suspense, useEffect, useState } from 'react'
 import { AppProvider, useApp } from './context/AppContext'
 import { WorkspaceProvider, useWorkspace } from './contexts/WorkspaceContext'
-import { useLang } from './i18n/useLang'
-import { t } from './i18n/t'
+import { useTranslation } from 'react-i18next'
 import Sidebar from './components/Sidebar'
 import ProtectedRoute from './components/ProtectedRoute'
 import PageLoader from './components/PageLoader'
@@ -42,7 +23,26 @@ import { isDemoMode } from './demo/demoMode'
 import { isScreenshotMode } from './lib/ui/screenshotMode'
 import { supabase } from './lib/supabase'
 import { useOnboardingStatus } from './hooks/useOnboardingStatus'
-import './i18n'
+import i18n from './i18n'
+
+function RedirectToApp() {
+  const { pathname } = useLocation()
+  return <Navigate to={`/app${pathname}`} replace />
+}
+
+/** Inside /app/* when no route matches (avoids redirect loop to /app). */
+function NotFoundInApp() {
+  const { t } = useTranslation()
+  const location = useLocation()
+  const navigate = useNavigate()
+  return (
+    <div style={{ padding: '2rem', textAlign: 'center' }}>
+      <h2>{t('shell.notFoundTitle')}</h2>
+      <p><code>{location.pathname}</code></p>
+      <button type="button" onClick={() => navigate('/app')}>{t('shell.notFoundBack')}</button>
+    </div>
+  )
+}
 
 // Login, Landing, Activation (no lazy)
 import Login from './pages/Login'
@@ -61,30 +61,32 @@ import CookieBanner from './components/legal/CookieBanner'
 
 // Lazy loading wrapper with error handling
 const lazyWithErrorBoundary = (importFn, pageName) => {
-  return React.lazy(() => 
-    importFn().catch(error => {
+  return React.lazy(() =>
+    importFn().catch((error) => {
       console.error(`Error loading ${pageName}:`, error)
-      // Return a fallback component
       return {
-        default: () => (
-          <ErrorBoundary context={`lazy:${pageName}`} darkMode={false}>
-            <div style={{
-              minHeight: '100vh',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '24px'
-            }}>
-              <div style={{ textAlign: 'center' }}>
-                <h2>Error carregant la pàgina</h2>
-                <p>No s'ha pogut carregar {pageName}</p>
-                <button onClick={() => window.location.reload()}>
-                  Recarregar
-                </button>
+        default: function LazyChunkErrorFallback() {
+          return (
+            <ErrorBoundary context={`lazy:${pageName}`} darkMode={false}>
+              <div style={{
+                minHeight: '100vh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '24px'
+              }}
+              >
+                <div style={{ textAlign: 'center' }}>
+                  <h2>{i18n.t('shell.lazyLoadTitle')}</h2>
+                  <p>{i18n.t('shell.lazyLoadMessage', { page: pageName })}</p>
+                  <button type="button" onClick={() => window.location.reload()}>
+                    {i18n.t('shell.reload')}
+                  </button>
+                </div>
               </div>
-            </div>
-          </ErrorBoundary>
-        )
+            </ErrorBoundary>
+          )
+        },
       }
     })
   )
@@ -129,6 +131,7 @@ const ADMIN_EMAILS = new Set(['david@freedolia.com'])
 
 /** D23 — Protect admin route: only users whose email is in ADMIN_EMAILS can access. */
 function AdminGate({ children }) {
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(true)
   const [allowed, setAllowed] = useState(false)
 
@@ -151,7 +154,7 @@ function AdminGate({ children }) {
   if (loading) {
     return (
       <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary, #6b7280)' }}>
-        Carregant…
+        {t('common.loading')}
       </div>
     )
   }
@@ -162,9 +165,10 @@ function AdminGate({ children }) {
 }
 
 function OnboardingGate({ children }) {
+  const { t } = useTranslation()
   const { isWorkspaceReady, activeOrgId } = useWorkspace()
   const location = useLocation()
-  const { loading, requiresOnboarding } = useOnboardingStatus(activeOrgId || null)
+  const { loading, requiresOnboarding, error, refetch } = useOnboardingStatus(activeOrgId || null)
   const path = location.pathname
 
   // Esperem que workspace i hook estiguin llestos (mai retornem blank)
@@ -186,7 +190,54 @@ function OnboardingGate({ children }) {
         padding: '24px',
         textAlign: 'center'
       }}>
-        Carregant…
+        {t('common.loading')}
+      </div>
+    )
+  }
+
+  // Read failure ≠ "missing org_activation": don't bounce to /activation; allow /activation so wizard can still run.
+  if (activeOrgId && error) {
+    if (path === '/activation') {
+      return children
+    }
+    console.log('[DiagWhiteScreen][OnboardingGate] render -> org_activation read error branch', {
+      activeOrgId,
+      path,
+      message: error?.message,
+    })
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'var(--page-bg)',
+        padding: '24px',
+      }}>
+        <div style={{ textAlign: 'center', color: 'var(--text-secondary, #6b7280)', maxWidth: 480 }}>
+          <p style={{ marginBottom: 12, color: 'var(--text-primary, #f3f4f6)', fontWeight: 600 }}>
+            {t('gate.onboardingStatusErrorTitle')}
+          </p>
+          <p style={{ marginBottom: 12, fontSize: 14, lineHeight: 1.45 }}>{t('gate.onboardingStatusErrorHint')}</p>
+          {error?.message ? (
+            <p style={{ marginBottom: 20, fontSize: 13, opacity: 0.9 }}>{error.message}</p>
+          ) : null}
+          <button
+            type="button"
+            onClick={refetch}
+            style={{
+              padding: '10px 18px',
+              borderRadius: 8,
+              border: '1px solid var(--border-1, #374151)',
+              background: 'var(--surface-bg-2, #1e1e2e)',
+              color: 'var(--text-1, #f3f4f6)',
+              cursor: 'pointer',
+              fontWeight: 600,
+            }}
+          >
+            {t('common.retry')}
+          </button>
+        </div>
       </div>
     )
   }
@@ -282,7 +333,7 @@ function AppPageWrap({ children, context }) {
 
 function AppContent() {
   const { sidebarCollapsed, darkMode } = useApp()
-  const { lang } = useLang()
+  const { t } = useTranslation()
   const { isWorkspaceReady, activeOrgId } = useWorkspace()
   const { usage, isLoading: usageLoading } = useWorkspaceUsage()
   const { loading: billingLoading, billing, isTrialExpired } = useOrgBilling(activeOrgId ?? null)
@@ -352,7 +403,7 @@ function AppContent() {
         justifyContent: 'center',
         backgroundColor: 'var(--page-bg)',
       }}>
-        <div style={{ fontSize: 16, color: 'var(--text-secondary, #6b7280)' }}>{t(lang, 'common_loading')}</div>
+        <div style={{ fontSize: 16, color: 'var(--text-secondary, #6b7280)' }}>{t('common.loading')}</div>
       </div>
     )
   }
@@ -371,10 +422,10 @@ function AppContent() {
         backgroundColor: 'var(--page-bg)',
       }}>
         <div style={{ textAlign: 'center', color: 'var(--text-secondary, #6b7280)', maxWidth: 480 }}>
-          <p style={{ marginBottom: 12 }}>Error carregant l'estat de billing.</p>
+          <p style={{ marginBottom: 12 }}>{t('gate.billingStateErrorTitle')}</p>
           <p style={{ marginBottom: 20, fontSize: 14 }}>{billingState.error.message || String(billingState.error)}</p>
           <button type="button" onClick={() => window.location.reload()}>
-            Reintentar
+            {t('common.retry')}
           </button>
         </div>
       </div>
@@ -388,7 +439,7 @@ function AppContent() {
     })
     return (
       <>
-        <Suspense fallback={<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--page-bg)' }}><span style={{ color: 'var(--text-secondary)' }}>{t(lang, 'common_loading')}</span></div>}>
+        <Suspense fallback={<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--page-bg)' }}><span style={{ color: 'var(--text-secondary)' }}>{t('common.loading')}</span></div>}>
           <Outlet />
         </Suspense>
         <ToastContainer darkMode={darkMode} />

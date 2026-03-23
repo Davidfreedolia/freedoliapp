@@ -129,7 +129,7 @@ export default function Landing() {
       </section>
 
       {/* 6 — Product modules */}
-      <section className="landing-section landing-section--modules">
+      <section id="landing-modules" className="landing-section landing-section--modules">
         <div className="landing-section__inner">
           <header className="landing-section__header landing-section__header--center">
             <h2 className="landing-section__title">{t('landing.modules.title')}</h2>
@@ -161,7 +161,7 @@ export default function Landing() {
       </section>
 
       {/* 7 — How it works */}
-      <section className="landing-section landing-section--how">
+      <section id="how-it-works" className="landing-section landing-section--how">
         <div className="landing-section__inner">
           <header className="landing-section__header landing-section__header--center">
             <h2 className="landing-section__title">{t('landing.how_it_works.title')}</h2>
@@ -244,10 +244,18 @@ export default function Landing() {
             </div>
           </div>
           <div className="landing-assistantActions">
-            <Button variant="secondary" size="md">
+            <Button
+              variant="secondary"
+              size="md"
+              onClick={() => document.getElementById('landing-modules')?.scrollIntoView({ behavior: 'smooth' })}
+            >
               {t('landing.assistant.actions.show_product')}
             </Button>
-            <Button variant="ghost" size="md">
+            <Button
+              variant="ghost"
+              size="md"
+              onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
+            >
               {t('landing.assistant.actions.how_it_works')}
             </Button>
             <Button variant="primary" size="md" onClick={() => navigate('/trial')}>

@@ -1,13 +1,13 @@
 import React from 'react'
 import { Sun, Moon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useApp } from '../context/AppContext'
 
 /**
- * HeaderPreferencesWidget - Preferences controls grouped together
- * Contains: Day/Night toggle + Settings
- * Language selector disabled (P0 pragmatic - Catalan only)
+ * Header preferences: day/night toggle (language control lives in AppLanguageControl on TopNavbar).
  */
 export default function HeaderPreferencesWidget({ onLanguageClick }) {
+  const { t } = useTranslation()
   const { darkMode, setDarkMode } = useApp()
 
   const widgetStyle = {
@@ -45,14 +45,14 @@ export default function HeaderPreferencesWidget({ onLanguageClick }) {
         type="button"
         className={`theme-pill ${darkMode ? 'is-dark' : 'is-light'}`}
         onClick={() => setDarkMode(!darkMode)}
-        aria-label={darkMode ? 'Activar mode dia' : 'Activar mode nit'}
-        title={darkMode ? 'Mode dia' : 'Mode nit'}
+        aria-label={darkMode ? t('topbar.themeAriaToLight') : t('topbar.themeAriaToDark')}
+        title={darkMode ? t('topbar.themeTitleLight') : t('topbar.themeTitleDark')}
       >
         <span className="theme-pill__iconWrap" aria-hidden="true">
           {darkMode ? <Moon size={16} /> : <Sun size={16} />}
         </span>
         <span className="theme-pill__label">
-          {darkMode ? 'NIT' : 'DIA'}
+          {darkMode ? t('topbar.themeLabelNight') : t('topbar.themeLabelDay')}
         </span>
       </button>
     </div>

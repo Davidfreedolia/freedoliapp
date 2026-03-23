@@ -6,15 +6,7 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
 import Button from '../ui/Button'
-
-const PROJECTS_TEXT = {
-  message: 'Project limit reached.',
-  cta: 'Upgrade your plan to create more projects.',
-}
-const SEATS_TEXT = {
-  message: 'Your workspace exceeded the seat limit.',
-  cta: 'Upgrade your plan to add more team members.',
-}
+import useT from '../../hooks/useT'
 
 /**
  * @param {object} props
@@ -22,6 +14,7 @@ const SEATS_TEXT = {
  * @param {() => void} props.onUpgrade
  */
 export default function WorkspaceLimitAlert({ usage, onUpgrade }) {
+  const t = useT()
   const [dismissedProjects, setDismissedProjects] = useState(false)
   const [dismissedSeats, setDismissedSeats] = useState(false)
 
@@ -55,19 +48,19 @@ export default function WorkspaceLimitAlert({ usage, onUpgrade }) {
         <div role="alert" style={bannerStyle}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <p style={{ margin: 0, color: 'var(--text-primary)', fontWeight: 500 }}>
-              {PROJECTS_TEXT.message}
+              {t('billing.limits.workspaceAlert.projects.message')}
             </p>
             <p style={{ margin: '4px 0 8px 0', color: 'var(--text-secondary)', lineHeight: 1.35 }}>
-              {PROJECTS_TEXT.cta}
+              {t('billing.limits.workspaceAlert.projects.cta')}
             </p>
             <Button variant="primary" size="sm" onClick={onUpgrade}>
-              Upgrade
+              {t('billing.limits.upgrade')}
             </Button>
           </div>
           <button
             type="button"
             onClick={() => setDismissedProjects(true)}
-            aria-label="Dismiss"
+            aria-label={t('billing.limits.dismissAria')}
             style={{
               background: 'none',
               border: 'none',
@@ -85,19 +78,19 @@ export default function WorkspaceLimitAlert({ usage, onUpgrade }) {
         <div role="alert" style={bannerStyle}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <p style={{ margin: 0, color: 'var(--text-primary)', fontWeight: 500 }}>
-              {SEATS_TEXT.message}
+              {t('billing.limits.workspaceAlert.seats.message')}
             </p>
             <p style={{ margin: '4px 0 8px 0', color: 'var(--text-secondary)', lineHeight: 1.35 }}>
-              {SEATS_TEXT.cta}
+              {t('billing.limits.workspaceAlert.seats.cta')}
             </p>
             <Button variant="primary" size="sm" onClick={onUpgrade}>
-              Upgrade
+              {t('billing.limits.upgrade')}
             </Button>
           </div>
           <button
             type="button"
             onClick={() => setDismissedSeats(true)}
-            aria-label="Dismiss"
+            aria-label={t('billing.limits.dismissAria')}
             style={{
               background: 'none',
               border: 'none',
