@@ -32,6 +32,19 @@ export async function createWorkspace(supabase, { name, userEmail, userId }) {
   const startedAt = Date.now()
   const log = (phase, payload = {}) => console.info('[createWorkspace]', { ts: new Date().toISOString(), phase, ...payload })
   const warn = (phase, payload = {}) => console.warn('[createWorkspace]', { ts: new Date().toISOString(), phase, ...payload })
+  const serializeError = (error) => {
+    if (!error) return null
+    return {
+      message: error?.message ?? String(error),
+      code: error?.code ?? null,
+      details: error?.details ?? null,
+      hint: error?.hint ?? null,
+      status: error?.status ?? null,
+      name: error?.name ?? null,
+      stack: error?.stack ?? null,
+      raw: typeof error === 'object' ? error : String(error),
+    }
+  }
   if (!name || !userId) {
     console.error('[createWorkspace] missing required name/userId', { name, userId, userEmail: userEmail || null })
     return null
@@ -59,7 +72,12 @@ export async function createWorkspace(supabase, { name, userEmail, userId }) {
   window.clearTimeout(slowRpcTimer)
 
   if (error) {
-    console.error('[createWorkspace]', { ts: new Date().toISOString(), phase: 'rpc.error', elapsedMs: Date.now() - startedAt, error })
+    console.error('[createWorkspace]', {
+      ts: new Date().toISOString(),
+      phase: 'rpc.error',
+      elapsedMs: Date.now() - startedAt,
+      error: serializeError(error),
+    })
   }
   log('rpc.resolved', {
     elapsedMs: Date.now() - startedAt,
@@ -69,7 +87,14 @@ export async function createWorkspace(supabase, { name, userEmail, userId }) {
 
   const org = (Array.isArray(data) && data[0]) || null
   if (error || !org?.id) {
-    console.error('[createWorkspace] error || !org?.id', { hasError: Boolean(error), org })
+    console.error('[createWorkspace]', {
+      ts: new Date().toISOString(),
+      phase: 'rpc.nullResult',
+      elapsedMs: Date.now() - startedAt,
+      hasError: Boolean(error),
+      error: serializeError(error),
+      org,
+    })
     return null
   }
 

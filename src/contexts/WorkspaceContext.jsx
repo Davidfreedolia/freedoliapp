@@ -9,6 +9,19 @@ const STORAGE_USER_KEY = 'freedoli_active_org_user_id'
 const wsTs = () => new Date().toISOString()
 const wsLog = (phase, payload = {}) => console.info('[WorkspaceContext]', { ts: wsTs(), phase, ...payload })
 const wsWarn = (phase, payload = {}) => console.warn('[WorkspaceContext]', { ts: wsTs(), phase, ...payload })
+const serializeError = (error) => {
+  if (!error) return null
+  return {
+    message: error?.message ?? String(error),
+    code: error?.code ?? null,
+    details: error?.details ?? null,
+    hint: error?.hint ?? null,
+    status: error?.status ?? null,
+    name: error?.name ?? null,
+    stack: error?.stack ?? null,
+    raw: typeof error === 'object' ? error : String(error),
+  }
+}
 
 const WorkspaceContext = createContext(null)
 
@@ -61,6 +74,7 @@ export function WorkspaceProvider({ children }) {
         }
         return
       }
+      wsLog('bootstrap.getSession.initial.start')
       let session = (await supabase.auth.getSession()).data.session
       wsLog('bootstrap.getSession.initial', {
         hasSessionUser: Boolean(session?.user),
@@ -73,6 +87,7 @@ export function WorkspaceProvider({ children }) {
         await new Promise((r) => setTimeout(r, 750))
         if (cancelled) return
 
+        wsLog('bootstrap.getSession.retry.start')
         session = (await supabase.auth.getSession()).data.session
         wsLog('bootstrap.getSession.retry', {
           hasSessionUser: Boolean(session?.user),
@@ -89,6 +104,9 @@ export function WorkspaceProvider({ children }) {
           return
         }
       }
+      wsLog('bootstrap.memberships.query.start', {
+        userId: session.user.id,
+      })
       const { data: rows, error } = await supabase
         .from('org_memberships')
         .select('org_id, role, created_at, orgs(id, name)')
@@ -96,7 +114,12 @@ export function WorkspaceProvider({ children }) {
         .eq('status', 'active')
         .order('created_at', { ascending: true })
       if (error) {
-        console.error('[WorkspaceContext]', { ts: wsTs(), phase: 'bootstrap.memberships.error', error })
+        console.error('[WorkspaceContext]', {
+          ts: wsTs(),
+          phase: 'bootstrap.memberships.query.error',
+          userId: session.user.id,
+          error: serializeError(error),
+        })
         if (!cancelled) {
           setMemberships([])
           setActiveOrgIdState(null)
@@ -105,8 +128,14 @@ export function WorkspaceProvider({ children }) {
         return
       }
       const list = rows || []
+      wsLog('bootstrap.memberships.query.resolved', {
+        userId: session.user.id,
+        count: list.length,
+        orgIds: list.map((m) => m.org_id),
+      })
       if (!cancelled) setMemberships(list)
       wsLog('bootstrap.memberships.loaded', {
+        userId: session.user.id,
         count: list.length,
         orgIds: list.map((m) => m.org_id),
       })
@@ -115,6 +144,10 @@ export function WorkspaceProvider({ children }) {
       // If the authenticated user has no active memberships, auto-create a workspace (org + owner membership)
       // so that activeOrgId is never null for a real user session.
       if (list.length === 0) {
+        wsWarn('bootstrap.memberships.empty', {
+          userId: session.user.id,
+          count: 0,
+        })
         try {
           const user = session.user
           const userEmail = user?.email || ''
@@ -132,6 +165,12 @@ export function WorkspaceProvider({ children }) {
             name: derivedName || 'Workspace',
             userEmail,
             userId,
+          })
+          wsLog('bootstrap.createWorkspace.afterAwait', {
+            userId,
+            returnedOrgId: org?.id ?? null,
+            returnedOrgName: org?.name ?? null,
+            isNullResult: !org,
           })
 
           if (!cancelled) {
@@ -153,7 +192,13 @@ export function WorkspaceProvider({ children }) {
                 localStorage.setItem(STORAGE_USER_KEY, userId)
               } catch (_) {}
             } else {
-              console.error('[WorkspaceContext]', { ts: wsTs(), phase: 'bootstrap.createWorkspace.nullResult', userId, userEmail })
+              console.error('[WorkspaceContext]', {
+                ts: wsTs(),
+                phase: 'bootstrap.createWorkspace.nullResult',
+                userId,
+                userEmail,
+                error: null,
+              })
               setMemberships([])
               setActiveOrgIdState(null)
               persistActiveOrg(null)
@@ -163,8 +208,12 @@ export function WorkspaceProvider({ children }) {
             }
             setIsWorkspaceReady(true)
           }
-        } catch (_) {
-          console.error('[WorkspaceContext]', { ts: wsTs(), phase: 'bootstrap.createWorkspace.threw', error: _ })
+        } catch (error) {
+          console.error('[WorkspaceContext]', {
+            ts: wsTs(),
+            phase: 'bootstrap.createWorkspace.threw',
+            error: serializeError(error),
+          })
           if (!cancelled) {
             setMemberships([])
             setActiveOrgIdState(null)
@@ -207,9 +256,21 @@ export function WorkspaceProvider({ children }) {
         } catch (_) {}
         setIsWorkspaceReady(true)
       }
+      } catch (error) {
+        console.error('[WorkspaceContext] bootstrap.unhandledError', {
+          ts: wsTs(),
+          phase: 'bootstrap.unhandledError',
+          elapsedMs: Date.now() - bootstrapStartedAt,
+          error: serializeError(error),
+        })
+        throw error
       } finally {
         window.clearTimeout(slowBootstrapTimer)
-        wsLog('bootstrap.finally', { elapsedMs: Date.now() - bootstrapStartedAt })
+        wsLog('bootstrap.finally', {
+          elapsedMs: Date.now() - bootstrapStartedAt,
+          cancelled,
+          bootstrapInFlight,
+        })
         bootstrapInFlight = false
       }
     }
