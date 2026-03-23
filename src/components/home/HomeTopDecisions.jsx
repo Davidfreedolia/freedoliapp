@@ -41,23 +41,23 @@ export default function HomeTopDecisions() {
   }, [activeOrgId])
 
   return (
-    <div style={styles.wrap}>
-      <div style={styles.header}>
-        <div style={styles.title}>Top Decisions</div>
-        <Link to="/app/decisions" style={styles.cta}>
+    <div className="dashboard-home-card dashboard-home-card--list">
+      <div className="dashboard-home-card__header">
+        <div className="dashboard-home-card__title">Top Decisions</div>
+        <Link to="/app/decisions" className="dashboard-home-card__cta">
           View all decisions
         </Link>
       </div>
       {loading ? (
-        <div style={styles.placeholder}>Loading…</div>
+        <div className="dashboard-home-card__placeholder">Loading…</div>
       ) : items.length === 0 ? (
-        <div style={styles.placeholder}>No high-priority decisions right now.</div>
+        <div className="dashboard-home-card__placeholder">No high-priority decisions right now.</div>
       ) : (
-        <ul style={styles.list}>
+        <ul className="dashboard-home-card__list">
           {items.map((item) => (
-            <li key={item.id} style={styles.row}>
-              <div style={styles.rowTitle}>{item.title}</div>
-              <div style={styles.rowMeta}>
+            <li key={item.id} className="dashboard-home-card__listRow dashboard-home-card__listRow--stacked">
+              <div className="dashboard-home-card__listPrimary">{item.title}</div>
+              <div className="dashboard-home-card__metaWrap">
                 <span>{item.severity ? `Severity: ${item.severity}` : null}</span>
                 {item.explanation && (
                   <span className="truncate" title={item.explanation}>
@@ -71,54 +71,5 @@ export default function HomeTopDecisions() {
       )}
     </div>
   )
-}
-
-const styles = {
-  wrap: {
-    width: '100%',
-    padding: '1rem 1.25rem',
-    borderRadius: 8,
-    background: 'var(--card-bg, #f9fafb)',
-    border: '1px solid var(--border-color, #e5e7eb)',
-    marginBottom: 16,
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  title: {
-    fontSize: '0.9375rem',
-    fontWeight: 600,
-    color: 'var(--text-1, #111827)',
-  },
-  cta: {
-    fontSize: 12,
-    color: 'var(--primary-1, #2563eb)',
-    textDecoration: 'none',
-  },
-  list: { margin: 0, padding: 0, listStyle: 'none' },
-  row: {
-    padding: '6px 0',
-    borderBottom: '1px solid var(--border-color, #e5e7eb)',
-  },
-  rowTitle: {
-    fontSize: 13,
-    fontWeight: 500,
-    color: 'var(--text-1, #111827)',
-    marginBottom: 2,
-  },
-  rowMeta: {
-    fontSize: 12,
-    color: 'var(--text-2, #6b7280)',
-    display: 'flex',
-    gap: 8,
-    flexWrap: 'wrap',
-  },
-  placeholder: {
-    fontSize: 13,
-    color: 'var(--text-2, #6b7280)',
-  },
 }
 

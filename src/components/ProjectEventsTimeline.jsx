@@ -467,13 +467,14 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
   }, [menuOpen])
 
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>
-        <h3 style={{ ...styles.title, color: darkMode ? '#ffffff' : '#111827' }}>
+    <div className="project-events-timeline" style={styles.container}>
+      <div className="project-events-timeline__header" style={styles.header}>
+        <h3 className="project-events-timeline__title" style={{ ...styles.title, color: darkMode ? '#ffffff' : '#111827' }}>
           <Calendar size={18} />
           {t('projectTimeline.title')}
         </h3>
         <button
+          className="project-events-timeline__add"
           onClick={handleAddEvent}
           disabled={isLocked}
           title={isLocked ? t('projectTimeline.lockedTooltip') : ''}
@@ -488,11 +489,11 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
       </div>
 
       {loading ? (
-        <div style={styles.loading}>{t('common.loading')}</div>
+        <div className="project-events-timeline__state" style={styles.loading}>{t('common.loading')}</div>
       ) : events.length === 0 ? (
-        <div style={styles.empty}>{t('projectTimeline.empty')}</div>
+        <div className="project-events-timeline__state" style={styles.empty}>{t('projectTimeline.empty')}</div>
       ) : (
-        <div style={{ overflowX: 'auto' }}>
+        <div className="project-events-timeline__tableWrap" style={{ overflowX: 'auto' }}>
           <table style={styles.table}>
             <thead style={styles.tableHeader}>
               <tr>

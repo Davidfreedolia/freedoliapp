@@ -595,34 +595,26 @@ export default function Dashboard() {
   }
 
   return (
-    <div style={styles.container} className="page-dashboard">
-      <div style={{
-        ...styles.content,
-        padding: isMobile ? '16px' : '32px'
-      }}>
+    <div style={styles.container} className="page-dashboard dashboard-screen">
+      <div
+        className="dashboard-screen__content"
+        style={{
+          ...styles.content,
+          padding: isMobile ? '16px' : '32px'
+        }}
+      >
         {showFirstValueBanner && (
-          <div
-            style={{
-              marginBottom: 24,
-              padding: '12px 16px',
-              borderRadius: 12,
-              border: '1px solid var(--border-1)',
-              background: darkMode ? '#0b1120' : '#eff6ff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 12,
-            }}
-          >
-            <div style={{ fontSize: 14, color: 'var(--text-1)' }}>
+          <div className="dashboard-first-value">
+            <div className="dashboard-first-value__copy">
               <strong>{t('dashboard.firstValue.title')}</strong>{' '}
               <span>{t('dashboard.firstValue.subtitle')}</span>
               <br />
-              <span style={{ fontSize: 13, color: 'var(--muted-1)' }}>
+              <span className="dashboard-first-value__note">
                 {t('dashboard.firstValue.checklist')}
               </span>
             </div>
             <Button
+              className="dashboard-hero__cta dashboard-hero__cta--primary"
               variant="primary"
               size="sm"
               onClick={() => {
@@ -678,18 +670,18 @@ export default function Dashboard() {
         {!dashboardModeLoading && dashboardHasData && (
           <>
           {homeDataError && (
-            <div style={{ marginBottom: 16 }}>
+            <div className="dashboard-inline-error">
               <DataError message={homeDataError} />
             </div>
           )}
 
           {/* 1. Hero / Executive summary */}
-          <section style={styles.homeSection} aria-label="Hero">
-            <header style={styles.homeHeader}>
-              <h1 style={styles.homeTitle}>{t('dashboard.modeA.title', 'Dashboard')}</h1>
-              <p style={styles.homeSubtitle}>{t('dashboard.modeA.subtitle', 'Resum del teu negoci')}</p>
+          <section className="dashboard-hero" aria-label="Hero">
+            <header className="dashboard-hero__header">
+              <h1 className="dashboard-hero__title">{t('dashboard.modeA.title', 'Dashboard')}</h1>
+              <p className="dashboard-hero__subtitle">{t('dashboard.modeA.subtitle', 'Resum del teu negoci')}</p>
             </header>
-            <div style={styles.homeRow} aria-label="KPI row">
+            <div className="dashboard-kpi-grid" aria-label="KPI row">
               <HomeKpiCard
                 title="Net profit (30d)"
                 value={formatCurrency(homeData?.kpis?.netProfit30d)}
@@ -711,25 +703,25 @@ export default function Dashboard() {
                 loading={homeDataLoading}
               />
             </div>
-            <div style={{ ...styles.homeRow, alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-              <Button variant="primary" size="sm" onClick={() => setShowNewProjectModal(true)}>
+            <div className="dashboard-hero__actions">
+              <Button className="dashboard-hero__cta dashboard-hero__cta--primary" variant="primary" size="sm" onClick={() => setShowNewProjectModal(true)}>
                 <Plus size={16} style={{ marginRight: 6 }} />
                 {tCommon('dashboard.modeB.cta.createProduct')}
               </Button>
-              <Button variant="secondary" size="sm" onClick={() => navigate('/app/orders')}>
+              <Button className="dashboard-hero__cta" variant="secondary" size="sm" onClick={() => navigate('/app/orders')}>
                 {t('dashboard.newPO', 'New PO')}
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => navigate('/app/decisions')}>
+              <Button className="dashboard-hero__cta" variant="ghost" size="sm" onClick={() => navigate('/app/decisions')}>
                 {t('dashboard.viewDecisionsInbox', 'View Decisions Inbox')}
               </Button>
             </div>
-            <div style={{ fontSize: 13, color: 'var(--muted-1)', marginTop: 8, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+            <div className="dashboard-hero__meta">
               <span>Active projects: {stats.activeProjects ?? 0}</span>
               {discardedCount > 0 && (
                 <button
                   type="button"
                   onClick={() => navigate('/app/projects?showDiscarded=true')}
-                  style={{ background: 'none', border: 'none', color: 'var(--primary-1)', cursor: 'pointer', fontWeight: 500 }}
+                  className="dashboard-inline-link"
                 >
                   Discarded: {discardedCount} →
                 </button>
@@ -776,82 +768,58 @@ export default function Dashboard() {
           })()}
 
           {/* 2. Atenció immediata — una sola capa d'alerts + projectes bloquejats */}
-          <section style={{ marginBottom: 24 }} aria-label="Atenció immediata">
-            <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 600, color: 'var(--text-1)' }}>
-              <Bell size={18} style={{ verticalAlign: 'middle', marginRight: 6 }} />
-              {t('dashboard.attentionTitle', 'Atenció immediata')}
-            </h2>
+          <section className="dashboard-section" aria-label="Atenció immediata">
+            <div className="dashboard-section__header">
+              <h2 className="dashboard-section__title">
+                <Bell size={18} />
+                {t('dashboard.attentionTitle', 'Atenció immediata')}
+              </h2>
+            </div>
             {execLoading && (
-              <div style={{ padding: '12px 0', color: 'var(--muted-1)', fontSize: 14 }}>{t('common.loading')}</div>
+              <div className="dashboard-section__state">{t('common.loading')}</div>
             )}
             {execError && (
-              <div style={{ padding: '12px 0', color: 'var(--danger-1)', fontSize: 14 }}>{execError || t('common.errorGeneric')}</div>
+              <div className="dashboard-section__state dashboard-section__state--error">{execError || t('common.errorGeneric')}</div>
             )}
             {!execLoading && !execError && execData.alerts && (
-              <div style={{
-                marginBottom: 16,
-                padding: '12px 16px',
-                borderRadius: 'var(--radius-ui)',
-                border: '1px solid var(--border-1)',
-                background: 'var(--surface-bg-2)'
-              }}>
+              <div className="dashboard-surface dashboard-surface--attention">
                 {(execData.alerts.counts.criticalCount + execData.alerts.counts.warningCount + execData.alerts.counts.infoCount) === 0 ? (
-                  <div style={{ padding: '8px 0', color: 'var(--muted-1)', fontSize: 13 }}>{t('dashboard.noAlerts', 'No alerts. You\'re unusually safe today.')}</div>
+                  <div className="dashboard-surface__empty">{t('dashboard.noAlerts', 'No alerts. You\'re unusually safe today.')}</div>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div className="dashboard-alert-list">
                     {execData.alerts.all
                       .filter(a => alertsFilter === 'all' || (alertsFilter === 'critical' && a.severity === 'critical') || (alertsFilter === 'warning' && a.severity === 'warning'))
                       .slice(0, 10)
                       .map((alert) => (
                         <div
                           key={alert.id}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 12,
-                            padding: '8px 12px',
-                            border: '1px solid var(--border-1)',
-                            borderRadius: 'var(--radius-ui)',
-                            background: 'var(--surface-bg)'
-                          }}
+                          className="dashboard-alert-item"
                         >
-                          <span style={{
-                            fontSize: 11,
-                            padding: '3px 8px',
-                            borderRadius: 999,
-                            fontWeight: 600,
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.2px',
+                          <span
+                            className="dashboard-alert-item__severity"
+                            style={{
                             color: alert.tone === 'danger' ? 'var(--danger-1)' : alert.tone === 'warn' ? 'var(--warning-1)' : 'var(--muted-1)',
                             border: `1px solid ${alert.tone === 'danger' ? 'var(--danger-1)' : alert.tone === 'warn' ? 'var(--warning-1)' : 'var(--muted-1)'}`
-                          }}>
+                            }}
+                          >
                             {alert.severity}
                           </span>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontWeight: 600, fontSize: 13 }}>{alert.title}</div>
-                            {alert.detail && <div style={{ fontSize: 12, color: 'var(--muted-1)', marginTop: 2 }}>{alert.detail}</div>}
+                          <div className="dashboard-alert-item__copy">
+                            <div className="dashboard-alert-item__title">{alert.title}</div>
+                            {alert.detail && <div className="dashboard-alert-item__detail">{alert.detail}</div>}
                           </div>
-                          <Link to={alert.action.href} style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-1)' }}>{alert.action.label}</Link>
+                          <Link to={alert.action.href} className="dashboard-alert-item__action">{alert.action.label}</Link>
                         </div>
                       ))}
                   </div>
                 )}
-                <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+                <div className="dashboard-filter-row">
                   {['all', 'critical', 'warning'].map((f) => (
                     <button
                       key={f}
                       type="button"
                       onClick={() => setAlertsFilter(f)}
-                      style={{
-                        fontSize: 12,
-                        padding: '4px 10px',
-                        border: '1px solid var(--border-1)',
-                        borderRadius: 'var(--radius-ui)',
-                        background: alertsFilter === f ? 'var(--surface-bg)' : 'transparent',
-                        color: alertsFilter === f ? 'var(--text-1)' : 'var(--muted-1)',
-                        cursor: 'pointer',
-                        fontWeight: alertsFilter === f ? 600 : 400
-                      }}
+                      className={`dashboard-filter-pill${alertsFilter === f ? ' is-active' : ''}`}
                     >
                       {f === 'all' ? 'All' : f === 'critical' ? 'Critical' : 'Warning'}
                     </button>
@@ -860,35 +828,30 @@ export default function Dashboard() {
               </div>
             )}
             {blockedProjects.length >= 1 && (
-              <div style={{
-                padding: '12px 16px',
-                borderRadius: 'var(--radius-ui)',
-                border: '1px solid var(--border-1)',
-                background: 'var(--surface-bg-2)'
-              }}>
-                <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8, color: 'var(--text-1)' }}>{t('dashboard.blockedProjects', 'Projectes bloquejats')}</div>
-                <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+              <div className="dashboard-surface dashboard-surface--blocked">
+                <div className="dashboard-surface__title">{t('dashboard.blockedProjects', 'Projectes bloquejats')}</div>
+                <ul className="dashboard-blocked-list">
                   {blockedProjects.slice(0, 5).map((p) => {
                     const ratio = p?.progress_ratio
                     const pct = ratio != null && Number.isFinite(ratio) ? Math.max(0, Math.min(100, Math.round(ratio <= 1 ? ratio * 100 : ratio))) : 0
                     const reason = (p?.blocked_reason ?? '').toString().trim()
                     return (
-                      <li key={p.id} style={{ padding: '6px 0', borderBottom: '1px solid var(--border-1)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
-                          <Link to={`/app/projects/${p.id}`} style={{ fontWeight: 500, color: 'var(--text-1)', textDecoration: 'none', minWidth: 0, flex: '1 1 auto' }}>
+                      <li key={p.id} className="dashboard-blocked-item">
+                        <div className="dashboard-blocked-item__row">
+                          <Link to={`/app/projects/${p.id}`} className="dashboard-blocked-item__link">
                             {p.name || '—'}
                           </Link>
-                          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--muted-1)', flexShrink: 0 }}>{pct}%</span>
+                          <span className="dashboard-blocked-item__progress">{pct}%</span>
                         </div>
                         {reason && (
-                          <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={reason}>{reason}</div>
+                          <div className="dashboard-blocked-item__reason" title={reason}>{reason}</div>
                         )}
-                        <div style={{ marginTop: 6 }}>
+                        <div className="dashboard-blocked-item__actions">
                           <button
                             type="button"
                             onClick={(e) => { e.preventDefault(); handleCreateUnblockTask(p) }}
                             disabled={unblockTaskProjectId === p.id}
-                            style={{ fontSize: 11, padding: '4px 8px', border: '1px solid var(--border-1)', borderRadius: 6, background: 'var(--surface-bg-2)', color: 'var(--text-1)', cursor: unblockTaskProjectId === p.id ? 'wait' : 'pointer' }}
+                            className="dashboard-inline-action"
                           >
                             {unblockTaskProjectId === p.id ? '…' : t('dashboard.createUnblockTask', 'Create unblock task')}
                           </button>
@@ -898,8 +861,8 @@ export default function Dashboard() {
                   })}
                 </ul>
                 {blockedProjects.length > 5 && (
-                  <div style={{ marginTop: 8, fontSize: 12 }}>
-                    <Link to="/app/projects" style={{ color: 'var(--primary-1)', fontWeight: 500 }}>{t('dashboard.viewAllProjects', 'Veure tots a Projectes')}</Link>
+                  <div className="dashboard-surface__footer">
+                    <Link to="/app/projects" className="dashboard-inline-link">{t('dashboard.viewAllProjects', 'Veure tots a Projectes')}</Link>
                   </div>
                 )}
               </div>
@@ -907,45 +870,41 @@ export default function Dashboard() {
           </section>
 
           {/* 3. Operativa del dia */}
-          <section style={{ marginBottom: 24 }} aria-label="Operativa del dia">
-            <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 600, color: 'var(--text-1)' }}>
-              {t('dashboard.operativaTitle', 'Operativa del dia')}
-            </h2>
+          <section className="dashboard-section" aria-label="Operativa del dia">
+            <div className="dashboard-section__header">
+              <h2 className="dashboard-section__title">
+                {t('dashboard.operativaTitle', 'Operativa del dia')}
+              </h2>
+            </div>
         {dashboardWidgets.orders_in_progress && (
           <SafeWidget widgetName="Orders In Progress" darkMode={darkMode}>
             <div
-              className="dash-merged-widget"
-              style={{
-                ...styles.section,
-                backgroundColor: darkMode ? '#15151f' : '#ffffff'
-              }}
+              className="dash-merged-widget dashboard-widget-card"
+              style={styles.section}
             >
-              <div style={styles.sectionHeader}>
-                <h2 style={{
-                  ...styles.sectionTitle,
-                  color: darkMode ? '#ffffff' : '#111827'
-                }}>
+              <div className="dashboard-widget-card__header" style={styles.sectionHeader}>
+                <h2 className="dashboard-widget-card__title" style={styles.sectionTitle}>
                   <Package size={20} className="dash-widget-icon--orders" />
                   {t('dashboard.ordersInProgress.title')}
                 </h2>
             <Button
+              className="dashboard-view-all"
               variant="secondary"
                   size="sm"
                   onClick={() => navigate('/app/orders')}
-              className="dashboard-view-all"
                 >
                   {t('dashboard.ordersInProgress.viewAll')} <ArrowRight size={16} />
                 </Button>
               </div>
 
               {loadingOrders ? (
-                <div style={styles.loading}>{t('dashboard.ordersInProgress.loading')}</div>
+                <div className="dashboard-widget-card__state" style={styles.loading}>{t('dashboard.ordersInProgress.loading')}</div>
               ) : ordersInProgress.length === 0 ? (
-                <div style={styles.empty}>
+                <div className="dashboard-widget-card__state" style={styles.empty}>
                   <p>{t('dashboard.ordersInProgress.empty')}</p>
                 </div>
               ) : (
-                <div style={styles.ordersList}>
+                <div className="dashboard-order-list" style={styles.ordersList}>
                   {ordersInProgress.map(order => {
                     const projectName = order.project?.name || order.project_name || t('dashboard.noProject')
                     const thumbnailUrl = order.asin_image_url || order.image_url
@@ -960,6 +919,7 @@ export default function Dashboard() {
                         key={order.id}
                         data-order-id={order.id}
                         data-phase-id={phaseId}
+                        className="dashboard-order-item"
                         style={styles.orderItem}
                       >
                         <div style={styles.orderInfo}>
@@ -1044,39 +1004,34 @@ export default function Dashboard() {
 
         {/* POs not ready */}
         {dashboardWidgets.pos_not_ready && (
-        <div style={{
-          ...styles.section,
-          backgroundColor: darkMode ? '#15151f' : '#ffffff'
-        }}>
-          <div style={styles.sectionHeader}>
-            <h2 style={{
-              ...styles.sectionTitle,
-              color: darkMode ? '#ffffff' : '#111827'
-            }}>
+        <div className="dashboard-widget-card" style={styles.section}>
+          <div className="dashboard-widget-card__header" style={styles.sectionHeader}>
+            <h2 className="dashboard-widget-card__title" style={styles.sectionTitle}>
               <AlertTriangle size={20} />
               {t('dashboard.posNotReady.title')}
             </h2>
             <Button
+              className="dashboard-view-all"
               variant="secondary"
               size="sm"
               onClick={() => navigate('/app/orders')}
-              className="dashboard-view-all"
             >
               {t('dashboard.posNotReady.viewAll')} <ArrowRight size={16} />
             </Button>
           </div>
 
           {loadingPosNotReady ? (
-            <div style={styles.loading}>{t('dashboard.posNotReady.loading')}</div>
+            <div className="dashboard-widget-card__state" style={styles.loading}>{t('dashboard.posNotReady.loading')}</div>
           ) : posNotReady.length === 0 ? (
-            <div style={styles.empty}>
+            <div className="dashboard-widget-card__state" style={styles.empty}>
               <p>{t('dashboard.posNotReady.empty')}</p>
             </div>
           ) : (
-            <div style={styles.ordersList}>
+            <div className="dashboard-order-list" style={styles.ordersList}>
               {posNotReady.map(po => (
                 <div
                   key={po.id}
+                  className="dashboard-order-item dashboard-order-item--stacked"
                   style={{
                     ...styles.orderItem,
                     flexDirection: 'column',
@@ -1115,45 +1070,43 @@ export default function Dashboard() {
           </section>
 
           {/* 4. Next actions */}
-          <section style={{ marginBottom: 24 }} aria-label="Next actions">
-            <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 600, color: 'var(--text-1)' }}>
-              {t('dashboard.nextActionsTitle', 'Next actions')}
-            </h2>
-            <div style={styles.homeRow}>
+          <section className="dashboard-section" aria-label="Next actions">
+            <div className="dashboard-section__header">
+              <h2 className="dashboard-section__title">
+                {t('dashboard.nextActionsTitle', 'Next actions')}
+              </h2>
+            </div>
+            <div className="dashboard-two-col">
               <HomeReorderCandidates reorder={homeData?.reorder} loading={homeDataLoading} />
               <HomeTopDecisions />
             </div>
           </section>
 
           {/* 5. Performance / portfolio snapshot */}
-          <section style={{ marginBottom: 24 }} aria-label="Performance">
-            <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 600, color: 'var(--text-1)' }}>
-              <TrendingUp size={18} style={{ verticalAlign: 'middle', marginRight: 6 }} />
-              {t('dashboard.performanceTitle', 'Performance')}
-            </h2>
-            <div style={styles.homeRow}>
+          <section className="dashboard-section" aria-label="Performance">
+            <div className="dashboard-section__header">
+              <h2 className="dashboard-section__title">
+                <TrendingUp size={18} />
+                {t('dashboard.performanceTitle', 'Performance')}
+              </h2>
+            </div>
+            <div className="dashboard-two-col">
               <HomeProfitTrend data={homeData?.performance?.profitTrend} loading={homeDataLoading} />
               <HomeTopAsins items={homeData?.performance?.topAsins} loading={homeDataLoading} />
             </div>
             {!execLoading && !execError && (execData.risk?.length > 0 || execData.focus?.length > 0) && (
-              <div style={{
-                marginTop: 16,
-                padding: '12px 16px',
-                borderRadius: 'var(--radius-ui)',
-                border: '1px solid var(--border-1)',
-                background: 'var(--surface-bg-2)'
-              }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--muted-1)', marginBottom: 8 }}>{t('dashboard.portfolioSnapshot', 'Portfolio snapshot')}</div>
-                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
+              <div className="dashboard-surface dashboard-surface--portfolio">
+                <div className="dashboard-surface__title">{t('dashboard.portfolioSnapshot', 'Portfolio snapshot')}</div>
+                <div className="dashboard-portfolio-grid" style={{ gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr' }}>
                   {execData.risk.length > 0 && (
-                    <div>
-                      <div style={{ fontSize: 11, color: 'var(--muted-1)', marginBottom: 4 }}>At risk ({execData.risk.length})</div>
-                      <ul style={{ margin: 0, padding: 0, listStyle: 'none', fontSize: 13 }}>
+                    <div className="dashboard-portfolio-block">
+                      <div className="dashboard-portfolio-block__title">At risk ({execData.risk.length})</div>
+                      <ul className="dashboard-portfolio-list">
                         {execData.risk.slice(0, 3).map((row) => (
-                          <li key={row.project.id} style={{ padding: '4px 0', borderBottom: '1px solid var(--border-1)' }}>
-                            <Link to={`/app/projects/${row.project.id}`} style={{ color: 'var(--text-1)' }}>{row.project.name}</Link>
+                          <li key={row.project.id} className="dashboard-portfolio-list__item">
+                            <Link to={`/app/projects/${row.project.id}`} className="dashboard-inline-link dashboard-inline-link--strong">{row.project.name}</Link>
                             {row.gate?.gateId && row.gate.gateId !== 'NONE' && (
-                              <span style={{ marginLeft: 6, fontSize: 11, color: 'var(--muted-1)' }}>{row.gate.label}</span>
+                              <span className="dashboard-portfolio-list__meta">{row.gate.label}</span>
                             )}
                           </li>
                         ))}
@@ -1161,13 +1114,13 @@ export default function Dashboard() {
                     </div>
                   )}
                   {execData.focus.length > 0 && (
-                    <div>
-                      <div style={{ fontSize: 11, color: 'var(--muted-1)', marginBottom: 4 }}>Scale focus ({execData.focus.length})</div>
-                      <ul style={{ margin: 0, padding: 0, listStyle: 'none', fontSize: 13 }}>
+                    <div className="dashboard-portfolio-block">
+                      <div className="dashboard-portfolio-block__title">Scale focus ({execData.focus.length})</div>
+                      <ul className="dashboard-portfolio-list">
                         {execData.focus.slice(0, 3).map((row) => (
-                          <li key={row.project.id} style={{ padding: '4px 0', borderBottom: '1px solid var(--border-1)' }}>
-                            <Link to={`/app/projects/${row.project.id}`} style={{ color: 'var(--text-1)' }}>{row.project.name}</Link>
-                            <span style={{ marginLeft: 6, fontSize: 11, color: 'var(--success-1)' }}>ROI {Math.round(row.business?.roi_percent ?? 0)}%</span>
+                          <li key={row.project.id} className="dashboard-portfolio-list__item">
+                            <Link to={`/app/projects/${row.project.id}`} className="dashboard-inline-link dashboard-inline-link--strong">{row.project.name}</Link>
+                            <span className="dashboard-portfolio-list__meta dashboard-portfolio-list__meta--success">ROI {Math.round(row.business?.roi_percent ?? 0)}%</span>
                           </li>
                         ))}
                       </ul>
@@ -1489,13 +1442,14 @@ const styles = {
     marginBottom: '24px'
   },
   section: {
-    borderRadius: '16px',
-    border: '1px solid var(--border-color)',
+    borderRadius: '14px',
+    border: '1px solid var(--border-1)',
+    background: 'var(--surface-bg)',
     overflow: 'hidden',
-    marginBottom: '32px'
+    marginBottom: '24px'
   },
   sectionHeader: {
-    padding: '20px 24px',
+    padding: '18px 20px 12px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between'
@@ -1509,12 +1463,12 @@ const styles = {
     gap: '10px'
   },
   loading: {
-    padding: '48px',
+    padding: '28px 24px',
     textAlign: 'center',
     color: 'var(--muted-1)'
   },
   empty: {
-    padding: '48px',
+    padding: '28px 24px',
     textAlign: 'center',
     color: 'var(--muted-1)'
   },
@@ -1523,18 +1477,18 @@ const styles = {
     flexDirection: 'column'
   },
   orderItem: {
-    padding: '16px 24px',
+    padding: '14px 20px',
     display: 'flex',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: '16px',
-    cursor: 'pointer',
+    cursor: 'default',
     transition: 'background-color 0.2s'
   },
   orderInfo: {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
-    gap: '4px'
+    gap: '8px'
   },
   orderNumber: {
     fontSize: '15px',

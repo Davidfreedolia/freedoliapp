@@ -214,7 +214,9 @@ export default function Sidebar() {
       {/* Logo */}
       <div style={{
         ...styles.logoContainer,
-        position: 'relative'
+        position: 'relative',
+        justifyContent: shouldCollapse ? 'center' : 'flex-start',
+        padding: shouldCollapse ? '18px 12px 12px' : '22px 20px 14px'
       }}>
         <img 
           src={BRAND_LOGO_URL}
@@ -266,9 +268,9 @@ export default function Sidebar() {
                     ? 'var(--nav-highlight-strong)'
                     : (hoveredPath === item.path ? 'var(--nav-highlight)' : 'transparent'),
                   color: isActive ? 'var(--nav-fg)' : 'var(--nav-fg-muted)',
-                  borderLeft: 'none',
-                  padding: shouldCollapse ? '12px 0' : '12px 16px',
-                  borderRadius: shouldCollapse ? '12px' : '10px',
+                  border: `1px solid ${isActive ? 'rgba(110, 203, 195, 0.22)' : 'transparent'}`,
+                  padding: shouldCollapse ? '11px 0' : '11px 14px',
+                  borderRadius: shouldCollapse ? '10px' : '12px',
                   justifyContent: shouldCollapse ? 'center' : 'flex-start'
                 })}
               >
@@ -361,19 +363,22 @@ export default function Sidebar() {
 
 const styles = {
   sidebar: {
-    height: '100vh',
+    top: '12px',
+    bottom: '12px',
+    height: 'calc(100vh - 24px)',
     display: 'flex',
     flexDirection: 'column',
     position: 'fixed',
     left: 0,
-    top: 0,
     transition: 'width 0.3s ease',
     zIndex: 100,
     color: 'var(--nav-fg)',
     backgroundColor: 'var(--nav-bg)',
-    borderRight: 'var(--sidebar-edge)',
+    border: 'var(--sidebar-edge)',
+    borderLeft: 'none',
+    borderRadius: '0 var(--layout-radius-lg) var(--layout-radius-lg) 0',
     boxShadow: 'var(--sidebar-shadow)',
-    overflow: 'visible'
+    overflow: 'hidden'
   },
   sidebarInner: {
     position: 'relative',
@@ -382,9 +387,9 @@ const styles = {
     flexDirection: 'column'
   },
   logoContainer: {
-    padding: '20px',
     display: 'flex',
-    justifyContent: 'center'
+    alignItems: 'center',
+    gap: '8px'
   },
   logo: {
     height: 'auto',
@@ -401,10 +406,10 @@ const styles = {
   },
   nav: {
     flex: 1,
-    padding: '16px 12px',
+    padding: '10px 10px 16px',
     display: 'flex',
     flexDirection: 'column',
-    gap: '4px',
+    gap: '6px',
     overflowY: 'auto',
     scrollbarWidth: 'none',
     msOverflowStyle: 'none'
@@ -430,7 +435,7 @@ const styles = {
     minWidth: 0
   },
   group: {
-    marginBottom: '16px'
+    marginBottom: '14px'
   },
   groupHeader: {
     fontSize: '11px',
@@ -438,23 +443,23 @@ const styles = {
     letterSpacing: '0.04em',
     textTransform: 'uppercase',
     color: 'var(--nav-fg-muted)',
-    padding: '8px 16px 6px',
+    padding: '6px 12px 4px',
     marginBottom: '2px'
   },
   mobileMenuButton: {
     position: 'fixed',
-    top: '16px',
+    top: '14px',
     left: '16px',
     zIndex: 1000,
     padding: '10px',
-    border: 'var(--sidebar-edge)',
-    borderRadius: '8px',
+    border: '1px solid var(--topbar-btn-border)',
+    borderRadius: '10px',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    boxShadow: 'var(--shadow-soft)',
-    backgroundColor: 'var(--nav-bg)',
+    boxShadow: 'var(--shadow-soft-2)',
+    backgroundColor: 'var(--topbar-btn-bg)',
     color: 'var(--nav-icon)'
   },
   drawerOverlay: {
@@ -463,14 +468,14 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(31, 51, 51, 0.18)',
     zIndex: 999,
     transition: 'opacity 0.3s ease'
   },
   drawer: {
     transform: 'translateX(-100%)',
     transition: 'transform 0.3s ease',
-    boxShadow: '2px 0 8px rgba(0,0,0,0.1)'
+    boxShadow: 'var(--sidebar-shadow)'
   },
   closeButton: {
     position: 'absolute',
@@ -481,7 +486,7 @@ const styles = {
     cursor: 'pointer',
     color: 'var(--nav-icon)',
     padding: '8px',
-    borderRadius: '6px',
+    borderRadius: '10px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center'

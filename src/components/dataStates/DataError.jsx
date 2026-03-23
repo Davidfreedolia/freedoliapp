@@ -10,33 +10,14 @@ export default function DataError({ message, onRetry }) {
   const displayMessage = message ?? t('dataStates.errorGeneric', { defaultValue: 'Unable to load data' })
   const retryLabel = t('dataStates.retry', { defaultValue: 'Try again' })
   return (
-    <div
-      role="alert"
-      style={{
-        textAlign: 'center',
-        padding: 24,
-        color: 'var(--muted-1, #6b7280)',
-        fontSize: 14,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 12,
-      }}
-    >
-      <p style={{ margin: 0 }}>{displayMessage}</p>
+    <div className="data-state data-state--error" role="alert">
+      <p className="data-state__title">{t('dataStates.errorTitle', { defaultValue: 'Something went wrong' })}</p>
+      <p className="data-state__message">{displayMessage}</p>
       {onRetry && (
         <button
+          className="data-state__action"
           type="button"
           onClick={onRetry}
-          style={{
-            padding: '8px 16px',
-            fontSize: 14,
-            cursor: 'pointer',
-            border: '1px solid var(--border-1, #e5e7eb)',
-            borderRadius: 8,
-            background: 'var(--surface-bg-2, #f9fafb)',
-            color: 'var(--text-1, #111827)',
-          }}
         >
           {retryLabel}
         </button>

@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Package } from 'lucide-react'
 import MarketplaceTag, { MarketplaceTagGroup } from '../../../components/MarketplaceTag'
 import StatusBadge from '../../../components/StatusBadge'
 import PhaseMark from '../../../components/Phase/PhaseMark'
@@ -47,13 +46,11 @@ function getNextActionTarget(decision, currentPhase) {
  */
 export default function ProjectDetailHeader({
   project,
-  effectiveThumbUrl,
   marketplaceTags,
   businessSnapshot,
   stockSnapshot,
   projectState,
   phaseLabel,
-  darkMode,
   onScrollToPhase
 }) {
   const navigate = useNavigate()
@@ -99,246 +96,109 @@ export default function ProjectDetailHeader({
   const tags = marketplaceTags || [{ marketplace_code: 'ES', is_primary: true, stock_state: 'none' }]
 
   return (
-    <div
-      className="project-header project-header--canon ui-card"
-      style={{
-        display: 'flex',
-        alignItems: 'stretch',
-        justifyContent: 'space-between',
-        gap: 8,
-        padding: '12px 16px',
-        marginBottom: 8,
-        background: 'var(--surface-bg)',
-        borderRadius: 'var(--radius-ui)',
-        width: '100%',
-        boxSizing: 'border-box'
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-        <div
-          className="project-header__thumb"
-          style={{
-            width: 48,
-            minWidth: 48,
-            height: 48,
-            borderRadius: 10,
-            overflow: 'hidden',
-            flex: '0 0 auto',
-            background: 'var(--surface-bg-2)',
-            border: '1px solid var(--border-1)',
-            display: 'grid',
-            placeItems: 'center'
-          }}
-          aria-label="Project thumbnail"
-        >
-          {effectiveThumbUrl ? (
-            <img
-              src={effectiveThumbUrl}
-              alt=""
-              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-              loading="lazy"
-              onError={(e) => { e.currentTarget.style.display = 'none' }}
-            />
-          ) : (
-            <Package size={18} color="var(--muted-1)" />
-          )}
-        </div>
-        <div className="project-header__main" style={{ minWidth: 0 }}>
-          <h2 style={{ margin: 0, lineHeight: 1.3 }}>{project.name}</h2>
-          <div className="project-header__meta" style={{ marginTop: 0, opacity: 0.8 }}>
-            <strong>{project.project_code}</strong>
-            <span style={{ opacity: 0.6 }}> · </span>
-            <span>{project.sku_internal || '—'}</span>
+    <div className="project-detail-summary ui-card">
+      <div className="project-detail-summary__header">
+        <div className="project-detail-summary__intro">
+          <div className="project-detail-summary__eyebrow">Project summary</div>
+          <div className="project-detail-summary__statusRow">
+            <StatusBadge status={project.status} decision={project.decision} />
+            <span className="project-detail-summary__phaseTag">{phaseLabel}</span>
+            {isBlocked ? <span className="project-detail-summary__blockedTag">Blocked</span> : null}
           </div>
-          <div style={{ marginTop: 5 }}>
-            <div className="project-card__marketplaces">
-              <span className="project-card__marketplacesLabel">Marketplaces actius</span>
-              <div className="project-card__marketplacesTags">
-                <MarketplaceTagGroup>
-                  {tags.map((m) => (
-                    <MarketplaceTag
-                      key={`${m.marketplace_code}-${m.is_primary ? 'p' : 's'}`}
-                      code={m.marketplace_code}
-                      isPrimary={!!m.is_primary}
-                      stockState={m.stock_state || 'none'}
-                    />
-                  ))}
-                </MarketplaceTagGroup>
-              </div>
+          {tags?.length ? (
+            <div className="project-detail-summary__marketplaces">
+              <MarketplaceTagGroup>
+                {tags.map((m) => (
+                  <MarketplaceTag
+                    key={`${m.marketplace_code}-${m.is_primary ? 'p' : 's'}`}
+                    code={m.marketplace_code}
+                    isPrimary={!!m.is_primary}
+                    stockState={m.stock_state || 'none'}
+                  />
+                ))}
+              </MarketplaceTagGroup>
             </div>
-          </div>
+          ) : null}
           {nextDecision && (() => {
             const target = getNextActionTarget(nextDecision, project?.current_phase)
             const hasTarget = !!target
-            const blockStyle = {
-              marginTop: 8,
-              padding: '6px 10px',
-              background: 'var(--surface-bg-2, #f3f4f6)',
-              border: '1px solid var(--border-subtle, var(--border-1, #e5e7eb))',
-              borderRadius: 8,
-              fontSize: 12,
-              color: 'var(--text-1, #111827)',
-              ...(hasTarget ? { cursor: 'pointer', transition: 'border-color 0.15s ease' } : {})
-            }
             return (
               <div
                 role={hasTarget ? 'button' : undefined}
                 tabIndex={hasTarget ? 0 : undefined}
                 onClick={hasTarget ? handleNextActionClick : undefined}
                 onKeyDown={hasTarget ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleNextActionClick() } } : undefined}
-                style={blockStyle}
+                className={`project-detail-summary__nextAction${hasTarget ? ' is-clickable' : ''}`}
                 title={hasTarget ? (target?.type === 'scroll' ? 'Anar a la secció' : 'Obrir') : undefined}
-                onMouseEnter={hasTarget ? (e) => { e.currentTarget.style.borderColor = 'var(--border-1, #d1d5db)' } : undefined}
-                onMouseLeave={hasTarget ? (e) => { e.currentTarget.style.borderColor = '' } : undefined}
               >
-                <span style={{ color: 'var(--muted-1, #6b7280)', marginRight: 6 }}>Next action</span>
-                <span style={{ fontWeight: 500 }}>{getNextActionLabel(nextDecision)}</span>
+                <span className="project-detail-summary__nextActionLabel">Next action</span>
+                <span className="project-detail-summary__nextActionValue">{getNextActionLabel(nextDecision)}</span>
               </div>
             )
           })()}
+          {blockedReason ? (
+            <div className="project-detail-summary__blockedReason" title={blockedReason}>
+              {blockedReason}
+            </div>
+          ) : null}
         </div>
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <StatusBadge status={project.status} decision={project.decision} />
-        </div>
-        {businessSnapshot && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2, minWidth: 0 }}>
-            <span
-              style={{
-                fontSize: 12,
-                padding: '4px 8px',
-                border: '1px solid var(--border-1)',
-                background: 'var(--surface-bg-2)',
-                borderRadius: 999,
-                color: businessSnapshot.badge.tone === 'success' ? 'var(--success-1)' : businessSnapshot.badge.tone === 'warn' ? 'var(--warning-1)' : businessSnapshot.badge.tone === 'danger' ? 'var(--danger-1)' : 'var(--muted-1)',
-                fontWeight: 600,
-                whiteSpace: 'nowrap'
-              }}
-            >
-              {businessSnapshot.roi_percent != null ? `ROI ${Math.round(businessSnapshot.roi_percent)}% · ${businessSnapshot.badge.label}` : `— · ${businessSnapshot.badge.label}`}
-            </span>
-            <span style={{ fontSize: 11, color: 'var(--muted-1)' }}>
-              Inv: €{businessSnapshot.invested_total.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-              {' · Unit: '}
-              {businessSnapshot.unit_cost != null ? `€${businessSnapshot.unit_cost.toFixed(2)}` : '—'}
-              {' · BE: '}
-              {businessSnapshot.breakeven_units != null ? `${Math.round(businessSnapshot.breakeven_units)}u` : '—'}
-            </span>
-          </div>
-        )}
-        {stockSnapshot && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2, minWidth: 0 }}>
-            <span
-              style={{
-                fontSize: 12,
-                padding: '4px 8px',
-                border: '1px solid var(--border-1)',
-                background: 'var(--surface-bg-2)',
-                borderRadius: 999,
-                color: stockSnapshot.tone === 'success' ? 'var(--success-1)' : stockSnapshot.tone === 'warn' ? 'var(--warning-1)' : stockSnapshot.tone === 'danger' ? 'var(--danger-1)' : 'var(--muted-1)',
-                fontWeight: 600,
-                whiteSpace: 'nowrap'
-              }}
-            >
-              {stockSnapshot.badgeTextPrimary}
-            </span>
-            <span style={{ fontSize: 11, color: 'var(--muted-1)' }}>
-              {stockSnapshot.badgeTextSecondary}
-            </span>
-          </div>
-        )}
-        <div style={{ minWidth: 0 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, opacity: 0.8, marginBottom: 4 }}>
-            <span>{phaseLabel}</span>
-            <span>{project.current_phase}/7 · {pct}%</span>
-          </div>
-          <div
-            style={{
-              width: '100%',
-              height: 5,
-              borderRadius: 999,
-              background: 'var(--surface-bg-2)',
-              border: '1px solid var(--border-1)',
-              overflow: 'hidden'
-            }}
-            data-progress-track="true"
-          >
-            <div
-              style={{
-                height: '100%',
-                width: `${pct}%`,
-                borderRadius: 999,
-                background: meta.color
-              }}
-              data-progress-fill="true"
-              data-phase-id={cur}
-            />
-          </div>
-          {isBlocked && (
-            <div style={{ marginTop: 6, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
+
+        <div className="project-detail-summary__metrics">
+          {businessSnapshot && (
+            <div className="project-detail-summary__metricCard">
               <span
-                style={{
-                  fontSize: 12,
-                  padding: '4px 8px',
-                  border: '1px solid var(--danger-1)',
-                  background: 'var(--surface-bg-2)',
-                  borderRadius: 999,
-                  color: 'var(--danger-1)',
-                  fontWeight: 600,
-                  whiteSpace: 'nowrap'
-                }}
+                className={`project-detail-summary__metricBadge project-detail-summary__metricBadge--${businessSnapshot.badge.tone || 'muted'}`}
               >
-                BLOCKED
+                {businessSnapshot.roi_percent != null ? `ROI ${Math.round(businessSnapshot.roi_percent)}%` : 'ROI —'}
               </span>
-              {blockedReason ? (
-                <div
-                  style={{
-                    fontSize: 11,
-                    color: 'var(--text-secondary)',
-                    maxWidth: '100%',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
-                  }}
-                  title={blockedReason}
-                >
-                  {blockedReason}
-                </div>
-              ) : null}
+              <div className="project-detail-summary__metricValue">{businessSnapshot.badge.label}</div>
+              <div className="project-detail-summary__metricMeta">
+                Inv: EUR {businessSnapshot.invested_total.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                {' · Unit: '}
+                {businessSnapshot.unit_cost != null ? `EUR ${businessSnapshot.unit_cost.toFixed(2)}` : '—'}
+              </div>
             </div>
           )}
-          <div style={{ marginTop: 6, overflowX: 'auto' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'nowrap', minWidth: 'max-content' }}>
+
+          {stockSnapshot && (
+            <div className="project-detail-summary__metricCard">
+              <span
+                className={`project-detail-summary__metricBadge project-detail-summary__metricBadge--${stockSnapshot.tone || 'muted'}`}
+              >
+                {stockSnapshot.badgeTextPrimary}
+              </span>
+              <div className="project-detail-summary__metricValue">{stockSnapshot.badgeTextSecondary}</div>
+            </div>
+          )}
+
+          <div className="project-detail-summary__progress">
+            <div className="project-detail-summary__progressMeta">
+              <span>{phaseLabel}</span>
+              <span>{project.current_phase}/7 · {pct}%</span>
+            </div>
+            <div className="project-detail-summary__progressTrack" data-progress-track="true">
+              <div
+                className="project-detail-summary__progressFill"
+                style={{ width: `${pct}%`, background: meta.color }}
+                data-progress-fill="true"
+                data-phase-id={cur}
+              />
+            </div>
+            <div className="project-detail-summary__phaseRail">
               {[1, 2, 3, 4, 5, 6, 7].map((phaseId, idx) => {
                 const isDone = cur > phaseId
                 return (
-                  <div key={phaseId} style={{ display: 'flex', alignItems: 'center', gap: 8, flex: idx === 6 ? '0 0 auto' : '1 1 auto' }}>
+                  <div key={phaseId} className="project-detail-summary__phaseStep">
                     <span
                       title={getPhaseMeta(phaseId).label}
-                      style={{
-                        width: 28,
-                        height: 28,
-                        borderRadius: 999,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        background: 'var(--surface-bg)',
-                        border: '1px solid var(--border-1)'
-                      }}
+                      className={`project-detail-summary__phaseDot${cur === phaseId ? ' is-current' : ''}${isDone ? ' is-done' : ''}`}
                     >
                       <PhaseMark phaseId={phaseId} size={16} showLabel={false} />
                     </span>
                     {idx < 6 ? (
                       <span
                         aria-hidden="true"
-                        style={{
-                          height: 2,
-                          flex: 1,
-                          borderRadius: 999,
-                          background: isDone ? 'var(--success-1)' : 'var(--border-1)',
-                          opacity: isDone ? 0.9 : 0.6
-                        }}
+                        className={`project-detail-summary__phaseConnector${isDone ? ' is-done' : ''}`}
                       />
                     ) : null}
                   </div>

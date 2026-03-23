@@ -5,34 +5,9 @@
 export default function HomeKpiCard({ title, value, loading }) {
   const displayValue = loading ? '…' : (value ?? '—')
   return (
-    <div
-      style={{
-        flex: '1 1 180px',
-        minWidth: 140,
-        padding: '1rem 1.25rem',
-        borderRadius: 8,
-        background: 'var(--card-bg, #f9fafb)',
-        border: '1px solid var(--border-color, #e5e7eb)',
-      }}
-    >
-      <div
-        style={{
-          fontSize: '0.875rem',
-          color: 'var(--text-2, #6b7280)',
-          marginBottom: 4,
-        }}
-      >
-        {title}
-      </div>
-      <div
-        style={{
-          fontSize: '1.25rem',
-          fontWeight: 600,
-          color: 'var(--text-1, #111827)',
-        }}
-      >
-        {displayValue}
-      </div>
+    <div className="dashboard-home-card dashboard-home-card--kpi">
+      <div className="dashboard-home-card__eyebrow">{title}</div>
+      <div className="dashboard-home-card__value">{displayValue}</div>
     </div>
   )
 }

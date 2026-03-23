@@ -6,7 +6,7 @@
 
 **Relación con otros documentos**
 
-- **Tokens de marca (paleta, escala tipográfica base, sombras suaves, iconos línea):** `docs/PRODUCT/VISUAL_IDENTITY_SYSTEM_V1.md`. Este documento **B2** fija el **sistema de producto** (patrones, principios, intención por superficie). Si en el futuro los tokens divergen, se actualiza primero la identidad o un futuro “token file” y luego B6 aplica.
+- **Tokens de marca / identidad base:** `docs/PRODUCT/VISUAL_IDENTITY_SYSTEM_V1.md`. Para la **app autenticada**, la base visual canónica de aplicación (uso de paleta, botones, cards, inputs, radius, shadows, iconos, breakpoints, shell tone) queda fijada en `docs/PRODUCT/B6_1_VISUAL_FOUNDATIONS.md`. Este documento **B2** sigue fijando el **sistema de producto** (patrones, principios, intención por superficie).
 - **Armonización masiva pantalla a pantalla:** **B6** — fuera de alcance de B2.
 - **Rol del asistente:** `docs/SYSTEMS/ASSISTANT_LAYER.md`. La **superficie** UX canónica (entrada, panel, estructura interna) está en **`docs/PRODUCT/B5_ASSISTANT_IN_APP_UX_SURFACE.md`**; la **implementación** y armonización visual siguen **B5** + **B6**, alineadas con **este** sistema y ese rol.
 
@@ -120,7 +120,7 @@
 
 ## 5. Comportamiento de identidad visual (tokens y tono)
 
-*(Valores hex y escala base: `VISUAL_IDENTITY_SYSTEM_V1.md`.)*
+*(Valores base de identidad: `VISUAL_IDENTITY_SYSTEM_V1.md`. Aplicación UI: `B6_1_VISUAL_FOUNDATIONS.md`.)*
 
 | Dimensión | Directriz |
 |-----------|-----------|

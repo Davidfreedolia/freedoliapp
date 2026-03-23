@@ -1,11 +1,12 @@
 # FREEDOLIAPP — VISUAL IDENTITY SYSTEM V1
 
-Status: Draft  
+Status: Draft / brand baseline  
 Owner: Product / Design  
-Scope: Landing + Application UI  
+Scope: Brand, landing, and marketing baseline.  
 Last update: 2026
 
-**Vegeu també (sistema UI producte app — Track B B2):** `docs/PRODUCT/CANONICAL_UI_SYSTEM.md` — patrons de layout, interacció, famílies de pantalla i regles operatives; aquest document aporta **tokens i to base** (color, tipus, icones).
+**Vegeu també (sistema UI producte app — Track B B2):** `docs/PRODUCT/CANONICAL_UI_SYSTEM.md` — patrons de layout, interacció, famílies de pantalla i regles operatives.
+**Aplicació UI canònica (Track B — B6.1):** `docs/PRODUCT/B6_1_VISUAL_FOUNDATIONS.md` — per a l'app autenticada, aquest document preval si hi ha conflicte en paleta d'ús, components base o to visual.
 
 ---
 

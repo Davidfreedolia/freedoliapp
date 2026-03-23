@@ -790,14 +790,15 @@ export default function Projects() {
           }
         />
 
-        <div style={{ ...styles.content, padding: 0 }}>
-        <p style={{ margin: '4px 0 16px', fontSize: 13, color: 'var(--text-2)' }}>
+        <div className="projects-page__content" style={{ ...styles.content, padding: 0 }}>
+        <p className="projects-page__intro">
           Aquest és el catàleg de tots els teus productes/projectes. Obre un projecte per veure’n el detall i les fases.
         </p>
         {/* Toolbar */}
+        <div className="projects-page__toolbarShell">
         <div style={styles.toolbar} className="toolbar-row projects-toolbar__row">
-          <div style={styles.toolbarLeft} className="toolbar-group">
-            <div style={{ ...styles.controlPill, ...styles.searchPill }}>
+          <div style={styles.toolbarLeft} className="toolbar-group projects-toolbar__group projects-toolbar__group--filters">
+            <div style={{ ...styles.controlPill, ...styles.searchPill }} className="projects-toolbar__search">
               <Search size={18} style={styles.searchIcon} aria-hidden="true" />
               <input
                 type="text"
@@ -805,12 +806,14 @@ export default function Projects() {
                 value={searchInput}
                 onChange={e => setSearchInput(e.target.value)}
                 style={styles.searchInput}
+                className="projects-toolbar__searchInput"
               />
-              <span style={styles.countBadge}>
+              <span style={styles.countBadge} className="projects-toolbar__count">
                 {isFiltering ? `${filteredCount}/${totalCount}` : `${totalCount}`}
               </span>
               {searchInput.trim().length ? (
                 <Button
+                  className="projects-toolbar__searchClear"
                   variant="ghost"
                   size="sm"
                   onClick={() => {
@@ -825,7 +828,7 @@ export default function Projects() {
             </div>
 
             <div
-              className="projects-filter"
+              className="projects-filter projects-toolbar__phase"
               style={{
                 height: 44,
                 borderRadius: 12,
@@ -927,7 +930,7 @@ export default function Projects() {
             ) : null}
 
             {discardedCount > 0 && (
-              <label style={styles.filterToggle}>
+              <label style={styles.filterToggle} className="projects-toolbar__discarded">
                 <input
                   type="checkbox"
                   checked={showDiscarded}
@@ -938,8 +941,8 @@ export default function Projects() {
               </label>
             )}
           </div>
-          <div style={styles.toolbarRight} className="toolbar-group">
-            <div style={styles.viewControls}>
+          <div style={styles.toolbarRight} className="toolbar-group projects-toolbar__group projects-toolbar__group--actions">
+            <div style={styles.viewControls} className="projects-toolbar__layoutSlot">
               <LayoutSwitcher
                 value={effectiveViewMode}
                 onChange={setViewMode}
@@ -951,8 +954,7 @@ export default function Projects() {
               size="md"
               onClick={() => {
                 setShowModal(true)
-              }} 
-              style={{ width: isMobile ? '100%' : 'auto' }}
+              }}
               className="projects-toolbar__new btn-primary"
             >
               <Plus size={18} />
@@ -960,34 +962,35 @@ export default function Projects() {
             </Button>
           </div>
         </div>
+        </div>
 
         {/* Projects Grid */}
         {isLoadingProjects ? (
-          <div style={{ ...styles.empty, backgroundColor: 'var(--surface-bg)' }}>
+          <div style={{ ...styles.empty, backgroundColor: 'var(--surface-bg)' }} className="projects-page__state">
             <DataLoading message={t('common.loading')} />
           </div>
         ) : noOrg ? (
-          <div style={{ ...styles.empty, backgroundColor: 'var(--surface-bg)' }}>
-            <p style={{ color: 'var(--muted-1)' }}>No hi ha Workspace actiu / no tens org assignada.</p>
-            <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginTop: 8 }}>Configura el teu workspace a Configuració.</p>
+          <div style={{ ...styles.empty, backgroundColor: 'var(--surface-bg)' }} className="projects-page__state">
+            <p className="projects-page__stateText">No hi ha Workspace actiu / no tens org assignada.</p>
+            <p className="projects-page__stateHint">Configura el teu workspace a Configuració.</p>
             <Button variant="primary" onClick={() => navigate('/app/settings')}>
               Anar a Configuració
             </Button>
           </div>
         ) : loadError ? (
-          <div style={{ ...styles.empty, backgroundColor: 'var(--surface-bg)' }}>
+          <div style={{ ...styles.empty, backgroundColor: 'var(--surface-bg)' }} className="projects-page__state">
             <DataError
               message={t('dataStates.errorGeneric', { defaultValue: 'No s\'han pogut carregar les dades' })}
               onRetry={() => loadProjects({ showSpinner: true })}
             />
             {import.meta.env.DEV && listStateError && (listStateError?.status ?? listStateError?.message) && (
-              <p style={{ marginTop: 12, fontSize: 12, color: 'var(--muted-1)', fontFamily: 'monospace' }}>
+              <p className="projects-page__debug">
                 {[listStateError?.status, listStateError?.message].filter(Boolean).join(' — ')}
               </p>
             )}
           </div>
         ) : filteredProjects.length === 0 ? (
-          <div style={{ ...styles.empty, backgroundColor: 'var(--surface-bg)' }}>
+          <div style={{ ...styles.empty, backgroundColor: 'var(--surface-bg)' }} className="projects-page__state">
             <DataEmpty
               message={t('projects.empty.title')}
               action={
@@ -1004,15 +1007,17 @@ export default function Projects() {
           </div>
         ) : (
           <>
-            <NextStepCard
-              title={t('guidance.nextStepTitle')}
-              description={t('guidance.projects.openOrCreateOrder')}
-              ctaLabel={t('projects.empty.cta')}
-              ctaOnClick={() => setShowModal(true)}
-              secondaryCtaLabel={t('common.buttons.createOrder', 'Crear comanda')}
-              secondaryCtaOnClick={() => navigate('/app/orders')}
-            />
-            <div className="projects-shell">
+            <div className="projects-page__guidance">
+              <NextStepCard
+                title={t('guidance.nextStepTitle')}
+                description={t('guidance.projects.openOrCreateOrder')}
+                ctaLabel={t('projects.empty.cta')}
+                ctaOnClick={() => setShowModal(true)}
+                secondaryCtaLabel={t('common.buttons.createOrder', 'Crear comanda')}
+                secondaryCtaOnClick={() => navigate('/app/orders')}
+              />
+            </div>
+            <div className="projects-shell projects-page__listing">
               <div className="projects-grid">
                 {filteredProjects.map((project) => (
                   <ProjectCard key={project.id} project={project} />

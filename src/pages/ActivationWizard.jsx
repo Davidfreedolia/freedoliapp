@@ -21,6 +21,9 @@ const STEP_MORE_TOOLS = 7
 const SPAPI_STATE_KEY = 'spapi_oauth_state'
 const SPAPI_REDIRECT_URI_KEY = 'spapi_oauth_redirect_uri'
 const ACTIVATION_AMAZON_PATH_KEY = 'activation_amazon_path'
+const activationTs = () => new Date().toISOString()
+const activationLog = (phase, payload = {}) => console.info('[ActivationWizard]', { ts: activationTs(), phase, ...payload })
+const activationWarn = (phase, payload = {}) => console.warn('[ActivationWizard]', { ts: activationTs(), phase, ...payload })
 
 export default function ActivationWizard() {
   const { activeOrgId } = useWorkspace()
@@ -45,21 +48,33 @@ export default function ActivationWizard() {
 
   const loadSpapiConnections = useCallback(async () => {
     try {
+      activationLog('loadSpapiConnections.start', { activeOrgId })
       const { data, error } = await supabase.rpc('get_spapi_connection_safe')
       if (error) throw error
+      activationLog('loadSpapiConnections.resolved', {
+        activeOrgId,
+        count: Array.isArray(data) ? data.length : 0,
+      })
       setSpapiConnections(data || [])
     } catch (err) {
+      activationWarn('loadSpapiConnections.failed', {
+        activeOrgId,
+        message: err instanceof Error ? err.message : String(err),
+      })
       console.error('Load SP-API connections:', err)
     }
   }, [])
 
   useEffect(() => {
     if (!activeOrgId) {
+      activationWarn('fetchOrg.skipped.noActiveOrgId')
       setLoading(false)
       return
     }
     let cancelled = false
     async function fetchOrg() {
+      const startedAt = Date.now()
+      activationLog('fetchOrg.start', { activeOrgId })
       try {
         const { data: orgRow, error: orgErr } = await supabase
           .from('orgs')
@@ -67,9 +82,19 @@ export default function ActivationWizard() {
           .eq('id', activeOrgId)
           .single()
         if (orgErr || !orgRow) {
+          activationWarn('fetchOrg.orgMissingOrError', {
+            activeOrgId,
+            message: orgErr?.message ?? null,
+            elapsedMs: Date.now() - startedAt,
+          })
           if (!cancelled) setOrg(null)
           return
         }
+        activationLog('fetchOrg.orgResolved', {
+          activeOrgId,
+          orgName: orgRow.name,
+          elapsedMs: Date.now() - startedAt,
+        })
         if (!cancelled) setOrg(orgRow)
 
         const { data: settings } = await supabase
@@ -77,8 +102,14 @@ export default function ActivationWizard() {
           .select('base_currency')
           .eq('org_id', activeOrgId)
           .maybeSingle()
+        activationLog('fetchOrg.settingsResolved', {
+          activeOrgId,
+          hasBaseCurrency: Boolean(settings?.base_currency),
+          elapsedMs: Date.now() - startedAt,
+        })
         if (!cancelled && settings?.base_currency) setBaseCurrency(settings.base_currency)
       } finally {
+        activationLog('fetchOrg.finally', { activeOrgId, elapsedMs: Date.now() - startedAt })
         if (!cancelled) setLoading(false)
       }
     }
@@ -91,6 +122,38 @@ export default function ActivationWizard() {
     if (sessionStorage.getItem(ACTIVATION_AMAZON_PATH_KEY)) setStep(STEP_AMAZON_CONNECT)
     loadSpapiConnections()
   }, [loadSpapiConnections])
+
+  useEffect(() => {
+    activationLog('state.snapshot', {
+      activeOrgId,
+      step,
+      loading,
+      submitLoading,
+      activationPath,
+      importStatus,
+      importDone,
+      snapshotLoading,
+      hasOrg: Boolean(org),
+      hasBaseCurrency: Boolean(baseCurrency),
+      spapiConnectionsCount: spapiConnections.length,
+      hasSubmitError: Boolean(submitError),
+      hasImportError: Boolean(importError),
+    })
+  }, [
+    activeOrgId,
+    step,
+    loading,
+    submitLoading,
+    activationPath,
+    importStatus,
+    importDone,
+    snapshotLoading,
+    org,
+    baseCurrency,
+    spapiConnections.length,
+    submitError,
+    importError,
+  ])
 
   // OAuth return: Amazon log-in URI redirect (same as AmazonImports)
   useEffect(() => {

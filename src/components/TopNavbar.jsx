@@ -133,7 +133,7 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
   return (
     <>
       <nav style={navStyle} className="topbar">
-        <div style={styles.leftSection}>
+        <div className="topbar__section topbar__section--left" style={styles.leftSection}>
           <Button
             type="button"
             variant="note"
@@ -172,13 +172,13 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
           </Button>
         </div>
 
-        <div style={styles.centerSection}>
+        <div className="topbar__section topbar__section--center" style={styles.centerSection}>
           <div style={styles.centerGroup}>
             <HeaderTimeWidget />
           </div>
         </div>
 
-        <div style={styles.rightSection}>
+        <div className="topbar__section topbar__section--right" style={styles.rightSection}>
           {currentWorkspace && (
             workspaces.length <= 1 ? (
               <span style={{ fontSize: 11, color: 'var(--muted-1)', marginRight: 6 }}>
@@ -198,8 +198,8 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
                     gap: 4,
                     fontSize: 11,
                     color: 'var(--muted-1)',
-                    padding: '4px 8px',
-                    borderRadius: 999,
+                    padding: '6px 10px',
+                    borderRadius: 10,
                     border: '1px solid var(--border-1)',
                     background: 'var(--surface-bg-1)',
                     cursor: 'pointer',
@@ -216,11 +216,11 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
                       marginTop: 4,
                       minWidth: 200,
                       background: 'var(--surface-bg-2)',
-                      borderRadius: 8,
+                      borderRadius: 14,
                       border: '1px solid var(--border-1)',
-                      boxShadow: '0 8px 20px rgba(0,0,0,0.25)',
+                      boxShadow: 'var(--shadow-soft-2)',
                       zIndex: 20,
-                      padding: 4,
+                      padding: 6,
                     }}
                   >
                     {workspaces.map((w) => (
@@ -243,7 +243,7 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
                           background: w.id === activeOrgId ? 'var(--surface-bg-3)' : 'transparent',
                           color: 'var(--text-1)',
                           border: 'none',
-                          borderRadius: 6,
+                          borderRadius: 10,
                           cursor: 'pointer',
                         }}
                       >
@@ -260,10 +260,10 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
           )}
           <span style={{
             fontSize: 11,
-            padding: '4px 8px',
+            padding: '6px 10px',
             border: '1px solid var(--border-1)',
             background: 'var(--surface-bg-2)',
-            borderRadius: 999,
+            borderRadius: 10,
             color: demoMode ? 'var(--warning-1)' : 'var(--success-1)',
             fontWeight: 600
           }}>
@@ -323,22 +323,26 @@ const styles = {
   leftSection: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px'
+    gap: '8px',
+    minWidth: 0
   },
   centerSection: {
     flex: 1,
     display: 'flex',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    minWidth: 0
   },
   centerGroup: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px'
+    gap: '8px',
+    minWidth: 0
   },
   rightSection: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px'
+    gap: '8px',
+    minWidth: 0
   },
   
 }

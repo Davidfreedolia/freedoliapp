@@ -9,7 +9,7 @@ export default function ProjectMiniPipeline({ phase, totalSteps = 7 }) {
   const steps = Array.from({ length: totalSteps }, (_, idx) => idx + 1)
 
   return (
-    <div className="mini-pipeline" aria-hidden="true">
+    <div className="mini-pipeline" data-current-step={current} aria-hidden="true">
       {steps.map((step) => {
         const status =
           step < current ? 'is-done' :

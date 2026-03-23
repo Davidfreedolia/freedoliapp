@@ -25,26 +25,26 @@ export default function HomeProfitTrend({ data = [], loading }) {
 
   if (loading) {
     return (
-      <div style={styles.wrap}>
-        <div style={styles.title}>{t('home.profitTrend.title')}</div>
-        <div style={styles.placeholder}>{t('common.loading')}</div>
+      <div className="dashboard-home-card dashboard-home-card--chart">
+        <div className="dashboard-home-card__title">{t('home.profitTrend.title')}</div>
+        <div className="dashboard-home-card__placeholder dashboard-home-card__placeholder--chart">{t('common.loading')}</div>
       </div>
     )
   }
 
   if (list.length === 0) {
     return (
-      <div style={styles.wrap}>
-        <div style={styles.title}>{t('home.profitTrend.title')}</div>
-        <div style={styles.placeholder}>{t('home.profitTrend.empty')}</div>
+      <div className="dashboard-home-card dashboard-home-card--chart">
+        <div className="dashboard-home-card__title">{t('home.profitTrend.title')}</div>
+        <div className="dashboard-home-card__placeholder dashboard-home-card__placeholder--chart">{t('home.profitTrend.empty')}</div>
       </div>
     )
   }
 
   return (
-    <div style={styles.wrap}>
-      <div style={styles.title}>{t('home.profitTrend.title')}</div>
-      <div style={styles.chartWrap}>
+    <div className="dashboard-home-card dashboard-home-card--chart">
+      <div className="dashboard-home-card__title">{t('home.profitTrend.title')}</div>
+      <div className="dashboard-home-card__chart">
         <ResponsiveContainer width="100%" height={220}>
           <LineChart data={list} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color, #e5e7eb)" />
@@ -67,30 +67,4 @@ export default function HomeProfitTrend({ data = [], loading }) {
       </div>
     </div>
   )
-}
-
-const styles = {
-  wrap: {
-    flex: '1 1 320px',
-    minWidth: 280,
-    padding: '1rem 1.25rem',
-    borderRadius: 8,
-    background: 'var(--card-bg, #f9fafb)',
-    border: '1px solid var(--border-color, #e5e7eb)',
-  },
-  title: {
-    fontSize: '0.9375rem',
-    fontWeight: 600,
-    color: 'var(--text-1, #111827)',
-    marginBottom: 10,
-  },
-  chartWrap: { width: '100%', height: 220 },
-  placeholder: {
-    height: 220,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '0.875rem',
-    color: 'var(--text-2, #6b7280)',
-  },
 }

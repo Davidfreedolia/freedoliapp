@@ -15,6 +15,7 @@ export default function ProjectCard({ project }) {
   const navigate = useNavigate()
 
   const title = project?.name || '—'
+  const projectCode = project?.project_code || null
 
   const asin =
     project?.asin ||
@@ -71,7 +72,7 @@ export default function ProjectCard({ project }) {
   }
 
   return (
-    <Card className="project-card" onClick={handleCardClick}>
+    <Card className="project-card project-card--workspace" onClick={handleCardClick}>
       <div className="project-card__media">
         {thumbnailUrl ? (
           <img
@@ -90,17 +91,20 @@ export default function ProjectCard({ project }) {
       <div className="project-card__body">
         <div className="project-card__titleRow">
           <div className="project-card__titleBlock">
-            <h3 className="project-card__title">{title}</h3>
-            {project?.sku && (
-              <div className="project-card__subtitle">
-                {project.sku}
+            {(projectCode || project?.sku) && (
+              <div className="project-card__eyebrowRow">
+                {projectCode ? <span className="project-card__code">{projectCode}</span> : null}
+                {project?.sku ? <span className="project-card__subtitle">SKU {project.sku}</span> : null}
               </div>
             )}
+            <h3 className="project-card__title">{title}</h3>
           </div>
           {asin && (
-            <Badge variant="neutral">
-              {t('projects.badges.asin')} {asin}
-            </Badge>
+            <div className="project-card__asinBadge">
+              <Badge variant="neutral">
+                {t('projects.badges.asin')} {asin}
+              </Badge>
+            </div>
           )}
         </div>
 
@@ -129,14 +133,17 @@ export default function ProjectCard({ project }) {
         </div>
 
         <div className="project-card__footer">
-          <ProjectNextAction project={project} />
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleOpenDetails}
-          >
-            {t('common.buttons.details')}
-          </Button>
+          <div className="project-card__actions">
+            <ProjectNextAction project={project} />
+            <Button
+              className="project-card__secondaryAction"
+              variant="ghost"
+              size="sm"
+              onClick={handleOpenDetails}
+            >
+              {t('common.buttons.details')}
+            </Button>
+          </div>
         </div>
       </div>
     </Card>

@@ -39,9 +39,10 @@ export default function ProjectDetailActionBar({
         className="actionbar__search"
         style={{ position: 'relative', flex: isMobile ? '1 1 100%' : '0 0 auto' }}
       >
-        <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+        <div className="actionbar__searchInputWrap" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
           <Search
             size={16}
+            className="actionbar__searchIcon"
             style={{
               position: 'absolute',
               left: '10px',
@@ -56,6 +57,7 @@ export default function ProjectDetailActionBar({
             onChange={(e) => onSectionSearchChange(e.target.value)}
             onFocus={() => sectionSearchTerm.trim().length > 0 && onSectionSearchFocus?.()}
             onKeyDown={onSectionSearchKeyDown}
+            className="actionbar__searchInput"
             style={{
               width: '100%',
               height: '34px',
@@ -71,6 +73,7 @@ export default function ProjectDetailActionBar({
         </div>
         {showSectionDropdown && filteredSections && filteredSections.length > 0 && (
           <div
+            className="actionbar__searchDropdown"
             style={{
               position: 'absolute',
               top: '100%',
@@ -91,6 +94,7 @@ export default function ProjectDetailActionBar({
                 key={section.id}
                 type="button"
                 onClick={() => onScrollToSection(section.id)}
+                className="actionbar__searchOption"
                 style={{
                   width: '100%',
                   padding: '10px 12px',
@@ -111,9 +115,9 @@ export default function ProjectDetailActionBar({
                   e.currentTarget.style.backgroundColor = 'transparent'
                 }}
               >
-                <span style={{ fontWeight: 600 }}>{section.name}</span>
+                <span className="actionbar__searchOptionTitle" style={{ fontWeight: 600 }}>{section.name}</span>
                 {section.description && (
-                  <span style={{ fontSize: '11px', color: 'var(--muted-1)' }}>{section.description}</span>
+                  <span className="actionbar__searchOptionMeta" style={{ fontSize: '11px', color: 'var(--muted-1)' }}>{section.description}</span>
                 )}
               </button>
             ))}
@@ -140,13 +144,13 @@ export default function ProjectDetailActionBar({
         <Button variant="secondary" size="sm" disabled style={btnStateStyle('inactive')} className="btn-secondary">
           Crear Magatzem
         </Button>
-        <Button variant="primary" size="sm" style={btnStateStyle('active')} onClick={onCreatePO} className="btn-primary">
+        <Button variant="primary" size="sm" style={btnStateStyle('active')} onClick={onCreatePO} className="btn-primary project-actions__button project-actions__button--primary">
           Crear Comanda (PO)
         </Button>
-        <Button variant="secondary" size="sm" style={btnStateStyle('active')} onClick={onCreateExpense} className="btn-secondary">
+        <Button variant="secondary" size="sm" style={btnStateStyle('active')} onClick={onCreateExpense} className="btn-secondary project-actions__button">
           Crear Despesa
         </Button>
-        <Button variant="ghost" size="sm" style={btnStateStyle('active')} onClick={onAddDocument} className="btn-ghost">
+        <Button variant="ghost" size="sm" style={btnStateStyle('active')} onClick={onAddDocument} className="btn-ghost project-actions__button">
           + Document
         </Button>
       </div>

@@ -81,30 +81,30 @@ export default function ProjectDetailLifecycleEventsBlock({ projectId }) {
   }
 
   return (
-    <div style={blockStyle}>
-      <div style={titleStyle}>{t('projectDetailLifecycle.title')}</div>
+    <div className="project-detail-lifecycle" style={blockStyle}>
+      <div className="project-detail-lifecycle__title" style={titleStyle}>{t('projectDetailLifecycle.title')}</div>
       {loading && (
-        <div style={metaStyle}>{t('common.loading')}</div>
+        <div className="project-detail-lifecycle__meta" style={metaStyle}>{t('common.loading')}</div>
       )}
       {error && !loading && (
-        <div style={metaStyle}>{t('projectDetailLifecycle.error')}</div>
+        <div className="project-detail-lifecycle__meta" style={metaStyle}>{t('projectDetailLifecycle.error')}</div>
       )}
       {!loading && !error && events.length === 0 && (
-        <div style={metaStyle}>{t('projectDetailLifecycle.empty')}</div>
+        <div className="project-detail-lifecycle__meta" style={metaStyle}>{t('projectDetailLifecycle.empty')}</div>
       )}
       {!loading && !error && events.length > 0 && (
-        <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+        <ul className="project-detail-lifecycle__list" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
           {events.map((ev) => (
-            <li key={ev.id} style={itemStyle}>
+            <li key={ev.id} className="project-detail-lifecycle__item" style={itemStyle}>
               <span>
                 {t(`projectDetailLifecycle.events.${ev.event_type}`, { defaultValue: ev.event_type })}
               </span>
               {(ev.lifecycle_stage || ev.phase_id) && (
-                <span style={metaStyle}>
+                <span className="project-detail-lifecycle__meta" style={metaStyle}>
                   {ev.lifecycle_stage ?? t('projectDetailLifecycle.phaseLabel', { id: ev.phase_id })}
                 </span>
               )}
-              <span style={metaStyle}>{formatTimestamp(ev.created_at)}</span>
+              <span className="project-detail-lifecycle__meta" style={metaStyle}>{formatTimestamp(ev.created_at)}</span>
             </li>
           ))}
         </ul>

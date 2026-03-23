@@ -29,13 +29,24 @@ export function linkTrialRegistrationAfterWorkspaceCreated(supabase, { userEmail
  * @returns {Promise<{ id: string, name: string } | null>} Created org or null on failure.
  */
 export async function createWorkspace(supabase, { name, userEmail, userId }) {
+  const startedAt = Date.now()
+  const log = (phase, payload = {}) => console.info('[createWorkspace]', { ts: new Date().toISOString(), phase, ...payload })
+  const warn = (phase, payload = {}) => console.warn('[createWorkspace]', { ts: new Date().toISOString(), phase, ...payload })
   if (!name || !userId) {
     console.error('[createWorkspace] missing required name/userId', { name, userId, userEmail: userEmail || null })
     return null
   }
 
   // P0.RLS — use backend RPC to create org + owner membership atomically under RLS.
-  console.log('[createWorkspace] about to call RPC create_workspace_for_user', {
+  const slowRpcTimer = window.setTimeout(() => {
+    warn('rpc.slow', {
+      elapsedMs: Date.now() - startedAt,
+      name,
+      userId,
+      userEmail: userEmail || null,
+    })
+  }, 5000)
+  log('rpc.start', {
     name,
     userId,
     userEmail: userEmail || null
@@ -45,11 +56,16 @@ export async function createWorkspace(supabase, { name, userEmail, userId }) {
     p_user_id: userId,
     p_user_email: userEmail || null
   })
+  window.clearTimeout(slowRpcTimer)
 
   if (error) {
-    console.error('[createWorkspace] RPC returned error', error)
+    console.error('[createWorkspace]', { ts: new Date().toISOString(), phase: 'rpc.error', elapsedMs: Date.now() - startedAt, error })
   }
-  console.log('[createWorkspace] RPC returned data', data)
+  log('rpc.resolved', {
+    elapsedMs: Date.now() - startedAt,
+    hasArrayData: Array.isArray(data),
+    firstOrgId: Array.isArray(data) ? data[0]?.id ?? null : null,
+  })
 
   const org = (Array.isArray(data) && data[0]) || null
   if (error || !org?.id) {

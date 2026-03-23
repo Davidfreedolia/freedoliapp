@@ -110,23 +110,17 @@ class ErrorBoundary extends React.Component {
       }
       
       return (
-        <div style={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: darkMode ? '#0a0a0f' : '#f8f9fc',
-          padding: '24px'
-        }}>
-          <div style={{
-            maxWidth: '600px',
-            width: '100%',
-            backgroundColor: darkMode ? '#15151f' : '#ffffff',
-            borderRadius: '16px',
-            border: `1px solid ${darkMode ? '#2a2a3a' : '#e5e7eb'}`,
-            padding: '32px',
-            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)'
-          }}>
+        <div className="layout-fullstate" style={{ backgroundColor: darkMode ? '#0F1F20' : 'var(--page-bg)' }}>
+          <div
+            className="layout-fullstate__card"
+            style={{
+              maxWidth: '600px',
+              backgroundColor: darkMode ? 'rgba(21, 41, 42, 0.92)' : 'rgba(255, 255, 255, 0.9)',
+              borderColor: darkMode ? 'rgba(216, 225, 222, 0.16)' : 'var(--border-1)',
+              alignItems: 'stretch',
+              textAlign: 'left'
+            }}
+          >
             <div style={{
               display: 'flex',
               alignItems: 'center',
@@ -136,7 +130,7 @@ class ErrorBoundary extends React.Component {
               <div style={{
                 width: '48px',
                 height: '48px',
-                borderRadius: '12px',
+                borderRadius: '14px',
                 backgroundColor: '#ef444415',
                 display: 'flex',
                 alignItems: 'center',
@@ -149,7 +143,7 @@ class ErrorBoundary extends React.Component {
                   margin: 0,
                   fontSize: '20px',
                   fontWeight: '600',
-                  color: darkMode ? '#ffffff' : '#111827'
+                  color: 'var(--text-1)'
                 }}>
                   Alguna cosa ha fallat
                 </h2>
@@ -265,17 +259,17 @@ class ErrorBoundary extends React.Component {
                   alignItems: 'center',
                   gap: '8px',
                   padding: '12px 24px',
-                  backgroundColor: '#4f46e5',
-                  color: '#ffffff',
-                  border: 'none',
-                  borderRadius: '8px',
+                  backgroundColor: 'var(--cta-1)',
+                  color: 'var(--cta-1-fg, #ffffff)',
+                  border: '1px solid var(--cta-1)',
+                  borderRadius: '10px',
                   fontSize: '14px',
                   fontWeight: '500',
                   cursor: 'pointer',
                   transition: 'background-color 0.2s'
                 }}
-                onMouseOver={(e) => e.target.style.backgroundColor = '#4338ca'}
-                onMouseOut={(e) => e.target.style.backgroundColor = '#4f46e5'}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--cta-1-hover)'}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'var(--cta-1)'}
               >
                 <RefreshCw size={16} />
                 Recarregar secció
@@ -287,20 +281,20 @@ class ErrorBoundary extends React.Component {
                   alignItems: 'center',
                   gap: '8px',
                   padding: '12px 24px',
-                  backgroundColor: 'transparent',
-                  color: darkMode ? '#9ca3af' : '#6b7280',
-                  border: `1px solid ${darkMode ? '#2a2a3a' : '#e5e7eb'}`,
-                  borderRadius: '8px',
+                  backgroundColor: 'var(--surface-bg)',
+                  color: 'var(--text-1)',
+                  border: '1px solid var(--border-1)',
+                  borderRadius: '10px',
                   fontSize: '14px',
                   fontWeight: '500',
                   cursor: 'pointer',
                   transition: 'all 0.2s'
                 }}
                 onMouseOver={(e) => {
-                  e.target.style.backgroundColor = darkMode ? '#1f1f2e' : '#f9fafb'
+                  e.currentTarget.style.backgroundColor = 'var(--surface-bg-2)'
                 }}
                 onMouseOut={(e) => {
-                  e.target.style.backgroundColor = 'transparent'
+                  e.currentTarget.style.backgroundColor = 'var(--surface-bg)'
                 }}
               >
                 <Home size={16} />

@@ -32,56 +32,25 @@ class SafeWidget extends React.Component {
     if (this.state.hasError) {
       const { widgetName = 'Widget', darkMode = false } = this.props
     return (
-      <div style={{
-        padding: '24px',
-        backgroundColor: darkMode ? '#15151f' : '#ffffff',
-        borderRadius: '12px',
-        border: `1px solid ${darkMode ? '#2a2a3a' : '#e5e7eb'}`,
-        textAlign: 'center'
-      }}>
-        <div style={{
-          width: '48px',
-          height: '48px',
-          borderRadius: '12px',
-          backgroundColor: '#ef444415',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          margin: '0 auto 16px'
-        }}>
+      <div
+        className="dashboard-safe-widget"
+        style={{
+          backgroundColor: darkMode ? '#15292A' : '#ffffff',
+          borderColor: darkMode ? 'rgba(216, 225, 222, 0.16)' : 'var(--border-1)'
+        }}
+      >
+        <div className="dashboard-safe-widget__icon">
           <AlertTriangle size={24} color="#ef4444" />
         </div>
-        <h3 style={{
-          margin: '0 0 8px',
-          fontSize: '16px',
-          fontWeight: '600',
-          color: darkMode ? '#ffffff' : '#111827'
-        }}>
+        <h3 className="dashboard-safe-widget__title" style={{ color: darkMode ? '#ffffff' : '#111827' }}>
           {widgetName} no disponible
         </h3>
-        <p style={{
-          margin: '0 0 16px',
-          fontSize: '14px',
-          color: '#6b7280'
-        }}>
+        <p className="dashboard-safe-widget__message">
           S'ha produït un error en aquest widget
         </p>
         <button
+          className="dashboard-safe-widget__action"
           onClick={this.handleRetry}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            margin: '0 auto',
-            padding: '8px 16px',
-            backgroundColor: '#4f46e5',
-            color: '#ffffff',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '14px',
-            fontWeight: '500',
-            cursor: 'pointer'
-          }}
         >
           <RefreshCw size={16} />
           Reintentar

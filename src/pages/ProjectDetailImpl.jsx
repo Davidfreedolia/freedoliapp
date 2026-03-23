@@ -2537,12 +2537,12 @@ ${t}
   return (
     <div style={styles.container} className="project-detail-page">
       <PageGutter>
-        <div className="project-detail-shell">
+        <div className="project-detail-shell project-detail-shell--context">
           <ProjectHeader project={project} phase={phaseId} marketplaceTags={marketplaceTags} />
           <div className="project-detail-grid">
             <div className="project-detail-left">
               <ProjectPhaseChecklist phase={phaseId} />
-              <p style={{ margin: '8px 0 0', fontSize: 13, color: 'var(--muted-1)' }}>
+              <p className="project-detail-shell__hint" style={{ margin: '8px 0 0', fontSize: 13, color: 'var(--muted-1)' }}>
                 {t('guidance.projectDetail.recommended')}: <strong style={{ color: 'var(--text-1)' }}>{phaseLabel}</strong>
               </p>
             </div>
@@ -2556,6 +2556,7 @@ ${t}
         <section
           aria-label="Project summary"
           style={styles.hero}
+          className="project-detail-hero"
         >
           <ProjectDetailHeader
             project={project}
@@ -2922,13 +2923,14 @@ ${t}
           </div>
         )}
 
-        <div className="project-split__layout">
-          <div className="project-split__left">
+        <div className="project-split__layout project-detail-page__mainLayout">
+          <div className="project-split__left project-detail-page__primary">
         <div className="project-detail-page__phase-wrap" style={phaseWrapperStyle}>
           <div
             data-testid="phase-gate-block-banner"
             data-revealed={phaseBlockVisible ? 'true' : 'false'}
             aria-hidden={phaseBlockVisible ? 'false' : 'true'}
+            className="project-detail-phase-banner"
             style={{
               ...styles.phaseGateBanner,
               borderColor: 'var(--border-color)',
@@ -2956,9 +2958,33 @@ ${t}
             </Button>
           </div>
 
+          {/* Discovery — research + viability (phases 1–2) */}
+          <section id="discovery" aria-label="Discovery" style={styles.overviewDiscoverySection} className="project-detail-phase-group">
+            <h2 style={styles.overviewDiscoveryHeading} className="project-detail-phase-group__title">
+              Discovery
+            </h2>
+            <PhaseSection
+              phaseId={1}
+              currentPhaseId={phaseId}
+              phaseStyle={getPhaseStyleForUI(1)}
+              darkMode={darkMode}
+            >
+              {renderPhaseContent(1)}
+            </PhaseSection>
+
+            <PhaseSection
+              phaseId={2}
+              currentPhaseId={phaseId}
+              phaseStyle={getPhaseStyleForUI(2)}
+              darkMode={darkMode}
+            >
+              {renderPhaseContent(2)}
+            </PhaseSection>
+          </section>
+
           {/* Overview / Execution — workflow, procurement, logistics, execution (phases 3–7) */}
-          <section id="overview" aria-label="Overview / Execution" style={styles.overviewDiscoverySection}>
-            <h2 style={styles.overviewDiscoveryHeading}>
+          <section id="overview" aria-label="Overview / Execution" style={styles.overviewDiscoverySection} className="project-detail-phase-group">
+            <h2 style={styles.overviewDiscoveryHeading} className="project-detail-phase-group__title">
               Overview / Execution
             </h2>
             <PhaseSection
@@ -3004,30 +3030,6 @@ ${t}
               darkMode={darkMode}
             >
               {renderPhaseContent(7)}
-            </PhaseSection>
-          </section>
-
-          {/* Discovery — research + viability (phases 1–2) */}
-          <section id="discovery" aria-label="Discovery" style={styles.overviewDiscoverySection}>
-            <h2 style={styles.overviewDiscoveryHeading}>
-              Discovery
-            </h2>
-            <PhaseSection
-              phaseId={1}
-              currentPhaseId={phaseId}
-              phaseStyle={getPhaseStyleForUI(1)}
-              darkMode={darkMode}
-            >
-              {renderPhaseContent(1)}
-            </PhaseSection>
-
-            <PhaseSection
-              phaseId={2}
-              currentPhaseId={phaseId}
-              phaseStyle={getPhaseStyleForUI(2)}
-              darkMode={darkMode}
-            >
-              {renderPhaseContent(2)}
             </PhaseSection>
           </section>
                 </div>

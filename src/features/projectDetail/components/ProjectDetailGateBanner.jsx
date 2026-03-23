@@ -7,6 +7,7 @@ export default function ProjectDetailGateBanner({ gate, darkMode }) {
   }
   return (
     <div
+      className={`project-detail-gate project-detail-gate--${gate.tone === 'danger' ? 'danger' : 'warn'}`}
       style={{
         display: 'flex',
         alignItems: 'flex-start',
@@ -19,13 +20,13 @@ export default function ProjectDetailGateBanner({ gate, darkMode }) {
         color: gate.tone === 'danger' ? 'var(--danger-1)' : 'var(--warning-1)'
       }}
     >
-      <span style={{ fontSize: 18 }} aria-hidden>{gate.status === 'blocked' ? '🔒' : '⚠'}</span>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 4 }}>
+      <span className="project-detail-gate__icon" style={{ fontSize: 18 }} aria-hidden>{gate.status === 'blocked' ? '🔒' : '⚠'}</span>
+      <div className="project-detail-gate__copy" style={{ flex: 1, minWidth: 0 }}>
+        <div className="project-detail-gate__title" style={{ fontWeight: 600, fontSize: 13, marginBottom: 4 }}>
           {gate.gateId} {gate.label}
         </div>
         {gate.reasons && gate.reasons.length > 0 && (
-          <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, opacity: 0.9 }}>
+          <ul className="project-detail-gate__list" style={{ margin: 0, paddingLeft: 18, fontSize: 12, opacity: 0.9 }}>
             {gate.reasons.slice(0, 4).map((r, i) => (
               <li key={i}>{r}</li>
             ))}

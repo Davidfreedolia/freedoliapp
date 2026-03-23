@@ -37,6 +37,7 @@ export default function ProjectNextAction({ project, size = 'sm' }) {
 
   return (
     <Button
+      className="project-card__primaryAction"
       variant="primary"
       size={size}
       onClick={(e) => {

@@ -6,7 +6,7 @@ function cx(...parts) {
 
 export default function AppToolbar({ children, className = '', ...props }) {
   return (
-    <div className={cx('app-toolbar', className)} {...props}>
+    <div className={cx('app-toolbar', className)} role="toolbar" {...props}>
       {children}
     </div>
   )

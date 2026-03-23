@@ -6,6 +6,9 @@ import { createWorkspace } from '../lib/workspace/createWorkspace'
 
 const STORAGE_KEY = 'freedoli_active_org_id'
 const STORAGE_USER_KEY = 'freedoli_active_org_user_id'
+const wsTs = () => new Date().toISOString()
+const wsLog = (phase, payload = {}) => console.info('[WorkspaceContext]', { ts: wsTs(), phase, ...payload })
+const wsWarn = (phase, payload = {}) => console.warn('[WorkspaceContext]', { ts: wsTs(), phase, ...payload })
 
 const WorkspaceContext = createContext(null)
 
@@ -30,6 +33,7 @@ export function WorkspaceProvider({ children }) {
   }, [])
 
   const setActiveOrgId = useCallback((orgId) => {
+    wsLog('setActiveOrgId.called', { orgId })
     setActiveOrgIdState(orgId)
     persistActiveOrg(orgId)
     navigate('/app', { replace: true })
@@ -41,10 +45,14 @@ export function WorkspaceProvider({ children }) {
     async function bootstrap() {
       if (bootstrapInFlight) return
       bootstrapInFlight = true
+      const bootstrapStartedAt = Date.now()
+      const slowBootstrapTimer = window.setTimeout(() => {
+        wsWarn('bootstrap.slow', { elapsedMs: Date.now() - bootstrapStartedAt })
+      }, 5000)
       try {
-      console.log('[WorkspaceBootstrap] bootstrap() entry')
+      wsLog('bootstrap.start')
       if (isDemoMode()) {
-        console.log('[WorkspaceBootstrap] demo mode branch')
+        wsLog('bootstrap.demoMode')
         if (!cancelled) {
           setMemberships([])
           setActiveOrgIdState(null)
@@ -54,18 +62,22 @@ export function WorkspaceProvider({ children }) {
         return
       }
       let session = (await supabase.auth.getSession()).data.session
-      console.log('[WorkspaceBootstrap] after getSession()', {
+      wsLog('bootstrap.getSession.initial', {
         hasSessionUser: Boolean(session?.user),
         userId: session?.user?.id
       })
       if (!session?.user) {
-        console.log('[WorkspaceBootstrap] no session user branch')
+        wsWarn('bootstrap.noSessionUser.initial')
         // Minimal race fix: right after login Supabase may still be hydrating.
         // Give it a short window before finalizing an "empty ready" state.
         await new Promise((r) => setTimeout(r, 750))
         if (cancelled) return
 
         session = (await supabase.auth.getSession()).data.session
+        wsLog('bootstrap.getSession.retry', {
+          hasSessionUser: Boolean(session?.user),
+          userId: session?.user?.id
+        })
         if (!session?.user) {
           if (!cancelled) {
             setMemberships([])
@@ -84,7 +96,7 @@ export function WorkspaceProvider({ children }) {
         .eq('status', 'active')
         .order('created_at', { ascending: true })
       if (error) {
-        console.error('[WorkspaceBootstrap] org_memberships query error', error)
+        console.error('[WorkspaceContext]', { ts: wsTs(), phase: 'bootstrap.memberships.error', error })
         if (!cancelled) {
           setMemberships([])
           setActiveOrgIdState(null)
@@ -94,7 +106,10 @@ export function WorkspaceProvider({ children }) {
       }
       const list = rows || []
       if (!cancelled) setMemberships(list)
-      console.log('[WorkspaceBootstrap] memberships loaded', { count: list.length })
+      wsLog('bootstrap.memberships.loaded', {
+        count: list.length,
+        orgIds: list.map((m) => m.org_id),
+      })
 
       // P0.CRITICAL — first-user workspace onboarding unblock:
       // If the authenticated user has no active memberships, auto-create a workspace (org + owner membership)
@@ -108,7 +123,7 @@ export function WorkspaceProvider({ children }) {
             user?.user_metadata?.full_name ||
             (userEmail ? userEmail.split('@')[0] : 'Workspace')
 
-          console.log('[WorkspaceBootstrap] about to call createWorkspace()', {
+          wsWarn('bootstrap.createWorkspace.requested', {
             userId,
             userEmail: userEmail || null,
             derivedName
@@ -121,7 +136,7 @@ export function WorkspaceProvider({ children }) {
 
           if (!cancelled) {
             if (org?.id) {
-              console.log('[WorkspaceBootstrap] createWorkspace() returned org', {
+              wsLog('bootstrap.createWorkspace.resolved', {
                 orgId: org.id,
                 orgName: org.name
               })
@@ -138,7 +153,7 @@ export function WorkspaceProvider({ children }) {
                 localStorage.setItem(STORAGE_USER_KEY, userId)
               } catch (_) {}
             } else {
-              console.error('[WorkspaceBootstrap] createWorkspace() returned null', { userId, userEmail })
+              console.error('[WorkspaceContext]', { ts: wsTs(), phase: 'bootstrap.createWorkspace.nullResult', userId, userEmail })
               setMemberships([])
               setActiveOrgIdState(null)
               persistActiveOrg(null)
@@ -149,7 +164,7 @@ export function WorkspaceProvider({ children }) {
             setIsWorkspaceReady(true)
           }
         } catch (_) {
-          console.error('[WorkspaceBootstrap] createWorkspace() threw', _)
+          console.error('[WorkspaceContext]', { ts: wsTs(), phase: 'bootstrap.createWorkspace.threw', error: _ })
           if (!cancelled) {
             setMemberships([])
             setActiveOrgIdState(null)
@@ -180,6 +195,11 @@ export function WorkspaceProvider({ children }) {
         chosen = ownerOrg ? ownerOrg.org_id : list[0].org_id
       }
       if (!cancelled) {
+        wsLog('bootstrap.chooseActiveOrg', {
+          currentStored,
+          isMemberOfStored,
+          chosen,
+        })
         setActiveOrgIdState(chosen)
         persistActiveOrg(chosen)
         try {
@@ -188,6 +208,8 @@ export function WorkspaceProvider({ children }) {
         setIsWorkspaceReady(true)
       }
       } finally {
+        window.clearTimeout(slowBootstrapTimer)
+        wsLog('bootstrap.finally', { elapsedMs: Date.now() - bootstrapStartedAt })
         bootstrapInFlight = false
       }
     }
@@ -202,7 +224,7 @@ export function WorkspaceProvider({ children }) {
         hasSessionUser &&
         ['SIGNED_IN', 'INITIAL_SESSION', 'TOKEN_REFRESHED'].includes(event)
       ) {
-        console.log('[WorkspaceBootstrap] auth state change -> re-run bootstrap', {
+        wsLog('authStateChange.rebootstrap', {
           event,
           userId: session?.user?.id,
         })
@@ -212,10 +234,12 @@ export function WorkspaceProvider({ children }) {
     return () => {
       cancelled = true
       subscription.unsubscribe()
+      wsLog('bootstrap.effect.cleanup')
     }
   }, [])
 
   const revalidateActiveOrg = useCallback(async () => {
+    wsLog('revalidateActiveOrg.start')
     if (isDemoMode()) return
     const { data: { session } } = await supabase.auth.getSession()
     if (!session?.user) return
@@ -239,6 +263,12 @@ export function WorkspaceProvider({ children }) {
     } catch (_) {}
     const isMemberOfStored = list.some(m => m.org_id === currentStored)
     const chosen = currentStored && isMemberOfStored ? currentStored : (list.find(m => m.role === 'owner')?.org_id ?? list[0].org_id)
+    wsLog('revalidateActiveOrg.result', {
+      membershipsCount: list.length,
+      currentStored,
+      isMemberOfStored,
+      chosen,
+    })
     setActiveOrgIdState(chosen)
     persistActiveOrg(chosen)
     try {

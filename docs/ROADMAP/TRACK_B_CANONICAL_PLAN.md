@@ -87,11 +87,21 @@
 
 ---
 
-### B6 — Core screen visual harmonization
+### B6.1 — Visual Foundations
+
+- **Type:** **Definition** (documentation / repo source of truth).
+- **Canonical doc:** `docs/PRODUCT/B6_1_VISUAL_FOUNDATIONS.md`.
+- **Scope:** Fix the canonical visual foundations for the authenticated app: palette usage, buttons, cards, inputs, radius, shadows, icons, breakpoints, and shell-base tone.
+- **Dependency:** Builds on **B2** (`docs/PRODUCT/CANONICAL_UI_SYSTEM.md`) without reopening screen patterns or layout families.
+- **Out of scope:** Screen rollout, CSS implementation, or page-by-page harmonization.
+
+---
+
+### B6.2 — Core screen visual harmonization
 
 - **Type:** **Implementation** (large surface area).
-- **Scope:** Apply **B2** system across priority screens (product-defined list): dashboard, key flows, settings, etc.
-- **Dependency:** **B2** approved/stable enough to avoid thrash.
+- **Scope:** Apply **B2 + B6.1** across priority screens (product-defined list): dashboard, key flows, settings, etc.
+- **Dependency:** **B6.1** approved/stable enough to avoid thrash.
 - **Out of scope:** Pixel-perfect everything at once — prioritize by product value.
 
 ---
@@ -109,8 +119,8 @@
 
 | Type | Blocks |
 |------|--------|
-| **Definition** | B2, B3 |
-| **Implementation** | B4, B5, B6 |
+| **Definition** | B2, B3, B6.1 |
+| **Implementation** | B4, B5, B6.2 |
 | **Verification** | B7 |
 
 *B5:* canonical **UX surface** is specified in `docs/PRODUCT/B5_ASSISTANT_IN_APP_UX_SURFACE.md`; engineering work implements against that spec + `ASSISTANT_LAYER.md` + B2.
@@ -123,6 +133,7 @@
 
 - `docs/PRODUCT/CANONICAL_UI_SYSTEM.md` — **B2** canonical UI system (product patterns + Pencil readiness).  
 - `docs/PRODUCT/CANONICAL_APP_LANGUAGE_POLICY_B3.md` — **B3** canonical language policy + repo audit basis.  
+- `docs/PRODUCT/B6_1_VISUAL_FOUNDATIONS.md` — **B6.1** canonical visual foundations for app UI.  
 - `docs/ROADMAP/IMPLEMENTATION_STATUS.md` — live phase tracker; Track B summary points here for **order**.  
 - `docs/ROADMAP/ROADMAP_CURRENT_POSITION.md` — executive snapshot; Track B pointer.  
 - `docs/SYSTEMS/ASSISTANT_LAYER.md` — assistant canonical role.  

@@ -77,6 +77,8 @@ Scope: Index of main documents and their roles.
   - **Status:** canonical planning (documentation)
 - **`PRODUCT/CANONICAL_APP_LANGUAGE_POLICY_B3.md`** — *Track B B3: canonical app language policy (Catalan source, es/en translations), governance rules, scope vs B4, repo i18n audit.*  
   - **Status:** canonical planning + audit (documentation)
+- **`PRODUCT/B6_1_VISUAL_FOUNDATIONS.md`** — *Track B B6.1: canonical visual foundations for app UI (palette usage, buttons, cards, inputs, radius, shadows, icons, breakpoints, shell base); definition only, no rollout claimed.*  
+  - **Status:** canonical planning (documentation)
 - **`PRODUCT/B5_ASSISTANT_IN_APP_UX_SURFACE.md`** — *Track B B5: canonical assistant **in-app UX surface** (entry points, drawer model, internal zones, tone in UI, context strip, scope vs agents, screen examples, hand-off to B6/backend).*  
   - **Status:** canonical planning (documentation); implementation separate
 

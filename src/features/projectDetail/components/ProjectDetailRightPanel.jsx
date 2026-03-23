@@ -24,8 +24,8 @@ export default function ProjectDetailRightPanel({
 }) {
   return (
     <aside className="project-split__right">
-      <div className="project-split__sticky">
-        <div className="projects-split__panel projects-split__panel--drive">
+      <div className="project-split__sticky project-detail-rightpanel">
+        <div className="projects-split__panel projects-split__panel--drive project-detail-rightpanel__files">
           <div className="projects-split__panelHeader" style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
             <div style={{ minWidth: 0 }}>
               <div className="projects-panel__title">{projectTitle}</div>
@@ -49,17 +49,25 @@ export default function ProjectDetailRightPanel({
             onActivePathChange={onActivePathChange}
             fixedFolderId={phaseId === 1 ? `projects/${projectId}/research/` : null}
           />
-          <ProjectDetailLifecycleEventsBlock projectId={projectId} />
-          <Suspense fallback={<div style={{ padding: 8, fontSize: 12, color: 'var(--muted-1)' }}>Carregant timeline…</div>}>
-            <ProjectEventsTimeline
-              projectId={projectId}
-              projectStatus={project?.status}
-              darkMode={darkMode}
-              phaseStyle={currentPhase}
-              refreshToken={eventsRefreshToken}
-            />
-          </Suspense>
         </div>
+        <details className="project-detail-activity" open={false}>
+          <summary className="project-detail-activity__summary">
+            <span className="project-detail-activity__title">Activitat i timeline</span>
+            <span className="project-detail-activity__meta">Secundari</span>
+          </summary>
+          <div className="project-detail-activity__content">
+            <ProjectDetailLifecycleEventsBlock projectId={projectId} />
+            <Suspense fallback={<div className="project-detail-activity__loading" style={{ padding: 8, fontSize: 12, color: 'var(--muted-1)' }}>Carregant timeline…</div>}>
+              <ProjectEventsTimeline
+                projectId={projectId}
+                projectStatus={project?.status}
+                darkMode={darkMode}
+                phaseStyle={currentPhase}
+                refreshToken={eventsRefreshToken}
+              />
+            </Suspense>
+          </div>
+        </details>
       </div>
     </aside>
   )

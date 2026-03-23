@@ -588,7 +588,7 @@ export default function ProjectDriveExplorer({
   }, [breadcrumbLabel, onActivePathChange])
 
   return (
-    <div className="projects-drive__grid">
+    <div className="projects-drive__grid project-drive-explorer">
       <div className="projects-drive__box">
         <div className="projects-drive__boxHeader">
           <div className="projects-drive__boxTitle">{c.sections}</div>
@@ -661,7 +661,7 @@ export default function ProjectDriveExplorer({
           )}
         </div>
         {showNewFolder && !readOnly && (
-          <div style={{
+          <div className="projects-drive__newFolder" style={{
             padding: 12,
             borderTop: '1px solid var(--border-color)',
             background: 'var(--surface-bg)'

@@ -8,20 +8,14 @@ export default function DataEmpty({ message, icon: Icon, action }) {
   const { t } = useTranslation()
   const displayMessage = message ?? t('dataStates.emptyGeneric', { defaultValue: 'No data available' })
   return (
-    <div
-      style={{
-        textAlign: 'center',
-        padding: 24,
-        color: 'var(--muted-1, #6b7280)',
-        fontSize: 14,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 12,
-      }}
-    >
-      {Icon && <Icon size={40} color="var(--muted-1, #9ca3af)" aria-hidden />}
-      <p style={{ margin: 0 }}>{displayMessage}</p>
+    <div className="data-state data-state--empty">
+      {Icon && (
+        <div className="data-state__icon" aria-hidden="true">
+          <Icon size={36} color="currentColor" />
+        </div>
+      )}
+      <p className="data-state__title">{t('dataStates.emptyTitle', { defaultValue: 'Nothing here yet' })}</p>
+      <p className="data-state__message">{displayMessage}</p>
       {action}
     </div>
   )

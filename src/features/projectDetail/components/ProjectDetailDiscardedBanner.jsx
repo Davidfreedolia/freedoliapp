@@ -28,21 +28,22 @@ export default function ProjectDetailDiscardedBanner({ project, darkMode, onRest
   if (project?.decision !== 'DISCARDED') return null
   return (
     <div
+      className="project-detail-discarded"
       style={{
         ...bannerStyle,
         backgroundColor: darkMode ? '#7f1d1d' : '#fef2f2',
         borderColor: '#ef4444'
       }}
     >
-      <AlertCircle size={20} color="#ef4444" />
-      <div style={{ flex: 1 }}>
-        <strong style={{ color: '#ef4444', display: 'block', marginBottom: '4px' }}>
+      <AlertCircle className="project-detail-discarded__icon" size={20} color="#ef4444" />
+      <div className="project-detail-discarded__copy" style={{ flex: 1 }}>
+        <strong className="project-detail-discarded__title" style={{ color: '#ef4444', display: 'block', marginBottom: '4px' }}>
           Aquest projecte ha estat descartat
         </strong>
-        <span style={{ color: darkMode ? '#fca5a5' : '#991b1b', fontSize: '13px' }}>
+        <span className="project-detail-discarded__text" style={{ color: darkMode ? '#fca5a5' : '#991b1b', fontSize: '13px' }}>
           {project.discarded_reason || 'No s\'ha proporcionat una raó.'}
           {project.discarded_at && (
-            <span style={{ display: 'block', marginTop: '4px' }}>
+            <span className="project-detail-discarded__date" style={{ display: 'block', marginTop: '4px' }}>
               Data: {new Date(project.discarded_at).toLocaleDateString('ca-ES')}
             </span>
           )}
@@ -52,6 +53,7 @@ export default function ProjectDetailDiscardedBanner({ project, darkMode, onRest
         variant="primary"
         size="sm"
         onClick={onRestore}
+        className="project-detail-discarded__action"
         style={restoreButtonStyle}
       >
         {t ? t('common.restore') : 'Restaurar'} Projecte

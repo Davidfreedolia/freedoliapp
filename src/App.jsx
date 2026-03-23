@@ -36,10 +36,16 @@ function NotFoundInApp() {
   const location = useLocation()
   const navigate = useNavigate()
   return (
-    <div style={{ padding: '2rem', textAlign: 'center' }}>
-      <h2>{t('shell.notFoundTitle')}</h2>
-      <p><code>{location.pathname}</code></p>
-      <button type="button" onClick={() => navigate('/app')}>{t('shell.notFoundBack')}</button>
+    <div className="layout-fullstate">
+      <div className="layout-fullstate__card">
+        <h2 className="layout-fullstate__title">{t('shell.notFoundTitle')}</h2>
+        <p className="layout-fullstate__message"><code>{location.pathname}</code></p>
+        <div className="layout-fullstate__actions">
+          <button type="button" className="data-state__action" onClick={() => navigate('/app')}>
+            {t('shell.notFoundBack')}
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
@@ -68,22 +74,15 @@ const lazyWithErrorBoundary = (importFn, pageName) => {
         default: function LazyChunkErrorFallback() {
           return (
             <ErrorBoundary context={`lazy:${pageName}`} darkMode={false}>
-              <div style={{
-                minHeight: '100vh',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '24px'
-              }}
-              >
-                <div style={{ textAlign: 'center' }}>
-                  <h2>{i18n.t('shell.lazyLoadTitle')}</h2>
-                  <p>{i18n.t('shell.lazyLoadMessage', { page: pageName })}</p>
-                  <button type="button" onClick={() => window.location.reload()}>
+              <LayoutStateScreen
+                title={i18n.t('shell.lazyLoadTitle')}
+                message={i18n.t('shell.lazyLoadMessage', { page: pageName })}
+                actions={(
+                  <button type="button" className="data-state__action" onClick={() => window.location.reload()}>
                     {i18n.t('shell.reload')}
                   </button>
-                </div>
-              </div>
+                )}
+              />
             </ErrorBoundary>
           )
         },
@@ -128,6 +127,22 @@ const AutomationAnalyticsPage = lazyWithErrorBoundary(() => import('./pages/auto
 const TaskInbox = lazyWithErrorBoundary(() => import('./pages/TaskInbox'), 'TaskInbox')
 
 const ADMIN_EMAILS = new Set(['david@freedolia.com'])
+const gateTs = () => new Date().toISOString()
+const gateLog = (phase, payload = {}) => console.info('[OnboardingGate]', { ts: gateTs(), phase, ...payload })
+const gateWarn = (phase, payload = {}) => console.warn('[OnboardingGate]', { ts: gateTs(), phase, ...payload })
+
+function LayoutStateScreen({ title, message, children, actions }) {
+  return (
+    <div className="layout-fullstate">
+      <div className="layout-fullstate__card">
+        {title ? <h2 className="layout-fullstate__title">{title}</h2> : null}
+        {message ? <p className="layout-fullstate__message">{message}</p> : null}
+        {children}
+        {actions ? <div className="layout-fullstate__actions">{actions}</div> : null}
+      </div>
+    </div>
+  )
+}
 
 /** D23 — Protect admin route: only users whose email is in ADMIN_EMAILS can access. */
 function AdminGate({ children }) {
@@ -152,11 +167,7 @@ function AdminGate({ children }) {
   }, [])
 
   if (loading) {
-    return (
-      <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary, #6b7280)' }}>
-        {t('common.loading')}
-      </div>
-    )
+    return <LayoutStateScreen message={t('common.loading')} />
   }
   if (!allowed) {
     return <Navigate to="/app" replace />
@@ -171,74 +182,60 @@ function OnboardingGate({ children }) {
   const { loading, requiresOnboarding, error, refetch } = useOnboardingStatus(activeOrgId || null)
   const path = location.pathname
 
+  useEffect(() => {
+    gateLog('state.snapshot', {
+      path,
+      isWorkspaceReady,
+      activeOrgId,
+      loading,
+      requiresOnboarding,
+      hasError: Boolean(error),
+      errorMessage: error?.message ?? null,
+      hasAmazonActivationFlag:
+        typeof sessionStorage !== 'undefined'
+          ? Boolean(sessionStorage.getItem('activation_amazon_path'))
+          : false,
+    })
+  }, [path, isWorkspaceReady, activeOrgId, loading, requiresOnboarding, error])
+
   // Esperem que workspace i hook estiguin llestos (mai retornem blank)
   if (!isWorkspaceReady || loading) {
-    console.log('[DiagWhiteScreen][OnboardingGate] render -> loading branch', {
+    gateLog('render.loading', {
       isWorkspaceReady,
       activeOrgId,
       path,
       hook: { loading, requiresOnboarding },
     })
-    return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'var(--page-bg)',
-        color: 'var(--text-secondary, #6b7280)',
-        padding: '24px',
-        textAlign: 'center'
-      }}>
-        {t('common.loading')}
-      </div>
-    )
+    return <LayoutStateScreen message={t('common.loading')} />
   }
 
   // Read failure ≠ "missing org_activation": don't bounce to /activation; allow /activation so wizard can still run.
   if (activeOrgId && error) {
     if (path === '/activation') {
+      gateWarn('render.activationAllowedDespiteError', {
+        activeOrgId,
+        path,
+        message: error?.message,
+      })
       return children
     }
-    console.log('[DiagWhiteScreen][OnboardingGate] render -> org_activation read error branch', {
+    gateWarn('render.onboardingReadError', {
       activeOrgId,
       path,
       message: error?.message,
     })
     return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'var(--page-bg)',
-        padding: '24px',
-      }}>
-        <div style={{ textAlign: 'center', color: 'var(--text-secondary, #6b7280)', maxWidth: 480 }}>
-          <p style={{ marginBottom: 12, color: 'var(--text-primary, #f3f4f6)', fontWeight: 600 }}>
-            {t('gate.onboardingStatusErrorTitle')}
-          </p>
-          <p style={{ marginBottom: 12, fontSize: 14, lineHeight: 1.45 }}>{t('gate.onboardingStatusErrorHint')}</p>
-          {error?.message ? (
-            <p style={{ marginBottom: 20, fontSize: 13, opacity: 0.9 }}>{error.message}</p>
-          ) : null}
-          <button
-            type="button"
-            onClick={refetch}
-            style={{
-              padding: '10px 18px',
-              borderRadius: 8,
-              border: '1px solid var(--border-1, #374151)',
-              background: 'var(--surface-bg-2, #1e1e2e)',
-              color: 'var(--text-1, #f3f4f6)',
-              cursor: 'pointer',
-              fontWeight: 600,
-            }}
-          >
+      <LayoutStateScreen
+        title={t('gate.onboardingStatusErrorTitle')}
+        message={t('gate.onboardingStatusErrorHint')}
+        actions={(
+          <button type="button" className="data-state__action" onClick={refetch}>
             {t('common.retry')}
           </button>
-        </div>
-      </div>
+        )}
+      >
+        {error?.message ? <p className="layout-fullstate__message">{error.message}</p> : null}
+      </LayoutStateScreen>
     )
   }
 
@@ -247,7 +244,7 @@ function OnboardingGate({ children }) {
 
   // P0.CRITICAL — si hi ha usuari però cap org activa, no deixem entrar a /app sense passar per activation.
   if (!activeOrgId && path.startsWith('/app') && path !== '/activation') {
-    console.log('[DiagWhiteScreen][OnboardingGate] render -> Navigate /activation (no activeOrgId)', {
+    gateWarn('redirect.toActivation.noActiveOrgId', {
       isWorkspaceReady,
       activeOrgId,
       path,
@@ -257,7 +254,7 @@ function OnboardingGate({ children }) {
 
   // Usuari autenticat + org carregada + onboarding complet → root envia a /app
   if (!requiresOnboarding && path === '/' && activeOrgId) {
-    console.log('[DiagWhiteScreen][OnboardingGate] render -> Navigate /app (onboarding done, path=/)', {
+    gateLog('redirect.toApp.onboardingDoneFromRoot', {
       isWorkspaceReady,
       activeOrgId,
       path,
@@ -267,7 +264,7 @@ function OnboardingGate({ children }) {
   }
 
   if (!requiresOnboarding && path === '/activation' && activeOrgId) {
-    console.log('[DiagWhiteScreen][OnboardingGate] render -> Navigate /app (onboarding done, path=/activation)', {
+    gateLog('redirect.toApp.onboardingDoneFromActivation', {
       isWorkspaceReady,
       activeOrgId,
       path,
@@ -279,7 +276,7 @@ function OnboardingGate({ children }) {
   // Encara cal onboarding: redirigir a /activation només quan entri a /app amb el flag d'Amazon
   if (requiresOnboarding) {
     if (path === '/activation') {
-      console.log('[DiagWhiteScreen][OnboardingGate] render -> return children (requiresOnboarding && path=/activation)', {
+      gateLog('render.children.activationRequired', {
         isWorkspaceReady,
         activeOrgId,
         path,
@@ -288,7 +285,7 @@ function OnboardingGate({ children }) {
       return children
     }
     if (path.startsWith('/app') && hasAmazonActivationFlag) {
-      console.log('[DiagWhiteScreen][OnboardingGate] render -> Navigate /activation (requiresOnboarding, path starts /app, hasAmazonActivationFlag)', {
+      gateWarn('redirect.toActivation.requiresOnboarding.amazonFlag', {
         isWorkspaceReady,
         activeOrgId,
         path,
@@ -298,7 +295,7 @@ function OnboardingGate({ children }) {
       return <Navigate to="/activation" replace />
     }
     if (path !== '/activation') {
-      console.log('[DiagWhiteScreen][OnboardingGate] render -> Navigate /activation (requiresOnboarding, path !== /activation)', {
+      gateWarn('redirect.toActivation.requiresOnboarding', {
         isWorkspaceReady,
         activeOrgId,
         path,
@@ -309,7 +306,7 @@ function OnboardingGate({ children }) {
     }
   }
 
-  console.log('[DiagWhiteScreen][OnboardingGate] render -> return children (fallthrough)', {
+  gateLog('render.children.fallthrough', {
     isWorkspaceReady,
     activeOrgId,
     path,
@@ -395,17 +392,7 @@ function AppContent() {
       activeOrgId,
       billingState: { loading: billingState.loading, allowed: billingState.allowed, gate: billingState.gate, error: Boolean(billingState.error) },
     })
-    return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'var(--page-bg)',
-      }}>
-        <div style={{ fontSize: 16, color: 'var(--text-secondary, #6b7280)' }}>{t('common.loading')}</div>
-      </div>
-    )
+    return <LayoutStateScreen message={t('common.loading')} />
   }
   if (billingState.error && !isBillingRoute) {
     console.log('[DiagWhiteScreen][AppContent] render -> billing error branch', {
@@ -414,21 +401,15 @@ function AppContent() {
       billingState: { loading: billingState.loading, allowed: billingState.allowed, gate: billingState.gate, error: String(billingState.error?.message ?? billingState.error) },
     })
     return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'var(--page-bg)',
-      }}>
-        <div style={{ textAlign: 'center', color: 'var(--text-secondary, #6b7280)', maxWidth: 480 }}>
-          <p style={{ marginBottom: 12 }}>{t('gate.billingStateErrorTitle')}</p>
-          <p style={{ marginBottom: 20, fontSize: 14 }}>{billingState.error.message || String(billingState.error)}</p>
-          <button type="button" onClick={() => window.location.reload()}>
+      <LayoutStateScreen
+        title={t('gate.billingStateErrorTitle')}
+        message={billingState.error.message || String(billingState.error)}
+        actions={(
+          <button type="button" className="data-state__action" onClick={() => window.location.reload()}>
             {t('common.retry')}
           </button>
-        </div>
-      </div>
+        )}
+      />
     )
   }
   if (isBillingRoute) {
@@ -439,7 +420,7 @@ function AppContent() {
     })
     return (
       <>
-        <Suspense fallback={<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--page-bg)' }}><span style={{ color: 'var(--text-secondary)' }}>{t('common.loading')}</span></div>}>
+        <Suspense fallback={<PageLoader darkMode={darkMode} fullScreen />}>
           <Outlet />
         </Suspense>
         <ToastContainer darkMode={darkMode} />
@@ -466,23 +447,22 @@ function AppContent() {
     billingState: { loading: billingState.loading, allowed: billingState.allowed, gate: billingState.gate },
   })
   return (
-    <div style={{
-      display: 'flex',
-      minHeight: '100vh',
-      backgroundColor: 'var(--page-bg)',
-      '--sidebar-w': `${sidebarWidth}px`
-    }}>
+    <div
+      className="layout-shell"
+      style={{
+        '--sidebar-w': `${sidebarWidth}px`
+      }}
+    >
       <DemoModeBanner darkMode={darkMode} />
       <Sidebar />
-      <main style={{
-        flex: 1,
-        marginLeft: isMobile ? '0' : `${sidebarWidth}px`,
-        transition: 'margin-left 0.3s ease',
-        display: 'flex',
-        flexDirection: 'column',
-        width: isMobile ? '100%' : 'auto',
-        paddingTop: 'var(--topbar-h)'
-      }}>
+      <main
+        className="layout-shell__main"
+        style={{
+          marginLeft: isMobile ? '0' : `${sidebarWidth}px`,
+          transition: 'margin-left 0.3s ease',
+          width: isMobile ? '100%' : 'auto'
+        }}
+      >
         <BillingBanner />
         <WorkspaceLimitAlert usage={usage} onUpgrade={handleUpgradeForLimit} />
         <TopNavbar sidebarWidth={sidebarWidth} />

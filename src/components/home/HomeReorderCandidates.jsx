@@ -17,37 +17,37 @@ export default function HomeReorderCandidates({ reorder = {}, loading }) {
 
   if (loading) {
     return (
-      <div style={styles.wrap}>
-        <div style={styles.title}>Reorder candidates</div>
-        <div style={styles.placeholder}>Carregant…</div>
+      <div className="dashboard-home-card dashboard-home-card--list">
+        <div className="dashboard-home-card__title">Reorder candidates</div>
+        <div className="dashboard-home-card__placeholder">Carregant…</div>
       </div>
     )
   }
 
   if (isEmpty) {
     return (
-      <div style={styles.wrap}>
-        <div style={styles.title}>Reorder candidates</div>
-        <div style={styles.placeholder}>No reorder actions needed right now.</div>
+      <div className="dashboard-home-card dashboard-home-card--list">
+        <div className="dashboard-home-card__title">Reorder candidates</div>
+        <div className="dashboard-home-card__placeholder">No reorder actions needed right now.</div>
       </div>
     )
   }
 
   return (
-    <div style={styles.wrap}>
-      <div style={styles.title}>Reorder candidates</div>
-      <ul style={styles.list}>
+    <div className="dashboard-home-card dashboard-home-card--list">
+      <div className="dashboard-home-card__title">Reorder candidates</div>
+      <ul className="dashboard-home-card__list">
         {candidates.map((row) => (
-          <li key={row.asin} style={styles.row}>
-            <div style={styles.label}>
+          <li key={row.asin} className="dashboard-home-card__listRow dashboard-home-card__listRow--stacked">
+            <div className="dashboard-home-card__listPrimary">
               {row.productName && row.productName.trim() ? row.productName.trim() : row.asin || '—'}
               {row.confidence === 'low' && (
-                <span style={styles.confidenceHint} title={Array.isArray(row.issues) ? row.issues.join(', ') : ''}>
+                <span className="dashboard-home-card__hint" title={Array.isArray(row.issues) ? row.issues.join(', ') : ''}>
                   {' '}(low confidence)
                 </span>
               )}
             </div>
-            <div style={styles.meta}>
+            <div className="dashboard-home-card__metaWrap">
               <span title="Suggested reorder units">Reorder: {Number.isFinite(row.reorderUnits) ? row.reorderUnits : '—'}</span>
               <span>Stockout in: {formatDays(row.daysUntilStockout)}</span>
               <span>Stock: {Number.isFinite(row.stockOnHand) ? row.stockOnHand : '—'}</span>
@@ -58,36 +58,4 @@ export default function HomeReorderCandidates({ reorder = {}, loading }) {
       </ul>
     </div>
   )
-}
-
-const styles = {
-  wrap: {
-    width: '100%',
-    padding: '1rem 1.25rem',
-    borderRadius: 8,
-    background: 'var(--card-bg, #f9fafb)',
-    border: '1px solid var(--border-color, #e5e7eb)',
-  },
-  title: {
-    fontSize: '0.9375rem',
-    fontWeight: 600,
-    color: 'var(--text-1, #111827)',
-    marginBottom: 10,
-  },
-  list: { margin: 0, padding: 0, listStyle: 'none' },
-  row: {
-    padding: '6px 0',
-    borderBottom: '1px solid var(--border-color, #e5e7eb)',
-  },
-  label: { fontSize: '0.8125rem', fontWeight: 500, color: 'var(--text-1)' },
-  confidenceHint: { fontSize: '0.7rem', color: 'var(--text-2, #6b7280)', fontWeight: 400 },
-  meta: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '8px 12px',
-    marginTop: 2,
-    fontSize: '0.75rem',
-    color: 'var(--text-2, #6b7280)',
-  },
-  placeholder: { fontSize: '0.875rem', color: 'var(--text-2, #6b7280)' },
 }

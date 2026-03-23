@@ -54,6 +54,8 @@ This file is the **canonical live status tracker** for implementation phases. It
 - **Pla canònic d’execució (ordre B2–B7, dependències UI/idioma/assistent):** `docs/ROADMAP/TRACK_B_CANONICAL_PLAN.md`.  
 - **B2 (definició sistema UI app):** tancat a nivell documentació repo — `docs/PRODUCT/CANONICAL_UI_SYSTEM.md` (patrons + famílies de pantalla + Pencil); tokens base segueixen referenciats a `docs/PRODUCT/VISUAL_IDENTITY_SYSTEM_V1.md`. **B6** = harmonització visual massiva al codi, no reobre B2 salvo decisió explícita.  
 - **B3 (canonització idioma app):** tancat a nivell documentació + auditoria repo — `docs/PRODUCT/CANONICAL_APP_LANGUAGE_POLICY_B3.md` (català font; es/en traduccions; regles; **no** selector B4 ni refactor massiu). **No** es reclama consistència lingüística a producció fins implementació posterior.  
+- **B6.1 (visual foundations):** definit a nivell documentació/repo a `docs/PRODUCT/B6_1_VISUAL_FOUNDATIONS.md` com a base visual canònica de l'app (paleta d'ús, botons, cards, inputs, radius, shadows, icones, breakpoints, shell base). **No** implica implementació ni verificació en producció.  
+- **B6.2 (screen harmonization):** **no obert**; queda explícitament posterior a B6.1 i fora d'aquest tall documental.  
 - **Paper:** Mantenir **accés, onboarding i valor visible** mentre Track A avança fora del codi.
 - **Estat actual (documentat):**
   - **Access / auth:** blockers majors **reduïts** (p. ex. Google OAuth operatiu com a login+signup; entrada trial alineada amb el mateix patró OAuth on escau).
