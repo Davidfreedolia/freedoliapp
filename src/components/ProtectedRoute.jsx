@@ -10,6 +10,7 @@ const prLog = (phase, payload = {}) => console.info('[ProtectedRoute]', { ts: pr
 const prWarn = (phase, payload = {}) => console.warn('[ProtectedRoute]', { ts: prTs(), phase, ...payload })
 
 export default function ProtectedRoute({ children }) {
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(true)
   const [authenticated, setAuthenticated] = useState(false)
 
