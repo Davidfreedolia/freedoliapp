@@ -1,6 +1,7 @@
 /**
  * F8.3.2 — Determines dashboard mode: A (with data) vs B (getting started).
- * Uses same criterion as activation snapshot: recent activity in financial_ledger (org, company scope, last 30 days).
+ * Hotfix: avoid direct client-side reads to financial_ledger, which can 403 under the
+ * current finance access contract. Use a safer org-scoped signal instead.
  * On error or no data → Mode B (do not block UX).
  */
 import { useState, useEffect } from 'react'
@@ -18,17 +19,11 @@ export function useOrgDashboardMode(activeOrgId) {
     }
     let cancelled = false
     setLoading(true)
-    const from = new Date()
-    from.setDate(from.getDate() - 30)
-    const fromStr = from.toISOString().slice(0, 10)
 
     supabase
-      .from('financial_ledger')
+      .from('projects')
       .select('id')
       .eq('org_id', activeOrgId)
-      .eq('scope', 'company')
-      .in('status', ['posted', 'locked'])
-      .gte('occurred_at', fromStr)
       .limit(1)
       .then(({ data, error }) => {
         if (cancelled) return
