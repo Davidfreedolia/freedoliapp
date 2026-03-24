@@ -207,7 +207,7 @@ export default function Dashboard() {
         let stockRowsByProject = {}
         // Stock source: inventory (org-scoped). project_stock has been removed.
         const stockTables = [
-          { table: 'inventory', columns: 'project_id,quantity,qty,units,total_units' }
+          { table: 'inventory', columns: '*' }
         ]
         for (const { table, columns } of stockTables) {
           try {
