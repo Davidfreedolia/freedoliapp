@@ -112,6 +112,7 @@
 - **Scope:** End-to-end checks after Track B slices ship: activation, assistant entry, language switch, critical flows, regression smoke.
 - **Dependency:** Relevant **implementation** blocks above are candidate for verification when closed.
 - **Does not claim:** “Production complete” for the whole product — only **evidence** for the scope verified.
+- **Current closeout note:** the first B7 pass was blocked by a real runtime access issue (`/app` -> `/activation` + white screen / loader state). After hotfixes in `ProtectedRoute` and `WorkspaceContext`, the main production path into `/app` was verified again and the blocker was resolved for the tested case. Later Dashboard runtime debt (`financial_ledger 403`, `inventory 400`) was also hotfixed and verified in production. Track all this as **partial/substantial verification**, not universal proof of every auth hydration edge case. See `docs/ROADMAP/B7_PRODUCTION_VERIFICATION_AND_RUNTIME_HOTFIX_CLOSEOUT.md`.
 
 ---
 

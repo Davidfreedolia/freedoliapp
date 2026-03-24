@@ -65,6 +65,8 @@ Scope: Index of main documents and their roles.
   - **Status:** canonical (executive snapshot)
 - **`ROADMAP/TRACK_B_CANONICAL_PLAN.md`** — *Track B — Product Continuity: canonical block order (B2–B7), UI definition vs harmonization, language policy vs selector, assistant surface deps.*  
   - **Status:** canonical planning (documentation)
+- **`ROADMAP/B7_PRODUCTION_VERIFICATION_AND_RUNTIME_HOTFIX_CLOSEOUT.md`** — *Closeout of B7 production verification, the real `/app` -> `/activation` runtime blocker, applied hotfixes (`ProtectedRoute`, `WorkspaceContext`), Dashboard runtime debt fixes (`financial_ledger 403`, `inventory 400`), what is verified in production, and remaining minor runtime debt.*  
+  - **Status:** canonical closeout (documentation)
 - **`ROADMAP_STATUS.md`** — *Historical roadmap status snapshot (post FASE 2 CBA); kept for context only.*  
   - **Status:** historical / superseded
 - **`PRODUCT/LEAD_SYSTEM.md`** — *Lead system architecture stub (lead → trial → workspace → customer).*  
