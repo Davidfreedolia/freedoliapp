@@ -56,7 +56,9 @@ async function getAverageDailyUnitsSold(supabase, orgId, productId, lookbackDays
 }
 
 /**
- * Current stock for product (sum total_units from inventory for org + project_id).
+ * Current stock for product from inventory for org + project_id.
+ * Hotfix: avoid selecting a single potentially non-canonical quantity column.
+ * Read the row shape conservatively and tolerate quantity / qty / units / total_units.
  * @param {import('@supabase/supabase-js').SupabaseClient} supabase
  * @param {string} orgId
  * @param {string} productId
@@ -65,12 +67,15 @@ async function getAverageDailyUnitsSold(supabase, orgId, productId, lookbackDays
 async function getCurrentStock(supabase, orgId, productId) {
   const { data: rows, error } = await supabase
     .from('inventory')
-    .select('total_units')
+    .select('*')
     .eq('org_id', orgId)
     .eq('project_id', productId)
   if (error) return 0
   if (!rows?.length) return 0
-  return rows.reduce((s, r) => s + (Number(r?.total_units) || 0), 0)
+  return rows.reduce((sum, row) => {
+    const quantity = row?.quantity ?? row?.qty ?? row?.units ?? row?.total_units ?? 0
+    return sum + (Number(quantity) || 0)
+  }, 0)
 }
 
 /**
