@@ -55,6 +55,7 @@ export function WorkspaceProvider({ children }) {
   useEffect(() => {
     let cancelled = false
     let bootstrapInFlight = false
+    let pendingAuthenticatedBootstrap = false
     async function bootstrap() {
       if (bootstrapInFlight) return
       bootstrapInFlight = true
@@ -94,6 +95,12 @@ export function WorkspaceProvider({ children }) {
           userId: session?.user?.id
         })
         if (!session?.user) {
+          if (pendingAuthenticatedBootstrap) {
+            wsWarn('bootstrap.noSessionUser.deferEmptyState', {
+              reason: 'pendingAuthenticatedBootstrap',
+            })
+            return
+          }
           if (!cancelled) {
             setMemberships([])
             setActiveOrgIdState(null)
@@ -270,8 +277,14 @@ export function WorkspaceProvider({ children }) {
           elapsedMs: Date.now() - bootstrapStartedAt,
           cancelled,
           bootstrapInFlight,
+          pendingAuthenticatedBootstrap,
         })
         bootstrapInFlight = false
+        if (!cancelled && pendingAuthenticatedBootstrap) {
+          pendingAuthenticatedBootstrap = false
+          wsLog('bootstrap.runQueuedAuthenticatedBootstrap')
+          bootstrap()
+        }
       }
     }
     bootstrap()
@@ -289,6 +302,14 @@ export function WorkspaceProvider({ children }) {
           event,
           userId: session?.user?.id,
         })
+        if (bootstrapInFlight) {
+          pendingAuthenticatedBootstrap = true
+          wsLog('authStateChange.queueRebootstrap', {
+            event,
+            userId: session?.user?.id,
+          })
+          return
+        }
         bootstrap()
       }
     })
