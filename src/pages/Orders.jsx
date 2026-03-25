@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { 
   Plus, 
@@ -71,6 +71,7 @@ import { DataLoading, DataError, DataEmpty } from '../components/dataStates'
 import { showToast } from '../components/Toast'
 import { useTranslation } from 'react-i18next'
 import NextStepCard from '../components/assistant/NextStepCard'
+import { deriveOrderOperationalCard } from '../lib/orders/deriveOrderOperationalCard'
 
 // PO status visuals (labels from i18n: orders.status.*)
 const PO_STATUS_META = {
@@ -83,6 +84,13 @@ const PO_STATUS_META = {
   shipped: { color: '#06b6d4', icon: Truck },
   received: { color: '#10b981', icon: CheckCircle },
   cancelled: { color: '#ef4444', icon: AlertCircle }
+}
+
+const RISK_META = {
+  high: { label: 'high', color: '#dc2626', background: 'rgba(220, 38, 38, 0.12)' },
+  medium: { label: 'medium', color: '#d97706', background: 'rgba(217, 119, 6, 0.12)' },
+  low: { label: 'low', color: '#0f766e', background: 'rgba(15, 118, 110, 0.12)' },
+  done: { label: 'done', color: '#2563eb', background: 'rgba(37, 99, 235, 0.12)' }
 }
 
 export default function Orders() {
@@ -181,16 +189,29 @@ export default function Orders() {
       setSuppliers(Array.isArray(suppliersData) ? suppliersData : [])
       setLoading(false) // Marcar como cargado para mostrar la página
       
-      // Carregar estat Amazon Ready per cada PO (async, després de mostrar la pàgina)
+      // Carregar estat Amazon Ready + shipment summary per cada PO (async, després de mostrar la pàgina)
       if (ordersData && ordersData.length > 0) {
         const ordersWithReadiness = await Promise.all(
           ordersData.map(async (order) => {
-            if (!order.project_id) return { ...order, amazonReadyStatus: null }
+            if (!order.project_id) {
+              return {
+                ...order,
+                amazonReadyStatus: null,
+                shipment: null,
+                ...deriveOrderOperationalCard({
+                  ...order,
+                  amazonReadyStatus: null,
+                  shipment: null,
+                  manufacturerPackStatus: null
+                })
+              }
+            }
             
             try {
-              const [readiness, identifiers] = await Promise.all([
+              const [readiness, identifiers, shipment] = await Promise.all([
                 getPoAmazonReadiness(order.id),
-                getProductIdentifiers(order.project_id)
+                getProductIdentifiers(order.project_id),
+                getShipmentForPo(order.id)
               ])
               
               const readyStatus = computePoAmazonReady({
@@ -208,20 +229,34 @@ export default function Orders() {
                   packStatus = 'generated'
                 }
               }
+
+              const operational = deriveOrderOperationalCard({
+                ...order,
+                shipment,
+                amazonReadyStatus: readyStatus,
+                manufacturerPackStatus: packStatus
+              })
               
               return { 
                 ...order, 
+                shipment,
                 amazonReadyStatus: readyStatus,
                 manufacturerPackStatus: packStatus,
                 manufacturerPackVersion: readiness?.manufacturer_pack_version || null,
                 manufacturerPackGeneratedAt: readiness?.manufacturer_pack_generated_at || null,
-                manufacturerPackSentAt: readiness?.manufacturer_pack_sent_at || null
+                manufacturerPackSentAt: readiness?.manufacturer_pack_sent_at || null,
+                ...operational
               }
             } catch (err) {
               if (import.meta.env.DEV) {
                 console.error(`Error carregant Amazon readiness per PO ${order.id}:`, err)
               }
-              return { ...order, amazonReadyStatus: null }
+              return {
+                ...order,
+                amazonReadyStatus: null,
+                shipment: null,
+                ...deriveOrderOperationalCard({ ...order, amazonReadyStatus: null, shipment: null, manufacturerPackStatus: null })
+              }
             }
           })
         )
@@ -563,21 +598,14 @@ export default function Orders() {
   const effectiveLayout = isMobile ? 'list' : layout
   const selectedOrderCard = filteredOrders.find(o => o.id === selectedOrderId)
 
-  // Estadístiques (con manejo de errores)
   const ordersArray = safeArray(orders)
-  const stats = {
+  const stats = useMemo(() => ({
     total: ordersArray.length,
-    pending: safeArray(ordersArray).filter(o => o?.status && ['draft', 'sent'].includes(o.status)).length,
-    inProgress: safeArray(ordersArray).filter(o => o?.status && ['confirmed', 'partial_paid', 'paid', 'in_production'].includes(o.status)).length,
-    completed: safeArray(ordersArray).filter(o => o?.status && ['shipped', 'received'].includes(o.status)).length,
-    totalValue: safeArray(ordersArray).reduce((sum, o) => {
-      try {
-        return sum + (parseFloat(o?.total_amount) || 0)
-      } catch (err) {
-        return sum
-      }
-    }, 0)
-  }
+    requiringAttention: ordersArray.filter(o => o?.riskLevel === 'high').length,
+    activeLogistics: ordersArray.filter(o => o?.shipment && o?.shipment?.status !== 'delivered').length,
+    notAmazonReady: ordersArray.filter(o => o?.amazonReadyStatus && o.amazonReadyStatus.ready === false).length,
+    completed: ordersArray.filter(o => o?.status === 'received').length
+  }), [ordersArray])
 
   const handleDeleteOrder = async (order) => {
     if (!confirm(t('orders.confirmDelete', { poNumber: order.po_number }))) return
@@ -627,6 +655,19 @@ export default function Orders() {
       name: t(`orders.status.${statusKey}`)
     }
     const StatusIcon = status.icon
+    const risk = RISK_META[order.riskLevel] || RISK_META.low
+    const amazonReadyLabel = order.amazonReadyStatus == null
+      ? 'Readiness unknown'
+      : (order.amazonReadyStatus.ready ? 'Amazon ready' : 'Not Amazon ready')
+    const packLabel = order.manufacturerPackStatus === 'sent'
+      ? 'Pack sent'
+      : order.manufacturerPackStatus === 'generated'
+        ? 'Pack generated'
+        : 'Pack not started'
+    const blockerDetails = Array.isArray(order.amazonReadyStatus?.missing) ? order.amazonReadyStatus.missing : []
+    const blockerHint = order.blockerSummary === 'Amazon setup missing' && blockerDetails.length > 0
+      ? blockerDetails.slice(0, 2).join(' · ')
+      : order.blockerSummary
 
     return (
       <div
@@ -645,29 +686,69 @@ export default function Orders() {
             <div style={{ fontSize: '14px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
               {order.project?.name || '-'}
             </div>
+            <div style={{ fontSize: '13px', color: darkMode ? '#6b7280' : '#6b7280', marginTop: '4px' }}>
+              {order.supplier?.name || '-'}
+            </div>
           </div>
-          <span style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '4px 10px',
-            borderRadius: '999px',
-            fontSize: '12px',
-            fontWeight: '500',
-            letterSpacing: '0.2px',
-            textTransform: 'capitalize',
-            backgroundColor: `${status.color}15`,
-            color: status.color
-          }}>
-            <StatusIcon size={14} />
-            {status.name}
-          </span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '4px 10px',
+              borderRadius: '999px',
+              fontSize: '12px',
+              fontWeight: '500',
+              letterSpacing: '0.2px',
+              textTransform: 'capitalize',
+              backgroundColor: `${status.color}15`,
+              color: status.color
+            }}>
+              <StatusIcon size={14} />
+              {status.name}
+            </span>
+            <span style={{
+              ...styles.riskBadge,
+              color: risk.color,
+              backgroundColor: risk.background
+            }}>
+              {risk.label}
+            </span>
+          </div>
         </div>
         <div style={styles.orderCardBody}>
-          <div>{t('orders.card.supplier')}: {order.supplier?.name || '-'}</div>
-          <div>{t('orders.card.date')}: {formatDate(order.order_date)}</div>
-          <div style={{ fontWeight: '600', color: darkMode ? '#ffffff' : '#111827' }}>
-            {formatCurrency(order.total_amount, order.currency)}
+          <div style={styles.operationalRow}>
+            <span style={styles.operationalLabel}>Total</span>
+            <strong style={{ color: darkMode ? '#ffffff' : '#111827' }}>
+              {formatCurrency(order.total_amount, order.currency)}
+            </strong>
+          </div>
+          <div style={styles.operationalRow}>
+            <span style={styles.operationalLabel}>Shipment</span>
+            <span>{order.shipmentSummary || 'No shipment'}</span>
+          </div>
+          <div style={styles.operationalRow}>
+            <span style={styles.operationalLabel}>ETA</span>
+            <span>{order.etaDate ? formatDate(order.etaDate) : '-'}</span>
+          </div>
+          <div style={styles.operationalRow}>
+            <span style={styles.operationalLabel}>Readiness</span>
+            <span>{amazonReadyLabel}</span>
+          </div>
+          <div style={styles.operationalRow}>
+            <span style={styles.operationalLabel}>Pack</span>
+            <span>{packLabel}</span>
+          </div>
+          <div style={styles.operationalPanel}>
+            <span style={styles.operationalPanelLabel}>Blocker</span>
+            <strong style={{ color: darkMode ? '#ffffff' : '#111827' }}>{blockerHint}</strong>
+          </div>
+          <div style={styles.operationalPanel}>
+            <span style={styles.operationalPanelLabel}>Next action</span>
+            <strong style={{ color: status.color }}>{order.nextAction || 'Monitor execution'}</strong>
+          </div>
+          <div style={{ fontSize: '12px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
+            {t('orders.card.date')}: {formatDate(order.order_date)}
           </div>
         </div>
         {!isPreview && (
@@ -842,17 +923,24 @@ export default function Orders() {
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <Clock size={24} color="#f59e0b" />
+            <AlertCircle size={24} color="#ef4444" />
             <div>
-              <span style={{ ...styles.statValue, color: '#f59e0b' }}>{stats.pending}</span>
-              <span style={styles.statLabel}>{t('orders.stats.pending')}</span>
+              <span style={{ ...styles.statValue, color: '#ef4444' }}>{stats.requiringAttention}</span>
+              <span style={styles.statLabel}>Requiring attention</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <Package size={24} color="#8b5cf6" />
+            <Truck size={24} color="#06b6d4" />
             <div>
-              <span style={{ ...styles.statValue, color: '#8b5cf6' }}>{stats.inProgress}</span>
-              <span style={styles.statLabel}>{t('orders.stats.inProgress')}</span>
+              <span style={{ ...styles.statValue, color: '#06b6d4' }}>{stats.activeLogistics}</span>
+              <span style={styles.statLabel}>Active logistics</span>
+            </div>
+          </div>
+          <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
+            <Package size={24} color="#d97706" />
+            <div>
+              <span style={{ ...styles.statValue, color: '#d97706' }}>{stats.notAmazonReady}</span>
+              <span style={styles.statLabel}>Not Amazon ready</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
@@ -860,13 +948,6 @@ export default function Orders() {
             <div>
               <span style={{ ...styles.statValue, color: '#22c55e' }}>{stats.completed}</span>
               <span style={styles.statLabel}>{t('orders.stats.completed')}</span>
-            </div>
-          </div>
-          <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <DollarSign size={24} color="#4f46e5" />
-            <div>
-              <span style={styles.statValue}>{formatCurrency(stats.totalValue)}</span>
-              <span style={styles.statLabel}>{t('orders.stats.totalValue')}</span>
             </div>
           </div>
         </div>
@@ -1601,6 +1682,11 @@ const styles = {
   orderCard: { padding: '16px', borderRadius: '16px', border: 'none', boxShadow: 'var(--shadow-soft)' },
   orderCardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' },
   orderCardBody: { display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: '#6b7280' },
+  riskBadge: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '4px 10px', borderRadius: '999px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.06em' },
+  operationalRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' },
+  operationalLabel: { fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#9ca3af' },
+  operationalPanel: { display: 'flex', flexDirection: 'column', gap: '4px', padding: '10px 12px', borderRadius: '12px', backgroundColor: 'rgba(148, 163, 184, 0.08)' },
+  operationalPanelLabel: { fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#9ca3af' },
   orderCardActions: { display: 'flex', gap: '8px', marginTop: '12px', alignItems: 'center', flexWrap: 'wrap' },
   iconButton: { padding: '0', width: 'var(--btn-h-sm)', minWidth: 'var(--btn-h-sm)' },
   menu: { position: 'absolute', right: 0, top: '100%', minWidth: '140px', borderRadius: '10px', border: '1px solid rgba(31, 78, 95, 0.12)', boxShadow: 'var(--shadow-soft-hover)', zIndex: 10 },
