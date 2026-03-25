@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '../../lib/supabase'
 
 export default function TrackingEventList({ packageId, darkMode }) {
+  const { t } = useTranslation()
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(false)
 
@@ -34,17 +36,17 @@ export default function TrackingEventList({ packageId, darkMode }) {
   if (!packageId) {
     return (
       <div style={{ padding: 12, fontSize: 13, color: darkMode ? '#9ca3af' : '#6b7280' }}>
-        Selecciona un package per veure els events.
+        {t('orders.shipmentsPanel.drawer.selectPackage')}
       </div>
     )
   }
 
   if (loading) {
-    return <div style={{ padding: 12, fontSize: 13, color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant…</div>
+    return <div style={{ padding: 12, fontSize: 13, color: darkMode ? '#9ca3af' : '#6b7280' }}>{t('common.loading')}</div>
   }
 
   if (!events.length) {
-    return <div style={{ padding: 12, fontSize: 13, color: darkMode ? '#9ca3af' : '#6b7280' }}>Cap event de tracking.</div>
+    return <div style={{ padding: 12, fontSize: 13, color: darkMode ? '#9ca3af' : '#6b7280' }}>{t('orders.shipmentsPanel.drawer.noTrackingEvents')}</div>
   }
 
   const formatTime = (v) => {
@@ -61,9 +63,9 @@ export default function TrackingEventList({ packageId, darkMode }) {
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
         <thead>
           <tr>
-            <th style={{ textAlign: 'left', padding: '8px 10px', borderBottom: '1px solid var(--border-1)', color: darkMode ? '#9ca3af' : '#6b7280', fontWeight: 600 }}>Data</th>
-            <th style={{ textAlign: 'left', padding: '8px 10px', borderBottom: '1px solid var(--border-1)', color: darkMode ? '#9ca3af' : '#6b7280', fontWeight: 600 }}>Ubicació</th>
-            <th style={{ textAlign: 'left', padding: '8px 10px', borderBottom: '1px solid var(--border-1)', color: darkMode ? '#9ca3af' : '#6b7280', fontWeight: 600 }}>Estat</th>
+            <th style={{ textAlign: 'left', padding: '8px 10px', borderBottom: '1px solid var(--border-1)', color: darkMode ? '#9ca3af' : '#6b7280', fontWeight: 600 }}>{t('orders.shipmentsPanel.drawer.columns.date')}</th>
+            <th style={{ textAlign: 'left', padding: '8px 10px', borderBottom: '1px solid var(--border-1)', color: darkMode ? '#9ca3af' : '#6b7280', fontWeight: 600 }}>{t('orders.shipmentsPanel.drawer.columns.location')}</th>
+            <th style={{ textAlign: 'left', padding: '8px 10px', borderBottom: '1px solid var(--border-1)', color: darkMode ? '#9ca3af' : '#6b7280', fontWeight: 600 }}>{t('orders.shipmentsPanel.drawer.columns.status')}</th>
           </tr>
         </thead>
         <tbody>

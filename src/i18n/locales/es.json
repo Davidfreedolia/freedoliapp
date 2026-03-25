@@ -1428,6 +1428,261 @@
         "generateFallback": "Error generando el pack del fabricante",
         "markAsSent": "Error marcando el pack como enviado: {{message}}"
       }
+    },
+    "amazonReadySection": {
+      "alerts": {
+        "updated": "Amazon Ready actualizado correctamente",
+        "saveErrorPrefix": "Error guardando:"
+      },
+      "status": {
+        "readyToSend": "Listo para enviar a Amazon",
+        "missingItems": "Faltan {{count}} elemento(s)"
+      },
+      "missingTitle": "Elementos pendientes:",
+      "fields": {
+        "needsFnsku": "Esta PO necesita etiquetas FNSKU",
+        "unitsPerCarton": "Unidades por caja",
+        "cartonsCount": "Número de cajas",
+        "length": "Largo (cm)",
+        "width": "Ancho (cm)",
+        "height": "Alto (cm)",
+        "weight": "Peso (kg)",
+        "prepType": "Tipo de preparación",
+        "notes": "Notas"
+      },
+      "prep": {
+        "none": "Ninguno",
+        "polybag": "Bolsa de plástico",
+        "bubblewrap": "Plástico de burbujas",
+        "labeling": "Etiquetado"
+      },
+      "placeholders": {
+        "notes": "Notas adicionales..."
+      },
+      "labels": {
+        "generated": "Etiquetas generadas:",
+        "summary": "{{count}} etiquetas • {{template}}"
+      }
+    },
+    "shipmentTracking": {
+      "title": "Shipment hacia Amazon",
+      "loading": "Cargando shipment...",
+      "types": {
+        "spd": "SPD - Small Parcel Delivery",
+        "ltl": "LTL - Less Than Truckload",
+        "ftl": "FTL - Full Truckload"
+      },
+      "statuses": {
+        "planned": "Planificado",
+        "booked": "Reservado",
+        "pickedUp": "Recogido",
+        "inTransit": "En tránsito",
+        "delivered": "Entregado"
+      },
+      "alerts": {
+        "trackingRequired": "El tracking number es obligatorio para SPD cuando el estado no es \"planned\"",
+        "proRequired": "El PRO number es obligatorio para LTL/FTL cuando el estado no es \"planned\"",
+        "saved": "Shipment guardado correctamente",
+        "saveErrorPrefix": "Error guardando shipment:",
+        "statusErrorPrefix": "Error actualizando estado:"
+      },
+      "fields": {
+        "shipmentType": "Tipo de envío",
+        "carrier": "Carrier",
+        "trackingNumber": "Tracking number",
+        "proNumber": "PRO number",
+        "pickupDate": "Fecha de recogida",
+        "etaDate": "Fecha ETA",
+        "status": "Estado",
+        "notes": "Notas"
+      },
+      "placeholders": {
+        "carrier": "Ej: UPS, FedEx, DHL...",
+        "trackingNumber": "Ej: 1Z999AA10123456784",
+        "proNumber": "Ej: PRO123456789",
+        "notes": "Notas adicionales sobre el envío..."
+      },
+      "quickActions": {
+        "title": "Acciones rápidas:",
+        "booked": "Marcar como reservado",
+        "pickedUp": "Marcar como recogido",
+        "inTransit": "Marcar en tránsito",
+        "delivered": "Marcar entregado"
+      },
+      "actions": {
+        "update": "Actualizar shipment",
+        "create": "Crear shipment"
+      }
+    },
+    "shipmentsPanel": {
+      "title": "Shipments",
+      "empty": "No hay shipments para esta PO.",
+      "status": {
+        "draft": "Borrador",
+        "inTransit": "En tránsito",
+        "customs": "Aduanas",
+        "delivered": "Entregado",
+        "exception": "Incidencia",
+        "cancelled": "Cancelado"
+      },
+      "destination": {
+        "amazonFba": "Amazon FBA",
+        "warehouse": "Almacén"
+      },
+      "toasts": {
+        "syncRequested": "Sincronización solicitada",
+        "syncError": "Error en la sincronización"
+      },
+      "packageCount": "{{count}} paquete(s)",
+      "lastUpdate": "Última actualización: {{date}}",
+      "eta": "ETA: {{date}}",
+      "drawer": {
+        "shipmentId": "Shipment {{id}}",
+        "packages": "Paquetes",
+        "trackingEvents": "Eventos de tracking",
+        "noPackages": "No hay paquetes.",
+        "lastSync": "Última sincronización: {{date}}",
+        "selectPackage": "Selecciona un paquete para ver los eventos.",
+        "noTrackingEvents": "No hay eventos de tracking.",
+        "columns": {
+          "date": "Fecha",
+          "location": "Ubicación",
+          "status": "Estado"
+        }
+      },
+      "packageStatus": {
+        "pending": "Pendiente",
+        "inTransit": "En tránsito",
+        "delivered": "Entregado",
+        "exception": "Incidencia",
+        "cancelled": "Cancelado"
+      },
+      "actions": {
+        "view": "Ver",
+        "syncNow": "Sincronizar ahora"
+      }
+    },
+    "plannedActual": {
+      "title": "Planificado vs real",
+      "badges": {
+        "better": "Mejor",
+        "worse": "Peor",
+        "onTarget": "En objetivo"
+      },
+      "sections": {
+        "unitPrice": "Precio unitario",
+        "leadTime": "Lead time"
+      },
+      "fields": {
+        "planned": "Planificado",
+        "actual": "Real",
+        "delta": "Delta",
+        "promised": "Prometido"
+      },
+      "days": "{{count}} días",
+      "delta": {
+        "delay": "(retraso)",
+        "ahead": "(adelantado)"
+      }
+    },
+    "newPoModal": {
+      "title": {
+        "edit": "Editar orden",
+        "create": "Nueva purchase order"
+      },
+      "alerts": {
+        "generatePoNumberError": "Error generando número de PO",
+        "selectProject": "Selecciona un proyecto",
+        "selectSupplier": "Selecciona un proveedor",
+        "missingPoNumber": "Error: no se ha generado el número de PO"
+      },
+      "generatingPoNumber": "Generando...",
+      "warehouseTypes": {
+        "forwarder": "Transitario",
+        "agent": "Agente",
+        "amazonFba": "Amazon FBA",
+        "amazonFbm": "Amazon FBM",
+        "custom": "Personalizado"
+      },
+      "sections": {
+        "basicInfo": "Información básica",
+        "deliveryAddress": "Dirección de entrega",
+        "commercialTerms": "Términos comerciales",
+        "productDetails": "Detalle de productos",
+        "shippingSpecs": "Especificaciones de envío"
+      },
+      "fields": {
+        "project": "Proyecto",
+        "poNumber": "Número PO",
+        "supplier": "Proveedor",
+        "date": "Fecha",
+        "quoteRef": "Ref. presupuesto",
+        "currency": "Moneda",
+        "selectWarehouse": "Seleccionar almacén / dirección",
+        "fullAddress": "Dirección completa",
+        "contact": "Contacto",
+        "phone": "Teléfono",
+        "email": "Email",
+        "paymentTerms": "Términos de pago",
+        "incoterm": "Incoterm",
+        "sampleLeadTime": "Lead time muestras",
+        "productionLeadTime": "Lead time producción",
+        "quoteValidity": "Validez presupuesto",
+        "ref": "Ref",
+        "description": "Descripción",
+        "qty": "Cantidad",
+        "unit": "Unidad",
+        "price": "Precio",
+        "total": "Total",
+        "totalCartons": "Total cajas (CTN)",
+        "netWeight": "Peso neto (kg)",
+        "grossWeight": "Peso bruto (kg)",
+        "totalVolume": "Volumen total (CBM)",
+        "cartonSize": "Medida caja",
+        "shippingMark": "Shipping mark",
+        "trackingNumber": "Tracking number",
+        "logisticsStatus": "Estado logístico",
+        "additionalNotes": "Notas adicionales"
+      },
+      "placeholders": {
+        "selectProject": "Selecciona proyecto...",
+        "selectSupplier": "Selecciona proveedor...",
+        "quoteRef": "Ej: 20251216",
+        "selectWarehouse": "-- Selecciona o escribe manualmente --",
+        "fullAddress": "Shenzhen Wingspeed Logistics Park...",
+        "contact": "Nombre del contacto",
+        "paymentTerms": "50% depósito, 50% antes del envío",
+        "incotermLocation": "SHENZHEN",
+        "sampleLeadTime": "7 días",
+        "productionLeadTime": "2 meses",
+        "quoteValidity": "5 meses",
+        "productDescription": "Descripción del producto...",
+        "totalCartons": "40 CTN",
+        "netWeight": "340 kg",
+        "grossWeight": "360 kg",
+        "totalVolume": "2.49 CBM",
+        "cartonSize": "45x38.5x36cm",
+        "shippingMark": "Freedolia + David Castellà",
+        "selectLogisticsStatus": "Selecciona estado",
+        "additionalNotes": "Notas, instrucciones especiales..."
+      },
+      "logisticsStatuses": {
+        "production": "Producción",
+        "pickup": "Recogida",
+        "inTransit": "En tránsito",
+        "customs": "Aduanas",
+        "amazonFba": "Amazon FBA",
+        "delivered": "Entregado"
+      },
+      "actions": {
+        "addLine": "Añadir línea",
+        "createPo": "Crear PO",
+        "update": "Actualizar"
+      },
+      "hints": {
+        "selectProjectForPoNumber": "Selecciona un proyecto para generar el número de PO",
+        "selectProjectToContinue": "Selecciona un proyecto para continuar"
+      }
     }
   },
   "amazonReadiness": {

@@ -1,19 +1,11 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { X, Truck, RefreshCw } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { showToast } from '../Toast'
 import Button from '../Button'
 import PackageList from './PackageList'
 import TrackingEventList from './TrackingEventList'
-
-const SHIPMENT_STATUS_COLOR = {
-  draft: { bg: '#6b7280', label: 'Draft' },
-  in_transit: { bg: '#f59e0b', label: 'In transit' },
-  customs: { bg: '#8b5cf6', label: 'Customs' },
-  delivered: { bg: '#22c55e', label: 'Delivered' },
-  exception: { bg: '#ef4444', label: 'Exception' },
-  cancelled: { bg: '#6b7280', label: 'Cancelled' }
-}
 
 function formatDate(v) {
   if (!v) return '—'
@@ -25,7 +17,17 @@ function formatDate(v) {
 }
 
 export default function ShipmentDetailDrawer({ shipment, darkMode, onClose, onSyncDone }) {
+  const { t } = useTranslation()
   const [packages, setPackages] = useState([])
+  const SHIPMENT_STATUS_COLOR = {
+    draft: { bg: '#6b7280', label: t('orders.shipmentsPanel.status.draft') },
+    in_transit: { bg: '#f59e0b', label: t('orders.shipmentsPanel.status.inTransit') },
+    customs: { bg: '#8b5cf6', label: t('orders.shipmentsPanel.status.customs') },
+    delivered: { bg: '#22c55e', label: t('orders.shipmentsPanel.status.delivered') },
+    exception: { bg: '#ef4444', label: t('orders.shipmentsPanel.status.exception') },
+    cancelled: { bg: '#6b7280', label: t('orders.shipmentsPanel.status.cancelled') }
+  }
+
   const [alerts, setAlerts] = useState([])
   const [loadingPackages, setLoadingPackages] = useState(true)
   const [loadingAlerts, setLoadingAlerts] = useState(true)
@@ -77,10 +79,14 @@ export default function ShipmentDetailDrawer({ shipment, darkMode, onClose, onSy
   const destinationLabel = () => {
     if (!shipment) return '—'
     if (shipment.destination_type === 'amazon_fba') {
-      return shipment.destination_amazon_fc_code ? `Amazon FBA · ${shipment.destination_amazon_fc_code}` : 'Amazon FBA'
+      return shipment.destination_amazon_fc_code
+        ? `${t('orders.shipmentsPanel.destination.amazonFba')} · ${shipment.destination_amazon_fc_code}`
+        : t('orders.shipmentsPanel.destination.amazonFba')
     }
     const country = shipment.destination_country || ''
-    return country ? `Warehouse · ${country}` : 'Warehouse'
+    return country
+      ? `${t('orders.shipmentsPanel.destination.warehouse')} · ${country}`
+      : t('orders.shipmentsPanel.destination.warehouse')
   }
 
   const statusMeta = SHIPMENT_STATUS_COLOR[shipment?.status] || SHIPMENT_STATUS_COLOR.draft
@@ -96,7 +102,7 @@ export default function ShipmentDetailDrawer({ shipment, darkMode, onClose, onSy
     try {
       const { error } = await supabase.rpc('tracking_sync_shipment', { p_shipment_id: shipment.id })
       if (error) throw error
-      showToast('Sync requested', 'success')
+      showToast(t('orders.shipmentsPanel.toasts.syncRequested'), 'success')
       onSyncDone?.()
       setLoadingPackages(true)
       supabase
@@ -110,7 +116,7 @@ export default function ShipmentDetailDrawer({ shipment, darkMode, onClose, onSy
         })
     } catch (err) {
       console.error('[ShipmentDetailDrawer] sync', err)
-      showToast(err?.message || 'Error en el sync', 'error')
+      showToast(err?.message || t('orders.shipmentsPanel.toasts.syncError'), 'error')
     }
     setSyncing(false)
   }
@@ -148,7 +154,7 @@ export default function ShipmentDetailDrawer({ shipment, darkMode, onClose, onSy
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
             <Truck size={18} color="var(--muted-1)" />
             <span style={{ fontSize: 14, fontWeight: 600, color: darkMode ? '#e5e7eb' : '#111827' }}>
-              Shipment {shortId}
+              {t('orders.shipmentsPanel.drawer.shipmentId', { id: shortId })}
             </span>
             <span
               style={{
@@ -164,7 +170,7 @@ export default function ShipmentDetailDrawer({ shipment, darkMode, onClose, onSy
             </span>
           </div>
           <div style={{ fontSize: 12, color: darkMode ? '#9ca3af' : '#6b7280' }}>
-            {destinationLabel()} · ETA: {formatDate(shipment.eta_estimated)}
+            {destinationLabel()} · {t('orders.shipmentsPanel.eta', { date: formatDate(shipment.eta_estimated) })}
           </div>
         </div>
         <button
@@ -180,7 +186,7 @@ export default function ShipmentDetailDrawer({ shipment, darkMode, onClose, onSy
             alignItems: 'center',
             justifyContent: 'center'
           }}
-          aria-label="Tancar"
+          aria-label={t('common.close')}
         >
           <X size={20} />
         </button>
@@ -216,16 +222,16 @@ export default function ShipmentDetailDrawer({ shipment, darkMode, onClose, onSy
           style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
         >
           <RefreshCw size={14} />
-          Sync now
+          {t('orders.shipmentsPanel.actions.syncNow')}
         </Button>
       </div>
 
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: '0 16px 16px' }}>
         <h4 style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 600, color: darkMode ? '#e5e7eb' : '#374151' }}>
-          Packages
+          {t('orders.shipmentsPanel.drawer.packages')}
         </h4>
         {loadingPackages ? (
-          <div style={{ padding: 12, fontSize: 13, color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant…</div>
+          <div style={{ padding: 12, fontSize: 13, color: darkMode ? '#9ca3af' : '#6b7280' }}>{t('common.loading')}</div>
         ) : (
           <div style={{ marginBottom: 16, minHeight: 80 }}>
             <PackageList
@@ -238,7 +244,7 @@ export default function ShipmentDetailDrawer({ shipment, darkMode, onClose, onSy
         )}
 
         <h4 style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 600, color: darkMode ? '#e5e7eb' : '#374151' }}>
-          Tracking events
+          {t('orders.shipmentsPanel.drawer.trackingEvents')}
         </h4>
         <div style={{ flex: 1, minHeight: 120, overflow: 'auto' }}>
           <TrackingEventList packageId={selectedPackageId} darkMode={darkMode} />

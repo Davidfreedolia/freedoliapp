@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { CheckCircle2, XCircle } from 'lucide-react'
 import HelpIcon from './HelpIcon'
 
 export default function AmazonReadySection({ readiness, readyStatus, onUpdate, darkMode }) {
+  const { t, i18n } = useTranslation()
   const [formData, setFormData] = useState({
     needs_fnsku: true,
     units_per_carton: null,
@@ -15,6 +17,12 @@ export default function AmazonReadySection({ readiness, readyStatus, onUpdate, d
     notes: ''
   })
   const [saving, setSaving] = useState(false)
+  const locale = (() => {
+    const lng = (i18n.language || 'ca').split('-')[0]
+    if (lng === 'en') return 'en-US'
+    if (lng === 'es') return 'es-ES'
+    return 'ca-ES'
+  })()
 
   // Sync formData when readiness changes
   useEffect(() => {
@@ -54,10 +62,10 @@ export default function AmazonReadySection({ readiness, readyStatus, onUpdate, d
     setSaving(true)
     try {
       await onUpdate(formData)
-      alert('Amazon readiness actualitzat correctament')
+      alert(t('orders.amazonReadySection.alerts.updated'))
     } catch (err) {
       console.error('Error guardant:', err)
-      alert('Error guardant: ' + (err.message || 'Error desconegut'))
+      alert(`${t('orders.amazonReadySection.alerts.saveErrorPrefix')} ${err.message || t('orders.toasts.unknownError')}`)
     }
     setSaving(false)
   }
@@ -146,12 +154,12 @@ export default function AmazonReadySection({ readiness, readyStatus, onUpdate, d
         {readyStatus.ready ? (
           <>
             <CheckCircle2 size={16} />
-            Ready per enviar a Amazon
+            {t('orders.amazonReadySection.status.readyToSend')}
           </>
         ) : (
           <>
             <XCircle size={16} />
-            Missing {readyStatus.missing.length} item(s)
+            {t('orders.amazonReadySection.status.missingItems', { count: readyStatus.missing.length })}
           </>
         )}
       </div>
@@ -160,7 +168,7 @@ export default function AmazonReadySection({ readiness, readyStatus, onUpdate, d
       {readyStatus.missing.length > 0 && (
         <div style={styles.missingList}>
           <strong style={{ fontSize: '13px', color: darkMode ? '#fca5a5' : '#dc2626', marginBottom: '8px', display: 'block' }}>
-            Missing items:
+            {t('orders.amazonReadySection.missingTitle')}
           </strong>
           {readyStatus.missing.map((item, idx) => (
             <div key={idx} style={styles.missingItem}>• {item}</div>
@@ -177,14 +185,14 @@ export default function AmazonReadySection({ readiness, readyStatus, onUpdate, d
             onChange={e => setFormData({ ...formData, needs_fnsku: e.target.checked })}
           />
           <span style={{ fontSize: '13px', color: darkMode ? '#e5e7eb' : '#374151' }}>
-            This PO needs FNSKU labels
+            {t('orders.amazonReadySection.fields.needsFnsku')}
           </span>
         </div>
 
         <div style={styles.formGrid}>
           <div style={styles.formGroup}>
             <label style={{ ...styles.label, display: 'flex', alignItems: 'center', gap: '4px' }}>
-              Units per carton
+              {t('orders.amazonReadySection.fields.unitsPerCarton')}
               <HelpIcon helpKey="amazon_ready.units_per_carton" size="small" darkMode={darkMode} />
             </label>
             <input
@@ -197,7 +205,7 @@ export default function AmazonReadySection({ readiness, readyStatus, onUpdate, d
           </div>
 
           <div style={styles.formGroup}>
-            <label style={styles.label}>Cartons count</label>
+            <label style={styles.label}>{t('orders.amazonReadySection.fields.cartonsCount')}</label>
             <input
               type="number"
               value={formData.cartons_count || ''}
@@ -208,7 +216,7 @@ export default function AmazonReadySection({ readiness, readyStatus, onUpdate, d
           </div>
 
           <div style={styles.formGroup}>
-            <label style={styles.label}>Length (cm)</label>
+            <label style={styles.label}>{t('orders.amazonReadySection.fields.length')}</label>
             <input
               type="number"
               step="0.1"
@@ -220,7 +228,7 @@ export default function AmazonReadySection({ readiness, readyStatus, onUpdate, d
           </div>
 
           <div style={styles.formGroup}>
-            <label style={styles.label}>Width (cm)</label>
+            <label style={styles.label}>{t('orders.amazonReadySection.fields.width')}</label>
             <input
               type="number"
               step="0.1"
@@ -232,7 +240,7 @@ export default function AmazonReadySection({ readiness, readyStatus, onUpdate, d
           </div>
 
           <div style={styles.formGroup}>
-            <label style={styles.label}>Height (cm)</label>
+            <label style={styles.label}>{t('orders.amazonReadySection.fields.height')}</label>
             <input
               type="number"
               step="0.1"
@@ -244,7 +252,7 @@ export default function AmazonReadySection({ readiness, readyStatus, onUpdate, d
           </div>
 
           <div style={styles.formGroup}>
-            <label style={styles.label}>Weight (kg)</label>
+            <label style={styles.label}>{t('orders.amazonReadySection.fields.weight')}</label>
             <input
               type="number"
               step="0.1"
@@ -257,26 +265,26 @@ export default function AmazonReadySection({ readiness, readyStatus, onUpdate, d
         </div>
 
         <div style={{ ...styles.formGroup, marginTop: '12px' }}>
-          <label style={styles.label}>Prep type</label>
+          <label style={styles.label}>{t('orders.amazonReadySection.fields.prepType')}</label>
           <select
             value={formData.prep_type}
             onChange={e => setFormData({ ...formData, prep_type: e.target.value })}
             style={styles.input}
           >
-            <option value="none">None</option>
-            <option value="polybag">Polybag</option>
-            <option value="bubblewrap">Bubble wrap</option>
-            <option value="labeling">Labeling</option>
+            <option value="none">{t('orders.amazonReadySection.prep.none')}</option>
+            <option value="polybag">{t('orders.amazonReadySection.prep.polybag')}</option>
+            <option value="bubblewrap">{t('orders.amazonReadySection.prep.bubblewrap')}</option>
+            <option value="labeling">{t('orders.amazonReadySection.prep.labeling')}</option>
           </select>
         </div>
 
         <div style={{ ...styles.formGroup, marginTop: '12px' }}>
-          <label style={styles.label}>Notes</label>
+          <label style={styles.label}>{t('orders.amazonReadySection.fields.notes')}</label>
           <textarea
             value={formData.notes}
             onChange={e => setFormData({ ...formData, notes: e.target.value })}
             style={{ ...styles.input, minHeight: '60px', resize: 'vertical' }}
-            placeholder="Additional notes..."
+            placeholder={t('orders.amazonReadySection.placeholders.notes')}
           />
         </div>
 
@@ -285,7 +293,7 @@ export default function AmazonReadySection({ readiness, readyStatus, onUpdate, d
           disabled={saving}
           style={styles.saveButton}
         >
-          {saving ? 'Guardant...' : 'Guardar'}
+          {saving ? t('common.saving') : t('common.save')}
         </button>
       </div>
 
@@ -293,10 +301,13 @@ export default function AmazonReadySection({ readiness, readyStatus, onUpdate, d
       {readiness?.labels_generated_at && (
         <div style={{ marginTop: '16px', padding: '12px', borderRadius: '6px', backgroundColor: darkMode ? '#1f1f2e' : '#f0f9ff', border: `1px solid ${darkMode ? '#374151' : '#bae6fd'}` }}>
           <div style={{ fontSize: '12px', fontWeight: '500', color: darkMode ? '#93c5fd' : '#0369a1', marginBottom: '4px' }}>
-            Labels generades:
+            {t('orders.amazonReadySection.labels.generated')}
           </div>
           <div style={{ fontSize: '13px', color: darkMode ? '#e5e7eb' : '#374151' }}>
-            {new Date(readiness.labels_generated_at).toLocaleString('ca-ES')} • {readiness.labels_qty} etiquetes • {readiness.labels_template || 'N/A'}
+            {new Date(readiness.labels_generated_at).toLocaleString(locale)} • {t('orders.amazonReadySection.labels.summary', {
+              count: readiness.labels_qty,
+              template: readiness.labels_template || 'N/A'
+            })}
           </div>
         </div>
       )}

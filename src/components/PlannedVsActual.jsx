@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { TrendingUp, TrendingDown, Minus, AlertCircle } from 'lucide-react'
 import { 
   getQuoteUnitPrice, 
@@ -10,6 +11,7 @@ import {
 } from '../lib/plannedVsActual'
 
 export default function PlannedVsActual({ quote, po, shipment, darkMode }) {
+  const { t } = useTranslation()
   if (!quote || !po) return null
   
   const poQuantity = getPoQuantity(po)
@@ -33,19 +35,19 @@ export default function PlannedVsActual({ quote, po, shipment, darkMode }) {
       better: {
         icon: TrendingDown,
         color: '#10b981',
-        label: 'Better',
+        label: t('orders.plannedActual.badges.better'),
         bg: '#10b98120'
       },
       worse: {
         icon: TrendingUp,
         color: '#ef4444',
-        label: 'Worse',
+        label: t('orders.plannedActual.badges.worse'),
         bg: '#ef444420'
       },
       on_target: {
         icon: Minus,
         color: '#f59e0b',
-        label: 'On Target',
+        label: t('orders.plannedActual.badges.onTarget'),
         bg: '#f59e0b20'
       }
     }
@@ -67,7 +69,7 @@ export default function PlannedVsActual({ quote, po, shipment, darkMode }) {
         fontWeight: '600',
         color: darkMode ? '#ffffff' : '#111827'
       }}>
-        Planned vs Actual
+        {t('orders.plannedActual.title')}
       </h4>
       
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -90,7 +92,7 @@ export default function PlannedVsActual({ quote, po, shipment, darkMode }) {
                 fontWeight: '500',
                 color: darkMode ? '#e5e7eb' : '#374151'
               }}>
-                Unit Price
+                {t('orders.plannedActual.sections.unitPrice')}
               </span>
               {(() => {
                 const badge = getStatusBadge(priceComparison.status)
@@ -120,7 +122,7 @@ export default function PlannedVsActual({ quote, po, shipment, darkMode }) {
               color: darkMode ? '#9ca3af' : '#6b7280',
               marginBottom: '4px'
             }}>
-              <span>Planned:</span>
+              <span>{t('orders.plannedActual.fields.planned')}:</span>
               <span style={{ fontWeight: '500', color: darkMode ? '#ffffff' : '#111827' }}>
                 {quote.currency} {priceComparison.planned.toFixed(4)}
               </span>
@@ -132,7 +134,7 @@ export default function PlannedVsActual({ quote, po, shipment, darkMode }) {
               color: darkMode ? '#9ca3af' : '#6b7280',
               marginBottom: '4px'
             }}>
-              <span>Actual:</span>
+              <span>{t('orders.plannedActual.fields.actual')}:</span>
               <span style={{ fontWeight: '500', color: darkMode ? '#ffffff' : '#111827' }}>
                 {po.currency || quote.currency} {priceComparison.actual.toFixed(4)}
               </span>
@@ -144,7 +146,7 @@ export default function PlannedVsActual({ quote, po, shipment, darkMode }) {
               color: priceComparison.deltaPercent > 0 ? '#ef4444' : '#10b981',
               fontWeight: '600'
             }}>
-              <span>Delta:</span>
+              <span>{t('orders.plannedActual.fields.delta')}:</span>
               <span>
                 {priceComparison.deltaPercent > 0 ? '+' : ''}
                 {priceComparison.deltaPercent.toFixed(2)}%
@@ -172,7 +174,7 @@ export default function PlannedVsActual({ quote, po, shipment, darkMode }) {
                 fontWeight: '500',
                 color: darkMode ? '#e5e7eb' : '#374151'
               }}>
-                Lead Time
+                {t('orders.plannedActual.sections.leadTime')}
               </span>
               {(() => {
                 const badge = getStatusBadge(leadTimeComparison.status)
@@ -202,9 +204,9 @@ export default function PlannedVsActual({ quote, po, shipment, darkMode }) {
               color: darkMode ? '#9ca3af' : '#6b7280',
               marginBottom: '4px'
             }}>
-              <span>Promised:</span>
+              <span>{t('orders.plannedActual.fields.promised')}:</span>
               <span style={{ fontWeight: '500', color: darkMode ? '#ffffff' : '#111827' }}>
-                {leadTimeComparison.promised} days
+                {t('orders.plannedActual.days', { count: leadTimeComparison.promised })}
               </span>
             </div>
             <div style={{
@@ -214,9 +216,9 @@ export default function PlannedVsActual({ quote, po, shipment, darkMode }) {
               color: darkMode ? '#9ca3af' : '#6b7280',
               marginBottom: '4px'
             }}>
-              <span>Actual:</span>
+              <span>{t('orders.plannedActual.fields.actual')}:</span>
               <span style={{ fontWeight: '500', color: darkMode ? '#ffffff' : '#111827' }}>
-                {leadTimeComparison.actual} days
+                {t('orders.plannedActual.days', { count: leadTimeComparison.actual })}
               </span>
             </div>
             <div style={{
@@ -226,11 +228,11 @@ export default function PlannedVsActual({ quote, po, shipment, darkMode }) {
               color: leadTimeComparison.delta > 0 ? '#ef4444' : '#10b981',
               fontWeight: '600'
             }}>
-              <span>Delta:</span>
+              <span>{t('orders.plannedActual.fields.delta')}:</span>
               <span>
                 {leadTimeComparison.delta > 0 ? '+' : ''}
-                {leadTimeComparison.delta} days
-                {leadTimeComparison.delta > 0 ? ' (delay)' : leadTimeComparison.delta < 0 ? ' (ahead)' : ''}
+                {t('orders.plannedActual.days', { count: leadTimeComparison.delta })}
+                {leadTimeComparison.delta > 0 ? ` ${t('orders.plannedActual.delta.delay')}` : leadTimeComparison.delta < 0 ? ` ${t('orders.plannedActual.delta.ahead')}` : ''}
               </span>
             </div>
           </div>

@@ -1,18 +1,10 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Truck, Eye, RefreshCw } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { showToast } from '../Toast'
 import Button from '../Button'
 import ShipmentDetailDrawer from './ShipmentDetailDrawer'
-
-const SHIPMENT_STATUS_COLOR = {
-  draft: { bg: '#6b7280', label: 'Draft' },
-  in_transit: { bg: '#f59e0b', label: 'In transit' },
-  customs: { bg: '#8b5cf6', label: 'Customs' },
-  delivered: { bg: '#22c55e', label: 'Delivered' },
-  exception: { bg: '#ef4444', label: 'Exception' },
-  cancelled: { bg: '#6b7280', label: 'Cancelled' }
-}
 
 function formatDate(v) {
   if (!v) return '—'
@@ -24,7 +16,17 @@ function formatDate(v) {
 }
 
 export default function ShipmentsPanel({ poId, orgId, darkMode, onShipmentSynced }) {
+  const { t } = useTranslation()
   const [shipments, setShipments] = useState([])
+  const SHIPMENT_STATUS_COLOR = {
+    draft: { bg: '#6b7280', label: t('orders.shipmentsPanel.status.draft') },
+    in_transit: { bg: '#f59e0b', label: t('orders.shipmentsPanel.status.inTransit') },
+    customs: { bg: '#8b5cf6', label: t('orders.shipmentsPanel.status.customs') },
+    delivered: { bg: '#22c55e', label: t('orders.shipmentsPanel.status.delivered') },
+    exception: { bg: '#ef4444', label: t('orders.shipmentsPanel.status.exception') },
+    cancelled: { bg: '#6b7280', label: t('orders.shipmentsPanel.status.cancelled') }
+  }
+
   const [loading, setLoading] = useState(true)
   const [drawerShipment, setDrawerShipment] = useState(null)
   const [syncingId, setSyncingId] = useState(null)
@@ -83,22 +85,26 @@ export default function ShipmentsPanel({ poId, orgId, darkMode, onShipmentSynced
     try {
       const { error } = await supabase.rpc('tracking_sync_shipment', { p_shipment_id: shipment.id })
       if (error) throw error
-      showToast('Sync requested', 'success')
+      showToast(t('orders.shipmentsPanel.toasts.syncRequested'), 'success')
       onShipmentSynced?.()
       setShipments((prev) => prev.map((s) => (s.id === shipment.id ? { ...s, updated_at: new Date().toISOString() } : s)))
     } catch (err) {
       console.error('[ShipmentsPanel] sync', err)
-      showToast(err?.message || 'Error en el sync', 'error')
+      showToast(err?.message || t('orders.shipmentsPanel.toasts.syncError'), 'error')
     }
     setSyncingId(null)
   }
 
   const destinationLabel = (s) => {
     if (s.destination_type === 'amazon_fba') {
-      return s.destination_amazon_fc_code ? `Amazon FBA · ${s.destination_amazon_fc_code}` : 'Amazon FBA'
+      return s.destination_amazon_fc_code
+        ? `${t('orders.shipmentsPanel.destination.amazonFba')} · ${s.destination_amazon_fc_code}`
+        : t('orders.shipmentsPanel.destination.amazonFba')
     }
     const country = s.destination_country || ''
-    return country ? `Warehouse · ${country}` : 'Warehouse'
+    return country
+      ? `${t('orders.shipmentsPanel.destination.warehouse')} · ${country}`
+      : t('orders.shipmentsPanel.destination.warehouse')
   }
 
   if (!poId) return null
@@ -107,10 +113,10 @@ export default function ShipmentsPanel({ poId, orgId, darkMode, onShipmentSynced
     <>
       <div style={{ marginBottom: 16 }}>
         <h4 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 600, color: darkMode ? '#e5e7eb' : '#374151' }}>
-          Shipments
+          {t('orders.shipmentsPanel.title')}
         </h4>
         {loading ? (
-          <div style={{ padding: 24, fontSize: 13, color: darkMode ? '#9ca3af' : '#6b7280' }}>Carregant…</div>
+          <div style={{ padding: 24, fontSize: 13, color: darkMode ? '#9ca3af' : '#6b7280' }}>{t('common.loading')}</div>
         ) : !shipments.length ? (
           <div
             style={{
@@ -122,7 +128,7 @@ export default function ShipmentsPanel({ poId, orgId, darkMode, onShipmentSynced
               color: darkMode ? '#9ca3af' : '#6b7280'
             }}
           >
-            Cap shipment per aquest PO.
+            {t('orders.shipmentsPanel.empty')}
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -142,6 +148,7 @@ export default function ShipmentsPanel({ poId, orgId, darkMode, onShipmentSynced
                   onView={() => setDrawerShipment(s)}
                   onSyncNow={() => handleSyncNow(s)}
                   syncing={syncingId === s.id}
+                  t={t}
                 />
               )
             })}
@@ -187,7 +194,8 @@ function ShipmentCard({
   lastSync,
   onView,
   onSyncNow,
-  syncing
+  syncing,
+  t
 }) {
   return (
     <div
@@ -223,15 +231,15 @@ function ShipmentCard({
         {destinationLabel}
       </div>
       <div style={{ fontSize: 12, color: darkMode ? '#9ca3af' : '#6b7280', marginBottom: 12 }}>
-        {packageCount != null ? `${packageCount} package(s)` : '—'}
-        {(lastSync || shipment.updated_at) && ` · Last update: ${formatDate(lastSync || shipment.updated_at)}`}
+        {packageCount != null ? t('orders.shipmentsPanel.packageCount', { count: packageCount }) : '—'}
+        {(lastSync || shipment.updated_at) && ` · ${t('orders.shipmentsPanel.lastUpdate', { date: formatDate(lastSync || shipment.updated_at) })}`}
       </div>
       <div style={{ fontSize: 12, color: darkMode ? '#9ca3af' : '#6b7280', marginBottom: 12 }}>
-        ETA: {formatDate(shipment.eta_estimated)}
+        {t('orders.shipmentsPanel.eta', { date: formatDate(shipment.eta_estimated) })}
       </div>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         <Button variant="secondary" size="sm" onClick={onView} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-          <Eye size={14} /> View
+          <Eye size={14} /> {t('orders.shipmentsPanel.actions.view')}
         </Button>
         <Button
           variant="secondary"
@@ -240,7 +248,7 @@ function ShipmentCard({
           disabled={syncing}
           style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
         >
-          <RefreshCw size={14} /> Sync now
+          <RefreshCw size={14} /> {t('orders.shipmentsPanel.actions.syncNow')}
         </Button>
       </div>
     </div>

@@ -1,23 +1,11 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Truck, Calendar, Package, CheckCircle, Clock, AlertCircle } from 'lucide-react'
 import { getPoShipment, upsertPoShipment, setShipmentStatus } from '../lib/supabase'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 
-const SHIPMENT_TYPES = [
-  { value: 'SPD', label: 'SPD - Small Parcel Delivery' },
-  { value: 'LTL', label: 'LTL - Less Than Truckload' },
-  { value: 'FTL', label: 'FTL - Full Truckload' }
-]
-
-const SHIPMENT_STATUSES = [
-  { value: 'planned', label: 'Planned', color: '#6b7280', icon: Clock },
-  { value: 'booked', label: 'Booked', color: '#3b82f6', icon: Calendar },
-  { value: 'picked_up', label: 'Picked Up', color: '#8b5cf6', icon: Package },
-  { value: 'in_transit', label: 'In Transit', color: '#f59e0b', icon: Truck },
-  { value: 'delivered', label: 'Delivered', color: '#22c55e', icon: CheckCircle }
-]
-
 export default function ShipmentTrackingSection({ po, darkMode }) {
+  const { t } = useTranslation()
   const { isMobile } = useBreakpoint()
   const [shipment, setShipment] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -38,6 +26,20 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
       loadShipment()
     }
   }, [po?.id])
+
+  const SHIPMENT_TYPES = [
+    { value: 'SPD', label: t('orders.shipmentTracking.types.spd') },
+    { value: 'LTL', label: t('orders.shipmentTracking.types.ltl') },
+    { value: 'FTL', label: t('orders.shipmentTracking.types.ftl') }
+  ]
+
+  const SHIPMENT_STATUSES = [
+    { value: 'planned', label: t('orders.shipmentTracking.statuses.planned'), color: '#6b7280', icon: Clock },
+    { value: 'booked', label: t('orders.shipmentTracking.statuses.booked'), color: '#3b82f6', icon: Calendar },
+    { value: 'picked_up', label: t('orders.shipmentTracking.statuses.pickedUp'), color: '#8b5cf6', icon: Package },
+    { value: 'in_transit', label: t('orders.shipmentTracking.statuses.inTransit'), color: '#f59e0b', icon: Truck },
+    { value: 'delivered', label: t('orders.shipmentTracking.statuses.delivered'), color: '#22c55e', icon: CheckCircle }
+  ]
 
   const loadShipment = async () => {
     setLoading(true)
@@ -66,11 +68,11 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
     // Validacions
     if (formData.status !== 'planned') {
       if (formData.shipment_type === 'SPD' && !formData.tracking_number) {
-        alert('El tracking number és obligatori per SPD quan l\'estat no és "planned"')
+        alert(t('orders.shipmentTracking.alerts.trackingRequired'))
         return
       }
       if (['LTL', 'FTL'].includes(formData.shipment_type) && !formData.pro_number) {
-        alert('El PRO number és obligatori per LTL/FTL quan l\'estat no és "planned"')
+        alert(t('orders.shipmentTracking.alerts.proRequired'))
         return
       }
     }
@@ -79,10 +81,10 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
     try {
       const saved = await upsertPoShipment(po.id, formData)
       setShipment(saved)
-      alert('Shipment guardat correctament')
+      alert(t('orders.shipmentTracking.alerts.saved'))
     } catch (err) {
       console.error('Error guardant shipment:', err)
-      alert('Error guardant shipment: ' + (err.message || 'Error desconegut'))
+      alert(`${t('orders.shipmentTracking.alerts.saveErrorPrefix')} ${err.message || t('orders.toasts.unknownError')}`)
     }
     setSaving(false)
   }
@@ -95,7 +97,7 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
       await loadShipment()
     } catch (err) {
       console.error('Error actualitzant estat:', err)
-      alert('Error actualitzant estat: ' + (err.message || 'Error desconegut'))
+      alert(`${t('orders.shipmentTracking.alerts.statusErrorPrefix')} ${err.message || t('orders.toasts.unknownError')}`)
     }
   }
 
@@ -106,7 +108,7 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
   if (loading) {
     return (
       <div style={styles.container}>
-        <div style={styles.loading}>Carregant shipment...</div>
+        <div style={styles.loading}>{t('orders.shipmentTracking.loading')}</div>
       </div>
     )
   }
@@ -122,7 +124,7 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
           color: darkMode ? '#ffffff' : '#111827'
         }}>
           <Truck size={18} />
-          Shipment to Amazon
+          {t('orders.shipmentTracking.title')}
         </h4>
         {shipment && (
           <span style={{
@@ -143,7 +145,7 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
             ...styles.label,
             color: darkMode ? '#e5e7eb' : '#374151'
           }}>
-            Tipus d'Enviament *
+            {t('orders.shipmentTracking.fields.shipmentType')} *
           </label>
           <select
             value={formData.shipment_type}
@@ -167,13 +169,13 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
             ...styles.label,
             color: darkMode ? '#e5e7eb' : '#374151'
           }}>
-            Carrier
+            {t('orders.shipmentTracking.fields.carrier')}
           </label>
           <input
             type="text"
             value={formData.carrier}
             onChange={e => setFormData({ ...formData, carrier: e.target.value })}
-            placeholder="Ex: UPS, FedEx, DHL..."
+            placeholder={t('orders.shipmentTracking.placeholders.carrier')}
             style={{
               ...styles.input,
               backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
@@ -190,13 +192,13 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
               ...styles.label,
               color: darkMode ? '#e5e7eb' : '#374151'
             }}>
-              Tracking Number {formData.status !== 'planned' && '*'}
+              {t('orders.shipmentTracking.fields.trackingNumber')} {formData.status !== 'planned' && '*'}
             </label>
             <input
               type="text"
               value={formData.tracking_number}
               onChange={e => setFormData({ ...formData, tracking_number: e.target.value })}
-              placeholder="Ex: 1Z999AA10123456784"
+              placeholder={t('orders.shipmentTracking.placeholders.trackingNumber')}
               style={{
                 ...styles.input,
                 backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
@@ -214,13 +216,13 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
               ...styles.label,
               color: darkMode ? '#e5e7eb' : '#374151'
             }}>
-              PRO Number {formData.status !== 'planned' && '*'}
+              {t('orders.shipmentTracking.fields.proNumber')} {formData.status !== 'planned' && '*'}
             </label>
             <input
               type="text"
               value={formData.pro_number}
               onChange={e => setFormData({ ...formData, pro_number: e.target.value })}
-              placeholder="Ex: PRO123456789"
+              placeholder={t('orders.shipmentTracking.placeholders.proNumber')}
               style={{
                 ...styles.input,
                 backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
@@ -241,7 +243,7 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
               ...styles.label,
               color: darkMode ? '#e5e7eb' : '#374151'
             }}>
-              Pickup Date
+              {t('orders.shipmentTracking.fields.pickupDate')}
             </label>
             <input
               type="date"
@@ -261,7 +263,7 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
               ...styles.label,
               color: darkMode ? '#e5e7eb' : '#374151'
             }}>
-              ETA Date
+              {t('orders.shipmentTracking.fields.etaDate')}
             </label>
             <input
               type="date"
@@ -283,7 +285,7 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
             ...styles.label,
             color: darkMode ? '#e5e7eb' : '#374151'
           }}>
-            Estat
+            {t('orders.shipmentTracking.fields.status')}
           </label>
           <select
             value={formData.status}
@@ -307,12 +309,12 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
             ...styles.label,
             color: darkMode ? '#e5e7eb' : '#374151'
           }}>
-            Notes
+            {t('orders.shipmentTracking.fields.notes')}
           </label>
           <textarea
             value={formData.notes}
             onChange={e => setFormData({ ...formData, notes: e.target.value })}
-            placeholder="Notes addicionals sobre l'enviament..."
+            placeholder={t('orders.shipmentTracking.placeholders.notes')}
             rows={3}
             style={{
               ...styles.textarea,
@@ -330,7 +332,7 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
               ...styles.quickActionsLabel,
               color: darkMode ? '#9ca3af' : '#6b7280'
             }}>
-              Quick Actions:
+              {t('orders.shipmentTracking.quickActions.title')}
             </span>
             <div style={styles.quickActionsButtons}>
               {formData.status !== 'booked' && (
@@ -342,7 +344,7 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
                     color: '#ffffff'
                   }}
                 >
-                  Mark Booked
+                  {t('orders.shipmentTracking.quickActions.booked')}
                 </button>
               )}
               {formData.status !== 'picked_up' && (
@@ -354,7 +356,7 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
                     color: '#ffffff'
                   }}
                 >
-                  Mark Picked Up
+                  {t('orders.shipmentTracking.quickActions.pickedUp')}
                 </button>
               )}
               {formData.status !== 'in_transit' && (
@@ -366,7 +368,7 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
                     color: '#ffffff'
                   }}
                 >
-                  Mark In Transit
+                  {t('orders.shipmentTracking.quickActions.inTransit')}
                 </button>
               )}
               {formData.status !== 'delivered' && (
@@ -378,7 +380,7 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
                     color: '#ffffff'
                   }}
                 >
-                  Mark Delivered
+                  {t('orders.shipmentTracking.quickActions.delivered')}
                 </button>
               )}
             </div>
@@ -397,7 +399,7 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
             cursor: saving ? 'not-allowed' : 'pointer'
           }}
         >
-          {saving ? 'Guardant...' : shipment ? 'Actualitzar Shipment' : 'Crear Shipment'}
+          {saving ? t('common.saving') : shipment ? t('orders.shipmentTracking.actions.update') : t('orders.shipmentTracking.actions.create')}
         </button>
       </div>
     </div>

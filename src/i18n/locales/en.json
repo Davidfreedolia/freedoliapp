@@ -1413,6 +1413,261 @@
         "generateFallback": "Error generating manufacturer pack",
         "markAsSent": "Error marking pack as sent: {{message}}"
       }
+    },
+    "amazonReadySection": {
+      "alerts": {
+        "updated": "Amazon Ready updated successfully",
+        "saveErrorPrefix": "Error saving:"
+      },
+      "status": {
+        "readyToSend": "Ready to send to Amazon",
+        "missingItems": "Missing {{count}} item(s)"
+      },
+      "missingTitle": "Missing items:",
+      "fields": {
+        "needsFnsku": "This PO needs FNSKU labels",
+        "unitsPerCarton": "Units per carton",
+        "cartonsCount": "Cartons count",
+        "length": "Length (cm)",
+        "width": "Width (cm)",
+        "height": "Height (cm)",
+        "weight": "Weight (kg)",
+        "prepType": "Prep type",
+        "notes": "Notes"
+      },
+      "prep": {
+        "none": "None",
+        "polybag": "Polybag",
+        "bubblewrap": "Bubble wrap",
+        "labeling": "Labeling"
+      },
+      "placeholders": {
+        "notes": "Additional notes..."
+      },
+      "labels": {
+        "generated": "Generated labels:",
+        "summary": "{{count}} labels • {{template}}"
+      }
+    },
+    "shipmentTracking": {
+      "title": "Shipment to Amazon",
+      "loading": "Loading shipment...",
+      "types": {
+        "spd": "SPD - Small Parcel Delivery",
+        "ltl": "LTL - Less Than Truckload",
+        "ftl": "FTL - Full Truckload"
+      },
+      "statuses": {
+        "planned": "Planned",
+        "booked": "Booked",
+        "pickedUp": "Picked up",
+        "inTransit": "In transit",
+        "delivered": "Delivered"
+      },
+      "alerts": {
+        "trackingRequired": "Tracking number is required for SPD when status is not \"planned\"",
+        "proRequired": "PRO number is required for LTL/FTL when status is not \"planned\"",
+        "saved": "Shipment saved successfully",
+        "saveErrorPrefix": "Error saving shipment:",
+        "statusErrorPrefix": "Error updating status:"
+      },
+      "fields": {
+        "shipmentType": "Shipment type",
+        "carrier": "Carrier",
+        "trackingNumber": "Tracking number",
+        "proNumber": "PRO number",
+        "pickupDate": "Pickup date",
+        "etaDate": "ETA date",
+        "status": "Status",
+        "notes": "Notes"
+      },
+      "placeholders": {
+        "carrier": "Ex: UPS, FedEx, DHL...",
+        "trackingNumber": "Ex: 1Z999AA10123456784",
+        "proNumber": "Ex: PRO123456789",
+        "notes": "Additional shipment notes..."
+      },
+      "quickActions": {
+        "title": "Quick actions:",
+        "booked": "Mark booked",
+        "pickedUp": "Mark picked up",
+        "inTransit": "Mark in transit",
+        "delivered": "Mark delivered"
+      },
+      "actions": {
+        "update": "Update shipment",
+        "create": "Create shipment"
+      }
+    },
+    "shipmentsPanel": {
+      "title": "Shipments",
+      "empty": "No shipments for this PO.",
+      "status": {
+        "draft": "Draft",
+        "inTransit": "In transit",
+        "customs": "Customs",
+        "delivered": "Delivered",
+        "exception": "Exception",
+        "cancelled": "Cancelled"
+      },
+      "destination": {
+        "amazonFba": "Amazon FBA",
+        "warehouse": "Warehouse"
+      },
+      "toasts": {
+        "syncRequested": "Sync requested",
+        "syncError": "Sync error"
+      },
+      "packageCount": "{{count}} package(s)",
+      "lastUpdate": "Last update: {{date}}",
+      "eta": "ETA: {{date}}",
+      "drawer": {
+        "shipmentId": "Shipment {{id}}",
+        "packages": "Packages",
+        "trackingEvents": "Tracking events",
+        "noPackages": "No packages.",
+        "lastSync": "Last sync: {{date}}",
+        "selectPackage": "Select a package to view events.",
+        "noTrackingEvents": "No tracking events.",
+        "columns": {
+          "date": "Date",
+          "location": "Location",
+          "status": "Status"
+        }
+      },
+      "packageStatus": {
+        "pending": "Pending",
+        "inTransit": "In transit",
+        "delivered": "Delivered",
+        "exception": "Exception",
+        "cancelled": "Cancelled"
+      },
+      "actions": {
+        "view": "View",
+        "syncNow": "Sync now"
+      }
+    },
+    "plannedActual": {
+      "title": "Planned vs actual",
+      "badges": {
+        "better": "Better",
+        "worse": "Worse",
+        "onTarget": "On target"
+      },
+      "sections": {
+        "unitPrice": "Unit price",
+        "leadTime": "Lead time"
+      },
+      "fields": {
+        "planned": "Planned",
+        "actual": "Actual",
+        "delta": "Delta",
+        "promised": "Promised"
+      },
+      "days": "{{count}} days",
+      "delta": {
+        "delay": "(delay)",
+        "ahead": "(ahead)"
+      }
+    },
+    "newPoModal": {
+      "title": {
+        "edit": "Edit order",
+        "create": "New purchase order"
+      },
+      "alerts": {
+        "generatePoNumberError": "Error generating PO number",
+        "selectProject": "Select a project",
+        "selectSupplier": "Select a supplier",
+        "missingPoNumber": "Error: PO number was not generated"
+      },
+      "generatingPoNumber": "Generating...",
+      "warehouseTypes": {
+        "forwarder": "Forwarder",
+        "agent": "Agent",
+        "amazonFba": "Amazon FBA",
+        "amazonFbm": "Amazon FBM",
+        "custom": "Custom"
+      },
+      "sections": {
+        "basicInfo": "Basic information",
+        "deliveryAddress": "Delivery address",
+        "commercialTerms": "Commercial terms",
+        "productDetails": "Product details",
+        "shippingSpecs": "Shipping specifications"
+      },
+      "fields": {
+        "project": "Project",
+        "poNumber": "PO number",
+        "supplier": "Supplier",
+        "date": "Date",
+        "quoteRef": "Quote ref",
+        "currency": "Currency",
+        "selectWarehouse": "Select warehouse / address",
+        "fullAddress": "Full address",
+        "contact": "Contact",
+        "phone": "Phone",
+        "email": "Email",
+        "paymentTerms": "Payment terms",
+        "incoterm": "Incoterm",
+        "sampleLeadTime": "Sample lead time",
+        "productionLeadTime": "Production lead time",
+        "quoteValidity": "Quote validity",
+        "ref": "Ref",
+        "description": "Description",
+        "qty": "Qty",
+        "unit": "Unit",
+        "price": "Price",
+        "total": "Total",
+        "totalCartons": "Total cartons (CTN)",
+        "netWeight": "Net weight (kg)",
+        "grossWeight": "Gross weight (kg)",
+        "totalVolume": "Total volume (CBM)",
+        "cartonSize": "Carton size",
+        "shippingMark": "Shipping mark",
+        "trackingNumber": "Tracking number",
+        "logisticsStatus": "Logistics status",
+        "additionalNotes": "Additional notes"
+      },
+      "placeholders": {
+        "selectProject": "Select project...",
+        "selectSupplier": "Select supplier...",
+        "quoteRef": "Ex: 20251216",
+        "selectWarehouse": "-- Select or enter manually --",
+        "fullAddress": "Shenzhen Wingspeed Logistics Park...",
+        "contact": "Contact name",
+        "paymentTerms": "50% deposit, 50% before shipping",
+        "incotermLocation": "SHENZHEN",
+        "sampleLeadTime": "7 days",
+        "productionLeadTime": "2 months",
+        "quoteValidity": "5 months",
+        "productDescription": "Product description...",
+        "totalCartons": "40 CTN",
+        "netWeight": "340 kg",
+        "grossWeight": "360 kg",
+        "totalVolume": "2.49 CBM",
+        "cartonSize": "45x38.5x36cm",
+        "shippingMark": "Freedolia + David Castellà",
+        "selectLogisticsStatus": "Select status",
+        "additionalNotes": "Notes, special instructions..."
+      },
+      "logisticsStatuses": {
+        "production": "Production",
+        "pickup": "Pickup",
+        "inTransit": "In transit",
+        "customs": "Customs",
+        "amazonFba": "Amazon FBA",
+        "delivered": "Delivered"
+      },
+      "actions": {
+        "addLine": "Add line",
+        "createPo": "Create PO",
+        "update": "Update"
+      },
+      "hints": {
+        "selectProjectForPoNumber": "Select a project to generate the PO number",
+        "selectProjectToContinue": "Select a project to continue"
+      }
     }
   },
   "amazonReadiness": {

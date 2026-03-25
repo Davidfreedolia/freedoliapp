@@ -1,12 +1,5 @@
 import { useMemo } from 'react'
-
-const PACKAGE_STATUS_COLOR = {
-  pending: { bg: '#6b7280', label: 'Pending' },
-  in_transit: { bg: '#f59e0b', label: 'In transit' },
-  delivered: { bg: '#22c55e', label: 'Delivered' },
-  exception: { bg: '#ef4444', label: 'Exception' },
-  cancelled: { bg: '#6b7280', label: 'Cancelled' }
-}
+import { useTranslation } from 'react-i18next'
 
 function formatDate(v) {
   if (!v) return '—'
@@ -18,12 +11,20 @@ function formatDate(v) {
 }
 
 export default function PackageList({ packages, selectedPackageId, onSelectPackage, darkMode }) {
+  const { t } = useTranslation()
   const list = useMemo(() => Array.isArray(packages) ? packages : [], [packages])
+  const PACKAGE_STATUS_COLOR = {
+    pending: { bg: '#6b7280', label: t('orders.shipmentsPanel.packageStatus.pending') },
+    in_transit: { bg: '#f59e0b', label: t('orders.shipmentsPanel.packageStatus.inTransit') },
+    delivered: { bg: '#22c55e', label: t('orders.shipmentsPanel.packageStatus.delivered') },
+    exception: { bg: '#ef4444', label: t('orders.shipmentsPanel.packageStatus.exception') },
+    cancelled: { bg: '#6b7280', label: t('orders.shipmentsPanel.packageStatus.cancelled') }
+  }
 
   if (!list.length) {
     return (
       <div style={{ padding: 12, fontSize: 13, color: darkMode ? '#9ca3af' : '#6b7280' }}>
-        Cap package.
+        {t('orders.shipmentsPanel.drawer.noPackages')}
       </div>
     )
   }
@@ -68,7 +69,7 @@ export default function PackageList({ packages, selectedPackageId, onSelectPacka
             </div>
             <div style={{ fontSize: 12, color: darkMode ? '#9ca3af' : '#6b7280' }}>
               {pkg.carrier_name && <span>{pkg.carrier_name} · </span>}
-              Last sync: {formatDate(pkg.last_tracking_sync_at)}
+              {t('orders.shipmentsPanel.drawer.lastSync', { date: formatDate(pkg.last_tracking_sync_at) })}
             </div>
           </button>
         )

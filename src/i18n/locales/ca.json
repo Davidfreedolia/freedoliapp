@@ -1426,6 +1426,261 @@
         "generateFallback": "Error generant el pack del fabricant",
         "markAsSent": "Error marcant el pack com enviat: {{message}}"
       }
+    },
+    "amazonReadySection": {
+      "alerts": {
+        "updated": "Amazon Ready actualitzat correctament",
+        "saveErrorPrefix": "Error guardant:"
+      },
+      "status": {
+        "readyToSend": "Preparat per enviar a Amazon",
+        "missingItems": "Falten {{count}} element(s)"
+      },
+      "missingTitle": "Elements pendents:",
+      "fields": {
+        "needsFnsku": "Aquesta PO necessita etiquetes FNSKU",
+        "unitsPerCarton": "Unitats per caixa",
+        "cartonsCount": "Nombre de caixes",
+        "length": "Llargada (cm)",
+        "width": "Amplada (cm)",
+        "height": "Alçada (cm)",
+        "weight": "Pes (kg)",
+        "prepType": "Tipus de preparació",
+        "notes": "Notes"
+      },
+      "prep": {
+        "none": "Cap",
+        "polybag": "Bossa de plàstic",
+        "bubblewrap": "Plàstic de bombolles",
+        "labeling": "Etiquetatge"
+      },
+      "placeholders": {
+        "notes": "Notes addicionals..."
+      },
+      "labels": {
+        "generated": "Etiquetes generades:",
+        "summary": "{{count}} etiquetes • {{template}}"
+      }
+    },
+    "shipmentTracking": {
+      "title": "Shipment cap a Amazon",
+      "loading": "Carregant shipment...",
+      "types": {
+        "spd": "SPD - Small Parcel Delivery",
+        "ltl": "LTL - Less Than Truckload",
+        "ftl": "FTL - Full Truckload"
+      },
+      "statuses": {
+        "planned": "Planificat",
+        "booked": "Reservat",
+        "pickedUp": "Recollit",
+        "inTransit": "En trànsit",
+        "delivered": "Entregat"
+      },
+      "alerts": {
+        "trackingRequired": "El tracking number és obligatori per SPD quan l'estat no és \"planned\"",
+        "proRequired": "El PRO number és obligatori per LTL/FTL quan l'estat no és \"planned\"",
+        "saved": "Shipment guardat correctament",
+        "saveErrorPrefix": "Error guardant shipment:",
+        "statusErrorPrefix": "Error actualitzant estat:"
+      },
+      "fields": {
+        "shipmentType": "Tipus d'enviament",
+        "carrier": "Carrier",
+        "trackingNumber": "Tracking number",
+        "proNumber": "PRO number",
+        "pickupDate": "Data de recollida",
+        "etaDate": "Data ETA",
+        "status": "Estat",
+        "notes": "Notes"
+      },
+      "placeholders": {
+        "carrier": "Ex: UPS, FedEx, DHL...",
+        "trackingNumber": "Ex: 1Z999AA10123456784",
+        "proNumber": "Ex: PRO123456789",
+        "notes": "Notes addicionals sobre l'enviament..."
+      },
+      "quickActions": {
+        "title": "Accions ràpides:",
+        "booked": "Marcar com reservat",
+        "pickedUp": "Marcar com recollit",
+        "inTransit": "Marcar en trànsit",
+        "delivered": "Marcar entregat"
+      },
+      "actions": {
+        "update": "Actualitzar shipment",
+        "create": "Crear shipment"
+      }
+    },
+    "shipmentsPanel": {
+      "title": "Shipments",
+      "empty": "Cap shipment per aquest PO.",
+      "status": {
+        "draft": "Esborrany",
+        "inTransit": "En trànsit",
+        "customs": "Duanes",
+        "delivered": "Entregat",
+        "exception": "Incidència",
+        "cancelled": "Cancel·lat"
+      },
+      "destination": {
+        "amazonFba": "Amazon FBA",
+        "warehouse": "Magatzem"
+      },
+      "toasts": {
+        "syncRequested": "Sincronització sol·licitada",
+        "syncError": "Error en la sincronització"
+      },
+      "packageCount": "{{count}} paquet(s)",
+      "lastUpdate": "Última actualització: {{date}}",
+      "eta": "ETA: {{date}}",
+      "drawer": {
+        "shipmentId": "Shipment {{id}}",
+        "packages": "Paquets",
+        "trackingEvents": "Esdeveniments de tracking",
+        "noPackages": "Cap paquet.",
+        "lastSync": "Última sincronització: {{date}}",
+        "selectPackage": "Selecciona un paquet per veure els esdeveniments.",
+        "noTrackingEvents": "Cap esdeveniment de tracking.",
+        "columns": {
+          "date": "Data",
+          "location": "Ubicació",
+          "status": "Estat"
+        }
+      },
+      "packageStatus": {
+        "pending": "Pendent",
+        "inTransit": "En trànsit",
+        "delivered": "Entregat",
+        "exception": "Incidència",
+        "cancelled": "Cancel·lat"
+      },
+      "actions": {
+        "view": "Veure",
+        "syncNow": "Sincronitzar ara"
+      }
+    },
+    "plannedActual": {
+      "title": "Planificat vs real",
+      "badges": {
+        "better": "Millor",
+        "worse": "Pitjor",
+        "onTarget": "En objectiu"
+      },
+      "sections": {
+        "unitPrice": "Preu unitari",
+        "leadTime": "Lead time"
+      },
+      "fields": {
+        "planned": "Planificat",
+        "actual": "Real",
+        "delta": "Delta",
+        "promised": "Promès"
+      },
+      "days": "{{count}} dies",
+      "delta": {
+        "delay": "(retard)",
+        "ahead": "(avançat)"
+      }
+    },
+    "newPoModal": {
+      "title": {
+        "edit": "Editar comanda",
+        "create": "Nova purchase order"
+      },
+      "alerts": {
+        "generatePoNumberError": "Error generant número de PO",
+        "selectProject": "Selecciona un projecte",
+        "selectSupplier": "Selecciona un proveïdor",
+        "missingPoNumber": "Error: no s'ha generat el número de PO"
+      },
+      "generatingPoNumber": "Generant...",
+      "warehouseTypes": {
+        "forwarder": "Transitari",
+        "agent": "Agent",
+        "amazonFba": "Amazon FBA",
+        "amazonFbm": "Amazon FBM",
+        "custom": "Personalitzat"
+      },
+      "sections": {
+        "basicInfo": "Informació bàsica",
+        "deliveryAddress": "Adreça d'entrega",
+        "commercialTerms": "Termes comercials",
+        "productDetails": "Detall de productes",
+        "shippingSpecs": "Especificacions d'enviament"
+      },
+      "fields": {
+        "project": "Projecte",
+        "poNumber": "Número PO",
+        "supplier": "Proveïdor",
+        "date": "Data",
+        "quoteRef": "Ref. pressupost",
+        "currency": "Moneda",
+        "selectWarehouse": "Seleccionar magatzem / adreça",
+        "fullAddress": "Adreça completa",
+        "contact": "Contacte",
+        "phone": "Telèfon",
+        "email": "Email",
+        "paymentTerms": "Termes de pagament",
+        "incoterm": "Incoterm",
+        "sampleLeadTime": "Lead time mostres",
+        "productionLeadTime": "Lead time producció",
+        "quoteValidity": "Validesa pressupost",
+        "ref": "Ref",
+        "description": "Descripció",
+        "qty": "Quantitat",
+        "unit": "Unitat",
+        "price": "Preu",
+        "total": "Total",
+        "totalCartons": "Total caixes (CTN)",
+        "netWeight": "Pes net (kg)",
+        "grossWeight": "Pes brut (kg)",
+        "totalVolume": "Volum total (CBM)",
+        "cartonSize": "Mida caixa",
+        "shippingMark": "Shipping mark",
+        "trackingNumber": "Tracking number",
+        "logisticsStatus": "Estat logístic",
+        "additionalNotes": "Notes addicionals"
+      },
+      "placeholders": {
+        "selectProject": "Selecciona projecte...",
+        "selectSupplier": "Selecciona proveïdor...",
+        "quoteRef": "Ex: 20251216",
+        "selectWarehouse": "-- Selecciona o escriu manualment --",
+        "fullAddress": "Shenzhen Wingspeed Logistics Park...",
+        "contact": "Nom del contacte",
+        "paymentTerms": "50% dipòsit, 50% abans de l'enviament",
+        "incotermLocation": "SHENZHEN",
+        "sampleLeadTime": "7 dies",
+        "productionLeadTime": "2 mesos",
+        "quoteValidity": "5 mesos",
+        "productDescription": "Descripció del producte...",
+        "totalCartons": "40 CTN",
+        "netWeight": "340 kg",
+        "grossWeight": "360 kg",
+        "totalVolume": "2.49 CBM",
+        "cartonSize": "45x38.5x36cm",
+        "shippingMark": "Freedolia + David Castellà",
+        "selectLogisticsStatus": "Selecciona estat",
+        "additionalNotes": "Notes, instruccions especials..."
+      },
+      "logisticsStatuses": {
+        "production": "Producció",
+        "pickup": "Recollida",
+        "inTransit": "En trànsit",
+        "customs": "Duanes",
+        "amazonFba": "Amazon FBA",
+        "delivered": "Lliurat"
+      },
+      "actions": {
+        "addLine": "Afegir línia",
+        "createPo": "Crear PO",
+        "update": "Actualitzar"
+      },
+      "hints": {
+        "selectProjectForPoNumber": "Selecciona un projecte per generar el número de PO",
+        "selectProjectToContinue": "Selecciona un projecte per continuar"
+      }
     }
   },
   "amazonReadiness": {

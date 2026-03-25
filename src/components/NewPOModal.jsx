@@ -169,11 +169,11 @@ export default function NewPOModal({
   // Obtenir icona i color segons tipus de magatzem
   const getWarehouseTypeInfo = (type) => {
     const types = {
-      forwarder: { icon: '🚚', label: 'Transitari' },
-      agent: { icon: '🏭', label: 'Agent' },
-      amazon_fba: { icon: '📦', label: 'Amazon FBA' },
-      amazon_fbm: { icon: '📦', label: 'Amazon FBM' },
-      custom: { icon: '📍', label: 'Personalitzat' }
+      forwarder: { icon: '🚚', label: t('orders.newPoModal.warehouseTypes.forwarder') },
+      agent: { icon: '🏭', label: t('orders.newPoModal.warehouseTypes.agent') },
+      amazon_fba: { icon: '📦', label: t('orders.newPoModal.warehouseTypes.amazonFba') },
+      amazon_fbm: { icon: '📦', label: t('orders.newPoModal.warehouseTypes.amazonFbm') },
+      custom: { icon: '📍', label: t('orders.newPoModal.warehouseTypes.custom') }
     }
     return types[type] || types.custom
   }
@@ -223,7 +223,7 @@ export default function NewPOModal({
       }))
     } catch (err) {
       console.error('Error generant PO:', err)
-      alert('Error generant número de PO')
+      alert(t('orders.newPoModal.alerts.generatePoNumberError'))
     }
     setGeneratingPO(false)
   }
@@ -269,15 +269,15 @@ export default function NewPOModal({
   // Guardar PO
   const handleSave = async () => {
     if (!formData.project_id) {
-      alert('Selecciona un projecte')
+      alert(t('orders.newPoModal.alerts.selectProject'))
       return
     }
     if (!formData.supplier_id) {
-      alert('Selecciona un proveïdor')
+      alert(t('orders.newPoModal.alerts.selectSupplier'))
       return
     }
     if (!formData.po_number) {
-      alert('Error: No s\'ha generat el número de PO')
+      alert(t('orders.newPoModal.alerts.missingPoNumber'))
       return
     }
 
@@ -370,13 +370,13 @@ export default function NewPOModal({
               ...styles.title,
               color: darkMode ? '#ffffff' : '#111827'
             }}>
-              {editingOrder ? 'Editar Comanda' : 'Nova Purchase Order'}
+              {editingOrder ? t('orders.newPoModal.title.edit') : t('orders.newPoModal.title.create')}
             </h2>
             {formData.po_number && (
               <span style={styles.poNumberBadge}>{formData.po_number}</span>
             )}
           </div>
-          <Button variant="ghost" onClick={onClose} aria-label="Tancar">
+          <Button variant="ghost" onClick={onClose} aria-label={t('common.close')}>
             <X size={20} />
           </Button>
         </div>
@@ -387,12 +387,12 @@ export default function NewPOModal({
           <div style={styles.section}>
             <h3 style={{...styles.sectionTitle, color: darkMode ? '#ffffff' : '#111827'}}>
               <FileText size={18} />
-              Informació Bàsica
+              {t('orders.newPoModal.sections.basicInfo')}
             </h3>
             
             <div style={styles.formGrid}>
               <div style={styles.formGroup}>
-                <label style={styles.label}>Projecte *</label>
+                <label style={styles.label}>{t('orders.newPoModal.fields.project')} *</label>
                 <select
                   value={formData.project_id}
                   onChange={e => handleProjectChange(e.target.value)}
@@ -403,7 +403,7 @@ export default function NewPOModal({
                     color: darkMode ? '#ffffff' : '#111827'
                   }}
                 >
-                  <option value="">Selecciona projecte...</option>
+                  <option value="">{t('orders.newPoModal.placeholders.selectProject')}</option>
                   {projects.map(project => (
                     <option key={project.id} value={project.id}>
                       {project.sku || project.project_code} - {project.name}
@@ -413,10 +413,10 @@ export default function NewPOModal({
               </div>
 
               <div style={styles.formGroup}>
-                <label style={styles.label}>Número PO</label>
+                <label style={styles.label}>{t('orders.newPoModal.fields.poNumber')}</label>
                 <input
                   type="text"
-                  value={generatingPO ? 'Generant...' : formData.po_number}
+                  value={generatingPO ? t('orders.newPoModal.generatingPoNumber') : formData.po_number}
                   disabled
                   style={{
                     ...styles.input,
@@ -429,7 +429,7 @@ export default function NewPOModal({
               </div>
 
               <div style={styles.formGroup}>
-                <label style={styles.label}>Proveïdor *</label>
+                <label style={styles.label}>{t('orders.newPoModal.fields.supplier')} *</label>
                 <select
                   value={formData.supplier_id}
                   onChange={e => {
@@ -450,7 +450,7 @@ export default function NewPOModal({
                     color: darkMode ? '#ffffff' : '#111827'
                   }}
                 >
-                  <option value="">Selecciona proveïdor...</option>
+                  <option value="">{t('orders.newPoModal.placeholders.selectSupplier')}</option>
                   {suppliers.filter(s => s.type !== 'freight').map(supplier => (
                     <option key={supplier.id} value={supplier.id}>
                       {supplier.name} ({supplier.city}, {supplier.country})
@@ -460,7 +460,7 @@ export default function NewPOModal({
               </div>
 
               <div style={styles.formGroup}>
-                <label style={styles.label}>Data</label>
+                <label style={styles.label}>{t('orders.newPoModal.fields.date')}</label>
                 <input
                   type="date"
                   value={formData.order_date}
@@ -474,12 +474,12 @@ export default function NewPOModal({
               </div>
 
               <div style={styles.formGroup}>
-                <label style={styles.label}>Ref. Pressupost</label>
+                <label style={styles.label}>{t('orders.newPoModal.fields.quoteRef')}</label>
                 <input
                   type="text"
                   value={formData.quote_ref}
                   onChange={e => setFormData({...formData, quote_ref: e.target.value})}
-                  placeholder="Ex: 20251216"
+                  placeholder={t('orders.newPoModal.placeholders.quoteRef')}
                   style={{
                     ...styles.input,
                     backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
@@ -489,7 +489,7 @@ export default function NewPOModal({
               </div>
 
               <div style={styles.formGroup}>
-                <label style={styles.label}>Moneda</label>
+                <label style={styles.label}>{t('orders.newPoModal.fields.currency')}</label>
                 <select
                   value={formData.currency}
                   onChange={e => setFormData({...formData, currency: e.target.value})}
@@ -511,13 +511,13 @@ export default function NewPOModal({
           <div style={styles.section}>
             <h3 style={{...styles.sectionTitle, color: darkMode ? '#ffffff' : '#111827'}}>
               <Truck size={18} />
-              Adreça d'Entrega
+              {t('orders.newPoModal.sections.deliveryAddress')}
             </h3>
             
             <div style={styles.formGrid}>
               {/* Combo de magatzems */}
               <div style={{...styles.formGroup, gridColumn: 'span 3'}}>
-                <label style={styles.label}>Seleccionar Magatzem / Adreça</label>
+                <label style={styles.label}>{t('orders.newPoModal.fields.selectWarehouse')}</label>
                 <select
                   value={formData.warehouse_id}
                   onChange={e => handleWarehouseChange(e.target.value)}
@@ -527,7 +527,7 @@ export default function NewPOModal({
                     color: darkMode ? '#ffffff' : '#111827'
                   }}
                 >
-                  <option value="">-- Selecciona o escriu manualment --</option>
+                  <option value="">{t('orders.newPoModal.placeholders.selectWarehouse')}</option>
                   {warehouses.map(warehouse => {
                     const typeInfo = getWarehouseTypeInfo(warehouse.type)
                     return (
@@ -540,11 +540,11 @@ export default function NewPOModal({
               </div>
 
               <div style={{...styles.formGroup, gridColumn: 'span 3'}}>
-                <label style={styles.label}>Adreça completa</label>
+                <label style={styles.label}>{t('orders.newPoModal.fields.fullAddress')}</label>
                 <textarea
                   value={formData.delivery_address}
                   onChange={e => setFormData({...formData, delivery_address: e.target.value})}
-                  placeholder="Shenzhen Wingspeed Logistics Park..."
+                  placeholder={t('orders.newPoModal.placeholders.fullAddress')}
                   rows={2}
                   style={{
                     ...styles.input,
@@ -555,12 +555,12 @@ export default function NewPOModal({
                 />
               </div>
               <div style={styles.formGroup}>
-                <label style={styles.label}>Contacte</label>
+                <label style={styles.label}>{t('orders.newPoModal.fields.contact')}</label>
                 <input
                   type="text"
                   value={formData.delivery_contact}
                   onChange={e => setFormData({...formData, delivery_contact: e.target.value})}
-                  placeholder="Nom del contacte"
+                  placeholder={t('orders.newPoModal.placeholders.contact')}
                   style={{
                     ...styles.input,
                     backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
@@ -569,7 +569,7 @@ export default function NewPOModal({
                 />
               </div>
               <div style={styles.formGroup}>
-                <label style={styles.label}>Telèfon</label>
+                <label style={styles.label}>{t('orders.newPoModal.fields.phone')}</label>
                 <input
                   type="tel"
                   value={formData.delivery_phone}
@@ -583,7 +583,7 @@ export default function NewPOModal({
                 />
               </div>
               <div style={styles.formGroup}>
-                <label style={styles.label}>Email</label>
+                <label style={styles.label}>{t('orders.newPoModal.fields.email')}</label>
                 <input
                   type="email"
                   value={formData.delivery_email}
@@ -602,17 +602,17 @@ export default function NewPOModal({
           <div style={styles.section}>
             <h3 style={{...styles.sectionTitle, color: darkMode ? '#ffffff' : '#111827'}}>
               <Building2 size={18} />
-              Termes Comercials
+              {t('orders.newPoModal.sections.commercialTerms')}
             </h3>
             
             <div style={styles.formGrid}>
               <div style={styles.formGroup}>
-                <label style={styles.label}>Termes de Pagament</label>
+                <label style={styles.label}>{t('orders.newPoModal.fields.paymentTerms')}</label>
                 <input
                   type="text"
                   value={formData.payment_terms}
                   onChange={e => setFormData({...formData, payment_terms: e.target.value})}
-                  placeholder="50% deposit, 50% before shipping"
+                  placeholder={t('orders.newPoModal.placeholders.paymentTerms')}
                   style={{
                     ...styles.input,
                     backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
@@ -621,7 +621,7 @@ export default function NewPOModal({
                 />
               </div>
               <div style={styles.formGroup}>
-                <label style={styles.label}>Incoterm</label>
+                <label style={styles.label}>{t('orders.newPoModal.fields.incoterm')}</label>
                 <div style={styles.inlineInputs}>
                   <select
                     value={formData.incoterm}
@@ -641,7 +641,7 @@ export default function NewPOModal({
                     type="text"
                     value={formData.incoterm_location}
                     onChange={e => setFormData({...formData, incoterm_location: e.target.value})}
-                    placeholder="SHENZHEN"
+                    placeholder={t('orders.newPoModal.placeholders.incotermLocation')}
                     style={{
                       ...styles.input,
                       flex: 1,
@@ -652,12 +652,12 @@ export default function NewPOModal({
                 </div>
               </div>
               <div style={styles.formGroup}>
-                <label style={styles.label}>Lead Time Mostres</label>
+                <label style={styles.label}>{t('orders.newPoModal.fields.sampleLeadTime')}</label>
                 <input
                   type="text"
                   value={formData.sample_lead_time}
                   onChange={e => setFormData({...formData, sample_lead_time: e.target.value})}
-                  placeholder="7 dies"
+                  placeholder={t('orders.newPoModal.placeholders.sampleLeadTime')}
                   style={{
                     ...styles.input,
                     backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
@@ -666,12 +666,12 @@ export default function NewPOModal({
                 />
               </div>
               <div style={styles.formGroup}>
-                <label style={styles.label}>Lead Time Producció</label>
+                <label style={styles.label}>{t('orders.newPoModal.fields.productionLeadTime')}</label>
                 <input
                   type="text"
                   value={formData.production_lead_time}
                   onChange={e => setFormData({...formData, production_lead_time: e.target.value})}
-                  placeholder="2 mesos"
+                  placeholder={t('orders.newPoModal.placeholders.productionLeadTime')}
                   style={{
                     ...styles.input,
                     backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
@@ -680,12 +680,12 @@ export default function NewPOModal({
                 />
               </div>
               <div style={styles.formGroup}>
-                <label style={styles.label}>Validesa Pressupost</label>
+                <label style={styles.label}>{t('orders.newPoModal.fields.quoteValidity')}</label>
                 <input
                   type="text"
                   value={formData.quote_validity}
                   onChange={e => setFormData({...formData, quote_validity: e.target.value})}
-                  placeholder="5 mesos"
+                  placeholder={t('orders.newPoModal.placeholders.quoteValidity')}
                   style={{
                     ...styles.input,
                     backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
@@ -701,23 +701,23 @@ export default function NewPOModal({
             <div style={styles.sectionHeader}>
               <h3 style={{...styles.sectionTitle, color: darkMode ? '#ffffff' : '#111827', margin: 0}}>
                 <Package size={18} />
-                Detall de Productes
+                {t('orders.newPoModal.sections.productDetails')}
               </h3>
               <Button variant="primary" onClick={addItem}>
                 <Plus size={16} />
-                Afegir línia
+                {t('orders.newPoModal.actions.addLine')}
               </Button>
             </div>
             
             <div style={styles.itemsTableWrapper}>
               <div style={styles.itemsTable}>
                 <div style={styles.itemsHeader}>
-                  <span style={{width: '40px', minWidth: '40px', flexShrink: 0}}>Ref</span>
-                  <span style={{flex: '2 1 0', minWidth: 0}}>Descripció</span>
-                  <span style={{width: '80px', minWidth: '80px', flexShrink: 0}}>Qty</span>
-                  <span style={{width: '80px', minWidth: '80px', flexShrink: 0}}>Unitat</span>
-                  <span style={{width: '100px', minWidth: '100px', flexShrink: 0}}>Preu ({formData.currency})</span>
-                  <span style={{width: '100px', minWidth: '100px', flexShrink: 0}}>Total</span>
+                  <span style={{width: '40px', minWidth: '40px', flexShrink: 0}}>{t('orders.newPoModal.fields.ref')}</span>
+                  <span style={{flex: '2 1 0', minWidth: 0}}>{t('orders.newPoModal.fields.description')}</span>
+                  <span style={{width: '80px', minWidth: '80px', flexShrink: 0}}>{t('orders.newPoModal.fields.qty')}</span>
+                  <span style={{width: '80px', minWidth: '80px', flexShrink: 0}}>{t('orders.newPoModal.fields.unit')}</span>
+                  <span style={{width: '100px', minWidth: '100px', flexShrink: 0}}>{t('orders.newPoModal.fields.price')} ({formData.currency})</span>
+                  <span style={{width: '100px', minWidth: '100px', flexShrink: 0}}>{t('orders.newPoModal.fields.total')}</span>
                   <span style={{width: '40px', minWidth: '40px', flexShrink: 0}}></span>
                 </div>
                 
@@ -728,7 +728,7 @@ export default function NewPOModal({
                       type="text"
                       value={item.description}
                       onChange={e => updateItem(index, 'description', e.target.value)}
-                      placeholder="Descripció del producte..."
+                      placeholder={t('orders.newPoModal.placeholders.productDescription')}
                       style={{
                         ...styles.itemInput,
                         flex: '2 1 0',
@@ -807,7 +807,7 @@ export default function NewPOModal({
                 {/* Total */}
                 <div style={styles.totalRow}>
                   <span style={{flex: '1 1 0', minWidth: 0, textAlign: 'right', fontWeight: '600'}}>
-                    TOTAL ({formData.currency}):
+                    {t('orders.newPoModal.fields.total').toUpperCase()} ({formData.currency}):
                   </span>
                   <span style={{
                     width: '100px',
@@ -830,17 +830,17 @@ export default function NewPOModal({
           <div style={styles.section}>
             <h3 style={{...styles.sectionTitle, color: darkMode ? '#ffffff' : '#111827'}}>
               <Calculator size={18} />
-              Especificacions d'Enviament
+              {t('orders.newPoModal.sections.shippingSpecs')}
             </h3>
             
             <div style={styles.formGrid}>
               <div style={styles.formGroup}>
-                <label style={styles.label}>Total Caixes (CTN)</label>
+                <label style={styles.label}>{t('orders.newPoModal.fields.totalCartons')}</label>
                 <input
                   type="text"
                   value={formData.total_cartons}
                   onChange={e => setFormData({...formData, total_cartons: e.target.value})}
-                  placeholder="40 CTN"
+                  placeholder={t('orders.newPoModal.placeholders.totalCartons')}
                   style={{
                     ...styles.input,
                     backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
@@ -849,12 +849,12 @@ export default function NewPOModal({
                 />
               </div>
               <div style={styles.formGroup}>
-                <label style={styles.label}>Pes Net (kg)</label>
+                <label style={styles.label}>{t('orders.newPoModal.fields.netWeight')}</label>
                 <input
                   type="text"
                   value={formData.net_weight}
                   onChange={e => setFormData({...formData, net_weight: e.target.value})}
-                  placeholder="340 kg"
+                  placeholder={t('orders.newPoModal.placeholders.netWeight')}
                   style={{
                     ...styles.input,
                     backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
@@ -863,12 +863,12 @@ export default function NewPOModal({
                 />
               </div>
               <div style={styles.formGroup}>
-                <label style={styles.label}>Pes Brut (kg)</label>
+                <label style={styles.label}>{t('orders.newPoModal.fields.grossWeight')}</label>
                 <input
                   type="text"
                   value={formData.gross_weight}
                   onChange={e => setFormData({...formData, gross_weight: e.target.value})}
-                  placeholder="360 kg"
+                  placeholder={t('orders.newPoModal.placeholders.grossWeight')}
                   style={{
                     ...styles.input,
                     backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
@@ -877,12 +877,12 @@ export default function NewPOModal({
                 />
               </div>
               <div style={styles.formGroup}>
-                <label style={styles.label}>Volum Total (CBM)</label>
+                <label style={styles.label}>{t('orders.newPoModal.fields.totalVolume')}</label>
                 <input
                   type="text"
                   value={formData.total_volume}
                   onChange={e => setFormData({...formData, total_volume: e.target.value})}
-                  placeholder="2.49 CBM"
+                  placeholder={t('orders.newPoModal.placeholders.totalVolume')}
                   style={{
                     ...styles.input,
                     backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
@@ -891,12 +891,12 @@ export default function NewPOModal({
                 />
               </div>
               <div style={styles.formGroup}>
-                <label style={styles.label}>Mida Caixa</label>
+                <label style={styles.label}>{t('orders.newPoModal.fields.cartonSize')}</label>
                 <input
                   type="text"
                   value={formData.carton_size}
                   onChange={e => setFormData({...formData, carton_size: e.target.value})}
-                  placeholder="45x38.5x36cm"
+                  placeholder={t('orders.newPoModal.placeholders.cartonSize')}
                   style={{
                     ...styles.input,
                     backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
@@ -905,12 +905,12 @@ export default function NewPOModal({
                 />
               </div>
               <div style={styles.formGroup}>
-                <label style={styles.label}>Shipping Mark</label>
+                <label style={styles.label}>{t('orders.newPoModal.fields.shippingMark')}</label>
                 <input
                   type="text"
                   value={formData.shipping_mark}
                   onChange={e => setFormData({...formData, shipping_mark: e.target.value})}
-                  placeholder="Freedolia + David Castellà"
+                  placeholder={t('orders.newPoModal.placeholders.shippingMark')}
                   style={{
                     ...styles.input,
                     backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
@@ -924,7 +924,7 @@ export default function NewPOModal({
           {/* Tracking & Logistics Status */}
           <div style={styles.formRow}>
             <div style={styles.formGroup}>
-              <label style={styles.label}>Tracking Number</label>
+              <label style={styles.label}>{t('orders.newPoModal.fields.trackingNumber')}</label>
               <input
                 type="text"
                 value={formData.tracking_number}
@@ -938,7 +938,7 @@ export default function NewPOModal({
               />
             </div>
             <div style={styles.formGroup}>
-              <label style={styles.label}>Estat Logístic</label>
+              <label style={styles.label}>{t('orders.newPoModal.fields.logisticsStatus')}</label>
               <select
                 value={formData.logistics_status}
                 onChange={e => setFormData({...formData, logistics_status: e.target.value})}
@@ -948,24 +948,24 @@ export default function NewPOModal({
                   color: darkMode ? '#ffffff' : '#111827'
                 }}
               >
-                <option value="">Selecciona estat</option>
-                <option value="production">Producció</option>
-                <option value="pickup">Recollida</option>
-                <option value="in_transit">En trànsit</option>
-                <option value="customs">Duanes</option>
-                <option value="amazon_fba">Amazon FBA</option>
-                <option value="delivered">Lliurat</option>
+                <option value="">{t('orders.newPoModal.placeholders.selectLogisticsStatus')}</option>
+                <option value="production">{t('orders.newPoModal.logisticsStatuses.production')}</option>
+                <option value="pickup">{t('orders.newPoModal.logisticsStatuses.pickup')}</option>
+                <option value="in_transit">{t('orders.newPoModal.logisticsStatuses.inTransit')}</option>
+                <option value="customs">{t('orders.newPoModal.logisticsStatuses.customs')}</option>
+                <option value="amazon_fba">{t('orders.newPoModal.logisticsStatuses.amazonFba')}</option>
+                <option value="delivered">{t('orders.newPoModal.logisticsStatuses.delivered')}</option>
               </select>
             </div>
           </div>
 
           {/* Notes */}
           <div style={styles.formGroup}>
-            <label style={styles.label}>Notes addicionals</label>
+            <label style={styles.label}>{t('orders.newPoModal.fields.additionalNotes')}</label>
             <textarea
               value={formData.notes}
               onChange={e => setFormData({...formData, notes: e.target.value})}
-              placeholder="Notes, instruccions especials..."
+              placeholder={t('orders.newPoModal.placeholders.additionalNotes')}
               rows={3}
               style={{
                 ...styles.input,
@@ -996,7 +996,7 @@ export default function NewPOModal({
             <button 
               onClick={handleSave} 
               disabled={loading || !formData.po_number}
-              title={!formData.po_number ? 'Selecciona un projecte per generar el número de PO' : ''}
+              title={!formData.po_number ? t('orders.newPoModal.hints.selectProjectForPoNumber') : ''}
               {...saveButtonState}
               style={getButtonStyles({ 
                 variant: 'primary', 
@@ -1009,12 +1009,12 @@ export default function NewPOModal({
               {loading ? (
                 <>
                   <Loader size={18} style={{ animation: 'spin 1s linear infinite' }} />
-                  Guardant...
+                  {t('common.saving')}
                 </>
               ) : (
                 <>
                   <Save size={18} />
-                  {editingOrder ? 'Actualitzar' : 'Crear PO'}
+                  {editingOrder ? t('orders.newPoModal.actions.update') : t('orders.newPoModal.actions.createPo')}
                 </>
               )}
             </button>
@@ -1024,7 +1024,7 @@ export default function NewPOModal({
                 color: '#6b7280',
                 fontStyle: 'italic'
               }}>
-                Selecciona un projecte per continuar
+                {t('orders.newPoModal.hints.selectProjectToContinue')}
               </span>
             )}
           </div>
