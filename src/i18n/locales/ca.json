@@ -1289,7 +1289,7 @@
       "blockers": {
         "amazon_setup_missing": "Configuració Amazon pendent",
         "pack_pending": "Pack pendent",
-        "shipment_overdue": "Shipment endarrerit",
+        "shipment_overdue": "Enviament endarrerit",
         "in_execution": "En execució",
         "no_blockers": "Sense bloquejos"
       },
@@ -1331,8 +1331,8 @@
         "deliveryAddress": "Adreça d'entrega",
         "products": "Productes",
         "shippingSpecs": "Especificacions d'enviament",
-        "amazonReady": "Amazon Ready",
-        "manufacturerPack": "Manufacturer Pack",
+        "amazonReady": "Preparació per Amazon",
+        "manufacturerPack": "Pack del fabricant",
         "fnskuLabels": "Etiquetes FNSKU",
         "notes": "Notes"
       },
@@ -1362,7 +1362,7 @@
       },
       "whySupplier": "Per què s'ha triat aquest proveïdor",
       "manufacturerPackHelp": "Genera tots els documents per enviar al fabricant (PO, etiquetes, packing list, etiquetes de cartró).",
-      "generateManufacturerPack": "Generar manufacturer pack"
+      "generateManufacturerPack": "Generar pack del fabricant"
     },
     "labels": {
       "openGenerator": "Generar etiquetes FNSKU",
@@ -1381,11 +1381,11 @@
       }
     },
     "manufacturerPack": {
-      "title": "Generar Manufacturer Pack",
+      "title": "Generar pack del fabricant",
       "closeAriaLabel": "Tancar",
       "validation": {
         "title": "Errors de validació:",
-        "readinessNotInitialized": "Les dades d'Amazon Ready no estan inicialitzades. Omple primer la secció Amazon Ready.",
+        "readinessNotInitialized": "Les dades de preparació per Amazon no estan inicialitzades. Omple primer la secció de preparació per Amazon.",
         "cartonsCountForPackingList": "Cal indicar el nombre de caixes per al Packing List",
         "unitsPerCartonForPackingList": "Cal indicar les unitats per caixa per al Packing List",
         "cartonDimensionsForPackingList": "Cal indicar les dimensions de la caixa (L/A/H) per al Packing List",
@@ -1463,8 +1463,8 @@
       }
     },
     "shipmentTracking": {
-      "title": "Shipment cap a Amazon",
-      "loading": "Carregant shipment...",
+      "title": "Enviament cap a Amazon",
+      "loading": "Carregant enviament...",
       "types": {
         "spd": "SPD - Small Parcel Delivery",
         "ltl": "LTL - Less Than Truckload",
@@ -1478,16 +1478,16 @@
         "delivered": "Entregat"
       },
       "alerts": {
-        "trackingRequired": "El tracking number és obligatori per SPD quan l'estat no és \"planned\"",
-        "proRequired": "El PRO number és obligatori per LTL/FTL quan l'estat no és \"planned\"",
-        "saved": "Shipment guardat correctament",
-        "saveErrorPrefix": "Error guardant shipment:",
+        "trackingRequired": "El número de seguiment és obligatori per SPD quan l'estat no és \"planned\"",
+        "proRequired": "El número PRO és obligatori per LTL/FTL quan l'estat no és \"planned\"",
+        "saved": "Enviament guardat correctament",
+        "saveErrorPrefix": "Error guardant l'enviament:",
         "statusErrorPrefix": "Error actualitzant estat:"
       },
       "fields": {
         "shipmentType": "Tipus d'enviament",
-        "carrier": "Carrier",
-        "trackingNumber": "Tracking number",
+        "carrier": "Transportista",
+        "trackingNumber": "Número de seguiment",
         "proNumber": "PRO number",
         "pickupDate": "Data de recollida",
         "etaDate": "Data ETA",
@@ -1508,13 +1508,13 @@
         "delivered": "Marcar entregat"
       },
       "actions": {
-        "update": "Actualitzar shipment",
-        "create": "Crear shipment"
+        "update": "Actualitzar enviament",
+        "create": "Crear enviament"
       }
     },
     "shipmentsPanel": {
-      "title": "Shipments",
-      "empty": "Cap shipment per aquest PO.",
+      "title": "Enviaments",
+      "empty": "Cap enviament per a aquesta PO.",
       "status": {
         "draft": "Esborrany",
         "inTransit": "En trànsit",
@@ -1535,13 +1535,13 @@
       "lastUpdate": "Última actualització: {{date}}",
       "eta": "ETA: {{date}}",
       "drawer": {
-        "shipmentId": "Shipment {{id}}",
+        "shipmentId": "Enviament {{id}}",
         "packages": "Paquets",
-        "trackingEvents": "Esdeveniments de tracking",
+        "trackingEvents": "Esdeveniments de seguiment",
         "noPackages": "Cap paquet.",
         "lastSync": "Última sincronització: {{date}}",
         "selectPackage": "Selecciona un paquet per veure els esdeveniments.",
-        "noTrackingEvents": "Cap esdeveniment de tracking.",
+        "noTrackingEvents": "Cap esdeveniment de seguiment.",
         "columns": {
           "date": "Data",
           "location": "Ubicació",
@@ -1586,7 +1586,7 @@
     "newPoModal": {
       "title": {
         "edit": "Editar comanda",
-        "create": "Nova purchase order"
+        "create": "Nova comanda de compra"
       },
       "alerts": {
         "generatePoNumberError": "Error generant número de PO",
@@ -1637,8 +1637,8 @@
         "grossWeight": "Pes brut (kg)",
         "totalVolume": "Volum total (CBM)",
         "cartonSize": "Mida caixa",
-        "shippingMark": "Shipping mark",
-        "trackingNumber": "Tracking number",
+        "shippingMark": "Marca d'enviament",
+        "trackingNumber": "Número de seguiment",
         "logisticsStatus": "Estat logístic",
         "additionalNotes": "Notes addicionals"
       },

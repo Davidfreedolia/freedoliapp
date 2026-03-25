@@ -1333,8 +1333,8 @@
         "deliveryAddress": "Dirección de entrega",
         "products": "Productos",
         "shippingSpecs": "Especificaciones de envío",
-        "amazonReady": "Amazon Ready",
-        "manufacturerPack": "Manufacturer Pack",
+        "amazonReady": "Preparación para Amazon",
+        "manufacturerPack": "Pack del fabricante",
         "fnskuLabels": "Etiquetas FNSKU",
         "notes": "Notas"
       },
@@ -1364,7 +1364,7 @@
       },
       "whySupplier": "Por qué se eligió este proveedor",
       "manufacturerPackHelp": "Genera todos los documentos para enviar al fabricante (PO, etiquetas, packing list, etiquetas de cartón).",
-      "generateManufacturerPack": "Generar manufacturer pack"
+      "generateManufacturerPack": "Generar pack del fabricante"
     },
     "labels": {
       "openGenerator": "Generar etiquetas FNSKU",
@@ -1383,11 +1383,11 @@
       }
     },
     "manufacturerPack": {
-      "title": "Generar Manufacturer Pack",
+      "title": "Generar pack del fabricante",
       "closeAriaLabel": "Cerrar",
       "validation": {
         "title": "Errores de validación:",
-        "readinessNotInitialized": "Los datos de Amazon Ready no están inicializados. Completa primero la sección Amazon Ready.",
+        "readinessNotInitialized": "Los datos de preparación para Amazon no están inicializados. Completa primero la sección de preparación para Amazon.",
         "cartonsCountForPackingList": "Hay que indicar el número de cajas para el Packing List",
         "unitsPerCartonForPackingList": "Hay que indicar las unidades por caja para el Packing List",
         "cartonDimensionsForPackingList": "Hay que indicar las dimensiones de la caja (L/A/H) para el Packing List",
@@ -1465,8 +1465,8 @@
       }
     },
     "shipmentTracking": {
-      "title": "Shipment hacia Amazon",
-      "loading": "Cargando shipment...",
+      "title": "Envío hacia Amazon",
+      "loading": "Cargando envío...",
       "types": {
         "spd": "SPD - Small Parcel Delivery",
         "ltl": "LTL - Less Than Truckload",
@@ -1480,16 +1480,16 @@
         "delivered": "Entregado"
       },
       "alerts": {
-        "trackingRequired": "El tracking number es obligatorio para SPD cuando el estado no es \"planned\"",
-        "proRequired": "El PRO number es obligatorio para LTL/FTL cuando el estado no es \"planned\"",
-        "saved": "Shipment guardado correctamente",
-        "saveErrorPrefix": "Error guardando shipment:",
+        "trackingRequired": "El número de seguimiento es obligatorio para SPD cuando el estado no es \"planned\"",
+        "proRequired": "El número PRO es obligatorio para LTL/FTL cuando el estado no es \"planned\"",
+        "saved": "Envío guardado correctamente",
+        "saveErrorPrefix": "Error guardando el envío:",
         "statusErrorPrefix": "Error actualizando estado:"
       },
       "fields": {
         "shipmentType": "Tipo de envío",
-        "carrier": "Carrier",
-        "trackingNumber": "Tracking number",
+        "carrier": "Transportista",
+        "trackingNumber": "Número de seguimiento",
         "proNumber": "PRO number",
         "pickupDate": "Fecha de recogida",
         "etaDate": "Fecha ETA",
@@ -1510,13 +1510,13 @@
         "delivered": "Marcar entregado"
       },
       "actions": {
-        "update": "Actualizar shipment",
-        "create": "Crear shipment"
+        "update": "Actualizar envío",
+        "create": "Crear envío"
       }
     },
     "shipmentsPanel": {
-      "title": "Shipments",
-      "empty": "No hay shipments para esta PO.",
+      "title": "Envíos",
+      "empty": "No hay envíos para esta PO.",
       "status": {
         "draft": "Borrador",
         "inTransit": "En tránsito",
@@ -1537,13 +1537,13 @@
       "lastUpdate": "Última actualización: {{date}}",
       "eta": "ETA: {{date}}",
       "drawer": {
-        "shipmentId": "Shipment {{id}}",
+        "shipmentId": "Envío {{id}}",
         "packages": "Paquetes",
-        "trackingEvents": "Eventos de tracking",
+        "trackingEvents": "Eventos de seguimiento",
         "noPackages": "No hay paquetes.",
         "lastSync": "Última sincronización: {{date}}",
         "selectPackage": "Selecciona un paquete para ver los eventos.",
-        "noTrackingEvents": "No hay eventos de tracking.",
+        "noTrackingEvents": "No hay eventos de seguimiento.",
         "columns": {
           "date": "Fecha",
           "location": "Ubicación",
@@ -1588,7 +1588,7 @@
     "newPoModal": {
       "title": {
         "edit": "Editar orden",
-        "create": "Nueva purchase order"
+        "create": "Nueva orden de compra"
       },
       "alerts": {
         "generatePoNumberError": "Error generando número de PO",
@@ -1639,8 +1639,8 @@
         "grossWeight": "Peso bruto (kg)",
         "totalVolume": "Volumen total (CBM)",
         "cartonSize": "Medida caja",
-        "shippingMark": "Shipping mark",
-        "trackingNumber": "Tracking number",
+        "shippingMark": "Marca de envío",
+        "trackingNumber": "Número de seguimiento",
         "logisticsStatus": "Estado logístico",
         "additionalNotes": "Notas adicionales"
       },
