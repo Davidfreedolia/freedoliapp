@@ -19,6 +19,8 @@ import LayoutSwitcher from '../components/LayoutSwitcher'
 import { useLayoutPreference } from '../hooks/useLayoutPreference'
 import { DataLoading, DataEmpty, DataError } from '../components/dataStates'
 import { useTranslation } from 'react-i18next'
+import { getDemoMode } from '../lib/demoModeFilter'
+import { getInventoryOperationalDemoData } from '../lib/inventory/inventoryOperationalDemoData'
 
 const LOOKBACK_DAYS = 30
 const ACTIVE_SHIPMENT_STATUSES = new Set([
@@ -201,6 +203,7 @@ export default function Inventory() {
         return
       }
 
+      const demoMode = await getDemoMode()
       const [projectsData, inventoryResult, salesResult, shipmentsResult] = await Promise.all([
         getProjects(true, activeOrgId),
         supabase
@@ -224,20 +227,33 @@ export default function Inventory() {
 
       const { data: inventoryData, error: inventoryError } = inventoryResult
       if (inventoryError) throw inventoryError
-      setInventory(inventoryData || [])
+      const inventoryRows = inventoryData || []
 
       if (salesResult?.error) {
         console.warn('[Inventory] sales rows unavailable', salesResult.error)
-        setSalesRows([])
-      } else {
-        setSalesRows(salesResult?.data || [])
       }
+      const salesData = salesResult?.error ? [] : (salesResult?.data || [])
 
       if (shipmentsResult?.error) {
         console.warn('[Inventory] inbound shipments unavailable', shipmentsResult.error)
-        setShipmentRows([])
+      }
+      const shipmentData = shipmentsResult?.error ? [] : (shipmentsResult?.data || [])
+
+      const shouldUseDemoFallback = demoMode && (
+        inventoryRows.length < 4 ||
+        salesData.length === 0
+      )
+
+      if (shouldUseDemoFallback) {
+        const demoData = getInventoryOperationalDemoData()
+        setProjects(demoData.projects)
+        setInventory(demoData.inventory)
+        setSalesRows(demoData.salesRows)
+        setShipmentRows(demoData.shipmentRows)
       } else {
-        setShipmentRows(shipmentsResult?.data || [])
+        setInventory(inventoryRows)
+        setSalesRows(salesData)
+        setShipmentRows(shipmentData)
       }
     } catch (err) {
       console.error('Error carregant dades:', err)
@@ -340,6 +356,9 @@ export default function Inventory() {
   const selectedInventoryItem = filteredInventory.find(i => i.id === selectedInventoryId)
 
   const renderInventoryCard = (item, { isPreview = false, enablePreviewSelect = false } = {}) => {
+    const hasProjectNavigation = Boolean(item.project_id) && !item.isDemoSeed
+    const hasOrdersNavigation = Boolean(item.project_id) && !item.isDemoSeed
+
     return (
       <div
         key={item.id}
@@ -360,11 +379,11 @@ export default function Inventory() {
             {item.project && (
               <button
                 type="button"
-                onClick={() => item.project_id && navigate(`/app/projects/${item.project_id}`)}
+                onClick={hasProjectNavigation ? () => navigate(`/app/projects/${item.project_id}`) : undefined}
                 style={{
                   ...styles.projectBadge,
-                  cursor: item.project_id ? 'pointer' : 'default',
-                  textDecoration: item.project_id ? 'underline' : 'none',
+                  cursor: hasProjectNavigation ? 'pointer' : 'default',
+                  textDecoration: hasProjectNavigation ? 'underline' : 'none',
                   background: 'none',
                   border: 'none'
                 }}
@@ -444,7 +463,7 @@ export default function Inventory() {
 
         {!isPreview && (
           <div style={styles.cardFooter}>
-            {item.project_id && (
+            {hasProjectNavigation && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -454,7 +473,7 @@ export default function Inventory() {
                 Veure projecte
               </Button>
             )}
-          {item.project && (
+            {hasOrdersNavigation && (
               <Button
                 variant="ghost"
                 size="sm"
