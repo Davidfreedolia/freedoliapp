@@ -8,8 +8,6 @@ import {
   Truck,
   MapPin,
   Phone,
-  Mail,
-  Globe,
   Star,
   MoreVertical,
   Edit,
@@ -17,7 +15,6 @@ import {
   X,
   Save,
   MessageCircle,
-  CreditCard,
   Clock,
   Package,
   Filter
@@ -80,8 +77,130 @@ const COUNTRIES_CITIES = {
   'Altres': []
 }
 
+const CLOSED_QUOTE_VALIDITY = new Set(['FAIL', 'LOCK'])
+const CLOSED_SAMPLE_STATUSES = new Set(['RECEIVED', 'REJECTED'])
+const CLOSED_PO_STATUSES = new Set(['received', 'cancelled'])
+const CLOSED_SHIPMENT_STATUSES = new Set(['delivered'])
+const DAY_MS = 24 * 60 * 60 * 1000
+
+const OPERATIONAL_STATUS_META = {
+  active: { color: '#0f766e', background: 'rgba(15, 118, 110, 0.12)' },
+  watch: { color: '#b45309', background: 'rgba(180, 83, 9, 0.12)' },
+  inactive: { color: '#6b7280', background: 'rgba(107, 114, 128, 0.12)' }
+}
+
+const RISK_LEVEL_META = {
+  high: { color: '#dc2626', background: 'rgba(220, 38, 38, 0.12)' },
+  medium: { color: '#d97706', background: 'rgba(217, 119, 6, 0.12)' },
+  low: { color: '#2563eb', background: 'rgba(37, 99, 235, 0.12)' },
+  none: { color: '#6b7280', background: 'rgba(107, 114, 128, 0.12)' }
+}
+
+const EMPTY_OPERATIONAL_SUMMARY = {
+  openQuotesCount: 0,
+  pendingSamplesCount: 0,
+  activePosCount: 0,
+  activeShipmentsCount: 0,
+  lastActivityAt: null,
+  operationalStatus: 'inactive',
+  nextAction: 'noImmediateAction',
+  riskLevel: 'none',
+  needsFollowUp: false
+}
+
+const getTimestamp = (value) => {
+  if (!value) return null
+  const parsed = new Date(value).getTime()
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+const getDaysSince = (value) => {
+  const timestamp = getTimestamp(value)
+  if (timestamp == null) return Infinity
+  return (Date.now() - timestamp) / DAY_MS
+}
+
+const getLatestIsoDate = (values) => {
+  const timestamps = values
+    .map(getTimestamp)
+    .filter(timestamp => timestamp != null)
+
+  if (!timestamps.length) return null
+
+  return new Date(Math.max(...timestamps)).toISOString()
+}
+
+const deriveSupplierOperationalSummary = ({ quotes, samples, pos, shipmentsByPoId }) => {
+  const openQuotes = (quotes || []).filter(
+    quote => !CLOSED_QUOTE_VALIDITY.has(String(quote.validity_status || '').toUpperCase())
+  )
+  const pendingSamples = (samples || []).filter(
+    sample => !CLOSED_SAMPLE_STATUSES.has(String(sample.status || 'PENDING').toUpperCase())
+  )
+  const activePos = (pos || []).filter(
+    purchaseOrder => !CLOSED_PO_STATUSES.has(String(purchaseOrder.status || 'draft').toLowerCase())
+  )
+  const allShipmentRows = (pos || []).flatMap(purchaseOrder => shipmentsByPoId.get(purchaseOrder.id) || [])
+  const activeShipments = allShipmentRows.filter(
+    shipment => !CLOSED_SHIPMENT_STATUSES.has(String(shipment.status || 'planned').toLowerCase())
+  )
+  const posWithoutShipment = activePos.filter(purchaseOrder => {
+    const relatedShipments = shipmentsByPoId.get(purchaseOrder.id) || []
+    return relatedShipments.length === 0
+  })
+
+  const lastActivityAt = getLatestIsoDate([
+    ...(quotes || []).map(quote => quote.updated_at || quote.created_at),
+    ...(samples || []).map(sample => sample.updated_at || sample.created_at),
+    ...(pos || []).map(purchaseOrder => purchaseOrder.updated_at || purchaseOrder.order_date || purchaseOrder.created_at),
+    ...allShipmentRows.map(shipment => shipment.updated_at || shipment.pickup_date || shipment.created_at)
+  ])
+
+  const hasOldPendingSample = pendingSamples.some(sample => getDaysSince(sample.updated_at || sample.created_at) > 14)
+  const hasOldPoWithoutShipment = posWithoutShipment.some(
+    purchaseOrder => getDaysSince(purchaseOrder.updated_at || purchaseOrder.order_date || purchaseOrder.created_at) > 14
+  )
+
+  let operationalStatus = 'inactive'
+  if (openQuotes.length || pendingSamples.length || activePos.length || activeShipments.length) {
+    operationalStatus = 'active'
+  } else if (lastActivityAt) {
+    operationalStatus = getDaysSince(lastActivityAt) <= 60 ? 'active' : 'watch'
+  }
+
+  let nextAction = 'noImmediateAction'
+  if (pendingSamples.length) {
+    nextAction = 'reviewSample'
+  } else if (activeShipments.length || posWithoutShipment.length) {
+    nextAction = 'trackShipment'
+  } else if (openQuotes.length) {
+    nextAction = 'followUpQuote'
+  }
+
+  let riskLevel = 'none'
+  if (hasOldPendingSample || hasOldPoWithoutShipment) {
+    riskLevel = 'high'
+  } else if (openQuotes.length || pendingSamples.length || activePos.length || activeShipments.length) {
+    riskLevel = 'medium'
+  } else if (lastActivityAt) {
+    riskLevel = 'low'
+  }
+
+  return {
+    openQuotesCount: openQuotes.length,
+    pendingSamplesCount: pendingSamples.length,
+    activePosCount: activePos.length,
+    activeShipmentsCount: activeShipments.length,
+    lastActivityAt,
+    operationalStatus,
+    nextAction,
+    riskLevel,
+    needsFollowUp: riskLevel === 'high' || riskLevel === 'medium' || nextAction !== 'noImmediateAction'
+  }
+}
+
 export default function Suppliers() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { darkMode, demoMode, activeOrgId } = useApp()
   const { isMobile, isTablet } = useBreakpoint()
   const modalStyles = getModalStyles(isMobile, darkMode)
@@ -97,6 +216,7 @@ export default function Suppliers() {
   const [saving, setSaving] = useState(false)
   const [layout, setLayout] = useLayoutPreference('layout:suppliers', 'grid')
   const [selectedSupplierId, setSelectedSupplierId] = useState(null)
+  const [operationalBySupplier, setOperationalBySupplier] = useState({})
   
   // Delete confirmation
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, supplier: null, isDeleting: false })
@@ -108,6 +228,9 @@ export default function Suppliers() {
 
   useEffect(() => {
     loadData()
+  }, [activeOrgId])
+
+  useEffect(() => {
     loadCustomCities()
   }, [])
 
@@ -137,10 +260,100 @@ export default function Suppliers() {
     try {
       const data = await getSuppliers(activeOrgId ?? undefined)
       setSuppliers(data || [])
+      const operationalData = await loadOperationalData(data || [])
+      setOperationalBySupplier(operationalData)
     } catch (err) {
       console.error('Error carregant proveïdors:', err)
+      setOperationalBySupplier({})
     }
     setLoading(false)
+  }
+
+  const loadOperationalData = async (supplierRows) => {
+    const supplierIds = supplierRows.map(supplier => supplier.id).filter(Boolean)
+    if (!supplierIds.length) return {}
+
+    let quotesQuery = supabase
+      .from('supplier_quotes')
+      .select('id, supplier_id, created_at, updated_at, validity_status, go_samples')
+      .in('supplier_id', supplierIds)
+
+    let samplesQuery = supabase
+      .from('supplier_sample_requests')
+      .select('id, supplier_id, status, created_at, updated_at')
+      .in('supplier_id', supplierIds)
+
+    let posQuery = supabase
+      .from('purchase_orders')
+      .select('id, supplier_id, status, created_at, updated_at, order_date')
+      .in('supplier_id', supplierIds)
+
+    if (activeOrgId) {
+      quotesQuery = quotesQuery.eq('org_id', activeOrgId)
+      samplesQuery = samplesQuery.eq('org_id', activeOrgId)
+      posQuery = posQuery.eq('org_id', activeOrgId)
+    }
+
+    const [
+      { data: quotes = [], error: quotesError },
+      { data: samples = [], error: samplesError },
+      { data: purchaseOrders = [], error: posError }
+    ] = await Promise.all([quotesQuery, samplesQuery, posQuery])
+
+    if (quotesError) throw quotesError
+    if (samplesError) throw samplesError
+    if (posError) throw posError
+
+    const poIds = purchaseOrders.map(purchaseOrder => purchaseOrder.id).filter(Boolean)
+    let shipments = []
+    if (poIds.length) {
+      const { data: shipmentRows, error: shipmentsError } = await supabase
+        .from('po_shipments')
+        .select('id, purchase_order_id, status, created_at, updated_at, pickup_date, eta_date')
+        .in('purchase_order_id', poIds)
+
+      if (shipmentsError) throw shipmentsError
+      shipments = shipmentRows || []
+    }
+
+    const quotesBySupplier = quotes.reduce((acc, quote) => {
+      if (!quote.supplier_id) return acc
+      if (!acc[quote.supplier_id]) acc[quote.supplier_id] = []
+      acc[quote.supplier_id].push(quote)
+      return acc
+    }, {})
+
+    const samplesBySupplier = samples.reduce((acc, sample) => {
+      if (!sample.supplier_id) return acc
+      if (!acc[sample.supplier_id]) acc[sample.supplier_id] = []
+      acc[sample.supplier_id].push(sample)
+      return acc
+    }, {})
+
+    const posBySupplier = purchaseOrders.reduce((acc, purchaseOrder) => {
+      if (!purchaseOrder.supplier_id) return acc
+      if (!acc[purchaseOrder.supplier_id]) acc[purchaseOrder.supplier_id] = []
+      acc[purchaseOrder.supplier_id].push(purchaseOrder)
+      return acc
+    }, {})
+
+    const shipmentsByPoId = shipments.reduce((acc, shipment) => {
+      if (!shipment.purchase_order_id) return acc
+      const existing = acc.get(shipment.purchase_order_id) || []
+      existing.push(shipment)
+      acc.set(shipment.purchase_order_id, existing)
+      return acc
+    }, new Map())
+
+    return supplierRows.reduce((acc, supplier) => {
+      acc[supplier.id] = deriveSupplierOperationalSummary({
+        quotes: quotesBySupplier[supplier.id] || [],
+        samples: samplesBySupplier[supplier.id] || [],
+        pos: posBySupplier[supplier.id] || [],
+        shipmentsByPoId
+      })
+      return acc
+    }, {})
   }
 
   const loadCustomCities = async () => {
@@ -300,14 +513,22 @@ export default function Suppliers() {
 
   const effectiveLayout = isMobile ? 'list' : layout
   const selectedSupplier = filteredSuppliers.find(s => s.id === selectedSupplierId)
+  const locale = (i18n.language || 'ca').split('-')[0]
+  const formatLastActivity = (value) => {
+    if (!value) return t('suppliersPage.operational.noRecentActivity')
+    return new Date(value).toLocaleDateString(
+      locale === 'en' ? 'en-US' : locale === 'es' ? 'es-ES' : 'ca-ES',
+      { day: '2-digit', month: 'short', year: 'numeric' }
+    )
+  }
 
   // Stats
   const stats = {
-    total: filteredSuppliers.length,
-    manufacturers: filteredSuppliers.filter(s => s.type === 'manufacturer').length,
-    trading: filteredSuppliers.filter(s => s.type === 'trading').length,
-    agents: filteredSuppliers.filter(s => s.type === 'agent').length,
-    topRated: filteredSuppliers.filter(s => s.rating >= 4).length
+    suppliersWithOpenQuotes: filteredSuppliers.filter(supplier => (operationalBySupplier[supplier.id] || EMPTY_OPERATIONAL_SUMMARY).openQuotesCount > 0).length,
+    pendingSamples: filteredSuppliers.reduce((sum, supplier) => sum + (operationalBySupplier[supplier.id] || EMPTY_OPERATIONAL_SUMMARY).pendingSamplesCount, 0),
+    activePos: filteredSuppliers.reduce((sum, supplier) => sum + (operationalBySupplier[supplier.id] || EMPTY_OPERATIONAL_SUMMARY).activePosCount, 0),
+    activeShipments: filteredSuppliers.reduce((sum, supplier) => sum + (operationalBySupplier[supplier.id] || EMPTY_OPERATIONAL_SUMMARY).activeShipmentsCount, 0),
+    needsFollowUp: filteredSuppliers.filter(supplier => (operationalBySupplier[supplier.id] || EMPTY_OPERATIONAL_SUMMARY).needsFollowUp).length
   }
 
   const getTypeInfo = (type) => SUPPLIER_TYPES.find(t => t.id === type) || SUPPLIER_TYPES[0]
@@ -315,6 +536,9 @@ export default function Suppliers() {
   const renderSupplierCard = (supplier, { isPreview = false, enablePreviewSelect = false } = {}) => {
     const typeInfo = getTypeInfo(supplier.type)
     const TypeIcon = typeInfo.icon
+    const operational = operationalBySupplier[supplier.id] || EMPTY_OPERATIONAL_SUMMARY
+    const statusMeta = OPERATIONAL_STATUS_META[operational.operationalStatus] || OPERATIONAL_STATUS_META.inactive
+    const riskMeta = RISK_LEVEL_META[operational.riskLevel] || RISK_LEVEL_META.none
 
     return (
       <div
@@ -421,34 +645,60 @@ export default function Suppliers() {
           </div>
         )}
 
-        {/* Payment Terms */}
-        {supplier.payment_terms && (
-          <div style={styles.cardRow}>
-            <CreditCard size={14} color="#6b7280" />
-            <span style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '12px' }}>
-              {supplier.payment_terms}
-            </span>
-          </div>
-        )}
+        <div style={styles.operationalBadgeRow}>
+          <span style={{ ...styles.statusBadge, color: statusMeta.color, backgroundColor: statusMeta.background }}>
+            {t(`suppliersPage.operational.status.${operational.operationalStatus}`)}
+          </span>
+          <span style={{ ...styles.statusBadge, color: riskMeta.color, backgroundColor: riskMeta.background }}>
+            {t(`suppliersPage.operational.risk.${operational.riskLevel}`)}
+          </span>
+        </div>
 
-        {/* Incoterm */}
-        {supplier.incoterm && (
-          <div style={styles.cardRow}>
-            <Package size={14} color="#6b7280" />
-            <span style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
-              {supplier.incoterm} {supplier.incoterm_location}
-            </span>
+        <div style={styles.operationalMetricsGrid}>
+          <div style={{ ...styles.operationalMetricCard, backgroundColor: darkMode ? '#0f1118' : '#f8fafc' }}>
+            <MessageCircle size={14} color="#2563eb" />
+            <div>
+              <div style={{ ...styles.operationalMetricValue, color: darkMode ? '#ffffff' : '#111827' }}>{operational.openQuotesCount}</div>
+              <div style={styles.operationalMetricLabel}>{t('suppliersPage.operational.metrics.openQuotes')}</div>
+            </div>
           </div>
-        )}
+          <div style={{ ...styles.operationalMetricCard, backgroundColor: darkMode ? '#0f1118' : '#f8fafc' }}>
+            <Package size={14} color="#d97706" />
+            <div>
+              <div style={{ ...styles.operationalMetricValue, color: darkMode ? '#ffffff' : '#111827' }}>{operational.pendingSamplesCount}</div>
+              <div style={styles.operationalMetricLabel}>{t('suppliersPage.operational.metrics.pendingSamples')}</div>
+            </div>
+          </div>
+          <div style={{ ...styles.operationalMetricCard, backgroundColor: darkMode ? '#0f1118' : '#f8fafc' }}>
+            <Building2 size={14} color="#7c3aed" />
+            <div>
+              <div style={{ ...styles.operationalMetricValue, color: darkMode ? '#ffffff' : '#111827' }}>{operational.activePosCount}</div>
+              <div style={styles.operationalMetricLabel}>{t('suppliersPage.operational.metrics.activePos')}</div>
+            </div>
+          </div>
+          <div style={{ ...styles.operationalMetricCard, backgroundColor: darkMode ? '#0f1118' : '#f8fafc' }}>
+            <Truck size={14} color="#0891b2" />
+            <div>
+              <div style={{ ...styles.operationalMetricValue, color: darkMode ? '#ffffff' : '#111827' }}>{operational.activeShipmentsCount}</div>
+              <div style={styles.operationalMetricLabel}>{t('suppliersPage.operational.metrics.activeShipments')}</div>
+            </div>
+          </div>
+        </div>
 
-        {/* Rating */}
-        {supplier.rating > 0 && (
-          <div style={styles.ratingRow}>
-            {[1, 2, 3, 4, 5].map(i => (
-              <Star key={i} size={14} fill={i <= supplier.rating ? '#F2E27D' : 'none'} color={i <= supplier.rating ? '#F2E27D' : '#d1d5db'} />
-            ))}
+        <div style={styles.operationalFooter}>
+          <div style={styles.operationalFooterBlock}>
+            <span style={styles.operationalFooterLabel}>{t('suppliersPage.operational.nextActionLabel')}</span>
+            <strong style={{ color: darkMode ? '#ffffff' : '#111827' }}>
+              {t(`suppliersPage.operational.nextAction.${operational.nextAction}`)}
+            </strong>
           </div>
-        )}
+          <div style={styles.operationalFooterBlock}>
+            <span style={styles.operationalFooterLabel}>{t('suppliersPage.operational.lastActivityLabel')}</span>
+            <strong style={{ color: darkMode ? '#ffffff' : '#111827' }}>
+              {formatLastActivity(operational.lastActivityAt)}
+            </strong>
+          </div>
+        </div>
 
         {/* Supplier Memory */}
         <SupplierMemory supplierId={supplier.id} darkMode={darkMode} />
@@ -462,7 +712,7 @@ export default function Suppliers() {
         title={
           <span className="page-title-with-icon">
             <Users size={22} />
-            Proveïdors
+            {t('suppliersPage.pageTitle')}
           </span>
         }
       />
@@ -478,7 +728,7 @@ export default function Suppliers() {
               <Search size={18} color="#9ca3af" />
               <input
                 type="text"
-                placeholder="Buscar proveïdors..."
+                placeholder={t('suppliersPage.searchPlaceholder')}
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 style={styles.searchInput}
@@ -495,7 +745,7 @@ export default function Suppliers() {
                 value={filterType || ''}
                 onChange={e => setFilterType(e.target.value || null)}
               >
-                <option value="">Tots els tipus</option>
+                <option value="">{t('suppliersPage.filters.allTypes')}</option>
                 {SUPPLIER_TYPES.filter(t => t.id !== 'freight').map(t => (
                   <option key={t.id} value={t.id}>{t.name}</option>
                 ))}
@@ -510,7 +760,7 @@ export default function Suppliers() {
                 value={filterCountry || ''}
                 onChange={e => setFilterCountry(e.target.value || null)}
               >
-                <option value="">Tots els països</option>
+                <option value="">{t('suppliersPage.filters.allCountries')}</option>
                 {Object.keys(COUNTRIES_CITIES).map(c => (
                   <option key={c} value={c}>{c}</option>
                 ))}
@@ -539,31 +789,38 @@ export default function Suppliers() {
         {/* Stats */}
         <div style={styles.statsRow}>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <Users size={24} color="#1F4E5F" />
+            <MessageCircle size={24} color="#2563eb" />
             <div>
-              <span style={styles.statValue}>{stats.total}</span>
-              <span style={styles.statLabel}>Total Proveïdors</span>
+              <span style={styles.statValue}>{stats.suppliersWithOpenQuotes}</span>
+              <span style={styles.statLabel}>{t('suppliersPage.kpis.suppliersWithOpenQuotes')}</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <Building2 size={24} color="#6BC7B5" />
+            <Package size={24} color="#d97706" />
             <div>
-              <span style={styles.statValue}>{stats.manufacturers}</span>
-              <span style={styles.statLabel}>Fabricants</span>
+              <span style={styles.statValue}>{stats.pendingSamples}</span>
+              <span style={styles.statLabel}>{t('suppliersPage.kpis.pendingSamples')}</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <Package size={24} color="#F26C63" />
+            <Building2 size={24} color="#7c3aed" />
             <div>
-              <span style={styles.statValue}>{stats.trading}</span>
-              <span style={styles.statLabel}>Trading</span>
+              <span style={styles.statValue}>{stats.activePos}</span>
+              <span style={styles.statLabel}>{t('suppliersPage.kpis.activePos')}</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <Star size={24} color="#F2E27D" />
+            <Truck size={24} color="#0891b2" />
             <div>
-              <span style={styles.statValue}>{stats.topRated}</span>
-              <span style={styles.statLabel}>Top Rated (4+⭐)</span>
+              <span style={styles.statValue}>{stats.activeShipments}</span>
+              <span style={styles.statLabel}>{t('suppliersPage.kpis.activeShipments')}</span>
+            </div>
+          </div>
+          <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
+            <Clock size={24} color="#dc2626" />
+            <div>
+              <span style={styles.statValue}>{stats.needsFollowUp}</span>
+              <span style={styles.statLabel}>{t('suppliersPage.kpis.needsFollowUp')}</span>
             </div>
           </div>
         </div>
@@ -610,7 +867,7 @@ export default function Suppliers() {
                   {selectedSupplier ? (
                     renderSupplierCard(selectedSupplier, { isPreview: true })
                   ) : (
-                    <div style={styles.splitEmpty}>Selecciona un proveïdor</div>
+                    <div style={styles.splitEmpty}>{t('suppliersPage.selectSupplier')}</div>
                   )}
                 </div>
               </div>
@@ -943,6 +1200,15 @@ const styles = {
   typeBadge: { display: 'inline-block', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '500' },
   cardRow: { display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontSize: '13px' },
   ratingRow: { display: 'flex', gap: '2px', marginTop: '12px' },
+  operationalBadgeRow: { display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '14px', marginBottom: '14px' },
+  statusBadge: { display: 'inline-flex', alignItems: 'center', padding: '4px 10px', borderRadius: '999px', fontSize: '11px', fontWeight: '600' },
+  operationalMetricsGrid: { display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '10px', marginBottom: '14px' },
+  operationalMetricCard: { display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '10px' },
+  operationalMetricValue: { fontSize: '16px', fontWeight: '700', color: '#111827', lineHeight: 1.1 },
+  operationalMetricLabel: { fontSize: '11px', color: '#6b7280', lineHeight: 1.2 },
+  operationalFooter: { display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '12px', marginBottom: '8px' },
+  operationalFooterBlock: { display: 'flex', flexDirection: 'column', gap: '4px' },
+  operationalFooterLabel: { fontSize: '11px', color: '#6b7280' },
   menuButton: { padding: '0', width: 'var(--btn-h-sm)', minWidth: 'var(--btn-h-sm)', color: '#9ca3af' },
   menu: { position: 'absolute', right: 0, top: '100%', minWidth: '120px', borderRadius: '10px', border: '1px solid rgba(31, 78, 95, 0.12)', boxShadow: 'var(--shadow-soft-hover)', zIndex: 10 },
   menuItem: { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', justifyContent: 'flex-start', padding: '0 var(--btn-pad-x)', fontSize: '13px' },

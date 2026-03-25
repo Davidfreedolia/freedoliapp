@@ -492,11 +492,9 @@ export const getSuppliers = async (orgId = null) => {
     return data
   }
 
-  const userId = await getCurrentUserId()
   const { data, error } = await supabase
     .from('suppliers')
     .select('*')
-    .eq('user_id', userId)
     .order('name', { ascending: true })
   if (error) throw error
   return data
@@ -562,7 +560,7 @@ export const updateSupplier = async (id, updates) => {
   const demoMode = await getDemoMode()
   
   // Eliminar user_id si ve del client (no es pot canviar)
-  const { user_id, ...updateData } = updates
+  const { user_id, org_id, ...updateData } = updates
   const userId = await getCurrentUserId()
   if (!userId) {
     return authRequired()
@@ -578,7 +576,6 @@ export const updateSupplier = async (id, updates) => {
     .from('suppliers')
     .update({ ...updateData, updated_at: new Date().toISOString() })
     .eq('id', id)
-    .eq('user_id', userId)
     .select()
     .maybeSingle()
   
@@ -606,7 +603,6 @@ export const deleteSupplier = async (id) => {
     .from('suppliers')
     .delete()
     .eq('id', id)
-    .eq('user_id', userId)
   
   if (error) throw error
   return true

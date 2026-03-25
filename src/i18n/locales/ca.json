@@ -105,7 +105,23 @@
     "loading": "Carregant calculadora…"
   },
   "supplierMemory": {
-    "loading": "Carregant mètriques…"
+    "loading": "Carregant mètriques…",
+    "title": "Historial de rendiment",
+    "needMoreData": "Calen com a mínim {{count}} comandes completades per mostrar les mètriques de rendiment",
+    "badges": {
+      "often_late": "Sovint tard",
+      "price_changes": "Canvis de preu",
+      "reliable": "Fiable"
+    },
+    "metrics": {
+      "quotesSent": "Pressupostos enviats",
+      "quotesSelected": "Pressupostos seleccionats",
+      "winRate": "{{rate}}% d'encert",
+      "avgPriceDeviation": "Desviació mitjana de preu",
+      "avgLeadTimeDeviation": "Desviació mitjana de termini",
+      "samples": "{{count}} mostres",
+      "daysValue": "{{count}} dies"
+    }
   },
   "quickSupplier": {
     "loadingEstimates": "Carregant estimacions…"
@@ -185,7 +201,49 @@
     }
   },
   "suppliersPage": {
-    "deleteEntityNoun": "proveïdor"
+    "deleteEntityNoun": "proveïdor",
+    "pageTitle": "Proveïdors",
+    "searchPlaceholder": "Cercar proveïdors…",
+    "selectSupplier": "Selecciona un proveïdor",
+    "filters": {
+      "allTypes": "Tots els tipus",
+      "allCountries": "Tots els països"
+    },
+    "kpis": {
+      "suppliersWithOpenQuotes": "Proveïdors amb pressupostos oberts",
+      "pendingSamples": "Mostres pendents",
+      "activePos": "PO actives",
+      "activeShipments": "Enviaments actius",
+      "needsFollowUp": "Cal seguiment"
+    },
+    "operational": {
+      "status": {
+        "active": "Actiu",
+        "watch": "A vigilar",
+        "inactive": "Inactiu"
+      },
+      "risk": {
+        "high": "Risc alt",
+        "medium": "Risc mitjà",
+        "low": "Risc baix",
+        "none": "Sense risc"
+      },
+      "metrics": {
+        "openQuotes": "Pressupostos oberts",
+        "pendingSamples": "Mostres pendents",
+        "activePos": "PO actives",
+        "activeShipments": "Enviaments actius"
+      },
+      "nextActionLabel": "Pròxima acció",
+      "lastActivityLabel": "Última activitat",
+      "noRecentActivity": "Sense activitat recent",
+      "nextAction": {
+        "followUpQuote": "Fer seguiment del pressupost",
+        "reviewSample": "Revisar mostra",
+        "trackShipment": "Fer seguiment de l'enviament",
+        "noImmediateAction": "Sense acció immediata"
+      }
+    }
   },
   "forwardersPage": {
     "deleteEntityForwarder": "transitari",

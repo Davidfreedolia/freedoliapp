@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { TrendingUp, TrendingDown, Clock, DollarSign, CheckCircle2, AlertTriangle } from 'lucide-react'
+import { TrendingUp, TrendingDown, Clock, DollarSign } from 'lucide-react'
 import { getSupplierMetrics, generateSupplierBadges } from '../lib/supplierMemory'
-import { supabase, getCurrentUserId } from '../lib/supabase'
+import { supabase } from '../lib/supabase'
+import { useApp } from '../context/AppContext'
 
 export default function SupplierMemory({ supplierId, darkMode }) {
   const { t } = useTranslation()
+  const { activeOrgId } = useApp()
   const [metrics, setMetrics] = useState(null)
   const [badges, setBadges] = useState([])
   const [loading, setLoading] = useState(true)
@@ -14,12 +16,12 @@ export default function SupplierMemory({ supplierId, darkMode }) {
     if (supplierId) {
       loadMetrics()
     }
-  }, [supplierId])
+  }, [supplierId, activeOrgId])
   
   const loadMetrics = async () => {
     setLoading(true)
     try {
-      const supplierMetrics = await getSupplierMetrics(supplierId, supabase, getCurrentUserId)
+      const supplierMetrics = await getSupplierMetrics(supplierId, supabase, { orgId: activeOrgId ?? null })
       setMetrics(supplierMetrics)
       const generatedBadges = generateSupplierBadges(supplierMetrics)
       setBadges(generatedBadges)
@@ -68,7 +70,7 @@ export default function SupplierMemory({ supplierId, darkMode }) {
         fontWeight: '600',
         color: darkMode ? '#ffffff' : '#111827'
       }}>
-        Performance History
+        {t('supplierMemory.title')}
       </h4>
       
       {/* Badges */}
@@ -96,7 +98,7 @@ export default function SupplierMemory({ supplierId, darkMode }) {
               }}
             >
               <span>{badge.icon}</span>
-              {badge.label}
+              {t(`supplierMemory.badges.${badge.id}`)}
             </div>
           ))}
         </div>
@@ -120,7 +122,7 @@ export default function SupplierMemory({ supplierId, darkMode }) {
             color: darkMode ? '#9ca3af' : '#6b7280',
             marginBottom: '4px'
           }}>
-            Quotes Sent
+            {t('supplierMemory.metrics.quotesSent')}
           </div>
           <div style={{
             fontSize: '20px',
@@ -143,7 +145,7 @@ export default function SupplierMemory({ supplierId, darkMode }) {
             color: darkMode ? '#9ca3af' : '#6b7280',
             marginBottom: '4px'
           }}>
-            Quotes Selected
+            {t('supplierMemory.metrics.quotesSelected')}
           </div>
           <div style={{
             fontSize: '20px',
@@ -158,7 +160,7 @@ export default function SupplierMemory({ supplierId, darkMode }) {
               color: darkMode ? '#9ca3af' : '#6b7280',
               marginTop: '2px'
             }}>
-              {Math.round((metrics.quotesSelected / metrics.quotesSent) * 100)}% win rate
+              {t('supplierMemory.metrics.winRate', { rate: Math.round((metrics.quotesSelected / metrics.quotesSent) * 100) })}
             </div>
           )}
         </div>
@@ -180,7 +182,7 @@ export default function SupplierMemory({ supplierId, darkMode }) {
               gap: '4px'
             }}>
               <DollarSign size={12} />
-              Avg Price Deviation
+              {t('supplierMemory.metrics.avgPriceDeviation')}
             </div>
             <div style={{
               fontSize: '20px',
@@ -199,7 +201,7 @@ export default function SupplierMemory({ supplierId, darkMode }) {
               color: darkMode ? '#9ca3af' : '#6b7280',
               marginTop: '2px'
             }}>
-              {metrics.priceDeviationsCount} samples
+              {t('supplierMemory.metrics.samples', { count: metrics.priceDeviationsCount })}
             </div>
           </div>
         )}
@@ -221,7 +223,7 @@ export default function SupplierMemory({ supplierId, darkMode }) {
               gap: '4px'
             }}>
               <Clock size={12} />
-              Avg Lead Time Deviation
+              {t('supplierMemory.metrics.avgLeadTimeDeviation')}
             </div>
             <div style={{
               fontSize: '20px',
@@ -233,14 +235,14 @@ export default function SupplierMemory({ supplierId, darkMode }) {
             }}>
               {metrics.avgLeadTimeDeviation > 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
               {metrics.avgLeadTimeDeviation > 0 ? '+' : ''}
-              {Math.round(metrics.avgLeadTimeDeviation)} days
+              {t('supplierMemory.metrics.daysValue', { count: Math.round(metrics.avgLeadTimeDeviation) })}
             </div>
             <div style={{
               fontSize: '10px',
               color: darkMode ? '#9ca3af' : '#6b7280',
               marginTop: '2px'
             }}>
-              {metrics.leadTimeDeviationsCount} samples
+              {t('supplierMemory.metrics.samples', { count: metrics.leadTimeDeviationsCount })}
             </div>
           </div>
         )}
@@ -257,7 +259,7 @@ export default function SupplierMemory({ supplierId, darkMode }) {
           fontSize: '12px',
           color: darkMode ? '#9ca3af' : '#6b7280'
         }}>
-          Need at least {minSamples} completed orders to show performance metrics
+          {t('supplierMemory.needMoreData', { count: minSamples })}
         </div>
       )}
     </div>

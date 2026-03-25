@@ -105,7 +105,23 @@
     "loading": "Cargando calculadora…"
   },
   "supplierMemory": {
-    "loading": "Cargando métricas…"
+    "loading": "Cargando métricas…",
+    "title": "Historial de rendimiento",
+    "needMoreData": "Hacen falta al menos {{count}} pedidos completados para mostrar las métricas de rendimiento",
+    "badges": {
+      "often_late": "Suele retrasarse",
+      "price_changes": "Cambios de precio",
+      "reliable": "Fiable"
+    },
+    "metrics": {
+      "quotesSent": "Presupuestos enviados",
+      "quotesSelected": "Presupuestos seleccionados",
+      "winRate": "{{rate}}% de acierto",
+      "avgPriceDeviation": "Desviación media de precio",
+      "avgLeadTimeDeviation": "Desviación media de plazo",
+      "samples": "{{count}} muestras",
+      "daysValue": "{{count}} días"
+    }
   },
   "quickSupplier": {
     "loadingEstimates": "Cargando estimaciones…"
@@ -185,7 +201,49 @@
     }
   },
   "suppliersPage": {
-    "deleteEntityNoun": "proveedor"
+    "deleteEntityNoun": "proveedor",
+    "pageTitle": "Proveedores",
+    "searchPlaceholder": "Buscar proveedores…",
+    "selectSupplier": "Selecciona un proveedor",
+    "filters": {
+      "allTypes": "Todos los tipos",
+      "allCountries": "Todos los países"
+    },
+    "kpis": {
+      "suppliersWithOpenQuotes": "Proveedores con presupuestos abiertos",
+      "pendingSamples": "Muestras pendientes",
+      "activePos": "PO activas",
+      "activeShipments": "Envíos activos",
+      "needsFollowUp": "Requieren seguimiento"
+    },
+    "operational": {
+      "status": {
+        "active": "Activo",
+        "watch": "En seguimiento",
+        "inactive": "Inactivo"
+      },
+      "risk": {
+        "high": "Riesgo alto",
+        "medium": "Riesgo medio",
+        "low": "Riesgo bajo",
+        "none": "Sin riesgo"
+      },
+      "metrics": {
+        "openQuotes": "Presupuestos abiertos",
+        "pendingSamples": "Muestras pendientes",
+        "activePos": "PO activas",
+        "activeShipments": "Envíos activos"
+      },
+      "nextActionLabel": "Próxima acción",
+      "lastActivityLabel": "Última actividad",
+      "noRecentActivity": "Sin actividad reciente",
+      "nextAction": {
+        "followUpQuote": "Hacer seguimiento del presupuesto",
+        "reviewSample": "Revisar muestra",
+        "trackShipment": "Hacer seguimiento del envío",
+        "noImmediateAction": "Sin acción inmediata"
+      }
+    }
   },
   "forwardersPage": {
     "deleteEntityForwarder": "transitario",

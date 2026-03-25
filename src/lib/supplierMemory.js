@@ -14,11 +14,11 @@ import {
 /**
  * Get supplier performance metrics
  */
-export const getSupplierMetrics = async (supplierId, supabase, getCurrentUserId) => {
-  const userId = await getCurrentUserId()
-  
+export const getSupplierMetrics = async (supplierId, supabase, options = {}) => {
+  const { orgId = null } = options
+
   // Get all quotes from this supplier
-  const { data: quotes, error: quotesError } = await supabase
+  let quotesQuery = supabase
     .from('supplier_quotes')
     .select(`
       *,
@@ -28,19 +28,25 @@ export const getSupplierMetrics = async (supplierId, supabase, getCurrentUserId)
       )
     `)
     .eq('supplier_id', supplierId)
-    .eq('user_id', userId)
     .order('created_at', { ascending: false })
-  
+  if (orgId) {
+    quotesQuery = quotesQuery.eq('org_id', orgId)
+  }
+  const { data: quotes, error: quotesError } = await quotesQuery
+
   if (quotesError) throw quotesError
   
   // Get all POs from this supplier
-  const { data: pos, error: posError } = await supabase
+  let posQuery = supabase
     .from('purchase_orders')
     .select('*')
     .eq('supplier_id', supplierId)
-    .eq('user_id', userId)
     .order('created_at', { ascending: false })
-  
+  if (orgId) {
+    posQuery = posQuery.eq('org_id', orgId)
+  }
+  const { data: pos, error: posError } = await posQuery
+
   if (posError) throw posError
   
   // Get shipments for POs
@@ -64,12 +70,21 @@ export const getSupplierMetrics = async (supplierId, supabase, getCurrentUserId)
   }
   
   // Get decision logs for quotes
-  const { data: quoteDecisions } = await supabase
-    .from('decision_log')
-    .select('*')
-    .eq('entity_type', 'quote')
-    .eq('user_id', userId)
-    .in('entity_id', quotes?.map(q => q.id) || [])
+  let quoteDecisions = []
+  if (quotes?.length) {
+    let decisionsQuery = supabase
+      .from('decision_log')
+      .select('*')
+      .eq('entity_type', 'quote')
+      .in('entity_id', quotes.map(q => q.id))
+
+    if (orgId) {
+      decisionsQuery = decisionsQuery.eq('org_id', orgId)
+    }
+
+    const { data } = await decisionsQuery
+    quoteDecisions = data || []
+  }
   
   const selectedQuotes = new Set()
   if (quoteDecisions) {

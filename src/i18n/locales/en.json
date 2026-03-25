@@ -105,7 +105,23 @@
     "loading": "Loading calculator…"
   },
   "supplierMemory": {
-    "loading": "Loading metrics…"
+    "loading": "Loading metrics…",
+    "title": "Performance history",
+    "needMoreData": "Need at least {{count}} completed orders to show performance metrics",
+    "badges": {
+      "often_late": "Often late",
+      "price_changes": "Price changes",
+      "reliable": "Reliable"
+    },
+    "metrics": {
+      "quotesSent": "Quotes sent",
+      "quotesSelected": "Quotes selected",
+      "winRate": "{{rate}}% win rate",
+      "avgPriceDeviation": "Avg price deviation",
+      "avgLeadTimeDeviation": "Avg lead time deviation",
+      "samples": "{{count}} samples",
+      "daysValue": "{{count}} days"
+    }
   },
   "quickSupplier": {
     "loadingEstimates": "Loading estimates…"
@@ -185,7 +201,49 @@
     }
   },
   "suppliersPage": {
-    "deleteEntityNoun": "supplier"
+    "deleteEntityNoun": "supplier",
+    "pageTitle": "Suppliers",
+    "searchPlaceholder": "Search suppliers…",
+    "selectSupplier": "Select a supplier",
+    "filters": {
+      "allTypes": "All types",
+      "allCountries": "All countries"
+    },
+    "kpis": {
+      "suppliersWithOpenQuotes": "Suppliers with open quotes",
+      "pendingSamples": "Pending samples",
+      "activePos": "Active POs",
+      "activeShipments": "Active shipments",
+      "needsFollowUp": "Needs follow-up"
+    },
+    "operational": {
+      "status": {
+        "active": "Active",
+        "watch": "Watch",
+        "inactive": "Inactive"
+      },
+      "risk": {
+        "high": "High risk",
+        "medium": "Medium risk",
+        "low": "Low risk",
+        "none": "No risk"
+      },
+      "metrics": {
+        "openQuotes": "Open quotes",
+        "pendingSamples": "Pending samples",
+        "activePos": "Active POs",
+        "activeShipments": "Active shipments"
+      },
+      "nextActionLabel": "Next action",
+      "lastActivityLabel": "Last activity",
+      "noRecentActivity": "No recent activity",
+      "nextAction": {
+        "followUpQuote": "Follow up quote",
+        "reviewSample": "Review sample",
+        "trackShipment": "Track shipment",
+        "noImmediateAction": "No immediate action"
+      }
+    }
   },
   "forwardersPage": {
     "deleteEntityForwarder": "forwarder",
