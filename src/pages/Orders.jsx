@@ -402,7 +402,7 @@ export default function Orders() {
     } = options
 
     if (!selectedOrder?.id || !selectedOrder?.project_id) {
-      throw new Error('Error: La comanda no té projecte associat')
+      throw new Error(t('orders.errors.noProjectAssociated'))
     }
 
     // Validar
@@ -1130,29 +1130,29 @@ export default function Orders() {
                   {/* Info general */}
                   <div style={styles.detailGrid}>
                     <div style={styles.detailSection}>
-                      <h4 style={styles.detailSectionTitle}>📅 Informació General</h4>
+                      <h4 style={styles.detailSectionTitle}>📅 {t('orders.detail.sections.generalInfo')}</h4>
                       <div style={styles.detailRow}>
-                        <span style={styles.detailLabel}>Data:</span>
+                        <span style={styles.detailLabel}>{t('orders.detail.fields.date')}:</span>
                         <span style={{ color: darkMode ? '#ffffff' : '#111827' }}>{formatDate(selectedOrder.order_date)}</span>
                       </div>
                       <div style={styles.detailRow}>
-                        <span style={styles.detailLabel}>Quote Ref:</span>
+                        <span style={styles.detailLabel}>{t('orders.detail.fields.quoteRef')}:</span>
                         <span style={{ color: darkMode ? '#ffffff' : '#111827' }}>{selectedOrder.quote_ref || '-'}</span>
                       </div>
                       <div style={styles.detailRow}>
-                        <span style={styles.detailLabel}>Moneda:</span>
+                        <span style={styles.detailLabel}>{t('orders.detail.fields.currency')}:</span>
                         <span style={{ color: darkMode ? '#ffffff' : '#111827' }}>{selectedOrder.currency || 'USD'}</span>
                       </div>
                       <div style={styles.detailRow}>
-                        <span style={styles.detailLabel}>Incoterm:</span>
+                        <span style={styles.detailLabel}>{t('orders.detail.fields.incoterm')}:</span>
                         <span style={{ color: darkMode ? '#ffffff' : '#111827' }}>{selectedOrder.incoterm} {selectedOrder.incoterm_location}</span>
                       </div>
                     </div>
 
                     <div style={styles.detailSection}>
-                      <h4 style={styles.detailSectionTitle}>🏭 Proveïdor</h4>
+                      <h4 style={styles.detailSectionTitle}>🏭 {t('orders.detail.sections.supplier')}</h4>
                       <div style={styles.detailRow}>
-                        <span style={styles.detailLabel}>Nom:</span>
+                        <span style={styles.detailLabel}>{t('orders.detail.fields.name')}:</span>
                         {selectedOrder.supplier?.name ? (
                           <button
                             type="button"
@@ -1174,11 +1174,11 @@ export default function Orders() {
                         )}
                       </div>
                       <div style={styles.detailRow}>
-                        <span style={styles.detailLabel}>Contacte:</span>
+                        <span style={styles.detailLabel}>{t('orders.detail.fields.contact')}:</span>
                         <span style={{ color: darkMode ? '#ffffff' : '#111827' }}>{selectedOrder.supplier?.contact_name || '-'}</span>
                       </div>
                       <div style={styles.detailRow}>
-                        <span style={styles.detailLabel}>Email:</span>
+                        <span style={styles.detailLabel}>{t('orders.detail.fields.email')}:</span>
                         <span style={{ color: darkMode ? '#ffffff' : '#111827' }}>{selectedOrder.supplier?.email || '-'}</span>
                       </div>
                     </div>
@@ -1186,7 +1186,7 @@ export default function Orders() {
 
                   {/* Entrega */}
                   <div style={styles.detailSection}>
-                    <h4 style={styles.detailSectionTitle}>🚚 Adreça d'Entrega</h4>
+                    <h4 style={styles.detailSectionTitle}>🚚 {t('orders.detail.sections.deliveryAddress')}</h4>
                     <p style={{ margin: 0, color: darkMode ? '#ffffff' : '#111827' }}>
                       {selectedOrder.delivery_address || '-'}
                     </p>
@@ -1199,15 +1199,15 @@ export default function Orders() {
 
                   {/* Productes */}
                   <div style={styles.detailSection}>
-                    <h4 style={styles.detailSectionTitle}>📦 Productes</h4>
+                    <h4 style={styles.detailSectionTitle}>📦 {t('orders.detail.sections.products')}</h4>
                     <table style={styles.itemsTable}>
                       <thead>
                         <tr>
-                          <th style={styles.itemsTh}>Ref</th>
-                          <th style={styles.itemsTh}>Descripció</th>
-                          <th style={styles.itemsTh}>Qty</th>
-                          <th style={styles.itemsTh}>Preu</th>
-                          <th style={styles.itemsTh}>Total</th>
+                          <th style={styles.itemsTh}>{t('orders.detail.fields.ref')}</th>
+                          <th style={styles.itemsTh}>{t('orders.detail.fields.description')}</th>
+                          <th style={styles.itemsTh}>{t('orders.detail.fields.qty')}</th>
+                          <th style={styles.itemsTh}>{t('orders.detail.fields.price')}</th>
+                          <th style={styles.itemsTh}>{t('orders.detail.fields.total')}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1218,7 +1218,7 @@ export default function Orders() {
                             return (
                               <tr>
                                 <td colSpan={5} style={{ ...styles.itemsTd, textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>
-                                  No hi ha items
+                                  {t('orders.detail.empty.noItems')}
                                 </td>
                               </tr>
                             )
@@ -1239,7 +1239,7 @@ export default function Orders() {
                       </tbody>
                       <tfoot>
                         <tr>
-                          <td colSpan={4} style={{ ...styles.itemsTd, textAlign: 'right', fontWeight: '600' }}>TOTAL:</td>
+                          <td colSpan={4} style={{ ...styles.itemsTd, textAlign: 'right', fontWeight: '600' }}>{t('orders.detail.fields.total')}:</td>
                           <td style={{ ...styles.itemsTd, fontWeight: '700', color: '#4f46e5', fontSize: '16px' }}>
                             {formatCurrency(selectedOrder.total_amount, selectedOrder.currency)}
                           </td>
@@ -1251,19 +1251,19 @@ export default function Orders() {
                   {/* Shipping */}
                   {(selectedOrder.total_cartons || selectedOrder.net_weight || selectedOrder.gross_weight) && (
                     <div style={styles.detailSection}>
-                      <h4 style={styles.detailSectionTitle}>📊 Especificacions d'Enviament</h4>
+                      <h4 style={styles.detailSectionTitle}>📊 {t('orders.detail.sections.shippingSpecs')}</h4>
                       <div style={styles.shippingGrid}>
                         {selectedOrder.total_cartons && (
-                          <div><span style={styles.detailLabel}>Caixes:</span> {selectedOrder.total_cartons}</div>
+                          <div><span style={styles.detailLabel}>{t('orders.detail.fields.boxes')}:</span> {selectedOrder.total_cartons}</div>
                         )}
                         {selectedOrder.net_weight && (
-                          <div><span style={styles.detailLabel}>Pes net:</span> {selectedOrder.net_weight}</div>
+                          <div><span style={styles.detailLabel}>{t('orders.detail.fields.netWeight')}:</span> {selectedOrder.net_weight}</div>
                         )}
                         {selectedOrder.gross_weight && (
-                          <div><span style={styles.detailLabel}>Pes brut:</span> {selectedOrder.gross_weight}</div>
+                          <div><span style={styles.detailLabel}>{t('orders.detail.fields.grossWeight')}:</span> {selectedOrder.gross_weight}</div>
                         )}
                         {selectedOrder.total_volume && (
-                          <div><span style={styles.detailLabel}>Volum:</span> {selectedOrder.total_volume}</div>
+                          <div><span style={styles.detailLabel}>{t('orders.detail.fields.volume')}:</span> {selectedOrder.total_volume}</div>
                         )}
                       </div>
                     </div>
@@ -1272,13 +1272,13 @@ export default function Orders() {
                   {/* Amazon Ready Section */}
                   <div style={styles.detailSection}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                      <h4 style={styles.detailSectionTitle}>📦 Amazon Ready</h4>
+                      <h4 style={styles.detailSectionTitle}>📦 {t('orders.detail.sections.amazonReady')}</h4>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => setShowAmazonReadySection(!showAmazonReadySection)}
                       >
-                        {showAmazonReadySection ? 'Ocultar' : 'Mostrar'}
+                        {showAmazonReadySection ? t('orders.actions.hide') : t('orders.actions.show')}
                       </Button>
                     </div>
                     
@@ -1334,7 +1334,7 @@ export default function Orders() {
 
                   {/* Manufacturer Pack (single block) */}
                   <div style={styles.detailSection}>
-                    <h4 style={styles.detailSectionTitle}>📦 Manufacturer Pack</h4>
+                    <h4 style={styles.detailSectionTitle}>📦 {t('orders.detail.sections.manufacturerPack')}</h4>
                     <p style={{ 
                       fontSize: '13px', 
                       color: darkMode ? '#9ca3af' : '#6b7280',
@@ -1363,19 +1363,19 @@ export default function Orders() {
 
                   {/* Generar Etiquetes FNSKU */}
                   <div style={styles.detailSection}>
-                    <h4 style={styles.detailSectionTitle}>🏷️ Etiquetes FNSKU</h4>
+                    <h4 style={styles.detailSectionTitle}>🏷️ {t('orders.detail.sections.fnskuLabels')}</h4>
                     <Button
                       variant="primary"
                       onClick={() => setShowLabelsModal(true)}
                     >
-                      Generar Etiquetes FNSKU
+                      {t('orders.labels.openGenerator')}
                     </Button>
                   </div>
 
                   {/* Notes */}
                   {selectedOrder.notes && (
                     <div style={styles.detailSection}>
-                      <h4 style={styles.detailSectionTitle}>📝 Notes</h4>
+                      <h4 style={styles.detailSectionTitle}>📝 {t('orders.detail.sections.notes')}</h4>
                       <p style={{ margin: 0, color: darkMode ? '#ffffff' : '#111827', whiteSpace: 'pre-wrap' }}>
                         {selectedOrder.notes}
                       </p>
@@ -1409,7 +1409,7 @@ export default function Orders() {
                         entityId={selectedOrder.id} 
                         darkMode={darkMode}
                         allowedDecisions={[
-                          { value: 'go', label: 'GO', icon: CheckCircle2, color: '#10b981' }
+                          { value: 'go', label: t('orders.detail.decision.go'), icon: CheckCircle2, color: '#10b981' }
                         ]}
                       />
                     </div>
@@ -1470,7 +1470,7 @@ export default function Orders() {
                 ...styles.detailTitle,
                 color: darkMode ? '#ffffff' : '#111827'
               }}>
-                Generar Etiquetes FNSKU
+                {t('orders.labels.modalTitle')}
               </h3>
               <Button
                 variant="ghost"
@@ -1491,7 +1491,7 @@ export default function Orders() {
                     fontWeight: '500',
                     color: darkMode ? '#e5e7eb' : '#374151'
                   }}>
-                    Quantitat d'etiquetes
+                    {t('orders.labels.quantity')}
                   </label>
                   <input
                     type="number"
@@ -1518,7 +1518,7 @@ export default function Orders() {
                     fontWeight: '500',
                     color: darkMode ? '#e5e7eb' : '#374151'
                   }}>
-                    Plantilla
+                    {t('orders.labels.template')}
                   </label>
                   <select
                     value={labelsConfig.template}
@@ -1534,8 +1534,8 @@ export default function Orders() {
                       fontSize: '14px'
                     }}
                   >
-                    <option value="AVERY_5160">Avery 5160 - 30 etiquetes (3x10)</option>
-                    <option value="LABEL_40x30">Una etiqueta per pàgina (40x30mm)</option>
+                    <option value="AVERY_5160">{t('orders.labels.templates.avery5160')}</option>
+                    <option value="LABEL_40x30">{t('orders.labels.templates.single40x30')}</option>
                   </select>
                 </div>
                 <div style={{ display: 'flex', gap: '16px' }}>
@@ -1550,7 +1550,7 @@ export default function Orders() {
                       checked={labelsConfig.includeSku}
                       onChange={e => setLabelsConfig({ ...labelsConfig, includeSku: e.target.checked })}
                     />
-                    <span style={{ fontSize: '13px', color: darkMode ? '#e5e7eb' : '#374151' }}>Incloure SKU</span>
+                    <span style={{ fontSize: '13px', color: darkMode ? '#e5e7eb' : '#374151' }}>{t('orders.labels.includeSku')}</span>
                   </label>
                   <label style={{
                     display: 'flex',
@@ -1563,7 +1563,7 @@ export default function Orders() {
                       checked={labelsConfig.includeName}
                       onChange={e => setLabelsConfig({ ...labelsConfig, includeName: e.target.checked })}
                     />
-                    <span style={{ fontSize: '13px', color: darkMode ? '#e5e7eb' : '#374151' }}>Incloure Nom</span>
+                    <span style={{ fontSize: '13px', color: darkMode ? '#e5e7eb' : '#374151' }}>{t('orders.labels.includeName')}</span>
                   </label>
                   <label style={{
                     display: 'flex',
@@ -1576,7 +1576,7 @@ export default function Orders() {
                       checked={labelsConfig.testPrint}
                       onChange={e => setLabelsConfig({ ...labelsConfig, testPrint: e.target.checked })}
                     />
-                    <span style={{ fontSize: '13px', color: darkMode ? '#e5e7eb' : '#374151' }}>Mode Test Print (guies)</span>
+                    <span style={{ fontSize: '13px', color: darkMode ? '#e5e7eb' : '#374151' }}>{t('orders.labels.testPrint')}</span>
                   </label>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '12px' }}>
@@ -1588,7 +1588,7 @@ export default function Orders() {
                       fontWeight: '500',
                       color: darkMode ? '#e5e7eb' : '#374151'
                     }}>
-                      Offset X (mm)
+                      {t('orders.labels.offsetX')}
                     </label>
                     <input
                       type="number"
@@ -1615,7 +1615,7 @@ export default function Orders() {
                       fontWeight: '500',
                       color: darkMode ? '#e5e7eb' : '#374151'
                     }}>
-                      Offset Y (mm)
+                      {t('orders.labels.offsetY')}
                     </label>
                     <input
                       type="number"
@@ -1640,7 +1640,7 @@ export default function Orders() {
                   onClick={handleGenerateLabels}
                   style={{ marginTop: '12px' }}
                 >
-                  Generar i Descarregar PDF
+                  {t('orders.labels.generateAndDownloadPdf')}
                 </Button>
               </div>
             </div>

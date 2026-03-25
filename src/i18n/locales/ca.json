@@ -1309,6 +1309,10 @@
     "splitSelectPrompt": "Selecciona una comanda",
     "viewProject": "Veure projecte",
     "confirmDelete": "Segur que vols eliminar la comanda {{poNumber}}?",
+    "actions": {
+      "show": "Mostrar",
+      "hide": "Ocultar"
+    },
     "toasts": {
       "noProject": "La comanda no té projecte associat.",
       "missingFnsku": "El projecte no té FNSKU informat. Afegeix-lo a la secció d'Identificadors del projecte.",
@@ -1317,10 +1321,111 @@
       "manufacturerPackSuccess": "Manufacturer pack generat i descarregat correctament",
       "errorPrefix": "Error:"
     },
+    "errors": {
+      "noProjectAssociated": "La comanda no té projecte associat."
+    },
     "detail": {
+      "sections": {
+        "generalInfo": "Informació general",
+        "supplier": "Proveïdor",
+        "deliveryAddress": "Adreça d'entrega",
+        "products": "Productes",
+        "shippingSpecs": "Especificacions d'enviament",
+        "amazonReady": "Amazon Ready",
+        "manufacturerPack": "Manufacturer Pack",
+        "fnskuLabels": "Etiquetes FNSKU",
+        "notes": "Notes"
+      },
+      "fields": {
+        "date": "Data",
+        "quoteRef": "Ref. pressupost",
+        "currency": "Moneda",
+        "incoterm": "Incoterm",
+        "name": "Nom",
+        "contact": "Contacte",
+        "email": "Email",
+        "ref": "Ref",
+        "description": "Descripció",
+        "qty": "Quantitat",
+        "price": "Preu",
+        "total": "Total",
+        "boxes": "Caixes",
+        "netWeight": "Pes net",
+        "grossWeight": "Pes brut",
+        "volume": "Volum"
+      },
+      "empty": {
+        "noItems": "No hi ha ítems"
+      },
+      "decision": {
+        "go": "GO"
+      },
       "whySupplier": "Per què s'ha triat aquest proveïdor",
       "manufacturerPackHelp": "Genera tots els documents per enviar al fabricant (PO, etiquetes, packing list, etiquetes de cartró).",
       "generateManufacturerPack": "Generar manufacturer pack"
+    },
+    "labels": {
+      "openGenerator": "Generar etiquetes FNSKU",
+      "modalTitle": "Generar etiquetes FNSKU",
+      "quantity": "Quantitat d'etiquetes",
+      "template": "Plantilla",
+      "includeSku": "Incloure SKU",
+      "includeName": "Incloure nom",
+      "testPrint": "Mode test print (guies)",
+      "offsetX": "Offset X (mm)",
+      "offsetY": "Offset Y (mm)",
+      "generateAndDownloadPdf": "Generar i descarregar PDF",
+      "templates": {
+        "avery5160": "Avery 5160 - 30 etiquetes (3x10)",
+        "single40x30": "Una etiqueta per pàgina (40x30 mm)"
+      }
+    },
+    "manufacturerPack": {
+      "title": "Generar Manufacturer Pack",
+      "closeAriaLabel": "Tancar",
+      "validation": {
+        "title": "Errors de validació:",
+        "readinessNotInitialized": "Les dades d'Amazon Ready no estan inicialitzades. Omple primer la secció Amazon Ready.",
+        "cartonsCountForPackingList": "Cal indicar el nombre de caixes per al Packing List",
+        "unitsPerCartonForPackingList": "Cal indicar les unitats per caixa per al Packing List",
+        "cartonDimensionsForPackingList": "Cal indicar les dimensions de la caixa (L/A/H) per al Packing List",
+        "cartonWeightForPackingList": "Cal indicar el pes de la caixa per al Packing List",
+        "cartonsCountForCartonLabels": "Cal indicar el nombre de caixes per a les Carton Labels",
+        "fnskuRequired": "Cal un FNSKU per generar les etiquetes FNSKU. Defineix-lo als identificadors del projecte o desactiva aquest requisit a Amazon Ready."
+      },
+      "documents": {
+        "title": "Documents a incloure",
+        "poPdf": "PO PDF",
+        "fnskuLabelsPdf": "Etiquetes FNSKU PDF",
+        "packingListPdf": "Packing List PDF",
+        "cartonLabelsPdf": "Carton Labels PDF",
+        "fnskuRequired": "FNSKU obligatori",
+        "cartonsCountRequired": "Nombre de caixes obligatori"
+      },
+      "labels": {
+        "title": "Configuració d'etiquetes FNSKU",
+        "quantity": "Quantitat",
+        "template": "Plantilla",
+        "templates": {
+          "a4_30up": "A4 30UP (Avery 5160)",
+          "label40x30": "Etiqueta 40x30 mm",
+          "zebra40x30": "Zebra 40x30 mm"
+        }
+      },
+      "status": {
+        "sentOn": "✅ Pack enviat al fabricant el {{date}}",
+        "generatedOn": "📦 Pack generat el {{date}}",
+        "version": "(Versió {{version}})"
+      },
+      "actions": {
+        "generating": "Generant...",
+        "generateDownloadZip": "Generar i descarregar ZIP"
+      },
+      "errors": {
+        "fixValidation": "Corregeix els errors de validació abans de generar el pack",
+        "generateFallback": "Error generant el pack del fabricant",
+        "markAsSent": "Error marcant el pack com enviat: {{message}}"
+      }
     }
   },
   "amazonReadiness": {

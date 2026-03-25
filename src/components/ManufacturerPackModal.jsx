@@ -65,25 +65,25 @@ export default function ManufacturerPackModal({
     // Validar que readiness existeix per Packing List i Carton Labels
     if (selection.includePackingList || selection.includeCartonLabels) {
       if (!readiness) {
-        errors.push('Amazon readiness data not initialized. Please fill in the Amazon Ready section first.')
+        errors.push(t('orders.manufacturerPack.validation.readinessNotInitialized'))
       } else {
         // Validar camps crítics per Packing List
         if (!readiness.cartons_count || readiness.cartons_count <= 0) {
-          errors.push('Cartons count is required for Packing List')
+          errors.push(t('orders.manufacturerPack.validation.cartonsCountForPackingList'))
         }
         if (!readiness.units_per_carton || readiness.units_per_carton <= 0) {
-          errors.push('Units per carton is required for Packing List')
+          errors.push(t('orders.manufacturerPack.validation.unitsPerCartonForPackingList'))
         }
         if (!readiness.carton_length_cm || !readiness.carton_width_cm || !readiness.carton_height_cm) {
-          errors.push('Carton dimensions (L/W/H) are required for Packing List')
+          errors.push(t('orders.manufacturerPack.validation.cartonDimensionsForPackingList'))
         }
         if (!readiness.carton_weight_kg || readiness.carton_weight_kg <= 0) {
-          errors.push('Carton weight is required for Packing List')
+          errors.push(t('orders.manufacturerPack.validation.cartonWeightForPackingList'))
         }
 
         // Validar per Carton Labels
         if (selection.includeCartonLabels && !readiness.cartons_count) {
-          errors.push('Cartons count is required for Carton Labels')
+          errors.push(t('orders.manufacturerPack.validation.cartonsCountForCartonLabels'))
         }
       }
     }
@@ -92,7 +92,7 @@ export default function ManufacturerPackModal({
     if (selection.includeFnskuLabels) {
       if (readiness?.needs_fnsku !== false) {
         if (!identifiers || !identifiers.fnsku) {
-          errors.push('FNSKU is required for FNSKU labels. Please set it in the project identifiers or disable FNSKU requirement in Amazon Ready section.')
+          errors.push(t('orders.manufacturerPack.validation.fnskuRequired'))
         }
       }
     }
@@ -107,7 +107,7 @@ export default function ManufacturerPackModal({
 
   const handleGenerate = async () => {
     if (!validateReadiness()) {
-      setError('Please fix validation errors before generating the pack')
+      setError(t('orders.manufacturerPack.errors.fixValidation'))
       return
     }
 
@@ -177,7 +177,7 @@ export default function ManufacturerPackModal({
       onClose()
     } catch (err) {
       console.error('Error generant manufacturer pack:', err)
-      setError(err.message || 'Error generant el pack del fabricant')
+      setError(err.message || t('orders.manufacturerPack.errors.generateFallback'))
       
       // Audit log error
       try {
@@ -330,9 +330,9 @@ export default function ManufacturerPackModal({
         <div style={styles.header}>
           <h2 style={styles.title}>
             <Package size={20} style={{ verticalAlign: 'middle', marginRight: '8px' }} />
-            Generate Manufacturer Pack
+            {t('orders.manufacturerPack.title')}
           </h2>
-          <Button variant="ghost" onClick={onClose} aria-label="Tancar">
+          <Button variant="ghost" onClick={onClose} aria-label={t('orders.manufacturerPack.closeAriaLabel')}>
             <X size={20} />
           </Button>
         </div>
@@ -342,7 +342,7 @@ export default function ManufacturerPackModal({
           <div style={styles.errorBox}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
               <AlertTriangle size={16} color="#991b1b" />
-              <strong style={styles.errorText}>Validation Errors:</strong>
+              <strong style={styles.errorText}>{t('orders.manufacturerPack.validation.title')}</strong>
             </div>
             <ul style={{ margin: 0, paddingLeft: '20px' }}>
               {validationErrors.map((err, idx) => (
@@ -354,7 +354,7 @@ export default function ManufacturerPackModal({
 
         {/* Document Selection */}
         <div style={styles.section}>
-          <h3 style={styles.sectionTitle}>Documents to Include</h3>
+          <h3 style={styles.sectionTitle}>{t('orders.manufacturerPack.documents.title')}</h3>
           <div style={styles.checkboxGroup}>
             <label style={styles.checkbox}>
               <input
@@ -362,7 +362,7 @@ export default function ManufacturerPackModal({
                 checked={selection.includePO}
                 onChange={e => setSelection({ ...selection, includePO: e.target.checked })}
               />
-              <span style={{ color: darkMode ? '#e5e7eb' : '#374151' }}>PO PDF</span>
+              <span style={{ color: darkMode ? '#e5e7eb' : '#374151' }}>{t('orders.manufacturerPack.documents.poPdf')}</span>
             </label>
             
             <label style={styles.checkbox}>
@@ -377,10 +377,10 @@ export default function ManufacturerPackModal({
                   ? '#9ca3af'
                   : (darkMode ? '#e5e7eb' : '#374151')
               }}>
-                FNSKU Labels PDF
+                {t('orders.manufacturerPack.documents.fnskuLabelsPdf')}
                 {readiness?.needs_fnsku !== false && (!identifiers || !identifiers.fnsku) && (
                   <span style={{ color: '#ef4444', fontSize: '12px', marginLeft: '8px' }}>
-                    (FNSKU required)
+                    ({t('orders.manufacturerPack.documents.fnskuRequired')})
                   </span>
                 )}
               </span>
@@ -392,7 +392,7 @@ export default function ManufacturerPackModal({
                 checked={selection.includePackingList}
                 onChange={e => setSelection({ ...selection, includePackingList: e.target.checked })}
               />
-              <span style={{ color: darkMode ? '#e5e7eb' : '#374151' }}>Packing List PDF</span>
+              <span style={{ color: darkMode ? '#e5e7eb' : '#374151' }}>{t('orders.manufacturerPack.documents.packingListPdf')}</span>
             </label>
             
             <label style={styles.checkbox}>
@@ -407,10 +407,10 @@ export default function ManufacturerPackModal({
                   ? '#9ca3af'
                   : (darkMode ? '#e5e7eb' : '#374151')
               }}>
-                Carton Labels PDF
+                {t('orders.manufacturerPack.documents.cartonLabelsPdf')}
                 {!readiness?.cartons_count && (
                   <span style={{ color: '#ef4444', fontSize: '12px', marginLeft: '8px' }}>
-                    (Cartons count required)
+                    ({t('orders.manufacturerPack.documents.cartonsCountRequired')})
                   </span>
                 )}
               </span>
@@ -421,10 +421,10 @@ export default function ManufacturerPackModal({
         {/* FNSKU Labels Configuration */}
         {selection.includeFnskuLabels && identifiers?.fnsku && (
           <div style={styles.section}>
-            <h3 style={styles.sectionTitle}>FNSKU Labels Configuration</h3>
+            <h3 style={styles.sectionTitle}>{t('orders.manufacturerPack.labels.title')}</h3>
             
             <div style={{ marginBottom: '12px' }}>
-              <label style={styles.label}>Quantity</label>
+              <label style={styles.label}>{t('orders.manufacturerPack.labels.quantity')}</label>
               <input
                 type="number"
                 value={labelsConfig.quantity}
@@ -435,15 +435,15 @@ export default function ManufacturerPackModal({
             </div>
 
             <div>
-              <label style={styles.label}>Template</label>
+              <label style={styles.label}>{t('orders.manufacturerPack.labels.template')}</label>
               <select
                 value={labelsConfig.template}
                 onChange={e => setLabelsConfig({ ...labelsConfig, template: e.target.value })}
                 style={styles.input}
               >
-                <option value="A4_30UP">A4 30UP (Avery 5160)</option>
-                <option value="LABEL_40x30">Label 40x30mm</option>
-                <option value="ZEBRA_40x30">Zebra 40x30mm</option>
+                <option value="A4_30UP">{t('orders.manufacturerPack.labels.templates.a4_30up')}</option>
+                <option value="LABEL_40x30">{t('orders.manufacturerPack.labels.templates.label40x30')}</option>
+                <option value="ZEBRA_40x30">{t('orders.manufacturerPack.labels.templates.zebra40x30')}</option>
               </select>
             </div>
           </div>
@@ -462,16 +462,20 @@ export default function ManufacturerPackModal({
           }}>
             {readiness.manufacturer_pack_sent_at ? (
               <>
-                ✅ Pack sent to manufacturer on {new Date(readiness.manufacturer_pack_sent_at).toLocaleDateString()}
+                {t('orders.manufacturerPack.status.sentOn', {
+                  date: new Date(readiness.manufacturer_pack_sent_at).toLocaleDateString()
+                })}
                 {readiness.manufacturer_pack_version > 1 && (
-                  <span> (Version {readiness.manufacturer_pack_version})</span>
+                  <span> {t('orders.manufacturerPack.status.version', { version: readiness.manufacturer_pack_version })}</span>
                 )}
               </>
             ) : (
               <>
-                📦 Pack generated on {new Date(readiness.manufacturer_pack_generated_at).toLocaleDateString()}
+                {t('orders.manufacturerPack.status.generatedOn', {
+                  date: new Date(readiness.manufacturer_pack_generated_at).toLocaleDateString()
+                })}
                 {readiness.manufacturer_pack_version > 1 && (
-                  <span> (Version {readiness.manufacturer_pack_version})</span>
+                  <span> {t('orders.manufacturerPack.status.version', { version: readiness.manufacturer_pack_version })}</span>
                 )}
                 <br />
                 <button
@@ -486,7 +490,9 @@ export default function ManufacturerPackModal({
                       // Tancar modal després de marcar com enviat
                       onClose()
                     } catch (err) {
-                      setError('Error marking pack as sent: ' + (err.message || 'Unknown error'))
+                      setError(t('orders.manufacturerPack.errors.markAsSent', {
+                        message: err.message || t('orders.toasts.unknownError')
+                      }))
                     } finally {
                       setLoading(false)
                     }
@@ -541,12 +547,12 @@ export default function ManufacturerPackModal({
             {loading ? (
               <>
                 <Loader size={16} className="spin" />
-                Generating...
+                {t('orders.manufacturerPack.actions.generating')}
               </>
             ) : (
               <>
                 <Download size={16} />
-                Generate & Download ZIP
+                {t('orders.manufacturerPack.actions.generateDownloadZip')}
               </>
             )}
           </button>

@@ -1296,6 +1296,10 @@
     "splitSelectPrompt": "Select an order",
     "viewProject": "View project",
     "confirmDelete": "Delete order {{poNumber}}?",
+    "actions": {
+      "show": "Show",
+      "hide": "Hide"
+    },
     "toasts": {
       "noProject": "This order has no linked project.",
       "missingFnsku": "The project has no FNSKU. Add it in the project Identifiers section.",
@@ -1304,10 +1308,111 @@
       "manufacturerPackSuccess": "Manufacturer pack generated and downloaded",
       "errorPrefix": "Error:"
     },
+    "errors": {
+      "noProjectAssociated": "This order has no linked project."
+    },
     "detail": {
+      "sections": {
+        "generalInfo": "General information",
+        "supplier": "Supplier",
+        "deliveryAddress": "Delivery address",
+        "products": "Products",
+        "shippingSpecs": "Shipping specifications",
+        "amazonReady": "Amazon Ready",
+        "manufacturerPack": "Manufacturer Pack",
+        "fnskuLabels": "FNSKU labels",
+        "notes": "Notes"
+      },
+      "fields": {
+        "date": "Date",
+        "quoteRef": "Quote ref",
+        "currency": "Currency",
+        "incoterm": "Incoterm",
+        "name": "Name",
+        "contact": "Contact",
+        "email": "Email",
+        "ref": "Ref",
+        "description": "Description",
+        "qty": "Qty",
+        "price": "Price",
+        "total": "Total",
+        "boxes": "Boxes",
+        "netWeight": "Net weight",
+        "grossWeight": "Gross weight",
+        "volume": "Volume"
+      },
+      "empty": {
+        "noItems": "No items"
+      },
+      "decision": {
+        "go": "GO"
+      },
       "whySupplier": "Why this supplier was chosen",
       "manufacturerPackHelp": "Generate all documents needed to send to the manufacturer (PO, labels, packing list, carton labels).",
       "generateManufacturerPack": "Generate manufacturer pack"
+    },
+    "labels": {
+      "openGenerator": "Generate FNSKU labels",
+      "modalTitle": "Generate FNSKU labels",
+      "quantity": "Label quantity",
+      "template": "Template",
+      "includeSku": "Include SKU",
+      "includeName": "Include name",
+      "testPrint": "Test print mode (guides)",
+      "offsetX": "Offset X (mm)",
+      "offsetY": "Offset Y (mm)",
+      "generateAndDownloadPdf": "Generate and download PDF",
+      "templates": {
+        "avery5160": "Avery 5160 - 30 labels (3x10)",
+        "single40x30": "One label per page (40x30 mm)"
+      }
+    },
+    "manufacturerPack": {
+      "title": "Generate Manufacturer Pack",
+      "closeAriaLabel": "Close",
+      "validation": {
+        "title": "Validation errors:",
+        "readinessNotInitialized": "Amazon Ready data is not initialized. Please complete the Amazon Ready section first.",
+        "cartonsCountForPackingList": "Cartons count is required for the Packing List",
+        "unitsPerCartonForPackingList": "Units per carton is required for the Packing List",
+        "cartonDimensionsForPackingList": "Carton dimensions (L/W/H) are required for the Packing List",
+        "cartonWeightForPackingList": "Carton weight is required for the Packing List",
+        "cartonsCountForCartonLabels": "Cartons count is required for the Carton Labels",
+        "fnskuRequired": "FNSKU is required to generate FNSKU labels. Set it in the project identifiers or disable this requirement in Amazon Ready."
+      },
+      "documents": {
+        "title": "Documents to include",
+        "poPdf": "PO PDF",
+        "fnskuLabelsPdf": "FNSKU labels PDF",
+        "packingListPdf": "Packing List PDF",
+        "cartonLabelsPdf": "Carton Labels PDF",
+        "fnskuRequired": "FNSKU required",
+        "cartonsCountRequired": "Cartons count required"
+      },
+      "labels": {
+        "title": "FNSKU labels configuration",
+        "quantity": "Quantity",
+        "template": "Template",
+        "templates": {
+          "a4_30up": "A4 30UP (Avery 5160)",
+          "label40x30": "Label 40x30 mm",
+          "zebra40x30": "Zebra 40x30 mm"
+        }
+      },
+      "status": {
+        "sentOn": "✅ Pack sent to manufacturer on {{date}}",
+        "generatedOn": "📦 Pack generated on {{date}}",
+        "version": "(Version {{version}})"
+      },
+      "actions": {
+        "generating": "Generating...",
+        "generateDownloadZip": "Generate and download ZIP"
+      },
+      "errors": {
+        "fixValidation": "Please fix validation errors before generating the pack",
+        "generateFallback": "Error generating manufacturer pack",
+        "markAsSent": "Error marking pack as sent: {{message}}"
+      }
     }
   },
   "amazonReadiness": {
