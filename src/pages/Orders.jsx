@@ -87,10 +87,10 @@ const PO_STATUS_META = {
 }
 
 const RISK_META = {
-  high: { label: 'high', color: '#dc2626', background: 'rgba(220, 38, 38, 0.12)' },
-  medium: { label: 'medium', color: '#d97706', background: 'rgba(217, 119, 6, 0.12)' },
-  low: { label: 'low', color: '#0f766e', background: 'rgba(15, 118, 110, 0.12)' },
-  done: { label: 'done', color: '#2563eb', background: 'rgba(37, 99, 235, 0.12)' }
+  high: { color: '#dc2626', background: 'rgba(220, 38, 38, 0.12)' },
+  medium: { color: '#d97706', background: 'rgba(217, 119, 6, 0.12)' },
+  low: { color: '#0f766e', background: 'rgba(15, 118, 110, 0.12)' },
+  done: { color: '#2563eb', background: 'rgba(37, 99, 235, 0.12)' }
 }
 
 export default function Orders() {
@@ -657,17 +657,24 @@ export default function Orders() {
     const StatusIcon = status.icon
     const risk = RISK_META[order.riskLevel] || RISK_META.low
     const amazonReadyLabel = order.amazonReadyStatus == null
-      ? 'Readiness unknown'
-      : (order.amazonReadyStatus.ready ? 'Amazon ready' : 'Not Amazon ready')
+      ? t('orders.operational.readiness.unknown')
+      : (order.amazonReadyStatus.ready ? t('orders.operational.readiness.ready') : t('orders.operational.readiness.notReady'))
     const packLabel = order.manufacturerPackStatus === 'sent'
-      ? 'Pack sent'
+      ? t('orders.operational.packStatus.sent')
       : order.manufacturerPackStatus === 'generated'
-        ? 'Pack generated'
-        : 'Pack not started'
+        ? t('orders.operational.packStatus.generated')
+        : t('orders.operational.packStatus.notStarted')
     const blockerDetails = Array.isArray(order.amazonReadyStatus?.missing) ? order.amazonReadyStatus.missing : []
-    const blockerHint = order.blockerSummary === 'Amazon setup missing' && blockerDetails.length > 0
+    const blockerLabel = t(`orders.operational.blockers.${order.blockerKey || 'no_blockers'}`)
+    const blockerHint = order.blockerKey === 'amazon_setup_missing' && blockerDetails.length > 0
       ? blockerDetails.slice(0, 2).join(' · ')
-      : order.blockerSummary
+      : blockerLabel
+    const nextActionLabel = t(`orders.operational.nextActions.${order.nextActionKey || 'monitor_execution'}`)
+    const shipmentLabel = t(`orders.operational.shipmentSummary.${order.shipmentSummaryKey || 'no_shipment'}`, {
+      defaultValue: order.shipmentStatus
+        ? order.shipmentStatus.replace(/_/g, ' ')
+        : t('orders.operational.shipmentSummary.no_shipment')
+    })
 
     return (
       <div
@@ -712,40 +719,40 @@ export default function Orders() {
               color: risk.color,
               backgroundColor: risk.background
             }}>
-              {risk.label}
+              {t(`orders.operational.risk.${order.riskLevel || 'low'}`)}
             </span>
           </div>
         </div>
         <div style={styles.orderCardBody}>
           <div style={styles.operationalRow}>
-            <span style={styles.operationalLabel}>Total</span>
+            <span style={styles.operationalLabel}>{t('orders.operational.fields.total')}</span>
             <strong style={{ color: darkMode ? '#ffffff' : '#111827' }}>
               {formatCurrency(order.total_amount, order.currency)}
             </strong>
           </div>
           <div style={styles.operationalRow}>
-            <span style={styles.operationalLabel}>Shipment</span>
-            <span>{order.shipmentSummary || 'No shipment'}</span>
+            <span style={styles.operationalLabel}>{t('orders.operational.fields.shipment')}</span>
+            <span>{shipmentLabel}</span>
           </div>
           <div style={styles.operationalRow}>
-            <span style={styles.operationalLabel}>ETA</span>
+            <span style={styles.operationalLabel}>{t('orders.operational.fields.eta')}</span>
             <span>{order.etaDate ? formatDate(order.etaDate) : '-'}</span>
           </div>
           <div style={styles.operationalRow}>
-            <span style={styles.operationalLabel}>Readiness</span>
+            <span style={styles.operationalLabel}>{t('orders.operational.fields.readiness')}</span>
             <span>{amazonReadyLabel}</span>
           </div>
           <div style={styles.operationalRow}>
-            <span style={styles.operationalLabel}>Pack</span>
+            <span style={styles.operationalLabel}>{t('orders.operational.fields.pack')}</span>
             <span>{packLabel}</span>
           </div>
           <div style={styles.operationalPanel}>
-            <span style={styles.operationalPanelLabel}>Blocker</span>
+            <span style={styles.operationalPanelLabel}>{t('orders.operational.fields.blocker')}</span>
             <strong style={{ color: darkMode ? '#ffffff' : '#111827' }}>{blockerHint}</strong>
           </div>
           <div style={styles.operationalPanel}>
-            <span style={styles.operationalPanelLabel}>Next action</span>
-            <strong style={{ color: status.color }}>{order.nextAction || 'Monitor execution'}</strong>
+            <span style={styles.operationalPanelLabel}>{t('orders.operational.fields.nextAction')}</span>
+            <strong style={{ color: status.color }}>{nextActionLabel}</strong>
           </div>
           <div style={{ fontSize: '12px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
             {t('orders.card.date')}: {formatDate(order.order_date)}
@@ -926,21 +933,21 @@ export default function Orders() {
             <AlertCircle size={24} color="#ef4444" />
             <div>
               <span style={{ ...styles.statValue, color: '#ef4444' }}>{stats.requiringAttention}</span>
-              <span style={styles.statLabel}>Requiring attention</span>
+              <span style={styles.statLabel}>{t('orders.operational.stats.requiringAttention')}</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
             <Truck size={24} color="#06b6d4" />
             <div>
               <span style={{ ...styles.statValue, color: '#06b6d4' }}>{stats.activeLogistics}</span>
-              <span style={styles.statLabel}>Active logistics</span>
+              <span style={styles.statLabel}>{t('orders.operational.stats.activeLogistics')}</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
             <Package size={24} color="#d97706" />
             <div>
               <span style={{ ...styles.statValue, color: '#d97706' }}>{stats.notAmazonReady}</span>
-              <span style={styles.statLabel}>Not Amazon ready</span>
+              <span style={styles.statLabel}>{t('orders.operational.stats.notAmazonReady')}</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>

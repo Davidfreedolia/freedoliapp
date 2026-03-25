@@ -1245,6 +1245,67 @@
       "edit": "Editar",
       "delete": "Eliminar"
     },
+    "operational": {
+      "risk": {
+        "high": "alt",
+        "medium": "mitjà",
+        "low": "baix",
+        "done": "fet"
+      },
+      "fields": {
+        "total": "Total",
+        "shipment": "Enviament",
+        "eta": "ETA",
+        "readiness": "Preparació",
+        "pack": "Pack",
+        "blocker": "Bloqueig",
+        "nextAction": "Acció següent"
+      },
+      "readiness": {
+        "unknown": "Preparació desconeguda",
+        "ready": "Preparat per Amazon",
+        "notReady": "No preparat per Amazon"
+      },
+      "packStatus": {
+        "sent": "Pack enviat",
+        "generated": "Pack generat",
+        "notStarted": "Pack no iniciat"
+      },
+      "stats": {
+        "requiringAttention": "Requereixen atenció",
+        "activeLogistics": "Logística activa",
+        "notAmazonReady": "No preparat per Amazon"
+      },
+      "shipmentSummary": {
+        "no_shipment": "Sense enviament",
+        "shipment_active": "Enviament actiu",
+        "shipment_draft": "Enviament en esborrany",
+        "shipment_in_transit": "Enviament en trànsit",
+        "shipment_customs": "Enviament a duanes",
+        "shipment_delivered": "Enviament entregat",
+        "shipment_exception": "Enviament amb incidència",
+        "shipment_cancelled": "Enviament cancel·lat"
+      },
+      "blockers": {
+        "amazon_setup_missing": "Configuració Amazon pendent",
+        "pack_pending": "Pack pendent",
+        "shipment_overdue": "Shipment endarrerit",
+        "in_execution": "En execució",
+        "no_blockers": "Sense bloquejos"
+      },
+      "nextActions": {
+        "completed": "Completat",
+        "complete_amazon_readiness": "Completar preparació per Amazon",
+        "send_manufacturer_pack": "Enviar pack del fabricant",
+        "track_shipment": "Fer seguiment de l'enviament",
+        "send_po": "Enviar PO",
+        "await_supplier_confirmation": "Esperar confirmació del proveïdor",
+        "pay_supplier": "Pagar proveïdor",
+        "monitor_production": "Monitorar producció",
+        "receive_goods": "Rebre mercaderia",
+        "monitor_execution": "Monitorar execució"
+      }
+    },
     "splitSelectPrompt": "Selecciona una comanda",
     "viewProject": "Veure projecte",
     "confirmDelete": "Segur que vols eliminar la comanda {{poNumber}}?",

@@ -1232,6 +1232,67 @@
       "edit": "Edit",
       "delete": "Delete"
     },
+    "operational": {
+      "risk": {
+        "high": "high",
+        "medium": "medium",
+        "low": "low",
+        "done": "done"
+      },
+      "fields": {
+        "total": "Total",
+        "shipment": "Shipment",
+        "eta": "ETA",
+        "readiness": "Readiness",
+        "pack": "Pack",
+        "blocker": "Blocker",
+        "nextAction": "Next action"
+      },
+      "readiness": {
+        "unknown": "Readiness unknown",
+        "ready": "Amazon ready",
+        "notReady": "Not Amazon ready"
+      },
+      "packStatus": {
+        "sent": "Pack sent",
+        "generated": "Pack generated",
+        "notStarted": "Pack not started"
+      },
+      "stats": {
+        "requiringAttention": "Requiring attention",
+        "activeLogistics": "Active logistics",
+        "notAmazonReady": "Not Amazon ready"
+      },
+      "shipmentSummary": {
+        "no_shipment": "No shipment",
+        "shipment_active": "Shipment active",
+        "shipment_draft": "Draft shipment",
+        "shipment_in_transit": "Shipment in transit",
+        "shipment_customs": "Shipment in customs",
+        "shipment_delivered": "Shipment delivered",
+        "shipment_exception": "Shipment exception",
+        "shipment_cancelled": "Shipment cancelled"
+      },
+      "blockers": {
+        "amazon_setup_missing": "Amazon setup missing",
+        "pack_pending": "Pack pending",
+        "shipment_overdue": "Shipment overdue",
+        "in_execution": "In execution",
+        "no_blockers": "No blockers"
+      },
+      "nextActions": {
+        "completed": "Completed",
+        "complete_amazon_readiness": "Complete Amazon readiness",
+        "send_manufacturer_pack": "Send manufacturer pack",
+        "track_shipment": "Track shipment",
+        "send_po": "Send PO",
+        "await_supplier_confirmation": "Await supplier confirmation",
+        "pay_supplier": "Pay supplier",
+        "monitor_production": "Monitor production",
+        "receive_goods": "Receive goods",
+        "monitor_execution": "Monitor execution"
+      }
+    },
     "splitSelectPrompt": "Select an order",
     "viewProject": "View project",
     "confirmDelete": "Delete order {{poNumber}}?",

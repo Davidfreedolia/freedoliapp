@@ -1247,6 +1247,67 @@
       "edit": "Editar",
       "delete": "Eliminar"
     },
+    "operational": {
+      "risk": {
+        "high": "alto",
+        "medium": "medio",
+        "low": "bajo",
+        "done": "hecho"
+      },
+      "fields": {
+        "total": "Total",
+        "shipment": "Envío",
+        "eta": "ETA",
+        "readiness": "Preparación",
+        "pack": "Pack",
+        "blocker": "Bloqueo",
+        "nextAction": "Siguiente acción"
+      },
+      "readiness": {
+        "unknown": "Preparación desconocida",
+        "ready": "Listo para Amazon",
+        "notReady": "No listo para Amazon"
+      },
+      "packStatus": {
+        "sent": "Pack enviado",
+        "generated": "Pack generado",
+        "notStarted": "Pack no iniciado"
+      },
+      "stats": {
+        "requiringAttention": "Requieren atención",
+        "activeLogistics": "Logística activa",
+        "notAmazonReady": "No listo para Amazon"
+      },
+      "shipmentSummary": {
+        "no_shipment": "Sin envío",
+        "shipment_active": "Envío activo",
+        "shipment_draft": "Envío en borrador",
+        "shipment_in_transit": "Envío en tránsito",
+        "shipment_customs": "Envío en aduanas",
+        "shipment_delivered": "Envío entregado",
+        "shipment_exception": "Envío con incidencia",
+        "shipment_cancelled": "Envío cancelado"
+      },
+      "blockers": {
+        "amazon_setup_missing": "Configuración de Amazon pendiente",
+        "pack_pending": "Pack pendiente",
+        "shipment_overdue": "Envío retrasado",
+        "in_execution": "En ejecución",
+        "no_blockers": "Sin bloqueos"
+      },
+      "nextActions": {
+        "completed": "Completado",
+        "complete_amazon_readiness": "Completar preparación para Amazon",
+        "send_manufacturer_pack": "Enviar pack del fabricante",
+        "track_shipment": "Seguir envío",
+        "send_po": "Enviar PO",
+        "await_supplier_confirmation": "Esperar confirmación del proveedor",
+        "pay_supplier": "Pagar proveedor",
+        "monitor_production": "Monitorizar producción",
+        "receive_goods": "Recibir mercancía",
+        "monitor_execution": "Monitorizar ejecución"
+      }
+    },
     "splitSelectPrompt": "Selecciona una orden",
     "viewProject": "Ver proyecto",
     "confirmDelete": "¿Eliminar la orden {{poNumber}}?",
