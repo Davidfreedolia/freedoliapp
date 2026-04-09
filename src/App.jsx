@@ -504,38 +504,39 @@ function App() {
     <BrowserRouter>
       <WorkspaceProvider>
         <AppProvider>
-          <OnboardingGate>
-            <CookieBannerWrapper />
-            <ScreenshotModeBodyClass />
-            <Routes>
-              <Route path="/" element={<Landing />} />
-              <Route path="/landing" element={<Navigate to="/" replace />} />
-              <Route path="/amazon-fba-dashboard" element={<AmazonFbaDashboard />} />
-              <Route path="/purchase-order-management" element={<PurchaseOrderManagement />} />
-              <Route path="/supplier-management-system" element={<SupplierManagementSystem />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/trial" element={<Trial />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/cookies" element={<Cookies />} />
-              <Route path="/dpa" element={<DPA />} />
-              <Route path="/legal" element={<LegalIndex />} />
-              <Route path="/activation" element={<ProtectedRoute><ActivationWizard /></ProtectedRoute>} />
-              <Route path="/dashboard" element={<Navigate to="/app" replace />} />
-              <Route path="/projects/*" element={<RedirectToApp />} />
-              <Route path="/settings" element={<Navigate to="/app/settings" replace />} />
-              <Route path="/orders" element={<Navigate to="/app/orders" replace />} />
-              <Route path="/finances" element={<Navigate to="/app/finances" replace />} />
-              <Route path="/inventory" element={<Navigate to="/app/inventory" replace />} />
-              <Route path="/analytics" element={<Navigate to="/app/analytics" replace />} />
-              <Route path="/suppliers" element={<Navigate to="/app/suppliers" replace />} />
-              <Route path="/forwarders" element={<Navigate to="/app/forwarders" replace />} />
-              <Route path="/warehouses" element={<Navigate to="/app/warehouses" replace />} />
-              <Route path="/help" element={<Navigate to="/app/help" replace />} />
-              <Route path="/calendar" element={<Navigate to="/app/calendar" replace />} />
-              <Route path="/diagnostics" element={<Navigate to="/app/diagnostics" replace />} />
-              <Route path="/dev/seed" element={<Navigate to="/app/dev/seed" replace />} />
-              <Route path="/app" element={<AppContent />}>
+          <CookieBannerWrapper />
+          <ScreenshotModeBodyClass />
+          <Routes>
+            {/* ── Pàgines públiques — sense OnboardingGate ── */}
+            <Route path="/" element={<Landing />} />
+            <Route path="/landing" element={<Navigate to="/" replace />} />
+            <Route path="/amazon-fba-dashboard" element={<AmazonFbaDashboard />} />
+            <Route path="/purchase-order-management" element={<PurchaseOrderManagement />} />
+            <Route path="/supplier-management-system" element={<SupplierManagementSystem />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/trial" element={<Trial />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/cookies" element={<Cookies />} />
+            <Route path="/dpa" element={<DPA />} />
+            <Route path="/legal" element={<LegalIndex />} />
+            {/* ── Pàgines protegides — amb OnboardingGate ── */}
+            <Route path="/activation" element={<OnboardingGate><ProtectedRoute><ActivationWizard /></ProtectedRoute></OnboardingGate>} />
+            <Route path="/dashboard" element={<Navigate to="/app" replace />} />
+            <Route path="/projects/*" element={<RedirectToApp />} />
+            <Route path="/settings" element={<Navigate to="/app/settings" replace />} />
+            <Route path="/orders" element={<Navigate to="/app/orders" replace />} />
+            <Route path="/finances" element={<Navigate to="/app/finances" replace />} />
+            <Route path="/inventory" element={<Navigate to="/app/inventory" replace />} />
+            <Route path="/analytics" element={<Navigate to="/app/analytics" replace />} />
+            <Route path="/suppliers" element={<Navigate to="/app/suppliers" replace />} />
+            <Route path="/forwarders" element={<Navigate to="/app/forwarders" replace />} />
+            <Route path="/warehouses" element={<Navigate to="/app/warehouses" replace />} />
+            <Route path="/help" element={<Navigate to="/app/help" replace />} />
+            <Route path="/calendar" element={<Navigate to="/app/calendar" replace />} />
+            <Route path="/diagnostics" element={<Navigate to="/app/diagnostics" replace />} />
+            <Route path="/dev/seed" element={<Navigate to="/app/dev/seed" replace />} />
+            <Route path="/app" element={<OnboardingGate><AppContent /></OnboardingGate>}>
                 <Route index element={<AppPageWrap context="page:Dashboard"><Dashboard /></AppPageWrap>} />
                 <Route path="snapshot" element={<AppPageWrap context="page:AmazonSnapshot"><AmazonSnapshot /></AppPageWrap>} />
                 <Route path="projects" element={<AppPageWrap context="page:Projects"><Projects /></AppPageWrap>} />
@@ -574,7 +575,6 @@ function App() {
               </Route>
               <Route path="*" element={<Navigate to="/app" replace />} />
             </Routes>
-          </OnboardingGate>
         </AppProvider>
       </WorkspaceProvider>
     </BrowserRouter>
