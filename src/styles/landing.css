@@ -41,7 +41,7 @@
   box-shadow: 0 1px 0 rgba(110, 203, 195, 0.1);
 }
 .ld-nav__logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-.ld-nav__logo img { height: 32px; }
+.ld-nav__logo img { height: 36px; width: auto; }
 .ld-nav__logo-text {
   font-family: var(--ld-display);
   font-size: 20px;

@@ -179,9 +179,8 @@ export default function Landing() {
       {/* ── Nav ── */}
       <nav className={`ld-nav${scrolled ? ' ld-nav--scrolled' : ''}`}>
         <Link to="/" className="ld-nav__logo">
-          <img src="/brand/freedoliapp/logo/logo_master.png" alt="Freedoliapp"
-            onError={e => { e.target.style.display='none' }} />
-          <span className="ld-nav__logo-text">freedoliapp</span>
+          <img src="/brand/freedoliapp/logo/logo_white.png" alt="Freedoliapp"
+            onError={e => { e.target.src='/brand/freedoliapp/logo/logo_master.png' }} />
         </Link>
         <div className="ld-nav__links">
           <a href="#features" className="ld-nav__link">Features</a>
@@ -442,7 +441,7 @@ export default function Landing() {
       <footer className="ld-footer">
         <div className="ld-footer__top">
           <div>
-            <div className="ld-footer__brand-name">freedoliapp</div>
+            <img src="/brand/freedoliapp/logo/logo_white.png" alt="Freedoliapp" style={{height: '28px', marginBottom: '10px'}} />
             <p className="ld-footer__brand-desc">The operating system for Amazon FBA operators. Suppliers, POs, inventory and profit in one place.</p>
           </div>
           <div>

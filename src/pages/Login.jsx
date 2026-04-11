@@ -29,14 +29,13 @@ export default function Login() {
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        // P0.ACCESS.2 — use a stable entry route; gates decide /activation vs /app vs billing lock
-        navigate('/', { replace: true })
+        navigate('/app', { replace: true })
       }
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
-        navigate('/', { replace: true })
+        navigate('/app', { replace: true })
       }
     })
 
@@ -110,7 +109,7 @@ export default function Login() {
           email: email,
           method: 'password'
         })
-        navigate('/', { replace: true })
+        navigate('/app', { replace: true })
       }
     } catch (err) {
       await logError('user', 'login', err, { email: email, method: 'password' })

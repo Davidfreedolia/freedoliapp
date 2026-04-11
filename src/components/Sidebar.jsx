@@ -122,6 +122,7 @@ const prefetchedRoutes = new Set()
 
 // Canonical app brand logo (single source of truth; see public/brand/freedoliapp/README.md)
 const BRAND_LOGO_URL = '/brand/freedoliapp/logo/logo_master.png'
+const BRAND_ICON_URL = '/brand/freedoliapp/logo/symbol_left.png'
 
 // Grouped sidebar: one coherent operating system (Operations, Inventory, Finance, Intelligence, System)
 const SIDEBAR_GROUPS = [
