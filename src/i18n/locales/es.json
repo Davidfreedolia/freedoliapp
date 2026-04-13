@@ -346,7 +346,12 @@
       "ctaPrimary": "Empezar",
       "ctaSecondary": "Iniciar sesión",
       "cta_primary": "Empezar trial gratuito",
-      "cta_secondary": "Ver cómo funciona"
+      "cta_secondary": "Ver cómo funciona",
+      "eyebrow": "Creado para operadores de Amazon FBA",
+      "title_html": "Gestiona tu negocio Amazon desde <em>un solo lugar</em>",
+      "stat_phases": "Fases de producto",
+      "stat_trial": "Días de trial",
+      "stat_setup": "Coste de configuración"
     },
     "screenshots": {
       "hero_alt": "Dashboard de Freedoliapp con KPIs, alertas activas y gráfico de ingresos.",
@@ -378,7 +383,8 @@
         "inventory_visibility_desc": "Consulta stock actual y entrante por SKU para evitar roturas y sobrestock.",
         "profit_tracking": "Seguimiento de beneficio que refleja la realidad.",
         "profit_tracking_desc": "Combina costes, comisiones y ventas para conocer el beneficio real por producto y pedido."
-      }
+      },
+      "label": "Utilizado por sellers en"
     },
     "problem": {
       "title": "Gestionar un negocio Amazon no debería requerir 10 herramientas distintas.",
@@ -389,7 +395,8 @@
         "shipping_docs": "Documentos de envío escondidos en adjuntos de correo.",
         "email_threads": "Largos hilos de correo para aprobaciones.",
         "inventory_spreadsheets": "Hojas separadas solo para seguir stock y beneficio."
-      }
+      },
+      "label": "El problema"
     },
     "solution": {
       "title": "La torre de control de las operaciones de Amazon.",
@@ -398,7 +405,8 @@
         "visibility": "Visibilidad clara sobre proveedores, stock y pedidos.",
         "workflows": "Flujos estructurados desde el presupuesto hasta las unidades entregadas.",
         "profit": "Vistas operativas que siempre conectan con el beneficio."
-      }
+      },
+      "label": "La solución"
     },
     "modules": {
       "title": "Todo lo que necesita tu negocio Amazon en un solo lugar.",
@@ -498,7 +506,189 @@
       "about": "Sobre nosotros",
       "help": "Ayuda",
       "privacy": "Privacidad",
-      "terms": "Términos"
+      "terms": "Términos",
+      "brand_desc": "El sistema operativo para operadores de Amazon FBA. Proveedores, POs, inventario y rentabilidad en un solo lugar.",
+      "account": "Cuenta",
+      "free_trial": "Trial gratuito",
+      "cookies": "Cookies",
+      "rights": "Todos los derechos reservados."
+    },
+    "nav": {
+      "features": "Funcionalidades",
+      "how": "Cómo funciona",
+      "pricing": "Precios",
+      "login": "Iniciar sesión",
+      "cta": "Empezar gratis"
+    },
+    "problem_items": {
+      "i1": "Archivos Excel para inventario y pedidos de compra",
+      "i2": "Hilos de WhatsApp con proveedores",
+      "i3": "Documentos de envío en adjuntos de correo",
+      "i4": "Herramientas separadas para rentabilidad y analítica",
+      "i5": "Sin fuente de verdad única para toda la operación"
+    },
+    "solution_checks": {
+      "i1": "Proveedores, POs e inventario todo enlazado",
+      "i2": "Beneficio real por producto descontando todos los costes",
+      "i3": "Alertas cuando el stock baja o los márgenes caen",
+      "i4": "PDFs de PO generados automáticamente con tus datos",
+      "i5": "Amazon SP-API para importar ventas automáticamente"
+    },
+    "features_section": {
+      "label": "Funcionalidades",
+      "title": "Todo lo que necesita tu negocio Amazon",
+      "subtitle": "Un único espacio para sourcing, pedidos, inventario y rentabilidad."
+    },
+    "features_grid": {
+      "suppliers": {
+        "title": "Proveedores y Sourcing",
+        "desc": "Centraliza datos, condiciones, presupuestos y muestras. Sabe exactamente a quién compras y en qué condiciones."
+      },
+      "orders": {
+        "title": "Pedidos de Compra",
+        "desc": "Crea y sigue POs desde el presupuesto hasta la entrega. Genera PDFs, gestiona pagos y sigue la logística."
+      },
+      "inventory": {
+        "title": "Control de Inventario",
+        "desc": "Vista en tiempo real de unidades en FBA, en tránsito, en transitario y en producción. No te quedes sin stock."
+      },
+      "profit": {
+        "title": "Rentabilidad y Márgenes",
+        "desc": "Rentabilidad real por producto. Combina COGS, comisiones Amazon, flete y publicidad para ver tu margen real."
+      },
+      "spapi": {
+        "title": "Amazon SP-API",
+        "desc": "Conecta tu cuenta de Seller Central e importa datos de settlements automáticamente en todos los marketplaces."
+      },
+      "decisions": {
+        "title": "Decisiones Inteligentes",
+        "desc": "Alertas de stock, margen y caja de forma automática. Sabe qué repedir, cuándo y en qué cantidad."
+      }
+    },
+    "how": {
+      "label": "Cómo funciona",
+      "title": "De la idea a Amazon en 5 pasos"
+    },
+    "steps": {
+      "s1": {
+        "title": "Añade tus proveedores",
+        "desc": "Importa o crea tu base de datos de proveedores con contactos, condiciones y referencias de Alibaba/1688."
+      },
+      "s2": {
+        "title": "Crea pedidos de compra",
+        "desc": "Genera POs profesionales con un clic. Sigue el progreso de producción y los hitos de pago."
+      },
+      "s3": {
+        "title": "Sigue los envíos",
+        "desc": "Controla el stock desde la fábrica hasta el almacén FBA. Recibe alertas si hay retrasos."
+      },
+      "s4": {
+        "title": "Monitoriza el inventario",
+        "desc": "Ve exactamente cuántas unidades tienes en cada ubicación y cuándo repedir."
+      },
+      "s5": {
+        "title": "Entiende tu rentabilidad",
+        "desc": "Conecta todas las fuentes de datos para una vista P&L completa por producto, marketplace y período."
+      }
+    },
+    "pricing": {
+      "label": "Precios",
+      "title": "Precios simples y transparentes",
+      "subtitle": "14 días de prueba gratuita. Sin tarjeta de crédito.",
+      "monthly": "Mensual",
+      "yearly": "Anual",
+      "save": "Ahorra 17%",
+      "per_month": "por mes",
+      "billed_yearly": "facturado anualmente"
+    },
+    "plans": {
+      "starter": {
+        "name": "Starter",
+        "desc": "Para sellers individuales con sus primeros productos.",
+        "f1": "1 usuario",
+        "f2": "Hasta 10 proyectos activos",
+        "f3": "Proveedores y pedidos de compra",
+        "f4": "Control de inventario",
+        "f5": "Calculadora de rentabilidad",
+        "f6": "Integración Google Drive",
+        "f7": "Soporte por email",
+        "cta": "Empezar trial gratuito"
+      },
+      "growth": {
+        "name": "Growth",
+        "desc": "Para marcas en crecimiento y equipos pequeños.",
+        "badge": "Más popular",
+        "f1": "Hasta 3 usuarios",
+        "f2": "Proyectos ilimitados",
+        "f3": "Todo en Starter",
+        "f4": "Integración Amazon SP-API",
+        "f5": "Libro mayor financiero y exportaciones",
+        "f6": "Alertas y automatizaciones",
+        "f7": "Soporte email prioritario",
+        "cta": "Empezar trial gratuito"
+      },
+      "scale": {
+        "name": "Scale",
+        "desc": "Para operaciones multi-marca y agencias.",
+        "f1": "Usuarios ilimitados",
+        "f2": "Proyectos ilimitados",
+        "f3": "Todo en Growth",
+        "f4": "Soporte multi-marketplace",
+        "f5": "Decisiones con IA",
+        "f6": "Packs de exportación trimestral",
+        "f7": "Soporte dedicado",
+        "cta": "Contáctanos"
+      }
+    },
+    "testimonials": {
+      "label": "Qué dicen los sellers",
+      "title": "Usado por operadores de Amazon",
+      "t1": {
+        "quote": "Antes tenía 4 hojas de cálculo y 3 grupos de WhatsApp para gestionar un solo PO. Ahora todo está en un sitio y me fío de los números.",
+        "name": "Marta S.",
+        "role": "Seller Amazon FBA · ES",
+        "initial": "M"
+      },
+      "t2": {
+        "quote": "La generación de PDFs de PO sola nos ahorró horas cada semana. Pero lo que realmente cambió todo fue tener proveedores, muestras y envíos todo enlazado.",
+        "name": "Jordi P.",
+        "role": "Operations manager · Multi-marca",
+        "initial": "J"
+      },
+      "t3": {
+        "quote": "Por fin veo mi margen real por producto después de comisiones Amazon, flete y aduanas. La vista de rentabilidad es algo que nunca pude construir bien en Excel.",
+        "name": "Laura M.",
+        "role": "Brand owner · Amazon EU",
+        "initial": "L"
+      }
+    },
+    "faq": {
+      "label": "FAQ",
+      "title": "Preguntas frecuentes",
+      "q1": {
+        "q": "¿Hay trial gratuito?",
+        "a": "Sí — todos los planes incluyen 14 días de prueba gratuita. Sin tarjeta de crédito."
+      },
+      "q2": {
+        "q": "¿Puedo cambiar de plan en cualquier momento?",
+        "a": "Sí, los cambios de plan se aplican de inmediato. Se realiza un ajuste prorrateado en la facturación."
+      },
+      "q3": {
+        "q": "¿Funciona con varios marketplaces de Amazon?",
+        "a": "Sí. Conecta ES, DE, FR, IT, UK, US y más en un único workspace. Los datos se unifican en todos los marketplaces."
+      },
+      "q4": {
+        "q": "¿Qué necesito para conectar Amazon SP-API?",
+        "a": "Una cuenta de Seller Central con acceso API. La configuración tarda unos 5 minutos con el asistente guiado. Disponible en los planes Growth y Scale."
+      },
+      "q5": {
+        "q": "¿Son seguros mis datos?",
+        "a": "Los datos se almacenan en Supabase (región EU, infraestructura ISO 27001). Todas las conexiones están cifradas y la seguridad se aplica a nivel de fila por organización."
+      }
+    },
+    "cta": {
+      "label": "Empezar",
+      "note": "14 días de trial gratuito · Sin tarjeta de crédito · Cancela cuando quieras"
     }
   },
   "guidance": {
@@ -1000,191 +1190,9 @@
     "banner": "Los datos son simulados"
   },
   "help": {
-    "profitability": {
-      "title": "Rentabilidad",
-      "short": "Calcular la rentabilidad del producto",
-      "long": "La calculadora de rentabilidad te ayuda a determinar si un producto es viable para vender en Amazon. Introduce los costos e ingresos esperados para obtener el margen y la decisión (GO, RISKY, NO-GO).",
-      "selling_price": {
-        "title": "Precio de venta",
-        "short": "Precio al que venderás el producto en Amazon",
-        "long": "El precio de venta es el precio final que el cliente pagará por el producto en Amazon. Este precio debe incluir todos los costos y tu beneficio deseado.",
-        "example": "Ej: 24,99 €"
-      },
-      "cogs": {
-        "title": "COGS (Coste de Productos Vendidos)",
-        "short": "Coste del producto fabricado",
-        "long": "El COGS incluye el coste unitario del producto en fábrica, sin incluir envíos ni otros costos. Es el precio que pagas al proveedor por unidad.",
-        "example": "Ej: 3,20 € por unidad"
-      },
-      "shipping_per_unit": {
-        "title": "Envío por unidad",
-        "short": "Coste de envío desde fábrica hasta Amazon",
-        "long": "Coste de envío por unidad desde la fábrica hasta el almacén de Amazon (FBA). Incluye transporte internacional, aduanas y manipulación.",
-        "example": "Ej: 0,50 € por unidad"
-      },
-      "referral_fee_percent": {
-        "title": "Comisión de referencia",
-        "short": "Porcentaje que cobra Amazon por cada venta",
-        "long": "Amazon cobra una comisión de referencia sobre cada venta. Este porcentaje varía según la categoría del producto (normalmente entre 8% y 15%).",
-        "example": "Ej: 15% (categoría estándar)"
-      },
-      "fba_fee_per_unit": {
-        "title": "Tarifa FBA por unidad",
-        "short": "Coste de gestión y almacenamiento de Amazon",
-        "long": "Amazon cobra una tarifa FBA (Fulfillment by Amazon) por unidad que incluye almacenamiento, recogida, embalaje y envío al cliente final.",
-        "example": "Ej: 2,50 € por unidad"
-      },
-      "ppc_per_unit": {
-        "title": "PPC por unidad",
-        "short": "Coste de publicidad por unidad vendida",
-        "long": "Coste medio de publicidad (Pay-Per-Click) por unidad vendida. Calcula el coste total de publicidad dividido por el número de unidades vendidas.",
-        "example": "Ej: 0,80 € por unidad"
-      },
-      "other_costs_per_unit": {
-        "title": "Otros costos por unidad",
-        "short": "Otros costos variables por unidad",
-        "long": "Cualquier otro costo variable por unidad, como embalaje personalizado, etiquetas, inspecciones de calidad, etc.",
-        "example": "Ej: 0,20 € por unidad"
-      },
-      "fixed_costs": {
-        "title": "Costos fijos",
-        "short": "Costos únicos independientes del volumen",
-        "long": "Costos fijos que solo se pagan una vez, como fotografía de producto, creación de listing, registro de marca, etc. Se dividen entre todas las unidades vendidas.",
-        "example": "Ej: 500 € (fotografía + listing)"
-      },
-      "margin": {
-        "title": "Margen",
-        "short": "Porcentaje de beneficio sobre el precio de venta",
-        "long": "El margen es el porcentaje de beneficio que obtienes sobre el precio de venta después de restar todos los costos. Un margen superior al 25% se considera bueno.",
-        "example": "Ej: 32,5% de margen"
-      },
-      "roi": {
-        "title": "ROI (Retorno de Inversión)",
-        "short": "Retorno sobre la inversión",
-        "long": "El ROI indica cuánto beneficio por cada euro invertido. Un ROI superior a 2.0 significa que ganas más del doble de lo que inviertes.",
-        "example": "Ej: ROI de 2,5 significa 2,50 € de beneficio por cada 1 € invertido"
-      }
-    },
-    "amazon_ready": {
-      "title": "Amazon Ready",
-      "short": "Configuración para enviar productos a Amazon",
-      "long": "La sección Amazon Ready contiene toda la información necesaria para enviar productos a los almacenes de Amazon FBA. Asegúrate de que todos los campos estén completados antes de generar el Manufacturer Pack.",
-      "fnsku": {
-        "title": "FNSKU",
-        "short": "Código único de Amazon para el producto",
-        "long": "El FNSKU (Fulfillment Network Stock Keeping Unit) es un código único que Amazon asigna a tu producto. Es necesario para generar las etiquetas que se deben pegar en cada unidad.",
-        "example": "Ej: X001ABC123"
-      },
-      "gtin": {
-        "title": "GTIN",
-        "short": "Código de producto global (EAN/UPC)",
-        "long": "El GTIN (Global Trade Item Number) es un código de barras único que identifica el producto a nivel global. Puede ser un EAN-13 (Europa) o UPC (Estados Unidos).",
-        "example": "Ej: 1234567890123"
-      },
-      "units_per_carton": {
-        "title": "Unidades por cartón",
-        "short": "Cantidad de unidades que caben en un cartón",
-        "long": "Número de unidades individuales que se embalan en cada cartón. Esta información es necesaria para generar las etiquetas de cartón y calcular el espacio necesario en el pallet.",
-        "example": "Ej: 12 unidades por cartón"
-      },
-      "cartons_per_pallet": {
-        "title": "Cartones por pallet",
-        "short": "Cantidad de cartones que caben en un pallet",
-        "long": "Número de cartones que se pueden apilar en un pallet estándar. Esto ayuda a calcular el espacio necesario en el almacén y optimizar los envíos.",
-        "example": "Ej: 50 cartones por pallet"
-      }
-    },
-    "purchase_orders": {
-      "title": "Órdenes de compra",
-      "short": "Gestión de órdenes a proveedores",
-      "long": "Las órdenes de compra (PO) son documentos que formalizan la compra de productos a los proveedores. Aquí puedes gestionar todo el ciclo de vida de las órdenes, desde la creación hasta la recepción.",
-      "po_number": {
-        "title": "Número de PO",
-        "short": "Identificador único de la orden",
-        "long": "El número de PO es un identificador único generado automáticamente para cada orden de compra. Se utiliza para referenciar la orden en comunicaciones con proveedores y para el seguimiento."
-      },
-      "status": {
-        "title": "Estado de la orden",
-        "short": "Estado actual de la orden",
-        "long": "El estado de la orden indica en qué fase se encuentra: confirmed (confirmada), waiting_manufacturer (esperando fabricación), in_transit (en tránsito), received (recibida), etc."
-      },
-      "tracking_number": {
-        "title": "Número de seguimiento",
-        "short": "Código de seguimiento del envío",
-        "long": "El número de seguimiento permite rastrear el envío desde la fábrica hasta el almacén. Introduce el código proporcionado por la compañía de transporte."
-      },
-      "eta_date": {
-        "title": "Fecha estimada de llegada",
-        "short": "Fecha prevista de llegada al almacén",
-        "long": "La fecha estimada de llegada (ETA) es la fecha prevista en la que el envío llegará al almacén de Amazon o a tu almacén. Ayuda a planificar la recepción y el lanzamiento del producto."
-      }
-    },
-    "research": {
-      "title": "Fase de investigación",
-      "short": "Primera fase del proyecto",
-      "long": "La fase de investigación es la primera etapa del proyecto, donde evalúas la viabilidad del producto. Aquí capturas información del producto, analizas la competencia y tomas la decisión inicial (GO, RISKY, DISCARDED).",
-      "asin": {
-        "title": "ASIN de Amazon",
-        "short": "Identificador único del producto en Amazon",
-        "long": "El ASIN (Amazon Standard Identification Number) es un identificador único de 10 caracteres que Amazon asigna a cada producto. Puedes obtenerlo desde la URL del producto en Amazon o introducirlo directamente.",
-        "example": "Ej: B08XYZ1234"
-      },
-      "supplier_quotes": {
-        "title": "Presupuestos de proveedores",
-        "short": "Comparación de precios de diferentes proveedores",
-        "long": "Los presupuestos de proveedores te permiten comparar ofertas de diferentes proveedores para el mismo producto. Puedes añadir múltiples presupuestos y comparar precios, MOQ (Cantidad Mínima de Pedido) y condiciones."
-      },
-      "decision": {
-        "title": "Decisión",
-        "short": "Decisión sobre la viabilidad del producto",
-        "long": "La decisión indica si el producto es viable: GO (viable, continuar), RISKY (viable pero con riesgo), DISCARDED (no viable, descartar). Esta decisión se basa en el análisis de rentabilidad y competencia."
-      }
-    },
-    "finances": {
-      "title": "Finanzas",
-      "short": "Gestión de gastos e ingresos",
-      "long": "La sección de finanzas te permite registrar y gestionar todos los gastos e ingresos relacionados con tus proyectos. Puedes crear categorías personalizadas, ver el balance y generar informes.",
-      "expenses": {
-        "title": "Gastos",
-        "short": "Registro de todos los costos",
-        "long": "Los gastos incluyen todos los costos relacionados con los proyectos: órdenes de compra, muestras, publicidad, herramientas, etc. Puedes asignarlos a un proyecto específico o dejarlos globales."
-      },
-      "incomes": {
-        "title": "Ingresos",
-        "short": "Registro de todos los ingresos",
-        "long": "Los ingresos son todo el dinero que recibes por ventas de productos en Amazon. Puedes asignarlos a un proyecto específico para hacer un seguimiento detallado de la rentabilidad."
-      },
-      "categories": {
-        "title": "Categorías",
-        "short": "Organización de gastos e ingresos",
-        "long": "Las categorías te permiten organizar tus gastos e ingresos. Puedes crear categorías personalizadas como 'Publicidad', 'Muestras', 'Herramientas', etc., para tener un mejor control financiero."
-      },
-      "recurring_expenses": {
-        "title": "Gastos recurrentes",
-        "short": "Gastos que se repiten periódicamente",
-        "long": "Los gastos recurrentes son gastos que se generan automáticamente cada mes o período (como suscripciones, alquileres, etc.). El sistema los genera automáticamente según la configuración."
-      }
-    },
-    "dashboard": {
-      "title": "Dashboard",
-      "short": "Vista general de todos los proyectos y actividades",
-      "long": "El dashboard es la página principal donde ves una vista general de todos tus proyectos, órdenes, tareas y actividades. Puedes personalizar los widgets que se muestran para adaptarlo a tus necesidades.",
-      "widgets": {
-        "title": "Widgets",
-        "short": "Elementos personalizables del dashboard",
-        "long": "Los widgets son elementos que se muestran en el dashboard para proporcionar información rápida. Puedes activar o desactivar widgets y reorganizarlos según tus preferencias."
-      },
-      "sticky_notes": {
-        "title": "Notas adhesivas",
-        "short": "Notas rápidas para recordatorios",
-        "long": "Las notas adhesivas te permiten crear recordatorios rápidos. Pueden ser globales o asociadas a un proyecto específico. Puedes convertirlas en tareas cuando sea necesario."
-      },
-      "tasks": {
-        "title": "Tareas",
-        "short": "Lista de tareas pendientes",
-        "long": "Las tareas te ayudan a hacer un seguimiento de las acciones pendientes. Pueden estar asociadas a un proyecto específico o ser globales. Puedes asignar prioridad y fecha de vencimiento."
-      }
-    }
+    "searchPlaceholder": "Buscar en el manual...",
+    "title": "Ayuda y Documentación",
+    "noResults": "No se encontraron resultados"
   },
   "gate": {
     "onboardingStatusErrorTitle": "No hemos podido comprobar el estado de activación del workspace.",
@@ -1203,11 +1211,6 @@
     "themeAriaToDark": "Activar modo noche",
     "themeTitleLight": "Modo día",
     "themeTitleDark": "Modo noche"
-  },
-  "help": {
-    "searchPlaceholder": "Buscar en el manual...",
-    "title": "Ayuda y Documentación",
-    "noResults": "No se encontraron resultados"
   },
   "navbar": {
     "addNote": "Añadir nota",
@@ -1874,13 +1877,13 @@
       "loadingRequirements": "Cargando requisitos…",
       "allReady": "Todo listo para avanzar"
     },
-  "suppliers": {
-    "empty": {
-      "title": "Todavía no tienes proveedores",
-      "subtitle": "Crea tu primer proveedor para empezar a gestionar el sourcing y la producción.",
-      "cta": "Crear proveedor"
-    }
-  },
+    "suppliers": {
+      "empty": {
+        "title": "Todavía no tienes proveedores",
+        "subtitle": "Crea tu primer proveedor para empezar a gestionar el sourcing y la producción.",
+        "cta": "Crear proveedor"
+      }
+    },
     "nextAction": {
       "open": "Abrir proyecto",
       "viability": "Revisar viabilidad",

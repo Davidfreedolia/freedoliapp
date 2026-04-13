@@ -345,8 +345,13 @@
       "subtitle": "El sistema operatiu per a negocis de producte que gestionen proveïdors, comandes de compra, inventari i benefici.",
       "ctaPrimary": "Començar",
       "ctaSecondary": "Iniciar sessió",
-      "cta_primary": "Començar trial gratuït",
-      "cta_secondary": "Veure com funciona"
+      "cta_primary": "Comença el trial gratuït",
+      "cta_secondary": "Veure com funciona",
+      "eyebrow": "Creat per a operadors d'Amazon FBA",
+      "title_html": "Gestiona el teu negoci Amazon des d'<em>un sol lloc</em>",
+      "stat_phases": "Fases de producte",
+      "stat_trial": "Dies de trial",
+      "stat_setup": "Cost de configuració"
     },
     "screenshots": {
       "hero_alt": "Dashboard de Freedoliapp amb KPIs, alertes actives i gràfic d'ingressos.",
@@ -378,7 +383,8 @@
         "inventory_visibility_desc": "Veu estoc actual i pendent per SKU per evitar ruptures i sobreestoc.",
         "profit_tracking": "Seguiment de benefici que reflecteix la realitat.",
         "profit_tracking_desc": "Combina costos, comissions i vendes per conèixer el benefici real per producte i comanda."
-      }
+      },
+      "label": "Utilitzat per sellers a"
     },
     "problem": {
       "title": "Gestionar un negoci Amazon no hauria de requerir 10 eines diferents.",
@@ -389,7 +395,8 @@
         "shipping_docs": "Documents d'enviament amagats en adjunts de correu.",
         "email_threads": "Llargs fils de correu per a aprovacions.",
         "inventory_spreadsheets": "Fulls separats només per seguir estoc i benefici."
-      }
+      },
+      "label": "El problema"
     },
     "solution": {
       "title": "La torre de control de les operacions d'Amazon.",
@@ -398,7 +405,8 @@
         "visibility": "Visibilitat clara sobre proveïdors, estoc i comandes.",
         "workflows": "Fluxos estructurats des del pressupost fins a les unitats lliurades.",
         "profit": "Vistes operatives que sempre connecten amb el benefici."
-      }
+      },
+      "label": "La solució"
     },
     "modules": {
       "title": "Tot el que necessita el teu negoci Amazon en un sol lloc.",
@@ -498,7 +506,189 @@
       "about": "Sobre nosaltres",
       "help": "Ajuda",
       "privacy": "Privacitat",
-      "terms": "Termes"
+      "terms": "Termes",
+      "brand_desc": "El sistema operatiu per a operadors d'Amazon FBA. Proveïdors, POs, inventari i rendibilitat en un sol lloc.",
+      "account": "Compte",
+      "free_trial": "Trial gratuït",
+      "cookies": "Cookies",
+      "rights": "Tots els drets reservats."
+    },
+    "nav": {
+      "features": "Funcionalitats",
+      "how": "Com funciona",
+      "pricing": "Preus",
+      "login": "Inicia sessió",
+      "cta": "Comença gratis"
+    },
+    "problem_items": {
+      "i1": "Arxius Excel per a inventari i comandes de compra",
+      "i2": "Fils de WhatsApp amb proveïdors",
+      "i3": "Documents d'enviament enterrats en adjunts de correu",
+      "i4": "Eines separades per a rentabilitat i analítica",
+      "i5": "Cap font de veritat única per a tota l'operació"
+    },
+    "solution_checks": {
+      "i1": "Proveïdors, POs i inventari tot enllaçat",
+      "i2": "Benefici real per producte descomptant tots els costos",
+      "i3": "Alertes quan l'estoc baixa o els marges cauen",
+      "i4": "PDFs de PO generats automàticament amb les teves dades",
+      "i5": "Amazon SP-API per importar vendes automàticament"
+    },
+    "features_section": {
+      "label": "Funcionalitats",
+      "title": "Tot el que necessita el teu negoci Amazon",
+      "subtitle": "Un únic espai per a sourcing, comandes, inventari i rendibilitat."
+    },
+    "features_grid": {
+      "suppliers": {
+        "title": "Proveïdors i Sourcing",
+        "desc": "Centralitza dades, condicions, pressupostos i mostres. Sap exactament a qui compres i en quines condicions."
+      },
+      "orders": {
+        "title": "Comandes de Compra",
+        "desc": "Crea i segueix POs des del pressupost fins al lliurament. Genera PDFs, gestiona pagaments i segueix la logística."
+      },
+      "inventory": {
+        "title": "Control d'Inventari",
+        "desc": "Vista en temps real d'unitats a FBA, en trànsit, al transitari i en producció. No et quedis sense estoc."
+      },
+      "profit": {
+        "title": "Rendibilitat i Marges",
+        "desc": "Rendibilitat real per producte. Combina COGS, comissions Amazon, noli i publicitat per veure el teu marge real."
+      },
+      "spapi": {
+        "title": "Amazon SP-API",
+        "desc": "Connecta el teu compte de Seller Central i importa dades de settlements automàticament a tots els marketplaces."
+      },
+      "decisions": {
+        "title": "Decisions Intel·ligents",
+        "desc": "Alertes d'estoc, marge i caixa de forma automàtica. Sap què repidir, quan i en quina quantitat."
+      }
+    },
+    "how": {
+      "label": "Com funciona",
+      "title": "De la idea a Amazon en 5 passos"
+    },
+    "steps": {
+      "s1": {
+        "title": "Afegeix els teus proveïdors",
+        "desc": "Importa o crea la teva base de dades de proveïdors amb contactes, condicions i referències d'Alibaba/1688."
+      },
+      "s2": {
+        "title": "Crea comandes de compra",
+        "desc": "Genera POs professionals amb un clic. Segueix el progrés de producció i les fites de pagament."
+      },
+      "s3": {
+        "title": "Segueix els enviaments",
+        "desc": "Controla l'estoc des de la fàbrica fins al magatzem FBA. Rep alertes si hi ha retards."
+      },
+      "s4": {
+        "title": "Monitoritza l'inventari",
+        "desc": "Veure exactament quantes unitats tens a cada ubicació i quan repidir."
+      },
+      "s5": {
+        "title": "Entén la teva rendibilitat",
+        "desc": "Connecta totes les fonts de dades per a una vista P&L completa per producte, marketplace i període."
+      }
+    },
+    "pricing": {
+      "label": "Preus",
+      "title": "Preus simples i transparents",
+      "subtitle": "14 dies de prova gratuïta. Sense targeta de crèdit.",
+      "monthly": "Mensual",
+      "yearly": "Anual",
+      "save": "Estalvia 17%",
+      "per_month": "per mes",
+      "billed_yearly": "facturat anualment"
+    },
+    "plans": {
+      "starter": {
+        "name": "Starter",
+        "desc": "Per a sellers individuals amb els seus primers productes.",
+        "f1": "1 usuari",
+        "f2": "Fins a 10 projectes actius",
+        "f3": "Proveïdors i comandes de compra",
+        "f4": "Control d'inventari",
+        "f5": "Calculadora de rendibilitat",
+        "f6": "Integració Google Drive",
+        "f7": "Suport per email",
+        "cta": "Comença el trial gratuït"
+      },
+      "growth": {
+        "name": "Growth",
+        "desc": "Per a marques en creixement i equips petits.",
+        "badge": "Més popular",
+        "f1": "Fins a 3 usuaris",
+        "f2": "Projectes il·limitats",
+        "f3": "Tot a Starter",
+        "f4": "Integració Amazon SP-API",
+        "f5": "Llibre major financer i exportacions",
+        "f6": "Alertes i automatitzacions",
+        "f7": "Suport email prioritari",
+        "cta": "Comença el trial gratuït"
+      },
+      "scale": {
+        "name": "Scale",
+        "desc": "Per a operacions multi-marca i agències.",
+        "f1": "Usuaris il·limitats",
+        "f2": "Projectes il·limitats",
+        "f3": "Tot a Growth",
+        "f4": "Suport multi-marketplace",
+        "f5": "Decisions amb IA",
+        "f6": "Packs d'exportació trimestral",
+        "f7": "Suport dedicat",
+        "cta": "Contacta'ns"
+      }
+    },
+    "testimonials": {
+      "label": "Què diuen els sellers",
+      "title": "Usat per operadors d'Amazon",
+      "t1": {
+        "quote": "Abans tenia 4 fulls de càlcul i 3 grups de WhatsApp per gestionar un sol PO. Ara tot és en un lloc i em fio dels números.",
+        "name": "Marta S.",
+        "role": "Seller Amazon FBA · ES",
+        "initial": "M"
+      },
+      "t2": {
+        "quote": "La generació de PDFs de PO sola ens va estalviar hores cada setmana. Però el que realment va canviar les coses va ser tenir proveïdors, mostres i enviaments tot enllaçat.",
+        "name": "Jordi P.",
+        "role": "Operations manager · Multi-marca",
+        "initial": "J"
+      },
+      "t3": {
+        "quote": "Per fi veig el meu marge real per producte després de comissions Amazon, noli i duanes. La vista de rendibilitat és quelcom que mai vaig poder construir bé a Excel.",
+        "name": "Laura M.",
+        "role": "Brand owner · Amazon EU",
+        "initial": "L"
+      }
+    },
+    "faq": {
+      "label": "FAQ",
+      "title": "Preguntes freqüents",
+      "q1": {
+        "q": "Hi ha trial gratuït?",
+        "a": "Sí — tots els plans inclouen 14 dies de prova gratuïta. Sense targeta de crèdit."
+      },
+      "q2": {
+        "q": "Puc canviar de pla en qualsevol moment?",
+        "a": "Sí, els canvis de pla s'apliquen immediatament. Es fa un ajust prorratejat a la facturació."
+      },
+      "q3": {
+        "q": "Funciona amb diversos marketplaces d'Amazon?",
+        "a": "Sí. Connecta ES, DE, FR, IT, UK, US i més en un únic workspace. Les dades s'unifiquen a tots els marketplaces."
+      },
+      "q4": {
+        "q": "Què necessito per connectar Amazon SP-API?",
+        "a": "Un compte de Seller Central amb accés API. La configuració tarda uns 5 minuts amb l'assistent guiat. Disponible als plans Growth i Scale."
+      },
+      "q5": {
+        "q": "Són segures les meves dades?",
+        "a": "Les dades s'emmagatzemen a Supabase (regió EU, infraestructura ISO 27001). Totes les connexions estan xifrades i la seguretat s'aplica a nivell de fila per organització."
+      }
+    },
+    "cta": {
+      "label": "Comença",
+      "note": "14 dies de trial gratuït · Sense targeta de crèdit · Cancel·la quan vulguis"
     }
   },
   "guidance": {
@@ -1872,13 +2062,13 @@
       "loadingRequirements": "Carregant requisits…",
       "allReady": "Tot llest per avançar"
     },
-  "suppliers": {
-    "empty": {
-      "title": "Encara no tens proveïdors",
-      "subtitle": "Crea el teu primer proveïdor per començar a gestionar el sourcing i la producció.",
-      "cta": "Crear proveïdor"
-    }
-  },
+    "suppliers": {
+      "empty": {
+        "title": "Encara no tens proveïdors",
+        "subtitle": "Crea el teu primer proveïdor per començar a gestionar el sourcing i la producció.",
+        "cta": "Crear proveïdor"
+      }
+    },
     "nextAction": {
       "open": "Obrir projecte",
       "viability": "Revisar viabilitat",
@@ -1981,4 +2171,3 @@
     }
   }
 }
-
