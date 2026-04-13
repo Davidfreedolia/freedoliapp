@@ -39,3 +39,4 @@ _local_ignored/
 
 # Supabase CLI temp
 supabase/.temp/
+.env.local.off 
