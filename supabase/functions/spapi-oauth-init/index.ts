@@ -2,6 +2,7 @@
  * SP-API OAuth init: returns state (signed) and consent URL for the chosen region.
  * Called by frontend with Auth + body { org_id, user_id, region, marketplace_ids }.
  */
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createState } from "../_shared/spapiState.ts";
 
 const corsHeaders: Record<string, string> = {
@@ -20,6 +21,8 @@ const LWA_CLIENT_ID = Deno.env.get("LWA_CLIENT_ID");
 const LWA_REDIRECT_URI = Deno.env.get("LWA_REDIRECT_URI");
 const LWA_CLIENT_SECRET = Deno.env.get("LWA_CLIENT_SECRET");
 const OAUTH_STATE_SECRET = Deno.env.get("OAUTH_STATE_SECRET");
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 
 const CONSENT_BY_REGION: Record<string, string> = {
   EU: "https://sellercentral-europe.amazon.com/apps/authorize/consent",
@@ -47,6 +50,20 @@ Deno.serve(async (req: Request): Promise<Response> => {
     });
   }
 
+  // Validar JWT real (no nomes comprovar que existeix l'header)
+  const token = authHeader.replace("Bearer ", "").trim();
+  const supabaseUser = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: false },
+  });
+  const { data: userData, error: userErr } = await supabaseUser.auth.getUser(token);
+  if (userErr || !userData?.user) {
+    return new Response(JSON.stringify({ error: "Invalid or expired JWT" }), {
+      status: 401,
+      headers: jsonHeaders,
+    });
+  }
+  const verifiedUserId = userData.user.id;
+
   if (!LWA_CLIENT_ID || !LWA_REDIRECT_URI || !LWA_CLIENT_SECRET || !OAUTH_STATE_SECRET) {
     return new Response(JSON.stringify({ error: "SP-API OAuth not configured" }), {
       status: 503,
@@ -72,6 +89,14 @@ Deno.serve(async (req: Request): Promise<Response> => {
   if (!orgId || !userId) {
     return new Response(JSON.stringify({ error: "org_id and user_id required" }), {
       status: 400,
+      headers: jsonHeaders,
+    });
+  }
+
+  // Evitar que un usuari suplanti un altre passant un user_id diferent al JWT
+  if (userId !== verifiedUserId) {
+    return new Response(JSON.stringify({ error: "user_id mismatch with JWT" }), {
+      status: 403,
       headers: jsonHeaders,
     });
   }
