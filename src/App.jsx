@@ -383,7 +383,7 @@ function AppContent() {
     setBillingState({ loading: false, allowed, org: null, gate, seatsUsed, error: null })
   }, [isWorkspaceReady, activeOrgId, usageLoading, billingLoading, usage, billing, isTrialExpired])
 
-  const sidebarWidth = isMobile ? 0 : (isTablet ? 72 : (sidebarCollapsed ? 72 : 260))
+  const sidebarWidth = isMobile ? 0 : (isTablet ? 64 : (sidebarCollapsed ? 64 : 240))
 
   if (!isWorkspaceReady || billingState.loading) {
     console.log('[DiagWhiteScreen][AppContent] render -> loader branch', {

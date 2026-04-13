@@ -4,6 +4,8 @@
   box-sizing: border-box;
 }
 
+@import url('./styles/layout-improvements.css');
+
 /* ============================================
    PALETA OFICIAL FREEDOLIAPP
    ============================================
@@ -151,15 +153,15 @@
   --nav-highlight-strong: rgba(110, 203, 195, 0.14);
 
   /* Layout surfaces */
-  --topbar-bg: rgba(246, 248, 243, 0.88);
-  --topbar-border: 1px solid rgba(216, 225, 222, 0.92);
-  --topbar-shadow: none;
-  --topbar-blur: blur(14px);
+  --topbar-bg: rgba(246, 248, 243, 0.92);
+  --topbar-border: 1px solid rgba(216, 225, 222, 0.80);
+  --topbar-shadow: 0 1px 0 rgba(31, 95, 99, 0.06);
+  --topbar-blur: blur(16px);
   --info-1: var(--cta-1);
   --help-icon: var(--info-1);
   --collapse-icon: var(--coral-1);
   --topbar-text: var(--nav-fg);
-  --topbar-h: 68px;
+  --topbar-h: 56px;
   --topbar-fg: var(--text-1);
   --topbar-fg-muted: var(--muted-1);
   --topbar-btn-bg: rgba(255, 255, 255, 0.78);
@@ -4419,6 +4421,9 @@ body.dark .page-dashboard .dashboard-portfolio-list__item {
   flex-direction: column;
   background: var(--page-bg);
   padding-top: var(--topbar-h);
+  /* Àrea de contingut amb padding consistent */
+  --content-px: clamp(16px, 3vw, 32px);
+  --content-py: 24px;
 }
 
 .layout-fullstate {
@@ -4538,15 +4543,16 @@ body.dark .layout-fullstate__card {
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  padding: 8px 0 18px;
+  padding: 20px 0 20px;
 }
 
 .page-header__title {
   margin: 0;
-  font-size: clamp(24px, 2.1vw, 30px);
-  line-height: 1.12;
+  font-size: clamp(20px, 1.8vw, 26px);
+  line-height: 1.15;
   font-weight: 600;
   color: var(--text-1);
+  letter-spacing: -0.02em;
 }
 
 .page-header__actions {

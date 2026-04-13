@@ -217,15 +217,18 @@ export default function Sidebar() {
         ...styles.logoContainer,
         position: 'relative',
         justifyContent: shouldCollapse ? 'center' : 'flex-start',
-        padding: shouldCollapse ? '18px 12px 12px' : '22px 20px 14px'
+        padding: shouldCollapse ? '14px 8px 10px' : '16px 16px 12px'
       }}>
         <img 
-          src={BRAND_LOGO_URL}
-          alt="Freedolia"
+          src={shouldCollapse ? BRAND_ICON_URL : BRAND_LOGO_URL}
+          alt="Freedoliapp"
           onError={handleLogoError}
           style={{
             ...styles.logo,
-            width: shouldCollapse ? '40px' : '140px'
+            height: shouldCollapse ? '32px' : '28px',
+            width: 'auto',
+            maxWidth: shouldCollapse ? '32px' : '130px',
+            objectFit: 'contain'
           }}
         />
         {isMobile && (
@@ -355,7 +358,7 @@ export default function Sidebar() {
   return (
     <aside className="sidebar" style={{
       ...styles.sidebar,
-      width: shouldCollapse ? '72px' : '260px'
+      width: shouldCollapse ? '64px' : '240px'
     }}>
       <div style={styles.sidebarInner}>{sidebarContent}</div>
     </aside>

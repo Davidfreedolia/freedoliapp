@@ -1,0 +1,188 @@
+/* ============================================================
+   FREEDOLIAPP — LAYOUT IMPROVEMENTS
+   Millores de sidebar, topbar, pàgines i tipografia
+   ============================================================ */
+
+/* ── Sidebar: nav items més polits ── */
+.sidebar-scroll a {
+  color: var(--nav-fg) !important;
+  font-weight: 500;
+  font-size: 13.5px;
+  letter-spacing: -0.01em;
+  transition: background 0.15s, color 0.15s;
+}
+
+.sidebar-scroll a svg {
+  color: var(--nav-icon) !important;
+  transition: color 0.15s;
+}
+
+/* Hover: suau */
+.sidebar-scroll a:hover {
+  background: var(--nav-highlight) !important;
+  color: var(--nav-fg) !important;
+}
+
+/* Actiu: turquesa lleuger + borde esquerre */
+.sidebar-scroll a[aria-current="page"] {
+  background: var(--nav-highlight-strong) !important;
+  color: var(--nav-fg) !important;
+  position: relative;
+}
+
+.sidebar-scroll a[aria-current="page"]::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 20%;
+  bottom: 20%;
+  width: 3px;
+  background: var(--c-teal-300);
+  border-radius: 0 3px 3px 0;
+}
+
+.sidebar-scroll a[aria-current="page"] svg {
+  color: var(--c-cta-500) !important;
+}
+
+/* ── Sidebar: grup headers ── */
+.sidebar-group-header,
+[style*="groupHeader"] {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+  color: var(--nav-fg-muted) !important;
+  opacity: 0.6;
+  padding: 16px 14px 4px !important;
+}
+
+/* ── Topbar: més compacte i net ── */
+.topbar {
+  border-bottom: var(--topbar-border);
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
+}
+
+/* Topbar buttons: uniformes i discrets */
+.topbar .topbar-button,
+.topbar button.topbar-button {
+  height: 32px !important;
+  padding: 0 10px !important;
+  font-size: 13px !important;
+  gap: 6px !important;
+  border-radius: 8px !important;
+  font-weight: 500;
+}
+
+/* ── Àrea de contingut: padding consistent ── */
+.layout-shell__main > .page-wrapper,
+.layout-shell__main > main > *:not(.topbar):not(.billing-banner):not(.alert-strip),
+.layout-shell__main [class*="page-content"],
+.layout-shell__main [class*="Page"] > * {
+  padding-left: var(--content-px, 28px);
+  padding-right: var(--content-px, 28px);
+}
+
+/* ── Cards: lleugerament elevades ── */
+.card,
+[class*="card--"],
+.surface-card {
+  border-radius: var(--layout-radius-md);
+  border: 1px solid var(--border-1);
+  background: var(--surface-bg);
+  transition: box-shadow 0.2s;
+}
+
+/* ── Scroll suau global ── */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ── Millora de la scrollbar ── */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-1);
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--nav-fg-muted);
+}
+
+/* ── Page header millorat ── */
+.page-header {
+  border-bottom: 1px solid var(--border-1);
+  margin-bottom: 20px;
+}
+
+.page-header__title {
+  letter-spacing: -0.025em;
+}
+
+/* Títols secundaris */
+.page-section-title,
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted-1);
+  margin-bottom: 12px;
+}
+
+/* ── Taules millorades ── */
+table th {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--muted-1);
+}
+
+/* ── Focus ring més net ── */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--c-teal-300);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/* ── Transicions globals ── */
+a, button, .card, [class*="nav-"] {
+  transition: all 0.18s ease;
+}
+
+/* ── Badge / pill ── */
+.badge, [class*="badge--"] {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  border-radius: 6px;
+  padding: 2px 7px;
+}
+
+/* ── Millores del dark mode ── */
+body.dark .page-header {
+  border-bottom-color: var(--border-1);
+}
+
+body.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.12);
+}
+
+body.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.22);
+}
