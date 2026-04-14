@@ -14,7 +14,10 @@ import { PLAN_FEATURES, normalizePlanCode } from '../lib/billing/planFeatures'
  */
 export function usePlanFeatures() {
   const { activeOrgId } = useApp()
-  const [planCode, setPlanCode] = useState('starter')
+  // TESTING: fallback to 'scale' so all features are visible until billing is fully
+  // populated for every org. Flip to 'starter' once billing_org_entitlements is
+  // reliably provisioned for new sign-ups.
+  const [planCode, setPlanCode] = useState('scale')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -23,7 +26,8 @@ export function usePlanFeatures() {
     async function load() {
       if (!activeOrgId) {
         if (!cancelled) {
-          setPlanCode('starter')
+          // TESTING: fallback 'scale' — see note above.
+          setPlanCode('scale')
           setLoading(false)
         }
         return
@@ -38,7 +42,8 @@ export function usePlanFeatures() {
           .maybeSingle()
         if (entErr) throw entErr
 
-        let code = 'starter'
+        // TESTING: default 'scale' — see note above.
+        let code = 'scale'
         if (ent?.plan_id) {
           const { data: plan } = await supabase
             .from('billing_plans')
@@ -51,7 +56,8 @@ export function usePlanFeatures() {
       } catch (err) {
         if (!cancelled) {
           setError(err)
-          setPlanCode('starter')
+          // TESTING: fallback 'scale' — see note above.
+          setPlanCode('scale')
         }
       } finally {
         if (!cancelled) setLoading(false)

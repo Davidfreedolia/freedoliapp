@@ -71,17 +71,20 @@ export async function executeImport(mappedRows, ctx) {
 
     // Check for existing projects by ASIN or SKU to avoid duplicates
     try {
-      const { data: existing } = await supabase
-        .from('projects')
-        .select('id, asin, sku')
-        .or([
-          asins.length ? `asin.in.(${asins.join(',')})` : null,
-          skus.length ? `sku.in.(${skus.map((s) => `"${s}"`).join(',')})` : null,
-        ].filter(Boolean).join(','))
-      if (existing) {
-        for (const e of existing) {
-          const k = e.asin || e.sku
-          if (k) projectIdByKey.set(k, e.id)
+      const clauses = []
+      if (asins.length) clauses.push(`asin.in.(${asins.join(',')})`)
+      if (skus.length) clauses.push(`sku.in.(${skus.map((s) => `"${s}"`).join(',')})`)
+      if (clauses.length > 0) {
+        const { data: existing } = await supabase
+          .from('projects')
+          .select('id, asin, sku')
+          .eq('org_id', orgId)
+          .or(clauses.join(','))
+        if (existing) {
+          for (const e of existing) {
+            const k = e.asin || e.sku
+            if (k) projectIdByKey.set(k, e.id)
+          }
         }
       }
     } catch (_) { /* non-blocking */ }
@@ -99,10 +102,11 @@ export async function executeImport(mappedRows, ctx) {
         name: seed.name,
         description: `Importat des de ${sourceLabel}`,
         current_phase: 1,
+        phase: 1,              // NOT NULL, legacy column kept in sync with current_phase
         status: 'active',
         asin: seed.asin,
         org_id: orgId,
-        created_by: userId,
+        user_id: userId,       // NOT NULL on projects
       })
     }
     if (toInsert.length > 0) {
@@ -136,32 +140,48 @@ export async function executeImport(mappedRows, ctx) {
     if (revenue != null && revenue > 0) {
       incomesToInsert.push({
         org_id: orgId,
+        user_id: userId,           // NOT NULL on incomes
         project_id: projectId,
         amount: revenue,
-        date,
-        concept: `${sourceLabel} – revenue`,
-        source: sourceLabel,
+        income_date: date,         // real column name
+        category: 'sales',         // NOT NULL on incomes
+        description: `${sourceLabel} – revenue`,
       })
     }
     const cogs = toNumber(row.cogs)
     if (cogs != null && cogs > 0) {
       expensesToInsert.push({
-        org_id: orgId, project_id: projectId, amount: cogs, date,
-        category: 'cogs', concept: `${sourceLabel} – cogs`, source: sourceLabel,
+        org_id: orgId,
+        user_id: userId,
+        project_id: projectId,
+        amount: cogs,
+        expense_date: date,
+        category: 'cogs',
+        description: `${sourceLabel} – cogs`,
       })
     }
     const fbaFees = toNumber(row.fba_fees)
     if (fbaFees != null && fbaFees > 0) {
       expensesToInsert.push({
-        org_id: orgId, project_id: projectId, amount: fbaFees, date,
-        category: 'fba_fees', concept: `${sourceLabel} – fba fees`, source: sourceLabel,
+        org_id: orgId,
+        user_id: userId,
+        project_id: projectId,
+        amount: fbaFees,
+        expense_date: date,
+        category: 'fba_fees',
+        description: `${sourceLabel} – fba fees`,
       })
     }
     const ppc = toNumber(row.ppc_cost)
     if (ppc != null && ppc > 0) {
       expensesToInsert.push({
-        org_id: orgId, project_id: projectId, amount: ppc, date,
-        category: 'ppc', concept: `${sourceLabel} – ppc`, source: sourceLabel,
+        org_id: orgId,
+        user_id: userId,
+        project_id: projectId,
+        amount: ppc,
+        expense_date: date,
+        category: 'ppc',
+        description: `${sourceLabel} – ppc`,
       })
     }
   }
