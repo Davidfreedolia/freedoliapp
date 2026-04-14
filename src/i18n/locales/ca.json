@@ -1011,6 +1011,7 @@
     "operationsPlanning": "Planificació operativa",
     "decisions": "Decisions",
     "research": "Recerca IA",
+    "dataImport": "Importar dades",
     "settings": "Configuració",
     "billing": "Facturació",
     "help": "Ajuda",
@@ -2274,5 +2275,58 @@
       "generic": "Error a la recerca."
     },
     "confirmDelete": "Vols eliminar aquest informe?"
+  },
+  "upgrade": {
+    "title": "Funció no disponible al teu pla",
+    "description": "Aquesta funcionalitat forma part del pla {{requiredPlan}}. Actualitza el teu pla per accedir-hi.",
+    "currentPlan": "Pla actual",
+    "cta": "Actualitzar pla",
+    "back": "Tornar al dashboard"
+  },
+  "dataImport": {
+    "page": {
+      "title": "Importar dades",
+      "subtitle": "Migra dades des d'altres eines (Helium 10, Sellerboard, Amazon Seller Central, Excel…) sense tornar a introduir-les manualment."
+    },
+    "steps": {
+      "source": "Font",
+      "upload": "Puja",
+      "mapping": "Mapping",
+      "done": "Fet"
+    },
+    "source": {
+      "title": "Des de quina eina vols importar?",
+      "subtitle": "Escull la font del fitxer. Si no la trobes, usa l'opció genèrica.",
+      "genericHint": "Qualsevol Excel/CSV; tu defineixes el mapping"
+    },
+    "upload": {
+      "title": "Puja el fitxer exportat",
+      "subtitle": "Formats acceptats: CSV, TSV, XLSX, JSON. Font: {{source}}.",
+      "drop": "Fes clic o arrossega un fitxer aquí",
+      "formats": "CSV · TSV · XLSX · XLS · JSON"
+    },
+    "mapping": {
+      "title": "Revisa el mapping de columnes",
+      "subtitle": "Hem detectat {{rows}} files i {{columns}} columnes. Ajusta el mapping si cal.",
+      "target": "Camp FreedoliApp",
+      "column": "Columna del fitxer",
+      "none": "— No mapejat —",
+      "fuzzy": "auto-detectat",
+      "preview": "Previsualització (3 files)",
+      "submit": "Importar {{count}} files",
+      "submitting": "Important…"
+    },
+    "done": {
+      "title": "Importació completada",
+      "projects": "Projectes creats: {{count}}",
+      "incomes": "Ingressos importats: {{count}}",
+      "expenses": "Despeses importades: {{count}}",
+      "research": "Informes de recerca importats: {{count}}",
+      "errors": "Errors:",
+      "another": "Importar un altre fitxer"
+    },
+    "errors": {
+      "empty": "El fitxer no conté files de dades."
+    }
   }
 }

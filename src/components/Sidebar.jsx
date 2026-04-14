@@ -26,11 +26,13 @@ import {
   ShieldCheck,
   CreditCard,
   Link2,
-  Sparkles
+  Sparkles,
+  Database
 } from 'lucide-react'
 import Button from './Button'
 import { useApp } from '../context/AppContext'
 import { useBreakpoint } from '../hooks/useBreakpoint'
+import { usePlanFeatures } from '../hooks/usePlanFeatures'
 
 // Prefetch functions per rutes probables
 // Carrega el chunk abans que es necessiti per millorar UX
@@ -104,6 +106,9 @@ const prefetchRoute = (path) => {
     case '/research':
       import('../pages/Research.jsx').catch(() => {})
       break
+    case '/import':
+      import('../pages/DataImport.jsx').catch(() => {})
+      break
     case '/billing':
       import('../pages/Billing.jsx').catch(() => {})
       break
@@ -129,6 +134,8 @@ const BRAND_LOGO_URL = '/brand/freedoliapp/logo/logo_master.png'
 const BRAND_ICON_URL = '/brand/freedoliapp/logo/symbol_left.png'
 
 // Grouped sidebar: one coherent operating system (Operations, Inventory, Finance, Intelligence, System)
+// Each item may carry `feature` — a key from planFeatures.js used to gate visibility by plan.
+// Items without `feature` are always visible.
 const SIDEBAR_GROUPS = [
   {
     id: 'operations',
@@ -139,9 +146,9 @@ const SIDEBAR_GROUPS = [
       { path: '/app/suppliers', icon: Users, labelKey: 'nav.suppliers' },
       { path: '/app/forwarders', icon: Truck, labelKey: 'nav.forwarders' },
       { path: '/app/orders', icon: FileText, labelKey: 'nav.orders' },
-      { path: '/app/operations', icon: ClipboardList, labelKey: 'nav.operationsPlanning' },
-      { path: '/app/calendar', icon: CalendarIcon, labelKey: 'nav.calendar' },
-      { path: '/app/inbox', icon: Inbox, labelKey: 'nav.taskInbox' },
+      { path: '/app/operations', icon: ClipboardList, labelKey: 'nav.operationsPlanning', feature: 'operations_planning' },
+      { path: '/app/calendar', icon: CalendarIcon, labelKey: 'nav.calendar', feature: 'calendar' },
+      { path: '/app/inbox', icon: Inbox, labelKey: 'nav.taskInbox', feature: 'task_inbox' },
     ],
   },
   {
@@ -159,7 +166,7 @@ const SIDEBAR_GROUPS = [
       { path: '/app/profit', icon: DollarSign, labelKey: 'nav.profit' },
       { path: '/app/cash', icon: Wallet, labelKey: 'nav.cashflow' },
       { path: '/app/finances', icon: Receipt, labelKey: 'nav.finances', end: true },
-      { path: '/app/finances/amazon-imports', icon: Link2, labelKey: 'nav.amazonImports' },
+      { path: '/app/finances/amazon-imports', icon: Link2, labelKey: 'nav.amazonImports', feature: 'amazon_imports' },
     ],
   },
   {
@@ -167,16 +174,17 @@ const SIDEBAR_GROUPS = [
     labelKey: 'nav.groupIntelligence',
     items: [
       { path: '/app/research', icon: Sparkles, labelKey: 'nav.research' },
-      { path: '/app/decision-dashboard', icon: TrendingUp, labelKey: 'nav.decisionDashboard' },
-      { path: '/app/decisions', icon: Inbox, labelKey: 'nav.decisions' },
-      { path: '/app/automations', icon: Workflow, labelKey: 'nav.automations' },
-      { path: '/app/analytics', icon: TrendingUp, labelKey: 'nav.analytics' },
+      { path: '/app/decision-dashboard', icon: TrendingUp, labelKey: 'nav.decisionDashboard', feature: 'decision_engine' },
+      { path: '/app/decisions', icon: Inbox, labelKey: 'nav.decisions', feature: 'decision_engine' },
+      { path: '/app/automations', icon: Workflow, labelKey: 'nav.automations', feature: 'automations' },
+      { path: '/app/analytics', icon: TrendingUp, labelKey: 'nav.analytics', feature: 'advanced_analytics' },
     ],
   },
   {
     id: 'system',
     labelKey: 'nav.groupSystem',
     items: [
+      { path: '/app/import', icon: Database, labelKey: 'nav.dataImport', feature: 'data_import' },
       { path: '/app/billing', icon: CreditCard, labelKey: 'nav.billing' },
       { path: '/app/settings', icon: Settings, labelKey: 'nav.settings' },
       { path: '/app/help', icon: HelpCircle, labelKey: 'nav.help' },
@@ -188,6 +196,7 @@ const SIDEBAR_GROUPS = [
 
 export default function Sidebar() {
   const { sidebarCollapsed, setSidebarCollapsed, darkMode } = useApp()
+  const { features: planFeatures, loading: planLoading } = usePlanFeatures()
   const { isMobile, isTablet, isDesktop } = useBreakpoint()
   const { t } = useTranslation()
   const [logoError, setLogoError] = useState(false)
@@ -255,7 +264,15 @@ export default function Sidebar() {
                 {t(group.labelKey)}
               </div>
             )}
-            {group.items.map((item) => (
+            {group.items
+              .filter((item) => {
+                // While plan loads, show everything to avoid flicker.
+                if (planLoading) return true
+                if (!item.feature) return true
+                const val = planFeatures?.[item.feature]
+                return val === -1 || Boolean(val)
+              })
+              .map((item) => (
               <NavLink
                 key={item.path}
                 to={item.path}

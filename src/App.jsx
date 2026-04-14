@@ -121,6 +121,7 @@ const AmazonSnapshot = lazyWithErrorBoundary(() => import('./pages/AmazonSnapsho
 const AdminConsole = lazyWithErrorBoundary(() => import('./pages/AdminConsole'), 'AdminConsole')
 const Decisions = lazyWithErrorBoundary(() => import('./pages/Decisions'), 'Decisions')
 const Research = lazyWithErrorBoundary(() => import('./pages/Research'), 'Research')
+const DataImport = lazyWithErrorBoundary(() => import('./pages/DataImport'), 'DataImport')
 const AutomationInboxPage = lazyWithErrorBoundary(() => import('./pages/automations/AutomationInboxPage'), 'AutomationInboxPage')
 const AutomationProposalDetailPage = lazyWithErrorBoundary(() => import('./pages/automations/AutomationProposalDetailPage'), 'AutomationProposalDetailPage')
 const AutomationActivityPage = lazyWithErrorBoundary(() => import('./pages/automations/AutomationActivityPage'), 'AutomationActivityPage')
@@ -558,6 +559,7 @@ function App() {
                 <Route path="operations" element={<AppPageWrap context="page:OperationsPlanning"><OperationsPlanning /></AppPageWrap>} />
                 <Route path="decisions" element={<AppPageWrap context="page:Decisions"><Decisions /></AppPageWrap>} />
                 <Route path="research" element={<AppPageWrap context="page:Research"><Research /></AppPageWrap>} />
+                <Route path="import" element={<AppPageWrap context="page:DataImport"><DataImport /></AppPageWrap>} />
                 <Route path="automations" element={<AppPageWrap context="page:AutomationInbox"><AutomationInboxPage /></AppPageWrap>} />
                 <Route path="automations/analytics" element={<AppPageWrap context="page:AutomationAnalytics"><AutomationAnalyticsPage /></AppPageWrap>} />
                 <Route path="automations/activity" element={<AppPageWrap context="page:AutomationActivity"><AutomationActivityPage /></AppPageWrap>} />

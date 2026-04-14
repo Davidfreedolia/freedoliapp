@@ -1011,6 +1011,7 @@
     "operationsPlanning": "Planificación operativa",
     "decisions": "Decisiones",
     "research": "Investigación IA",
+    "dataImport": "Importar datos",
     "settings": "Configuración",
     "billing": "Facturación",
     "help": "Ayuda",
@@ -2089,5 +2090,58 @@
       "generic": "Error en la investigación."
     },
     "confirmDelete": "¿Quieres eliminar este informe?"
+  },
+  "upgrade": {
+    "title": "Función no disponible en tu plan",
+    "description": "Esta funcionalidad forma parte del plan {{requiredPlan}}. Actualiza tu plan para acceder.",
+    "currentPlan": "Plan actual",
+    "cta": "Actualizar plan",
+    "back": "Volver al dashboard"
+  },
+  "dataImport": {
+    "page": {
+      "title": "Importar datos",
+      "subtitle": "Migra datos desde otras herramientas (Helium 10, Sellerboard, Amazon Seller Central, Excel…) sin volver a introducirlos manualmente."
+    },
+    "steps": {
+      "source": "Fuente",
+      "upload": "Subir",
+      "mapping": "Mapeo",
+      "done": "Listo"
+    },
+    "source": {
+      "title": "¿Desde qué herramienta quieres importar?",
+      "subtitle": "Elige la fuente del archivo. Si no está, usa la opción genérica.",
+      "genericHint": "Cualquier Excel/CSV; tú defines el mapping"
+    },
+    "upload": {
+      "title": "Sube el archivo exportado",
+      "subtitle": "Formatos aceptados: CSV, TSV, XLSX, JSON. Fuente: {{source}}.",
+      "drop": "Haz clic o arrastra un archivo aquí",
+      "formats": "CSV · TSV · XLSX · XLS · JSON"
+    },
+    "mapping": {
+      "title": "Revisa el mapeo de columnas",
+      "subtitle": "Detectadas {{rows}} filas y {{columns}} columnas. Ajusta el mapeo si es necesario.",
+      "target": "Campo FreedoliApp",
+      "column": "Columna del archivo",
+      "none": "— No mapeado —",
+      "fuzzy": "auto-detectado",
+      "preview": "Previsualización (3 filas)",
+      "submit": "Importar {{count}} filas",
+      "submitting": "Importando…"
+    },
+    "done": {
+      "title": "Importación completada",
+      "projects": "Proyectos creados: {{count}}",
+      "incomes": "Ingresos importados: {{count}}",
+      "expenses": "Gastos importados: {{count}}",
+      "research": "Informes de investigación importados: {{count}}",
+      "errors": "Errores:",
+      "another": "Importar otro archivo"
+    },
+    "errors": {
+      "empty": "El archivo no contiene filas de datos."
+    }
   }
 }

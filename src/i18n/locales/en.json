@@ -956,6 +956,7 @@
     "operationsPlanning": "Operations Planning",
     "decisions": "Decisions",
     "research": "AI Research",
+    "dataImport": "Data Import",
     "settings": "Settings",
     "billing": "Billing",
     "help": "Help",
@@ -2074,5 +2075,58 @@
       "generic": "Research error."
     },
     "confirmDelete": "Delete this report?"
+  },
+  "upgrade": {
+    "title": "Feature not available on your plan",
+    "description": "This feature is part of the {{requiredPlan}} plan. Upgrade your plan to unlock it.",
+    "currentPlan": "Current plan",
+    "cta": "Upgrade plan",
+    "back": "Back to dashboard"
+  },
+  "dataImport": {
+    "page": {
+      "title": "Data Import",
+      "subtitle": "Migrate data from other tools (Helium 10, Sellerboard, Amazon Seller Central, Excel…) without manual re-entry."
+    },
+    "steps": {
+      "source": "Source",
+      "upload": "Upload",
+      "mapping": "Mapping",
+      "done": "Done"
+    },
+    "source": {
+      "title": "Which tool are you importing from?",
+      "subtitle": "Pick the source of your file. If it's not listed, use the generic option.",
+      "genericHint": "Any Excel/CSV; you define the mapping"
+    },
+    "upload": {
+      "title": "Upload the exported file",
+      "subtitle": "Supported formats: CSV, TSV, XLSX, JSON. Source: {{source}}.",
+      "drop": "Click or drag a file here",
+      "formats": "CSV · TSV · XLSX · XLS · JSON"
+    },
+    "mapping": {
+      "title": "Review the column mapping",
+      "subtitle": "Detected {{rows}} rows and {{columns}} columns. Adjust the mapping if needed.",
+      "target": "FreedoliApp field",
+      "column": "File column",
+      "none": "— Not mapped —",
+      "fuzzy": "auto-detected",
+      "preview": "Preview (3 rows)",
+      "submit": "Import {{count}} rows",
+      "submitting": "Importing…"
+    },
+    "done": {
+      "title": "Import completed",
+      "projects": "Projects created: {{count}}",
+      "incomes": "Incomes imported: {{count}}",
+      "expenses": "Expenses imported: {{count}}",
+      "research": "Research reports imported: {{count}}",
+      "errors": "Errors:",
+      "another": "Import another file"
+    },
+    "errors": {
+      "empty": "The file has no data rows."
+    }
   }
 }
