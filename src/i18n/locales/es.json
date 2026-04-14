@@ -1005,6 +1005,7 @@
     "cashflow": "Cashflow",
     "operationsPlanning": "Planificación operativa",
     "decisions": "Decisiones",
+    "research": "Investigación IA",
     "settings": "Configuración",
     "billing": "Facturación",
     "help": "Ayuda",
@@ -1984,5 +1985,91 @@
         ]
       }
     }
+  },
+  "research": {
+    "page": {
+      "title": "Investigación IA",
+      "subtitle": "Análisis de viabilidad con datos reales de mercado y proveedores.",
+      "newAnalysis": "Nuevo análisis",
+      "searchPlaceholder": "Busca por ASIN, descripción o marketplace…",
+      "empty": "Aún no hay informes. Crea el primero con «Nuevo análisis»."
+    },
+    "wizard": {
+      "title": "Investigación IA de producto",
+      "intro": "Introduce un ASIN o una descripción. La IA buscará datos de mercado y proveedores y generará un informe de viabilidad.",
+      "asinLabel": "ASIN",
+      "descLabel": "Descripción del producto",
+      "descPlaceholder": "Ej: juego de utensilios de cocina de silicona",
+      "marketplaceLabel": "Marketplace",
+      "submit": "Analizar",
+      "progressIntro": "Analizando datos. Esto puede tardar 15-45 segundos."
+    },
+    "progress": {
+      "amazon": "Buscando datos en Amazon…",
+      "alibaba": "Buscando precios en Alibaba…",
+      "onecom688": "Buscando precios en 1688…",
+      "zentrada": "Buscando precios en Zentrada…",
+      "ai": "Analizando con inteligencia artificial…"
+    },
+    "score": "Puntuación",
+    "recommendation": "Recomendación",
+    "executiveSummary": "Resumen ejecutivo",
+    "noSummary": "Sin resumen disponible.",
+    "sources": "Fuentes utilizadas",
+    "sections": {
+      "market": "Mercado",
+      "costs": "Costes",
+      "margins": "Márgenes",
+      "risks": "Riesgos",
+      "nextSteps": "Próximos pasos"
+    },
+    "market": {
+      "sellingPrice": "Precio de venta",
+      "bsr": "BSR",
+      "competition": "Competencia",
+      "reviews": "Rango de reviews",
+      "searchVolume": "Volumen de búsqueda",
+      "trend": "Tendencia"
+    },
+    "costs": {
+      "source": "Fuente",
+      "priceRange": "Precio",
+      "moq": "MOQ",
+      "shippingSea": "Envío mar/unid",
+      "shippingAir": "Envío aéreo/unid",
+      "fba": "FBA fees"
+    },
+    "margins": {
+      "title": "Escenario",
+      "scenario": "Escenario",
+      "price": "Precio venta",
+      "cost": "Coste total",
+      "net": "Margen neto %",
+      "optimistic": "Optimista",
+      "realistic": "Realista",
+      "pessimistic": "Pesimista"
+    },
+    "risks": "Riesgos",
+    "reco": {
+      "go": "GO",
+      "noGo": "NO-GO",
+      "needsResearch": "NECESITA MÁS INVESTIGACIÓN"
+    },
+    "actions": {
+      "saveBriefing": "Guardar como briefing",
+      "createProject": "Crear proyecto",
+      "exportPdf": "Exportar PDF"
+    },
+    "pdf": {
+      "title": "Informe de Viabilidad — FreedoliApp",
+      "desc": "Descripción"
+    },
+    "errors": {
+      "invalidAsin": "ASIN no válido. Formato: B0XXXXXXXX",
+      "inputRequired": "Introduce un ASIN o una descripción.",
+      "noOrg": "No hay organización activa.",
+      "generic": "Error en la investigación."
+    },
+    "confirmDelete": "¿Quieres eliminar este informe?"
   }
 }

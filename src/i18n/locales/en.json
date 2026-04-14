@@ -950,6 +950,7 @@
     "cashflow": "Cashflow",
     "operationsPlanning": "Operations Planning",
     "decisions": "Decisions",
+    "research": "AI Research",
     "settings": "Settings",
     "billing": "Billing",
     "help": "Help",
@@ -1969,5 +1970,91 @@
         ]
       }
     }
+  },
+  "research": {
+    "page": {
+      "title": "AI Research",
+      "subtitle": "Viability analysis with real market and supplier data.",
+      "newAnalysis": "New analysis",
+      "searchPlaceholder": "Search by ASIN, description, or marketplace…",
+      "empty": "No reports yet. Create your first with \"New analysis\"."
+    },
+    "wizard": {
+      "title": "AI Product Research",
+      "intro": "Enter an ASIN or a description. AI will look up market and supplier data and generate a viability report.",
+      "asinLabel": "ASIN",
+      "descLabel": "Product description",
+      "descPlaceholder": "E.g. silicone kitchen utensils set",
+      "marketplaceLabel": "Marketplace",
+      "submit": "Analyze",
+      "progressIntro": "Analyzing data. This can take 15-45 seconds."
+    },
+    "progress": {
+      "amazon": "Searching Amazon data…",
+      "alibaba": "Searching Alibaba prices…",
+      "onecom688": "Searching 1688 prices…",
+      "zentrada": "Searching Zentrada prices…",
+      "ai": "Analyzing with artificial intelligence…"
+    },
+    "score": "Score",
+    "recommendation": "Recommendation",
+    "executiveSummary": "Executive summary",
+    "noSummary": "No summary available.",
+    "sources": "Sources used",
+    "sections": {
+      "market": "Market",
+      "costs": "Costs",
+      "margins": "Margins",
+      "risks": "Risks",
+      "nextSteps": "Next steps"
+    },
+    "market": {
+      "sellingPrice": "Selling price",
+      "bsr": "BSR",
+      "competition": "Competition",
+      "reviews": "Reviews range",
+      "searchVolume": "Search volume",
+      "trend": "Trend"
+    },
+    "costs": {
+      "source": "Source",
+      "priceRange": "Price",
+      "moq": "MOQ",
+      "shippingSea": "Sea shipping/unit",
+      "shippingAir": "Air shipping/unit",
+      "fba": "FBA fees"
+    },
+    "margins": {
+      "title": "Scenario",
+      "scenario": "Scenario",
+      "price": "Selling price",
+      "cost": "Total cost",
+      "net": "Net margin %",
+      "optimistic": "Optimistic",
+      "realistic": "Realistic",
+      "pessimistic": "Pessimistic"
+    },
+    "risks": "Risks",
+    "reco": {
+      "go": "GO",
+      "noGo": "NO-GO",
+      "needsResearch": "NEEDS MORE RESEARCH"
+    },
+    "actions": {
+      "saveBriefing": "Save as briefing",
+      "createProject": "Create project",
+      "exportPdf": "Export PDF"
+    },
+    "pdf": {
+      "title": "Viability Report — FreedoliApp",
+      "desc": "Description"
+    },
+    "errors": {
+      "invalidAsin": "Invalid ASIN. Format: B0XXXXXXXX",
+      "inputRequired": "Enter an ASIN or a description.",
+      "noOrg": "No active organization.",
+      "generic": "Research error."
+    },
+    "confirmDelete": "Delete this report?"
   }
 }

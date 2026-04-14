@@ -1005,6 +1005,7 @@
     "cashflow": "Cashflow",
     "operationsPlanning": "Planificació operativa",
     "decisions": "Decisions",
+    "research": "Recerca IA",
     "settings": "Configuració",
     "billing": "Facturació",
     "help": "Ajuda",
@@ -2169,5 +2170,91 @@
         ]
       }
     }
+  },
+  "research": {
+    "page": {
+      "title": "Recerca IA",
+      "subtitle": "Anàlisi de viabilitat amb dades reals de mercat i proveïdors.",
+      "newAnalysis": "Nova anàlisi",
+      "searchPlaceholder": "Cerca per ASIN, descripció o marketplace…",
+      "empty": "Encara no hi ha informes. Crea el primer amb «Nova anàlisi»."
+    },
+    "wizard": {
+      "title": "Recerca IA de producte",
+      "intro": "Introdueix un ASIN o una descripció. L'IA cercarà dades de mercat i proveïdors i generarà un informe de viabilitat.",
+      "asinLabel": "ASIN",
+      "descLabel": "Descripció del producte",
+      "descPlaceholder": "Ex: joc d'estris de cuina de silicona",
+      "marketplaceLabel": "Marketplace",
+      "submit": "Analitzar",
+      "progressIntro": "Analitzant dades. Això pot trigar 15-45 segons."
+    },
+    "progress": {
+      "amazon": "Cercant dades a Amazon…",
+      "alibaba": "Cercant preus a Alibaba…",
+      "onecom688": "Cercant preus a 1688…",
+      "zentrada": "Cercant preus a Zentrada…",
+      "ai": "Analitzant amb intel·ligència artificial…"
+    },
+    "score": "Puntuació",
+    "recommendation": "Recomanació",
+    "executiveSummary": "Resum executiu",
+    "noSummary": "Sense resum disponible.",
+    "sources": "Fonts utilitzades",
+    "sections": {
+      "market": "Mercat",
+      "costs": "Costos",
+      "margins": "Marges",
+      "risks": "Riscos",
+      "nextSteps": "Pròxims passos"
+    },
+    "market": {
+      "sellingPrice": "Preu de venda",
+      "bsr": "BSR",
+      "competition": "Competència",
+      "reviews": "Rang de reviews",
+      "searchVolume": "Volum de cerca",
+      "trend": "Tendència"
+    },
+    "costs": {
+      "source": "Font",
+      "priceRange": "Preu",
+      "moq": "MOQ",
+      "shippingSea": "Enviament mar/unit",
+      "shippingAir": "Enviament aire/unit",
+      "fba": "FBA fees"
+    },
+    "margins": {
+      "title": "Escenari",
+      "scenario": "Escenari",
+      "price": "Preu venda",
+      "cost": "Cost total",
+      "net": "Marge net %",
+      "optimistic": "Optimista",
+      "realistic": "Realista",
+      "pessimistic": "Pessimista"
+    },
+    "risks": "Riscos",
+    "reco": {
+      "go": "GO",
+      "noGo": "NO-GO",
+      "needsResearch": "NECESSITA MÉS RECERCA"
+    },
+    "actions": {
+      "saveBriefing": "Desar com a briefing",
+      "createProject": "Crear projecte",
+      "exportPdf": "Exportar PDF"
+    },
+    "pdf": {
+      "title": "Informe de Viabilitat — FreedoliApp",
+      "desc": "Descripció"
+    },
+    "errors": {
+      "invalidAsin": "ASIN no vàlid. Format: B0XXXXXXXX",
+      "inputRequired": "Introdueix un ASIN o una descripció.",
+      "noOrg": "No hi ha organització activa.",
+      "generic": "Error a la recerca."
+    },
+    "confirmDelete": "Vols eliminar aquest informe?"
   }
 }

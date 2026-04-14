@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { X, Loader, Hash, Tag, Link } from 'lucide-react'
+import { X, Loader, Hash, Tag, Link, Sparkles } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { supabase, createProject, updateProject, generateProjectCode } from '../lib/supabase'
 import { logSuccess, logError } from '../lib/auditLog'
@@ -10,6 +10,7 @@ import { showToast } from './Toast'
 import Button from './Button'
 import { downloadPrompt } from '../utils/marketResearchPrompt'
 import { generateClaudeResearchPrompt } from '../lib/generateClaudeResearchPrompt'
+import ResearchWizard from './research/ResearchWizard'
 
 export default function NewProjectModal({ isOpen, onClose, onSuccess }) {
   const { refreshProjects, activeOrgId } = useApp()
@@ -40,6 +41,7 @@ export default function NewProjectModal({ isOpen, onClose, onSuccess }) {
     summary: ''
   })
   const [projectCodes, setProjectCodes] = useState({ projectCode: '', sku: '' })
+  const [researchWizardOpen, setResearchWizardOpen] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     description: ''
@@ -506,6 +508,15 @@ export default function NewProjectModal({ isOpen, onClose, onSuccess }) {
                   >
                     Descarregar Prompt
                   </Button>
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="sm"
+                    onClick={() => setResearchWizardOpen(true)}
+                  >
+                    <Sparkles size={14} style={{ marginRight: 6 }} />
+                    {t('research.page.newAnalysis', 'Recerca IA')}
+                  </Button>
                 </div>
               </>
             )}
@@ -595,6 +606,12 @@ export default function NewProjectModal({ isOpen, onClose, onSuccess }) {
           </div>
         </form>
       </div>
+      <ResearchWizard
+        isOpen={researchWizardOpen}
+        onClose={() => setResearchWizardOpen(false)}
+        initialAsin={modalAsin || ''}
+        initialMarketplace={(modalMarketplace || 'ES').toUpperCase()}
+      />
     </div>
   )
 }

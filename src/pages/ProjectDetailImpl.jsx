@@ -52,6 +52,7 @@ import EvidenceCheckRow from '../components/projects/EvidenceCheckRow'
 import { getModalStyles } from '../utils/responsiveStyles'
 import Button from '../components/Button'
 import { generateClaudeResearchPrompt } from '../lib/generateClaudeResearchPrompt'
+import ResearchWizard from '../components/research/ResearchWizard'
 import { computeCommercialGate } from '../lib/phaseGates'
 import ProjectHeader from '../components/projects/ProjectHeader'
 import ProjectPhaseChecklist from '../components/projects/ProjectPhaseChecklist'
@@ -344,6 +345,7 @@ function ProjectDetailInner({ useApp }) {
   const [phaseBlockMessage, setPhaseBlockMessage] = useState(null)
   const [phaseBlockVisible, setPhaseBlockVisible] = useState(false)
   const [eventsRefreshToken, setEventsRefreshToken] = useState(0)
+  const [researchWizardOpen, setResearchWizardOpen] = useState(false)
   const [viabilitySnapshot, setViabilitySnapshot] = useState(null)
   const [createMenuOpen, setCreateMenuOpen] = useState(false)
   const [createModalType, setCreateModalType] = useState(null)
@@ -2043,6 +2045,15 @@ ${t}
                     >
                       Descarregar Prompt
                     </Button>
+                    <Button
+                      type="button"
+                      variant="primary"
+                      size="sm"
+                      disabled={!project?.asin}
+                      onClick={() => setResearchWizardOpen(true)}
+                    >
+                      {t('research.page.newAnalysis', 'Recerca IA')}
+                    </Button>
                   </div>
                 </>
               )}
@@ -3052,6 +3063,13 @@ ${t}
         </div>
         </div>
       </PageGutter>
+      <ResearchWizard
+        isOpen={researchWizardOpen}
+        onClose={() => setResearchWizardOpen(false)}
+        initialAsin={project?.asin || ''}
+        initialMarketplace={(project?.marketplace || 'ES').toUpperCase()}
+        projectId={project?.id || null}
+      />
     </div>
   )
 }

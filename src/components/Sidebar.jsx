@@ -25,7 +25,8 @@ import {
   Bug,
   ShieldCheck,
   CreditCard,
-  Link2
+  Link2,
+  Sparkles
 } from 'lucide-react'
 import Button from './Button'
 import { useApp } from '../context/AppContext'
@@ -100,6 +101,9 @@ const prefetchRoute = (path) => {
     case '/automations':
       import('../pages/automations/AutomationInboxPage.jsx').catch(() => {})
       break
+    case '/research':
+      import('../pages/Research.jsx').catch(() => {})
+      break
     case '/billing':
       import('../pages/Billing.jsx').catch(() => {})
       break
@@ -162,6 +166,7 @@ const SIDEBAR_GROUPS = [
     id: 'intelligence',
     labelKey: 'nav.groupIntelligence',
     items: [
+      { path: '/app/research', icon: Sparkles, labelKey: 'nav.research' },
       { path: '/app/decision-dashboard', icon: TrendingUp, labelKey: 'nav.decisionDashboard' },
       { path: '/app/decisions', icon: Inbox, labelKey: 'nav.decisions' },
       { path: '/app/automations', icon: Workflow, labelKey: 'nav.automations' },
