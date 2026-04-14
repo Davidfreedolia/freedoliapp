@@ -2,9 +2,12 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Truck, Eye, RefreshCw } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { isTrackingSyncEnabled } from '../../lib/featureFlags'
 import { showToast } from '../Toast'
 import Button from '../Button'
 import ShipmentDetailDrawer from './ShipmentDetailDrawer'
+
+const TRACKING_SYNC_ENABLED = isTrackingSyncEnabled()
 
 function formatDate(v) {
   if (!v) return '—'
@@ -241,15 +244,17 @@ function ShipmentCard({
         <Button variant="secondary" size="sm" onClick={onView} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
           <Eye size={14} /> {t('orders.shipmentsPanel.actions.view')}
         </Button>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={onSyncNow}
-          disabled={syncing}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
-        >
-          <RefreshCw size={14} /> {t('orders.shipmentsPanel.actions.syncNow')}
-        </Button>
+        {TRACKING_SYNC_ENABLED && (
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={onSyncNow}
+            disabled={syncing}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+          >
+            <RefreshCw size={14} /> {t('orders.shipmentsPanel.actions.syncNow')}
+          </Button>
+        )}
       </div>
     </div>
   )

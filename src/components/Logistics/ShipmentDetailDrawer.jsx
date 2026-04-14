@@ -2,10 +2,13 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Truck, RefreshCw } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { isTrackingSyncEnabled } from '../../lib/featureFlags'
 import { showToast } from '../Toast'
 import Button from '../Button'
 import PackageList from './PackageList'
 import TrackingEventList from './TrackingEventList'
+
+const TRACKING_SYNC_ENABLED = isTrackingSyncEnabled()
 
 function formatDate(v) {
   if (!v) return '—'
@@ -213,18 +216,20 @@ export default function ShipmentDetailDrawer({ shipment, darkMode, onClose, onSy
         </div>
       )}
 
-      <div style={{ padding: 16, display: 'flex', gap: 12 }}>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={handleSyncNow}
-          disabled={syncing}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
-        >
-          <RefreshCw size={14} />
-          {t('orders.shipmentsPanel.actions.syncNow')}
-        </Button>
-      </div>
+      {TRACKING_SYNC_ENABLED && (
+        <div style={{ padding: 16, display: 'flex', gap: 12 }}>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleSyncNow}
+            disabled={syncing}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+          >
+            <RefreshCw size={14} />
+            {t('orders.shipmentsPanel.actions.syncNow')}
+          </Button>
+        </div>
+      )}
 
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: '0 16px 16px' }}>
         <h4 style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 600, color: darkMode ? '#e5e7eb' : '#374151' }}>

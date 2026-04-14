@@ -1,0 +1,26 @@
+# Freedoliapp — robots.txt
+User-agent: *
+Allow: /
+Allow: /amazon-fba-dashboard
+Allow: /purchase-order-management
+Allow: /supplier-management-system
+Allow: /trial
+Allow: /privacy
+Allow: /terms
+Allow: /cookies
+Allow: /dpa
+Allow: /legal
+
+# Private / authenticated areas — not for indexing
+Disallow: /app/
+Disallow: /login
+Disallow: /activation
+Disallow: /dashboard
+Disallow: /auth/
+Disallow: /api/
+
+# AI crawlers — allow unless you want to opt out
+# User-agent: GPTBot
+# Disallow: /
+
+Sitemap: https://freedoliapp.com/sitemap.xml
