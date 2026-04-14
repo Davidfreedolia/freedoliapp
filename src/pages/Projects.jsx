@@ -23,7 +23,9 @@ import Header from '../components/Header'
 import NewProjectModal from '../components/NewProjectModal'
 import Button from '../components/Button'
 import PageGutter from '../components/ui/PageGutter'
-import LayoutSwitcher from '../components/LayoutSwitcher'
+import LayoutSwitcher, { KANBAN_OPTION } from '../components/LayoutSwitcher'
+import { List, Columns, Grid2X2 } from 'lucide-react'
+import ProjectsKanban from '../components/projects/ProjectsKanban'
 import { useLayoutPreference } from '../hooks/useLayoutPreference'
 import { useProjectsListState } from '../hooks/useProjectsListState'
 import ProjectDriveExplorer from '../components/projects/ProjectDriveExplorer'
@@ -947,6 +949,12 @@ export default function Projects() {
                 value={effectiveViewMode}
                 onChange={setViewMode}
                 compact={isMobile}
+                options={[
+                  { id: 'list', label: 'Llista', Icon: List },
+                  { id: 'grid', label: 'Graella', Icon: Grid2X2 },
+                  KANBAN_OPTION,
+                  { id: 'split', label: 'Split', Icon: Columns },
+                ]}
               />
             </div>
             <Button
@@ -1018,11 +1026,20 @@ export default function Projects() {
               />
             </div>
             <div className="projects-shell projects-page__listing">
-              <div className="projects-grid">
-                {filteredProjects.map((project) => (
-                  <ProjectCard key={project.id} project={project} />
-                ))}
-              </div>
+              {effectiveViewMode === 'kanban' ? (
+                <ProjectsKanban
+                  projects={filteredProjects}
+                  businessByProjectId={businessByProjectId}
+                  darkMode={darkMode}
+                  onPhaseChanged={() => { refetch() }}
+                />
+              ) : (
+                <div className="projects-grid">
+                  {filteredProjects.map((project) => (
+                    <ProjectCard key={project.id} project={project} />
+                  ))}
+                </div>
+              )}
             </div>
           </>
         )}

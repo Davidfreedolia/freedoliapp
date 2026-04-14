@@ -1,13 +1,15 @@
-import { List, Columns, Grid2X2 } from 'lucide-react'
+import { List, Columns, Grid2X2, LayoutGrid } from 'lucide-react'
 import Button from './Button'
 
-const options = [
+const DEFAULT_OPTIONS = [
   { id: 'list', label: 'Llista', Icon: List },
   { id: 'split', label: 'Split', Icon: Columns },
   { id: 'grid', label: 'Graella', Icon: Grid2X2 }
 ]
 
-export default function LayoutSwitcher({ value, onChange, compact = false }) {
+export const KANBAN_OPTION = { id: 'kanban', label: 'Kanban', Icon: LayoutGrid }
+
+export default function LayoutSwitcher({ value, onChange, compact = false, options = DEFAULT_OPTIONS }) {
   return (
     <div style={styles.container} className="layout-switcher">
       {options.map(option => {

@@ -847,10 +847,15 @@
       "amazonLabel": "Conectar Amazon e importar datos reales",
       "amazonDescription": "Autoriza Seller Central e importa los últimos 30 días de settlements para ver un primer resumen.",
       "setupLabel": "Empezar en modo Setup (sin Amazon todavía)",
-      "setupDescription": "Planifica productos y costes sin conectar Amazon. Podrás conectarlo después en Configuración."
+      "setupDescription": "Planifica productos y costes sin conectar Amazon. Podrás conectarlo después en Configuración.",
+      "demoLabel": "Cargar datos demo",
+      "demoLoading": "Cargando datos demo…",
+      "demoDescription": "Explora la app con 10 proyectos, 8 proveedores, finanzas y un informe IA de ejemplo."
     },
     "toasts": {
       "spapiConnected": "Conexión Amazon SP-API completada",
+      "demoLoaded": "Datos demo cargados",
+      "demoFailed": "Error cargando datos demo",
       "spapiErrorPrefix": "SP-API:",
       "invalidSession": "Sesión no válida",
       "oauthStartFailed": "No se pudo iniciar OAuth",
@@ -1029,6 +1034,12 @@
       "title": "Dashboard",
       "subtitle": "Resumen de tu negocio"
     },
+    "kpis": {
+      "pendingPos": "POs pendientes",
+      "activeProjects": "Proyectos activos"
+    },
+    "aiResearch": "Investigación IA",
+    "viewFinances": "Finanzas",
     "modeB": {
       "title": "Empieza tu primer producto Amazon",
       "subtitle": "Crea un producto y muévelo por el pipeline de lanzamiento.",
@@ -1858,6 +1869,13 @@
     }
   },
   "projects": {
+    "kanban": {
+      "phaseUpdated": "Fase actualizada",
+      "updateFailed": "No se pudo actualizar la fase",
+      "emptyColumn": "Sin proyectos",
+      "daysInPhase_one": "{{count}}d en la fase",
+      "daysInPhase_other": "{{count}}d en la fase"
+    },
     "newProject": "Nuevo Proyecto",
     "projectCode": "Código Proyecto",
     "productSku": "SKU Producto",

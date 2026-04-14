@@ -847,10 +847,15 @@
       "amazonLabel": "Connectar Amazon i importar dades reals",
       "amazonDescription": "Autoritza Seller Central i importa els últims 30 dies de settlements per veure un primer resum.",
       "setupLabel": "Començar en mode Setup (sense Amazon encara)",
-      "setupDescription": "Planifica productes i costos sense connectar Amazon. Podràs connectar-ho després a Configuració."
+      "setupDescription": "Planifica productes i costos sense connectar Amazon. Podràs connectar-ho després a Configuració.",
+      "demoLabel": "Carregar dades demo",
+      "demoLoading": "Carregant dades demo…",
+      "demoDescription": "Explora l'app amb 10 projectes, 8 proveïdors, finances i un informe IA d'exemple."
     },
     "toasts": {
       "spapiConnected": "Connexió Amazon SP-API completada",
+      "demoLoaded": "Dades demo carregades",
+      "demoFailed": "Error carregant dades demo",
       "spapiErrorPrefix": "SP-API:",
       "invalidSession": "Sessió no vàlida",
       "oauthStartFailed": "No s'ha pogut iniciar OAuth",
@@ -1029,6 +1034,12 @@
       "title": "Dashboard",
       "subtitle": "Resum del teu negoci"
     },
+    "kpis": {
+      "pendingPos": "POs pendents",
+      "activeProjects": "Projectes actius"
+    },
+    "aiResearch": "Recerca IA",
+    "viewFinances": "Finances",
     "modeB": {
       "title": "Comença el teu primer producte Amazon",
       "subtitle": "Crea un producte i mou-lo pel pipeline de llançament.",
@@ -2043,6 +2054,13 @@
     }
   },
   "projects": {
+    "kanban": {
+      "phaseUpdated": "Fase actualitzada",
+      "updateFailed": "No s'ha pogut actualitzar la fase",
+      "emptyColumn": "Sense projectes",
+      "daysInPhase_one": "{{count}}d a la fase",
+      "daysInPhase_other": "{{count}}d a la fase"
+    },
     "newProject": "Nou Projecte",
     "projectCode": "Codi Projecte",
     "productSku": "SKU Producte",

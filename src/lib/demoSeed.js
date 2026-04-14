@@ -96,17 +96,19 @@ export const generateDemoData = async (onProgress = null) => {
 
     // 2) Projects (10)
     const projects = []
+    // Realistic Amazon private-label products — spread across lifecycle phases.
+    // asin / marketplace fields feed the Research IA wizard prefill.
     const projectNames = [
-      { name: 'Demo Wireless Earbuds', phase: 1, decision: null, profitability: 'GO' },
-      { name: 'Demo Phone Case Pro', phase: 2, decision: 'HOLD', profitability: null },
-      { name: 'Demo Smart Watch', phase: 3, decision: 'GO', profitability: null },
-      { name: 'Demo Laptop Stand', phase: 4, decision: 'GO', profitability: null },
-      { name: 'Demo USB Cable', phase: 2, decision: 'DISCARDED', profitability: null },
-      { name: 'Demo Power Bank', phase: 5, decision: 'GO', profitability: null },
-      { name: 'Demo Tablet Cover', phase: 3, decision: 'HOLD', profitability: null },
-      { name: 'Demo Keyboard', phase: 6, decision: 'GO', profitability: null },
-      { name: 'Demo Mouse Pad', phase: 1, decision: 'DISCARDED', profitability: 'RISKY' },
-      { name: 'Demo Webcam', phase: 7, decision: 'GO', profitability: null }
+      { name: 'Silicone Kitchen Utensils Set (12 pcs)', asin: 'B0CDEMO001', marketplace: 'ES', phase: 1, decision: null, profitability: 'GO' },
+      { name: 'Resistance Bands Set — 5 Levels', asin: 'B0CDEMO002', marketplace: 'DE', phase: 3, decision: 'GO', profitability: null },
+      { name: 'Phone Case iPhone 15 Pro — Matte Black', asin: 'B0CDEMO003', marketplace: 'ES', phase: 5, decision: 'GO', profitability: null },
+      { name: 'Yoga Mat 6mm TPE Eco', asin: 'B0CDEMO004', marketplace: 'FR', phase: 6, decision: 'GO', profitability: null },
+      { name: 'Bamboo Cutting Board Set', asin: 'B0CDEMO005', marketplace: 'ES', phase: 7, decision: 'GO', profitability: null },
+      { name: 'USB-C Cable Braided 2m (3-pack)', asin: 'B0CDEMO006', marketplace: 'DE', phase: 2, decision: 'HOLD', profitability: null },
+      { name: 'Laptop Stand Aluminium Adjustable', asin: 'B0CDEMO007', marketplace: 'IT', phase: 4, decision: 'GO', profitability: null },
+      { name: 'Pet Water Fountain 2L Filtered', asin: 'B0CDEMO008', marketplace: 'ES', phase: 3, decision: 'HOLD', profitability: null },
+      { name: 'Essential Oil Diffuser 500ml', asin: null, marketplace: 'ES', phase: 1, decision: 'DISCARDED', profitability: 'RISKY' },
+      { name: 'Meal Prep Containers Glass (5 pcs)', asin: null, marketplace: 'UK', phase: 2, decision: 'DISCARDED', profitability: null }
     ]
 
     for (let i = 0; i < projectNames.length; i++) {
@@ -125,6 +127,8 @@ export const generateDemoData = async (onProgress = null) => {
           current_phase: p.phase,
           decision: p.decision,
           status: p.decision === 'DISCARDED' ? 'inactive' : 'active',
+          asin: p.asin || null,
+          marketplace: p.marketplace || null,
           is_demo: true
         }])
         .select()
@@ -153,6 +157,65 @@ export const generateDemoData = async (onProgress = null) => {
           console.warn('Could not add profitability data:', err)
         }
       }
+    }
+
+    // 2.5) Research report for the "Live" project (phase 7) — showcases AI research feature
+    try {
+      const liveProject = projects.find((p) => p.current_phase === 7)
+      if (liveProject) {
+        const orgId = liveProject.org_id
+        const demoAiAnalysis = {
+          market: {
+            selling_price: { min: 24.99, max: 32.99, currency: 'EUR' },
+            bsr: 4820,
+            reviews_range: 'medium',
+            competition_level: 'medium',
+            search_volume: 14500,
+            trend: 'stable',
+            summary: 'Mercat saludable amb demanda estable i competència gestionable. BSR 4.820 en Kitchen & Dining.',
+          },
+          costs: {
+            alibaba_price: { min: 4.20, max: 6.80, moq: 500 },
+            factory_price_1688: { min: 2.80, max: 4.50 },
+            zentrada_price: { min: 0, max: 0 },
+            estimated_shipping_per_unit: { sea: 0.85, air: 2.30 },
+            estimated_fba_fees: 3.25,
+            summary: 'Costos competitius. 1688 ofereix millor preu fàbrica; Alibaba recomanable per primer pedido (amb MOQ 500).',
+          },
+          margins: {
+            optimistic: { selling_price: 32.99, total_cost: 12.80, net_margin_pct: 38 },
+            realistic: { selling_price: 28.99, total_cost: 13.50, net_margin_pct: 30 },
+            pessimistic: { selling_price: 24.99, total_cost: 14.20, net_margin_pct: 18 },
+          },
+          risks: [
+            { type: 'competition', severity: 'medium', description: 'Diverses marques establertes amb 500+ reviews.' },
+            { type: 'regulation', severity: 'low', description: 'Producte no gated, sense restriccions específiques a ES/EU.' },
+          ],
+          viability_score: 72,
+          recommendation: 'go',
+          next_steps: [
+            'Demanar mostres a 2-3 proveïdors d\'Alibaba amb rating >= 4.5',
+            'Dissenyar packaging diferencial (eco-friendly)',
+            'Validar regulacions d\'EU per bambú (fitosanitari)',
+          ],
+          executive_summary: 'Producte viable amb marge net realista del 30%. Competència moderada però diferenciable amb packaging premium. Recomanat GO amb MOQ 500u al primer lot.',
+        }
+        await supabase.from('research_reports').insert([{
+          org_id: orgId,
+          project_id: liveProject.id,
+          input_asin: liveProject.asin,
+          input_description: liveProject.name,
+          marketplace: liveProject.marketplace || 'ES',
+          sources_used: ['amazon', 'suppliers', 'ai'],
+          raw_data: { demo: true },
+          ai_analysis: demoAiAnalysis,
+          viability_score: 72,
+          recommendation: 'go',
+          created_by: userId,
+        }])
+      }
+    } catch (err) {
+      console.warn('Could not seed demo research report:', err?.message || err)
     }
 
     // 3) GTIN Pool (80 GTINs)

@@ -199,6 +199,24 @@ export default function ActivationWizard() {
     setStep(STEP_AMAZON_CONNECT)
   }
 
+  const [demoLoading, setDemoLoading] = useState(false)
+  const handleChooseDemo = async () => {
+    if (demoLoading) return
+    setDemoLoading(true)
+    try {
+      const { generateDemoData } = await import('../lib/demoSeed')
+      await generateDemoData()
+      setActivationPath('demo')
+      showToast(t('activation.toasts.demoLoaded', 'Dades demo carregades'), 'success')
+      setStep(STEP_SETUP_DONE)
+    } catch (err) {
+      console.error('Demo load failed:', err)
+      showToast(err?.message || t('activation.toasts.demoFailed', 'Error carregant dades demo'), 'error')
+    } finally {
+      setDemoLoading(false)
+    }
+  }
+
   const handleConnectAmazon = async () => {
     if (!activeOrgId) return
     setConnecting(true)
@@ -492,6 +510,20 @@ export default function ActivationWizard() {
                 </div>
                 <p className="wizard-tool-card__subtitle">
                   {t('activation.choosePath.setupDescription')}
+                </p>
+              </div>
+              <div
+                className="wizard-tool-card"
+                onClick={handleChooseDemo}
+                style={{ opacity: demoLoading ? 0.6 : 1, cursor: demoLoading ? 'wait' : 'pointer' }}
+              >
+                <div className="wizard-tool-card__title">
+                  {demoLoading
+                    ? t('activation.choosePath.demoLoading', 'Carregant dades demo…')
+                    : t('activation.choosePath.demoLabel', 'Carregar dades demo')}
+                </div>
+                <p className="wizard-tool-card__subtitle">
+                  {t('activation.choosePath.demoDescription', 'Explora l\'app amb 10 projectes, 8 proveïdors, finances i un informe IA d\'exemple.')}
                 </p>
               </div>
             </div>

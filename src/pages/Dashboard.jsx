@@ -8,7 +8,7 @@ import useT from '../hooks/useT'
 import GridLayout from 'react-grid-layout'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
-import { 
+import {
   ArrowRight,
   Bell,
   Factory,
@@ -18,7 +18,9 @@ import {
   Rocket,
   Truck,
   TrendingUp,
-  AlertTriangle
+  AlertTriangle,
+  Sparkles,
+  Receipt
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { getPurchaseOrders, getDashboardPreferences, getPosNotReady, getPosWaitingManufacturer, createOrGetTaskFromOrigin } from '../lib/supabase'
@@ -702,6 +704,16 @@ export default function Dashboard() {
                 value={formatCurrency(homeData?.kpis?.cashNow)}
                 loading={homeDataLoading}
               />
+              <HomeKpiCard
+                title={t('dashboard.kpis.pendingPos', 'POs pendents')}
+                value={String((posNotReady?.length ?? 0) + (posWaitingManufacturer?.length ?? 0))}
+                loading={false}
+              />
+              <HomeKpiCard
+                title={t('dashboard.kpis.activeProjects', 'Projectes actius')}
+                value={String(stats.activeProjects ?? 0)}
+                loading={false}
+              />
             </div>
             <div className="dashboard-hero__actions">
               <Button className="dashboard-hero__cta dashboard-hero__cta--primary" variant="primary" size="sm" onClick={() => setShowNewProjectModal(true)}>
@@ -710,6 +722,14 @@ export default function Dashboard() {
               </Button>
               <Button className="dashboard-hero__cta" variant="secondary" size="sm" onClick={() => navigate('/app/orders')}>
                 {t('dashboard.newPO', 'New PO')}
+              </Button>
+              <Button className="dashboard-hero__cta" variant="secondary" size="sm" onClick={() => navigate('/app/research')}>
+                <Sparkles size={14} style={{ marginRight: 6 }} />
+                {t('dashboard.aiResearch', 'Recerca IA')}
+              </Button>
+              <Button className="dashboard-hero__cta" variant="ghost" size="sm" onClick={() => navigate('/app/finances')}>
+                <Receipt size={14} style={{ marginRight: 6 }} />
+                {t('dashboard.viewFinances', 'Finances')}
               </Button>
               <Button className="dashboard-hero__cta" variant="ghost" size="sm" onClick={() => navigate('/app/decisions')}>
                 {t('dashboard.viewDecisionsInbox', 'View Decisions Inbox')}
