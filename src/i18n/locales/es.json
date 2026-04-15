@@ -2227,5 +2227,103 @@
     "errors": {
       "empty": "El archivo no contiene filas de datos."
     }
+  },
+  "helpAssistant": {
+    "title": "Ayuda",
+    "openLabel": "Abrir ayuda",
+    "searchPlaceholder": "Buscar en la ayuda…",
+    "noResults": "Sin resultados. Prueba a contactarnos.",
+    "contexts": {
+      "default": { "title": "¿Cómo te podemos ayudar?" },
+      "dashboard": { "title": "Ayuda con el Dashboard" },
+      "import": { "title": "Ayuda con la importación" },
+      "research": { "title": "Ayuda con la investigación IA" },
+      "settings": { "title": "Ayuda con la configuración" },
+      "onboarding": { "title": "Ayuda con la activación" }
+    },
+    "contact": {
+      "cta": "Contactar con soporte",
+      "subject": "Ayuda — FreedoliApp",
+      "messageLabel": "Tu mensaje",
+      "placeholder": "Cuéntanos qué necesitas…",
+      "send": "Enviar",
+      "fromPage": "Desde"
+    },
+    "faq": {
+      "dashboard": {
+        "firstProduct": {
+          "q": "¿Cómo añado mi primer producto?",
+          "a": "Ve a Proyectos y haz clic en «Nuevo proyecto». Añade un nombre, un ASIN si lo tienes, y las fases se irán completando a medida que cargues datos."
+        },
+        "kpis": {
+          "q": "¿Qué significan las KPIs?",
+          "a": "Las KPIs principales son ingresos del mes, margen neto, gastos y pedidos activos. Cada tarjeta muestra la variación respecto al mes anterior."
+        },
+        "amazon": {
+          "q": "¿Cómo conecto mi cuenta de Amazon?",
+          "a": "En Configuración → Conexiones, haz clic en «Conectar Amazon». Te redirigiremos a Seller Central para autorizar el acceso vía OAuth (solo lectura)."
+        }
+      },
+      "import": {
+        "export": {
+          "q": "¿Cómo exporto datos de Sellerboard?",
+          "a": "En Sellerboard, ve a «Reports» y exporta a CSV el report «Dashboard» o «Products». Después sube el archivo aquí — detectaremos las columnas automáticamente."
+        },
+        "formats": {
+          "q": "¿Qué formatos de archivo aceptáis?",
+          "a": "CSV, TSV, XLSX, XLS y JSON. Detectamos el separador y el formato de números (1,234.56 vs 1.234,56) automáticamente."
+        },
+        "excel": {
+          "q": "¿Puedo importar desde mi propio Excel?",
+          "a": "Sí. Elige «Excel / CSV genérico» como fuente y te dejaremos mapear manualmente cada columna al campo correspondiente (revenue, COGS, etc.)."
+        },
+        "duplicates": {
+          "q": "¿Qué pasa si importo datos duplicados?",
+          "a": "Detectamos duplicados por ASIN + fecha. Las reimportaciones actualizan los valores existentes en lugar de crear nuevos."
+        }
+      },
+      "research": {
+        "asin": {
+          "q": "¿Qué es un ASIN?",
+          "a": "El ASIN (Amazon Standard Identification Number) es el código de 10 caracteres que empieza con B0 e identifica de forma única un producto en Amazon."
+        },
+        "suppliers": {
+          "q": "¿Cómo funciona la búsqueda de proveedores?",
+          "a": "Buscamos en paralelo en Alibaba, 1688 y Zentrada con las palabras clave extraídas del título o tu descripción. Si tienes Helium 10 o Jungle Scout conectados, también los consultamos."
+        },
+        "cost": {
+          "q": "¿Cuánto cuesta un análisis IA?",
+          "a": "Cada plan tiene una cuota mensual gratuita (Starter: 5, Growth: 50, Scale: ilimitado). Si la superas, puedes conectar tu propia clave de IA para análisis sin límite."
+        },
+        "byok": {
+          "q": "¿Puedo usar mi propia cuenta de IA?",
+          "a": "Sí. En Configuración → Potencia tu IA puedes conectar Anthropic, OpenAI, Google, Mistral, Groq u Ollama. Cuando está conectada, no consume tu cuota."
+        }
+      },
+      "settings": {
+        "plan": {
+          "q": "¿Cómo cambio mi plan?",
+          "a": "En Configuración → Facturación puedes ver tu plan actual y hacer upgrade/downgrade. El cambio se aplica inmediatamente."
+        },
+        "amazon": {
+          "q": "¿Cómo conecto Amazon?",
+          "a": "En Configuración → Conexiones haz clic en «Conectar Amazon» y autorízalo desde Seller Central. La conexión es solo lectura y puedes revocarla cuando quieras."
+        },
+        "aiKey": {
+          "q": "¿Dónde encuentro mi clave de IA?",
+          "a": "Depende del proveedor: Anthropic en console.anthropic.com → Settings → API Keys; OpenAI en platform.openai.com → API keys. El asistente de conexión tiene enlaces directos."
+        }
+      },
+      "onboarding": {
+        "help": {
+          "q": "¿Necesitas ayuda con este paso?",
+          "a": "Cada paso de la activación tiene un texto explicativo. Si tienes dudas sobre qué poner, contáctanos con el botón de abajo y te guiamos."
+        },
+        "skip": {
+          "q": "¿Puedo saltar pasos?",
+          "a": "Los pasos opcionales tienen un botón «Omitir» abajo. Los obligatorios (nombre de empresa, marketplace) hay que completarlos para acceder a la app."
+        }
+      }
+    }
   }
 }

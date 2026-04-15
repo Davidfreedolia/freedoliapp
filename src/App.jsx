@@ -10,6 +10,7 @@ import ToastContainer from './components/Toast'
 import DemoModeBanner from './components/DemoModeBanner'
 import ErrorBoundary from './components/ErrorBoundary'
 import FloatingNotesLayer from './components/FloatingNotesLayer'
+import HelpAssistant from './components/assistant/HelpAssistant'
 import TopNavbar from './components/TopNavbar'
 import BillingBanner from './components/billing/BillingBanner'
 import WorkspaceLimitAlert from './components/billing/WorkspaceLimitAlert'
@@ -478,6 +479,7 @@ function AppContent() {
       </main>
       <ToastContainer darkMode={darkMode} />
       {!isProjectDetail && <FloatingNotesLayer />}
+      <HelpAssistant darkMode={darkMode} />
     </div>
   )
 }

@@ -2212,5 +2212,103 @@
     "errors": {
       "empty": "The file has no data rows."
     }
+  },
+  "helpAssistant": {
+    "title": "Help",
+    "openLabel": "Open help",
+    "searchPlaceholder": "Search help…",
+    "noResults": "No results. Try contacting us instead.",
+    "contexts": {
+      "default": { "title": "How can we help?" },
+      "dashboard": { "title": "Dashboard help" },
+      "import": { "title": "Import help" },
+      "research": { "title": "AI research help" },
+      "settings": { "title": "Settings help" },
+      "onboarding": { "title": "Onboarding help" }
+    },
+    "contact": {
+      "cta": "Contact support",
+      "subject": "Help — FreedoliApp",
+      "messageLabel": "Your message",
+      "placeholder": "Tell us what you need…",
+      "send": "Send",
+      "fromPage": "From"
+    },
+    "faq": {
+      "dashboard": {
+        "firstProduct": {
+          "q": "How do I add my first product?",
+          "a": "Go to Projects and click \"New project\". Add a name, an ASIN if you have one, and the phases will fill in as you load data."
+        },
+        "kpis": {
+          "q": "What do the KPIs mean?",
+          "a": "The main KPIs are monthly revenue, net margin, expenses, and active orders. Each card shows the change vs. the previous month."
+        },
+        "amazon": {
+          "q": "How do I connect my Amazon account?",
+          "a": "In Settings → Connections, click \"Connect Amazon\". You'll be redirected to Seller Central to authorize read-only OAuth access."
+        }
+      },
+      "import": {
+        "export": {
+          "q": "How do I export from Sellerboard?",
+          "a": "In Sellerboard, go to \"Reports\" and export the \"Dashboard\" or \"Products\" report as CSV. Then upload it here — we'll auto-detect the columns."
+        },
+        "formats": {
+          "q": "Which file formats do you accept?",
+          "a": "CSV, TSV, XLSX, XLS and JSON. We auto-detect the separator and number format (1,234.56 vs 1.234,56)."
+        },
+        "excel": {
+          "q": "Can I import from my own Excel?",
+          "a": "Yes. Pick \"Generic Excel / CSV\" as the source and we'll let you map each column manually to the matching field (revenue, COGS, etc.)."
+        },
+        "duplicates": {
+          "q": "What happens if I import duplicate data?",
+          "a": "We deduplicate by ASIN + date. Re-imports update existing values instead of creating new rows."
+        }
+      },
+      "research": {
+        "asin": {
+          "q": "What is an ASIN?",
+          "a": "ASIN (Amazon Standard Identification Number) is the 10-character code starting with B0 that uniquely identifies a product on Amazon."
+        },
+        "suppliers": {
+          "q": "How does supplier research work?",
+          "a": "We query Alibaba, 1688 and Zentrada in parallel using keywords from the title or your description. If you have Helium 10 or Jungle Scout connected, we query those too."
+        },
+        "cost": {
+          "q": "How much does an AI analysis cost?",
+          "a": "Each plan has a free monthly quota (Starter: 5, Growth: 50, Scale: unlimited). If you exceed it, connect your own AI key for unlimited analyses."
+        },
+        "byok": {
+          "q": "Can I use my own AI account?",
+          "a": "Yes. In Settings → Power up your AI you can connect Anthropic, OpenAI, Google, Mistral, Groq or Ollama. When connected, it doesn't consume your quota."
+        }
+      },
+      "settings": {
+        "plan": {
+          "q": "How do I change my plan?",
+          "a": "In Settings → Billing you can see your current plan and upgrade/downgrade. The change applies immediately."
+        },
+        "amazon": {
+          "q": "How do I connect Amazon?",
+          "a": "In Settings → Connections click \"Connect Amazon\" and authorize from Seller Central. Connection is read-only and you can revoke it any time."
+        },
+        "aiKey": {
+          "q": "Where do I find my AI key?",
+          "a": "Depends on the provider: Anthropic at console.anthropic.com → Settings → API Keys; OpenAI at platform.openai.com → API keys. The connection wizard has direct links."
+        }
+      },
+      "onboarding": {
+        "help": {
+          "q": "Need help with this step?",
+          "a": "Each activation step has explanatory text. If you have doubts about what to enter, use the contact button below and we'll walk you through it."
+        },
+        "skip": {
+          "q": "Can I skip steps?",
+          "a": "Optional steps have a \"Skip\" button below. Required ones (company name, marketplace) must be completed to access the app."
+        }
+      }
+    }
   }
 }

@@ -2412,5 +2412,103 @@
     "errors": {
       "empty": "El fitxer no conté files de dades."
     }
+  },
+  "helpAssistant": {
+    "title": "Ajuda",
+    "openLabel": "Obrir ajuda",
+    "searchPlaceholder": "Cerca a l'ajuda…",
+    "noResults": "No hi ha resultats. Prova de contactar-nos.",
+    "contexts": {
+      "default": { "title": "Com et podem ajudar?" },
+      "dashboard": { "title": "Ajuda amb el Dashboard" },
+      "import": { "title": "Ajuda amb la importació" },
+      "research": { "title": "Ajuda amb la recerca IA" },
+      "settings": { "title": "Ajuda amb la configuració" },
+      "onboarding": { "title": "Ajuda amb l'activació" }
+    },
+    "contact": {
+      "cta": "Contactar amb suport",
+      "subject": "Ajuda — FreedoliApp",
+      "messageLabel": "El teu missatge",
+      "placeholder": "Explica'ns què necessites…",
+      "send": "Enviar",
+      "fromPage": "Des de"
+    },
+    "faq": {
+      "dashboard": {
+        "firstProduct": {
+          "q": "Com afegeixo el meu primer producte?",
+          "a": "Vés a Projectes i clica «Nou projecte». Introdueix el nom, l'ASIN si en tens, i les fases s'aniran completant a mesura que carreguis dades."
+        },
+        "kpis": {
+          "q": "Què signifiquen les KPIs?",
+          "a": "Les KPIs principals són ingressos del mes, marge net, despeses i comandes actives. Cada targeta mostra la variació respecte al mes anterior."
+        },
+        "amazon": {
+          "q": "Com connecto el meu compte d'Amazon?",
+          "a": "A Configuració → Connexions, clica «Connectar Amazon». Et redirigirem a Seller Central per autoritzar l'accés via OAuth (només lectura)."
+        }
+      },
+      "import": {
+        "export": {
+          "q": "Com exporto dades de Sellerboard?",
+          "a": "A Sellerboard, vés a «Reports» i exporta a CSV el report «Dashboard» o «Products». Després puja el fitxer aquí — detectarem les columnes automàticament."
+        },
+        "formats": {
+          "q": "Quins formats de fitxer accepteu?",
+          "a": "CSV, TSV, XLSX, XLS i JSON. Detectem el separador i el format de números (1,234.56 vs 1.234,56) automàticament."
+        },
+        "excel": {
+          "q": "Puc importar des d'Excel propi?",
+          "a": "Sí. Tria «Excel / CSV genèric» com a font i et deixarem mapejar manualment cada columna al camp corresponent (revenue, COGS, etc.)."
+        },
+        "duplicates": {
+          "q": "Què passa si importo dades duplicades?",
+          "a": "Detectem duplicats per ASIN + data. Els reimports actualitzen els valors existents en lloc de crear-ne de nous."
+        }
+      },
+      "research": {
+        "asin": {
+          "q": "Què és un ASIN?",
+          "a": "L'ASIN (Amazon Standard Identification Number) és el codi de 10 caràcters que comença amb B0 i identifica de forma única un producte a Amazon."
+        },
+        "suppliers": {
+          "q": "Com funciona la recerca de proveïdors?",
+          "a": "Cerquem en paral·lel a Alibaba, 1688 i Zentrada amb les paraules clau extretes del títol o la teva descripció. Si tens Helium 10 o Jungle Scout connectats, també els consultem."
+        },
+        "cost": {
+          "q": "Quant costa una anàlisi IA?",
+          "a": "Cada pla té una quota mensual gratuïta (Starter: 5, Growth: 50, Scale: il·limitat). Si la superes, pots connectar la teva pròpia clau d'IA per anàlisis sense límit."
+        },
+        "byok": {
+          "q": "Puc usar el meu propi compte d'IA?",
+          "a": "Sí. A Configuració → Potencia la teva IA pots connectar Anthropic, OpenAI, Google, Mistral, Groq o Ollama. Quan està connectat, no consumeix la teva quota."
+        }
+      },
+      "settings": {
+        "plan": {
+          "q": "Com canvio el meu pla?",
+          "a": "A Configuració → Facturació pots veure el teu pla actual i fer upgrade/downgrade. El canvi s'aplica immediatament."
+        },
+        "amazon": {
+          "q": "Com connecto Amazon?",
+          "a": "A Configuració → Connexions clica «Connectar Amazon» i autoritza-ho a Seller Central. La connexió és només lectura i pots revocar-la quan vulguis."
+        },
+        "aiKey": {
+          "q": "On trobo la meva clau d'IA?",
+          "a": "Depèn del proveïdor: Anthropic a console.anthropic.com → Settings → API Keys; OpenAI a platform.openai.com → API keys. A l'assistent de connexió tens enllaços directes."
+        }
+      },
+      "onboarding": {
+        "help": {
+          "q": "Necessites ajuda amb aquest pas?",
+          "a": "Cada pas de l'activació té un text explicatiu. Si tens dubtes sobre què posar, contacta'ns pel botó de baix i et guiem."
+        },
+        "skip": {
+          "q": "Puc saltar passos?",
+          "a": "Els passos opcionals tenen un botó «Omitir» a sota. Els obligatoris (nom d'empresa, marketplace) cal completar-los per accedir a l'app."
+        }
+      }
+    }
   }
 }
