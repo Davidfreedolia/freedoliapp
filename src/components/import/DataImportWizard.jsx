@@ -2,13 +2,16 @@ import { useState, useMemo, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Upload, CheckCircle2, AlertTriangle, ArrowRight, ArrowLeft,
-  HelpCircle, Sparkles,
+  HelpCircle, Sparkles, FileSpreadsheet,
 } from 'lucide-react'
 import Button from '../Button'
 import { useApp } from '../../context/AppContext'
 import { supabase } from '../../lib/supabase'
 import { parseImportFile } from '../../lib/import/importParser'
-import { IMPORT_SOURCES, SOURCE_GROUPS, getSource } from '../../lib/import/columnDictionaries'
+import {
+  IMPORT_SOURCES, SOURCE_GROUPS, getSource,
+  getSourceLogoUrl, getSourceFaviconFallback,
+} from '../../lib/import/columnDictionaries'
 import { proposeMapping, applyMapping, listTargets } from '../../lib/import/columnMapper'
 import { executeImport, computePreviewSummary } from '../../lib/import/importExecutor'
 import { detectSource, SELLERBOARD_SUBTYPES } from '../../lib/import/sourceDetector'
@@ -180,6 +183,8 @@ export default function DataImportWizard({ darkMode = false }) {
 
   const SourcePill = ({ s }) => {
     const selected = sourceId === s.id
+    const logoUrl = getSourceLogoUrl(s)
+    const faviconFallback = getSourceFaviconFallback(s)
     return (
       <button
         type="button"
@@ -203,8 +208,36 @@ export default function DataImportWizard({ darkMode = false }) {
             {t('dataImport.badge.popularEs', 'Popular ES')}
           </span>
         )}
-        <strong>{s.label}</strong>
-        <span className="wizard-pill__caption">{s.tagline}</span>
+        <div className="wizard-pill__row">
+          {logoUrl ? (
+            <img
+              src={logoUrl}
+              alt=""
+              aria-hidden="true"
+              loading="lazy"
+              referrerPolicy="no-referrer"
+              className="wizard-pill__logo"
+              data-fallback="0"
+              onError={(e) => {
+                const el = e.currentTarget
+                if (el.dataset.fallback === '0' && faviconFallback) {
+                  el.dataset.fallback = '1'
+                  el.src = faviconFallback
+                } else {
+                  el.style.display = 'none'
+                }
+              }}
+            />
+          ) : (
+            <span className="wizard-pill__logo wizard-pill__logo--generic" aria-hidden="true">
+              <FileSpreadsheet size={20} color="#2ea082" />
+            </span>
+          )}
+          <div className="wizard-pill__text">
+            <strong>{s.label}</strong>
+            <span className="wizard-pill__caption">{s.tagline}</span>
+          </div>
+        </div>
       </button>
     )
   }

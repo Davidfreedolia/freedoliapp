@@ -26,16 +26,29 @@ function readBool(envKey) {
 export const isTrackingSyncEnabled = () => readBool('VITE_ENABLE_TRACKING_SYNC')
 
 /**
- * Beta override — disable the seat-limit gate on the frontend.
+ * Beta override — disable billing limits on the frontend.
  *
  * During closed beta the Stripe entitlement may still report `team.seats=1`
- * while the user is invited to a workspace that already has them as a
- * member, which routes them to `/app/billing/over-seat` and locks the app.
+ * or `projects.max=3` while the user is invited to a workspace that already
+ * has more members/projects, which routes them to `/app/billing/over-seat`
+ * or raises the "límit de projectes" banner and effectively locks the app.
  *
- * Enabling this flag bypasses the `over_seat` gate in `App.jsx` and the
- * "Add member" check in `Settings.jsx`. Backend / Edge Functions still
- * enforce the limit — this is purely a UX unblock.
+ * Enabling this flag bypasses on the frontend:
+ *   - the `over_seat` gate in `App.jsx`
+ *   - the "Add member" check in `Settings.jsx`
+ *   - the `WorkspaceLimitAlert` banner (seats + projects)
+ *   - the plan-feature gating in `Sidebar.jsx` (all pages visible)
+ *
+ * Backend / Edge Functions still enforce the real entitlements — this is
+ * purely a UX unblock during beta.
  *
  * Enable with: VITE_DISABLE_SEAT_LIMIT=true
  */
 export const isSeatLimitDisabled = () => readBool('VITE_DISABLE_SEAT_LIMIT')
+
+/**
+ * Alias — same flag, broader intent. Use this at call sites that are not
+ * strictly "seats" but still part of the beta billing bypass (project-count
+ * limit banner, plan-gated sidebar items, etc.).
+ */
+export const isBillingLimitsDisabled = isSeatLimitDisabled

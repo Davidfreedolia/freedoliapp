@@ -360,31 +360,44 @@ export const KEEPA_COLUMNS = {
  */
 export const IMPORT_SOURCES = [
   // Amazon tools
-  { id: 'sellerboard', label: 'Sellerboard', group: 'amazon', tagline: 'Profit analytics', recommended: true, dict: SELLERBOARD_COLUMNS },
-  { id: 'helium10', label: 'Helium 10', group: 'amazon', tagline: 'All-in-one Amazon tool', dict: HELIUM10_COLUMNS },
-  { id: 'junglescout', label: 'Jungle Scout', group: 'amazon', tagline: 'Product research', dict: JUNGLE_SCOUT_COLUMNS },
-  { id: 'inventorylab', label: 'InventoryLab', group: 'amazon', tagline: 'Inventory & P&L', dict: INVENTORYLAB_COLUMNS },
-  { id: 'sostocked', label: 'SoStocked', group: 'amazon', tagline: 'Inventory forecasting', dict: SOSTOCKED_COLUMNS },
-  { id: 'keepa', label: 'Keepa', group: 'amazon', tagline: 'Price history', dict: KEEPA_COLUMNS },
-  { id: 'amazon', label: 'Amazon Seller Central', group: 'amazon', tagline: 'Reports oficials', dict: AMAZON_COLUMNS },
+  { id: 'sellerboard', label: 'Sellerboard', group: 'amazon', tagline: 'Profit analytics', recommended: true, domain: 'sellerboard.com', dict: SELLERBOARD_COLUMNS },
+  { id: 'helium10', label: 'Helium 10', group: 'amazon', tagline: 'All-in-one Amazon tool', domain: 'helium10.com', dict: HELIUM10_COLUMNS },
+  { id: 'junglescout', label: 'Jungle Scout', group: 'amazon', tagline: 'Product research', domain: 'junglescout.com', dict: JUNGLE_SCOUT_COLUMNS },
+  { id: 'inventorylab', label: 'InventoryLab', group: 'amazon', tagline: 'Inventory & P&L', domain: 'inventorylab.com', dict: INVENTORYLAB_COLUMNS },
+  { id: 'sostocked', label: 'SoStocked', group: 'amazon', tagline: 'Inventory forecasting', domain: 'sostocked.com', dict: SOSTOCKED_COLUMNS },
+  { id: 'keepa', label: 'Keepa', group: 'amazon', tagline: 'Price history', domain: 'keepa.com', dict: KEEPA_COLUMNS },
+  { id: 'amazon', label: 'Amazon Seller Central', group: 'amazon', tagline: 'Reports oficials', domain: 'amazon.com', dict: AMAZON_COLUMNS },
 
   // Accounting
-  { id: 'holded', label: 'Holded', group: 'accounting', tagline: 'Facturació i comptabilitat', popular: 'ES', dict: HOLDED_COLUMNS },
-  { id: 'quickbooks', label: 'QuickBooks', group: 'accounting', tagline: 'Accounting (US/UK)', dict: QUICKBOOKS_COLUMNS },
-  { id: 'xero', label: 'Xero', group: 'accounting', tagline: 'Accounting (UK/AU)', dict: XERO_COLUMNS },
+  { id: 'holded', label: 'Holded', group: 'accounting', tagline: 'Facturació i comptabilitat', popular: 'ES', domain: 'holded.com', dict: HOLDED_COLUMNS },
+  { id: 'quickbooks', label: 'QuickBooks', group: 'accounting', tagline: 'Accounting (US/UK)', domain: 'quickbooks.intuit.com', dict: QUICKBOOKS_COLUMNS },
+  { id: 'xero', label: 'Xero', group: 'accounting', tagline: 'Accounting (UK/AU)', domain: 'xero.com', dict: XERO_COLUMNS },
 
   // Project management
-  { id: 'asana', label: 'Asana', group: 'projects', tagline: 'Project management', dict: ASANA_COLUMNS },
-  { id: 'monday', label: 'Monday.com', group: 'projects', tagline: 'Work management', dict: MONDAY_COLUMNS },
-  { id: 'trello', label: 'Trello', group: 'projects', tagline: 'Kanban boards (JSON)', dict: TRELLO_COLUMNS },
+  { id: 'asana', label: 'Asana', group: 'projects', tagline: 'Project management', domain: 'asana.com', dict: ASANA_COLUMNS },
+  { id: 'monday', label: 'Monday.com', group: 'projects', tagline: 'Work management', domain: 'monday.com', dict: MONDAY_COLUMNS },
+  { id: 'trello', label: 'Trello', group: 'projects', tagline: 'Kanban boards (JSON)', domain: 'trello.com', dict: TRELLO_COLUMNS },
 
   // Flexible DBs
-  { id: 'notion', label: 'Notion', group: 'database', tagline: 'All-in-one workspace', dict: NOTION_COLUMNS },
-  { id: 'airtable', label: 'Airtable', group: 'database', tagline: 'Database spreadsheets', dict: AIRTABLE_COLUMNS },
+  { id: 'notion', label: 'Notion', group: 'database', tagline: 'All-in-one workspace', domain: 'notion.so', dict: NOTION_COLUMNS },
+  { id: 'airtable', label: 'Airtable', group: 'database', tagline: 'Database spreadsheets', domain: 'airtable.com', dict: AIRTABLE_COLUMNS },
 
-  // Generic
-  { id: 'generic', label: 'Excel / CSV genèric', group: 'generic', tagline: 'Funciona amb tot', dict: null },
+  // Generic — no remote logo, render the FileSpreadsheet icon instead.
+  { id: 'generic', label: 'Excel / CSV genèric', group: 'generic', tagline: 'Funciona amb tot', domain: null, dict: null },
 ]
+
+/**
+ * Clearbit Logo API (https://logo.clearbit.com/{domain}) returns the
+ * brand's high-quality color logo. Used as primary; components should
+ * fall back to Google Favicons if the image fails to load.
+ */
+export const getSourceLogoUrl = (source) =>
+  source?.domain ? `https://logo.clearbit.com/${source.domain}` : null
+
+export const getSourceFaviconFallback = (source) =>
+  source?.domain
+    ? `https://www.google.com/s2/favicons?domain=${source.domain}&sz=64`
+    : null
 
 /** UI source groups (ordered). */
 export const SOURCE_GROUPS = [

@@ -7607,6 +7607,37 @@ svg[class*="lucide-star"] {
   font-weight: 400;
   color: var(--text-2, #6B7280);
 }
+.wizard-pill__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+.wizard-pill__logo {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  object-fit: contain;
+  border-radius: 6px;
+  background: #fff;
+  padding: 2px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+.wizard-pill__logo--generic {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(46, 160, 130, 0.10);
+  padding: 0;
+  box-shadow: none;
+}
+.wizard-pill__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
 .wizard-pill__badge {
   position: absolute;
   top: 8px;

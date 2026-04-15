@@ -33,6 +33,7 @@ import Button from './Button'
 import { useApp } from '../context/AppContext'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { usePlanFeatures } from '../hooks/usePlanFeatures'
+import { isBillingLimitsDisabled } from '../lib/featureFlags'
 
 // Prefetch functions per rutes probables
 // Carrega el chunk abans que es necessiti per millorar UX
@@ -266,6 +267,9 @@ export default function Sidebar() {
             )}
             {group.items
               .filter((item) => {
+                // Beta bypass: VITE_DISABLE_SEAT_LIMIT shows every page
+                // regardless of plan, so beta testers see the full app.
+                if (isBillingLimitsDisabled()) return true
                 // While plan loads, show everything to avoid flicker.
                 if (planLoading) return true
                 if (!item.feature) return true

@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { X } from 'lucide-react'
 import Button from '../ui/Button'
 import useT from '../../hooks/useT'
+import { isBillingLimitsDisabled } from '../../lib/featureFlags'
 
 /**
  * @param {object} props
@@ -19,6 +20,8 @@ export default function WorkspaceLimitAlert({ usage, onUpgrade }) {
   const [dismissedSeats, setDismissedSeats] = useState(false)
 
   if (!usage) return null
+  // Beta bypass: VITE_DISABLE_SEAT_LIMIT silences both seat + project banners.
+  if (isBillingLimitsDisabled()) return null
 
   const projectsReached =
     usage.projects?.limit != null && usage.projects.used >= usage.projects.limit
