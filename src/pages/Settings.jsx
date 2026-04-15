@@ -23,7 +23,8 @@ import {
   BookOpen,
   ExternalLink,
   Settings as SettingsIcon,
-  Users
+  Users,
+  Sparkles
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { getCompanySettings, updateCompanySettings, uploadCompanyLogo, deleteCompanyLogo, supabase, getAuditLogs, updateLanguage, getCurrentUserId } from '../lib/supabase'
@@ -33,6 +34,7 @@ import { clearDemoData, generateDemoData, checkDemoExists } from '../lib/demoSee
 import Header from '../components/Header'
 import Button from '../components/Button'
 import GTINPoolSection from '../components/GTINPoolSection'
+import AiConnectionSection from '../components/ai/AiConnectionSection'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { useBillingUsage } from '../hooks/useBillingUsage'
 import { getModalStyles } from '../utils/responsiveStyles'
@@ -558,6 +560,17 @@ export default function Settings() {
             }}
           >
             <Users size={18} /> Workspace
+          </Button>
+          <Button
+            variant={activeTab === 'ai' ? 'primary' : 'ghost'}
+            size="sm"
+            onClick={() => setActiveTab('ai')}
+            style={{
+              ...styles.tab,
+              color: activeTab === 'ai' ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280')
+            }}
+          >
+            <Sparkles size={18} /> {t('settings.ai.tab', 'IA')}
           </Button>
         </div>
 
@@ -1366,6 +1379,11 @@ export default function Settings() {
               </>
             )}
           </div>
+        )}
+
+        {/* AI (BYOK) Tab */}
+        {activeTab === 'ai' && (
+          <AiConnectionSection darkMode={darkMode} />
         )}
       </div>
 

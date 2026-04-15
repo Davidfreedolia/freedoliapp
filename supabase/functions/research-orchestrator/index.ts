@@ -1,10 +1,37 @@
 // research-orchestrator: coordinate research-amazon + research-suppliers +
 // optional Helium 10 / Jungle Scout + ai-research-analyst, then persist.
+//
+// Bloc 6 BYOK IA: before invoking the analyst, we resolve which AI provider to
+// use.  If the org has a user-configured provider in `tool_connections`
+// (tool_name='ai_provider'), we pass that through and skip the monthly quota.
+// Otherwise we use the system key and atomically bump `ai_usage`; if the quota
+// is exceeded we return the pipeline *without* the AI analysis plus a structured
+// `quota_exceeded` marker so the UI can prompt the user to connect their own.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
+const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+
+// Plan → monthly free quota of system AI analyses. Keep in sync with
+// PLAN_FEATURES.ai_research_per_month in the frontend.
+const PLAN_QUOTA: Record<string, number> = {
+  starter: 5,
+  trial: 50,
+  growth: 50,
+  scale: -1, // unlimited
+};
+
+type AiProviderName =
+  | "anthropic"
+  | "openai"
+  | "google"
+  | "mistral"
+  | "groq"
+  | "ollama";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -32,6 +59,122 @@ function extractKeywordsFromTitle(title: string, description: string): string {
   // Take first 4-5 significant tokens
   const tokens = cleaned.split(" ").filter((t) => t.length >= 3).slice(0, 5);
   return tokens.join(" ");
+}
+
+interface AiProviderDecision {
+  provider: AiProviderName | null;
+  apiKey: string;
+  model?: string;
+  baseUrl?: string;
+  source: "user" | "system" | "none";
+  quotaExceeded?: boolean;
+  monthlyCount?: number;
+  monthlyLimit?: number;
+}
+
+async function resolveAiProvider(
+  supabaseUser: ReturnType<typeof createClient>,
+  orgId: string,
+): Promise<AiProviderDecision> {
+  // 1) User-configured provider takes precedence and carries no quota cost.
+  const { data: conns } = await supabaseUser
+    .from("tool_connections")
+    .select("credentials, status")
+    .eq("org_id", orgId)
+    .eq("tool_name", "ai_provider")
+    .eq("status", "active")
+    .limit(1);
+  const userConn = Array.isArray(conns) && conns[0] ? conns[0] : null;
+  if (userConn?.credentials) {
+    const c = userConn.credentials as Record<string, unknown>;
+    const provider = (c.provider ?? "anthropic") as AiProviderName;
+    const apiKey = (c.api_key ?? "") as string;
+    if (apiKey || provider === "ollama") {
+      return {
+        provider,
+        apiKey,
+        model: (c.model as string) || undefined,
+        baseUrl: (c.base_url as string) || undefined,
+        source: "user",
+      };
+    }
+  }
+
+  // 2) Fall back to system key. Bump `ai_usage` atomically; if over quota, skip AI.
+  const plan = await resolvePlanCode(supabaseUser, orgId);
+  const limit = PLAN_QUOTA[plan] ?? 5;
+
+  if (SUPABASE_SERVICE_ROLE_KEY) {
+    const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+      auth: { persistSession: false },
+    });
+    if (limit !== -1) {
+      // Pre-check current count so we don't increment before deciding.
+      const { data: usage } = await admin
+        .from("ai_usage")
+        .select("monthly_count, month_year")
+        .eq("org_id", orgId)
+        .maybeSingle();
+      const currentMonth = new Date().toISOString().slice(0, 7);
+      const count =
+        usage && usage.month_year === currentMonth ? (usage.monthly_count ?? 0) : 0;
+      if (count >= limit) {
+        return {
+          provider: null,
+          apiKey: "",
+          source: "none",
+          quotaExceeded: true,
+          monthlyCount: count,
+          monthlyLimit: limit,
+        };
+      }
+    }
+    // Under quota — pick the best available system key.
+    const sysProvider: AiProviderName | null = ANTHROPIC_API_KEY
+      ? "anthropic"
+      : OPENAI_API_KEY
+      ? "openai"
+      : null;
+    const sysKey = sysProvider === "anthropic" ? ANTHROPIC_API_KEY! : sysProvider === "openai" ? OPENAI_API_KEY! : "";
+    if (!sysProvider) {
+      return { provider: null, apiKey: "", source: "none" };
+    }
+    // Increment counter (atomic RPC) before returning so concurrent calls can't race past the limit.
+    const { data: bumped } = await admin.rpc("ai_usage_increment", { p_org_id: orgId });
+    const bumpedRow = Array.isArray(bumped) ? bumped[0] : bumped;
+    return {
+      provider: sysProvider,
+      apiKey: sysKey,
+      source: "system",
+      monthlyCount: bumpedRow?.monthly_count ?? undefined,
+      monthlyLimit: limit,
+    };
+  }
+
+  // No service role key available — degrade gracefully to "no AI".
+  return { provider: null, apiKey: "", source: "none" };
+}
+
+async function resolvePlanCode(
+  supabaseUser: ReturnType<typeof createClient>,
+  orgId: string,
+): Promise<string> {
+  try {
+    const { data: ent } = await supabaseUser
+      .from("billing_org_entitlements")
+      .select("plan_id")
+      .eq("org_id", orgId)
+      .maybeSingle();
+    if (ent?.plan_id) {
+      const { data: plan } = await supabaseUser
+        .from("billing_plans")
+        .select("code")
+        .eq("id", ent.plan_id)
+        .maybeSingle();
+      if (plan?.code) return String(plan.code).toLowerCase();
+    }
+  } catch { /* noop */ }
+  return "starter";
 }
 
 async function invokeFunction(name: string, body: unknown, authHeader: string) {
@@ -178,17 +321,60 @@ Deno.serve(async (req: Request) => {
 
   raw.keywords = keywords;
 
-  // Step 4: AI analysis
+  // Step 4: AI analysis — BYOK-aware
+  const providerDecision = await resolveAiProvider(supabase, orgId);
   let aiAnalysis: Record<string, unknown> | null = null;
-  try {
-    aiAnalysis = await invokeFunction(
-      "ai-research-analyst",
-      { marketplace, asin, description, ...raw },
-      authHeader,
-    );
-    sourcesUsed.push("ai");
-  } catch (err) {
-    aiAnalysis = { error: String(err) };
+  let aiMeta: Record<string, unknown> = {
+    provider: providerDecision.provider ?? null,
+    provider_source: providerDecision.source,
+    quota_exceeded: !!providerDecision.quotaExceeded,
+    monthly_count: providerDecision.monthlyCount ?? null,
+    monthly_limit: providerDecision.monthlyLimit ?? null,
+  };
+
+  if (providerDecision.quotaExceeded) {
+    aiAnalysis = {
+      _meta: { ...aiMeta, reason: "quota_exceeded" },
+      executive_summary:
+        "Has esgotat les teves anàlisis IA gratuïtes d'aquest mes. Connecta el teu compte d'IA a Settings per desbloquejar anàlisis il·limitades.",
+      recommendation: "needs-research",
+      viability_score: null,
+    };
+    sourcesUsed.push("ai:quota_exceeded");
+  } else if (!providerDecision.provider) {
+    aiAnalysis = {
+      _meta: { ...aiMeta, reason: "no_provider" },
+      executive_summary:
+        "Configura la teva IA a Settings → Potencia la teva IA per obtenir anàlisis automàtiques.",
+      recommendation: "needs-research",
+      viability_score: null,
+    };
+  } else {
+    try {
+      aiAnalysis = await invokeFunction(
+        "ai-research-analyst",
+        {
+          marketplace,
+          asin,
+          description,
+          ...raw,
+          _provider: {
+            provider: providerDecision.provider,
+            api_key: providerDecision.apiKey,
+            model: providerDecision.model,
+            base_url: providerDecision.baseUrl,
+            source: providerDecision.source,
+          },
+        },
+        authHeader,
+      );
+      aiMeta = { ...aiMeta, ...((aiAnalysis?._meta as Record<string, unknown>) ?? {}) };
+      sourcesUsed.push(
+        providerDecision.source === "user" ? "ai:user_key" : "ai:system_key",
+      );
+    } catch (err) {
+      aiAnalysis = { error: String(err), _meta: aiMeta };
+    }
   }
 
   const viabilityScore =
@@ -241,6 +427,7 @@ Deno.serve(async (req: Request) => {
       keywords,
       sources_used: sourcesUsed,
       ai_analysis: aiAnalysis,
+      ai_meta: aiMeta,
       raw_data: raw,
     },
     200,

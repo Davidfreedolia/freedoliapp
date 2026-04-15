@@ -1820,6 +1820,48 @@
     "errorClearingDemo": "Error clearing demo data",
     "errorGeneratingDemo": "Error generating demo data",
     "errorRegeneratingDemo": "Error regenerating demo data",
+    "ai": {
+      "tab": "AI",
+      "title": "Power up your AI",
+      "pitch": "Connect your own AI account to unlock unlimited analyses. It's like having an expert analyst working for you 24/7.",
+      "connectCta": "Connect AI account",
+      "changeProvider": "Change service",
+      "disconnect": "Disconnect",
+      "disconnecting": "Disconnecting…",
+      "confirmDisconnect": "Are you sure you want to disconnect your AI? You'll revert to the free quota.",
+      "badge": { "connected": "Connected" },
+      "usage": {
+        "label": "AI analyses this month",
+        "used": "used",
+        "unlimited": "Unlimited",
+        "exhausted": "Quota exhausted"
+      },
+      "connected": {
+        "service": "AI service",
+        "keyMasked": "Key"
+      },
+      "wizard": {
+        "title": "Connect AI account",
+        "step1Intro": "Pick an AI service. You can change it later.",
+        "recommended": "Recommended",
+        "howToGetKey": "How do I get an account?",
+        "showAdvanced": "Advanced options",
+        "hideAdvanced": "Hide advanced options",
+        "step2Intro": "Paste your private {{provider}} key. We don't share it — we only use it to run analyses on your behalf.",
+        "keyLabel": "Your private key",
+        "baseUrlLabel": "Ollama URL",
+        "whereIsKey": "Where do I find my key?",
+        "verify": "Verify",
+        "verifying": "Verifying…",
+        "connect": "Connect",
+        "saving": "Saving…",
+        "testOk": "Connected successfully ({{ms}}ms)",
+        "testError": "This key doesn't work. Make sure you copied the whole thing. Error: {{error}}",
+        "doneTitle": "Connected!",
+        "doneBody": "Your AI is connected. You can now run unlimited analyses.",
+        "doneCta": "Done"
+      }
+    },
     "gtinPool": {
       "description": "Manage available EAN/UPC codes to assign to projects",
       "import": "Import GTINs",
@@ -2014,6 +2056,13 @@
       "onecom688": "Searching 1688 prices…",
       "zentrada": "Searching Zentrada prices…",
       "ai": "Analyzing with artificial intelligence…"
+    },
+    "quota": {
+      "exhaustedTitle": "You've used up your free AI analyses this month",
+      "exhaustedBody": "Connect your own AI account to unlock unlimited analyses.",
+      "unlockCta": "Unlock",
+      "remainingBanner": "This analysis used your free quota ({{remaining}} of {{limit}} remaining).",
+      "connectCta": "Connect your own AI"
     },
     "score": "Score",
     "recommendation": "Recommendation",

@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X, Sparkles, CheckCircle2, Circle, Loader2 } from 'lucide-react'
+import { X, Sparkles, CheckCircle2, Circle, Loader2, Zap, AlertTriangle } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useApp } from '../../context/AppContext'
 import Button from '../Button'
 import ResearchReport from './ResearchReport'
+import AiConnectionWizard from '../ai/AiConnectionWizard'
 
 /**
  * ResearchWizard — modal with 3 steps: Input → Progress → Result
@@ -50,6 +51,7 @@ export default function ResearchWizard({
   const [fetchError, setFetchError] = useState('')
   const [result, setResult] = useState(null)
   const [activeProgressStep, setActiveProgressStep] = useState(0)
+  const [aiWizardOpen, setAiWizardOpen] = useState(false)
 
   useEffect(() => {
     if (isOpen) {
@@ -296,17 +298,68 @@ export default function ResearchWizard({
           )}
 
           {step === 'result' && result && (
-            <ResearchReport
-              report={result.ai_analysis}
-              meta={{
-                asin: result.asin,
-                description: result.description,
-                marketplace: result.marketplace,
-                sources_used: result.sources_used,
-                report_id: result.report_id,
-              }}
-              darkMode={darkMode}
-            />
+            <>
+              {/* Quota banner — shown when the system key was used, either as a
+                  gentle nudge (remaining quota) or as a hard block when exceeded. */}
+              {(() => {
+                const aiMeta = result.ai_meta || {}
+                if (aiMeta.quota_exceeded) {
+                  return (
+                    <div style={{
+                      marginBottom: 12, padding: '12px 14px', borderRadius: 10,
+                      backgroundColor: 'rgba(242,217,78,0.25)', color: '#8a7318',
+                      display: 'flex', alignItems: 'flex-start', gap: 10,
+                    }}>
+                      <AlertTriangle size={18} style={{ flexShrink: 0, marginTop: 2 }} />
+                      <div style={{ flex: 1 }}>
+                        <strong>{t('research.quota.exhaustedTitle', 'Has esgotat les teves anàlisis IA gratuïtes d\'aquest mes')}</strong>
+                        <div style={{ fontSize: 13, marginTop: 4 }}>
+                          {t('research.quota.exhaustedBody', 'Connecta el teu compte d\'IA per desbloquejar anàlisis il·limitades.')}
+                        </div>
+                      </div>
+                      <Button variant="primary" size="sm" onClick={() => setAiWizardOpen(true)}>
+                        <Zap size={14} style={{ marginRight: 4, verticalAlign: -2 }} />
+                        {t('research.quota.unlockCta', 'Desbloquejar')}
+                      </Button>
+                    </div>
+                  )
+                }
+                if (aiMeta.provider_source === 'system' && typeof aiMeta.monthly_count === 'number' && typeof aiMeta.monthly_limit === 'number' && aiMeta.monthly_limit !== -1) {
+                  const remaining = Math.max(0, aiMeta.monthly_limit - aiMeta.monthly_count)
+                  return (
+                    <div style={{
+                      marginBottom: 12, padding: '10px 14px', borderRadius: 10,
+                      backgroundColor: 'rgba(110,203,195,0.14)', color: ink,
+                      display: 'flex', alignItems: 'center', gap: 10, fontSize: 13,
+                    }}>
+                      <Sparkles size={14} color="var(--brand-1,#1F5F63)" />
+                      <span style={{ flex: 1 }}>
+                        {t('research.quota.remainingBanner', {
+                          defaultValue: 'Aquesta anàlisi s\'ha fet amb la teva quota gratuïta ({{remaining}} de {{limit}} restants).',
+                          remaining,
+                          limit: aiMeta.monthly_limit,
+                        })}
+                      </span>
+                      <Button variant="ghost" size="sm" onClick={() => setAiWizardOpen(true)}>
+                        {t('research.quota.connectCta', 'Connectar IA pròpia')}
+                      </Button>
+                    </div>
+                  )
+                }
+                return null
+              })()}
+              <ResearchReport
+                report={result.ai_analysis}
+                meta={{
+                  asin: result.asin,
+                  description: result.description,
+                  marketplace: result.marketplace,
+                  sources_used: result.sources_used,
+                  report_id: result.report_id,
+                }}
+                darkMode={darkMode}
+              />
+            </>
           )}
 
           {step === 'error' && (
@@ -346,6 +399,12 @@ export default function ResearchWizard({
           </div>
         )}
       </div>
+
+      <AiConnectionWizard
+        isOpen={aiWizardOpen}
+        onClose={() => setAiWizardOpen(false)}
+        darkMode={darkMode}
+      />
     </div>
   )
 }

@@ -1835,6 +1835,48 @@
     "errorClearingDemo": "Error limpiando datos demo",
     "errorGeneratingDemo": "Error generando datos demo",
     "errorRegeneratingDemo": "Error al regenerar datos demo",
+    "ai": {
+      "tab": "IA",
+      "title": "Potencia tu IA",
+      "pitch": "Conecta tu propia cuenta de IA para obtener análisis ilimitados. Es como tener un analista experto trabajando para ti 24/7.",
+      "connectCta": "Conectar cuenta de IA",
+      "changeProvider": "Cambiar servicio",
+      "disconnect": "Desconectar",
+      "disconnecting": "Desconectando…",
+      "confirmDisconnect": "¿Seguro que quieres desconectar tu IA? Volverás a la cuota gratuita.",
+      "badge": { "connected": "Conectado" },
+      "usage": {
+        "label": "Análisis IA este mes",
+        "used": "usados",
+        "unlimited": "Ilimitados",
+        "exhausted": "Cuota agotada"
+      },
+      "connected": {
+        "service": "Servicio de IA",
+        "keyMasked": "Clave"
+      },
+      "wizard": {
+        "title": "Conectar cuenta de IA",
+        "step1Intro": "Elige un servicio de IA. Puedes cambiarlo más adelante.",
+        "recommended": "Recomendado",
+        "howToGetKey": "¿Cómo obtener una cuenta?",
+        "showAdvanced": "Opciones avanzadas",
+        "hideAdvanced": "Ocultar opciones avanzadas",
+        "step2Intro": "Pega tu clave privada de {{provider}}. No la compartimos, solo la usamos para hacer análisis por ti.",
+        "keyLabel": "Tu clave privada",
+        "baseUrlLabel": "URL de Ollama",
+        "whereIsKey": "¿Dónde encuentro mi clave?",
+        "verify": "Verificar",
+        "verifying": "Verificando…",
+        "connect": "Conectar",
+        "saving": "Guardando…",
+        "testOk": "Conectado correctamente ({{ms}}ms)",
+        "testError": "Esta clave no funciona. Asegúrate de haberla copiado entera. Error: {{error}}",
+        "doneTitle": "¡Conectado!",
+        "doneBody": "Tu IA está conectada. Ya puedes hacer análisis ilimitados.",
+        "doneCta": "Hecho"
+      }
+    },
     "gtinPool": {
       "description": "Gestiona los códigos EAN/UPC disponibles para asignar a proyectos",
       "import": "Importar GTINs",
@@ -2029,6 +2071,13 @@
       "onecom688": "Buscando precios en 1688…",
       "zentrada": "Buscando precios en Zentrada…",
       "ai": "Analizando con inteligencia artificial…"
+    },
+    "quota": {
+      "exhaustedTitle": "Has agotado tus análisis IA gratuitos de este mes",
+      "exhaustedBody": "Conecta tu cuenta de IA para desbloquear análisis ilimitados.",
+      "unlockCta": "Desbloquear",
+      "remainingBanner": "Este análisis usó tu cuota gratuita ({{remaining}} de {{limit}} restantes).",
+      "connectCta": "Conectar IA propia"
     },
     "score": "Puntuación",
     "recommendation": "Recomendación",

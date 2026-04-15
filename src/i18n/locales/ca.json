@@ -2020,6 +2020,48 @@
     "errorClearingDemo": "Error netejant dades demo",
     "errorGeneratingDemo": "Error generant dades demo",
     "errorRegeneratingDemo": "Error al regenerar dades demo",
+    "ai": {
+      "tab": "IA",
+      "title": "Potencia la teva IA",
+      "pitch": "Connecta el teu propi compte d'IA per obtenir anàlisis il·limitades. És com tenir un analista expert treballant per a tu 24/7.",
+      "connectCta": "Connectar compte d'IA",
+      "changeProvider": "Canviar servei",
+      "disconnect": "Desconnectar",
+      "disconnecting": "Desconnectant…",
+      "confirmDisconnect": "Segur que vols desconnectar la teva IA? Tornaràs a la quota gratuïta.",
+      "badge": { "connected": "Connectat" },
+      "usage": {
+        "label": "Anàlisis IA aquest mes",
+        "used": "usades",
+        "unlimited": "Il·limitades",
+        "exhausted": "Quota esgotada"
+      },
+      "connected": {
+        "service": "Servei d'IA",
+        "keyMasked": "Clau"
+      },
+      "wizard": {
+        "title": "Connectar compte d'IA",
+        "step1Intro": "Escull un servei d'IA. Pots canviar-lo més endavant.",
+        "recommended": "Recomanat",
+        "howToGetKey": "Com obtenir un compte?",
+        "showAdvanced": "Opcions avançades",
+        "hideAdvanced": "Amagar opcions avançades",
+        "step2Intro": "Enganxa la teva clau privada de {{provider}}. No la compartim, només la fem servir per fer anàlisis pel teu compte.",
+        "keyLabel": "La teva clau privada",
+        "baseUrlLabel": "URL de l'Ollama",
+        "whereIsKey": "On trobo la meva clau?",
+        "verify": "Verificar",
+        "verifying": "Verificant…",
+        "connect": "Connectar",
+        "saving": "Desant…",
+        "testOk": "Connectat correctament ({{ms}}ms)",
+        "testError": "Aquesta clau no funciona. Assegura't que l'has copiat sencera. Error: {{error}}",
+        "doneTitle": "Connectat!",
+        "doneBody": "La teva IA està connectada. Ara pots fer anàlisis il·limitades.",
+        "doneCta": "Fet"
+      }
+    },
     "gtinPool": {
       "description": "Gestiona els codis EAN/UPC disponibles per assignar a projectes",
       "import": "Import GTINs",
@@ -2214,6 +2256,13 @@
       "onecom688": "Cercant preus a 1688…",
       "zentrada": "Cercant preus a Zentrada…",
       "ai": "Analitzant amb intel·ligència artificial…"
+    },
+    "quota": {
+      "exhaustedTitle": "Has esgotat les teves anàlisis IA gratuïtes d'aquest mes",
+      "exhaustedBody": "Connecta el teu compte d'IA per desbloquejar anàlisis il·limitades.",
+      "unlockCta": "Desbloquejar",
+      "remainingBanner": "Aquesta anàlisi s'ha fet amb la teva quota gratuïta ({{remaining}} de {{limit}} restants).",
+      "connectCta": "Connectar IA pròpia"
     },
     "score": "Puntuació",
     "recommendation": "Recomanació",
