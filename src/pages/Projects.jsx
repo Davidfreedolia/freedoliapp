@@ -1033,6 +1033,63 @@ export default function Projects() {
                   darkMode={darkMode}
                   onPhaseChanged={() => { refetch() }}
                 />
+              ) : effectiveViewMode === 'list' ? (
+                <ProjectsListView
+                  projects={filteredProjects}
+                  onOpen={(p) => navigate(`/projects/${p.id}`)}
+                />
+              ) : effectiveViewMode === 'split' ? (
+                <div className="projects-split-view" style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'minmax(280px, 30%) 1fr',
+                  gap: 16,
+                  alignItems: 'start'
+                }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {filteredProjects.map((project) => {
+                      const isSel = project.id === selectedProjectId
+                      const phaseId = project?.current_phase ?? project?.phase ?? 1
+                      const meta = getPhaseMeta(phaseId)
+                      return (
+                        <button
+                          key={project.id}
+                          type="button"
+                          onClick={() => setSelectedProjectId(project.id)}
+                          onDoubleClick={() => navigate(`/projects/${project.id}`)}
+                          aria-current={isSel ? 'true' : undefined}
+                          style={{
+                            all: 'unset',
+                            cursor: 'pointer',
+                            padding: 12,
+                            borderRadius: 10,
+                            border: `1.5px solid ${isSel ? 'var(--accent-primary, #3b82f6)' : 'var(--border-1)'}`,
+                            background: isSel ? 'var(--surface-bg-2)' : 'var(--surface-bg)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 4
+                          }}
+                        >
+                          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-1)' }}>
+                            {project.name || 'Sense nom'}
+                          </div>
+                          <div style={{ fontSize: 12, color: 'var(--text-2)' }}>
+                            {meta?.label || `Fase ${phaseId}`}
+                            {project.sku ? ` · ${project.sku}` : ''}
+                          </div>
+                        </button>
+                      )
+                    })}
+                  </div>
+                  <div>
+                    {selectedProject ? (
+                      <ProjectCard project={selectedProject} />
+                    ) : (
+                      <div style={{ padding: 24, color: 'var(--text-2)', textAlign: 'center' }}>
+                        Selecciona un projecte per veure el preview.
+                      </div>
+                    )}
+                  </div>
+                </div>
               ) : (
                 <div className="projects-grid">
                   {filteredProjects.map((project) => (
@@ -1046,11 +1103,131 @@ export default function Projects() {
         </div>
       </PageGutter>
 
-      <NewProjectModal 
-        isOpen={showModal} 
-        onClose={() => setShowModal(false)} 
+      <NewProjectModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
         onSuccess={refetch}
       />
+    </div>
+  )
+}
+
+/**
+ * Projects rendered as a table grouped by phase, each phase a collapsible
+ * group. Columns: Name, ASIN, Marketplace, Margin estimate, Days in phase,
+ * Last activity.
+ */
+function ProjectsListView({ projects = [], onOpen = () => {} }) {
+  const [collapsed, setCollapsed] = useState(() => new Set())
+  const groups = useMemo(() => {
+    const byPhase = new Map()
+    for (const p of projects) {
+      const phaseId = Number(p?.current_phase ?? p?.phase ?? 1) || 1
+      if (!byPhase.has(phaseId)) byPhase.set(phaseId, [])
+      byPhase.get(phaseId).push(p)
+    }
+    const ordered = []
+    for (let i = 1; i <= 7; i++) {
+      if (byPhase.has(i)) ordered.push({ phaseId: i, meta: getPhaseMeta(i), items: byPhase.get(i) })
+    }
+    return ordered
+  }, [projects])
+
+  const toggle = (phaseId) => {
+    setCollapsed((prev) => {
+      const next = new Set(prev)
+      if (next.has(phaseId)) next.delete(phaseId)
+      else next.add(phaseId)
+      return next
+    })
+  }
+
+  const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('ca-ES', { day: '2-digit', month: 'short' }) : '—'
+  const daysSince = (iso) => iso ? Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 86400000)) : null
+  const cellStyle = { padding: '10px 12px', fontSize: 13, color: 'var(--text-1)', borderBottom: '1px solid var(--border-1)' }
+  const thStyle = { ...cellStyle, fontSize: 11, fontWeight: 700, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: 0.5, textAlign: 'left', background: 'var(--surface-bg-2)' }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {groups.map(({ phaseId, meta, items }) => {
+        const isCollapsed = collapsed.has(phaseId)
+        const Icon = meta?.icon
+        return (
+          <div key={phaseId} style={{
+            border: '1px solid var(--border-1)',
+            borderRadius: 12,
+            background: 'var(--surface-bg)',
+            overflow: 'hidden'
+          }}>
+            <button
+              type="button"
+              onClick={() => toggle(phaseId)}
+              style={{
+                all: 'unset',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '12px 16px',
+                cursor: 'pointer',
+                background: 'var(--surface-bg-2)',
+                width: '100%',
+                boxSizing: 'border-box'
+              }}
+            >
+              {Icon ? <Icon size={16} style={{ color: 'var(--text-2)' }} /> : null}
+              <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-1)' }}>
+                {meta?.label || `Fase ${phaseId}`}
+              </span>
+              <span style={{ fontSize: 12, color: 'var(--text-2)' }}>
+                ({items.length})
+              </span>
+              <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--text-2)' }}>
+                {isCollapsed ? 'Mostrar ▾' : 'Amagar ▴'}
+              </span>
+            </button>
+            {!isCollapsed && (
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr>
+                      <th style={thStyle}>Nom</th>
+                      <th style={thStyle}>ASIN</th>
+                      <th style={thStyle}>Marketplace</th>
+                      <th style={thStyle}>Marge est.</th>
+                      <th style={thStyle}>Dies en fase</th>
+                      <th style={thStyle}>Última activitat</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {items.map((p) => {
+                      const mp = Array.isArray(p?.marketplace_tags) && p.marketplace_tags[0]
+                        ? (typeof p.marketplace_tags[0] === 'object' ? p.marketplace_tags[0].marketplace_code : p.marketplace_tags[0])
+                        : (p?.marketplace || '—')
+                      const days = daysSince(p?.status_changed_at || p?.updated_at || p?.created_at)
+                      return (
+                        <tr
+                          key={p.id}
+                          onClick={() => onOpen(p)}
+                          style={{ cursor: 'pointer' }}
+                          className="projects-list-row"
+                        >
+                          <td style={{ ...cellStyle, fontWeight: 600 }}>{p.name || 'Sense nom'}</td>
+                          <td style={cellStyle}>{p.asin || '—'}</td>
+                          <td style={cellStyle}>{mp}</td>
+                          <td style={cellStyle}>{p.target_margin != null ? `${p.target_margin}%` : '—'}</td>
+                          <td style={cellStyle}>{days != null ? `${days}d` : '—'}</td>
+                          <td style={cellStyle}>{fmtDate(p.updated_at || p.created_at)}</td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )
+      })}
+      <style>{`.projects-list-row:hover td { background: var(--surface-bg-2); }`}</style>
     </div>
   )
 }
