@@ -1,0 +1,4 @@
+ASIN,SKU,Product,Units,Sales,Warehouse,BinLocation,CustomFlag,PrepType
+B0CX23WVMB,ORG-BAMBOO-01,"Organizador Cajones Bambu",3,89.97,FBA-ES,A-12-3,yes,bubble
+B0DFG8KNTJ,KITCHEN-SILICONE-01,"Utensilios Cocina",2,49.80,FBA-DE,B-04-1,no,poly
+B0BTGFK1QR,YOGA-MAT-01,"Esterilla Yoga TPE",4,139.96,3PL-UK,R-99-9,yes,none
