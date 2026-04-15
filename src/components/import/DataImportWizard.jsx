@@ -1,16 +1,24 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Upload, CheckCircle2, AlertTriangle, ArrowRight } from 'lucide-react'
+import { Upload, CheckCircle2, AlertTriangle, ArrowRight, HelpCircle, Sparkles } from 'lucide-react'
 import Button from '../Button'
 import { useApp } from '../../context/AppContext'
 import { supabase } from '../../lib/supabase'
 import { parseImportFile } from '../../lib/import/importParser'
-import { IMPORT_SOURCES } from '../../lib/import/columnDictionaries'
+import { IMPORT_SOURCES, SOURCE_GROUPS, getSource } from '../../lib/import/columnDictionaries'
 import { proposeMapping, applyMapping, listTargets } from '../../lib/import/columnMapper'
-import { executeImport } from '../../lib/import/importExecutor'
+import { executeImport, computePreviewSummary } from '../../lib/import/importExecutor'
+import { detectSource, SELLERBOARD_SUBTYPES } from '../../lib/import/sourceDetector'
+import { detectCurrency, inferFormatFromRows } from '../../lib/import/currencyDetector'
+import ImportPreviewSummary from './ImportPreviewSummary'
+import ExportGuide from './ExportGuide'
 
 /**
- * DataImportWizard — 4-step wizard: source → upload → mapping → confirm/execute
+ * DataImportWizard — 4-step wizard: source → upload → mapping+preview → confirm/done.
+ *
+ * The source-selection grid is grouped by category (Amazon / Accounting / Projects /
+ * Database / Generic). After a file is parsed we auto-detect the source and
+ * pre-fill the mapping, but the user can override at any point.
  */
 const STEP_SOURCE = 1
 const STEP_UPLOAD = 2
@@ -23,14 +31,20 @@ export default function DataImportWizard({ darkMode = false }) {
 
   const [step, setStep] = useState(STEP_SOURCE)
   const [sourceId, setSourceId] = useState('generic')
+  const [subType, setSubType] = useState(null)
   const [file, setFile] = useState(null)
   const [parsed, setParsed] = useState(null)
   const [parseError, setParseError] = useState(null)
   const [mapping, setMapping] = useState({})
   const [submitting, setSubmitting] = useState(false)
   const [summary, setSummary] = useState(null)
+  const [showGuide, setShowGuide] = useState(false)
+  const [numberFormat, setNumberFormat] = useState(null)
+  const [currency, setCurrency] = useState('EUR')
+  const [autoDetect, setAutoDetect] = useState(null)
 
-  const sourceLabel = IMPORT_SOURCES.find((s) => s.id === sourceId)?.label || sourceId
+  const currentSource = getSource(sourceId) || IMPORT_SOURCES[IMPORT_SOURCES.length - 1]
+  const sourceLabel = currentSource?.label || sourceId
 
   useEffect(() => {
     if (parsed?.columns) {
@@ -41,14 +55,59 @@ export default function DataImportWizard({ darkMode = false }) {
 
   const targets = useMemo(() => listTargets(sourceId), [sourceId])
 
+  // Mapped rows used for preview — memoized so ImportPreviewSummary recomputes cheaply.
+  const mappedRows = useMemo(() => {
+    if (!parsed?.rows) return []
+    return applyMapping(parsed.rows, mapping)
+  }, [parsed, mapping])
+
+  const preview = useMemo(() => {
+    if (mappedRows.length === 0) return null
+    return computePreviewSummary(mappedRows, { sourceId, subType, numberFormat })
+  }, [mappedRows, sourceId, subType, numberFormat])
+
   const handleFileChosen = async (f) => {
     if (!f) return
     setFile(f)
     setParseError(null)
     setParsed(null)
+    setAutoDetect(null)
     try {
       const result = await parseImportFile(f)
-      if (!result.rows?.length) throw new Error(t('dataImport.errors.empty', 'El fitxer no conté files de dades.'))
+      if (!result.rows?.length) {
+        throw new Error(t('dataImport.errors.empty', 'El fitxer no conté files de dades.'))
+      }
+      // Auto-detect source (+ sub-type for Sellerboard).
+      const detected = detectSource({
+        columns: result.columns,
+        kind: result.kind,
+        rawJson: result.rawJson,
+      })
+      setAutoDetect(detected)
+
+      // Only apply detection if the user hadn't explicitly picked a specific source
+      // (i.e., left "generic") or if detection is very confident.
+      if (sourceId === 'generic' || detected.confidence >= 0.85) {
+        setSourceId(detected.sourceId)
+        if (detected.subType) setSubType(detected.subType)
+      }
+
+      // Sniff currency + number format from sample values.
+      const numericCols = []
+      for (const col of result.columns) {
+        const lower = col.toLowerCase()
+        if (/revenue|ventas|umsatz|profit|gewinn|beneficio|cost|coste|cogs|fees|ppc|storage|amount|importe|total/.test(lower)) {
+          numericCols.push(col)
+        }
+      }
+      const fmt = inferFormatFromRows(result.rows, numericCols.length ? numericCols : result.columns)
+      setNumberFormat(fmt)
+      const samples = []
+      for (const row of result.rows.slice(0, 10)) {
+        for (const col of numericCols) samples.push(row[col])
+      }
+      setCurrency(detectCurrency(samples, null))
+
       setParsed(result)
       setStep(STEP_MAPPING)
     } catch (err) {
@@ -69,8 +128,14 @@ export default function DataImportWizard({ darkMode = false }) {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const userId = session?.user?.id
-      const mappedRows = applyMapping(parsed.rows, mapping)
-      const res = await executeImport(mappedRows, { orgId: activeOrgId, userId, sourceLabel })
+      const res = await executeImport(mappedRows, {
+        orgId: activeOrgId,
+        userId,
+        sourceId,
+        subType,
+        sourceLabel,
+        numberFormat,
+      })
       setSummary(res)
       setStep(STEP_DONE)
     } finally {
@@ -81,18 +146,19 @@ export default function DataImportWizard({ darkMode = false }) {
   const reset = () => {
     setStep(STEP_SOURCE)
     setSourceId('generic')
+    setSubType(null)
     setFile(null)
     setParsed(null)
     setParseError(null)
     setMapping({})
     setSummary(null)
+    setAutoDetect(null)
   }
 
   const cardBg = darkMode ? '#1b1b2a' : '#ffffff'
   const borderColor = darkMode ? '#2a2a3a' : 'rgba(31,95,99,0.14)'
   const muted = darkMode ? '#9aa1b4' : '#6b7280'
   const ink = darkMode ? '#e6e9f2' : '#1f2937'
-
   const shell = {
     backgroundColor: cardBg,
     border: `1px solid ${borderColor}`,
@@ -120,8 +186,56 @@ export default function DataImportWizard({ darkMode = false }) {
     </div>
   )
 
+  const SourceCard = ({ s }) => {
+    const selected = sourceId === s.id
+    return (
+      <button
+        type="button"
+        onClick={() => { setSourceId(s.id); setSubType(null) }}
+        style={{
+          position: 'relative',
+          textAlign: 'left', padding: 14, borderRadius: 10, cursor: 'pointer',
+          border: `1.5px solid ${selected ? 'var(--brand-1,#1F5F63)' : borderColor}`,
+          backgroundColor: selected ? 'rgba(31,95,99,0.08)' : 'transparent',
+          color: ink, fontSize: 13, fontWeight: 600,
+          display: 'flex', flexDirection: 'column', gap: 4, minHeight: 72,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span>{s.label}</span>
+          {s.recommended && (
+            <span style={{
+              fontSize: 10, padding: '2px 6px', borderRadius: 10,
+              backgroundColor: 'rgba(63,191,154,0.18)', color: '#2ea082', fontWeight: 700,
+            }}>
+              {t('dataImport.badge.recommended', 'Recomanat')}
+            </span>
+          )}
+          {s.popular === 'ES' && (
+            <span style={{
+              fontSize: 10, padding: '2px 6px', borderRadius: 10,
+              backgroundColor: 'rgba(242,108,108,0.16)', color: '#c94545', fontWeight: 700,
+            }}>
+              {t('dataImport.badge.popularEs', 'Popular a Espanya')}
+            </span>
+          )}
+        </div>
+        <div style={{ fontSize: 11, color: muted, fontWeight: 400 }}>{s.tagline}</div>
+      </button>
+    )
+  }
+
+  const sourcesByGroup = useMemo(() => {
+    const map = new Map()
+    for (const g of SOURCE_GROUPS) map.set(g.id, [])
+    for (const s of IMPORT_SOURCES) {
+      if (map.has(s.group)) map.get(s.group).push(s)
+    }
+    return map
+  }, [])
+
   return (
-    <div style={{ ...shell }}>
+    <div style={shell}>
       <div style={{ display: 'flex', gap: 16, marginBottom: 20, flexWrap: 'wrap' }}>
         {stepPill(1, t('dataImport.steps.source', 'Font'))}
         <ArrowRight size={14} color={muted} />
@@ -138,32 +252,31 @@ export default function DataImportWizard({ darkMode = false }) {
             {t('dataImport.source.title', 'Des de quina eina vols importar?')}
           </h2>
           <p style={{ margin: '0 0 16px', color: muted, fontSize: 13 }}>
-            {t('dataImport.source.subtitle', 'Escull la font del fitxer. Si no la trobes, usa l\'opció genèrica.')}
+            {t('dataImport.source.subtitle', 'Escull la font. Si no saps quina és o no és a la llista, tria "Excel / CSV genèric".')}
           </p>
-          <div style={{
-            display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10,
-          }}>
-            {IMPORT_SOURCES.map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => setSourceId(s.id)}
-                style={{
-                  textAlign: 'left', padding: 14, borderRadius: 10, cursor: 'pointer',
-                  border: `1.5px solid ${sourceId === s.id ? 'var(--brand-1,#1F5F63)' : borderColor}`,
-                  backgroundColor: sourceId === s.id ? 'rgba(31,95,99,0.08)' : 'transparent',
-                  color: ink, fontSize: 13, fontWeight: 600,
-                }}
-              >
-                {s.label}
-                {s.id === 'generic' && (
-                  <div style={{ fontSize: 11, color: muted, marginTop: 4, fontWeight: 400 }}>
-                    {t('dataImport.source.genericHint', 'Qualsevol Excel/CSV; tu defineixes el mapping')}
-                  </div>
-                )}
-              </button>
-            ))}
-          </div>
+
+          {SOURCE_GROUPS.map((group) => {
+            const items = sourcesByGroup.get(group.id) || []
+            if (!items.length) return null
+            return (
+              <div key={group.id} style={{ marginBottom: 18 }}>
+                <div style={{
+                  fontSize: 11, fontWeight: 700, color: muted,
+                  textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 8,
+                }}>
+                  {t(group.labelKey, group.defaultLabel)}
+                </div>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                  gap: 10,
+                }}>
+                  {items.map((s) => <SourceCard key={s.id} s={s} />)}
+                </div>
+              </div>
+            )
+          })}
+
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 20 }}>
             <Button variant="primary" onClick={() => setStep(STEP_UPLOAD)}>
               {t('common.buttons.continue', 'Continuar')}
@@ -174,12 +287,51 @@ export default function DataImportWizard({ darkMode = false }) {
 
       {step === STEP_UPLOAD && (
         <div>
-          <h2 style={{ margin: '0 0 8px', fontSize: 16, fontWeight: 700 }}>
-            {t('dataImport.upload.title', 'Puja el fitxer exportat')}
-          </h2>
-          <p style={{ margin: '0 0 16px', color: muted, fontSize: 13 }}>
-            {t('dataImport.upload.subtitle', { defaultValue: 'Formats acceptats: CSV, TSV, XLSX, JSON. Font: {{source}}.', source: sourceLabel })}
-          </p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <div>
+              <h2 style={{ margin: '0 0 8px', fontSize: 16, fontWeight: 700 }}>
+                {t('dataImport.upload.title', 'Puja el fitxer exportat')}
+              </h2>
+              <p style={{ margin: '0 0 16px', color: muted, fontSize: 13 }}>
+                {t('dataImport.upload.subtitle', { defaultValue: 'Formats acceptats: CSV, TSV, XLSX, JSON. Font: {{source}}.', source: sourceLabel })}
+              </p>
+            </div>
+            <Button variant="ghost" size="sm" onClick={() => setShowGuide(true)}>
+              <HelpCircle size={14} style={{ marginRight: 4 }} />
+              {t('dataImport.guide.cta', 'Com exportar?')}
+            </Button>
+          </div>
+
+          {/* Sellerboard sub-type selector */}
+          {sourceId === 'sellerboard' && (
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: muted, marginBottom: 6 }}>
+                {t('dataImport.sellerboard.selectType', 'Quin tipus de dades vols importar?')}
+              </div>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+                gap: 8,
+              }}>
+                {SELLERBOARD_SUBTYPES.map((st) => (
+                  <button
+                    key={st.id}
+                    type="button"
+                    onClick={() => setSubType(st.id)}
+                    style={{
+                      padding: 10, borderRadius: 8, cursor: 'pointer',
+                      border: `1.5px solid ${subType === st.id ? 'var(--brand-1,#1F5F63)' : borderColor}`,
+                      backgroundColor: subType === st.id ? 'rgba(31,95,99,0.08)' : 'transparent',
+                      color: ink, fontSize: 12, fontWeight: 600,
+                    }}
+                  >
+                    {t(st.labelKey, st.defaultLabel)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <label
             style={{
               display: 'flex', flexDirection: 'column', alignItems: 'center',
@@ -216,6 +368,14 @@ export default function DataImportWizard({ darkMode = false }) {
               {t('common.buttons.back', 'Enrere')}
             </Button>
           </div>
+
+          <ExportGuide
+            sourceId={sourceId}
+            sourceLabel={sourceLabel}
+            isOpen={showGuide}
+            onClose={() => setShowGuide(false)}
+            darkMode={darkMode}
+          />
         </div>
       )}
 
@@ -231,7 +391,38 @@ export default function DataImportWizard({ darkMode = false }) {
               columns: parsed.columns.length,
             })}
           </p>
-          <div style={{ maxHeight: 360, overflowY: 'auto', border: `1px solid ${borderColor}`, borderRadius: 8 }}>
+
+          {/* Auto-detect notice */}
+          {autoDetect && autoDetect.sourceId !== 'generic' && (
+            <div style={{
+              marginBottom: 12, padding: '10px 12px', borderRadius: 8,
+              backgroundColor: 'rgba(110,203,195,0.14)', color: ink, fontSize: 13,
+              display: 'flex', alignItems: 'center', gap: 8,
+            }}>
+              <Sparkles size={14} color="var(--brand-1,#1F5F63)" />
+              <span>
+                {t('dataImport.autoDetect.hint', {
+                  defaultValue: 'Hem detectat que el fitxer sembla de {{source}}{{subType}}.',
+                  source: getSource(autoDetect.sourceId)?.label || autoDetect.sourceId,
+                  subType: autoDetect.subType ? ` (${autoDetect.subType})` : '',
+                })}
+              </span>
+            </div>
+          )}
+
+          {/* Preview summary */}
+          {preview && (
+            <div style={{ marginBottom: 12 }}>
+              <ImportPreviewSummary
+                preview={preview}
+                sourceLabel={sourceLabel}
+                currency={currency}
+                darkMode={darkMode}
+              />
+            </div>
+          )}
+
+          <div style={{ maxHeight: 320, overflowY: 'auto', border: `1px solid ${borderColor}`, borderRadius: 8 }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
               <thead style={{ backgroundColor: darkMode ? '#12121c' : '#f4f6f0', position: 'sticky', top: 0 }}>
                 <tr>
@@ -277,7 +468,7 @@ export default function DataImportWizard({ darkMode = false }) {
               </tbody>
             </table>
           </div>
-          {/* Preview first 3 rows of mapped data */}
+
           <details style={{ marginTop: 12 }}>
             <summary style={{ cursor: 'pointer', fontSize: 13, color: 'var(--brand-1,#1F5F63)', fontWeight: 600 }}>
               {t('dataImport.mapping.preview', 'Previsualització (3 files)')}
@@ -287,11 +478,11 @@ export default function DataImportWizard({ darkMode = false }) {
               backgroundColor: darkMode ? '#0f0f17' : '#f4f6f0',
               fontSize: 11, maxHeight: 220, overflow: 'auto', color: ink,
             }}>
-              {JSON.stringify(applyMapping(parsed.rows.slice(0, 3), mapping), null, 2)}
+              {JSON.stringify(mappedRows.slice(0, 3), null, 2)}
             </pre>
           </details>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 20 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 20, gap: 8, flexWrap: 'wrap' }}>
             <Button variant="ghost" onClick={() => setStep(STEP_UPLOAD)}>
               {t('common.buttons.back', 'Enrere')}
             </Button>

@@ -2286,7 +2286,7 @@
   "dataImport": {
     "page": {
       "title": "Importar dades",
-      "subtitle": "Migra dades des d'altres eines (Helium 10, Sellerboard, Amazon Seller Central, Excel…) sense tornar a introduir-les manualment."
+      "subtitle": "Migra dades des d'altres eines (Sellerboard, Helium 10, Holded, Asana, Excel…) sense tornar a introduir-les manualment."
     },
     "steps": {
       "source": "Font",
@@ -2296,14 +2296,49 @@
     },
     "source": {
       "title": "Des de quina eina vols importar?",
-      "subtitle": "Escull la font del fitxer. Si no la trobes, usa l'opció genèrica.",
+      "subtitle": "Escull la font. Si no saps quina és o no és a la llista, tria \"Excel / CSV genèric\".",
       "genericHint": "Qualsevol Excel/CSV; tu defineixes el mapping"
+    },
+    "groups": {
+      "amazon": "Eines Amazon",
+      "accounting": "Comptabilitat",
+      "projects": "Gestió de projectes",
+      "database": "Bases de dades",
+      "generic": "Genèric"
+    },
+    "badge": {
+      "recommended": "Recomanat",
+      "popularEs": "Popular a Espanya"
     },
     "upload": {
       "title": "Puja el fitxer exportat",
       "subtitle": "Formats acceptats: CSV, TSV, XLSX, JSON. Font: {{source}}.",
       "drop": "Fes clic o arrossega un fitxer aquí",
       "formats": "CSV · TSV · XLSX · XLS · JSON"
+    },
+    "guide": {
+      "cta": "Com exportar?",
+      "title": "Com exportar de {{source}}",
+      "hint": "Un cop tinguis el fitxer, tanca aquest missatge i puja'l."
+    },
+    "sellerboard": {
+      "selectType": "Quin tipus de dades vols importar?",
+      "profitSales": "Profit i Vendes",
+      "products": "Llista de Productes",
+      "orders": "Comandes",
+      "ppc": "Publicitat PPC"
+    },
+    "autoDetect": {
+      "hint": "Hem detectat que el fitxer sembla de {{source}}{{subType}}."
+    },
+    "preview": {
+      "title": "Resum de la importació",
+      "period": "Període",
+      "products": "Productes",
+      "revenue": "Ingressos totals",
+      "expenses": "Despeses totals",
+      "net": "Benefici net",
+      "actions": "Es crearan {{projects}} projectes, {{incomes}} ingressos i {{expenses}} despeses a partir de {{rows}} files."
     },
     "mapping": {
       "title": "Revisa el mapping de columnes",

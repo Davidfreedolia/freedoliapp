@@ -2101,7 +2101,7 @@
   "dataImport": {
     "page": {
       "title": "Importar datos",
-      "subtitle": "Migra datos desde otras herramientas (Helium 10, Sellerboard, Amazon Seller Central, Excel…) sin volver a introducirlos manualmente."
+      "subtitle": "Migra datos desde otras herramientas (Sellerboard, Helium 10, Holded, Asana, Excel…) sin volver a introducirlos manualmente."
     },
     "steps": {
       "source": "Fuente",
@@ -2111,14 +2111,49 @@
     },
     "source": {
       "title": "¿Desde qué herramienta quieres importar?",
-      "subtitle": "Elige la fuente del archivo. Si no está, usa la opción genérica.",
+      "subtitle": "Elige la fuente. Si no sabes cuál es o no está listada, elige \"Excel / CSV genérico\".",
       "genericHint": "Cualquier Excel/CSV; tú defines el mapping"
+    },
+    "groups": {
+      "amazon": "Herramientas Amazon",
+      "accounting": "Contabilidad",
+      "projects": "Gestión de proyectos",
+      "database": "Bases de datos",
+      "generic": "Genérico"
+    },
+    "badge": {
+      "recommended": "Recomendado",
+      "popularEs": "Popular en España"
     },
     "upload": {
       "title": "Sube el archivo exportado",
       "subtitle": "Formatos aceptados: CSV, TSV, XLSX, JSON. Fuente: {{source}}.",
       "drop": "Haz clic o arrastra un archivo aquí",
       "formats": "CSV · TSV · XLSX · XLS · JSON"
+    },
+    "guide": {
+      "cta": "¿Cómo exportar?",
+      "title": "Cómo exportar de {{source}}",
+      "hint": "Cuando tengas el archivo, cierra este mensaje y súbelo."
+    },
+    "sellerboard": {
+      "selectType": "¿Qué tipo de datos quieres importar?",
+      "profitSales": "Profit y Ventas",
+      "products": "Lista de Productos",
+      "orders": "Pedidos",
+      "ppc": "Publicidad PPC"
+    },
+    "autoDetect": {
+      "hint": "Hemos detectado que el archivo parece de {{source}}{{subType}}."
+    },
+    "preview": {
+      "title": "Resumen de la importación",
+      "period": "Periodo",
+      "products": "Productos",
+      "revenue": "Ingresos totales",
+      "expenses": "Gastos totales",
+      "net": "Beneficio neto",
+      "actions": "Se crearán {{projects}} proyectos, {{incomes}} ingresos y {{expenses}} gastos a partir de {{rows}} filas."
     },
     "mapping": {
       "title": "Revisa el mapeo de columnas",

@@ -93,10 +93,32 @@ export async function parseImportFile(file, opts = {}) {
   if (kind === 'json') {
     const text = await readAsText(file)
     let parsed
-    try { parsed = JSON.parse(text) } catch (e) { throw new Error('invalid_json') }
+    try { parsed = JSON.parse(text) } catch { throw new Error('invalid_json') }
+
+    // Trello export shape: { lists: [...], cards: [...], name, ... }
+    // Flatten into card rows with the parent list name resolved.
+    if (parsed && typeof parsed === 'object' && Array.isArray(parsed.lists) && Array.isArray(parsed.cards)) {
+      const listNameById = new Map()
+      for (const list of parsed.lists) {
+        if (list?.id) listNameById.set(list.id, list.name || '')
+      }
+      const rows = parsed.cards
+        .filter((c) => c && !c.closed)
+        .map((c) => ({
+          card_name: c.name || '',
+          list_name: listNameById.get(c.idList) || '',
+          desc: c.desc || '',
+          due: c.due || null,
+          labels: Array.isArray(c.labels) ? c.labels.map((l) => l.name).filter(Boolean).join(', ') : '',
+          idMembers: Array.isArray(c.idMembers) ? c.idMembers.join(', ') : '',
+        }))
+      const columns = rows.length ? Object.keys(rows[0]) : []
+      return { kind, columns, rows, trelloBoard: parsed.name || null, rawJson: parsed }
+    }
+
     const rows = Array.isArray(parsed) ? parsed : (Array.isArray(parsed?.data) ? parsed.data : [])
     const columns = rows.length ? Array.from(new Set(rows.flatMap((r) => Object.keys(r || {})))) : []
-    return { kind, columns, rows }
+    return { kind, columns, rows, rawJson: parsed }
   }
 
   if (kind === 'csv' || kind === 'tsv') {

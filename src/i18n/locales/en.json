@@ -2086,7 +2086,7 @@
   "dataImport": {
     "page": {
       "title": "Data Import",
-      "subtitle": "Migrate data from other tools (Helium 10, Sellerboard, Amazon Seller Central, Excel…) without manual re-entry."
+      "subtitle": "Migrate data from other tools (Sellerboard, Helium 10, Holded, Asana, Excel…) without manual re-entry."
     },
     "steps": {
       "source": "Source",
@@ -2096,14 +2096,49 @@
     },
     "source": {
       "title": "Which tool are you importing from?",
-      "subtitle": "Pick the source of your file. If it's not listed, use the generic option.",
+      "subtitle": "Pick the source. If you don't know which one or it's not listed, choose \"Generic Excel / CSV\".",
       "genericHint": "Any Excel/CSV; you define the mapping"
+    },
+    "groups": {
+      "amazon": "Amazon tools",
+      "accounting": "Accounting",
+      "projects": "Project management",
+      "database": "Databases",
+      "generic": "Generic"
+    },
+    "badge": {
+      "recommended": "Recommended",
+      "popularEs": "Popular in Spain"
     },
     "upload": {
       "title": "Upload the exported file",
       "subtitle": "Supported formats: CSV, TSV, XLSX, JSON. Source: {{source}}.",
       "drop": "Click or drag a file here",
       "formats": "CSV · TSV · XLSX · XLS · JSON"
+    },
+    "guide": {
+      "cta": "How to export?",
+      "title": "How to export from {{source}}",
+      "hint": "Once you have the file, close this dialog and upload it."
+    },
+    "sellerboard": {
+      "selectType": "Which type of data do you want to import?",
+      "profitSales": "Profit & Sales",
+      "products": "Product List",
+      "orders": "Orders",
+      "ppc": "PPC Advertising"
+    },
+    "autoDetect": {
+      "hint": "We detected that the file looks like {{source}}{{subType}}."
+    },
+    "preview": {
+      "title": "Import preview",
+      "period": "Period",
+      "products": "Products",
+      "revenue": "Total revenue",
+      "expenses": "Total expenses",
+      "net": "Net profit",
+      "actions": "Will create {{projects}} projects, {{incomes}} incomes and {{expenses}} expenses from {{rows}} rows."
     },
     "mapping": {
       "title": "Review the column mapping",
