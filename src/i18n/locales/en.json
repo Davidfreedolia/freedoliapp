@@ -1829,7 +1829,9 @@
       "disconnect": "Disconnect",
       "disconnecting": "Disconnecting…",
       "confirmDisconnect": "Are you sure you want to disconnect your AI? You'll revert to the free quota.",
-      "badge": { "connected": "Connected" },
+      "badge": {
+        "connected": "Connected"
+      },
       "usage": {
         "label": "AI analyses this month",
         "used": "used",
@@ -2219,12 +2221,24 @@
     "searchPlaceholder": "Search help…",
     "noResults": "No results. Try contacting us instead.",
     "contexts": {
-      "default": { "title": "How can we help?" },
-      "dashboard": { "title": "Dashboard help" },
-      "import": { "title": "Import help" },
-      "research": { "title": "AI research help" },
-      "settings": { "title": "Settings help" },
-      "onboarding": { "title": "Onboarding help" }
+      "default": {
+        "title": "How can we help?"
+      },
+      "dashboard": {
+        "title": "Dashboard help"
+      },
+      "import": {
+        "title": "Import help"
+      },
+      "research": {
+        "title": "AI research help"
+      },
+      "settings": {
+        "title": "Settings help"
+      },
+      "onboarding": {
+        "title": "Onboarding help"
+      }
     },
     "contact": {
       "cta": "Contact support",
@@ -2310,5 +2324,112 @@
         }
       }
     }
+  },
+  "hero": {
+    "title": "Manage your Amazon FBA business from one place",
+    "subtitle": "Visual pipeline, FBA profitability calculator, import from 16 tools and AI analysis. All integrated.",
+    "cta_primary": "Start for free",
+    "cta_secondary": "Watch demo"
+  },
+  "logos": {
+    "label": "Compatible with:"
+  },
+  "feature1": {
+    "title": "Real-time Dashboard",
+    "text": "Revenue, profit, net margin and inventory — all at a glance."
+  },
+  "feature2": {
+    "title": "Visual Product Pipeline",
+    "text": "Kanban with drag & drop, 7 product lifecycle phases."
+  },
+  "feature3": {
+    "title": "AI-Powered Research",
+    "text": "AI analyses ASINs, finds suppliers and generates viability reports."
+  },
+  "feature4": {
+    "title": "Import from 16 Tools",
+    "text": "Migrate from Sellerboard, Helium 10, Holded or any Excel in minutes."
+  },
+  "feature5": {
+    "title": "Detailed Finances",
+    "text": "COGS, FBA fees, PPC, shipping and returns — separated by product."
+  },
+  "feature6": {
+    "title": "Built-in Assistant",
+    "text": "Answers your questions based on the page you're on. No waiting."
+  },
+  "visual_a": {
+    "title": "All your Amazon business in one place",
+    "text": "Stop switching between 10 tools. FreedoliApp centralises your data in a single real-time dashboard."
+  },
+  "visual_b": {
+    "title": "Decision in 5 minutes, not 5 hours",
+    "text": "AI calculates real profitability with updated FBA fees and tells you whether it's worth investing."
+  },
+  "step1": {
+    "title": "Sign up",
+    "text": "Create your account in 30 seconds"
+  },
+  "step2": {
+    "title": "Connect",
+    "text": "Import from Sellerboard, Helium 10 or Excel"
+  },
+  "step3": {
+    "title": "Analyse",
+    "text": "AI analyses products and suppliers automatically"
+  },
+  "step4": {
+    "title": "Manage",
+    "text": "Visual pipeline, finances and centralised inventory"
+  },
+  "step5": {
+    "title": "Grow",
+    "text": "Decide with data, not intuition"
+  },
+  "how_it_works": {
+    "title": "How does it work?"
+  },
+  "testimonials": {
+    "title": "What our sellers say"
+  },
+  "testimonial_1": {
+    "name": "Carlos M.",
+    "role": "Seller Amazon ES · 3 years",
+    "text": "I used to spend 2h doing the monthly P&L. Now I see it on the dashboard in 10 seconds. No going back."
+  },
+  "testimonial_2": {
+    "name": "Laura G.",
+    "role": "Seller Amazon DE · 5 years",
+    "text": "The FBA calculator is incredible. It tells me exactly what margin I have before placing the order."
+  },
+  "testimonial_3": {
+    "name": "Miquel F.",
+    "role": "Seller Amazon FR+ES · 2 years",
+    "text": "The import from Sellerboard was instant. Everything mapped, without touching anything manually."
+  },
+  "testimonial_4": {
+    "name": "Ana P.",
+    "role": "Seller Amazon IT · 4 years",
+    "text": "The visual pipeline changes my life. I know exactly which phase each product is in."
+  },
+  "testimonial_5": {
+    "name": "Jordi B.",
+    "role": "Seller Amazon UK · 1 year",
+    "text": "I migrated from 4 tools to FreedoliApp in a weekend. The AI research exceeded my expectations."
+  },
+  "testimonial_6": {
+    "name": "Sara V.",
+    "role": "Seller Amazon ES · 6 years",
+    "text": "The contextual assistant always knows exactly what I need based on the page I'm on."
+  },
+  "testimonial_7": {
+    "name": "Marc T.",
+    "role": "Seller Amazon DE+FR · 3 years",
+    "text": "For the first time I have Amazon finances properly organised. COGS, fees, PPC, all by product."
+  },
+  "testimonial_8": {
+    "name": "Elena R.",
+    "role": "Seller Amazon ES · 2 years",
+    "text": "The AI found me a supplier on 1688 I would never have found alone. Brutal ROI the first month."
   }
 }

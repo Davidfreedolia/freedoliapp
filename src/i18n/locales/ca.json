@@ -2029,7 +2029,9 @@
       "disconnect": "Desconnectar",
       "disconnecting": "Desconnectant…",
       "confirmDisconnect": "Segur que vols desconnectar la teva IA? Tornaràs a la quota gratuïta.",
-      "badge": { "connected": "Connectat" },
+      "badge": {
+        "connected": "Connectat"
+      },
       "usage": {
         "label": "Anàlisis IA aquest mes",
         "used": "usades",
@@ -2419,12 +2421,24 @@
     "searchPlaceholder": "Cerca a l'ajuda…",
     "noResults": "No hi ha resultats. Prova de contactar-nos.",
     "contexts": {
-      "default": { "title": "Com et podem ajudar?" },
-      "dashboard": { "title": "Ajuda amb el Dashboard" },
-      "import": { "title": "Ajuda amb la importació" },
-      "research": { "title": "Ajuda amb la recerca IA" },
-      "settings": { "title": "Ajuda amb la configuració" },
-      "onboarding": { "title": "Ajuda amb l'activació" }
+      "default": {
+        "title": "Com et podem ajudar?"
+      },
+      "dashboard": {
+        "title": "Ajuda amb el Dashboard"
+      },
+      "import": {
+        "title": "Ajuda amb la importació"
+      },
+      "research": {
+        "title": "Ajuda amb la recerca IA"
+      },
+      "settings": {
+        "title": "Ajuda amb la configuració"
+      },
+      "onboarding": {
+        "title": "Ajuda amb l'activació"
+      }
     },
     "contact": {
       "cta": "Contactar amb suport",
@@ -2510,5 +2524,112 @@
         }
       }
     }
+  },
+  "hero": {
+    "title": "Gestiona el teu negoci Amazon FBA des d'un sol lloc",
+    "subtitle": "Pipeline visual, calculadora de rendibilitat FBA, importació des de 16 eines i anàlisi IA. Tot integrat.",
+    "cta_primary": "Comença gratis",
+    "cta_secondary": "Veure demo"
+  },
+  "logos": {
+    "label": "Importació compatible amb:"
+  },
+  "feature1": {
+    "title": "Dashboard en temps real",
+    "text": "Revenue, benefici, marge net i inventari — tot d'un cop d'ull."
+  },
+  "feature2": {
+    "title": "Pipeline de productes visual",
+    "text": "Kanban amb drag & drop, 7 fases del cicle del producte."
+  },
+  "feature3": {
+    "title": "Recerca amb IA",
+    "text": "La IA analitza ASINs, troba proveïdors i genera informes de viabilitat."
+  },
+  "feature4": {
+    "title": "Importa des de 16 eines",
+    "text": "Migra de Sellerboard, Helium 10, Holded o qualsevol Excel en minuts."
+  },
+  "feature5": {
+    "title": "Finances desglossades",
+    "text": "COGS, fees FBA, PPC, enviaments i devolucions — per producte."
+  },
+  "feature6": {
+    "title": "Assistent integrat",
+    "text": "Respon les teves dubtes segons la pàgina on estiguis. Sense esperes."
+  },
+  "visual_a": {
+    "title": "Tot el teu negoci Amazon en un sol lloc",
+    "text": "Deixa d'alternar entre 10 eines. FreedoliApp centralitza les teves dades en un dashboard únic, en temps real."
+  },
+  "visual_b": {
+    "title": "Decisió en 5 minuts, no en 5 hores",
+    "text": "La IA calcula la rendibilitat real amb tarifes FBA actualitzades i et diu si val la pena invertir."
+  },
+  "step1": {
+    "title": "Registra't",
+    "text": "Crea el teu compte en 30 segons"
+  },
+  "step2": {
+    "title": "Connecta",
+    "text": "Importa des de Sellerboard, Helium 10 o Excel"
+  },
+  "step3": {
+    "title": "Analitza",
+    "text": "La IA analitza productes i proveïdors automàticament"
+  },
+  "step4": {
+    "title": "Gestiona",
+    "text": "Pipeline visual, finances i inventari centralitzat"
+  },
+  "step5": {
+    "title": "Creix",
+    "text": "Decideix amb dades, no amb intuïció"
+  },
+  "how_it_works": {
+    "title": "Com funciona?"
+  },
+  "testimonials": {
+    "title": "El que diuen els nostres sellers"
+  },
+  "testimonial_1": {
+    "name": "Carlos M.",
+    "role": "Seller Amazon ES · 3 anys",
+    "text": "Abans tardava 2h a fer el P&L mensual. Ara ho veig al dashboard en 10 segons. No tornaria enrere."
+  },
+  "testimonial_2": {
+    "name": "Laura G.",
+    "role": "Seller Amazon DE · 5 anys",
+    "text": "La calculadora FBA és increïble. Em diu exactament quin marge tinc abans de fer la comanda."
+  },
+  "testimonial_3": {
+    "name": "Miquel F.",
+    "role": "Seller Amazon FR+ES · 2 anys",
+    "text": "La importació des de Sellerboard va ser instantània. Tot mapejat, sense tocar res a mà."
+  },
+  "testimonial_4": {
+    "name": "Ana P.",
+    "role": "Seller Amazon IT · 4 anys",
+    "text": "El pipeline visual em canvia la vida. Sé exactament en quina fase és cada producte i qui té la pilota."
+  },
+  "testimonial_5": {
+    "name": "Jordi B.",
+    "role": "Seller Amazon UK · 1 any",
+    "text": "Vaig migrar de 4 eines a FreedoliApp en un cap de setmana. La IA de recerca va superar les meves expectatives."
+  },
+  "testimonial_6": {
+    "name": "Sara V.",
+    "role": "Seller Amazon ES · 6 anys",
+    "text": "L'assistent contextual sempre sap exactament el que necessito segons la pàgina on estic."
+  },
+  "testimonial_7": {
+    "name": "Marc T.",
+    "role": "Seller Amazon DE+FR · 3 anys",
+    "text": "Per primera vegada tinc les finances d'Amazon ordenades de debò. COGS, fees, PPC, tot per producte."
+  },
+  "testimonial_8": {
+    "name": "Elena R.",
+    "role": "Seller Amazon ES · 2 anys",
+    "text": "La IA em va trobar un proveïdor a 1688 que mai hauria trobat sola. ROI brutal el primer mes."
   }
 }

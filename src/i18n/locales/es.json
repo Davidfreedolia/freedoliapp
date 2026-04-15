@@ -1844,7 +1844,9 @@
       "disconnect": "Desconectar",
       "disconnecting": "Desconectando…",
       "confirmDisconnect": "¿Seguro que quieres desconectar tu IA? Volverás a la cuota gratuita.",
-      "badge": { "connected": "Conectado" },
+      "badge": {
+        "connected": "Conectado"
+      },
       "usage": {
         "label": "Análisis IA este mes",
         "used": "usados",
@@ -2234,12 +2236,24 @@
     "searchPlaceholder": "Buscar en la ayuda…",
     "noResults": "Sin resultados. Prueba a contactarnos.",
     "contexts": {
-      "default": { "title": "¿Cómo te podemos ayudar?" },
-      "dashboard": { "title": "Ayuda con el Dashboard" },
-      "import": { "title": "Ayuda con la importación" },
-      "research": { "title": "Ayuda con la investigación IA" },
-      "settings": { "title": "Ayuda con la configuración" },
-      "onboarding": { "title": "Ayuda con la activación" }
+      "default": {
+        "title": "¿Cómo te podemos ayudar?"
+      },
+      "dashboard": {
+        "title": "Ayuda con el Dashboard"
+      },
+      "import": {
+        "title": "Ayuda con la importación"
+      },
+      "research": {
+        "title": "Ayuda con la investigación IA"
+      },
+      "settings": {
+        "title": "Ayuda con la configuración"
+      },
+      "onboarding": {
+        "title": "Ayuda con la activación"
+      }
     },
     "contact": {
       "cta": "Contactar con soporte",
@@ -2325,5 +2339,112 @@
         }
       }
     }
+  },
+  "hero": {
+    "title": "Gestiona tu negocio Amazon FBA desde un solo lugar",
+    "subtitle": "Pipeline visual, calculadora de rentabilidad FBA, importación desde 16 herramientas y análisis IA. Todo integrado.",
+    "cta_primary": "Empezar gratis",
+    "cta_secondary": "Ver demo"
+  },
+  "logos": {
+    "label": "Importación compatible con:"
+  },
+  "feature1": {
+    "title": "Dashboard en tiempo real",
+    "text": "Revenue, beneficio, margen neto e inventario — todo de un vistazo."
+  },
+  "feature2": {
+    "title": "Pipeline de productos visual",
+    "text": "Kanban con drag & drop, 7 fases del ciclo del producto."
+  },
+  "feature3": {
+    "title": "Investigación con IA",
+    "text": "La IA analiza ASINs, busca proveedores y genera informes de viabilidad."
+  },
+  "feature4": {
+    "title": "Importa desde 16 herramientas",
+    "text": "Migra de Sellerboard, Helium 10, Holded o cualquier Excel en minutos."
+  },
+  "feature5": {
+    "title": "Finanzas desglosadas",
+    "text": "COGS, fees FBA, PPC, envíos y devoluciones — separados por producto."
+  },
+  "feature6": {
+    "title": "Asistente integrado",
+    "text": "Responde tus dudas según la página donde estés. Sin esperas."
+  },
+  "visual_a": {
+    "title": "Todo tu negocio Amazon en un solo lugar",
+    "text": "Deja de alternar entre 10 herramientas. FreedoliApp centraliza tus datos en un dashboard único, en tiempo real."
+  },
+  "visual_b": {
+    "title": "Decisión en 5 minutos, no en 5 horas",
+    "text": "La IA calcula la rentabilidad real con tarifas FBA actualizadas y te dice si vale la pena invertir."
+  },
+  "step1": {
+    "title": "Regístrate",
+    "text": "Crea tu cuenta en 30 segundos"
+  },
+  "step2": {
+    "title": "Conecta",
+    "text": "Importa desde Sellerboard, Helium 10 o Excel"
+  },
+  "step3": {
+    "title": "Analiza",
+    "text": "La IA analiza productos y proveedores automáticamente"
+  },
+  "step4": {
+    "title": "Gestiona",
+    "text": "Pipeline visual, finanzas y inventario centralizado"
+  },
+  "step5": {
+    "title": "Crece",
+    "text": "Decide con datos, no con intuición"
+  },
+  "how_it_works": {
+    "title": "¿Cómo funciona?"
+  },
+  "testimonials": {
+    "title": "Lo que dicen nuestros sellers"
+  },
+  "testimonial_1": {
+    "name": "Carlos M.",
+    "role": "Seller Amazon ES · 3 años",
+    "text": "Antes tardaba 2h en hacer el P&L mensual. Ahora lo veo en el dashboard en 10 segundos. No volvería atrás."
+  },
+  "testimonial_2": {
+    "name": "Laura G.",
+    "role": "Seller Amazon DE · 5 años",
+    "text": "La calculadora FBA es increíble. Me dice exactamente qué margen tengo antes de hacer el pedido."
+  },
+  "testimonial_3": {
+    "name": "Miquel F.",
+    "role": "Seller Amazon FR+ES · 2 años",
+    "text": "La importación desde Sellerboard fue instantánea. Todo mapeado, sin tocar nada a mano."
+  },
+  "testimonial_4": {
+    "name": "Ana P.",
+    "role": "Seller Amazon IT · 4 años",
+    "text": "El pipeline visual me cambia la vida. Sé exactamente en qué fase está cada producto y quién tiene la pelota."
+  },
+  "testimonial_5": {
+    "name": "Jordi B.",
+    "role": "Seller Amazon UK · 1 año",
+    "text": "Migré de 4 herramientas a FreedoliApp en un fin de semana. La IA de investigación superó mis expectativas."
+  },
+  "testimonial_6": {
+    "name": "Sara V.",
+    "role": "Seller Amazon ES · 6 años",
+    "text": "El asistente contextual siempre sabe exactamente lo que necesito según la página donde estoy."
+  },
+  "testimonial_7": {
+    "name": "Marc T.",
+    "role": "Seller Amazon DE+FR · 3 años",
+    "text": "Por primera vez tengo las finanzas de Amazon ordenadas de verdad. COGS, fees, PPC, todo por producto."
+  },
+  "testimonial_8": {
+    "name": "Elena R.",
+    "role": "Seller Amazon ES · 2 años",
+    "text": "La IA me encontró un proveedor en 1688 que nunca habría encontrado sola. ROI brutal el primer mes."
   }
 }
