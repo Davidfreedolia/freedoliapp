@@ -767,7 +767,8 @@
     "successTitle": "Revisa la teva bústia",
     "successMessage": "T'hem enviat un enllaç d'inici de sessió. Obre el correu i segueix l'enllaç per continuar el trial.",
     "signInLink": "Ja tens compte? Inicia sessió",
-    "invalidEmail": "Introdueix un correu electrònic vàlid."
+    "invalidEmail": "Introdueix un correu electrònic vàlid.",
+    "subtitle_flow_hint": "Et guiarem pas a pas perquè treus el màxim profit des del primer dia."
   },
   "billing": {
     "banner": {
@@ -2631,5 +2632,10 @@
     "name": "Elena R.",
     "role": "Seller Amazon ES · 2 anys",
     "text": "La IA em va trobar un proveïdor a 1688 que mai hauria trobat sola. ROI brutal el primer mes."
+  },
+  "auth": {
+    "continue_google": "Continua amb Google",
+    "already_have_account": "Ja tens compte?",
+    "sign_in": "Inicia sessió"
   }
 }

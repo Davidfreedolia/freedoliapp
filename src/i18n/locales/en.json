@@ -767,7 +767,8 @@
     "successTitle": "Check your inbox",
     "successMessage": "We’ve sent you a sign-in link. Open your email and follow the link to continue the trial.",
     "signInLink": "Already have an account? Sign in",
-    "invalidEmail": "Please enter a valid email address."
+    "invalidEmail": "Please enter a valid email address.",
+    "subtitle_flow_hint": "We'll guide you step by step to get the most out of it from day one."
   },
   "activation": {
     "title": "Activation wizard",
@@ -2431,5 +2432,10 @@
     "name": "Elena R.",
     "role": "Seller Amazon ES · 2 years",
     "text": "The AI found me a supplier on 1688 I would never have found alone. Brutal ROI the first month."
+  },
+  "auth": {
+    "continue_google": "Continue with Google",
+    "already_have_account": "Already have an account?",
+    "sign_in": "Sign in"
   }
 }

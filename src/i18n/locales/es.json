@@ -767,7 +767,8 @@
     "successTitle": "Revisa tu bandeja de entrada",
     "successMessage": "Te hemos enviado un enlace de inicio de sesión. Abre el correo y sigue el enlace para continuar el trial.",
     "signInLink": "¿Ya tienes cuenta? Inicia sesión",
-    "invalidEmail": "Introduce una dirección de correo electrónico válida."
+    "invalidEmail": "Introduce una dirección de correo electrónico válida.",
+    "subtitle_flow_hint": "Te guiaremos paso a paso para que saques el máximo partido desde el primer día."
   },
   "billing": {
     "banner": {
@@ -2446,5 +2447,10 @@
     "name": "Elena R.",
     "role": "Seller Amazon ES · 2 años",
     "text": "La IA me encontró un proveedor en 1688 que nunca habría encontrado sola. ROI brutal el primer mes."
+  },
+  "auth": {
+    "continue_google": "Continuar con Google",
+    "already_have_account": "¿Ya tienes cuenta?",
+    "sign_in": "Inicia sesión"
   }
 }
