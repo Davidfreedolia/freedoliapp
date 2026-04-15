@@ -540,29 +540,29 @@
       "subtitle": "A single workspace for sourcing, orders, inventory and profitability."
     },
     "features_grid": {
-      "suppliers": {
-        "title": "Suppliers & Sourcing",
-        "desc": "Centralise supplier data, terms, quotes and samples. Know exactly who you buy from and on what conditions."
+      "dashboard": {
+        "title": "Real-time Dashboard",
+        "desc": "Revenue, profit, net margin, inventory and alerts — all at a glance. No more opening ten different spreadsheets."
       },
-      "orders": {
-        "title": "Purchase Orders",
-        "desc": "Create and track POs from quote to delivery. Auto-generate PDFs, manage payments and follow logistics."
+      "pipeline": {
+        "title": "Visual Product Pipeline",
+        "desc": "Manage every product from research to Amazon listing. Kanban with drag & drop, 7 lifecycle phases."
       },
-      "inventory": {
-        "title": "Inventory Control",
-        "desc": "Live view of units in FBA, in transit, at forwarder and in production. Never run out of stock again."
+      "research": {
+        "title": "AI-Powered Product Research",
+        "desc": "Enter an ASIN or product idea. The app searches prices on Alibaba, 1688 and Zentrada, and AI generates a viability report with margins, risks and recommendation."
       },
-      "profit": {
-        "title": "Profit & Margins",
-        "desc": "True profitability per product. Combine COGS, Amazon fees, freight and ads to see your real margin."
+      "import": {
+        "title": "Import from 16 Tools",
+        "desc": "Migrate from Sellerboard, Helium 10, QuickBooks, Asana or any Excel file. Automatic column detection and preview before importing."
       },
-      "spapi": {
-        "title": "Amazon SP-API",
-        "desc": "Connect your Seller Central account and automatically import settlement data across all marketplaces."
+      "finances": {
+        "title": "Detailed Financial Breakdown",
+        "desc": "COGS, FBA fees, advertising, shipping, refunds — all separated by product and month. Know exactly where your money goes."
       },
-      "decisions": {
-        "title": "Smart Decisions",
-        "desc": "Surface stock, margin and cash alerts automatically. Know what to reorder, when and in what quantity."
+      "assistant": {
+        "title": "Built-in Assistant",
+        "desc": "If you get stuck, the integrated assistant answers questions based on the page you're on. No waiting, no support tickets."
       }
     },
     "how": {
@@ -571,24 +571,24 @@
     },
     "steps": {
       "s1": {
-        "title": "Add your suppliers",
-        "desc": "Import or create your supplier database with contacts, terms, and Alibaba/1688 references."
+        "title": "Sign up",
+        "desc": "Create your account in 30 seconds — no credit card required."
       },
       "s2": {
-        "title": "Create purchase orders",
-        "desc": "Generate professional POs with one click. Track production progress and payment milestones."
+        "title": "Set up",
+        "desc": "Connect Amazon or import your data from Sellerboard, Helium 10 or any Excel file."
       },
       "s3": {
-        "title": "Track shipments",
-        "desc": "Follow your stock from factory to FBA warehouse. Get alerts when things are delayed."
+        "title": "Analyse",
+        "desc": "AI analyses products and suppliers automatically and generates a viability report."
       },
       "s4": {
-        "title": "Monitor inventory",
-        "desc": "See exactly how many units you have in each location and when to reorder."
+        "title": "Manage",
+        "desc": "Visual pipeline, detailed finances, centralised inventory — your whole operation in one place."
       },
       "s5": {
-        "title": "Understand your profit",
-        "desc": "Connect all data sources for a complete P&L view per product, marketplace and period."
+        "title": "Grow",
+        "desc": "Make decisions backed by data, not intuition. Scale your Amazon business with confidence."
       }
     },
     "pricing": {

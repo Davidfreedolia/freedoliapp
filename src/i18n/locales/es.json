@@ -540,29 +540,29 @@
       "subtitle": "Un único espacio para sourcing, pedidos, inventario y rentabilidad."
     },
     "features_grid": {
-      "suppliers": {
-        "title": "Proveedores y Sourcing",
-        "desc": "Centraliza datos, condiciones, presupuestos y muestras. Sabe exactamente a quién compras y en qué condiciones."
+      "dashboard": {
+        "title": "Dashboard en tiempo real",
+        "desc": "Revenue, beneficio, margen neto, inventario y alertas — todo de un vistazo. Sin abrir diez hojas de Excel."
       },
-      "orders": {
-        "title": "Pedidos de Compra",
-        "desc": "Crea y sigue POs desde el presupuesto hasta la entrega. Genera PDFs, gestiona pagos y sigue la logística."
+      "pipeline": {
+        "title": "Pipeline de productos visual",
+        "desc": "Gestiona cada producto desde la investigación hasta el listado en Amazon. Kanban con drag & drop, 7 fases del ciclo."
       },
-      "inventory": {
-        "title": "Control de Inventario",
-        "desc": "Vista en tiempo real de unidades en FBA, en tránsito, en transitario y en producción. No te quedes sin stock."
+      "research": {
+        "title": "Investigación inteligente con IA",
+        "desc": "Introduce un ASIN o una idea. La app busca precios en Alibaba, 1688 y Zentrada, y la IA genera un informe de viabilidad con márgenes, riesgos y recomendación."
       },
-      "profit": {
-        "title": "Rentabilidad y Márgenes",
-        "desc": "Rentabilidad real por producto. Combina COGS, comisiones Amazon, flete y publicidad para ver tu margen real."
+      "import": {
+        "title": "Importa desde 16 herramientas",
+        "desc": "Migra de Sellerboard, Helium 10, Holded, Asana o cualquier Excel. Detección automática de columnas y preview antes de importar."
       },
-      "spapi": {
-        "title": "Amazon SP-API",
-        "desc": "Conecta tu cuenta de Seller Central e importa datos de settlements automáticamente en todos los marketplaces."
+      "finances": {
+        "title": "Finanzas desglosadas al detalle",
+        "desc": "COGS, comisiones FBA, publicidad, envíos, devoluciones — todo separado por producto y mes. Sabes exactamente dónde va tu dinero."
       },
-      "decisions": {
-        "title": "Decisiones Inteligentes",
-        "desc": "Alertas de stock, margen y caja de forma automática. Sabe qué repedir, cuándo y en qué cantidad."
+      "assistant": {
+        "title": "Asistente que te ayuda",
+        "desc": "Si te pierdes, el asistente integrado responde preguntas según la página donde estés. Sin esperas, sin tickets."
       }
     },
     "how": {
@@ -571,24 +571,24 @@
     },
     "steps": {
       "s1": {
-        "title": "Añade tus proveedores",
-        "desc": "Importa o crea tu base de datos de proveedores con contactos, condiciones y referencias de Alibaba/1688."
+        "title": "Regístrate",
+        "desc": "Crea tu cuenta en menos de un minuto. Sin tarjeta, sin compromisos. 14 días de prueba completa."
       },
       "s2": {
-        "title": "Crea pedidos de compra",
-        "desc": "Genera POs profesionales con un clic. Sigue el progreso de producción y los hitos de pago."
+        "title": "Configura",
+        "desc": "Conecta Amazon SP-API, importa desde Sellerboard/Helium 10/Excel, o empieza desde cero. Tú eliges."
       },
       "s3": {
-        "title": "Sigue los envíos",
-        "desc": "Controla el stock desde la fábrica hasta el almacén FBA. Recibe alertas si hay retrasos."
+        "title": "Analiza",
+        "desc": "Investiga productos con IA, calcula márgenes reales y decide qué lanzar con datos, no con intuición."
       },
       "s4": {
-        "title": "Monitoriza el inventario",
-        "desc": "Ve exactamente cuántas unidades tienes en cada ubicación y cuándo repedir."
+        "title": "Gestiona",
+        "desc": "Pipeline visual, pedidos a proveedores, inventario en tiempo real y finanzas al céntimo. Todo en un solo sitio."
       },
       "s5": {
-        "title": "Entiende tu rentabilidad",
-        "desc": "Conecta todas las fuentes de datos para una vista P&L completa por producto, marketplace y período."
+        "title": "Crece",
+        "desc": "Reinvierte con confianza: sabes exactamente qué producto rinde, cuándo repedir y cuánto puedes gastar en ads."
       }
     },
     "pricing": {

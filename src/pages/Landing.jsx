@@ -128,12 +128,12 @@ export default function Landing() {
   ]
 
   const FEATURES = [
-    { icon: '📦', key: 'suppliers' },
-    { icon: '📋', key: 'orders' },
-    { icon: '📊', key: 'inventory' },
-    { icon: '💰', key: 'profit' },
-    { icon: '🔗', key: 'spapi' },
-    { icon: '🤖', key: 'decisions' },
+    { icon: '📊', key: 'dashboard' },
+    { icon: '📋', key: 'pipeline' },
+    { icon: '🧠', key: 'research' },
+    { icon: '⬇️', key: 'import' },
+    { icon: '💶', key: 'finances' },
+    { icon: '💡', key: 'assistant' },
   ].map(f => ({
     ...f,
     title: t(`landing.features_grid.${f.key}.title`),

@@ -540,29 +540,29 @@
       "subtitle": "Un únic espai per a sourcing, comandes, inventari i rendibilitat."
     },
     "features_grid": {
-      "suppliers": {
-        "title": "Proveïdors i Sourcing",
-        "desc": "Centralitza dades, condicions, pressupostos i mostres. Sap exactament a qui compres i en quines condicions."
+      "dashboard": {
+        "title": "Dashboard en temps real",
+        "desc": "Revenue, benefici, marge net, inventari i alertes — tot d'un cop d'ull. Sense obrir deu fulls d'Excel."
       },
-      "orders": {
-        "title": "Comandes de Compra",
-        "desc": "Crea i segueix POs des del pressupost fins al lliurament. Genera PDFs, gestiona pagaments i segueix la logística."
+      "pipeline": {
+        "title": "Pipeline de productes visual",
+        "desc": "Gestiona cada producte des de la recerca fins al llistat a Amazon. Kanban amb drag & drop, 7 fases del cicle."
       },
-      "inventory": {
-        "title": "Control d'Inventari",
-        "desc": "Vista en temps real d'unitats a FBA, en trànsit, al transitari i en producció. No et quedis sense estoc."
+      "research": {
+        "title": "Recerca intel·ligent amb IA",
+        "desc": "Introdueix un ASIN o una idea. L'app cerca preus a Alibaba, 1688 i Zentrada, i la IA genera un informe de viabilitat amb marges, riscos i recomanació."
       },
-      "profit": {
-        "title": "Rendibilitat i Marges",
-        "desc": "Rendibilitat real per producte. Combina COGS, comissions Amazon, noli i publicitat per veure el teu marge real."
+      "import": {
+        "title": "Importa des de 16 eines",
+        "desc": "Migra de Sellerboard, Helium 10, Holded, Asana o qualsevol Excel. Detecció automàtica de columnes i preview abans d'importar."
       },
-      "spapi": {
-        "title": "Amazon SP-API",
-        "desc": "Connecta el teu compte de Seller Central i importa dades de settlements automàticament a tots els marketplaces."
+      "finances": {
+        "title": "Finances desglossades al detall",
+        "desc": "COGS, comissions FBA, publicitat, enviaments, devolucions — tot separat per producte i mes. Saps exactament on va el teu diner."
       },
-      "decisions": {
-        "title": "Decisions Intel·ligents",
-        "desc": "Alertes d'estoc, marge i caixa de forma automàtica. Sap què repidir, quan i en quina quantitat."
+      "assistant": {
+        "title": "Assistent que t'ajuda",
+        "desc": "Si et perds, l'assistent integrat respon preguntes segons la pàgina on siguis. Sense esperes, sense tickets."
       }
     },
     "how": {
@@ -571,24 +571,24 @@
     },
     "steps": {
       "s1": {
-        "title": "Afegeix els teus proveïdors",
-        "desc": "Importa o crea la teva base de dades de proveïdors amb contactes, condicions i referències d'Alibaba/1688."
+        "title": "Registra't",
+        "desc": "Crea el teu compte en menys d'un minut. Sense targeta, sense compromisos. 14 dies de prova completa."
       },
       "s2": {
-        "title": "Crea comandes de compra",
-        "desc": "Genera POs professionals amb un clic. Segueix el progrés de producció i les fites de pagament."
+        "title": "Configura",
+        "desc": "Connecta Amazon SP-API, importa des de Sellerboard/Helium 10/Excel, o comença des de zero. Tu tries."
       },
       "s3": {
-        "title": "Segueix els enviaments",
-        "desc": "Controla l'estoc des de la fàbrica fins al magatzem FBA. Rep alertes si hi ha retards."
+        "title": "Analitza",
+        "desc": "Investiga productes amb IA, calcula marges reals i decideix què llançar amb dades, no amb intuïció."
       },
       "s4": {
-        "title": "Monitoritza l'inventari",
-        "desc": "Veure exactament quantes unitats tens a cada ubicació i quan repidir."
+        "title": "Gestiona",
+        "desc": "Pipeline visual, comandes a proveïdors, inventari en temps real i finances al cèntim. Tot en un sol lloc."
       },
       "s5": {
-        "title": "Entén la teva rendibilitat",
-        "desc": "Connecta totes les fonts de dades per a una vista P&L completa per producte, marketplace i període."
+        "title": "Creix",
+        "desc": "Reinverteix amb confiança: saps exactament quin producte ret, quan repidir i quant pots gastar en ads."
       }
     },
     "pricing": {
