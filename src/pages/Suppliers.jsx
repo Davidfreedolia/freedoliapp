@@ -17,8 +17,18 @@ import {
   MessageCircle,
   Clock,
   Package,
-  Filter
+  Filter,
+  List,
+  Grid2X2
 } from 'lucide-react'
+
+// Suppliers expose a simple list/grid toggle — split view was removed because
+// a supplier's profile is a flat record, not something to preview alongside a
+// list. Click a supplier to open its full sheet.
+const SUPPLIERS_VIEW_OPTIONS = [
+  { id: 'list', label: 'Llista', Icon: List },
+  { id: 'grid', label: 'Graella', Icon: Grid2X2 }
+]
 import { useApp } from '../context/AppContext'
 import { 
   getSuppliers, 
@@ -511,7 +521,9 @@ export default function Suppliers() {
     }
   }, [filteredSuppliers, selectedSupplierId])
 
-  const effectiveLayout = isMobile ? 'list' : layout
+  // Suppliers no longer support split view — coerce stale preference to grid.
+  const normalizedLayout = layout === 'split' ? 'grid' : layout
+  const effectiveLayout = isMobile ? 'list' : normalizedLayout
   const selectedSupplier = filteredSuppliers.find(s => s.id === selectedSupplierId)
   const locale = (i18n.language || 'ca').split('-')[0]
   const formatLastActivity = (value) => {
@@ -773,6 +785,7 @@ export default function Suppliers() {
               value={effectiveLayout}
               onChange={setLayout}
               compact={isMobile}
+              options={SUPPLIERS_VIEW_OPTIONS}
             />
           </div>
           <div style={styles.toolbarRight} className="toolbar-group">
@@ -856,20 +869,6 @@ export default function Suppliers() {
             {effectiveLayout === 'list' && (
               <div style={styles.suppliersList}>
                 {filteredSuppliers.map(supplier => renderSupplierCard(supplier))}
-              </div>
-            )}
-            {effectiveLayout === 'split' && (
-              <div style={styles.splitLayout}>
-                <div style={styles.splitList}>
-                  {filteredSuppliers.map(supplier => renderSupplierCard(supplier, { enablePreviewSelect: true }))}
-                </div>
-                <div style={styles.splitPreview}>
-                  {selectedSupplier ? (
-                    renderSupplierCard(selectedSupplier, { isPreview: true })
-                  ) : (
-                    <div style={styles.splitEmpty}>{t('suppliersPage.selectSupplier')}</div>
-                  )}
-                </div>
               </div>
             )}
           </>

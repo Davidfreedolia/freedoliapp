@@ -19,8 +19,17 @@ import {
   ChevronDown,
   ChevronUp,
   CreditCard,
-  Package
+  Package,
+  List,
+  Grid2X2
 } from 'lucide-react'
+
+// Forwarders expose a simple list/grid toggle — split view was removed because
+// a forwarder profile is a flat record. Click a forwarder to open its sheet.
+const FORWARDERS_VIEW_OPTIONS = [
+  { id: 'list', label: 'Llista', Icon: List },
+  { id: 'grid', label: 'Graella', Icon: Grid2X2 }
+]
 import { useApp } from '../context/AppContext'
 import { 
   getSuppliersByType,
@@ -226,7 +235,9 @@ export default function Forwarders() {
     }
   }, [filteredForwarders, selectedForwarderId])
 
-  const effectiveLayout = isMobile ? 'list' : layout
+  // Forwarders no longer support split view — coerce stale preference to grid.
+  const normalizedLayout = layout === 'split' ? 'grid' : layout
+  const effectiveLayout = isMobile ? 'list' : normalizedLayout
   const selectedForwarder = filteredForwarders.find(f => f.id === selectedForwarderId)
 
   // Obtenir magatzems d'un transitari
@@ -617,6 +628,7 @@ export default function Forwarders() {
               value={effectiveLayout}
               onChange={setLayout}
               compact={isMobile}
+              options={FORWARDERS_VIEW_OPTIONS}
             />
           </div>
           <div style={styles.toolbarRight} className="toolbar-group">
@@ -673,20 +685,6 @@ export default function Forwarders() {
             {effectiveLayout === 'list' && (
               <div style={styles.forwardersList}>
                 {filteredForwarders.map(forwarder => renderForwarderCard(forwarder))}
-              </div>
-            )}
-            {effectiveLayout === 'split' && (
-              <div style={styles.splitLayout}>
-                <div style={styles.splitList}>
-                  {filteredForwarders.map(forwarder => renderForwarderCard(forwarder, { enablePreviewSelect: true }))}
-                </div>
-                <div style={styles.splitPreview}>
-                  {selectedForwarder ? (
-                    renderForwarderCard(selectedForwarder, { isPreview: true })
-                  ) : (
-                    <div style={styles.splitEmpty}>Selecciona un transitari</div>
-                  )}
-                </div>
               </div>
             )}
           </>
