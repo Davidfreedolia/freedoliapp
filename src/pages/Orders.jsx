@@ -117,6 +117,9 @@ export default function Orders() {
   const [menuOpen, setMenuOpen] = useState(null)
   const [layout, setLayout] = useLayoutPreference('layout:orders', 'grid')
   const [selectedOrderId, setSelectedOrderId] = useState(null)
+  // Rich PO detail loaded for the split-view right pane
+  const [splitDetail, setSplitDetail] = useState(null)
+  const [splitDetailLoading, setSplitDetailLoading] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [editingOrder, setEditingOrder] = useState(null)
   const [downloadingPdf, setDownloadingPdf] = useState(null)
@@ -598,6 +601,24 @@ export default function Orders() {
   const effectiveLayout = isMobile ? 'list' : layout
   const selectedOrderCard = filteredOrders.find(o => o.id === selectedOrderId)
 
+  // Load full PO detail (line items, etc.) when in split mode.
+  useEffect(() => {
+    if (effectiveLayout !== 'split' || !selectedOrderId) {
+      setSplitDetail(null)
+      return
+    }
+    let cancelled = false
+    setSplitDetailLoading(true)
+    getPurchaseOrder(selectedOrderId)
+      .then((row) => { if (!cancelled) setSplitDetail(row || null) })
+      .catch((err) => {
+        console.warn('Failed to load PO detail for split view:', err?.message || err)
+        if (!cancelled) setSplitDetail(null)
+      })
+      .finally(() => { if (!cancelled) setSplitDetailLoading(false) })
+    return () => { cancelled = true }
+  }, [effectiveLayout, selectedOrderId])
+
   const ordersArray = safeArray(orders)
   const stats = useMemo(() => ({
     total: ordersArray.length,
@@ -1016,7 +1037,17 @@ export default function Orders() {
                 </div>
                 <div style={styles.splitPreview}>
                   {selectedOrderCard ? (
-                    renderOrderCard(selectedOrderCard, { isPreview: true })
+                    <SplitPODetail
+                      summary={selectedOrderCard}
+                      detail={splitDetail}
+                      loading={splitDetailLoading}
+                      darkMode={darkMode}
+                      onOpenFull={() => handleViewOrder(selectedOrderCard)}
+                      onOpenProject={(pid) => navigate(`/app/projects/${pid}`)}
+                      formatCurrency={formatCurrency}
+                      formatDate={formatDate}
+                      t={t}
+                    />
                   ) : (
                     <div style={styles.splitEmpty}>{t('orders.splitSelectPrompt')}</div>
                   )}
@@ -1719,4 +1750,136 @@ const styles = {
   itemsTh: { padding: '10px 12px', textAlign: 'left', backgroundColor: 'var(--bg-secondary)', fontWeight: '600', color: '#6b7280' },
   itemsTd: { padding: '10px 12px', borderBottom: '1px solid var(--border-color)', color: '#6b7280' },
   shippingGrid: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', fontSize: '14px', color: '#6b7280' }
+}
+
+/**
+ * Rich PO detail panel rendered in the right side of the split view.
+ * Shows line items (from the PO's items jsonb), totals, dates, tracking and
+ * a quick action to open the full detail modal.
+ */
+function SplitPODetail({ summary, detail, loading, darkMode, onOpenFull, onOpenProject, formatCurrency, formatDate, t }) {
+  const data = detail || summary
+  const items = Array.isArray(data?.items) ? data.items : []
+  const cellTh = { padding: '8px 10px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: 0.5, borderBottom: '1px solid var(--border-1)', background: 'var(--surface-bg-2)' }
+  const cellTd = { padding: '8px 10px', fontSize: 13, color: 'var(--text-1)', borderBottom: '1px solid var(--border-1)' }
+
+  return (
+    <div style={{
+      background: darkMode ? '#15151f' : 'var(--surface-bg)',
+      border: '1px solid var(--border-1)',
+      borderRadius: 12,
+      padding: 16,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 14,
+      position: 'sticky',
+      top: 88,
+      maxHeight: 'calc(100vh - 110px)',
+      overflowY: 'auto'
+    }}>
+      <header style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-1)' }}>
+            {data?.po_number || '—'}
+          </div>
+          <div style={{ fontSize: 13, color: 'var(--text-2)' }}>
+            {data?.supplier?.name || data?.supplier_name || '—'}
+            {data?.project?.name && (
+              <>
+                {' · '}
+                <button
+                  type="button"
+                  onClick={() => data?.project_id && onOpenProject(data.project_id)}
+                  style={{ background: 'none', border: 'none', color: 'var(--accent-primary, #3b82f6)', textDecoration: 'underline', cursor: 'pointer', padding: 0, fontSize: 13 }}
+                >
+                  {data.project.name}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+        <button type="button" onClick={onOpenFull} style={{
+          padding: '6px 10px',
+          fontSize: 12,
+          fontWeight: 600,
+          border: '1px solid var(--border-1)',
+          background: 'var(--surface-bg-2)',
+          color: 'var(--text-1)',
+          borderRadius: 8,
+          cursor: 'pointer'
+        }}>
+          {t('orders.card.view', 'Obrir detall')}
+        </button>
+      </header>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 10 }}>
+        <KV label={t('orders.operational.fields.total', 'Total')} value={formatCurrency(data?.total_amount, data?.currency || 'EUR')} strong />
+        <KV label="Estat" value={t(`orders.status.${data?.status || 'draft'}`)} />
+        <KV label={t('orders.card.date', 'Data')} value={data?.order_date ? formatDate(data.order_date) : '—'} />
+        <KV label={t('orders.operational.fields.eta', 'ETA')} value={data?.etaDate ? formatDate(data.etaDate) : (data?.delivery_date ? formatDate(data.delivery_date) : '—')} />
+        <KV label="Tracking" value={data?.tracking_number || '—'} />
+        <KV label="Incoterm" value={data?.incoterm || '—'} />
+      </div>
+
+      <div>
+        <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--text-2)', marginBottom: 6 }}>
+          Línies de producte {loading ? '· carregant…' : `(${items.length})`}
+        </div>
+        {items.length === 0 ? (
+          <div style={{ padding: 12, color: 'var(--text-2)', fontSize: 13, fontStyle: 'italic' }}>
+            {loading ? '…' : 'Sense línies registrades.'}
+          </div>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>
+                  <th style={cellTh}>SKU / nom</th>
+                  <th style={{ ...cellTh, textAlign: 'right' }}>Qty</th>
+                  <th style={{ ...cellTh, textAlign: 'right' }}>Unitat</th>
+                  <th style={{ ...cellTh, textAlign: 'right' }}>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((it, idx) => {
+                  const qty = Number(it?.quantity ?? it?.qty ?? 0) || 0
+                  const unit = Number(it?.unit_price ?? it?.price ?? 0) || 0
+                  const subtotal = it?.subtotal != null ? Number(it.subtotal) : qty * unit
+                  return (
+                    <tr key={idx}>
+                      <td style={cellTd}>
+                        <div style={{ fontWeight: 600 }}>{it?.sku || it?.name || `Línia ${idx + 1}`}</div>
+                        {it?.name && it?.sku && <div style={{ fontSize: 12, color: 'var(--text-2)' }}>{it.name}</div>}
+                      </td>
+                      <td style={{ ...cellTd, textAlign: 'right' }}>{qty}</td>
+                      <td style={{ ...cellTd, textAlign: 'right' }}>{formatCurrency(unit, data?.currency || 'EUR')}</td>
+                      <td style={{ ...cellTd, textAlign: 'right', fontWeight: 600 }}>{formatCurrency(subtotal, data?.currency || 'EUR')}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {data?.notes && (
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--text-2)', marginBottom: 6 }}>Notes</div>
+          <div style={{ padding: 10, border: '1px solid var(--border-1)', borderRadius: 8, background: 'var(--surface-bg-2)', fontSize: 13, color: 'var(--text-1)', whiteSpace: 'pre-wrap' }}>
+            {data.notes}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function KV({ label, value, strong }) {
+  return (
+    <div style={{ padding: 10, border: '1px solid var(--border-1)', borderRadius: 8, background: 'var(--surface-bg-2)' }}>
+      <div style={{ fontSize: 10, color: 'var(--text-2)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</div>
+      <div style={{ fontSize: strong ? 16 : 13, fontWeight: strong ? 700 : 500, color: 'var(--text-1)', marginTop: 2 }}>{value}</div>
+    </div>
+  )
 }
