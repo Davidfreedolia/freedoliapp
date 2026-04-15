@@ -87,10 +87,7 @@ export default function Trial() {
 
         <div className="auth-card__header">
           <h1 className="auth-card__title">{t('trial.title')}</h1>
-          <p className="auth-card__subtitle">
-            {t('trial.subtitle')}
-          </p>
-          <p className="auth-card__subtitle auth-card__subtitle--secondary">
+          <p className="text-muted text-center mb-4" style={{ fontSize: 15, maxWidth: 340, margin: '0 auto' }}>
             {t('trial.subtitle_flow_hint')}
           </p>
         </div>
@@ -135,10 +132,10 @@ export default function Trial() {
             >
               {t('trial.submit')}
             </Button>
-            <div className="auth-card__divider">
-              <span className="auth-card__dividerLine" />
-              <span className="auth-card__dividerLabel">{t('login.or')}</span>
-              <span className="auth-card__dividerLine" />
+            <div className="d-flex align-items-center gap-3 my-3">
+              <hr className="flex-grow-1 m-0" style={{ borderColor: '#E5E7EB' }} />
+              <span style={{ fontSize: 12, color: '#9CA3AF', fontWeight: 500 }}>{t('auth.or')}</span>
+              <hr className="flex-grow-1 m-0" style={{ borderColor: '#E5E7EB' }} />
             </div>
             {/* BUG 3 — Google button with official SVG logo */}
             <button

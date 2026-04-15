@@ -2451,6 +2451,7 @@
   "auth": {
     "continue_google": "Continuar con Google",
     "already_have_account": "¿Ya tienes cuenta?",
-    "sign_in": "Inicia sesión"
+    "sign_in": "Inicia sesión",
+    "or": "o"
   }
 }

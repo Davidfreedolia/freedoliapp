@@ -2636,6 +2636,7 @@
   "auth": {
     "continue_google": "Continua amb Google",
     "already_have_account": "Ja tens compte?",
-    "sign_in": "Inicia sessió"
+    "sign_in": "Inicia sessió",
+    "or": "o"
   }
 }

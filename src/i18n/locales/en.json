@@ -2436,6 +2436,7 @@
   "auth": {
     "continue_google": "Continue with Google",
     "already_have_account": "Already have an account?",
-    "sign_in": "Sign in"
+    "sign_in": "Sign in",
+    "or": "or"
   }
 }
