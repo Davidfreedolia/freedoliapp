@@ -22,6 +22,7 @@ import { useOrgBilling } from './hooks/useOrgBilling'
 import { createStripeCheckoutSession } from './lib/billingApi'
 import { isDemoMode } from './demo/demoMode'
 import { isScreenshotMode } from './lib/ui/screenshotMode'
+import { isSeatLimitDisabled } from './lib/featureFlags'
 import { supabase } from './lib/supabase'
 import { useOnboardingStatus } from './hooks/useOnboardingStatus'
 import i18n from './i18n'
@@ -379,7 +380,9 @@ function AppContent() {
     const locked = billing
       ? (billing.status === 'past_due' || billing.status === 'canceled' || isTrialExpired)
       : false
-    const overSeat = (usage?.limitsReached?.includes('seats')) === true
+    // BETA: seat limit disabled via VITE_DISABLE_SEAT_LIMIT (frontend only —
+    // backend still enforces). See src/lib/featureFlags.js.
+    const overSeat = !isSeatLimitDisabled() && (usage?.limitsReached?.includes('seats')) === true
     const allowed = !locked && !overSeat
     const gate = locked ? 'locked' : overSeat ? 'over_seat' : null
     const seatsUsed = usage?.seats?.used ?? 0

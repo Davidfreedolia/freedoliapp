@@ -29,6 +29,7 @@ import {
 import { useApp } from '../context/AppContext'
 import { getCompanySettings, updateCompanySettings, uploadCompanyLogo, deleteCompanyLogo, supabase, getAuditLogs, updateLanguage, getCurrentUserId } from '../lib/supabase'
 import { getOrgEntitlements, assertOrgWithinLimit, hasOrgFeature, getOrgFeatureLimit } from '../lib/billing/entitlements'
+import { isSeatLimitDisabled } from '../lib/featureFlags'
 import { createStripePortalSession, createStripeCheckoutSession } from '../lib/billingApi'
 import { clearDemoData, generateDemoData, checkDemoExists } from '../lib/demoSeed'
 import Header from '../components/Header'
@@ -379,7 +380,9 @@ export default function Settings() {
 
   // S3.3.H: seat limit from canonical billing usage (entitlements); fallback to org while loading
   const seatLimit = canonicalSeatsLimit ?? org?.seat_limit ?? null
-  const seatLimitReached = seatLimit != null && seatsUsed >= seatLimit
+  // BETA: seat limit disabled via VITE_DISABLE_SEAT_LIMIT (frontend only —
+  // backend RPC `org_add_member` still enforces). See src/lib/featureFlags.js.
+  const seatLimitReached = !isSeatLimitDisabled() && seatLimit != null && seatsUsed >= seatLimit
 
   const handleUpdateMemberStatus = async (member, nextStatus) => {
     if (!org?.id || !member?.user_id || updatingMemberId) return

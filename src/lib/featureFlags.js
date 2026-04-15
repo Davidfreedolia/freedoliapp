@@ -24,3 +24,18 @@ function readBool(envKey) {
  * Enable with: VITE_ENABLE_TRACKING_SYNC=true
  */
 export const isTrackingSyncEnabled = () => readBool('VITE_ENABLE_TRACKING_SYNC')
+
+/**
+ * Beta override — disable the seat-limit gate on the frontend.
+ *
+ * During closed beta the Stripe entitlement may still report `team.seats=1`
+ * while the user is invited to a workspace that already has them as a
+ * member, which routes them to `/app/billing/over-seat` and locks the app.
+ *
+ * Enabling this flag bypasses the `over_seat` gate in `App.jsx` and the
+ * "Add member" check in `Settings.jsx`. Backend / Edge Functions still
+ * enforce the limit — this is purely a UX unblock.
+ *
+ * Enable with: VITE_DISABLE_SEAT_LIMIT=true
+ */
+export const isSeatLimitDisabled = () => readBool('VITE_DISABLE_SEAT_LIMIT')
