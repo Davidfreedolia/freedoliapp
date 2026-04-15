@@ -1,7 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, lazy, Suspense } from 'react'
 import {
   AlertTriangle,
   Filter,
+  List,
+  Columns,
+  Grid2X2,
+  MapPin,
   Package,
   RefreshCw,
   Search,
@@ -11,11 +15,20 @@ import {
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
-import { supabase, getProjects } from '../lib/supabase'
+import { supabase, getProjects, getWarehouses } from '../lib/supabase'
 import Header from '../components/Header'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import Button from '../components/Button'
 import LayoutSwitcher from '../components/LayoutSwitcher'
+
+const WarehouseMap = lazy(() => import('../components/inventory/WarehouseMap'))
+
+const INVENTORY_VIEW_OPTIONS = [
+  { id: 'list', label: 'Llista', Icon: List },
+  { id: 'split', label: 'Split', Icon: Columns },
+  { id: 'grid', label: 'Graella', Icon: Grid2X2 },
+  { id: 'map', label: 'Mapa', Icon: MapPin }
+]
 import { useLayoutPreference } from '../hooks/useLayoutPreference'
 import { DataLoading, DataEmpty, DataError } from '../components/dataStates'
 import { useTranslation } from 'react-i18next'
@@ -176,6 +189,7 @@ export default function Inventory() {
 
   const [inventory, setInventory] = useState([])
   const [projects, setProjects] = useState([])
+  const [warehouses, setWarehouses] = useState([])
   const [salesRows, setSalesRows] = useState([])
   const [shipmentRows, setShipmentRows] = useState([])
   const [loading, setLoading] = useState(true)
@@ -197,6 +211,7 @@ export default function Inventory() {
       if (!activeOrgId) {
         setProjects([])
         setInventory([])
+        setWarehouses([])
         setSalesRows([])
         setShipmentRows([])
         setLoading(false)
@@ -204,7 +219,7 @@ export default function Inventory() {
       }
 
       const demoMode = await getDemoMode()
-      const [projectsData, inventoryResult, salesResult, shipmentsResult] = await Promise.all([
+      const [projectsData, inventoryResult, salesResult, shipmentsResult, warehousesData] = await Promise.all([
         getProjects(true, activeOrgId),
         supabase
           .from('inventory')
@@ -220,10 +235,15 @@ export default function Inventory() {
         supabase
           .from('shipments')
           .select('id, status, eta_estimated, destination_type, destination_country, destination_amazon_fc_code, purchase_orders!inner(project_id)')
-          .eq('org_id', activeOrgId)
+          .eq('org_id', activeOrgId),
+        getWarehouses(activeOrgId).catch(err => {
+          console.warn('[Inventory] warehouses unavailable', err)
+          return []
+        })
       ])
 
       setProjects(projectsData || [])
+      setWarehouses(warehousesData || [])
 
       const { data: inventoryData, error: inventoryError } = inventoryResult
       if (inventoryError) throw inventoryError
@@ -354,6 +374,34 @@ export default function Inventory() {
 
   const effectiveLayout = isMobile ? 'list' : layout
   const selectedInventoryItem = filteredInventory.find(i => i.id === selectedInventoryId)
+
+  /**
+   * The inventory schema splits stock into FBA vs FBM buckets per SKU
+   * but doesn't reference a specific warehouse row. Map view aggregates
+   * per-warehouse by bucket: FBA warehouses get the `units_amazon_fba`
+   * of each SKU, non-FBA warehouses get the `units_amazon_fbm`.
+   */
+  const stockByWarehouse = useMemo(() => {
+    const map = new Map()
+    if (!warehouses.length) return map
+    const isFbaWh = (wh) => {
+      if (wh.type === 'amazon_fba' || wh.kind === 'amazon_fba') return true
+      const n = (wh.name || '').toLowerCase()
+      return n.includes('amazon') || n.includes('fba')
+    }
+    for (const wh of warehouses) {
+      const isFba = isFbaWh(wh)
+      const items = []
+      for (const item of filteredInventory) {
+        const units = isFba ? safeNumber(item.amazonStock) : safeNumber(item.warehouseStock)
+        if (units <= 0) continue
+        items.push({ sku: item.sku || '—', units })
+      }
+      items.sort((a, b) => b.units - a.units)
+      map.set(wh.id, items.slice(0, 50))
+    }
+    return map
+  }, [warehouses, filteredInventory])
 
   const renderInventoryCard = (item, { isPreview = false, enablePreviewSelect = false } = {}) => {
     const hasProjectNavigation = Boolean(item.project_id) && !item.isDemoSeed
@@ -607,6 +655,7 @@ export default function Inventory() {
               value={effectiveLayout}
               onChange={setLayout}
               compact={isMobile}
+              options={INVENTORY_VIEW_OPTIONS}
             />
           </div>
         </div>
@@ -619,7 +668,7 @@ export default function Inventory() {
           <div style={{ ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff', border: '1px solid var(--border-color)' }}>
             <DataError message={error} onRetry={loadData} />
           </div>
-        ) : filteredInventory.length === 0 ? (
+        ) : filteredInventory.length === 0 && effectiveLayout !== 'map' ? (
           <div style={{ ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
             <DataEmpty
               message="No hi ha SKU operatives per a aquesta selecció."
@@ -637,6 +686,20 @@ export default function Inventory() {
               <div style={styles.inventoryList}>
                 {filteredInventory.map(item => renderInventoryCard(item))}
               </div>
+            )}
+            {effectiveLayout === 'map' && (
+              <Suspense fallback={
+                <div style={{ padding: 64, ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
+                  <DataLoading message="Carregant mapa…" />
+                </div>
+              }>
+                <WarehouseMap
+                  warehouses={warehouses}
+                  stockByWarehouse={stockByWarehouse}
+                  darkMode={darkMode}
+                  height={isMobile ? 420 : 620}
+                />
+              </Suspense>
             )}
             {effectiveLayout === 'split' && (
               <div style={styles.splitLayout}>
