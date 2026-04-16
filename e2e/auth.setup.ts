@@ -2,11 +2,40 @@ import { test as setup } from "@playwright/test";
 import fs from "fs";
 import path from "path";
 
+const storageStatePath = path.join(process.cwd(), "e2e", ".auth", "storageState.json");
+
+function hasValidAuthToken(): boolean {
+  try {
+    if (!fs.existsSync(storageStatePath)) return false;
+    const saved = JSON.parse(fs.readFileSync(storageStatePath, "utf8"));
+    const allKeys = (saved.origins || []).flatMap((o: any) =>
+      (o.localStorage || []).map((e: any) => e.name)
+    );
+    const hasToken = allKeys.some((k: string) =>
+      k.includes("auth-token") || k.startsWith("sb-") || k === "freedoliapp-auth"
+    );
+    if (!hasToken) return false;
+    // Comprova que el token no hagi caducat (max 1 hora d'antiguitat del fitxer)
+    const stat = fs.statSync(storageStatePath);
+    const ageMs = Date.now() - stat.mtimeMs;
+    return ageMs < 60 * 60 * 1000; // 1 hora
+  } catch {
+    return false;
+  }
+}
+
 setup("auth: capture storageState", async ({ page }) => {
+  // Si ja tenim un storageState vàlid amb token, no el sobreescribim
+  if (hasValidAuthToken()) {
+    console.log("✅ storageState existent i vàlid — no es sobreescriu.");
+    return;
+  }
+
   await page.goto("/");
 
   console.log("⏳ Esperant que facis login manualment...");
   console.log("   Buscant indicadors d'autenticació: sidebar, dashboard, finances...");
+  console.log("   (o executa: node e2e/login-and-save.mjs per fer-ho automàtic)");
 
   await Promise.race([
     page.getByText(/Finances|Despeses|Expenses/i).first().waitFor({ timeout: 120_000 }),
@@ -23,7 +52,6 @@ setup("auth: capture storageState", async ({ page }) => {
   const authDir = path.join(process.cwd(), "e2e", ".auth");
   fs.mkdirSync(authDir, { recursive: true });
 
-  const storageStatePath = path.join(authDir, "storageState.json");
   await page.context().storageState({ path: storageStatePath });
 
   console.log("✅ Storage state guardat correctament a:");
