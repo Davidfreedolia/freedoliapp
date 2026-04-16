@@ -2345,7 +2345,20 @@
     "title": "Gestiona tu negocio Amazon FBA desde un solo lugar",
     "subtitle": "Pipeline visual, calculadora de rentabilidad FBA, importación desde 16 herramientas y análisis IA. Todo integrado.",
     "cta_primary": "Empezar gratis",
-    "cta_secondary": "Ver demo"
+    "cta_secondary": "Ver demo",
+    "badge": "🚀 Ahora en beta cerrada — plazas limitadas",
+    "stat1": {
+      "value": "500+",
+      "label": "Vendedores activos"
+    },
+    "stat2": {
+      "value": "12k€",
+      "label": "Ahorro medio/mes"
+    },
+    "stat3": {
+      "value": "5min",
+      "label": "Para tomar decisiones"
+    }
   },
   "logos": {
     "label": "Importación compatible con:"

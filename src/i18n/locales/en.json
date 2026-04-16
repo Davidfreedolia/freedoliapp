@@ -2330,7 +2330,20 @@
     "title": "Manage your Amazon FBA business from one place",
     "subtitle": "Visual pipeline, FBA profitability calculator, import from 16 tools and AI analysis. All integrated.",
     "cta_primary": "Start for free",
-    "cta_secondary": "Watch demo"
+    "cta_secondary": "Watch demo",
+    "badge": "🚀 Now in closed beta — limited spots",
+    "stat1": {
+      "value": "500+",
+      "label": "Active sellers"
+    },
+    "stat2": {
+      "value": "12k€",
+      "label": "Average savings/mo"
+    },
+    "stat3": {
+      "value": "5min",
+      "label": "To make decisions"
+    }
   },
   "logos": {
     "label": "Compatible with:"

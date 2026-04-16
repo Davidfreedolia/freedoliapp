@@ -80,9 +80,10 @@ function VisualSection({ imgSrc, titleKey, textKey, reverse = false }) {
 export default function Landing() {
   const navigate     = useNavigate()
   const { t, i18n } = useTranslation()
-  const [scrolled,  setScrolled]  = useState(false)
-  const [yearly,    setYearly]    = useState(false)
-  const [openFaq,   setOpenFaq]   = useState(null)
+  const [scrolled,     setScrolled]     = useState(false)
+  const [yearly,       setYearly]       = useState(false)
+  const [openFaq,      setOpenFaq]      = useState(null)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   /* scroll watcher for navbar */
   useEffect(() => {
@@ -164,14 +165,60 @@ export default function Landing() {
               <Globe size={14} />
               {(i18n.language || 'ca').slice(0,2).toUpperCase()}
             </button>
-            <button className="ld-btn ld-btn--ghost"   onClick={() => navigate('/login')}>
+            <button className="ld-btn ld-btn--ghost d-none d-md-inline-flex" onClick={() => navigate('/login')}>
               {t('landing.nav.login')}
             </button>
-            <button className="ld-btn ld-btn--primary" onClick={() => navigate('/trial')}>
+            <button className="ld-btn ld-btn--primary d-none d-md-inline-flex" onClick={() => navigate('/trial')}>
               {t('landing.nav.cta')}
+            </button>
+            {/* hamburger — mobile only */}
+            <button
+              className="d-md-none ld-btn ld-btn--ghost"
+              onClick={() => setMobileMenuOpen(o => !o)}
+              aria-label="Menu"
+              style={{ padding: '6px 10px', fontSize: 20, lineHeight: 1 }}
+            >
+              {mobileMenuOpen ? '✕' : '☰'}
             </button>
           </div>
         </div>
+
+        {/* Mobile dropdown menu */}
+        {mobileMenuOpen && (
+          <div className="d-md-none" style={{
+            position: 'absolute', top: '100%', left: 0, right: 0,
+            background: '#1F5F63', borderTop: '1px solid rgba(255,255,255,0.12)',
+            padding: '12px 20px 20px', display: 'flex', flexDirection: 'column', gap: 4,
+            zIndex: 999,
+          }}>
+            {[
+              { href: '#features', label: t('landing.nav.features') },
+              { href: '#how',      label: t('landing.nav.how') },
+              { href: '#pricing',  label: t('landing.nav.pricing') },
+            ].map(item => (
+              <a
+                key={item.href}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                style={{
+                  color: 'rgba(255,255,255,0.85)', fontSize: 15, fontWeight: 500,
+                  textDecoration: 'none', padding: '10px 0',
+                  borderBottom: '1px solid rgba(255,255,255,0.08)',
+                }}
+              >
+                {item.label}
+              </a>
+            ))}
+            <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
+              <button className="ld-btn ld-btn--ghost" style={{ flex: 1 }} onClick={() => { setMobileMenuOpen(false); navigate('/login') }}>
+                {t('landing.nav.login')}
+              </button>
+              <button className="ld-btn ld-btn--primary" style={{ flex: 1 }} onClick={() => { setMobileMenuOpen(false); navigate('/trial') }}>
+                {t('landing.nav.cta')}
+              </button>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* ── 2. HERO (CANVI 1 — parallax) ─────────────────────────────────── */}
@@ -219,9 +266,21 @@ export default function Landing() {
 
             {/* text left */}
             <div className="col-12 col-md-6 text-white">
+              {/* eyebrow badge */}
+              <div className="mb-3">
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  background: 'rgba(110,203,195,0.18)', border: '1px solid rgba(110,203,195,0.4)',
+                  borderRadius: 20, padding: '5px 14px', fontSize: 13, fontWeight: 600,
+                  color: '#6ECBC3', letterSpacing: '0.01em',
+                }}>
+                  {t('hero.badge')}
+                </span>
+              </div>
+
               <h1 className="display-4 fw-bold mb-4">{t('hero.title')}</h1>
               <p className="lead mb-5 opacity-75">{t('hero.subtitle')}</p>
-              <div className="d-flex flex-wrap gap-3">
+              <div className="d-flex flex-wrap gap-3 mb-5">
                 <a
                   href="/register"
                   className="btn btn-lg px-5 py-3 fw-semibold"
@@ -236,6 +295,20 @@ export default function Landing() {
                 >
                   {t('hero.cta_secondary')}
                 </a>
+              </div>
+
+              {/* 3 stats */}
+              <div className="d-flex flex-wrap gap-4">
+                {[
+                  { value: t('hero.stat1.value'), label: t('hero.stat1.label') },
+                  { value: t('hero.stat2.value'), label: t('hero.stat2.label') },
+                  { value: t('hero.stat3.value'), label: t('hero.stat3.label') },
+                ].map((s, i) => (
+                  <div key={i}>
+                    <div style={{ fontSize: 26, fontWeight: 800, color: '#6ECBC3', lineHeight: 1 }}>{s.value}</div>
+                    <div style={{ fontSize: 12, opacity: 0.7, marginTop: 3 }}>{s.label}</div>
+                  </div>
+                ))}
               </div>
             </div>
 

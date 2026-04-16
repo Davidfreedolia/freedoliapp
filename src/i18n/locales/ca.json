@@ -2530,7 +2530,20 @@
     "title": "Gestiona el teu negoci Amazon FBA des d'un sol lloc",
     "subtitle": "Pipeline visual, calculadora de rendibilitat FBA, importació des de 16 eines i anàlisi IA. Tot integrat.",
     "cta_primary": "Comença gratis",
-    "cta_secondary": "Veure demo"
+    "cta_secondary": "Veure demo",
+    "badge": "🚀 Ara en beta tancada — places limitades",
+    "stat1": {
+      "value": "500+",
+      "label": "Venedors actius"
+    },
+    "stat2": {
+      "value": "12k€",
+      "label": "Estalvi mig/mes"
+    },
+    "stat3": {
+      "value": "5min",
+      "label": "Per prendre decisions"
+    }
   },
   "logos": {
     "label": "Importació compatible amb:"
