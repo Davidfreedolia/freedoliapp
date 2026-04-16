@@ -11,6 +11,11 @@ export async function createTestExpense(page: Page): Promise<{ reference: string
   // Navigate to finances page
   await page.goto("/finances");
   
+  // Si redirigeix al login, el storageState és invàlid — fallem clarament
+  await page.waitForURL(/\/finances|\/app\/finances/, { timeout: 15_000 }).catch(() => {
+    throw new Error('No s\'ha pogut navegar a /finances. Sessió caducada? Torna a executar: npx playwright test auth')
+  });
+  
   // Wait for page to load
   await expect(page.getByPlaceholder(/Buscar|buscar/i).first()).toBeVisible({ timeout: 10_000 });
   

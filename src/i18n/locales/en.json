@@ -755,7 +755,8 @@
     "back": "Back",
     "continueWithGoogle": "Continue with Google",
     "continueWithApple": "Continue with Apple",
-    "or": "or"
+    "or": "or",
+    "subtitle_existing": "Welcome back"
   },
   "trial": {
     "title": "Start your free trial",

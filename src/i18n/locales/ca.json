@@ -755,7 +755,8 @@
     "back": "Tornar",
     "continueWithGoogle": "Inicia sessió amb Google",
     "continueWithApple": "Inicia sessió amb Apple",
-    "or": "o"
+    "or": "o",
+    "subtitle_existing": "Benvingut/da de nou"
   },
   "trial": {
     "title": "Comença el teu trial gratuït",

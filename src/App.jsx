@@ -377,9 +377,9 @@ function AppContent() {
       setBillingState((prev) => (prev.loading ? prev : { ...prev, loading: true }))
       return
     }
-    const locked = billing
+    const locked = !isSeatLimitDisabled() && (billing
       ? (billing.status === 'past_due' || billing.status === 'canceled' || isTrialExpired)
-      : false
+      : false)
     // BETA: seat limit disabled via VITE_DISABLE_SEAT_LIMIT (frontend only —
     // backend still enforces). See src/lib/featureFlags.js.
     const overSeat = !isSeatLimitDisabled() && (usage?.limitsReached?.includes('seats')) === true

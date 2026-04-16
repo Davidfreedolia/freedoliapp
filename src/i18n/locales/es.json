@@ -755,7 +755,8 @@
     "back": "Volver",
     "continueWithGoogle": "Iniciar sesión con Google",
     "continueWithApple": "Iniciar sesión con Apple",
-    "or": "o"
+    "or": "o",
+    "subtitle_existing": "Bienvenido/a de nuevo"
   },
   "trial": {
     "title": "Empieza tu trial gratuito",
