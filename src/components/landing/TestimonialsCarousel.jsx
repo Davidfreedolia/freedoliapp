@@ -6,21 +6,21 @@
  *  - requestAnimationFrame auto-scroll (0.5 px / frame)
  *  - Mouse drag support (desktop)
  *  - Auto-scroll pauses on hover / drag
- *  - Dicebear avatar SVGs (no download needed)
+ *  - Real Unsplash portrait photos (professional headshots)
  *  - 100 % i18n via useTranslation()
  */
 import { useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
 const TESTIMONIALS = [
-  { nameKey: 'testimonial_1.name', roleKey: 'testimonial_1.role', textKey: 'testimonial_1.text', seed: 'Carlos' },
-  { nameKey: 'testimonial_2.name', roleKey: 'testimonial_2.role', textKey: 'testimonial_2.text', seed: 'Laura' },
-  { nameKey: 'testimonial_3.name', roleKey: 'testimonial_3.role', textKey: 'testimonial_3.text', seed: 'Miquel' },
-  { nameKey: 'testimonial_4.name', roleKey: 'testimonial_4.role', textKey: 'testimonial_4.text', seed: 'Ana' },
-  { nameKey: 'testimonial_5.name', roleKey: 'testimonial_5.role', textKey: 'testimonial_5.text', seed: 'Jordi' },
-  { nameKey: 'testimonial_6.name', roleKey: 'testimonial_6.role', textKey: 'testimonial_6.text', seed: 'Sara' },
-  { nameKey: 'testimonial_7.name', roleKey: 'testimonial_7.role', textKey: 'testimonial_7.text', seed: 'Marc' },
-  { nameKey: 'testimonial_8.name', roleKey: 'testimonial_8.role', textKey: 'testimonial_8.text', seed: 'Elena' },
+  { nameKey: 'testimonial_1.name', roleKey: 'testimonial_1.role', textKey: 'testimonial_1.text', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face' },
+  { nameKey: 'testimonial_2.name', roleKey: 'testimonial_2.role', textKey: 'testimonial_2.text', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face' },
+  { nameKey: 'testimonial_3.name', roleKey: 'testimonial_3.role', textKey: 'testimonial_3.text', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face' },
+  { nameKey: 'testimonial_4.name', roleKey: 'testimonial_4.role', textKey: 'testimonial_4.text', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&crop=face' },
+  { nameKey: 'testimonial_5.name', roleKey: 'testimonial_5.role', textKey: 'testimonial_5.text', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=face' },
+  { nameKey: 'testimonial_6.name', roleKey: 'testimonial_6.role', textKey: 'testimonial_6.text', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop&crop=face' },
+  { nameKey: 'testimonial_7.name', roleKey: 'testimonial_7.role', textKey: 'testimonial_7.text', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&crop=face' },
+  { nameKey: 'testimonial_8.name', roleKey: 'testimonial_8.role', textKey: 'testimonial_8.text', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=80&h=80&fit=crop&crop=face' },
 ]
 
 export function TestimonialsCarousel() {
@@ -113,9 +113,9 @@ export function TestimonialsCarousel() {
             </p>
             <div className="d-flex align-items-center gap-3">
               <img
-                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${item.seed}`}
+                src={item.avatar}
                 alt={t(item.nameKey)}
-                style={{ width: 44, height: 44, borderRadius: '50%', background: '#E5E7EB' }}
+                style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', border: '2px solid #E5E7EB' }}
               />
               <div>
                 <div className="fw-semibold" style={{ fontSize: 14 }}>{t(item.nameKey)}</div>

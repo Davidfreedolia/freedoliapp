@@ -314,7 +314,7 @@ export default function Landing() {
         textKey="visual_a.text"
       />
       <VisualSection
-        imgSrc="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80"
+        imgSrc="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&q=80"
         titleKey="visual_b.title"
         textKey="visual_b.text"
         reverse
