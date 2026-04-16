@@ -855,6 +855,16 @@ async function handleSubscriptionDeleted(event: Stripe.Event): Promise<void> {
 }
 
 Deno.serve(async (req: Request) => {
+  // Beta bypass: if BETA_MODE=true, acknowledge Stripe events without processing.
+  // Remove once Stripe is live in production.
+  if (Deno.env.get("BETA_MODE") === "true") {
+    console.info("[stripe_webhook] BETA_MODE active — skipping event processing");
+    return new Response(JSON.stringify({ ok: true, beta: true }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
   }

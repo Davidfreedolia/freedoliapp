@@ -3,11 +3,15 @@ import { useWorkspace } from '../../contexts/WorkspaceContext'
 import { useOrgBilling } from '../../hooks/useOrgBilling'
 import Button from '../ui/Button'
 import useT from '../../hooks/useT'
+import { isBillingLimitsDisabled } from '../../lib/featureFlags'
 
 export default function BillingBanner() {
   const { activeOrgId } = useWorkspace()
   const { loading, billing, isTrialExpired } = useOrgBilling(activeOrgId ?? null)
   const t = useT()
+
+  // Beta bypass: no billing gates during closed beta
+  if (isBillingLimitsDisabled()) return null
 
   if (loading || !billing) return null
 

@@ -8,6 +8,7 @@ import { createStripeCheckoutSession, createStripePortalSession } from '../lib/b
 import { showToast } from '../components/Toast'
 import AppLanguageControl from '../components/AppLanguageControl'
 import { useOrgBilling } from '../hooks/useOrgBilling'
+import { isBillingLimitsDisabled } from '../lib/featureFlags'
 
 export default function BillingLocked() {
   const location = useLocation()
@@ -62,6 +63,9 @@ export default function BillingLocked() {
       setActionLoading(false)
     }
   }
+
+  // Beta bypass: never lock users during closed beta (no Stripe subscriptions yet)
+  if (isBillingLimitsDisabled()) return <Navigate to="/app" replace />
 
   const status = billing?.status ?? 'inactive'
   const hasCustomer = !!billing?.stripe_customer_id

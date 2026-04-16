@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, Navigate } from 'react-router-dom'
 import { useWorkspace } from '../contexts/WorkspaceContext'
 import { useBillingUsage } from '../hooks/useBillingUsage'
 import { useLang } from '../i18n/useLang'
@@ -8,6 +8,7 @@ import { supabase, createOrGetTaskFromOrigin } from '../lib/supabase'
 import { createStripePortalSession } from '../lib/billingApi'
 import { showToast } from '../components/Toast'
 import AppLanguageControl from '../components/AppLanguageControl'
+import { isBillingLimitsDisabled } from '../lib/featureFlags'
 
 export default function BillingOverSeat() {
   const location = useLocation()
@@ -20,6 +21,9 @@ export default function BillingOverSeat() {
   const [loading, setLoading] = useState(!location.state?.org)
   const [actionLoading, setActionLoading] = useState(false)
   const [unblockTaskLoading, setUnblockTaskLoading] = useState(false)
+
+  // Beta bypass: seat limits not enforced during closed beta
+  if (isBillingLimitsDisabled()) return <Navigate to="/app" replace />
 
   const isOwnerAdmin = memberships.some(
     (m) => m.org_id === activeOrgId && (m.role === 'owner' || m.role === 'admin')
