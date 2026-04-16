@@ -299,6 +299,7 @@ export default function Sidebar() {
                     : (hoveredPath === item.path ? 'var(--nav-highlight)' : 'transparent'),
                   color: isActive ? 'var(--nav-fg)' : 'var(--nav-fg-muted)',
                   border: `1px solid ${isActive ? 'rgba(110, 203, 195, 0.22)' : 'transparent'}`,
+                  borderLeft: isActive ? '3px solid #6ECBC3' : '3px solid transparent',
                   padding: shouldCollapse ? '11px 0' : '11px 14px',
                   borderRadius: shouldCollapse ? '10px' : '12px',
                   justifyContent: shouldCollapse ? 'center' : 'flex-start'

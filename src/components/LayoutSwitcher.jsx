@@ -23,7 +23,10 @@ export default function LayoutSwitcher({ value, onChange, compact = false, optio
             aria-label={option.label}
             variant="ghost"
             size="sm"
-            style={compact ? styles.buttonCompact : styles.buttonBase}
+            style={compact
+              ? { ...styles.buttonCompact, ...(isActive ? styles.buttonActive : {}) }
+              : { ...styles.buttonBase, ...(isActive ? styles.buttonActive : {}) }
+            }
             className={`btn-icon btn-ghost view-btn layout-switcher__btn ${isActive ? 'is-active' : ''}`}
           >
             <option.Icon size={compact ? 16 : 18} />
@@ -38,7 +41,7 @@ const styles = {
   container: {
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '8px',
+    gap: '4px',
     padding: 0,
     border: 'none',
     backgroundColor: 'transparent'
@@ -46,14 +49,22 @@ const styles = {
   buttonBase: {
     boxShadow: 'none',
     backgroundColor: 'transparent',
-    border: 'none',
-    padding: 0
+    border: '1.5px solid transparent',
+    borderRadius: 8,
+    padding: '4px 8px',
+    transition: 'background-color 0.12s, border-color 0.12s'
   },
   buttonCompact: {
     minWidth: 'var(--h-btn)',
-    padding: 0,
+    padding: '4px',
     boxShadow: 'none',
     backgroundColor: 'transparent',
-    border: 'none'
+    border: '1.5px solid transparent',
+    borderRadius: 8,
+    transition: 'background-color 0.12s, border-color 0.12s'
+  },
+  buttonActive: {
+    backgroundColor: 'rgba(110, 203, 195, 0.15)',
+    borderColor: '#6ECBC3'
   }
 }

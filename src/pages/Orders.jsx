@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { 
-  Plus, 
-  Search, 
+import {
+  Plus,
+  Search,
   FileText,
   Download,
   Eye,
@@ -23,7 +23,9 @@ import {
   X,
   Ship,
   RefreshCw,
-  Filter
+  Filter,
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { 
@@ -147,6 +149,7 @@ export default function Orders() {
   const [manufacturerPackIdentifiers, setManufacturerPackIdentifiers] = useState(null)
   const [selectedOrders] = useState(new Set())
   // Removed unused bulkActionLoading state
+  const [collapsedOrderGroups, setCollapsedOrderGroups] = useState(new Set())
 
   useEffect(() => {
     loadData()
@@ -1025,11 +1028,68 @@ export default function Orders() {
                 {filteredOrders.map(order => renderOrderCard(order))}
               </div>
             )}
-            {effectiveLayout === 'list' && (
-              <div style={styles.ordersList}>
-                {filteredOrders.map(order => renderOrderCard(order))}
-              </div>
-            )}
+            {effectiveLayout === 'list' && (() => {
+              const STATUS_ORDER = ['draft', 'sent', 'confirmed', 'partial_paid', 'paid', 'in_production', 'shipped', 'received', 'cancelled']
+              const groups = STATUS_ORDER.reduce((acc, status) => {
+                const items = filteredOrders.filter(o => (o.status || 'draft') === status)
+                if (items.length > 0) acc.push({ status, items })
+                return acc
+              }, [])
+              const uncategorised = filteredOrders.filter(o => !STATUS_ORDER.includes(o.status))
+              if (uncategorised.length > 0) groups.push({ status: 'other', items: uncategorised })
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {groups.map(({ status, items: groupItems }) => {
+                    const meta = PO_STATUS_META[status] || { color: '#6b7280' }
+                    const label = STATUS_ORDER.includes(status) ? t(`orders.status.${status}`) : t('orders.statusOther', { defaultValue: 'Other' })
+                    const isCollapsed = collapsedOrderGroups.has(status)
+                    const toggleGroup = () => setCollapsedOrderGroups(prev => {
+                      const next = new Set(prev)
+                      if (next.has(status)) next.delete(status)
+                      else next.add(status)
+                      return next
+                    })
+                    return (
+                      <div key={status}>
+                        {/* Group header */}
+                        <button
+                          type="button"
+                          onClick={toggleGroup}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 8,
+                            width: '100%', padding: '6px 10px', marginBottom: isCollapsed ? 0 : 8,
+                            background: 'transparent', border: 'none', cursor: 'pointer',
+                            borderRadius: 8, textAlign: 'left',
+                            color: darkMode ? '#d1d5db' : '#374151'
+                          }}
+                        >
+                          {isCollapsed
+                            ? <ChevronRight size={14} style={{ flexShrink: 0, opacity: 0.6 }} />
+                            : <ChevronDown size={14} style={{ flexShrink: 0, opacity: 0.6 }} />
+                          }
+                          <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: meta.color, flexShrink: 0 }} />
+                          <span style={{ fontWeight: 600, fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                            {label}
+                          </span>
+                          <span style={{
+                            marginLeft: 4, fontSize: 11, fontWeight: 600, padding: '1px 6px',
+                            borderRadius: 10, backgroundColor: meta.color + '22', color: meta.color
+                          }}>
+                            {groupItems.length}
+                          </span>
+                        </button>
+                        {/* Group items */}
+                        {!isCollapsed && (
+                          <div style={styles.ordersList}>
+                            {groupItems.map(order => renderOrderCard(order))}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )
+            })()}
             {effectiveLayout === 'split' && (
               <div style={styles.splitLayout}>
                 <div style={styles.splitList}>

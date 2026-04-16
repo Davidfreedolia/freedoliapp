@@ -6260,6 +6260,18 @@ main > :not(.page-dashboard) .panel {
   border: none;
 }
 
+/* ── Card hover animation (ClickUp style) ─────────────────────────── */
+.card,
+.panel {
+  border-radius: 12px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.card:hover,
+.panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
 .fd-switch {
   width: 44px;
   height: 24px;

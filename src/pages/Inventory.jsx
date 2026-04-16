@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState, lazy, Suspense } from 'react'
 import {
   AlertTriangle,
+  ChevronDown,
+  ChevronRight,
   Filter,
   List,
   Columns,
@@ -199,6 +201,7 @@ export default function Inventory() {
   const [filterStatus, setFilterStatus] = useState('')
   const [layout, setLayout] = useLayoutPreference('layout:inventory', 'grid')
   const [selectedInventoryId, setSelectedInventoryId] = useState(null)
+  const [collapsedInventoryGroups, setCollapsedInventoryGroups] = useState(new Set())
 
   useEffect(() => {
     loadData()
@@ -682,11 +685,65 @@ export default function Inventory() {
                 {filteredInventory.map(item => renderInventoryCard(item))}
               </div>
             )}
-            {effectiveLayout === 'list' && (
-              <div style={styles.inventoryList}>
-                {filteredInventory.map(item => renderInventoryCard(item))}
-              </div>
-            )}
+            {effectiveLayout === 'list' && (() => {
+              const DECISION_ORDER = ['reorder', 'watch', 'do_not_reorder', 'let_die']
+              const groups = DECISION_ORDER.reduce((acc, key) => {
+                const meta = DECISION_META[key]
+                const items = filteredInventory.filter(item => item.decision?.label === meta.label)
+                if (items.length > 0) acc.push({ key, meta, items })
+                return acc
+              }, [])
+              const uncategorised = filteredInventory.filter(item => !DECISION_ORDER.some(k => DECISION_META[k].label === item.decision?.label))
+              if (uncategorised.length > 0) groups.push({ key: 'other', meta: { label: 'Other', tone: '#6b7280', background: 'rgba(107, 114, 128, 0.14)' }, items: uncategorised })
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {groups.map(({ key, meta, items: groupItems }) => {
+                    const isCollapsed = collapsedInventoryGroups.has(key)
+                    const toggleGroup = () => setCollapsedInventoryGroups(prev => {
+                      const next = new Set(prev)
+                      if (next.has(key)) next.delete(key)
+                      else next.add(key)
+                      return next
+                    })
+                    return (
+                      <div key={key}>
+                        <button
+                          type="button"
+                          onClick={toggleGroup}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 8,
+                            width: '100%', padding: '6px 10px', marginBottom: isCollapsed ? 0 : 8,
+                            background: 'transparent', border: 'none', cursor: 'pointer',
+                            borderRadius: 8, textAlign: 'left',
+                            color: darkMode ? '#d1d5db' : '#374151'
+                          }}
+                        >
+                          {isCollapsed
+                            ? <ChevronRight size={14} style={{ flexShrink: 0, opacity: 0.6 }} />
+                            : <ChevronDown size={14} style={{ flexShrink: 0, opacity: 0.6 }} />
+                          }
+                          <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: meta.tone, flexShrink: 0 }} />
+                          <span style={{ fontWeight: 600, fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                            {meta.label}
+                          </span>
+                          <span style={{
+                            marginLeft: 4, fontSize: 11, fontWeight: 600, padding: '1px 6px',
+                            borderRadius: 10, backgroundColor: meta.background, color: meta.tone
+                          }}>
+                            {groupItems.length}
+                          </span>
+                        </button>
+                        {!isCollapsed && (
+                          <div style={styles.inventoryList}>
+                            {groupItems.map(item => renderInventoryCard(item))}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )
+            })()}
             {effectiveLayout === 'map' && (
               <Suspense fallback={
                 <div style={{ padding: 64, ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
