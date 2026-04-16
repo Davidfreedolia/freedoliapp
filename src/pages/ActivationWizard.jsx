@@ -394,6 +394,25 @@ export default function ActivationWizard() {
     return () => { cancelled = true }
   }, [step, activeOrgId])
 
+  const saveOnboardingData = async ({ tools = selectedTools, found = howFound } = {}) => {
+    if (!activeOrgId) return
+    try {
+      await supabase
+        .from('org_onboarding_data')
+        .upsert(
+          {
+            org_id: activeOrgId,
+            tools_used: tools,
+            how_found: found ?? null,
+          },
+          { onConflict: 'org_id' }
+        )
+    } catch (err) {
+      // Non-blocking — wizard continues even if save fails
+      activationWarn('saveOnboardingData.failed', { message: err?.message })
+    }
+  }
+
   const handleEnterDashboard = async (activationPath = 'setup') => {
     if (!activeOrgId) return
     setSubmitError(null)
@@ -455,18 +474,22 @@ export default function ActivationWizard() {
   }
 
   const stepsForStepper = [
-    { id: 'welcome', label: t('activation.steps.welcome') },
-    { id: 'connect', label: t('activation.steps.connect') },
-    { id: 'import', label: t('activation.steps.import') },
-    { id: 'snapshot', label: t('activation.steps.snapshot') },
-    { id: 'moreTools', label: t('activation.steps.moreTools') },
+    { id: 'welcome',   label: t('activation.steps.welcome') },
+    { id: 'tools',     label: t('activation.steps.tools', 'Eines') },
+    { id: 'howFound',  label: t('activation.steps.howFound', 'Com ens has conegut') },
+    { id: 'path',      label: t('activation.steps.path', 'Configuració') },
+    { id: 'connect',   label: t('activation.steps.connect') },
+    { id: 'import',    label: t('activation.steps.import') },
+    { id: 'done',      label: t('activation.steps.done', 'Llest!') },
   ]
 
   let currentStepIndex = 0
-  if (step === STEP_AMAZON_CONNECT) currentStepIndex = 1
-  else if (step === STEP_AMAZON_IMPORT) currentStepIndex = 2
-  else if (step === STEP_AMAZON_SNAPSHOT) currentStepIndex = 3
-  else if (step === STEP_MORE_TOOLS) currentStepIndex = 4
+  if (step === STEP_TOOLS_USED)       currentStepIndex = 1
+  else if (step === STEP_HOW_FOUND)   currentStepIndex = 2
+  else if (step === STEP_CHOOSE_PATH || step === STEP_SETUP_DONE) currentStepIndex = 3
+  else if (step === STEP_AMAZON_CONNECT) currentStepIndex = 4
+  else if (step === STEP_AMAZON_IMPORT || step === STEP_AMAZON_SNAPSHOT) currentStepIndex = 5
+  else if (step === STEP_MORE_TOOLS)  currentStepIndex = 6
 
   return (
     <div className="wizard-shell">
@@ -575,10 +598,10 @@ export default function ActivationWizard() {
                 </Button>
               </div>
               <div className="wizard-footer__right">
-                <Button variant="ghost" size="md" onClick={() => setStep(STEP_CHOOSE_PATH)} style={{ marginRight: 8 }}>
+                <Button variant="ghost" size="md" onClick={async () => { await saveOnboardingData({ found: null }); setStep(STEP_CHOOSE_PATH) }} style={{ marginRight: 8 }}>
                   Omitir
                 </Button>
-                <Button variant="primary" size="md" onClick={() => setStep(STEP_CHOOSE_PATH)}>
+                <Button variant="primary" size="md" onClick={async () => { await saveOnboardingData(); setStep(STEP_CHOOSE_PATH) }}>
                   {t('common.buttons.continue')}
                 </Button>
               </div>
