@@ -1072,67 +1072,8 @@ export default function Finances() {
 
   const toolbarRowStyle = styles.toolbarRow
 
-  if (activeOrgId && demoMode === false) {
-    return (
-      <div style={styles.container}>
-        <Header
-          title={
-            <span className="page-title-with-icon">
-              <Receipt size={22} />
-              Finances
-            </span>
-          }
-          actions={
-            <>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => window.location.assign('/app/finances/amazon-imports')}
-                style={{ marginRight: 8 }}
-              >
-                {t('nav.amazonImports')}
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => window.location.assign('/app/finances/exports')}
-              >
-                {t('nav.financeExports')}
-              </Button>
-            </>
-          }
-        />
-        <div style={styles.content}>
-          <div style={styles.legacyWarning}>
-            <AlertCircle size={32} color="#f59e0b" />
-            <h3 style={{ marginTop: 12, marginBottom: 8 }}>Finances V0 legacy (per-user)</h3>
-            <p style={{ maxWidth: 520, fontSize: 14, lineHeight: 1.5 }}>
-              Aquesta pantalla és una vista financera antiga basada en <code>user_id</code> i no està adaptada al model multi-tenant actual.
-              Es manté només com a referència històrica i queda desactivada en aquest bloc. Fes servir el ledger canònic i els exports trimestrals per a dades de veritat.
-            </p>
-            <p style={{ maxWidth: 520, fontSize: 14, lineHeight: 1.5, marginTop: 12 }}>
-              {t('financesPage.legacy.amazonImportsHint')}
-            </p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 16 }}>
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => window.location.assign('/app/finances/amazon-imports')}
-              >
-                {t('nav.amazonImports')}
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => window.location.assign('/app/finances/exports')}
-              >
-                {t('nav.financeExports')}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
+  if (false) {
+    return null
   }
 
   return (
