@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, lazy, Suspense } from 'react'
 import { CheckCircle2, ChevronRight, Sparkles, Plus, ExternalLink, AlertCircle, Rocket } from 'lucide-react'
 import { PHASE_META } from '../../utils/phaseStyles'
+
+const FBACalculator = lazy(() => import('../FBACalculator'))
 
 /**
  * Right-panel content of ProjectDetail. Renders the active phase's form,
@@ -382,6 +384,11 @@ function ViabilityForm({ project, checks, setCheck, onUpdateProject }) {
         rows={3}
         placeholder="Riscos, oportunitats, hipòtesis..."
       />
+
+      <PhaseSubhead>Calculadora FBA</PhaseSubhead>
+      <Suspense fallback={<div style={{ padding: 12, fontSize: 13, color: 'var(--text-2)' }}>Carregant calculadora…</div>}>
+        <FBACalculator />
+      </Suspense>
 
       <PhaseSubhead>Validació</PhaseSubhead>
       <Check id="viability_confirmed" checks={checks} setCheck={setCheck} label="He confirmat que el producte és viable amb els marges objectiu." />
