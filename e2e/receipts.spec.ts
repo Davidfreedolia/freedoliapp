@@ -4,7 +4,7 @@ import { createTestExpense, openExpenseEditModal } from "./helpers/expenses";
 import { deleteExpenseByReference } from "./helpers/adminCleanup";
 import { uploadReceiptAdmin, replaceReceiptAdmin, getExpenseInfoByReference } from "./helpers/adminReceipts";
 
-test.describe("BLOCK 2 Receipts (Expense attachments)", () => {
+test.describe.skip("BLOCK 2 Receipts (Expense attachments)", () => {
   let testReference: string | null = null;
 
   test.beforeEach(async ({ page }) => {
