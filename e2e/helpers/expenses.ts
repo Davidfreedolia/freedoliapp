@@ -9,7 +9,7 @@ export async function createTestExpense(page: Page): Promise<{ reference: string
   const reference = `QA-E2E-${Date.now()}`;
   
   // Navigate to finances page
-  await page.goto("/finances");
+  await page.goto("/app/finances");
   
   // Si redirigeix al login, el storageState és invàlid — fallem clarament
   await page.waitForURL(/\/finances|\/app\/finances/, { timeout: 15_000 }).catch(() => {
@@ -90,7 +90,7 @@ export async function createTestExpense(page: Page): Promise<{ reference: string
  */
 export async function openExpenseEditModal(page: Page, reference: string): Promise<void> {
   // Navigate to finances if not already there
-  await page.goto("/finances");
+  await page.goto("/app/finances");
   
   // Search for the expense
   const searchInput = page.getByPlaceholder(/Buscar|buscar/i).first();
@@ -127,7 +127,7 @@ export async function deleteExpense(page: Page, reference: string): Promise<void
     console.log(`🗑️  Attempting to delete expense with reference: ${reference}`);
     
     // Always navigate to finances page (ensures we're on the list, not in modal)
-    await page.goto("/finances");
+    await page.goto("/app/finances");
     
     // Wait for page to load - look for search input
     const searchInput = page.getByPlaceholder(/Buscar|buscar/i).first();

@@ -20,20 +20,6 @@ setup("auth: capture storageState", async ({ page }) => {
 
   console.log("✅ Autenticació detectada! Guardant storage state...");
 
-  // Espera explícita que el token Supabase sigui al localStorage
-  // (el token és sb-<projectref>-auth-token)
-  await page.waitForFunction(() => {
-    return Object.keys(localStorage).some(k =>
-      k.includes('auth-token') || k.startsWith('sb-')
-    );
-  }, { timeout: 15_000 }).catch(() => {
-    console.log("⚠️  Token Supabase no trobat al localStorage — la sessió pot no funcionar per als tests");
-  });
-
-  // Debug: mostra quines claus de localStorage s'han guardat
-  const lsKeys = await page.evaluate(() => Object.keys(localStorage));
-  console.log("   localStorage keys:", lsKeys.filter(k => k.includes('sb-') || k.includes('auth')).join(', ') || '(cap token trobat)');
-
   const authDir = path.join(process.cwd(), "e2e", ".auth");
   fs.mkdirSync(authDir, { recursive: true });
 
