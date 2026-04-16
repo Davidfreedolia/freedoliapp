@@ -177,7 +177,7 @@ export default function Landing() {
       {/* ── 2. HERO (CANVI 1 — parallax) ─────────────────────────────────── */}
       <section
         className="hero-section position-relative overflow-hidden"
-        style={{ minHeight: '100vh' }}
+        style={{ minHeight: '100vh', width: '100vw', marginLeft: 'calc(-1 * (100vw - 100%) / 2)' }}
       >
         {/* parallax background — sense w-100/h-100 per evitar conflicte amb top/bottom */}
         <div
