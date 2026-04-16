@@ -11,6 +11,8 @@ import NextStepCard from '../components/assistant/NextStepCard'
 import useT from '../hooks/useT'
 
 const STEP_CONFIRM_ORG = 1
+const STEP_TOOLS_USED = 8
+const STEP_HOW_FOUND = 9
 const STEP_CHOOSE_PATH = 2
 const STEP_SETUP_DONE = 3
 const STEP_AMAZON_CONNECT = 4
@@ -43,6 +45,30 @@ export default function ActivationWizard() {
   const [snapshotLoading, setSnapshotLoading] = useState(false)
   const [activationPath, setActivationPath] = useState('setup')
   const [importError, setImportError] = useState(null)
+  const [selectedTools, setSelectedTools] = useState([])
+  const [howFound, setHowFound] = useState(null)
+
+  const TOOLS_LIST = [
+    { id: 'sellerboard', name: 'Sellerboard',  domain: 'sellerboard.com' },
+    { id: 'helium10',   name: 'Helium 10',    domain: 'helium10.com' },
+    { id: 'jungle',     name: 'Jungle Scout', domain: 'junglescout.com' },
+    { id: 'keepa',      name: 'Keepa',        domain: 'keepa.com' },
+    { id: 'holded',     name: 'Holded',       domain: 'holded.com' },
+    { id: 'excel',      name: 'Excel / CSV',  domain: null },
+    { id: 'none',       name: 'Cap',          domain: null },
+  ]
+  const HOW_FOUND_LIST = [
+    { id: 'youtube',  label: '📺 YouTube' },
+    { id: 'google',   label: '🔍 Google' },
+    { id: 'reddit',   label: '🟠 Reddit' },
+    { id: 'facebook', label: '📘 Facebook / Instagram' },
+    { id: 'friend',   label: '🤝 Un amic / col·lega' },
+    { id: 'ai',       label: '🤖 Eines IA (ChatGPT, etc.)' },
+    { id: 'other',    label: '✨ Altre' },
+  ]
+  const toggleTool = id => setSelectedTools(prev =>
+    prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+  )
 
   const t = useT()
 
@@ -477,6 +503,81 @@ export default function ActivationWizard() {
             <div className="wizard-footer">
               <div className="wizard-footer__left" />
               <div className="wizard-footer__right">
+                <Button variant="primary" size="md" onClick={() => setStep(STEP_TOOLS_USED)}>
+                  {t('common.buttons.continue')}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {step === STEP_TOOLS_USED && (
+          <div className="wizard-body">
+            <h1 className="wizard-title">Quines eines uses?</h1>
+            <p className="wizard-subtitle">Selecciona les que fas servir al teu negoci Amazon. Podrem personalitzar la teva experiència.</p>
+            <div className="wz-pills-grid">
+              {TOOLS_LIST.map(tool => (
+                <button
+                  key={tool.id}
+                  className={`wz-pill${selectedTools.includes(tool.id) ? ' wz-pill--selected' : ''}`}
+                  onClick={() => toggleTool(tool.id)}
+                  type="button"
+                >
+                  {tool.domain ? (
+                    <img
+                      src={`https://logo.clearbit.com/${tool.domain}`}
+                      alt={tool.name}
+                      className="wz-pill__logo"
+                      onError={e => { e.target.style.display = 'none' }}
+                    />
+                  ) : (
+                    <span className="wz-pill__emoji">{tool.id === 'excel' ? '📊' : '⭕'}</span>
+                  )}
+                  {tool.name}
+                </button>
+              ))}
+            </div>
+            <div className="wizard-footer">
+              <div className="wizard-footer__left">
+                <Button variant="secondary" size="md" onClick={() => setStep(STEP_CONFIRM_ORG)}>
+                  {t('common.buttons.back')}
+                </Button>
+              </div>
+              <div className="wizard-footer__right">
+                <Button variant="primary" size="md" onClick={() => setStep(STEP_HOW_FOUND)}>
+                  {t('common.buttons.continue')}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {step === STEP_HOW_FOUND && (
+          <div className="wizard-body">
+            <h1 className="wizard-title">Com ens has conegut?</h1>
+            <p className="wizard-subtitle">Ens ajuda a saber on trobar gent com tu.</p>
+            <div className="wz-pills-grid wz-pills-grid--single">
+              {HOW_FOUND_LIST.map(item => (
+                <button
+                  key={item.id}
+                  className={`wz-pill${howFound === item.id ? ' wz-pill--selected' : ''}`}
+                  onClick={() => setHowFound(item.id)}
+                  type="button"
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+            <div className="wizard-footer">
+              <div className="wizard-footer__left">
+                <Button variant="secondary" size="md" onClick={() => setStep(STEP_TOOLS_USED)}>
+                  {t('common.buttons.back')}
+                </Button>
+              </div>
+              <div className="wizard-footer__right">
+                <Button variant="ghost" size="md" onClick={() => setStep(STEP_CHOOSE_PATH)} style={{ marginRight: 8 }}>
+                  Omitir
+                </Button>
                 <Button variant="primary" size="md" onClick={() => setStep(STEP_CHOOSE_PATH)}>
                   {t('common.buttons.continue')}
                 </Button>
