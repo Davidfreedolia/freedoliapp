@@ -24,7 +24,7 @@ test.describe('Smoke: Landing page', () => {
     await page.goto('/')
     const nav = page.locator('nav').first()
     await expect(nav).toBeVisible({ timeout: 10_000 })
-    const loginBtn = nav.locator('button, a').filter({ hasText: /login|entrar|accedir/i })
+    const loginBtn = nav.locator('button, a').filter({ hasText: /inicia|iniciar|log\s*in/i })
     await expect(loginBtn.first()).toBeVisible({ timeout: 10_000 })
   })
 
