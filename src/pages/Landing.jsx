@@ -177,13 +177,16 @@ export default function Landing() {
       {/* ── 2. HERO (CANVI 1 — parallax) ─────────────────────────────────── */}
       <section
         className="hero-section position-relative overflow-hidden"
-        style={{ minHeight: '90vh' }}
+        style={{ minHeight: '100vh' }}
       >
-        {/* parallax background */}
+        {/* parallax background — sense w-100/h-100 per evitar conflicte amb top/bottom */}
         <div
-          className="hero-parallax-bg position-absolute w-100 h-100"
+          className="hero-parallax-bg position-absolute"
           style={{
-            inset: '-20%',
+            top: '-40%',
+            bottom: '-40%',
+            left: '-10%',
+            right: '-10%',
             background: 'linear-gradient(135deg, #1F5F63 0%, #0d3a3d 50%, #1a2a2e 100%)',
             zIndex: 0,
             willChange: 'transform',
@@ -239,7 +242,7 @@ export default function Landing() {
             {/* mockup right */}
             <div className="col-12 col-md-6 d-flex justify-content-center mt-5 mt-md-0">
               <img
-                src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80"
+                src="/images/landing/landing-hero-dashboard.png"
                 alt="FreedoliApp dashboard"
                 className="img-fluid rounded-4"
                 style={{
@@ -309,12 +312,12 @@ export default function Landing() {
 
       {/* ── 5–6. VISUAL SECTIONS (CANVI 4) ──────────────────────────────── */}
       <VisualSection
-        imgSrc="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"
+        imgSrc="/images/landing/landing-orders-workflow.png"
         titleKey="visual_a.title"
         textKey="visual_a.text"
       />
       <VisualSection
-        imgSrc="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&q=80"
+        imgSrc="/images/landing/landing-decisions-dashboard.png"
         titleKey="visual_b.title"
         textKey="visual_b.text"
         reverse
