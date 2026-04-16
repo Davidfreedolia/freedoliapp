@@ -95,7 +95,7 @@ export default function Landing() {
   useEffect(() => {
     const el = document.querySelector('.hero-parallax-bg')
     const onScroll = () => {
-      if (el) el.style.transform = `translateY(${window.scrollY * 0.4}px)`
+      if (el) el.style.transform = `translateY(${window.scrollY * -0.15}px)`
     }
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
