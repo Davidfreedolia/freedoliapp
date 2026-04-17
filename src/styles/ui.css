@@ -1809,6 +1809,58 @@ body.screenshot-mode .landing-assistantBubble {
   text-decoration: underline;
 }
 
+.auth-card__logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--s-3);
+}
+
+.auth-card__logoImg {
+  height: 40px;
+  width: auto;
+}
+
+.auth-card__consent {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
+  font-size: 13px;
+  color: var(--text-2);
+  cursor: pointer;
+}
+
+.auth-card__consentCheck {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.auth-card__providerBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  width: 100%;
+}
+
+.auth-provider-icon {
+  flex-shrink: 0;
+}
+
+.auth-provider-label {
+  margin-left: var(--s-2);
+}
+
+.auth-btn-icon {
+  margin-right: var(--s-2);
+}
+
+.auth-card__consentNote {
+  font-size: 12px;
+  color: var(--text-2);
+  text-align: center;
+  margin: 0;
+}
+
 .auth-card__forgot {
   margin: calc(-1 * var(--s-2)) 0 0;
   font-size: 13px;
