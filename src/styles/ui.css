@@ -1720,13 +1720,15 @@ body.screenshot-mode .landing-assistantBubble {
 }
 
 /* ----- Auth (Login) ----- */
+/* Auth pages always use a light background regardless of the user's theme.
+   This is an intentional exception — Login/Trial are brand-facing surfaces. */
 .auth-shell {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: var(--s-4);
-  background-color: var(--bg);
+  background-color: var(--c-white-warm);
 }
 
 .auth-card {

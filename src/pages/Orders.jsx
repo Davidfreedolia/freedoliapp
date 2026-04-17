@@ -705,7 +705,7 @@ export default function Orders() {
         key={order.id}
         style={{
           ...styles.orderCard,
-          backgroundColor: darkMode ? '#15151f' : '#ffffff'
+          backgroundColor: 'var(--surface-bg)'
         }}
         onMouseEnter={enablePreviewSelect ? () => setSelectedOrderId(order.id) : undefined}
       >
@@ -1093,7 +1093,53 @@ export default function Orders() {
             {effectiveLayout === 'split' && (
               <div style={styles.splitLayout}>
                 <div style={styles.splitList}>
-                  {filteredOrders.map(order => renderOrderCard(order, { enablePreviewSelect: true }))}
+                  {filteredOrders.map(order => {
+                    const statusKey = PO_STATUS_META[order.status] ? order.status : 'draft'
+                    const status = PO_STATUS_META[statusKey]
+                    const StatusIcon = status.icon
+                    const isSelected = order.id === selectedOrderId
+                    return (
+                      <div
+                        key={order.id}
+                        style={{
+                          ...styles.splitRow,
+                          backgroundColor: isSelected
+                            ? 'rgba(110, 203, 195, 0.12)'
+                            : 'var(--surface-bg)',
+                          borderLeft: isSelected
+                            ? '3px solid #6ECBC3'
+                            : '3px solid transparent'
+                        }}
+                        onClick={() => setSelectedOrderId(order.id)}
+                        onMouseEnter={() => !isSelected && setSelectedOrderId(order.id)}
+                      >
+                        <div style={styles.splitRowTop}>
+                          <span style={{ ...styles.splitRowPo, color: darkMode ? '#ffffff' : '#111827' }}>
+                            {order.po_number}
+                          </span>
+                          <span style={{
+                            ...styles.splitRowStatus,
+                            color: status.color,
+                            backgroundColor: `${status.color}15`
+                          }}>
+                            <StatusIcon size={11} />
+                            {t(`orders.status.${statusKey}`)}
+                          </span>
+                        </div>
+                        <div style={styles.splitRowSub}>
+                          <span>{order.project?.name || '—'}</span>
+                          <span style={{ color: status.color, fontSize: 11 }}>
+                            {order.supplier?.name || '—'}
+                          </span>
+                        </div>
+                        {order.total_amount ? (
+                          <div style={styles.splitRowAmount}>
+                            {formatCurrency(order.total_amount, order.currency)}
+                          </div>
+                        ) : null}
+                      </div>
+                    )
+                  })}
                 </div>
                 <div style={styles.splitPreview}>
                   {selectedOrderCard ? (
@@ -1773,10 +1819,16 @@ const styles = {
   createButton: { display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', backgroundColor: '#1F4E5F', color: '#F4F7F3', border: '1px solid #1F4E5F', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
   ordersGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' },
   ordersList: { display: 'flex', flexDirection: 'column', gap: '12px' },
-  splitLayout: { display: 'grid', gridTemplateColumns: 'minmax(280px, 360px) 1fr', gap: '20px' },
-  splitList: { display: 'flex', flexDirection: 'column', gap: '12px' },
-  splitPreview: { position: 'sticky', top: '96px', alignSelf: 'flex-start' },
-  splitEmpty: { padding: '24px', borderRadius: '16px', backgroundColor: 'var(--surface-bg)', boxShadow: 'var(--shadow-soft)', color: 'var(--muted)' },
+  splitLayout: { display: 'grid', gridTemplateColumns: 'minmax(260px, 320px) 1fr', gap: '0', border: '1px solid var(--border-1)', borderRadius: '12px', overflow: 'hidden' },
+  splitList: { display: 'flex', flexDirection: 'column', borderRight: '1px solid var(--border-1)', overflowY: 'auto', maxHeight: 'calc(100vh - 260px)' },
+  splitRow: { padding: '12px 14px', cursor: 'pointer', borderBottom: '1px solid var(--border-1)', transition: 'background 0.12s ease' },
+  splitRowTop: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 4 },
+  splitRowPo: { fontWeight: 600, fontSize: 13, fontFamily: "'Roboto Mono', monospace" },
+  splitRowStatus: { display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 99, fontSize: 11, fontWeight: 600 },
+  splitRowSub: { display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-2)' },
+  splitRowAmount: { fontSize: 12, fontWeight: 600, color: 'var(--text-1)', marginTop: 4, textAlign: 'right', fontVariantNumeric: 'tabular-nums' },
+  splitPreview: { overflowY: 'auto', maxHeight: 'calc(100vh - 260px)', padding: '16px' },
+  splitEmpty: { display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: 200, padding: '24px', color: 'var(--text-2)', fontSize: 14 },
   orderCard: { padding: '16px', borderRadius: '16px', border: 'none', boxShadow: 'var(--shadow-soft)' },
   orderCardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' },
   orderCardBody: { display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: '#6b7280' },

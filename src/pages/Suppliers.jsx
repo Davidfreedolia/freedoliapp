@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { 
   Plus, 
@@ -211,6 +212,7 @@ const deriveSupplierOperationalSummary = ({ quotes, samples, pos, shipmentsByPoI
 
 export default function Suppliers() {
   const { t, i18n } = useTranslation()
+  const navigate = useNavigate()
   const { darkMode, demoMode, activeOrgId } = useApp()
   const { isMobile, isTablet } = useBreakpoint()
   const modalStyles = getModalStyles(isMobile, darkMode)
@@ -558,9 +560,11 @@ export default function Suppliers() {
         style={{
           ...styles.supplierCard,
           ...(isPreview ? styles.supplierCardPreview : null),
-          backgroundColor: darkMode ? '#15151f' : '#ffffff'
+          backgroundColor: 'var(--surface-bg)',
+          cursor: isPreview ? 'default' : 'pointer'
         }}
         onMouseEnter={enablePreviewSelect ? () => setSelectedSupplierId(supplier.id) : undefined}
+        onClick={isPreview ? undefined : () => navigate(`/app/suppliers/${supplier.id}`)}
       >
         {/* Header */}
         <div style={styles.cardHeader}>
@@ -801,36 +805,36 @@ export default function Suppliers() {
 
         {/* Stats */}
         <div style={styles.statsRow}>
-          <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <MessageCircle size={24} color="#2563eb" />
+          <div style={{ ...styles.statCard, backgroundColor: 'var(--surface-bg)' }}>
+            <MessageCircle size={24} color="var(--c-teal-300)" />
             <div>
               <span style={styles.statValue}>{stats.suppliersWithOpenQuotes}</span>
               <span style={styles.statLabel}>{t('suppliersPage.kpis.suppliersWithOpenQuotes')}</span>
             </div>
           </div>
-          <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <Package size={24} color="#d97706" />
+          <div style={{ ...styles.statCard, backgroundColor: 'var(--surface-bg)' }}>
+            <Package size={24} color="var(--c-teal-300)" />
             <div>
               <span style={styles.statValue}>{stats.pendingSamples}</span>
               <span style={styles.statLabel}>{t('suppliersPage.kpis.pendingSamples')}</span>
             </div>
           </div>
-          <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <Building2 size={24} color="#7c3aed" />
+          <div style={{ ...styles.statCard, backgroundColor: 'var(--surface-bg)' }}>
+            <Building2 size={24} color="var(--c-teal-900)" />
             <div>
               <span style={styles.statValue}>{stats.activePos}</span>
               <span style={styles.statLabel}>{t('suppliersPage.kpis.activePos')}</span>
             </div>
           </div>
-          <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <Truck size={24} color="#0891b2" />
+          <div style={{ ...styles.statCard, backgroundColor: 'var(--surface-bg)' }}>
+            <Truck size={24} color="var(--c-teal-300)" />
             <div>
               <span style={styles.statValue}>{stats.activeShipments}</span>
               <span style={styles.statLabel}>{t('suppliersPage.kpis.activeShipments')}</span>
             </div>
           </div>
-          <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <Clock size={24} color="#dc2626" />
+          <div style={{ ...styles.statCard, backgroundColor: 'var(--surface-bg)' }}>
+            <Clock size={24} color="var(--c-teal-900)" />
             <div>
               <span style={styles.statValue}>{stats.needsFollowUp}</span>
               <span style={styles.statLabel}>{t('suppliersPage.kpis.needsFollowUp')}</span>
@@ -840,11 +844,11 @@ export default function Suppliers() {
 
         {/* Suppliers Grid */}
         {loading ? (
-          <div style={{ ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff', padding: 64 }}>
+          <div style={{ ...styles.empty, backgroundColor: 'var(--surface-bg)', padding: 64 }}>
             <DataLoading message={t('common.loading')} />
           </div>
         ) : filteredSuppliers.length === 0 ? (
-          <div style={{ ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
+          <div style={{ ...styles.empty, backgroundColor: 'var(--surface-bg)' }}>
             <DataEmpty
               icon={Users}
               message={t('suppliers.empty.title')}
@@ -878,7 +882,7 @@ export default function Suppliers() {
       {/* Modal */}
       {showModal && editingSupplier && (
         <div style={styles.modalOverlay} onClick={() => { setShowModal(false); setEditingSupplier(null) }}>
-          <div style={{ ...styles.modal, backgroundColor: darkMode ? '#15151f' : '#ffffff' }} onClick={e => e.stopPropagation()}>
+          <div style={{ ...styles.modal, backgroundColor: 'var(--surface-bg)' }} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeader}>
               <h3 style={{ ...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827' }}>
                 {editingSupplier.id ? 'Editar Proveïdor' : 'Nou Proveïdor'}

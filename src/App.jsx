@@ -130,6 +130,8 @@ const AutomationActivityPage = lazyWithErrorBoundary(() => import('./pages/autom
 const AutomationAnalyticsPage = lazyWithErrorBoundary(() => import('./pages/automations/AutomationAnalyticsPage'), 'AutomationAnalyticsPage')
 const TaskInbox = lazyWithErrorBoundary(() => import('./pages/TaskInbox'), 'TaskInbox')
 const Docs = lazyWithErrorBoundary(() => import('./pages/Docs'), 'Docs')
+const SupplierDetail = lazyWithErrorBoundary(() => import('./pages/SupplierDetail'), 'SupplierDetail')
+const ForwarderDetail = lazyWithErrorBoundary(() => import('./pages/ForwarderDetail'), 'ForwarderDetail')
 
 const ADMIN_EMAILS = new Set(['david@freedolia.com'])
 const gateTs = () => new Date().toISOString()
@@ -551,7 +553,9 @@ function App() {
                 <Route path="projects/:id" element={<AppPageWrap context="page:ProjectDetail"><ProjectDetailRoute /></AppPageWrap>} />
                 <Route path="projects/:projectId/briefing" element={<AppPageWrap context="page:Briefing"><Briefing /></AppPageWrap>} />
                 <Route path="suppliers" element={<AppPageWrap context="page:Suppliers"><Suppliers /></AppPageWrap>} />
+                <Route path="suppliers/:id" element={<AppPageWrap context="page:SupplierDetail"><SupplierDetail /></AppPageWrap>} />
                 <Route path="forwarders" element={<AppPageWrap context="page:Forwarders"><Forwarders /></AppPageWrap>} />
+                <Route path="forwarders/:id" element={<AppPageWrap context="page:ForwarderDetail"><ForwarderDetail /></AppPageWrap>} />
                 <Route path="warehouses" element={<AppPageWrap context="page:Warehouses"><Warehouses /></AppPageWrap>} />
                 <Route path="orders" element={<AppPageWrap context="page:Orders"><Orders /></AppPageWrap>} />
                 <Route path="finances" element={<AppPageWrap context="page:Finances"><Finances /></AppPageWrap>} />

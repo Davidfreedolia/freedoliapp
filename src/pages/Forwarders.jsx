@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { 
   Plus, 
@@ -77,6 +78,7 @@ const PAYMENT_TERMS = [
 const INCOTERMS = ['EXW', 'FOB', 'CIF', 'CFR', 'DDP', 'DAP', 'FCA', 'CPT']
 
 export default function Forwarders() {
+  const navigate = useNavigate()
   const { darkMode, demoMode, activeOrgId } = useApp()
   const { isMobile, isTablet } = useBreakpoint()
   const modalStyles = getModalStyles(isMobile, darkMode)
@@ -279,18 +281,14 @@ export default function Forwarders() {
     return (
       <div key={forwarder.id} style={{
         ...styles.forwarderCard,
-        backgroundColor: darkMode ? '#15151f' : '#ffffff'
+        backgroundColor: 'var(--surface-bg)',
+        cursor: isPreview ? 'default' : 'pointer'
       }}
       onMouseEnter={enablePreviewSelect ? () => setSelectedForwarderId(forwarder.id) : undefined}
+      onClick={isPreview ? undefined : () => navigate(`/app/forwarders/${forwarder.id}`)}
       >
         {/* Header */}
-        <div
-          style={styles.forwarderHeader}
-          onClick={() => {
-            if (isPreview) return
-            setExpandedForwarder(isExpanded ? null : forwarder.id)
-          }}
-        >
+        <div style={styles.forwarderHeader}>
           <div style={styles.forwarderIcon}>
             <Truck size={24} color="#1F4E5F" />
           </div>
@@ -644,15 +642,15 @@ export default function Forwarders() {
 
         {/* Stats */}
         <div style={styles.statsRow}>
-          <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <Truck size={24} color="#f59e0b" />
+          <div style={{ ...styles.statCard, backgroundColor: 'var(--surface-bg)' }}>
+            <Truck size={24} color="var(--c-teal-300)" />
             <div>
               <span style={styles.statValue}>{stats.total}</span>
               <span style={styles.statLabel}>Transitaris</span>
             </div>
           </div>
-          <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <Warehouse size={24} color="#3b82f6" />
+          <div style={{ ...styles.statCard, backgroundColor: 'var(--surface-bg)' }}>
+            <Warehouse size={24} color="var(--c-teal-900)" />
             <div>
               <span style={styles.statValue}>{stats.totalWarehouses}</span>
               <span style={styles.statLabel}>Magatzems</span>
@@ -664,7 +662,7 @@ export default function Forwarders() {
         {loading ? (
           <div style={styles.loading}>Carregant...</div>
         ) : filteredForwarders.length === 0 ? (
-          <div style={{ ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
+          <div style={{ ...styles.empty, backgroundColor: 'var(--surface-bg)' }}>
             <Truck size={48} color="#d1d5db" />
             <p style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>No hi ha transitaris. Crea el primer!</p>
             <Button onClick={handleNewForwarder}>
