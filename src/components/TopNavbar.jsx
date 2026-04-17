@@ -214,17 +214,6 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
               </div>
             )
           )}
-          <span style={{
-            fontSize: 11,
-            padding: '6px 10px',
-            border: '1px solid var(--border-1)',
-            background: 'var(--surface-bg-2)',
-            borderRadius: 10,
-            color: demoMode ? 'var(--warning-1)' : 'var(--success-1)',
-            fontWeight: 600
-          }}>
-            {demoMode ? t('topbar.demoBadge') : t('topbar.liveBadge')}
-          </span>
           <BusinessAlertsBadge />
           <DecisionBadge />
           <AppLanguageControl />
