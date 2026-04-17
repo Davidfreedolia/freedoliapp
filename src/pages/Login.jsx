@@ -233,16 +233,16 @@ export default function Login() {
                     required
                   />
                   <p className="auth-card__forgot">
-                    <button
-                      type="button"
+                    <span
+                      role="button"
+                      tabIndex={0}
                       className="auth-card__link"
-                      onClick={() => {
-                        setUseMagicLink(true)
-                        setError(null)
-                      }}
+                      style={{ cursor: 'pointer', fontSize: 13 }}
+                      onClick={() => { setUseMagicLink(true); setError(null) }}
+                      onKeyDown={e => e.key === 'Enter' && setUseMagicLink(true)}
                     >
                       {t('login.forgotPassword')}
-                    </button>
+                    </span>
                   </p>
                 </>
               )}
@@ -272,11 +272,6 @@ export default function Login() {
                   </>
                 )}
               </Button>
-              <div className="auth-card__divider">
-                <span className="auth-card__dividerLine" />
-                <span className="auth-card__dividerLabel">{t('login.or')}</span>
-                <span className="auth-card__dividerLine" />
-              </div>
               <Button
                 type="button"
                 variant="secondary"
