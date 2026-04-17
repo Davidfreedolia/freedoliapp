@@ -232,6 +232,7 @@ export default function ActivationWizard() {
     try {
       const { generateDemoData } = await import('../lib/demoSeed')
       await generateDemoData()
+      localStorage.setItem('demo_mode_toggle', 'true')
       setActivationPath('demo')
       showToast(t('activation.toasts.demoLoaded', 'Dades demo carregades'), 'success')
       setStep(STEP_SETUP_DONE)
