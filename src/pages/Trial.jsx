@@ -1,5 +1,17 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
+
+// Icona oficial Google G
+function GoogleIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+      <path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" fill="#4285F4"/>
+      <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z" fill="#34A853"/>
+      <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z" fill="#FBBC05"/>
+      <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58Z" fill="#EA4335"/>
+    </svg>
+  )
+}
 import { registerTrialLead } from '../lib/trials/registerTrialLead'
 import { getAppBaseUrl } from '../lib/config/getAppBaseUrl'
 import useT from '../hooks/useT'
@@ -75,18 +87,15 @@ export default function Trial() {
   return (
     <div className="auth-shell">
       <Card className="auth-card">
-        {/* BUG 2 — Logo */}
-        <div className="text-center mb-4">
-          <img
-            src="/logo.png"
-            alt="FreedoliApp"
-            style={{ height: 40, objectFit: 'contain' }}
-            onError={e => { e.target.style.display = 'none' }}
-          />
-        </div>
-
         <div className="auth-card__header">
-          <h1 className="auth-card__title">{t('trial.title')}</h1>
+          <div className="auth-card__logo">
+            <img
+              src="/brand/freedoliapp/logo/logo_master.png"
+              alt="FreedoliApp"
+              style={{ height: 40, width: 'auto', marginBottom: 12 }}
+              onError={e => { e.target.style.display = 'none' }}
+            />
+          </div>
           <p className="text-muted text-center mb-4" style={{ fontSize: 15, maxWidth: 340, margin: '0 auto' }}>
             {t('trial.subtitle_flow_hint')}
           </p>
@@ -137,22 +146,17 @@ export default function Trial() {
               <span style={{ fontSize: 12, color: '#9CA3AF', fontWeight: 500 }}>{t('auth.or')}</span>
               <hr className="flex-grow-1 m-0" style={{ borderColor: '#E5E7EB' }} />
             </div>
-            {/* BUG 3 — Google button with official SVG logo */}
-            <button
+            <Button
               type="button"
-              className="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2 auth-card__providerBtn"
-              style={{ borderRadius: 12, padding: '10px 20px' }}
+              variant="secondary"
+              size="md"
               onClick={handleGoogleLogin}
               disabled={loading}
+              className="auth-card__providerBtn"
             >
-              <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-                <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
-                <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" fill="#34A853"/>
-                <path d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957C.347 6.175 0 7.548 0 9s.348 2.825.957 4.039l3.007-2.332z" fill="#FBBC05"/>
-                <path d="M9 3.576c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 7.293C4.672 5.166 6.656 3.576 9 3.576z" fill="#EA4335"/>
-              </svg>
-              {t('auth.continue_google')}
-            </button>
+              <GoogleIcon />
+              <span style={{ marginLeft: 8 }}>{t('login.continueWithGoogle')}</span>
+            </Button>
           </form>
         )}
 
