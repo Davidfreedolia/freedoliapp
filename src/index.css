@@ -154,7 +154,7 @@
 
   /* Layout surfaces */
   --topbar-bg: rgba(246, 248, 243, 0.92);
-  --topbar-border: 1px solid rgba(216, 225, 222, 0.80);
+  --topbar-border: none;
   --topbar-shadow: 0 1px 0 rgba(31, 95, 99, 0.06);
   --topbar-blur: blur(16px);
   --info-1: var(--cta-1);
@@ -357,7 +357,7 @@ body.dark {
 
   /* Layout surfaces - Dark Mode */
   --topbar-bg: rgba(15, 31, 32, 0.82);
-  --topbar-border: 1px solid rgba(216, 225, 222, 0.16);
+  --topbar-border: none;
   --topbar-shadow: none;
   --topbar-blur: blur(14px);
   --info-1: var(--cta-1);

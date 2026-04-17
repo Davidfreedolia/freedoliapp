@@ -1,14 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { StickyNote, HelpCircle, MessageCircle, ChevronDown } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useApp } from '../context/AppContext'
 import { supabase } from '../lib/supabase'
 import { getDemoMode } from '../lib/demoModeFilter'
 import { logSuccess } from '../lib/auditLog'
-import { useNotes } from '../hooks/useNotes'
-import AddStickyNoteModal from './AddStickyNoteModal'
-import HelpModal from './HelpModal'
 import AvatarSelector from './AvatarSelector'
 import HeaderTimeWidget from './HeaderTimeWidget'
 import HeaderPreferencesWidget from './HeaderPreferencesWidget'
@@ -18,7 +15,6 @@ import { useWorkspace } from '../contexts/WorkspaceContext'
 import Button from './Button'
 import DecisionBadge from './decisions/DecisionBadge'
 import BusinessAlertsBadge from './alerts/BusinessAlertsBadge'
-import AssistantPanel from './assistant/AssistantPanel'
 import AppLanguageControl from './AppLanguageControl'
 
 export default function TopNavbar({ sidebarWidth = 0 }) {
@@ -28,10 +24,6 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
   const location = useLocation()
   const { t, i18n } = useTranslation()
   const { isMobile } = useBreakpoint()
-  const { refresh } = useNotes()
-  const [showNoteModal, setShowNoteModal] = useState(false)
-  const [showHelpModal, setShowHelpModal] = useState(false)
-  const [showAssistantPanel, setShowAssistantPanel] = useState(false)
   const [showAvatarSelector, setShowAvatarSelector] = useState(false)
   const [userEmail, setUserEmail] = useState('')
   const [userName, setUserName] = useState('')
@@ -134,42 +126,6 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
     <>
       <nav style={navStyle} className="topbar">
         <div className="topbar__section topbar__section--left" style={styles.leftSection}>
-          <Button
-            type="button"
-            variant="note"
-            size="sm"
-            onClick={() => setShowNoteModal(true)}
-            className="topbar-button topbar-notes"
-            title={t('topbar.addNote')}
-            aria-label={t('topbar.addNote')}
-          >
-            <StickyNote size={18} />
-            {!isMobile && <span style={{ marginLeft: '6px', fontSize: '14px' }}>+ {t('navbar.notes')}</span>}
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowAssistantPanel(true)}
-            className="topbar-button topbar-assistant"
-            title={t('assistant.title')}
-            aria-label={t('assistant.title')}
-          >
-            <MessageCircle size={18} />
-            {!isMobile && <span style={{ marginLeft: '6px', fontSize: '14px' }}>{t('assistant.title')}</span>}
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowHelpModal(true)}
-            className="topbar-button topbar-help"
-            title={t('navbar.help')}
-            aria-label={t('navbar.help')}
-          >
-            <HelpCircle size={18} />
-            {!isMobile && <span style={{ marginLeft: '6px', fontSize: '14px' }}>{t('navbar.help')}</span>}
-          </Button>
         </div>
 
         <div className="topbar__section topbar__section--center" style={styles.centerSection}>
@@ -281,31 +237,6 @@ export default function TopNavbar({ sidebarWidth = 0 }) {
           />
         </div>
       </nav>
-
-      {/* Note Modal */}
-      <AddStickyNoteModal
-        isOpen={showNoteModal}
-        onClose={() => setShowNoteModal(false)}
-        onSuccess={() => {
-          refresh()
-          setShowNoteModal(false)
-        }}
-        darkMode={darkMode}
-      />
-
-      {/* Help Modal */}
-      <HelpModal
-        isOpen={showHelpModal}
-        onClose={() => setShowHelpModal(false)}
-        darkMode={darkMode}
-      />
-
-      {/* R0.4 — In-app Assistant panel */}
-      <AssistantPanel
-        isOpen={showAssistantPanel}
-        onClose={() => setShowAssistantPanel(false)}
-        pathname={location.pathname}
-      />
 
       {/* Avatar Selector */}
       <AvatarSelector
