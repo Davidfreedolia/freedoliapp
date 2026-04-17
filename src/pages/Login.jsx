@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { Send, LogIn, Apple } from 'lucide-react'
+import { Send, LogIn } from 'lucide-react'
 import { logSuccess, logError } from '../lib/auditLog'
 import { isDemoMode } from '../demo/demoMode'
 import { registerTrialLead } from '../lib/trials/registerTrialLead'
@@ -63,23 +63,6 @@ export default function Login() {
       // No cal await sobre el redirect; Supabase gestionarà el flux OAuth.
       await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: {
-          redirectTo: `${getAppBaseUrl()}/app`,
-        },
-      })
-    } catch (err) {
-      setError(err.message)
-      setLoading(false)
-    }
-  }
-
-  const handleAppleLogin = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
-    try {
-      await supabase.auth.signInWithOAuth({
-        provider: 'apple',
         options: {
           redirectTo: `${getAppBaseUrl()}/app`,
         },
@@ -285,17 +268,6 @@ export default function Login() {
               >
                 <LogIn size={18} style={{ marginRight: 8 }} aria-hidden />
                 {t('login.continueWithGoogle')}
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                size="md"
-                onClick={handleAppleLogin}
-                disabled={loading}
-                className="auth-card__providerBtn"
-              >
-                <Apple size={18} style={{ marginRight: 8 }} aria-hidden />
-                {t('login.continueWithApple')}
               </Button>
               <p className="auth-card__consentNote">
                 By continuing, you agree to the{' '}
