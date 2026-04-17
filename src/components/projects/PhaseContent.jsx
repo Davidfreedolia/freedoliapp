@@ -1,25 +1,15 @@
-import { useEffect, useMemo, useState, lazy, Suspense } from 'react'
-import { CheckCircle2, ChevronRight, Sparkles, Plus, ExternalLink, AlertCircle, Rocket } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState, lazy, Suspense } from 'react'
+import { CheckCircle2, ChevronRight, Sparkles, Plus, ExternalLink, AlertCircle, Rocket, Image as ImageIcon, X, Upload } from 'lucide-react'
 import { PHASE_META } from '../../utils/phaseStyles'
+import ProjectPOSection from './sections/ProjectPOSection'
+import { useApp } from '../../context/AppContext'
 
 const FBACalculator = lazy(() => import('../FBACalculator'))
+const QuotesSection = lazy(() => import('../QuotesSection'))
 
 /**
  * Right-panel content of ProjectDetail. Renders the active phase's form,
  * required-check list and "Mark complete & advance" button.
- *
- * Props:
- * - project: project row
- * - activePhase {1..7}
- * - onAdvance(): called when user finishes the active phase (parent persists
- *   `current_phase = activePhase + 1` and refetches)
- * - onUpdateProject(patch): called to persist field edits in-line
- * - onOpenResearchWizard(): launches AI research modal (parent owns it)
- *
- * The phase forms keep a small slice of local state for the optional
- * project-side fields that don't (yet) live in the projects table — that data
- * is intentionally ephemeral here; the spec is UX-first and the schema is
- * already wide enough for the canonical fields (asin, decision, current_phase).
  */
 export default function PhaseContent({
   project,
@@ -31,12 +21,10 @@ export default function PhaseContent({
   const meta = PHASE_META[activePhase] || PHASE_META[1]
   const Icon = meta.icon
   const nextMeta = PHASE_META[activePhase + 1]
+  const { darkMode } = useApp?.() || {}
 
-  // Per-phase locally-tracked checklists. Persists in component state only —
-  // hydrated from project fields where they exist.
   const [checks, setChecks] = useState({})
   useEffect(() => {
-    // Re-derive checks from project for canonical fields.
     setChecks((prev) => ({
       ...prev,
       research_reviewed: !!project?.research_prompt_generated || prev.research_reviewed === true,
@@ -65,14 +53,10 @@ export default function PhaseContent({
     }}>
       <header style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <div style={{
-          width: 44,
-          height: 44,
-          borderRadius: 10,
+          width: 44, height: 44, borderRadius: 10,
           background: 'var(--accent-bg, #3b82f622)',
           color: 'var(--accent-primary, #3b82f6)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
         }}>
           <Icon size={22} />
         </div>
@@ -95,26 +79,17 @@ export default function PhaseContent({
         setCheck={setCheck}
         onUpdateProject={onUpdateProject}
         onOpenResearchWizard={onOpenResearchWizard}
+        darkMode={darkMode}
       />
 
       {!isFinalPhase && (
         <footer style={{
-          marginTop: 'auto',
-          paddingTop: 16,
+          marginTop: 'auto', paddingTop: 16,
           borderTop: '1px solid var(--border-1)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          flexWrap: 'wrap'
+          display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap'
         }}>
           {!allRequiredChecked && (
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              fontSize: 12,
-              color: 'var(--warning, #d97706)'
-            }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--warning, #d97706)' }}>
               <AlertCircle size={14} />
               Marca tots els checks obligatoris per avançar.
             </div>
@@ -125,16 +100,12 @@ export default function PhaseContent({
             onClick={onAdvance}
             style={{
               marginLeft: 'auto',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
+              display: 'inline-flex', alignItems: 'center', gap: 8,
               padding: '12px 18px',
               background: allRequiredChecked ? 'var(--accent-primary, #3b82f6)' : 'var(--surface-bg-2)',
               color: allRequiredChecked ? '#fff' : 'var(--text-2)',
-              border: 'none',
-              borderRadius: 10,
-              fontSize: 14,
-              fontWeight: 600,
+              border: 'none', borderRadius: 10,
+              fontSize: 14, fontWeight: 600,
               cursor: allRequiredChecked ? 'pointer' : 'not-allowed',
               boxShadow: allRequiredChecked ? '0 1px 2px rgba(0,0,0,.08)' : 'none'
             }}
@@ -150,45 +121,26 @@ export default function PhaseContent({
   )
 }
 
-/* ----------------------------------------------------------------------------
- * Field primitives
- * ------------------------------------------------------------------------- */
+/* ─── Field primitives ──────────────────────────────────────────────────── */
 
 const labelStyle = {
-  display: 'block',
-  fontSize: 12,
-  fontWeight: 600,
-  color: 'var(--text-2)',
-  marginBottom: 6
+  display: 'block', fontSize: 12, fontWeight: 600,
+  color: 'var(--text-2)', marginBottom: 6
 }
 const inputStyle = {
-  width: '100%',
-  padding: '10px 12px',
-  border: '1px solid var(--border-1)',
-  borderRadius: 8,
-  background: 'var(--surface-bg-2)',
-  color: 'var(--text-1)',
-  fontSize: 14,
-  fontFamily: 'inherit',
-  boxSizing: 'border-box'
+  width: '100%', padding: '10px 12px',
+  border: '1px solid var(--border-1)', borderRadius: 8,
+  background: 'var(--surface-bg-2)', color: 'var(--text-1)',
+  fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box'
 }
 
 function Field({ label, children }) {
-  return (
-    <div>
-      <label style={labelStyle}>{label}</label>
-      {children}
-    </div>
-  )
+  return <div><label style={labelStyle}>{label}</label>{children}</div>
 }
 
 function Grid({ children, cols = 2 }) {
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
-      gap: 14
-    }}>
+    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gap: 14 }}>
       {children}
     </div>
   )
@@ -198,21 +150,16 @@ function Check({ id, checks, setCheck, label, required = true }) {
   const checked = !!checks[id]
   return (
     <label style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: 10,
+      display: 'flex', alignItems: 'center', gap: 10,
       padding: '10px 12px',
       border: `1.5px solid ${checked ? 'var(--success, #10b981)' : 'var(--border-1)'}`,
       borderRadius: 8,
       background: checked ? 'var(--success-bg, #10b98111)' : 'var(--surface-bg-2)',
-      cursor: 'pointer',
-      fontSize: 13,
-      color: 'var(--text-1)',
+      cursor: 'pointer', fontSize: 13, color: 'var(--text-1)',
       transition: 'border 120ms, background 120ms'
     }}>
       <input
-        type="checkbox"
-        checked={checked}
+        type="checkbox" checked={checked}
         onChange={(e) => setCheck(id, e.target.checked)}
         style={{ width: 16, height: 16, accentColor: 'var(--success, #10b981)' }}
       />
@@ -225,12 +172,8 @@ function Check({ id, checks, setCheck, label, required = true }) {
 function PhaseSubhead({ children }) {
   return (
     <div style={{
-      fontSize: 12,
-      fontWeight: 700,
-      textTransform: 'uppercase',
-      letterSpacing: 0.6,
-      color: 'var(--text-2)',
-      marginTop: 4
+      fontSize: 12, fontWeight: 700, textTransform: 'uppercase',
+      letterSpacing: 0.6, color: 'var(--text-2)', marginTop: 4
     }}>
       {children}
     </div>
@@ -240,18 +183,13 @@ function PhaseSubhead({ children }) {
 function FieldDebounced({ label, value, onCommit, placeholder, type = 'text', rows }) {
   const [draft, setDraft] = useState(value ?? '')
   useEffect(() => { setDraft(value ?? '') }, [value])
-  const commit = () => {
-    if ((draft ?? '') !== (value ?? '')) onCommit(draft)
-  }
+  const commit = () => { if ((draft ?? '') !== (value ?? '')) onCommit(draft) }
   if (rows) {
     return (
       <Field label={label}>
         <textarea
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onBlur={commit}
-          placeholder={placeholder}
-          rows={rows}
+          value={draft} onChange={(e) => setDraft(e.target.value)}
+          onBlur={commit} placeholder={placeholder} rows={rows}
           style={{ ...inputStyle, resize: 'vertical', minHeight: rows * 22 }}
         />
       </Field>
@@ -260,22 +198,173 @@ function FieldDebounced({ label, value, onCommit, placeholder, type = 'text', ro
   return (
     <Field label={label}>
       <input
-        type={type}
-        value={draft}
+        type={type} value={draft}
         onChange={(e) => setDraft(e.target.value)}
-        onBlur={commit}
-        placeholder={placeholder}
-        style={inputStyle}
+        onBlur={commit} placeholder={placeholder} style={inputStyle}
       />
     </Field>
   )
 }
 
-/* ----------------------------------------------------------------------------
- * Phase 1 — Research
- * ------------------------------------------------------------------------- */
+/* ─── Image drag & drop uploader ─────────────────────────────────────────── */
+
+function ImageDropZone({ label, currentUrl, onUrl, placeholder = 'Arrossega una imatge o clica per seleccionar' }) {
+  const [dragging, setDragging] = useState(false)
+  const [preview, setPreview] = useState(currentUrl || null)
+  const inputRef = useRef()
+
+  useEffect(() => { setPreview(currentUrl || null) }, [currentUrl])
+
+  const processFile = (file) => {
+    if (!file || !file.type.startsWith('image/')) return
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      setPreview(e.target.result)
+      onUrl(e.target.result) // base64 — supabase storage upload deferred
+    }
+    reader.readAsDataURL(file)
+  }
+
+  return (
+    <div>
+      <label style={labelStyle}>{label}</label>
+      <div
+        onClick={() => inputRef.current?.click()}
+        onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={(e) => { e.preventDefault(); setDragging(false); processFile(e.dataTransfer.files[0]) }}
+        style={{
+          border: `2px dashed ${dragging ? 'var(--c-cta-500)' : 'var(--border-1)'}`,
+          borderRadius: 10,
+          background: dragging ? 'rgba(110,203,195,0.06)' : 'var(--surface-bg-2)',
+          cursor: 'pointer',
+          transition: 'border-color 150ms, background 150ms',
+          overflow: 'hidden',
+          minHeight: preview ? 'auto' : 90,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          gap: 6, position: 'relative'
+        }}
+      >
+        {preview ? (
+          <>
+            <img
+              src={preview}
+              alt="preview"
+              style={{ width: '100%', maxHeight: 200, objectFit: 'contain', display: 'block' }}
+              onError={() => setPreview(null)}
+            />
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setPreview(null); onUrl(null) }}
+              style={{
+                position: 'absolute', top: 6, right: 6,
+                background: 'rgba(0,0,0,0.55)', color: '#fff',
+                border: 'none', borderRadius: '50%', width: 22, height: 22,
+                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}
+            >
+              <X size={12} />
+            </button>
+          </>
+        ) : (
+          <>
+            <Upload size={20} style={{ color: 'var(--text-2)', opacity: 0.5 }} />
+            <span style={{ fontSize: 12, color: 'var(--text-2)', textAlign: 'center', padding: '0 12px' }}>
+              {placeholder}
+            </span>
+          </>
+        )}
+        <input
+          ref={inputRef} type="file" accept="image/*"
+          style={{ display: 'none' }}
+          onChange={(e) => processFile(e.target.files[0])}
+        />
+      </div>
+    </div>
+  )
+}
+
+/* ─── ASIN Image Resolver ────────────────────────────────────────────────── */
+
+function tryAsinImageUrl(asin) {
+  if (!asin || asin.length < 8) return null
+  // Patrons coneguts d'imatges de producte Amazon
+  return `https://images-na.ssl-images-amazon.com/images/P/${asin}.01.LZZZZZZZ.jpg`
+}
+
+function AsinImagePreview({ asin, currentImageUrl, onSaveUrl }) {
+  const [url, setUrl] = useState(currentImageUrl || null)
+  const [tried, setTried] = useState(false)
+
+  useEffect(() => {
+    if (!asin || asin.length < 8) return
+    const candidate = tryAsinImageUrl(asin)
+    if (!candidate) return
+    setTried(false)
+    // Prova si la imatge carrega
+    const img = new window.Image()
+    img.onload = () => {
+      setUrl(candidate)
+      setTried(true)
+      if (!currentImageUrl) onSaveUrl(candidate)
+    }
+    img.onerror = () => { setTried(true) }
+    img.src = candidate
+  }, [asin])
+
+  if (!asin) return null
+
+  return (
+    <div style={{
+      border: '1px solid var(--border-1)', borderRadius: 10,
+      background: 'var(--surface-bg-2)', overflow: 'hidden',
+      display: 'flex', flexDirection: 'column'
+    }}>
+      {url ? (
+        <>
+          <img
+            src={url} alt={`ASIN ${asin}`}
+            style={{ width: '100%', maxHeight: 160, objectFit: 'contain', display: 'block', padding: 8 }}
+            onError={() => setUrl(null)}
+          />
+          <div style={{ padding: '6px 10px', fontSize: 11, color: 'var(--text-2)', borderTop: '1px solid var(--border-1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>Imatge capturada d'Amazon</span>
+            <button
+              type="button"
+              onClick={() => onSaveUrl(url)}
+              style={{ fontSize: 11, color: 'var(--c-cta-500)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}
+            >
+              Usar com a miniatura ↑
+            </button>
+          </div>
+        </>
+      ) : tried ? (
+        <div style={{ padding: 12, fontSize: 12, color: 'var(--text-2)', textAlign: 'center' }}>
+          <ImageIcon size={18} style={{ opacity: 0.4, display: 'block', margin: '0 auto 4px' }} />
+          No s'ha pogut capturar la imatge per a {asin}
+        </div>
+      ) : (
+        <div style={{ padding: 12, fontSize: 12, color: 'var(--text-2)', textAlign: 'center' }}>
+          Cercant imatge per a {asin}…
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ─── Phase 1 — Research ─────────────────────────────────────────────────── */
 
 function ResearchForm({ project, checks, setCheck, onUpdateProject, onOpenResearchWizard }) {
+  const [asinDraft, setAsinDraft] = useState(project?.asin || '')
+
+  useEffect(() => { setAsinDraft(project?.asin || '') }, [project?.asin])
+
+  const handleAsinCommit = (val) => {
+    const patch = { asin: val }
+    if (!val) { patch.asin_image_url = null }
+    onUpdateProject(patch)
+  }
+
   return (
     <>
       <PhaseSubhead>Idea i mercat</PhaseSubhead>
@@ -286,13 +375,20 @@ function ResearchForm({ project, checks, setCheck, onUpdateProject, onOpenResear
         rows={3}
         placeholder="Què vols vendre? Per qui? Quina necessitat resol?"
       />
+
       <Grid cols={2}>
-        <FieldDebounced
-          label="ASIN de referència (opcional)"
-          value={project?.asin || ''}
-          onCommit={(v) => onUpdateProject({ asin: v })}
-          placeholder="B0XXXXXXXX"
-        />
+        {/* ASIN amb captura automàtica d'imatge */}
+        <Field label="ASIN de referència (opcional)">
+          <input
+            type="text"
+            value={asinDraft}
+            onChange={(e) => setAsinDraft(e.target.value.trim().toUpperCase())}
+            onBlur={() => handleAsinCommit(asinDraft)}
+            placeholder="B0XXXXXXXX"
+            style={inputStyle}
+          />
+        </Field>
+
         <FieldDebounced
           label="URL del producte / referència"
           value={project?.product_url || ''}
@@ -301,23 +397,35 @@ function ResearchForm({ project, checks, setCheck, onUpdateProject, onOpenResear
         />
       </Grid>
 
+      {/* Preview imatge ASIN */}
+      {asinDraft && asinDraft.length >= 8 && (
+        <AsinImagePreview
+          asin={asinDraft}
+          currentImageUrl={project?.asin_image_url}
+          onSaveUrl={(url) => onUpdateProject({ asin_image_url: url })}
+        />
+      )}
+
+      {/* Imatge del projecte (miniatura de la targeta) */}
+      <ImageDropZone
+        label="Imatge del projecte (miniatura)"
+        currentUrl={project?.main_image_url || project?.asin_image_url || null}
+        onUrl={(url) => onUpdateProject({ main_image_url: url })}
+        placeholder="Arrossega la imatge del producte o del packaging · Substituirà la miniatura de la targeta"
+      />
+
       <PhaseSubhead>Acció</PhaseSubhead>
       <button
         type="button"
         onClick={onOpenResearchWizard}
         style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 8,
+          display: 'inline-flex', alignItems: 'center', gap: 8,
           padding: '10px 14px',
           border: '1.5px solid var(--accent-primary, #3b82f6)',
           background: 'var(--accent-bg, #3b82f622)',
           color: 'var(--accent-primary, #3b82f6)',
-          borderRadius: 10,
-          fontSize: 14,
-          fontWeight: 600,
-          cursor: 'pointer',
-          alignSelf: 'flex-start'
+          borderRadius: 10, fontSize: 14, fontWeight: 600,
+          cursor: 'pointer', alignSelf: 'flex-start'
         }}
       >
         <Sparkles size={16} /> Llançar recerca IA
@@ -329,9 +437,7 @@ function ResearchForm({ project, checks, setCheck, onUpdateProject, onOpenResear
   )
 }
 
-/* ----------------------------------------------------------------------------
- * Phase 2 — Viability
- * ------------------------------------------------------------------------- */
+/* ─── Phase 2 — Viability ────────────────────────────────────────────────── */
 
 function ViabilityForm({ project, checks, setCheck, onUpdateProject }) {
   return (
@@ -342,18 +448,13 @@ function ViabilityForm({ project, checks, setCheck, onUpdateProject }) {
           const active = project?.decision === opt
           return (
             <button
-              key={opt}
-              type="button"
+              key={opt} type="button"
               onClick={() => onUpdateProject({ decision: opt })}
               style={{
-                padding: '12px 10px',
-                borderRadius: 10,
+                padding: '12px 10px', borderRadius: 10,
                 border: `1.5px solid ${active ? 'var(--accent-primary, #3b82f6)' : 'var(--border-1)'}`,
                 background: active ? 'var(--accent-bg, #3b82f622)' : 'var(--surface-bg-2)',
-                color: 'var(--text-1)',
-                fontSize: 14,
-                fontWeight: 600,
-                cursor: 'pointer'
+                color: 'var(--text-1)', fontSize: 14, fontWeight: 600, cursor: 'pointer'
               }}
             >
               {opt === 'GO' ? '✅ Go' : opt === 'HOLD' ? '⏸️ Hold' : '❌ Descartar'}
@@ -366,67 +467,46 @@ function ViabilityForm({ project, checks, setCheck, onUpdateProject }) {
           label="Preu de venda objectiu (€)"
           value={project?.target_price ?? ''}
           onCommit={(v) => onUpdateProject({ target_price: v ? Number(v) : null })}
-          type="number"
-          placeholder="29.90"
+          type="number" placeholder="29.90"
         />
         <FieldDebounced
           label="Marge objectiu (%)"
           value={project?.target_margin ?? ''}
           onCommit={(v) => onUpdateProject({ target_margin: v ? Number(v) : null })}
-          type="number"
-          placeholder="30"
+          type="number" placeholder="30"
         />
       </Grid>
       <FieldDebounced
         label="Notes d'avaluació"
         value={project?.viability_notes || ''}
         onCommit={(v) => onUpdateProject({ viability_notes: v })}
-        rows={3}
-        placeholder="Riscos, oportunitats, hipòtesis..."
+        rows={3} placeholder="Riscos, oportunitats, hipòtesis..."
       />
-
       <PhaseSubhead>Calculadora FBA</PhaseSubhead>
       <Suspense fallback={<div style={{ padding: 12, fontSize: 13, color: 'var(--text-2)' }}>Carregant calculadora…</div>}>
         <FBACalculator />
       </Suspense>
-
       <PhaseSubhead>Validació</PhaseSubhead>
       <Check id="viability_confirmed" checks={checks} setCheck={setCheck} label="He confirmat que el producte és viable amb els marges objectiu." />
     </>
   )
 }
 
-/* ----------------------------------------------------------------------------
- * Phase 3 — Suppliers
- * ------------------------------------------------------------------------- */
+/* ─── Phase 3 — Suppliers + Cotitzacions ────────────────────────────────── */
 
-function SuppliersForm({ project, checks, setCheck, onUpdateProject }) {
+function SuppliersForm({ project, checks, setCheck, onUpdateProject, darkMode }) {
   return (
     <>
       <PhaseSubhead>Proveïdors vinculats</PhaseSubhead>
       <div style={{
-        padding: 12,
-        border: '1px dashed var(--border-1)',
-        borderRadius: 10,
-        background: 'var(--surface-bg-2)',
-        fontSize: 13,
-        color: 'var(--text-2)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 10
+        padding: 12, border: '1px dashed var(--border-1)', borderRadius: 10,
+        background: 'var(--surface-bg-2)', fontSize: 13, color: 'var(--text-2)',
+        display: 'flex', alignItems: 'center', gap: 10
       }}>
         <span>Gestiona els proveïdors vinculats a aquest projecte des de la pàgina de Proveïdors.</span>
         <a
           href="/suppliers"
-          style={{
-            marginLeft: 'auto',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 4,
-            color: 'var(--accent-primary, #3b82f6)',
-            fontWeight: 600,
-            textDecoration: 'none'
-          }}
+          style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, color: 'var(--accent-primary, #3b82f6)', fontWeight: 600, textDecoration: 'none' }}
         >
           Obrir <ExternalLink size={14} />
         </a>
@@ -445,15 +525,20 @@ function SuppliersForm({ project, checks, setCheck, onUpdateProject }) {
           type="number"
         />
       </Grid>
+
+      {/* ── Cotitzacions de proveïdors ── */}
+      <PhaseSubhead>Cotitzacions de proveïdors</PhaseSubhead>
+      <Suspense fallback={<div style={{ padding: 14, fontSize: 13, color: 'var(--text-2)' }}>Carregant cotitzacions…</div>}>
+        <QuotesSection projectId={project?.id} darkMode={!!darkMode} />
+      </Suspense>
+
       <PhaseSubhead>Validació</PhaseSubhead>
       <Check id="supplier_selected" checks={checks} setCheck={setCheck} label="He seleccionat el proveïdor i tinc el preu i MOQ acordats." />
     </>
   )
 }
 
-/* ----------------------------------------------------------------------------
- * Phase 4 — Samples
- * ------------------------------------------------------------------------- */
+/* ─── Phase 4 — Samples ──────────────────────────────────────────────────── */
 
 function SamplesForm({ project, checks, setCheck, onUpdateProject }) {
   return (
@@ -502,41 +587,15 @@ function SamplesForm({ project, checks, setCheck, onUpdateProject }) {
   )
 }
 
-/* ----------------------------------------------------------------------------
- * Phase 5 — Production
- * ------------------------------------------------------------------------- */
+/* ─── Phase 5 — Production + PO inline ──────────────────────────────────── */
 
 function ProductionForm({ project, checks, setCheck, onUpdateProject }) {
   return (
     <>
-      <PhaseSubhead>Ordre de producció</PhaseSubhead>
-      <div style={{
-        padding: 12,
-        border: '1px dashed var(--border-1)',
-        borderRadius: 10,
-        background: 'var(--surface-bg-2)',
-        fontSize: 13,
-        color: 'var(--text-2)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 10
-      }}>
-        <span>Crea o vincula una purchase order des de la pàgina de Comandes.</span>
-        <a
-          href="/orders"
-          style={{
-            marginLeft: 'auto',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 4,
-            color: 'var(--accent-primary, #3b82f6)',
-            fontWeight: 600,
-            textDecoration: 'none'
-          }}
-        >
-          <Plus size={14} /> Nova PO
-        </a>
-      </div>
+      <PhaseSubhead>Purchase Orders vinculades</PhaseSubhead>
+      <ProjectPOSection projectId={project?.id} />
+
+      <PhaseSubhead>Dades de producció</PhaseSubhead>
       <Grid cols={2}>
         <FieldDebounced
           label="Quantitat de producció"
@@ -581,9 +640,7 @@ function ProductionForm({ project, checks, setCheck, onUpdateProject }) {
   )
 }
 
-/* ----------------------------------------------------------------------------
- * Phase 6 — Listing
- * ------------------------------------------------------------------------- */
+/* ─── Phase 6 — Listing + Imatges + A+ ──────────────────────────────────── */
 
 function ListingForm({ project, checks, setCheck, onUpdateProject }) {
   return (
@@ -632,15 +689,60 @@ function ListingForm({ project, checks, setCheck, onUpdateProject }) {
           <option value="active">Actiu</option>
         </select>
       </Field>
+
+      {/* ── Imatges del listing ── */}
+      <PhaseSubhead>Imatges del listing</PhaseSubhead>
+      <Grid cols={2}>
+        <ImageDropZone
+          label="Imatge principal del listing"
+          currentUrl={project?.listing_main_image || project?.main_image_url || null}
+          onUrl={(url) => onUpdateProject({ listing_main_image: url, main_image_url: url })}
+          placeholder="Imatge principal · fons blanc · 2000×2000px"
+        />
+        <ImageDropZone
+          label="Imatge secundària / lifestyle"
+          currentUrl={project?.listing_secondary_image || null}
+          onUrl={(url) => onUpdateProject({ listing_secondary_image: url })}
+          placeholder="Arrossega imatge lifestyle o detall"
+        />
+      </Grid>
+
+      {/* ── Contingut A+ ── */}
+      <PhaseSubhead>Contingut A+</PhaseSubhead>
+      <Grid cols={2}>
+        <ImageDropZone
+          label="Mòdul A+ 1"
+          currentUrl={project?.aplus_image_1 || null}
+          onUrl={(url) => onUpdateProject({ aplus_image_1: url })}
+          placeholder="Banner / mòdul A+ 1"
+        />
+        <ImageDropZone
+          label="Mòdul A+ 2"
+          currentUrl={project?.aplus_image_2 || null}
+          onUrl={(url) => onUpdateProject({ aplus_image_2: url })}
+          placeholder="Banner / mòdul A+ 2"
+        />
+        <ImageDropZone
+          label="Mòdul A+ 3"
+          currentUrl={project?.aplus_image_3 || null}
+          onUrl={(url) => onUpdateProject({ aplus_image_3: url })}
+          placeholder="Banner / mòdul A+ 3"
+        />
+        <ImageDropZone
+          label="Mòdul A+ 4"
+          currentUrl={project?.aplus_image_4 || null}
+          onUrl={(url) => onUpdateProject({ aplus_image_4: url })}
+          placeholder="Banner / mòdul A+ 4"
+        />
+      </Grid>
+
       <PhaseSubhead>Validació</PhaseSubhead>
       <Check id="listing_published" checks={checks} setCheck={setCheck} label="El listing està publicat i actiu a Amazon." />
     </>
   )
 }
 
-/* ----------------------------------------------------------------------------
- * Phase 7 — Live (final, no advance)
- * ------------------------------------------------------------------------- */
+/* ─── Phase 7 — Live ─────────────────────────────────────────────────────── */
 
 function LiveForm({ project }) {
   const stats = useMemo(() => ([
@@ -649,16 +751,15 @@ function LiveForm({ project }) {
     { label: 'Marge net', value: project?.live_margin_pct != null ? `${project.live_margin_pct}%` : '—' },
     { label: 'PPC cost', value: project?.live_ppc_month != null ? `€${Number(project.live_ppc_month).toLocaleString('es-ES')}` : '—' }
   ]), [project])
+
   return (
     <>
       <PhaseSubhead>Producte en venda</PhaseSubhead>
       <Grid cols={4}>
         {stats.map((s) => (
           <div key={s.label} style={{
-            padding: 14,
-            border: '1px solid var(--border-1)',
-            borderRadius: 10,
-            background: 'var(--surface-bg-2)'
+            padding: 14, border: '1px solid var(--border-1)',
+            borderRadius: 10, background: 'var(--surface-bg-2)'
           }}>
             <div style={{ fontSize: 11, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
               {s.label}
@@ -675,17 +776,11 @@ function LiveForm({ project }) {
         <a href="/inventory" style={quickLinkStyle}><ExternalLink size={14} /> Inventari</a>
       </div>
       <div style={{
-        marginTop: 8,
-        padding: 14,
+        marginTop: 8, padding: 14,
         border: '1.5px solid var(--accent-primary, #3b82f6)',
         background: 'var(--accent-bg, #3b82f622)',
-        borderRadius: 10,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 10,
-        color: 'var(--accent-primary, #3b82f6)',
-        fontSize: 13,
-        fontWeight: 600
+        borderRadius: 10, display: 'flex', alignItems: 'center', gap: 10,
+        color: 'var(--accent-primary, #3b82f6)', fontSize: 13, fontWeight: 600
       }}>
         <Rocket size={16} />
         Producte en venda — fes seguiment de mètriques i alertes des del Dashboard.
@@ -695,21 +790,13 @@ function LiveForm({ project }) {
 }
 
 const quickLinkStyle = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: 6,
-  padding: '8px 12px',
-  border: '1px solid var(--border-1)',
-  borderRadius: 8,
-  background: 'var(--surface-bg-2)',
-  color: 'var(--text-1)',
-  fontSize: 13,
-  textDecoration: 'none'
+  display: 'inline-flex', alignItems: 'center', gap: 6,
+  padding: '8px 12px', border: '1px solid var(--border-1)',
+  borderRadius: 8, background: 'var(--surface-bg-2)',
+  color: 'var(--text-1)', fontSize: 13, textDecoration: 'none'
 }
 
-/* ----------------------------------------------------------------------------
- * Registry
- * ------------------------------------------------------------------------- */
+/* ─── Registry ───────────────────────────────────────────────────────────── */
 
 const PHASE_FORMS = {
   1: ResearchForm,
