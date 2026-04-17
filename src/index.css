@@ -2957,13 +2957,13 @@ body.dark .fd-calendar-asana .rbc-day-bg {
 }
 
 /* Today highlight - subtle (no border) */
-.fd-calendar-asana .rbc-today .rbc-day-bg {
-  background: rgba(110, 203, 195, 0.12);
+.fd-calendar-asana .rbc-today {
+  background: rgba(110, 203, 195, 0.12) !important;
   /* No border - use background color only */
 }
 
-body.dark .fd-calendar-asana .rbc-today .rbc-day-bg {
-  background: rgba(110, 203, 195, 0.16);
+body.dark .fd-calendar-asana .rbc-today {
+  background: rgba(110, 203, 195, 0.16) !important;
   /* No border in dark mode */
 }
 
@@ -2973,14 +2973,14 @@ body.dark .fd-calendar-asana .rbc-today .rbc-day-bg {
   text-align: right;
 }
 
-.fd-calendar-asana .rbc-date-cell > a {
+.fd-calendar-asana .rbc-date-cell > button {
   font-weight: 600;
   font-size: 13px;
   color: var(--color-text);
   opacity: 0.85;
 }
 
-.fd-calendar-asana .rbc-today .rbc-date-cell > a {
+.fd-calendar-asana .rbc-date-cell.rbc-now > button {
   color: var(--c-cta-500);
   opacity: 1;
   font-weight: 600;
