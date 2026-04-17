@@ -37,9 +37,9 @@
 }
 
 .ui-btn--primary {
-  background-color: var(--color-primary);
-  color: var(--bg);
-  border-color: var(--color-primary);
+  background-color: var(--c-cta-500);
+  color: #1F5F63;
+  border-color: var(--c-cta-500);
 }
 
 .ui-btn--secondary {
@@ -66,7 +66,8 @@
 }
 
 .ui-btn--primary:not(:disabled):hover {
-  background-color: var(--color-primary);
+  background-color: var(--c-cta-600);
+  border-color: var(--c-cta-600);
 }
 
 .ui-btn--secondary:not(:disabled):hover {
