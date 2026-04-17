@@ -1,14 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import {
-  CheckCircle2,
-  Clock,
-  Calendar,
-  ArrowRight,
-  Inbox,
-  Filter
-} from 'lucide-react'
+import { Calendar, ArrowRight, Plus, ChevronDown, ChevronRight, Clock } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import {
   getTasks,
@@ -18,59 +11,81 @@ import {
   bulkSnoozeTasks
 } from '../lib/supabase'
 import { showToast } from '../components/Toast'
-import AppToolbar from '../components/ui/AppToolbar'
-import { parseISO, format } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { parseISO, format, isToday, isPast, isTomorrow } from 'date-fns'
+import { ca } from 'date-fns/locale'
 
-const STATUS_OPTIONS = [
-  { value: 'all', labelKey: 'tasks.inbox.filterStatusAll' },
-  { value: 'open', labelKey: 'tasks.inbox.filterStatusOpen' },
-  { value: 'done', labelKey: 'tasks.inbox.filterStatusDone' }
-]
-
-const SOURCE_OPTIONS = [
-  { value: 'all', labelKey: 'tasks.inbox.filterSourceAll' },
-  { value: 'manual', labelKey: 'tasks.inbox.sourceManual' },
-  { value: 'sticky_note', labelKey: 'tasks.inbox.sourceStickyNote' },
-  { value: 'alert', labelKey: 'tasks.inbox.sourceAlert' },
-  { value: 'decision', labelKey: 'tasks.inbox.sourceDecision' },
-  { value: 'gate', labelKey: 'tasks.inbox.sourceGate' }
-]
-
-function getSourceLabelKey(source) {
-  if (!source) return 'tasks.inbox.sourceManual'
-  const keyMap = {
-    manual: 'tasks.inbox.sourceManual',
-    sticky_note: 'tasks.inbox.sourceStickyNote',
-    alert: 'tasks.inbox.sourceAlert',
-    decision: 'tasks.inbox.sourceDecision',
-    gate: 'tasks.inbox.sourceGate'
-  }
-  return keyMap[source] || 'tasks.inbox.sourceManual'
+// Paleta corporativa
+const C = {
+  petrol:     '#1F5F63',
+  turquesa:   '#6ECBC3',
+  turqHover:  '#4FBFB7',
+  offwhite:   '#F6F8F3',
+  coral:      '#F26C6C',
+  muted:      '#8A9FAF',
+  border:     '#E2EAE8',
+  borderDark: '#2A3F42',
+  surface:    '#FFFFFF',
+  surfaceDark:'#1A2E30',
+  bg:         '#F6F8F3',
+  bgDark:     '#0F1F20',
+  amber:      '#F0B429',
 }
 
-function getDueDateInfo(dueDate, t) {
-  if (!dueDate) return { text: t('tasks.noDueDate'), color: '#6b7280' }
+const SOURCE_LABELS = {
+  manual: 'Manual',
+  sticky_note: 'Nota',
+  alert: 'Alerta',
+  decision: 'Decisió',
+  gate: 'Gate',
+}
+
+function getDueInfo(dueDate) {
+  if (!dueDate) return { text: null, color: C.muted }
   const due = parseISO(dueDate)
-  const now = new Date()
-  const diffDays = Math.ceil((due - now) / (1000 * 60 * 60 * 24))
-  if (diffDays < 0) {
-    const days = Math.abs(diffDays)
-    return { text: t('tasks.overdue', { days, count: days }), color: '#ef4444' }
-  }
-  if (diffDays === 0) return { text: t('tasks.dueToday'), color: '#f59e0b' }
-  if (diffDays === 1) return { text: t('tasks.dueTomorrow'), color: '#f59e0b' }
-  if (diffDays <= 7) return { text: t('tasks.dueInDays', { days: diffDays }), color: '#f59e0b' }
-  return { text: format(due, 'MMM d', { locale: es }) || format(due, 'MMM d'), color: '#6b7280' }
+  if (isPast(due) && !isToday(due)) return { text: format(due, 'd MMM', { locale: ca }), color: C.coral }
+  if (isToday(due))   return { text: 'Avui',   color: C.amber }
+  if (isTomorrow(due)) return { text: 'Demà',  color: C.amber }
+  return { text: format(due, 'd MMM', { locale: ca }), color: C.muted }
 }
 
-function getPriorityColor(priority) {
-  switch (priority) {
-    case 'high': return '#ef4444'
-    case 'normal': return '#f59e0b'
-    case 'low': return '#6b7280'
-    default: return '#6b7280'
-  }
+function groupTasks(tasks) {
+  const overdue  = tasks.filter(t => t.due_date && isPast(parseISO(t.due_date)) && !isToday(parseISO(t.due_date)))
+  const today    = tasks.filter(t => t.due_date && isToday(parseISO(t.due_date)))
+  const upcoming = tasks.filter(t => !t.due_date || (!isPast(parseISO(t.due_date)) && !isToday(parseISO(t.due_date))))
+  return [
+    { key: 'overdue',  label: 'Vencudes',  tasks: overdue,  accent: C.coral },
+    { key: 'today',    label: 'Avui',       tasks: today,    accent: C.amber },
+    { key: 'upcoming', label: 'Properes',   tasks: upcoming, accent: C.petrol },
+  ].filter(g => g.tasks.length > 0)
+}
+
+// Checkbox circular estil Asana
+function CircleCheck({ done, loading, onClick }) {
+  const [hovered, setHovered] = useState(false)
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={loading}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        width: 20, height: 20, borderRadius: '50%', flexShrink: 0,
+        border: `2px solid ${done ? C.turquesa : hovered ? C.turquesa : C.muted}`,
+        background: done ? C.turquesa : hovered ? `${C.turquesa}22` : 'transparent',
+        cursor: loading ? 'wait' : 'pointer',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        transition: 'all 0.15s', padding: 0,
+        opacity: loading ? 0.5 : 1,
+      }}
+    >
+      {(done || hovered) && (
+        <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+          <path d="M1 4l3 3 5-6" stroke={done ? '#fff' : C.turquesa} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      )}
+    </button>
+  )
 }
 
 export default function TaskInbox() {
@@ -80,471 +95,361 @@ export default function TaskInbox() {
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(null)
-  const [bulkActionLoading, setBulkActionLoading] = useState(false)
-  const [selectedTasks, setSelectedTasks] = useState(new Set())
-  const [statusFilter, setStatusFilter] = useState('open')
-  const [sourceFilter, setSourceFilter] = useState('all')
+  const [collapsed, setCollapsed] = useState({})
+  const [showDone, setShowDone] = useState(false)
+  const [activeTab, setActiveTab] = useState('list')
+
+  const bg      = darkMode ? C.bgDark      : C.bg
+  const surface = darkMode ? C.surfaceDark : C.surface
+  const border  = darkMode ? C.borderDark  : C.border
+  const text    = darkMode ? '#F0F5F5'     : '#1A2E30'
+  const muted   = darkMode ? '#5A7A7E'     : C.muted
 
   const loadTasks = useCallback(async () => {
-    if (!activeOrgId) {
-      setTasks([])
-      setLoading(false)
-      return
-    }
+    if (!activeOrgId) { setTasks([]); setLoading(false); return }
     setLoading(true)
     try {
-      const filters = { org_id: activeOrgId }
-      if (statusFilter !== 'all') filters.status = statusFilter
-      if (sourceFilter !== 'all') filters.source = sourceFilter
-      const data = await getTasks(filters)
+      const data = await getTasks({ org_id: activeOrgId })
       setTasks(data || [])
     } catch (err) {
-      console.error('TaskInbox: load tasks error', err)
-      showToast(err?.message || 'Error loading tasks', 'error')
+      showToast(err?.message || 'Error', 'error')
       setTasks([])
     } finally {
       setLoading(false)
     }
-  }, [activeOrgId, statusFilter, sourceFilter])
+  }, [activeOrgId])
 
-  useEffect(() => {
-    loadTasks()
-  }, [loadTasks])
+  useEffect(() => { loadTasks() }, [loadTasks])
 
   const handleMarkDone = async (taskId) => {
     setActionLoading(taskId)
     try {
       await markTaskDone(taskId)
-      showToast(t('tasks.markedDone'), 'success')
       await loadTasks()
-    } catch (err) {
-      showToast(err?.message || 'Error', 'error')
-    }
+    } catch (err) { showToast(err?.message || 'Error', 'error') }
     setActionLoading(null)
   }
 
-  const handleSnooze = async (taskId, days = 3) => {
+  const handleSnooze = async (taskId, days) => {
     setActionLoading(taskId)
     try {
       await snoozeTask(taskId, days)
-      showToast(t('tasks.snoozed', { days }), 'success')
+      showToast(`Ajornada ${days}d`, 'success')
       await loadTasks()
-    } catch (err) {
-      showToast(err?.message || 'Error', 'error')
-    }
+    } catch (err) { showToast(err?.message || 'Error', 'error') }
     setActionLoading(null)
   }
 
   const handleOpenEntity = (task) => {
-    switch (task.entity_type) {
-      case 'project':
-        navigate(`/app/projects/${task.entity_id}`)
-        break
-      case 'purchase_order':
-        navigate(`/app/orders?po=${task.entity_id}`)
-        break
-      case 'supplier':
-        navigate('/app/suppliers')
-        break
-      case 'shipment':
-        navigate('/app/orders')
-        break
-      default:
-        break
+    const routes = {
+      project: `/app/projects/${task.entity_id}`,
+      purchase_order: `/app/orders?po=${task.entity_id}`,
+      supplier: '/app/suppliers',
+      shipment: '/app/orders',
     }
+    if (routes[task.entity_type]) navigate(routes[task.entity_type])
   }
 
-  const handleOpenDecisionOrigin = (task) => {
-    if (!task?.source_ref_type || !task?.source_ref_id) return
-    if (task.source === 'decision' && task.source_ref_type === 'decision') {
-      navigate(`/app/decisions?id=${encodeURIComponent(task.source_ref_id)}`)
-    }
-  }
+  const open   = tasks.filter(t => t.status === 'open')
+  const done   = tasks.filter(t => t.status === 'done')
+  const groups = groupTasks(open)
 
-  const handleToggleSelect = (taskId) => {
-    setSelectedTasks((prev) => {
-      const next = new Set(prev)
-      if (next.has(taskId)) next.delete(taskId)
-      else next.add(taskId)
-      return next
-    })
-  }
-
-  const handleSelectAll = () => {
-    if (selectedTasks.size === tasks.length) setSelectedTasks(new Set())
-    else setSelectedTasks(new Set(tasks.map((t) => t.id)))
-  }
-
-  const handleBulkMarkDone = async () => {
-    if (selectedTasks.size === 0) return
-    setBulkActionLoading(true)
-    try {
-      await bulkMarkTasksDone(Array.from(selectedTasks))
-      showToast(t('tasks.bulkMarkedDone', { count: selectedTasks.size }), 'success')
-      setSelectedTasks(new Set())
-      await loadTasks()
-    } catch (err) {
-      showToast(err?.message || 'Error', 'error')
-    }
-    setBulkActionLoading(false)
-  }
-
-  const handleBulkSnooze = async (days) => {
-    if (selectedTasks.size === 0) return
-    setBulkActionLoading(true)
-    try {
-      await bulkSnoozeTasks(Array.from(selectedTasks), days)
-      showToast(t('tasks.bulkSnoozed', { count: selectedTasks.size, days }), 'success')
-      setSelectedTasks(new Set())
-      await loadTasks()
-    } catch (err) {
-      showToast(err?.message || 'Error', 'error')
-    }
-    setBulkActionLoading(false)
-  }
-
-  const borderColor = darkMode ? '#374151' : '#e5e7eb'
-  const bgColor = darkMode ? '#111827' : '#ffffff'
-  const textPrimary = darkMode ? '#f9fafb' : '#111827'
-  const textSecondary = darkMode ? '#9ca3af' : '#6b7280'
-
-  if (!activeOrgId) {
-    return (
-      <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
-        <h1 style={{ fontSize: '1.25rem', fontWeight: 600, color: textPrimary, marginBottom: '0.5rem' }}>
-          {t('tasks.inbox.title')}
-        </h1>
-        <p style={{ color: textSecondary }}>
-          {t('tasks.inbox.noWorkspace')}
-        </p>
-      </div>
-    )
-  }
+  const toggleSection = (key) => setCollapsed(p => ({ ...p, [key]: !p[key] }))
 
   return (
-    <div style={{ padding: '1rem', backgroundColor: darkMode ? '#0f0f14' : '#f9fafb', minHeight: '100%' }}>
-      <AppToolbar>
-        <AppToolbar.Left>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Inbox size={22} color="#6366f1" />
-            <h1 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600, color: textPrimary }}>
-              {t('tasks.inbox.title')}
-            </h1>
-          </div>
-        </AppToolbar.Left>
-      </AppToolbar>
-
+    <div style={{ background: bg, minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
+      {/* HEADER ESTIL ASANA */}
       <div style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        alignItems: 'center',
-        gap: '1rem',
-        marginBottom: '1rem',
-        padding: '0.75rem',
-        backgroundColor: bgColor,
-        border: `1px solid ${borderColor}`,
-        borderRadius: '8px'
+        background: surface,
+        borderBottom: `1px solid ${border}`,
+        padding: '0 32px',
       }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: textSecondary, fontSize: '0.875rem' }}>
-          <Filter size={14} />
-          {t('tasks.inbox.filters')}
-        </span>
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          style={{
-            padding: '6px 10px',
-            borderRadius: '6px',
-            border: `1px solid ${borderColor}`,
-            backgroundColor: darkMode ? '#1f2937' : '#fff',
-            color: textPrimary,
-            fontSize: '0.875rem'
-          }}
-        >
-          {STATUS_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>{t(opt.labelKey)}</option>
+        {/* Títol + tabs */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, paddingTop: 20, paddingBottom: 0 }}>
+          <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: C.petrol, letterSpacing: '-0.3px' }}>
+            Safata de Tasques
+          </h1>
+          <ChevronDown size={16} color={muted} />
+        </div>
+        {/* Tabs */}
+        <div style={{ display: 'flex', gap: 0, marginTop: 12 }}>
+          {['list', 'calendar'].map(tab => (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => setActiveTab(tab)}
+              style={{
+                padding: '8px 16px',
+                fontSize: 13, fontWeight: 500,
+                border: 'none', background: 'transparent', cursor: 'pointer',
+                color: activeTab === tab ? C.petrol : muted,
+                borderBottom: activeTab === tab ? `2px solid ${C.petrol}` : '2px solid transparent',
+                transition: 'all 0.15s',
+              }}
+            >
+              {tab === 'list' ? 'Llista' : 'Calendari'}
+            </button>
           ))}
-        </select>
-        <select
-          value={sourceFilter}
-          onChange={(e) => setSourceFilter(e.target.value)}
-          style={{
-            padding: '6px 10px',
-            borderRadius: '6px',
-            border: `1px solid ${borderColor}`,
-            backgroundColor: darkMode ? '#1f2937' : '#fff',
-            color: textPrimary,
-            fontSize: '0.875rem'
-          }}
-        >
-          {SOURCE_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>{t(opt.labelKey)}</option>
-          ))}
-        </select>
+        </div>
       </div>
 
-      {selectedTasks.size > 0 && (
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          marginBottom: '1rem',
-          padding: '0.75rem',
-          backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6',
-          border: `1px solid ${borderColor}`,
-          borderRadius: '8px'
-        }}>
-          <span style={{ fontSize: '0.875rem', color: textPrimary }}>{selectedTasks.size} {t('tasks.selected')}</span>
+      {/* TOOLBAR */}
+      <div style={{
+        background: surface, borderBottom: `1px solid ${border}`,
+        padding: '10px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+      }}>
+        <button
+          type="button"
+          style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            background: C.turquesa, color: C.petrol, border: 'none',
+            borderRadius: 8, padding: '7px 16px', fontSize: 13, fontWeight: 600,
+            cursor: 'pointer',
+          }}
+        >
+          <Plus size={16} /> Nova tasca
+        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <span style={{ fontSize: 12, color: muted }}>
+            {open.length} tasques obertes
+          </span>
           <button
             type="button"
-            onClick={handleBulkMarkDone}
-            disabled={bulkActionLoading}
+            onClick={() => setShowDone(p => !p)}
             style={{
-              padding: '6px 12px',
-              backgroundColor: '#22c55e',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '12px',
-              cursor: bulkActionLoading ? 'not-allowed' : 'pointer',
-              opacity: bulkActionLoading ? 0.6 : 1
+              fontSize: 12, color: showDone ? C.petrol : muted, border: 'none',
+              background: 'transparent', cursor: 'pointer', fontWeight: 500,
             }}
           >
-            {t('tasks.markDone')}
-          </button>
-          <button
-            type="button"
-            onClick={() => handleBulkSnooze(1)}
-            disabled={bulkActionLoading}
-            style={{
-              padding: '6px 12px',
-              backgroundColor: '#f59e0b',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '12px',
-              cursor: bulkActionLoading ? 'not-allowed' : 'pointer',
-              opacity: bulkActionLoading ? 0.6 : 1
-            }}
-          >
-            +1d
-          </button>
-          <button
-            type="button"
-            onClick={() => handleBulkSnooze(3)}
-            disabled={bulkActionLoading}
-            style={{
-              padding: '6px 12px',
-              backgroundColor: '#f59e0b',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '12px',
-              cursor: bulkActionLoading ? 'not-allowed' : 'pointer',
-              opacity: bulkActionLoading ? 0.6 : 1
-            }}
-          >
-            +3d
-          </button>
-          <button
-            type="button"
-            onClick={() => setSelectedTasks(new Set())}
-            style={{
-              padding: '6px 12px',
-              backgroundColor: 'transparent',
-              color: textSecondary,
-              border: `1px solid ${borderColor}`,
-              borderRadius: '6px',
-              fontSize: '12px',
-              cursor: 'pointer'
-            }}
-          >
-            {t('common.cancel')}
+            {showDone ? 'Ocultar completades' : 'Veure completades'}
           </button>
         </div>
-      )}
+      </div>
 
-      <div style={{
-        backgroundColor: bgColor,
-        border: `1px solid ${borderColor}`,
-        borderRadius: '8px',
-        overflow: 'hidden'
-      }}>
+      {/* CONTINGUT */}
+      <div style={{ flex: 1, padding: '24px 32px', maxWidth: 900 }}>
         {loading ? (
-          <div style={{ padding: '2rem', textAlign: 'center', color: textSecondary }}>{t('common.loading')}</div>
-        ) : tasks.length === 0 ? (
-          <div style={{ padding: '2rem', textAlign: 'center', color: textSecondary }}>
-            {t('tasks.inbox.empty')}
+          <div style={{ padding: 40, textAlign: 'center', color: muted }}>Carregant...</div>
+        ) : open.length === 0 && !showDone ? (
+          <div style={{
+            margin: '48px auto', maxWidth: 400, textAlign: 'center',
+            padding: 40, background: surface, borderRadius: 12, border: `1px solid ${border}`,
+          }}>
+            <div style={{ fontSize: 40, marginBottom: 16 }}>✅</div>
+            <p style={{ color: text, fontWeight: 600, fontSize: 16, margin: '0 0 8px' }}>Tot al dia!</p>
+            <p style={{ color: muted, fontSize: 14, margin: 0 }}>No hi ha tasques pendents.</p>
           </div>
         ) : (
-          <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-            {tasks.map((task) => {
-              const dueInfo = getDueDateInfo(task.due_date, t)
-              const priorityColor = getPriorityColor(task.priority)
-              const sourceLabel = t(getSourceLabelKey(task.source))
-              const entityLabel = task.entity_type && task.entity_id
-                ? `${(task.entity_type || '').replace('_', ' ')}`
-                : '—'
-              return (
-                <li
-                  key={task.id}
+          <>
+            {/* Seccions agrupades */}
+            {groups.map(group => (
+              <div key={group.key} style={{ marginBottom: 8 }}>
+                {/* Capçalera secció */}
+                <button
+                  type="button"
+                  onClick={() => toggleSection(group.key)}
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    padding: '0.75rem 1rem',
-                    borderBottom: `1px solid ${borderColor}`
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    padding: '6px 0', marginBottom: 2, width: '100%',
                   }}
                 >
-                  {task.status === 'open' && (
-                    <input
-                      type="checkbox"
-                      checked={selectedTasks.has(task.id)}
-                      onChange={() => handleToggleSelect(task.id)}
-                      style={{ cursor: 'pointer', width: '18px', height: '18px' }}
-                    />
-                  )}
-                  {task.status === 'done' && <span style={{ width: '18px' }} />}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                      <span style={{ fontWeight: 500, color: textPrimary }}>{task.title}</span>
-                      {task.priority && task.priority !== 'normal' && (
-                        <span style={{
-                          fontSize: '0.75rem',
-                          padding: '2px 6px',
-                          borderRadius: '4px',
-                          backgroundColor: `${priorityColor}20`,
-                          color: priorityColor,
-                          border: `1px solid ${priorityColor}`
-                        }}>
-                          {task.priority}
-                        </span>
-                      )}
-                      <span style={{
-                        fontSize: '0.75rem',
-                        padding: '2px 6px',
-                        borderRadius: '4px',
-                        backgroundColor: darkMode ? '#374151' : '#e5e7eb',
-                        color: textSecondary
-                      }}>
-                        {sourceLabel}
-                      </span>
-                      <span style={{
-                        fontSize: '0.75rem',
-                        padding: '2px 6px',
-                        borderRadius: '4px',
-                        backgroundColor: task.status === 'done' ? '#22c55e20' : '#f59e0b20',
-                        color: task.status === 'done' ? '#22c55e' : '#f59e0b'
-                      }}>
-                        {task.status}
-                      </span>
-                    </div>
-                    {task.notes && (
-                      <p style={{ margin: '0.25rem 0 0', fontSize: '0.8125rem', color: textSecondary }}>{task.notes}</p>
-                    )}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.25rem', fontSize: '0.8125rem', color: textSecondary }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: dueInfo.color }}>
-                        <Calendar size={12} />
-                        {dueInfo.text}
-                      </span>
-                      <span>{entityLabel}</span>
-                    </div>
+                  {collapsed[group.key]
+                    ? <ChevronRight size={14} color={group.accent} />
+                    : <ChevronDown  size={14} color={group.accent} />
+                  }
+                  <span style={{ fontSize: 13, fontWeight: 600, color: group.accent }}>
+                    {group.label}
+                  </span>
+                  <span style={{
+                    marginLeft: 6, fontSize: 11, color: muted,
+                    background: `${group.accent}18`, borderRadius: 10,
+                    padding: '1px 7px',
+                  }}>
+                    {group.tasks.length}
+                  </span>
+                </button>
+
+                {/* Files de tasques */}
+                {!collapsed[group.key] && (
+                  <div style={{
+                    background: surface, borderRadius: 10,
+                    border: `1px solid ${border}`, overflow: 'hidden',
+                  }}>
+                    {group.tasks.map((task, idx) => (
+                      <TaskRow
+                        key={task.id}
+                        task={task}
+                        last={idx === group.tasks.length - 1}
+                        loading={actionLoading === task.id}
+                        onDone={() => handleMarkDone(task.id)}
+                        onSnooze={(d) => handleSnooze(task.id, d)}
+                        onOpen={() => handleOpenEntity(task)}
+                        border={border} text={text} muted={muted} darkMode={darkMode}
+                      />
+                    ))}
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    {task.status === 'open' && (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => handleMarkDone(task.id)}
-                          disabled={actionLoading === task.id}
-                          title={t('tasks.markDone')}
-                          style={{
-                            padding: '6px',
-                            backgroundColor: '#22c55e',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '6px',
-                            cursor: actionLoading === task.id ? 'not-allowed' : 'pointer',
-                            opacity: actionLoading === task.id ? 0.6 : 1
-                          }}
-                        >
-                          <CheckCircle2 size={14} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleSnooze(task.id, 1)}
-                          disabled={actionLoading === task.id}
-                          title="+1d"
-                          style={{
-                            padding: '6px 8px',
-                            backgroundColor: '#f59e0b',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '6px',
-                            fontSize: '11px',
-                            cursor: actionLoading === task.id ? 'not-allowed' : 'pointer',
-                            opacity: actionLoading === task.id ? 0.6 : 1
-                          }}
-                        >
-                          +1d
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleSnooze(task.id, 3)}
-                          disabled={actionLoading === task.id}
-                          title="+3d"
-                          style={{
-                            padding: '6px 8px',
-                            backgroundColor: '#f59e0b',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '6px',
-                            fontSize: '11px',
-                            cursor: actionLoading === task.id ? 'not-allowed' : 'pointer',
-                            opacity: actionLoading === task.id ? 0.6 : 1
-                          }}
-                        >
-                          +3d
-                        </button>
-                      </>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => handleOpenEntity(task)}
-                      title={t('tasks.inbox.openEntity')}
-                      style={{
-                        padding: '6px',
-                        backgroundColor: 'transparent',
-                        color: textSecondary,
-                        border: `1px solid ${borderColor}`,
-                        borderRadius: '6px',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      <ArrowRight size={14} />
-                    </button>
-                        {task.source === 'decision' && task.source_ref_type === 'decision' && task.source_ref_id && (
-                          <button
-                            type="button"
-                            onClick={() => handleOpenDecisionOrigin(task)}
-                            title={t('tasks.inbox.openDecision')}
-                            style={{
-                              padding: '6px',
-                              backgroundColor: 'transparent',
-                              color: textSecondary,
-                              border: `1px solid ${borderColor}`,
-                              borderRadius: '6px',
-                              cursor: 'pointer'
-                            }}
-                          >
-                            {t('tasks.inbox.openDecision')}
-                          </button>
-                        )}
+                )}
+              </div>
+            ))}
+
+            {/* Completades */}
+            {showDone && done.length > 0 && (
+              <div style={{ marginTop: 24 }}>
+                <button
+                  type="button"
+                  onClick={() => toggleSection('done')}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    padding: '6px 0', marginBottom: 2,
+                  }}
+                >
+                  {collapsed['done']
+                    ? <ChevronRight size={14} color={muted} />
+                    : <ChevronDown  size={14} color={muted} />
+                  }
+                  <span style={{ fontSize: 13, fontWeight: 600, color: muted }}>Completades</span>
+                  <span style={{
+                    marginLeft: 6, fontSize: 11, color: muted,
+                    background: `${muted}20`, borderRadius: 10, padding: '1px 7px',
+                  }}>{done.length}</span>
+                </button>
+                {!collapsed['done'] && (
+                  <div style={{
+                    background: surface, borderRadius: 10,
+                    border: `1px solid ${border}`, overflow: 'hidden', opacity: 0.7,
+                  }}>
+                    {done.map((task, idx) => (
+                      <TaskRow
+                        key={task.id}
+                        task={task}
+                        last={idx === done.length - 1}
+                        loading={false}
+                        onDone={() => {}}
+                        onSnooze={() => {}}
+                        onOpen={() => handleOpenEntity(task)}
+                        border={border} text={text} muted={muted} darkMode={darkMode}
+                        isDone
+                      />
+                    ))}
                   </div>
-                </li>
-              )
-            })}
-          </ul>
+                )}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function TaskRow({ task, last, loading, onDone, onSnooze, onOpen, border, text, muted, darkMode, isDone }) {
+  const [hovered, setHovered] = useState(false)
+  const due = getDueInfo(task.due_date)
+  const source = SOURCE_LABELS[task.source] || task.source || 'Manual'
+
+  // Badge de prioritat
+  const priorityBadge = task.priority === 'high'
+    ? { label: 'Alta', bg: `${C.coral}18`, color: C.coral }
+    : task.priority === 'low'
+    ? { label: 'Baixa', bg: `${C.muted}18`, color: C.muted }
+    : null
+
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 12,
+        padding: '10px 16px',
+        borderBottom: last ? 'none' : `1px solid ${border}`,
+        background: hovered ? (darkMode ? '#1E3537' : `${C.turquesa}08`) : 'transparent',
+        transition: 'background 0.12s',
+      }}
+    >
+      {/* Checkbox circular */}
+      <CircleCheck done={isDone} loading={loading} onClick={isDone ? undefined : onDone} />
+
+      {/* Contingut principal */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <span style={{
+            fontSize: 14, color: isDone ? muted : text,
+            textDecoration: isDone ? 'line-through' : 'none',
+            fontWeight: 500,
+          }}>
+            {task.title}
+          </span>
+          {/* Badge font */}
+          <span style={{
+            fontSize: 11, padding: '2px 7px', borderRadius: 8,
+            background: `${C.turquesa}18`, color: C.petrol, fontWeight: 500,
+          }}>
+            {source}
+          </span>
+          {/* Badge prioritat */}
+          {priorityBadge && (
+            <span style={{
+              fontSize: 11, padding: '2px 7px', borderRadius: 8,
+              background: priorityBadge.bg, color: priorityBadge.color, fontWeight: 500,
+            }}>
+              {priorityBadge.label}
+            </span>
+          )}
+        </div>
+        {task.notes && (
+          <p style={{ margin: '2px 0 0', fontSize: 12, color: muted, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {task.notes}
+          </p>
+        )}
+      </div>
+
+      {/* Data + accions */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+        {due.text && (
+          <span style={{
+            display: 'flex', alignItems: 'center', gap: 4,
+            fontSize: 12, color: due.color, fontWeight: 500,
+          }}>
+            <Calendar size={12} />
+            {due.text}
+          </span>
+        )}
+        {/* Accions — visibles en hover */}
+        {hovered && !isDone && (
+          <div style={{ display: 'flex', gap: 4 }}>
+            <button
+              type="button" onClick={() => onSnooze(1)}
+              title="Ajornar 1 dia"
+              style={{
+                padding: '3px 7px', fontSize: 11, border: `1px solid ${C.amber}`,
+                color: C.amber, background: `${C.amber}18`, borderRadius: 6,
+                cursor: 'pointer', fontWeight: 600,
+              }}
+            >+1d</button>
+            <button
+              type="button" onClick={() => onSnooze(3)}
+              title="Ajornar 3 dies"
+              style={{
+                padding: '3px 7px', fontSize: 11, border: `1px solid ${C.amber}`,
+                color: C.amber, background: `${C.amber}18`, borderRadius: 6,
+                cursor: 'pointer', fontWeight: 600,
+              }}
+            >+3d</button>
+          </div>
+        )}
+        {hovered && (
+          <button
+            type="button" onClick={onOpen}
+            style={{
+              padding: '3px 7px', border: `1px solid ${border}`,
+              color: muted, background: 'transparent', borderRadius: 6,
+              cursor: 'pointer', display: 'flex', alignItems: 'center',
+            }}
+          >
+            <ArrowRight size={13} />
+          </button>
         )}
       </div>
     </div>
