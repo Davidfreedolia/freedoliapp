@@ -129,6 +129,7 @@ const AutomationProposalDetailPage = lazyWithErrorBoundary(() => import('./pages
 const AutomationActivityPage = lazyWithErrorBoundary(() => import('./pages/automations/AutomationActivityPage'), 'AutomationActivityPage')
 const AutomationAnalyticsPage = lazyWithErrorBoundary(() => import('./pages/automations/AutomationAnalyticsPage'), 'AutomationAnalyticsPage')
 const TaskInbox = lazyWithErrorBoundary(() => import('./pages/TaskInbox'), 'TaskInbox')
+const Docs = lazyWithErrorBoundary(() => import('./pages/Docs'), 'Docs')
 
 const ADMIN_EMAILS = new Set(['david@freedolia.com'])
 const gateTs = () => new Date().toISOString()
@@ -578,6 +579,7 @@ function App() {
                 <Route path="inbox" element={<AppPageWrap context="page:TaskInbox"><TaskInbox /></AppPageWrap>} />
                 <Route path="diagnostics" element={<AppPageWrap context="page:Diagnostics"><Diagnostics /></AppPageWrap>} />
                 <Route path="dev/seed" element={<AppPageWrap context="page:DevSeed"><DevSeed /></AppPageWrap>} />
+                <Route path="docs/*" element={<AppPageWrap context="page:Docs"><Docs /></AppPageWrap>} />
                 <Route path="billing/locked" element={<BillingLocked />} />
                 <Route path="billing/over-seat" element={<BillingOverSeat />} />
                 <Route path="*" element={<NotFoundInApp />} />

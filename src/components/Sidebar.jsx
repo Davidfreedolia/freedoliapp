@@ -27,7 +27,8 @@ import {
   CreditCard,
   Link2,
   Sparkles,
-  Database
+  Database,
+  BookOpen
 } from 'lucide-react'
 import Button from './Button'
 import { useApp } from '../context/AppContext'
@@ -122,6 +123,9 @@ const prefetchRoute = (path) => {
     case '/admin':
       import('../pages/AdminConsole.jsx').catch(() => {})
       break
+    case '/docs':
+      import('../pages/Docs.jsx').catch(() => {})
+      break
     default:
       break
   }
@@ -186,6 +190,7 @@ const SIDEBAR_GROUPS = [
     labelKey: 'nav.groupSystem',
     items: [
       { path: '/app/import', icon: Database, labelKey: 'nav.dataImport', feature: 'data_import' },
+      { path: '/app/docs', icon: BookOpen, labelKey: 'nav.docs' },
       { path: '/app/billing', icon: CreditCard, labelKey: 'nav.billing' },
       { path: '/app/settings', icon: Settings, labelKey: 'nav.settings' },
       { path: '/app/help', icon: HelpCircle, labelKey: 'nav.help' },
