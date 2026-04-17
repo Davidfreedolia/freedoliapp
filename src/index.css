@@ -28,8 +28,8 @@
   --c-coral-500: #F26C6C;
   --c-yellow-200: #F4E27A;
   --c-white-warm: #F6F8F3;
-  --c-cta-500: #2FA4A9;
-  --c-cta-600: #1E8A8F;
+  --c-cta-500: #6ECBC3;
+  --c-cta-600: #4FBFB7;
   --c-cta-secondary: #F47F7F;
   --c-accent: #F2D94E;
   --c-success: #3FBF9A;
@@ -56,7 +56,7 @@
   --cta-1: var(--c-cta-500);
   --cta-1-hover: var(--c-cta-600);
   --cta-2: var(--c-cta-secondary);
-  --cta-1-fg: var(--c-white-warm);
+  --cta-1-fg: #1F5F63;
   --cta-2-fg: var(--c-white-warm);
   --cta-1-soft: var(--brand-primary-soft);
   --cta-1-soft-border: var(--color-primary-soft-border);
