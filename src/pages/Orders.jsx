@@ -947,37 +947,37 @@ export default function Orders() {
         {/* Stats */}
         <div style={styles.statsRow}>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <FileText size={24} color="#4f46e5" />
+            <FileText size={24} color="var(--c-cta-500)" />
             <div>
               <span style={styles.statValue}>{stats.total}</span>
               <span style={styles.statLabel}>{t('orders.stats.totalPOs')}</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <AlertCircle size={24} color="#ef4444" />
+            <AlertCircle size={24} color="var(--c-cta-500)" />
             <div>
-              <span style={{ ...styles.statValue, color: '#ef4444' }}>{stats.requiringAttention}</span>
+              <span style={{ ...styles.statValue, color: 'var(--c-coral-500)' }}>{stats.requiringAttention}</span>
               <span style={styles.statLabel}>{t('orders.operational.stats.requiringAttention')}</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <Truck size={24} color="#06b6d4" />
+            <Truck size={24} color="var(--c-cta-500)" />
             <div>
-              <span style={{ ...styles.statValue, color: '#06b6d4' }}>{stats.activeLogistics}</span>
+              <span style={styles.statValue}>{stats.activeLogistics}</span>
               <span style={styles.statLabel}>{t('orders.operational.stats.activeLogistics')}</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <Package size={24} color="#d97706" />
+            <Package size={24} color="var(--c-cta-500)" />
             <div>
-              <span style={{ ...styles.statValue, color: '#d97706' }}>{stats.notAmazonReady}</span>
+              <span style={styles.statValue}>{stats.notAmazonReady}</span>
               <span style={styles.statLabel}>{t('orders.operational.stats.notAmazonReady')}</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <CheckCircle size={24} color="#22c55e" />
+            <CheckCircle size={24} color="var(--c-cta-500)" />
             <div>
-              <span style={{ ...styles.statValue, color: '#22c55e' }}>{stats.completed}</span>
+              <span style={styles.statValue}>{stats.completed}</span>
               <span style={styles.statLabel}>{t('orders.stats.completed')}</span>
             </div>
           </div>
@@ -1800,7 +1800,7 @@ export default function Orders() {
 
 const styles = {
   container: { flex: 1, display: 'flex', flexDirection: 'column' },
-  content: { padding: '32px', overflowY: 'auto' },
+  content: { padding: '32px', overflowY: 'auto', flex: 1, minHeight: 0 },
   toolbar: { display: 'flex', marginBottom: '24px' },
   searchGroup: { display: 'inline-flex', alignItems: 'center', gap: '12px', flexWrap: 'nowrap' },
   searchContainer: { flex: '0 0 auto', width: '320px', minWidth: '240px' },

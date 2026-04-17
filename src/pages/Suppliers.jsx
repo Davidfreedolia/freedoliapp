@@ -806,35 +806,35 @@ export default function Suppliers() {
         {/* Stats */}
         <div style={styles.statsRow}>
           <div style={{ ...styles.statCard, backgroundColor: 'var(--surface-bg)' }}>
-            <MessageCircle size={24} color="var(--c-teal-300)" />
+            <MessageCircle size={24} color="var(--c-cta-500)" />
             <div>
               <span style={styles.statValue}>{stats.suppliersWithOpenQuotes}</span>
               <span style={styles.statLabel}>{t('suppliersPage.kpis.suppliersWithOpenQuotes')}</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: 'var(--surface-bg)' }}>
-            <Package size={24} color="var(--c-teal-300)" />
+            <Package size={24} color="var(--c-cta-500)" />
             <div>
               <span style={styles.statValue}>{stats.pendingSamples}</span>
               <span style={styles.statLabel}>{t('suppliersPage.kpis.pendingSamples')}</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: 'var(--surface-bg)' }}>
-            <Building2 size={24} color="var(--c-teal-900)" />
+            <Building2 size={24} color="var(--c-cta-500)" />
             <div>
               <span style={styles.statValue}>{stats.activePos}</span>
               <span style={styles.statLabel}>{t('suppliersPage.kpis.activePos')}</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: 'var(--surface-bg)' }}>
-            <Truck size={24} color="var(--c-teal-300)" />
+            <Truck size={24} color="var(--c-cta-500)" />
             <div>
               <span style={styles.statValue}>{stats.activeShipments}</span>
               <span style={styles.statLabel}>{t('suppliersPage.kpis.activeShipments')}</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: 'var(--surface-bg)' }}>
-            <Clock size={24} color="var(--c-teal-900)" />
+            <Clock size={24} color="var(--c-cta-500)" />
             <div>
               <span style={styles.statValue}>{stats.needsFollowUp}</span>
               <span style={styles.statLabel}>{t('suppliersPage.kpis.needsFollowUp')}</span>

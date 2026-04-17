@@ -531,7 +531,6 @@ export default function Projects() {
         }}
         onClick={isPreview ? undefined : () => {
           setSelectedProjectId(project.id)
-          if (effectiveViewMode === 'split') return
           if (disableNavigation) return
           navigate(`/app/projects/${project.id}`)
         }}

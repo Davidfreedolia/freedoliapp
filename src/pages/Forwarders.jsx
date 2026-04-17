@@ -643,14 +643,14 @@ export default function Forwarders() {
         {/* Stats */}
         <div style={styles.statsRow}>
           <div style={{ ...styles.statCard, backgroundColor: 'var(--surface-bg)' }}>
-            <Truck size={24} color="var(--c-teal-300)" />
+            <Truck size={24} color="var(--c-cta-500)" />
             <div>
               <span style={styles.statValue}>{stats.total}</span>
               <span style={styles.statLabel}>Transitaris</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: 'var(--surface-bg)' }}>
-            <Warehouse size={24} color="var(--c-teal-900)" />
+            <Warehouse size={24} color="var(--c-cta-500)" />
             <div>
               <span style={styles.statValue}>{stats.totalWarehouses}</span>
               <span style={styles.statLabel}>Magatzems</span>
@@ -949,7 +949,7 @@ export default function Forwarders() {
 
 const styles = {
   container: { flex: 1, display: 'flex', flexDirection: 'column' },
-  content: { padding: '32px', overflowY: 'auto' },
+  content: { padding: '32px', overflowY: 'auto', flex: 1, minHeight: 0 },
   toolbar: { display: 'flex', marginBottom: '24px' },
   searchGroup: { display: 'inline-flex', alignItems: 'center', gap: '12px', flexWrap: 'nowrap' },
   searchContainer: { flex: '0 0 auto', width: '320px', minWidth: '240px' },

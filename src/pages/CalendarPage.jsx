@@ -513,10 +513,9 @@ export default function CalendarPage() {
               // react-big-calendar uses moment's locale configuration
               formats={{
                 // Weekday headers in month/week/day views - short format based on current locale
-                weekdayFormat: (date, culture, localizer) => {
-                  const locale = currentMomentLocale
-                  const weekday = moment(date).locale(locale).format('dd')
-                  return weekday.charAt(0).toUpperCase() + weekday.slice(1)
+                weekdayFormat: (date) => {
+                  const days = ['Dg', 'Dl', 'Dm', 'Dc', 'Dj', 'Dv', 'Ds']
+                  return days[date.getDay()]
                 },
                 // Day format for month view day numbers (just the number)
                 dayFormat: (date, culture, localizer) => {

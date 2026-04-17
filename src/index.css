@@ -963,10 +963,10 @@ body.dark .view-btn.is-active {
   background: rgba(255, 106, 61, 0.16);
 }
 
-/* Projects - NEW button: solid green always */
+/* Projects - NEW button: solid CTA always */
 .projects-toolbar__new:not(:disabled) {
-  background: var(--success-1) !important;
-  color: #fff !important;
+  background: var(--c-cta-500) !important;
+  color: var(--cta-1-fg) !important;
   border: 0 !important;
   opacity: 1 !important;
   box-shadow: var(--btn-shadow) !important;
@@ -974,14 +974,14 @@ body.dark .view-btn.is-active {
 
 .projects-toolbar__new:not(:disabled):hover,
 .projects-toolbar__new:not(:disabled):active {
-  background: var(--success-1) !important;
+  background: var(--c-cta-500) !important;
   opacity: 1 !important;
 }
 
-/* Toolbar CTA (Nou...) verd solid */
+/* Toolbar CTA (Nou...) turquesa corporatiu */
 .toolbar-cta:not(:disabled) {
-  background: var(--success-1) !important;
-  color: #fff !important;
+  background: var(--c-cta-500) !important;
+  color: var(--cta-1-fg) !important;
   border: 0 !important;
   opacity: 1 !important;
   box-shadow: var(--btn-shadow) !important;
@@ -989,7 +989,7 @@ body.dark .view-btn.is-active {
 
 .toolbar-cta:not(:disabled):hover,
 .toolbar-cta:not(:disabled):active {
-  background: var(--success-1) !important;
+  background: var(--c-cta-500) !important;
   opacity: 1 !important;
 }
 
@@ -2958,12 +2958,12 @@ body.dark .fd-calendar-asana .rbc-day-bg {
 
 /* Today highlight - subtle (no border) */
 .fd-calendar-asana .rbc-today .rbc-day-bg {
-  background: rgba(52, 152, 219, 0.08);
+  background: rgba(110, 203, 195, 0.12);
   /* No border - use background color only */
 }
 
 body.dark .fd-calendar-asana .rbc-today .rbc-day-bg {
-  background: rgba(52, 152, 219, 0.12);
+  background: rgba(110, 203, 195, 0.16);
   /* No border in dark mode */
 }
 
@@ -2981,7 +2981,7 @@ body.dark .fd-calendar-asana .rbc-today .rbc-day-bg {
 }
 
 .fd-calendar-asana .rbc-today .rbc-date-cell > a {
-  color: var(--color-accent);
+  color: var(--c-cta-500);
   opacity: 1;
   font-weight: 600;
 }
@@ -3037,13 +3037,13 @@ body.dark .fd-calendar-asana .rbc-toolbar button {
 }
 
 .fd-calendar-asana .rbc-toolbar button.rbc-active {
-  background: var(--color-accent) !important;
+  background: var(--c-cta-500) !important;
   color: #FFFFFF !important;
   border: none !important; /* No border */
 }
 
 body.dark .fd-calendar-asana .rbc-toolbar button.rbc-active {
-  background: var(--color-accent) !important;
+  background: var(--c-cta-500) !important;
   border: none !important; /* No border in dark mode */
 }
 

@@ -164,8 +164,8 @@ export default function Warehouses() {
         <div style={styles.cardHeader}>
           <span style={{
             ...styles.typeBadge,
-            backgroundColor: `${typeInfo.color}15`,
-            color: typeInfo.color
+            backgroundColor: 'var(--surface-bg-2)',
+            color: 'var(--c-cta-500)'
           }}>
             {typeInfo.icon} {t(`warehousesPage.types.${typeInfo.id}`)}
           </span>
@@ -471,16 +471,16 @@ export default function Warehouses() {
         {/* Stats */}
         <div style={styles.statsRow}>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <Warehouse size={24} color="#4f46e5" />
+            <Warehouse size={24} color="var(--c-cta-500)" />
             <div>
               <span style={styles.statValue}>{warehouses.length}</span>
               <span style={styles.statLabel}>{t('warehousesPage.totalWarehouses')}</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <Package size={24} color="#ff9900" />
+            <Package size={24} color="var(--c-cta-500)" />
             <div>
-              <span style={{...styles.statValue, color: '#ff9900'}}>{warehouses.filter(w => w.type === 'amazon_fba').length}</span>
+              <span style={styles.statValue}>{warehouses.filter(w => w.type === 'amazon_fba').length}</span>
               <span style={styles.statLabel}>{t('warehousesPage.amazonFbaStat')}</span>
             </div>
           </div>
