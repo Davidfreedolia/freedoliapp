@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+﻿import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import {
@@ -49,7 +49,7 @@ export default function Projects() {
   const [showMpAdd, setShowMpAdd] = useState(false)
   const [showDiscarded, setShowDiscarded] = useState(false)
   const [menuOpen, setMenuOpen] = useState(null)
-  const [viewMode, setViewMode] = useLayoutPreference('layout:projects', 'grid')
+  const [viewMode, setViewMode] = useLayoutPreference('layout:projects', 'list')
   const [selectedProjectId, setSelectedProjectId] = useState(null)
   const [loadError, setLoadError] = useState(null)
   const isLoadingProjects = loadingListState
@@ -1112,12 +1112,12 @@ export default function Projects() {
 }
 
 /**
- * Projects rendered as a table grouped by phase, each phase a collapsible
- * group. Columns: Name, ASIN, Marketplace, Margin estimate, Days in phase,
- * Last activity.
+ * Projects rendered as a ClickUp-style compact table grouped by phase.
+ * Columns: Nom | ASIN | Fase | Proveïdor | SKU | Accions
  */
 function ProjectsListView({ projects = [], onOpen = () => {} }) {
   const [collapsed, setCollapsed] = useState(() => new Set())
+  const navigate = useNavigate()
   const groups = useMemo(() => {
     const byPhase = new Map()
     for (const p of projects) {
@@ -1141,81 +1141,158 @@ function ProjectsListView({ projects = [], onOpen = () => {} }) {
     })
   }
 
-  const fmtDate = (iso) => iso ? new Date(iso).toLocaleDateString('ca-ES', { day: '2-digit', month: 'short' }) : '—'
-  const daysSince = (iso) => iso ? Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 86400000)) : null
-  const cellStyle = { padding: '10px 12px', fontSize: 13, color: 'var(--text-1)', borderBottom: '1px solid var(--border-1)' }
-  const thStyle = { ...cellStyle, fontSize: 11, fontWeight: 700, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: 0.5, textAlign: 'left', background: 'var(--surface-bg-2)' }
+  const TH = ({ w, children }) => (
+    <th style={{
+      padding: '8px 12px', fontSize: 11, fontWeight: 700,
+      color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: 0.6,
+      textAlign: 'left', background: 'var(--surface-bg-2)',
+      borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap',
+      width: w
+    }}>{children}</th>
+  )
+
+  const TD = ({ children, bold, muted, mono }) => (
+    <td style={{
+      padding: '0 12px', height: 46, fontSize: 13,
+      color: bold ? 'var(--text-1)' : muted ? 'var(--text-2)' : 'var(--text-1)',
+      fontWeight: bold ? 600 : 400,
+      fontFamily: mono ? 'var(--font-mono, monospace)' : undefined,
+      borderBottom: '1px solid var(--border)',
+      verticalAlign: 'middle', maxWidth: 240, overflow: 'hidden',
+      textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+    }}>{children}</td>
+  )
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {groups.map(({ phaseId, meta, items }) => {
         const isCollapsed = collapsed.has(phaseId)
         const Icon = meta?.icon
+        const phaseColor = meta?.color || 'var(--text-2)'
         return (
           <div key={phaseId} style={{
-            border: '1px solid var(--border-1)',
-            borderRadius: 12,
+            border: '1px solid var(--border)',
+            borderRadius: 10,
             background: 'var(--surface-bg)',
             overflow: 'hidden'
           }}>
+            {/* Section header */}
             <button
               type="button"
               onClick={() => toggle(phaseId)}
               style={{
-                all: 'unset',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                padding: '12px 16px',
-                cursor: 'pointer',
-                background: 'var(--surface-bg-2)',
-                width: '100%',
-                boxSizing: 'border-box'
+                all: 'unset', display: 'flex', alignItems: 'center', gap: 8,
+                padding: '9px 14px', cursor: 'pointer',
+                background: 'var(--surface-bg-2)', width: '100%', boxSizing: 'border-box'
               }}
             >
-              {Icon ? <Icon size={16} style={{ color: 'var(--text-2)' }} /> : null}
-              <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-1)' }}>
+              {isCollapsed
+                ? <svg width={14} height={14} viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                : <svg width={14} height={14} viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              }
+              <span style={{
+                width: 8, height: 8, borderRadius: '50%',
+                background: phaseColor, flexShrink: 0
+              }} />
+              <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-1)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 {meta?.label || `Fase ${phaseId}`}
               </span>
-              <span style={{ fontSize: 12, color: 'var(--text-2)' }}>
-                ({items.length})
-              </span>
-              <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--text-2)' }}>
-                {isCollapsed ? 'Mostrar ▾' : 'Amagar ▴'}
-              </span>
+              <span style={{
+                fontSize: 11, fontWeight: 600, padding: '1px 7px', borderRadius: 10,
+                background: phaseColor + '22', color: phaseColor
+              }}>{items.length}</span>
             </button>
+
             {!isCollapsed && (
               <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                  <colgroup>
+                    <col style={{ width: '28%' }} />
+                    <col style={{ width: '13%' }} />
+                    <col style={{ width: '13%' }} />
+                    <col style={{ width: '18%' }} />
+                    <col style={{ width: '12%' }} />
+                    <col style={{ width: '16%' }} />
+                  </colgroup>
                   <thead>
                     <tr>
-                      <th style={thStyle}>Nom</th>
-                      <th style={thStyle}>ASIN</th>
-                      <th style={thStyle}>Marketplace</th>
-                      <th style={thStyle}>Marge est.</th>
-                      <th style={thStyle}>Dies en fase</th>
-                      <th style={thStyle}>Última activitat</th>
+                      <TH>Nom</TH>
+                      <TH>ASIN</TH>
+                      <TH>Fase</TH>
+                      <TH>Proveïdor</TH>
+                      <TH>SKU</TH>
+                      <TH>Accions</TH>
                     </tr>
                   </thead>
                   <tbody>
                     {items.map((p) => {
-                      const mp = Array.isArray(p?.marketplace_tags) && p.marketplace_tags[0]
-                        ? (typeof p.marketplace_tags[0] === 'object' ? p.marketplace_tags[0].marketplace_code : p.marketplace_tags[0])
-                        : (p?.marketplace || '—')
-                      const days = daysSince(p?.status_changed_at || p?.updated_at || p?.created_at)
+                      const phId = Number(p?.current_phase ?? p?.phase ?? 1) || 1
+                      const pm = getPhaseMeta(phId)
+                      const pColor = pm?.color || 'var(--text-2)'
+                      const supplierName = p?.supplier_name || p?.supplier?.name || '—'
+                      const skuVal = p?.sku_internal || p?.sku || '—'
+                      const asinVal = p?.asin || p?.asin_code || '—'
                       return (
                         <tr
                           key={p.id}
-                          onClick={() => onOpen(p)}
+                          onClick={() => navigate(`/app/projects/${p.id}`)}
                           style={{ cursor: 'pointer' }}
-                          className="projects-list-row"
+                          className="fd-table-row"
                         >
-                          <td style={{ ...cellStyle, fontWeight: 600 }}>{p.name || 'Sense nom'}</td>
-                          <td style={cellStyle}>{p.asin || '—'}</td>
-                          <td style={cellStyle}>{mp}</td>
-                          <td style={cellStyle}>{p.target_margin != null ? `${p.target_margin}%` : '—'}</td>
-                          <td style={cellStyle}>{days != null ? `${days}d` : '—'}</td>
-                          <td style={cellStyle}>{fmtDate(p.updated_at || p.created_at)}</td>
+                          <TD bold>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              {p.main_image_url || p.asin_image_url ? (
+                                <img
+                                  src={p.main_image_url || p.asin_image_url}
+                                  alt=""
+                                  style={{ width: 28, height: 28, borderRadius: 4, objectFit: 'cover', flexShrink: 0 }}
+                                />
+                              ) : (
+                                <div style={{
+                                  width: 28, height: 28, borderRadius: 4, flexShrink: 0,
+                                  background: 'var(--surface-bg-2)',
+                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                  fontSize: 10, fontWeight: 700, color: 'var(--text-2)'
+                                }}>
+                                  {(p.name || '?').charAt(0).toUpperCase()}
+                                </div>
+                              )}
+                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {p.name || 'Sense nom'}
+                              </span>
+                            </div>
+                          </TD>
+                          <TD mono muted={asinVal === '—'}>{asinVal}</TD>
+                          <TD>
+                            <span style={{
+                              display: 'inline-flex', alignItems: 'center', gap: 4,
+                              padding: '2px 8px', borderRadius: 999, fontSize: 11,
+                              fontWeight: 600, background: pColor + '1a', color: pColor,
+                              whiteSpace: 'nowrap'
+                            }}>
+                              {pm?.label || `F${phId}`}
+                            </span>
+                          </TD>
+                          <TD muted={supplierName === '—'}>{supplierName}</TD>
+                          <TD mono muted={skuVal === '—'}>{skuVal}</TD>
+                          <td style={{
+                            padding: '0 12px', height: 46,
+                            borderBottom: '1px solid var(--border)',
+                            verticalAlign: 'middle'
+                          }}>
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); navigate(`/app/projects/${p.id}`) }}
+                              style={{
+                                all: 'unset', cursor: 'pointer', padding: '3px 10px',
+                                borderRadius: 6, fontSize: 12, fontWeight: 500,
+                                background: 'var(--surface-bg-2)', color: 'var(--text-2)',
+                                border: '1px solid var(--border)'
+                              }}
+                            >
+                              Obrir →
+                            </button>
+                          </td>
                         </tr>
                       )
                     })}
@@ -1226,7 +1303,9 @@ function ProjectsListView({ projects = [], onOpen = () => {} }) {
           </div>
         )
       })}
-      <style>{`.projects-list-row:hover td { background: var(--surface-bg-2); }`}</style>
+      <style>{`
+        .fd-table-row:hover td { background: rgba(110,203,195,0.06) !important; }
+      `}</style>
     </div>
   )
 }

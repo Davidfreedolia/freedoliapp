@@ -1,4 +1,4 @@
-* {
+﻿* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -8523,3 +8523,11 @@ svg[class*="lucide-star"] {
   color: var(--danger-1, #F26C6C);
   padding: 32px;
 }
+
+/* ============================================
+   FD Table rows - ClickUp style compact list
+   ============================================ */
+.fd-table-row { transition: background 0.1s; }
+.fd-table-row:hover td { background: rgba(110, 203, 195, 0.06) !important; cursor: pointer; }
+body.dark .fd-table-row:hover td { background: rgba(110, 203, 195, 0.08) !important; }
+.fd-table-row td { transition: background 0.1s; }

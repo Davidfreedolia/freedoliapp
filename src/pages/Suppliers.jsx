@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { 
@@ -226,7 +226,7 @@ export default function Suppliers() {
   const [showModal, setShowModal] = useState(false)
   const [editingSupplier, setEditingSupplier] = useState(null)
   const [saving, setSaving] = useState(false)
-  const [layout, setLayout] = useLayoutPreference('layout:suppliers', 'grid')
+  const [layout, setLayout] = useLayoutPreference('layout:suppliers', 'list')
   const [selectedSupplierId, setSelectedSupplierId] = useState(null)
   const [operationalBySupplier, setOperationalBySupplier] = useState({})
   
@@ -870,11 +870,74 @@ export default function Suppliers() {
                 {filteredSuppliers.map(supplier => renderSupplierCard(supplier))}
               </div>
             )}
-            {effectiveLayout === 'list' && (
-              <div style={styles.suppliersList}>
-                {filteredSuppliers.map(supplier => renderSupplierCard(supplier))}
-              </div>
-            )}
+            {effectiveLayout === 'list' && (() => {
+              const STATUS_ORDER = ['active', 'watch', 'inactive', 'blocked']
+              const grouped = new Map()
+              for (const s of filteredSuppliers) {
+                const ops = operationalBySupplier[s.id]
+                const key = ops?.operationalStatus || 'inactive'
+                if (!grouped.has(key)) grouped.set(key, [])
+                grouped.get(key).push(s)
+              }
+              const groups = []
+              for (const key of STATUS_ORDER) {
+                if (grouped.has(key)) groups.push({ key, items: grouped.get(key) })
+              }
+              for (const [key, items] of grouped) {
+                if (!STATUS_ORDER.includes(key)) groups.push({ key, items })
+              }
+              if (groups.length === 0) groups.push({ key: 'all', items: filteredSuppliers })
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {groups.map(({ key, items: groupItems }) => {
+                    const meta = OPERATIONAL_STATUS_META[key] || OPERATIONAL_STATUS_META.inactive
+                    const color = meta?.color || '#6b7280'
+                    return (
+                      <div key={key} style={{ border: '1px solid var(--border)', borderRadius: 10, background: 'var(--surface-bg)', overflow: 'hidden' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 14px', background: 'var(--surface-bg-2)', borderBottom: '1px solid var(--border)' }}>
+                          <span style={{ width: 8, height: 8, borderRadius: '50%', background: color }} />
+                          <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-1)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{meta?.label || key}</span>
+                          <span style={{ fontSize: 11, fontWeight: 600, padding: '1px 7px', borderRadius: 10, background: color + '22', color }}>{groupItems.length}</span>
+                        </div>
+                        <div style={{ overflowX: 'auto' }}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                            <colgroup>
+                              <col style={{ width: '27%' }} /><col style={{ width: '14%' }} /><col style={{ width: '11%' }} />
+                              <col style={{ width: '13%' }} /><col style={{ width: '16%' }} /><col style={{ width: '19%' }} />
+                            </colgroup>
+                            <thead>
+                              <tr>{['Nom','Tipus','País','PO actives','Estat','Accions'].map(h => (
+                                <th key={h} style={{ padding: '7px 12px', fontSize: 11, fontWeight: 700, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: 0.5, textAlign: 'left', background: 'var(--surface-bg-2)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }}>{h}</th>
+                              ))}</tr>
+                            </thead>
+                            <tbody>
+                              {groupItems.map(supplier => {
+                                const typeInfo = SUPPLIER_TYPES.find(tt => tt.id === supplier.type) || SUPPLIER_TYPES[0]
+                                const ops = operationalBySupplier[supplier.id]
+                                const opsMeta = OPERATIONAL_STATUS_META[ops?.operationalStatus] || OPERATIONAL_STATUS_META.inactive
+                                const opsColor = opsMeta?.color || '#6b7280'
+                                const poCount = ops?.activePOCount ?? ops?.active_po_count ?? 0
+                                const td = { padding: '0 12px', height: 46, fontSize: 13, color: 'var(--text-1)', borderBottom: '1px solid var(--border)', verticalAlign: 'middle', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
+                                return (
+                                  <tr key={supplier.id} onClick={() => navigate('/app/suppliers/' + supplier.id)} style={{ cursor: 'pointer' }} className="fd-table-row">
+                                    <td style={{ ...td, fontWeight: 600 }}>{supplier.name || '—'}</td>
+                                    <td style={td}><span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 999, fontSize: 11, fontWeight: 600, background: (typeInfo.color||'#6b7280')+'1a', color: typeInfo.color||'#6b7280' }}>{typeInfo.name}</span></td>
+                                    <td style={{ ...td, color: 'var(--text-2)' }}>{supplier.country || '—'}</td>
+                                    <td style={{ ...td, color: 'var(--text-2)', textAlign: 'center' }}>{poCount > 0 ? poCount : '—'}</td>
+                                    <td style={td}><span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '2px 8px', borderRadius: 999, fontSize: 11, fontWeight: 600, background: opsColor+'1a', color: opsColor }}>{opsMeta?.label || ops?.operationalStatus || 'Inactiu'}</span></td>
+                                    <td style={td}><button type="button" onClick={(e) => { e.stopPropagation(); navigate('/app/suppliers/' + supplier.id) }} style={{ all: 'unset', cursor: 'pointer', padding: '3px 10px', borderRadius: 6, fontSize: 12, fontWeight: 500, background: 'var(--surface-bg-2)', color: 'var(--text-2)', border: '1px solid var(--border)' }}>Obrir →</button></td>
+                                  </tr>
+                                )
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )
+            })()}
           </>
         )}
       </div>

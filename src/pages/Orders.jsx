@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Plus,
@@ -117,7 +117,7 @@ export default function Orders() {
   const [filterStatus, setFilterStatus] = useState(null)
   const [filterProject, setFilterProject] = useState(searchParams.get('project') || null)
   const [menuOpen, setMenuOpen] = useState(null)
-  const [layout, setLayout] = useLayoutPreference('layout:orders', 'grid')
+  const [layout, setLayout] = useLayoutPreference('layout:orders', 'list')
   const [selectedOrderId, setSelectedOrderId] = useState(null)
   // Rich PO detail loaded for the split-view right pane
   const [splitDetail, setSplitDetail] = useState(null)
@@ -1078,10 +1078,78 @@ export default function Orders() {
                             {groupItems.length}
                           </span>
                         </button>
-                        {/* Group items */}
+                        {/* Group items - compact table rows */}
                         {!isCollapsed && (
-                          <div style={styles.ordersList}>
-                            {groupItems.map(order => renderOrderCard(order))}
+                          <div style={{ overflowX: 'auto' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                              <colgroup>
+                                <col style={{ width: '14%' }} />
+                                <col style={{ width: '20%' }} />
+                                <col style={{ width: '18%' }} />
+                                <col style={{ width: '12%' }} />
+                                <col style={{ width: '10%' }} />
+                                <col style={{ width: '12%' }} />
+                                <col style={{ width: '14%' }} />
+                              </colgroup>
+                              <thead>
+                                <tr>
+                                  {['Referència','Projecte','Proveïdor','Estat','Total','ETA','Accions'].map(h => (
+                                    <th key={h} style={{
+                                      padding: '7px 12px', fontSize: 11, fontWeight: 700,
+                                      color: 'var(--text-2)', textTransform: 'uppercase',
+                                      letterSpacing: 0.5, textAlign: 'left',
+                                      background: 'var(--surface-bg-2)',
+                                      borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap'
+                                    }}>{h}</th>
+                                  ))}
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {groupItems.map(order => {
+                                  const stKey = PO_STATUS_META[order.status] ? order.status : 'draft'
+                                  const st = PO_STATUS_META[stKey]
+                                  const stColor = st?.color || '#6b7280'
+                                  const fmtEta = order.expected_delivery
+                                    ? new Date(order.expected_delivery).toLocaleDateString('ca-ES', { day: '2-digit', month: 'short' })
+                                    : (order.eta ? new Date(order.eta).toLocaleDateString('ca-ES', { day: '2-digit', month: 'short' }) : '—')
+                                  const total = order.total_amount != null
+                                    ? `${Number(order.total_amount).toLocaleString('ca-ES', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} €`
+                                    : '—'
+                                  const tdBase = { padding: '0 12px', height: 46, fontSize: 13, color: 'var(--text-1)', borderBottom: '1px solid var(--border)', verticalAlign: 'middle', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
+                                  return (
+                                    <tr key={order.id} onClick={() => navigate(`/app/orders/${order.id}`)}
+                                      style={{ cursor: 'pointer' }} className="fd-table-row">
+                                      <td style={{ ...tdBase, fontWeight: 600, fontFamily: 'var(--font-mono, monospace)', fontSize: 12 }}>{order.po_number || '—'}</td>
+                                      <td style={tdBase}>{order.project?.name || '—'}</td>
+                                      <td style={{ ...tdBase, color: 'var(--text-2)' }}>{order.supplier?.name || '—'}</td>
+                                      <td style={tdBase}>
+                                        <span style={{
+                                          display: 'inline-flex', alignItems: 'center', gap: 5,
+                                          padding: '2px 8px', borderRadius: 999, fontSize: 11,
+                                          fontWeight: 600, background: stColor + '1a', color: stColor, whiteSpace: 'nowrap'
+                                        }}>
+                                          {t(`orders.status.${stKey}`)}
+                                        </span>
+                                      </td>
+                                      <td style={{ ...tdBase, fontWeight: 600 }}>{total}</td>
+                                      <td style={{ ...tdBase, color: 'var(--text-2)' }}>{fmtEta}</td>
+                                      <td style={{ ...tdBase }}>
+                                        <button type="button"
+                                          onClick={(e) => { e.stopPropagation(); navigate(`/app/orders/${order.id}`) }}
+                                          style={{
+                                            all: 'unset', cursor: 'pointer', padding: '3px 10px',
+                                            borderRadius: 6, fontSize: 12, fontWeight: 500,
+                                            background: 'var(--surface-bg-2)', color: 'var(--text-2)',
+                                            border: '1px solid var(--border)'
+                                          }}>
+                                          Obrir →
+                                        </button>
+                                      </td>
+                                    </tr>
+                                  )
+                                })}
+                              </tbody>
+                            </table>
                           </div>
                         )}
                       </div>

@@ -89,7 +89,7 @@ export default function Forwarders() {
   const [searchTerm, setSearchTerm] = useState('')
   const [expandedForwarder, setExpandedForwarder] = useState(null)
   const [menuOpen, setMenuOpen] = useState(null)
-  const [layout, setLayout] = useLayoutPreference('layout:forwarders', 'grid')
+  const [layout, setLayout] = useLayoutPreference('layout:forwarders', 'list')
   const [selectedForwarderId, setSelectedForwarderId] = useState(null)
   
   // Modals
@@ -680,11 +680,49 @@ export default function Forwarders() {
                 {filteredForwarders.map(forwarder => renderForwarderCard(forwarder))}
               </div>
             )}
-            {effectiveLayout === 'list' && (
-              <div style={styles.forwardersList}>
-                {filteredForwarders.map(forwarder => renderForwarderCard(forwarder))}
-              </div>
-            )}
+            {effectiveLayout === 'list' && (() => {
+              return (
+                <div style={{ border: '1px solid var(--border)', borderRadius: 10, background: 'var(--surface-bg)', overflow: 'hidden' }}>
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                      <colgroup>
+                        <col style={{ width: '30%' }} /><col style={{ width: '14%' }} />
+                        <col style={{ width: '16%' }} /><col style={{ width: '16%' }} /><col style={{ width: '24%' }} />
+                      </colgroup>
+                      <thead>
+                        <tr>{['Nom','País','PO actives','Magatzems','Accions'].map(h => (
+                          <th key={h} style={{ padding: '8px 14px', fontSize: 11, fontWeight: 700, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: 0.5, textAlign: 'left', background: 'var(--surface-bg-2)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }}>{h}</th>
+                        ))}</tr>
+                      </thead>
+                      <tbody>
+                        {filteredForwarders.map(forwarder => {
+                          const fwWarehouses = getForwarderWarehouses(forwarder.id)
+                          const td = { padding: '0 14px', height: 46, fontSize: 13, color: 'var(--text-1)', borderBottom: '1px solid var(--border)', verticalAlign: 'middle', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
+                          return (
+                            <tr key={forwarder.id} onClick={() => navigate('/app/forwarders/' + forwarder.id)} style={{ cursor: 'pointer' }} className="fd-table-row">
+                              <td style={{ ...td, fontWeight: 600 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                  <div style={{ width: 28, height: 28, borderRadius: 6, background: 'rgba(31,78,95,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                    <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#1F4E5F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                                  </div>
+                                  {forwarder.name || '—'}
+                                </div>
+                              </td>
+                              <td style={{ ...td, color: 'var(--text-2)' }}>{forwarder.country || forwarder.city || '—'}</td>
+                              <td style={{ ...td, color: 'var(--text-2)', textAlign: 'center' }}>{forwarder.active_po_count > 0 ? forwarder.active_po_count : '—'}</td>
+                              <td style={{ ...td, color: 'var(--text-2)', textAlign: 'center' }}>{fwWarehouses.length > 0 ? fwWarehouses.length : '—'}</td>
+                              <td style={td}>
+                                <button type="button" onClick={(e) => { e.stopPropagation(); navigate('/app/forwarders/' + forwarder.id) }} style={{ all: 'unset', cursor: 'pointer', padding: '3px 10px', borderRadius: 6, fontSize: 12, fontWeight: 500, background: 'var(--surface-bg-2)', color: 'var(--text-2)', border: '1px solid var(--border)' }}>Obrir →</button>
+                              </td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )
+            })()}
           </>
         )}
       </div>

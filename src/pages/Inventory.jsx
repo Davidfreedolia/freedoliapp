@@ -199,7 +199,7 @@ export default function Inventory() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterProject, setFilterProject] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
-  const [layout, setLayout] = useLayoutPreference('layout:inventory', 'grid')
+  const [layout, setLayout] = useLayoutPreference('layout:inventory', 'list')
   const [selectedInventoryId, setSelectedInventoryId] = useState(null)
   const [collapsedInventoryGroups, setCollapsedInventoryGroups] = useState(new Set())
 
@@ -734,8 +734,39 @@ export default function Inventory() {
                           </span>
                         </button>
                         {!isCollapsed && (
-                          <div style={styles.inventoryList}>
-                            {groupItems.map(item => renderInventoryCard(item))}
+                          <div style={{ overflowX: 'auto' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                              <colgroup>
+                                <col style={{ width: '14%' }} /><col style={{ width: '26%' }} />
+                                <col style={{ width: '12%' }} /><col style={{ width: '16%' }} />
+                                <col style={{ width: '16%' }} /><col style={{ width: '16%' }} />
+                              </colgroup>
+                              <thead>
+                                <tr>{['SKU','Nom','Stock','Cobertura','Estat','Accions'].map(h => (
+                                  <th key={h} style={{ padding: '7px 12px', fontSize: 11, fontWeight: 700, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: 0.5, textAlign: 'left', background: 'var(--surface-bg-2)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }}>{h}</th>
+                                ))}</tr>
+                              </thead>
+                              <tbody>
+                                {groupItems.map(item => {
+                                  const decColor = item.decision?.tone || '#6b7280'
+                                  const coverage = item.coverageDays != null ? `${item.coverageDays}d` : (item.coverage_days != null ? `${item.coverage_days}d` : '—')
+                                  const stockQty = item.total_units ?? item.quantity ?? item.qty ?? item.units ?? '—'
+                                  const td = { padding: '0 12px', height: 46, fontSize: 13, color: 'var(--text-1)', borderBottom: '1px solid var(--border)', verticalAlign: 'middle', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
+                                  return (
+                                    <tr key={item.id} onClick={() => item.project_id ? navigate('/app/projects/' + item.project_id) : null} style={{ cursor: item.project_id ? 'pointer' : 'default' }} className="fd-table-row">
+                                      <td style={{ ...td, fontWeight: 700, fontFamily: 'var(--font-mono, monospace)', fontSize: 12 }}>{item.sku || '—'}</td>
+                                      <td style={{ ...td, fontWeight: 500 }}>{item.product_name || item.name || '—'}</td>
+                                      <td style={{ ...td, fontWeight: 600, textAlign: 'right' }}>{stockQty !== '—' ? Number(stockQty).toLocaleString('ca-ES') : '—'}</td>
+                                      <td style={{ ...td, color: 'var(--text-2)', textAlign: 'right' }}>{coverage}</td>
+                                      <td style={td}><span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '2px 8px', borderRadius: 999, fontSize: 11, fontWeight: 600, background: item.decision?.background || decColor + '1a', color: decColor }}>{item.decision?.label || '—'}</span></td>
+                                      <td style={td}>
+                                        {item.project_id && <button type="button" onClick={(e) => { e.stopPropagation(); navigate('/app/projects/' + item.project_id) }} style={{ all: 'unset', cursor: 'pointer', padding: '3px 10px', borderRadius: 6, fontSize: 12, fontWeight: 500, background: 'var(--surface-bg-2)', color: 'var(--text-2)', border: '1px solid var(--border)' }}>Projecte →</button>}
+                                      </td>
+                                    </tr>
+                                  )
+                                })}
+                              </tbody>
+                            </table>
                           </div>
                         )}
                       </div>
