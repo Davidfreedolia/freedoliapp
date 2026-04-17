@@ -63,7 +63,7 @@ export default function Trial() {
       await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${getAppBaseUrl()}/`,
+          redirectTo: `${getAppBaseUrl()}/app`,
         },
       })
     } catch (err) {

@@ -23,7 +23,7 @@ export default function Login() {
 
   useEffect(() => {
     if (isDemoMode()) {
-      navigate('/', { replace: true })
+      navigate('/app', { replace: true })
       return
     }
 
@@ -64,7 +64,7 @@ export default function Login() {
       await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${getAppBaseUrl()}/`,
+          redirectTo: `${getAppBaseUrl()}/app`,
         },
       })
     } catch (err) {
@@ -81,7 +81,7 @@ export default function Login() {
       await supabase.auth.signInWithOAuth({
         provider: 'apple',
         options: {
-          redirectTo: `${getAppBaseUrl()}/`,
+          redirectTo: `${getAppBaseUrl()}/app`,
         },
       })
     } catch (err) {
