@@ -9,9 +9,9 @@ export const checkDemoExists = async () => {
     const { data, error } = await supabase
       .from('projects')
       .select('id')
-      .eq('is_demo', true)
+      .ilike('name', 'Demo %')
       .limit(1)
-    
+
     if (error) throw error
     return (data || []).length > 0
   } catch (err) {
@@ -25,14 +25,12 @@ export const checkDemoExists = async () => {
  */
 export const checkRealDataExists = async () => {
   try {
-    const userId = await getCurrentUserId()
     const { data, error } = await supabase
       .from('projects')
       .select('id')
-      .eq('user_id', userId)
-      .or('is_demo.is.null,is_demo.eq.false')
+      .not('name', 'ilike', 'Demo %')
       .limit(1)
-    
+
     if (error) throw error
     return (data || []).length > 0
   } catch (err) {
@@ -83,7 +81,7 @@ export const generateDemoData = async (onProgress = null) => {
           incoterm: ['FOB', 'FCA', 'EXW'][Math.floor(Math.random() * 3)],
           payment_terms: ['T/T 30%', 'L/C at sight', 'Net 30'][Math.floor(Math.random() * 3)],
           user_id: userId, // Always set user_id explicitly
-          is_demo: true // Always true for demo data
+
         }])
         .select()
         .single()
@@ -129,7 +127,6 @@ export const generateDemoData = async (onProgress = null) => {
           status: p.decision === 'DISCARDED' ? 'inactive' : 'active',
           asin: p.asin || null,
           marketplace: p.marketplace || null,
-          is_demo: true
         }])
         .select()
         .single()
@@ -231,7 +228,6 @@ export const generateDemoData = async (onProgress = null) => {
           gtin_type: gtinType,
           status: i < 60 ? 'available' : 'assigned',
           user_id: userId, // Always set user_id explicitly
-          is_demo: true, // Always true for demo data
           assigned_to_project_id: i < 60 ? null : projects[i % 6].id,
           assigned_at: i < 60 ? null : new Date().toISOString()
         }])
@@ -267,7 +263,7 @@ export const generateDemoData = async (onProgress = null) => {
             shipping_estimate: 500,
             notes: `Demo quote ${q + 1} for ${project.name}`,
             user_id: userId, // Always set user_id explicitly
-            is_demo: true // Always true for demo data
+  
           }])
           .select()
           .single()
@@ -288,7 +284,7 @@ export const generateDemoData = async (onProgress = null) => {
                 min_qty: br.min_qty,
                 unit_price: br.unit_price,
                 user_id: userId, // Always set user_id explicitly
-                is_demo: true // Always true for demo data
+      
               }])
           }
 
@@ -334,7 +330,7 @@ export const generateDemoData = async (onProgress = null) => {
             items: JSON.stringify(items),
             total_amount: items.reduce((sum, item) => sum + item.total, 0),
             user_id: userId, // Always set user_id explicitly
-            is_demo: true // Always true for demo data
+  
           }])
           .select()
           .single()
@@ -358,7 +354,6 @@ export const generateDemoData = async (onProgress = null) => {
                 carton_height_cm: 15,
                 carton_weight_kg: 5.5,
                 prep_type: 'none',
-                is_demo: true
               }], { onConflict: 'purchase_order_id' })
           } else {
             await supabase
@@ -374,7 +369,7 @@ export const generateDemoData = async (onProgress = null) => {
                 carton_weight_kg: i === 5 ? null : 5.5,
                 prep_type: 'none',
                 user_id: userId, // Always set user_id explicitly
-                is_demo: true // Always true for demo data
+      
               }], { onConflict: 'user_id,purchase_order_id' })
           }
 
@@ -426,7 +421,7 @@ export const generateDemoData = async (onProgress = null) => {
           notes: ship.stale ? `Demo shipment ${i + 1} (stale tracking)` : `Demo shipment ${i + 1}`,
           updated_at: updatedAt,
           user_id: userId, // Always set user_id explicitly
-          is_demo: true // Always true for demo data
+
         }])
         .select()
         .single()
@@ -479,7 +474,7 @@ export const generateDemoData = async (onProgress = null) => {
           priority: priorities[i % 3],
           source: i < 5 ? 'sticky_note' : null,
           user_id: userId, // Always set user_id explicitly
-          is_demo: true // Always true for demo data
+
         }])
 
       newCounts.tasks++
@@ -510,7 +505,6 @@ export const generateDemoData = async (onProgress = null) => {
           pinned: actualIsPinned,
           priority: priorities[i % 3],
           user_id: userId, // Always set user_id explicitly
-          is_demo: true, // Always true for demo data
           linked_task_id: actualIsConverted && allTasks && allTasks[taskIndex] ? allTasks[taskIndex].id : null,
           converted_to_task_at: actualIsConverted ? new Date().toISOString() : null
         }])
@@ -544,7 +538,7 @@ export const generateDemoData = async (onProgress = null) => {
           expense_date: expenseDates[i],
           notes: `Demo expense for testing`,
           user_id: userId, // Always set user_id explicitly
-          is_demo: true // Always true for demo data
+
         }])
 
       newCounts.expenses = (newCounts.expenses || 0) + 1
@@ -576,7 +570,7 @@ export const generateDemoData = async (onProgress = null) => {
           marketplace: 'ES',
           notes: `Demo income for testing`,
           user_id: userId, // Always set user_id explicitly
-          is_demo: true // Always true for demo data
+
         }])
 
       newCounts.incomes = (newCounts.incomes || 0) + 1
@@ -599,7 +593,6 @@ export const generateDemoData = async (onProgress = null) => {
         description: 'Demo SaaS Subscription',
         is_active: true,
         user_id: userId, // Always set user_id explicitly
-        is_demo: true // Always true for demo data
       }])
 
     // Recurring 2: Quarterly service
@@ -614,7 +607,6 @@ export const generateDemoData = async (onProgress = null) => {
         description: 'Demo Quarterly Service Fee',
         is_active: true,
         user_id: userId, // Always set user_id explicitly
-        is_demo: true // Always true for demo data
       }])
 
     newCounts.recurring = 2
@@ -663,7 +655,7 @@ export const generateDemoData = async (onProgress = null) => {
           context: 'global',
           minimized: false,
           user_id: userId, // Always set user_id explicitly
-          is_demo: true // Always true for demo data
+
         }])
 
       newCounts.floatingNotes = (newCounts.floatingNotes || 0) + 1
@@ -696,7 +688,7 @@ export const clearDemoData = async () => {
     const { data: suppliers } = await supabase
       .from('suppliers')
       .select('id')
-      .eq('is_demo', true)
+      .ilike('name', 'Demo %')
       .eq('user_id', userId)
     
     // Delete in order of foreign keys (reverse dependency order)
@@ -726,7 +718,7 @@ export const clearDemoData = async () => {
             const { data: demoProjects } = await supabase
               .from('projects')
               .select('id')
-              .eq('is_demo', true)
+              .ilike('name', 'Demo %')
               .eq('user_id', userId)
 
             if (demoProjects && demoProjects.length > 0) {
@@ -765,7 +757,7 @@ export const clearDemoData = async () => {
           const { data: demoProjects } = await supabase
             .from('projects')
             .select('id')
-            .eq('is_demo', true)
+            .ilike('name', 'Demo %')
             .eq('user_id', userId)
 
           if (demoProjects && demoProjects.length > 0) {
@@ -785,11 +777,11 @@ export const clearDemoData = async () => {
             }
           }
         } else if (table === 'gtin_pool') {
-          // Delete demo GTINs (marked with is_demo or assigned to demo projects)
+          // Delete demo GTINs assigned to demo projects (name ILIKE 'Demo %')
           const { data: demoProjects } = await supabase
             .from('projects')
             .select('id')
-            .eq('is_demo', true)
+            .ilike('name', 'Demo %')
             .eq('user_id', userId)
 
           if (demoProjects && demoProjects.length > 0) {
@@ -806,53 +798,48 @@ export const clearDemoData = async () => {
               .in('assigned_to_project_id', projectIds)
           }
 
-          // Delete GTINs marked as demo
-          await supabase
-            .from('gtin_pool')
-            .delete()
-            .eq('user_id', userId)
-            .eq('is_demo', true)
+          // GTINs standalone: no marker available after is_demo removal; project-linked ones handled above
         } else if (table === 'sticky_notes') {
-          // Delete demo sticky notes
+          // Delete demo sticky notes (identified by title prefix)
           await supabase
             .from('sticky_notes')
             .delete()
             .eq('user_id', userId)
-            .eq('is_demo', true)
+            .ilike('title', 'Demo %')
         } else if (table === 'expenses') {
-          // Delete demo expenses
+          // Delete demo expenses (identified by description prefix)
           await supabase
             .from('expenses')
             .delete()
             .eq('user_id', userId)
-            .eq('is_demo', true)
+            .ilike('description', 'Demo %')
         } else if (table === 'incomes') {
-          // Delete demo incomes
+          // Delete demo incomes (identified by description prefix)
           await supabase
             .from('incomes')
             .delete()
             .eq('user_id', userId)
-            .eq('is_demo', true)
+            .ilike('description', 'Demo %')
         } else if (table === 'recurring_expenses') {
-          // Delete demo recurring expenses
+          // Delete demo recurring expenses (identified by description prefix)
           await supabase
             .from('recurring_expenses')
             .delete()
             .eq('user_id', userId)
-            .eq('is_demo', true)
+            .ilike('description', 'Demo %')
         } else if (table === 'tasks') {
-          // Delete demo tasks
+          // Delete demo tasks (identified by title prefix)
           await supabase
             .from('tasks')
             .delete()
             .eq('user_id', userId)
-            .eq('is_demo', true)
+            .ilike('title', 'Demo %')
         } else if (table === 'decision_log') {
           // Delete decision_log entries for demo projects (entity_type='project')
           const { data: demoProjects } = await supabase
             .from('projects')
             .select('id')
-            .eq('is_demo', true)
+            .ilike('name', 'Demo %')
             .eq('user_id', userId)
 
           if (demoProjects && demoProjects.length > 0) {
@@ -869,14 +856,14 @@ export const clearDemoData = async () => {
             .from('projects')
             .delete()
             .eq('user_id', userId)
-            .eq('is_demo', true)
+            .ilike('name', 'Demo %')
         } else if (table === 'suppliers') {
           // Delete demo suppliers (only if not used by non-demo projects)
           await supabase
             .from('suppliers')
             .delete()
             .eq('user_id', userId)
-            .eq('is_demo', true)
+            .ilike('name', 'Demo %')
         }
       } catch (err) {
         console.error(`Error deleting from ${table}:`, err)
