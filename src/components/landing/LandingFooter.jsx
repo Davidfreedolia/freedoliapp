@@ -34,6 +34,15 @@ export default function LandingFooter() {
           </ul>
         </div>
         <div className="landing-footer__col">
+          <div className="landing-footer__colTitle">{t('landing.footer.suite', { defaultValue: 'Suite Freedolia' })}</div>
+          <ul className="landing-footer__list">
+            <li><a href="https://freedolia.com" target="_blank" rel="noreferrer">Freedolia</a></li>
+            <li><a href="https://fluxsaas.com" target="_blank" rel="noreferrer">Flux</a></li>
+            <li><a href="https://freeseolia.com" target="_blank" rel="noreferrer">freeSEOlia</a></li>
+            <li><a href="https://freehubia.com" target="_blank" rel="noreferrer">Freehubia</a></li>
+          </ul>
+        </div>
+        <div className="landing-footer__col">
           <div className="landing-footer__colTitle">{t('landing.footer.legal')}</div>
           <ul className="landing-footer__list">
             <li><a href="/privacy">{t('landing.footer.privacy')}</a></li>
