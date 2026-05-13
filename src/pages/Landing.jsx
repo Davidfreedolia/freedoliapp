@@ -362,7 +362,7 @@ export default function Landing() {
       {/* ── 4. FEATURES 6-CARD GRID (CANVI 3) ───────────────────────────── */}
       <section className="py-5 bg-white" id="features">
         <div className="container">
-          <div className="text-center mb-5">
+          <div className="text-center mb-5 ld-section-header">
             <span className="ld-section-label">{t('landing.features_section.label')}</span>
             <h2 className="ld-section-title mt-2">{t('landing.features_section.title')}</h2>
           </div>
@@ -370,12 +370,14 @@ export default function Landing() {
             {FEATURES.map((f, i) => (
               <div key={i} className="col">
                 <div
-                  className="card h-100 border-0 shadow-sm p-4"
-                  style={{ borderRadius: 12 }}
+                  className="ld-feature-card h-100"
+                  style={{ animation: `fd-fade-up 0.5s ${0.05 * i}s both` }}
                 >
-                  <f.Icon size={32} color="#6ECBC3" className="mb-3" />
-                  <h5 className="fw-bold mb-2">{t(f.titleKey)}</h5>
-                  <p className="text-muted mb-0">{t(f.textKey)}</p>
+                  <div className="ld-feature-card__icon">
+                    <f.Icon size={22} color="#1F5F63" />
+                  </div>
+                  <h5 className="ld-feature-card__title">{t(f.titleKey)}</h5>
+                  <p className="ld-feature-card__desc mb-0">{t(f.textKey)}</p>
                 </div>
               </div>
             ))}

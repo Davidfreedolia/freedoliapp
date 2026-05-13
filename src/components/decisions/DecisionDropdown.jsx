@@ -11,10 +11,10 @@ export default function DecisionDropdown({ items, loading, error, onItemClick, o
         marginTop: 4,
         width: 320,
         maxHeight: 360,
-        backgroundColor: 'var(--surface-bg-2, #020617)',
-        borderRadius: 10,
-        boxShadow: 'var(--shadow-soft, 0 10px 40px rgba(15,23,42,0.6))',
-        border: '1px solid var(--border-1, #1f2933)',
+        backgroundColor: 'var(--surface-bg, #ffffff)',
+        borderRadius: 12,
+        boxShadow: 'var(--shadow-soft, 0 10px 30px rgba(31,95,99,0.10))',
+        border: '1px solid var(--border-1, #D8E1DE)',
         overflow: 'hidden',
         zIndex: 1600,
       }}
@@ -22,7 +22,7 @@ export default function DecisionDropdown({ items, loading, error, onItemClick, o
       <div
         style={{
           padding: '8px 10px',
-          borderBottom: '1px solid var(--border-1, #1f2933)',
+          borderBottom: '1px solid var(--border-1, #D8E1DE)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',

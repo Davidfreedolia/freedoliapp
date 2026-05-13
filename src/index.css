@@ -42,8 +42,10 @@
   /* Semantic UI tokens (Light) */
   --bg-app: var(--c-white-warm);
   --surface-bg: #FFFFFF;
-  --surface-bg-2: var(--bg-secondary);
-  --surface-bg-3: var(--surface-bg-2);
+  /* Soft surface for muted cards / hover states. Concrete value so it never
+     resolves to `unset` (circular ref had this falling back to near-black). */
+  --surface-bg-2: #F1F5F1;
+  --surface-bg-3: #E9EFE8;
   --border-1: var(--c-border);
 
   --text-1: var(--c-text-900);
@@ -1485,12 +1487,25 @@ body.dark .drive-btn--compact.drive--on {
 .fd-modal__overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(6, 26, 28, 0.42);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   padding: 20px;
+  animation: fd-overlay-in 0.2s ease-out;
+}
+
+@keyframes fd-overlay-in {
+  from { opacity: 0; backdrop-filter: blur(0); }
+  to   { opacity: 1; backdrop-filter: blur(6px); }
+}
+
+@keyframes fd-modal-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)     scale(1); }
 }
 
 .fd-modal {
@@ -1498,11 +1513,12 @@ body.dark .drive-btn--compact.drive--on {
   max-width: 600px;
   background: var(--surface-bg);
   border: 1px solid var(--border-1);
-  border-radius: var(--radius-ui);
-  box-shadow: var(--shadow-soft);
+  border-radius: 16px;
+  box-shadow: 0 24px 64px rgba(15, 36, 38, 0.20), 0 8px 16px rgba(15, 36, 38, 0.10);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  animation: fd-modal-in 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .fd-modal__header {
@@ -1510,26 +1526,35 @@ body.dark .drive-btn--compact.drive--on {
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
+  border-bottom: 1px solid var(--border-1);
 }
 
 .fd-modal__title {
   margin: 0;
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-1);
+  letter-spacing: -0.02em;
 }
 
 .fd-modal__close {
   background: transparent;
   border: 1px solid var(--border-1);
   color: var(--text-2);
-  border-radius: var(--radius-ui);
+  border-radius: 10px;
   width: 32px;
   height: 32px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.fd-modal__close:hover {
+  background: var(--surface-bg-2);
+  color: var(--text-1);
+  border-color: var(--cta-1);
 }
 
 .fd-modal__body {
@@ -1737,20 +1762,38 @@ body.dark .drive-btn--compact.drive--on {
 }
 
 .fd-field__label {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-1);
+  letter-spacing: -0.01em;
 }
 
 .fd-field__input {
   width: 100%;
-  height: 40px;
-  padding: 0 12px;
-  border-radius: var(--radius-ui);
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 10px;
   border: 1px solid var(--border-1);
   background: var(--surface-bg);
   color: var(--text-1);
   font-size: 14px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.fd-field__input:hover:not(:focus) {
+  border-color: rgba(110, 203, 195, 0.55);
+}
+
+.fd-field__input:focus,
+.fd-field__input:focus-visible {
+  outline: none;
+  border-color: var(--cta-1);
+  box-shadow: 0 0 0 3px rgba(110, 203, 195, 0.18);
+}
+
+.fd-field__input::placeholder {
+  color: var(--text-2);
+  opacity: 0.6;
 }
 
 .fd-field__textarea {
@@ -8531,3 +8574,196 @@ svg[class*="lucide-star"] {
 .fd-table-row:hover td { background: rgba(110, 203, 195, 0.06) !important; cursor: pointer; }
 body.dark .fd-table-row:hover td { background: rgba(110, 203, 195, 0.08) !important; }
 .fd-table-row td { transition: background 0.1s; }
+
+/* ==================================================================
+   MODERN SURFACE LAYER (2026 refresh)
+   Unifies cards, shadows, radii, focus rings, motion across the app.
+   Loaded last so it wins specificity without !important when possible.
+   ================================================================== */
+:root {
+  /* Modern shadow scale — softer, teal-tinted, layered */
+  --fd-shadow-xs: 0 1px 2px rgba(15, 36, 38, 0.04);
+  --fd-shadow-sm: 0 1px 2px rgba(15, 36, 38, 0.05), 0 1px 3px rgba(15, 36, 38, 0.04);
+  --fd-shadow-md: 0 2px 4px rgba(15, 36, 38, 0.04), 0 6px 16px rgba(15, 36, 38, 0.06);
+  --fd-shadow-lg: 0 4px 8px rgba(15, 36, 38, 0.05), 0 16px 40px rgba(15, 36, 38, 0.08);
+  --fd-shadow-xl: 0 8px 16px rgba(15, 36, 38, 0.06), 0 24px 60px rgba(15, 36, 38, 0.12);
+  --fd-shadow-glow: 0 0 0 4px rgba(110, 203, 195, 0.18);
+
+  /* Modern radii */
+  --fd-r-xs: 6px;
+  --fd-r-sm: 8px;
+  --fd-r-md: 12px;
+  --fd-r-lg: 16px;
+  --fd-r-xl: 20px;
+  --fd-r-pill: 999px;
+
+  /* Modern easing */
+  --fd-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --fd-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+body.dark {
+  --fd-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.30);
+  --fd-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.30);
+  --fd-shadow-md: 0 2px 4px rgba(0, 0, 0, 0.30), 0 6px 16px rgba(0, 0, 0, 0.34);
+  --fd-shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.35), 0 16px 40px rgba(0, 0, 0, 0.40);
+  --fd-shadow-xl: 0 8px 16px rgba(0, 0, 0, 0.40), 0 24px 60px rgba(0, 0, 0, 0.50);
+}
+
+/* All cards in the app share one surface look */
+.card,
+.widget,
+.panel {
+  background: var(--surface-bg);
+  border: 1px solid var(--border-1);
+  border-radius: var(--fd-r-md);
+  box-shadow: var(--fd-shadow-sm);
+  transition:
+    transform 0.2s var(--fd-ease-out),
+    box-shadow 0.2s var(--fd-ease-out),
+    border-color 0.2s var(--fd-ease-out);
+}
+
+.card:hover,
+.widget:hover,
+.panel:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--fd-shadow-md);
+  border-color: rgba(110, 203, 195, 0.45);
+}
+
+/* Override the older non-dashboard global card override (line ~6258)
+   which removes the border. We bring the modern look back. */
+main > :not(.page-dashboard) .card,
+main > :not(.page-dashboard) .widget,
+main > :not(.page-dashboard) .panel {
+  background: var(--surface-bg);
+  box-shadow: var(--fd-shadow-sm);
+  border: 1px solid var(--border-1);
+}
+
+/* Tighten dashboard cards but keep the same surface */
+.page-dashboard .card,
+.page-dashboard .widget {
+  border-radius: var(--fd-r-md);
+}
+
+/* Modern focus ring — works on buttons, inputs, selects */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible {
+  outline: none;
+  box-shadow: var(--fd-shadow-glow);
+  border-color: var(--cta-1) !important;
+}
+
+/* Modern selection */
+::selection {
+  background: rgba(110, 203, 195, 0.32);
+  color: var(--brand-1);
+}
+body.dark ::selection {
+  background: rgba(110, 203, 195, 0.32);
+  color: var(--text-1);
+}
+
+/* Smooth scroll for in-page anchors */
+html { scroll-behavior: smooth; }
+
+/* Reduced-motion respect */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Tighter, more refined scrollbars (WebKit) */
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: rgba(31, 95, 99, 0.18);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover { background: rgba(31, 95, 99, 0.32); background-clip: padding-box; }
+body.dark *::-webkit-scrollbar-thumb { background: rgba(234, 242, 241, 0.16); background-clip: padding-box; }
+body.dark *::-webkit-scrollbar-thumb:hover { background: rgba(234, 242, 241, 0.28); background-clip: padding-box; }
+
+/* Subtle entrance animation utility (apply via class="fd-enter") */
+@keyframes fd-fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fd-enter { animation: fd-fade-up 0.4s var(--fd-ease-out) both; }
+
+/* Headings — refined letter-spacing for modern feel */
+h1, h2, h3, h4 { letter-spacing: -0.02em; }
+h5, h6 { letter-spacing: -0.01em; }
+
+/* Modern form controls — applied to plain elements so even non-design-system
+   inputs feel cohesive. Component classes (.ui-input, .fd-field__input) still
+   win where defined. */
+input[type="text"]:not(.fd-field__input):not(.ui-input):not(.fd-table-input),
+input[type="email"]:not(.fd-field__input):not(.ui-input),
+input[type="password"]:not(.fd-field__input):not(.ui-input),
+input[type="number"]:not(.fd-field__input):not(.ui-input):not(.fd-table-input),
+input[type="search"]:not(.fd-field__input):not(.ui-input),
+input[type="tel"]:not(.fd-field__input):not(.ui-input),
+input[type="url"]:not(.fd-field__input):not(.ui-input),
+input[type="date"]:not(.fd-field__input):not(.ui-input),
+textarea:not(.fd-field__textarea):not(.ui-input),
+select:not(.fd-field__input):not(.ui-select) {
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+input[type="text"]:not(.fd-field__input):not(.ui-input):not(.fd-table-input):focus,
+input[type="email"]:not(.fd-field__input):not(.ui-input):focus,
+input[type="password"]:not(.fd-field__input):not(.ui-input):focus,
+input[type="number"]:not(.fd-field__input):not(.ui-input):not(.fd-table-input):focus,
+input[type="search"]:not(.fd-field__input):not(.ui-input):focus,
+input[type="tel"]:not(.fd-field__input):not(.ui-input):focus,
+input[type="url"]:not(.fd-field__input):not(.ui-input):focus,
+input[type="date"]:not(.fd-field__input):not(.ui-input):focus,
+textarea:not(.fd-field__textarea):not(.ui-input):focus,
+select:not(.fd-field__input):not(.ui-select):focus {
+  outline: none;
+  border-color: var(--cta-1, #6ECBC3) !important;
+  box-shadow: 0 0 0 3px rgba(110, 203, 195, 0.20);
+}
+
+/* Tables — modern, light, refined */
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+table th {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-1);
+  background: var(--surface-bg-2);
+  text-align: left;
+}
+table td {
+  padding: 12px;
+  font-size: 14px;
+  color: var(--text-1);
+  border-bottom: 1px solid var(--border-1);
+}
+table tr:last-child td { border-bottom: none; }
+table tbody tr {
+  transition: background-color 0.12s ease;
+}
+
+/* ==================================================================
+   END MODERN SURFACE LAYER
+   ================================================================== */

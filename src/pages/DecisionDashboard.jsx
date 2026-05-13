@@ -157,12 +157,12 @@ export default function DecisionDashboard() {
         )}
 
         {loading && !isScreenshotMode() && (
-          <div style={{ padding: 32, textAlign: 'center', color: 'var(--text-secondary, #6b7280)' }}>
+          <div style={{ padding: 32, textAlign: 'center', color: 'var(--text-2)' }}>
             Loading decision dashboard…
           </div>
         )}
         {error && !loading && (
-          <div style={{ padding: 32, textAlign: 'center', color: 'var(--status-critical, #b91c1c)' }}>
+          <div style={{ padding: 32, textAlign: 'center', color: 'var(--danger-1)' }}>
             Error loading decision metrics.
           </div>
         )}
@@ -225,10 +225,10 @@ export default function DecisionDashboard() {
                 <SimpleBarList data={byType} emptyLabel="No decisions in window" />
               </Card>
               <Card title="High severity open decisions" icon={<AlertTriangle size={18} />}>
-                <p style={{ fontSize: 13, color: 'var(--text-secondary, #6b7280)', marginBottom: 8 }}>
+                <p style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 10, lineHeight: 1.5 }}>
                   Count of high severity decisions that are currently open or acknowledged.
                 </p>
-                <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--status-critical, #b91c1c)' }}>
+                <div style={{ fontSize: 34, fontWeight: 800, color: 'var(--danger-1)', letterSpacing: '-0.02em', lineHeight: 1 }}>
                   {highSeverityOpenCount}
                 </div>
                 <Button
@@ -242,26 +242,26 @@ export default function DecisionDashboard() {
                 </Button>
               </Card>
               <Card title="Feedback distribution" icon={<Activity size={18} />}>
-                <p style={{ fontSize: 13, color: 'var(--text-secondary, #6b7280)', marginBottom: 8 }}>
+                <p style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 12, lineHeight: 1.5 }}>
                   Share of decisions with explicit feedback marked as useful or wrong in this window.
                 </p>
                 <div style={{ display: 'flex', gap: 16, fontSize: 13 }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 12, color: 'var(--text-secondary, #9ca3af)' }}>Useful</div>
-                    <div style={{ fontSize: 20, fontWeight: 600, color: '#22c55e' }}>
+                  <div style={{ flex: 1, padding: 12, borderRadius: 10, background: 'rgba(63,191,154,0.08)' }}>
+                    <div style={{ fontSize: 11, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Useful</div>
+                    <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--success-1)', marginTop: 4, letterSpacing: '-0.02em' }}>
                       {formatPercent(feedbackUsefulRate)}
                     </div>
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 12, color: 'var(--text-secondary, #9ca3af)' }}>Wrong</div>
-                    <div style={{ fontSize: 20, fontWeight: 600, color: '#ef4444' }}>
+                  <div style={{ flex: 1, padding: 12, borderRadius: 10, background: 'rgba(229,83,83,0.08)' }}>
+                    <div style={{ fontSize: 11, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Wrong</div>
+                    <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--danger-1)', marginTop: 4, letterSpacing: '-0.02em' }}>
                       {formatPercent(feedbackWrongRate)}
                     </div>
                   </div>
                 </div>
               </Card>
               <Card title="Time-to-action distribution" icon={<Clock size={18} />}>
-                <p style={{ fontSize: 13, color: 'var(--text-secondary, #6b7280)', marginBottom: 8 }}>
+                <p style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 12, lineHeight: 1.5 }}>
                   How quickly decisions are acted on or dismissed after creation.
                 </p>
                 <SimpleBarList data={timeToActionBuckets} emptyLabel="No closed decisions in window" />
@@ -271,11 +271,11 @@ export default function DecisionDashboard() {
             {/* Recent activity */}
             <Card title="Recent decision activity" icon={<Activity size={18} />}>
               {recent.length === 0 ? (
-                <div style={{ fontSize: 13, color: 'var(--text-secondary, #6b7280)' }}>
+                <div style={{ fontSize: 13, color: 'var(--text-2)', fontStyle: 'italic' }}>
                   No recent activity in this window.
                 </div>
               ) : (
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
                   {recent.map((item) => (
                     <li
                       key={`${item.kind}-${item.decisionId}-${item.at.toISOString()}`}
@@ -283,25 +283,30 @@ export default function DecisionDashboard() {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        gap: 8,
+                        gap: 12,
                         fontSize: 13,
+                        padding: '10px 12px',
+                        borderRadius: 10,
+                        transition: 'background-color 0.15s ease',
+                        cursor: 'pointer',
                       }}
+                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--surface-bg-2)' }}
+                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
+                      onClick={() => handleOpenDecision(item.decisionId)}
                     >
-                      <div
-                        style={{ display: 'flex', flexDirection: 'column', cursor: 'pointer' }}
-                        onClick={() => handleOpenDecision(item.decisionId)}
-                      >
-                        <span style={{ fontWeight: 500 }}>{item.title}</span>
-                        <span style={{ fontSize: 11, color: 'var(--text-secondary, #6b7280)' }}>
-                          {item.decisionType} · {item.status} ·{' '}
-                          {item.at.toLocaleString()}
+                      <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
+                        <span style={{ fontWeight: 600, color: 'var(--text-1)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {item.title}
+                        </span>
+                        <span style={{ fontSize: 11, color: 'var(--text-2)', marginTop: 2 }}>
+                          <span style={{ textTransform: 'capitalize' }}>{String(item.decisionType).replace(/_/g, ' ')}</span> · {item.status} · {item.at.toLocaleString()}
                         </span>
                       </div>
                       <Button
                         type="button"
                         variant="ghost"
                         size="xs"
-                        onClick={() => handleOpenDecision(item.decisionId)}
+                        onClick={(e) => { e.stopPropagation(); handleOpenDecision(item.decisionId) }}
                       >
                         Open
                       </Button>
@@ -318,64 +323,63 @@ export default function DecisionDashboard() {
 }
 
 function KpiCard({ icon, label, value, tone }) {
-  let color = 'var(--text-primary, #e5e7eb)'
-  if (tone === 'success') color = '#22c55e'
-  if (tone === 'danger') color = '#ef4444'
-  if (tone === 'muted') color = '#6b7280'
+  let color = 'var(--text-1)'
+  let iconBg = 'rgba(31, 95, 99, 0.08)'
+  let iconColor = 'var(--brand-1)'
+  if (tone === 'success') {
+    color = 'var(--success-1)'
+    iconBg = 'rgba(63, 191, 154, 0.14)'
+    iconColor = 'var(--success-1)'
+  } else if (tone === 'danger') {
+    color = 'var(--danger-1)'
+    iconBg = 'rgba(229, 83, 83, 0.12)'
+    iconColor = 'var(--danger-1)'
+  } else if (tone === 'muted') {
+    color = 'var(--text-2)'
+    iconBg = 'rgba(95, 116, 118, 0.12)'
+    iconColor = 'var(--text-2)'
+  } else if (tone === 'neutral') {
+    color = 'var(--brand-1)'
+  }
 
   return (
-    <div
-      style={{
-        padding: 16,
-        borderRadius: 14,
-        border: '1px solid var(--border-1)',
-        backgroundColor: 'var(--surface-bg-2, #020617)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 6,
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+    <div className="card" style={{ padding: 18 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <div
           style={{
-            width: 32,
-            height: 32,
-            borderRadius: 999,
+            width: 36,
+            height: 36,
+            borderRadius: 10,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'rgba(148,163,184,0.16)',
+            backgroundColor: iconBg,
+            color: iconColor,
           }}
         >
           {icon}
         </div>
-        <span style={{ fontSize: 13, color: 'var(--text-secondary, #9ca3af)' }}>{label}</span>
+        <span style={{ fontSize: 13, color: 'var(--text-2)', fontWeight: 500 }}>{label}</span>
       </div>
-      <div style={{ fontSize: 24, fontWeight: 700, color }}>{value}</div>
+      <div style={{ fontSize: 28, fontWeight: 700, color, marginTop: 10, letterSpacing: '-0.02em' }}>{value}</div>
     </div>
   )
 }
 
 function Card({ title, icon, children }) {
   return (
-    <div
-      style={{
-        padding: 16,
-        borderRadius: 14,
-        border: '1px solid var(--border-1)',
-        backgroundColor: 'var(--surface-bg-2, #020617)',
-      }}
-    >
+    <div className="card" style={{ padding: 18 }}>
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 8,
-          marginBottom: 10,
+          gap: 10,
+          marginBottom: 12,
+          color: 'var(--brand-1)',
         }}
       >
         {icon}
-        <span style={{ fontSize: 15, fontWeight: 600 }}>{title}</span>
+        <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-1)', letterSpacing: '-0.01em' }}>{title}</span>
       </div>
       {children}
     </div>
@@ -386,7 +390,7 @@ function SimpleBarList({ data, emptyLabel }) {
   const entries = Object.entries(data || {}).sort((a, b) => b[1] - a[1])
   if (entries.length === 0) {
     return (
-      <div style={{ fontSize: 13, color: 'var(--text-secondary, #6b7280)' }}>
+      <div style={{ fontSize: 13, color: 'var(--text-2)', fontStyle: 'italic' }}>
         {emptyLabel || 'No data'}
       </div>
     )
@@ -395,25 +399,26 @@ function SimpleBarList({ data, emptyLabel }) {
   const max = entries[0][1] || 1
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {entries.map(([key, value]) => (
-        <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           <div
             style={{
               display: 'flex',
               justifyContent: 'space-between',
               fontSize: 12,
-              color: 'var(--text-secondary, #9ca3af)',
+              color: 'var(--text-1)',
+              fontWeight: 500,
             }}
           >
-            <span>{key}</span>
-            <span>{value}</span>
+            <span style={{ textTransform: 'capitalize' }}>{String(key).replace(/_/g, ' ')}</span>
+            <span style={{ color: 'var(--text-2)', fontVariantNumeric: 'tabular-nums' }}>{value}</span>
           </div>
           <div
             style={{
               height: 6,
               borderRadius: 999,
-              backgroundColor: 'rgba(148,163,184,0.35)',
+              backgroundColor: 'rgba(31, 95, 99, 0.08)',
               overflow: 'hidden',
             }}
           >
@@ -423,7 +428,8 @@ function SimpleBarList({ data, emptyLabel }) {
                 height: '100%',
                 borderRadius: 999,
                 background:
-                  'linear-gradient(90deg, rgba(96,165,250,1) 0%, rgba(129,140,248,1) 50%, rgba(236,72,153,1) 100%)',
+                  'linear-gradient(90deg, var(--brand-1) 0%, var(--brand-2) 100%)',
+                transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
               }}
             />
           </div>

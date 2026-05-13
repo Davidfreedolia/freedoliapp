@@ -52,18 +52,18 @@ export default function ToastContainer({ darkMode }) {
       zIndex: 10000,
       display: 'flex',
       flexDirection: 'column',
-      gap: '12px',
+      gap: '10px',
       pointerEvents: 'none'
     }}>
       {toasts.map(toast => {
         const colors = {
-          success: { bg: '#10b981', icon: CheckCircle2 },
-          error: { bg: '#ef4444', icon: XCircle },
-          warning: { bg: '#f59e0b', icon: AlertTriangle },
-          info: { bg: '#3b82f6', icon: AlertTriangle }
+          success: { fg: 'var(--success-1)', tint: 'rgba(63, 191, 154, 0.10)', icon: CheckCircle2 },
+          error:   { fg: 'var(--danger-1)',  tint: 'rgba(229, 83, 83, 0.10)',  icon: XCircle },
+          warning: { fg: 'var(--warning-1)', tint: 'rgba(240, 180, 41, 0.12)', icon: AlertTriangle },
+          info:    { fg: 'var(--brand-1)',   tint: 'rgba(31, 95, 99, 0.10)',   icon: AlertTriangle }
         }
-        const { bg, icon: Icon } = colors[toast.type] || colors.success
-        
+        const { fg, tint, icon: Icon } = colors[toast.type] || colors.success
+
         return (
           <div
             key={toast.id}
@@ -71,31 +71,49 @@ export default function ToastContainer({ darkMode }) {
               display: 'flex',
               alignItems: 'center',
               gap: '12px',
-              padding: '12px 16px',
-              backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
-              color: darkMode ? '#ffffff' : '#111827',
-              borderRadius: '8px',
-              border: `1px solid ${bg}`,
-              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-              minWidth: '250px',
-              maxWidth: '400px',
+              padding: '14px 16px',
+              backgroundColor: 'var(--surface-bg)',
+              color: 'var(--text-1)',
+              borderRadius: '12px',
+              border: '1px solid var(--border-1)',
+              boxShadow: 'var(--fd-shadow-lg, 0 16px 40px rgba(15, 36, 38, 0.10))',
+              minWidth: '280px',
+              maxWidth: '420px',
               pointerEvents: 'auto',
-              animation: 'slideIn 0.3s ease-out'
+              animation: 'fd-toast-in 0.32s cubic-bezier(0.16, 1, 0.3, 1)',
+              position: 'relative',
+              overflow: 'hidden'
             }}
           >
-            <Icon size={20} color={bg} />
-            <span style={{ flex: 1, fontSize: '14px' }}>{toast.message}</span>
+            {/* left accent bar */}
+            <span aria-hidden style={{
+              position: 'absolute', left: 0, top: 0, bottom: 0, width: 3,
+              background: fg, borderRadius: '3px 0 0 3px'
+            }} />
+            <div style={{
+              width: 32, height: 32, borderRadius: 10,
+              background: tint, color: fg,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+            }}>
+              <Icon size={18} />
+            </div>
+            <span style={{ flex: 1, fontSize: '14px', lineHeight: 1.5, fontWeight: 500 }}>{toast.message}</span>
             <button
               onClick={() => removeToast(toast.id)}
+              aria-label="Close"
               style={{
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                padding: '4px',
+                padding: '6px',
                 display: 'flex',
                 alignItems: 'center',
-                color: darkMode ? '#9ca3af' : '#6b7280'
+                borderRadius: 8,
+                color: 'var(--text-2)',
+                transition: 'background-color 0.15s ease, color 0.15s ease'
               }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--surface-bg-2)'; e.currentTarget.style.color = 'var(--text-1)' }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent';        e.currentTarget.style.color = 'var(--text-2)' }}
             >
               <X size={16} />
             </button>
@@ -103,15 +121,9 @@ export default function ToastContainer({ darkMode }) {
         )
       })}
       <style>{`
-        @keyframes slideIn {
-          from {
-            transform: translateX(100%);
-            opacity: 0;
-          }
-          to {
-            transform: translateX(0);
-            opacity: 1;
-          }
+        @keyframes fd-toast-in {
+          from { transform: translateX(20px) scale(0.96); opacity: 0; }
+          to   { transform: translateX(0) scale(1);       opacity: 1; }
         }
       `}</style>
     </div>

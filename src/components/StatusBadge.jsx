@@ -1,8 +1,8 @@
 const STATUS_TONES = {
-  info: { bg: 'rgba(31, 78, 95, 0.12)', text: '#1F4E5F' },
-  success: { bg: 'rgba(107, 199, 181, 0.2)', text: '#2C7A6A' },
-  warning: { bg: 'rgba(242, 226, 125, 0.35)', text: '#7A6A2C' },
-  error: { bg: 'rgba(242, 108, 99, 0.2)', text: '#B84C44' }
+  info:    { bg: 'rgba(31, 95, 99, 0.10)',   text: '#1F5F63', border: 'rgba(31, 95, 99, 0.22)' },
+  success: { bg: 'rgba(63, 191, 154, 0.14)', text: '#2B7A66', border: 'rgba(63, 191, 154, 0.32)' },
+  warning: { bg: 'rgba(240, 180, 41, 0.18)', text: '#7A5F22', border: 'rgba(240, 180, 41, 0.40)' },
+  error:   { bg: 'rgba(229, 83, 83, 0.12)',  text: '#B0413F', border: 'rgba(229, 83, 83, 0.32)' }
 }
 
 const getTone = ({ status, decision }) => {
@@ -30,7 +30,8 @@ export default function StatusBadge({ status, decision, tone }) {
       style={{
         ...styles.badge,
         backgroundColor: palette.bg,
-        color: palette.text
+        color: palette.text,
+        border: `1px solid ${palette.border}`
       }}
     >
       {getLabel({ status, decision })}
@@ -42,11 +43,12 @@ const styles = {
   badge: {
     display: 'inline-flex',
     alignItems: 'center',
-    padding: '4px 10px',
+    padding: '3px 10px',
     borderRadius: '999px',
-    fontSize: '12px',
-    fontWeight: '500',
-    letterSpacing: '0.2px',
-    textTransform: 'capitalize'
+    fontSize: '11.5px',
+    fontWeight: '600',
+    letterSpacing: '0.01em',
+    textTransform: 'capitalize',
+    lineHeight: 1.4
   }
 }

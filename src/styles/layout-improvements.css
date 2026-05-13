@@ -96,29 +96,8 @@
   transition: box-shadow 0.2s;
 }
 
-/* ── Scroll suau global ── */
-html {
-  scroll-behavior: smooth;
-}
-
-/* ── Millora de la scrollbar ── */
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--border-1);
-  border-radius: 99px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--nav-fg-muted);
-}
+/* Scrollbars + scroll behavior are handled by the modern surface layer
+   at the bottom of index.css (10px tinted thumbs). */
 
 /* ── Page header millorat ── */
 .page-header {
@@ -150,19 +129,12 @@ table th {
   color: var(--muted-1);
 }
 
-/* ── Focus ring més net ── */
-button:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline: 2px solid var(--c-teal-300);
-  outline-offset: 2px;
-  box-shadow: none;
-}
+/* Focus ring is handled by the modern surface layer at the bottom of
+   index.css (turquoise glow via box-shadow). */
 
 /* ── Transicions globals ── */
-a, button, .card, [class*="nav-"] {
-  transition: all 0.18s ease;
+a, button, [class*="nav-"] {
+  transition: color 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
 }
 
 /* ── Badge / pill ── */
