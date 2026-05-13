@@ -1,11 +1,13 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import DecisionActions from './DecisionActions'
 
 export default function DecisionDetail({ item, onAction, actionLoading, onFeedback, feedbackSubmitting = false, feedbackGiven = false }) {
+  const { t } = useTranslation()
   if (!item) {
     return (
-      <div style={{ padding: 16, color: 'var(--text-secondary, #6b7280)', fontSize: 14 }}>
-        Select a decision to view details.
+      <div style={{ padding: 16, color: 'var(--text-2)', fontSize: 14 }}>
+        {t('decisionDetail.selectPrompt')}
       </div>
     )
   }
@@ -19,15 +21,15 @@ export default function DecisionDetail({ item, onAction, actionLoading, onFeedba
       )}
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, fontSize: 13, marginBottom: 12 }}>
-        <span><strong>Status:</strong> {item.status}</span>
-        <span><strong>Severity:</strong> {item.severity}</span>
-        {item.confidence && <span><strong>Confidence:</strong> {item.confidence}</span>}
-        {item.sourceEngine && <span><strong>Source:</strong> {item.sourceEngine}</span>}
+        <span><strong>{t('decisionDetail.fields.status')}:</strong> {item.status}</span>
+        <span><strong>{t('decisionDetail.fields.severity')}:</strong> {item.severity}</span>
+        {item.confidence && <span><strong>{t('decisionDetail.fields.confidence')}:</strong> {item.confidence}</span>}
+        {item.sourceEngine && <span><strong>{t('decisionDetail.fields.source')}:</strong> {item.sourceEngine}</span>}
       </div>
 
       {item.contextSummary && item.contextSummary.length > 0 && (
         <div style={{ marginBottom: 12 }}>
-          <h3 style={{ fontSize: 14, marginBottom: 4 }}>Context</h3>
+          <h3 style={{ fontSize: 14, marginBottom: 4 }}>{t('decisionDetail.context')}</h3>
           <ul style={{ paddingLeft: 16, margin: 0, fontSize: 13 }}>
             {item.contextSummary.map((c) => (
               <li key={`${c.label}-${String(c.value)}`}>
@@ -41,7 +43,7 @@ export default function DecisionDetail({ item, onAction, actionLoading, onFeedba
       {/* Feedback actions (Decision Feedback Loop, D47/D55) */}
       {onFeedback && (
         <div style={{ marginBottom: 16 }}>
-          <h3 style={{ fontSize: 14, marginBottom: 6 }}>Was this decision helpful?</h3>
+          <h3 style={{ fontSize: 14, marginBottom: 6 }}>{t('decisionDetail.feedback.prompt')}</h3>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <button
               type="button"
@@ -56,7 +58,7 @@ export default function DecisionDetail({ item, onAction, actionLoading, onFeedba
                 fontSize: 13,
               }}
             >
-              👍 Useful
+              👍 {t('decisionDetail.feedback.useful')}
             </button>
             <button
               type="button"
@@ -71,7 +73,7 @@ export default function DecisionDetail({ item, onAction, actionLoading, onFeedba
                 fontSize: 13,
               }}
             >
-              👎 Not useful
+              👎 {t('decisionDetail.feedback.notUseful')}
             </button>
             <button
               type="button"
@@ -86,12 +88,12 @@ export default function DecisionDetail({ item, onAction, actionLoading, onFeedba
                 fontSize: 13,
               }}
             >
-              ⚠ Wrong decision
+              ⚠ {t('decisionDetail.feedback.wrong')}
             </button>
           </div>
           {feedbackGiven && (
-            <div style={{ marginTop: 6, fontSize: 12, color: 'var(--text-secondary, #6b7280)' }}>
-              Thank you for your feedback.
+            <div style={{ marginTop: 6, fontSize: 12, color: 'var(--text-2)' }}>
+              {t('decisionDetail.feedback.thanks')}
             </div>
           )}
         </div>
@@ -101,4 +103,3 @@ export default function DecisionDetail({ item, onAction, actionLoading, onFeedba
     </div>
   )
 }
-

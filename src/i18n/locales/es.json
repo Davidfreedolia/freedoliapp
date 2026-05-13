@@ -1282,6 +1282,83 @@
       "openDecision": "Abrir decisión"
     }
   },
+  "decisionsDropdown": {
+    "title": "Decisiones",
+    "close": "Cerrar",
+    "loading": "Cargando decisiones…",
+    "error": "Error al cargar las notificaciones de decisiones.",
+    "empty": "No hay decisiones nuevas."
+  },
+  "businessAlerts": {
+    "title": "Alertas de negocio",
+    "close": "Cerrar",
+    "loading": "Cargando…",
+    "empty": "No hay alertas de negocio."
+  },
+  "statusBadge": {
+    "blocked": "Bloqueado",
+    "info": "Info"
+  },
+  "decisionsInbox": {
+    "title": "Bandeja de decisiones"
+  },
+  "decisionDetail": {
+    "selectPrompt": "Selecciona una decisión para ver los detalles.",
+    "context": "Contexto",
+    "fields": {
+      "status": "Estado",
+      "severity": "Severidad",
+      "confidence": "Confianza",
+      "source": "Fuente"
+    },
+    "feedback": {
+      "prompt": "¿Te ha sido útil esta decisión?",
+      "useful": "Útil",
+      "notUseful": "No útil",
+      "wrong": "Decisión errónea",
+      "thanks": "Gracias por tu feedback."
+    }
+  },
+  "decisionDashboardPage": {
+    "title": "Panel de decisiones",
+    "openInbox": "Abrir bandeja de decisiones",
+    "window": {
+      "last7": "Últimos 7 días",
+      "last30": "Últimos 30 días",
+      "last90": "Últimos 90 días"
+    },
+    "refresh": "Actualizar",
+    "loading": "Cargando el panel de decisiones…",
+    "error": "Error al cargar las métricas de decisiones.",
+    "kpi": {
+      "openDecisions": "Decisiones abiertas",
+      "highSeverityOpen": "Alta severidad abiertas",
+      "actedRate": "Tasa de acción",
+      "dismissedRate": "Tasa de descarte",
+      "avgTimeToAction": "Tiempo medio hasta la acción"
+    },
+    "cards": {
+      "byStatus": "Decisiones por estado",
+      "byType": "Decisiones por tipo",
+      "highSeverityOpenTitle": "Decisiones de alta severidad abiertas",
+      "highSeverityOpenDesc": "Número de decisiones de alta severidad actualmente abiertas o reconocidas.",
+      "viewInInbox": "Ver en la bandeja",
+      "feedbackDistTitle": "Distribución del feedback",
+      "feedbackDistDesc": "Porcentaje de decisiones con feedback explícito marcado como útil o erróneo en este periodo.",
+      "feedbackUseful": "Útil",
+      "feedbackWrong": "Erróneo",
+      "timeToActionTitle": "Distribución del tiempo hasta la acción",
+      "timeToActionDesc": "Con qué rapidez se actúa o se descartan las decisiones tras crearlas.",
+      "recentActivityTitle": "Actividad reciente de decisiones",
+      "recentActivityEmpty": "No hay actividad reciente en este periodo.",
+      "open": "Abrir"
+    },
+    "empty": {
+      "noDecisions": "No hay decisiones en este periodo",
+      "noClosed": "No hay decisiones cerradas en este periodo",
+      "noData": "Sin datos"
+    }
+  },
   "orders": {
     "empty": {
       "title": "Todavía no tienes órdenes",

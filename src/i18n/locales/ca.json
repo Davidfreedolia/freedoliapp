@@ -1467,6 +1467,83 @@
       "openDecision": "Obrir decisió"
     }
   },
+  "decisionsDropdown": {
+    "title": "Decisions",
+    "close": "Tancar",
+    "loading": "Carregant decisions…",
+    "error": "Error carregant les notificacions de decisions.",
+    "empty": "No hi ha decisions noves."
+  },
+  "businessAlerts": {
+    "title": "Alertes de negoci",
+    "close": "Tancar",
+    "loading": "Carregant…",
+    "empty": "No hi ha alertes de negoci."
+  },
+  "statusBadge": {
+    "blocked": "Bloquejat",
+    "info": "Info"
+  },
+  "decisionsInbox": {
+    "title": "Safata de decisions"
+  },
+  "decisionDetail": {
+    "selectPrompt": "Selecciona una decisió per veure els detalls.",
+    "context": "Context",
+    "fields": {
+      "status": "Estat",
+      "severity": "Severitat",
+      "confidence": "Confiança",
+      "source": "Font"
+    },
+    "feedback": {
+      "prompt": "T'ha estat útil aquesta decisió?",
+      "useful": "Útil",
+      "notUseful": "No útil",
+      "wrong": "Decisió errònia",
+      "thanks": "Gràcies pel teu feedback."
+    }
+  },
+  "decisionDashboardPage": {
+    "title": "Panell de decisions",
+    "openInbox": "Obrir safata de decisions",
+    "window": {
+      "last7": "Últims 7 dies",
+      "last30": "Últims 30 dies",
+      "last90": "Últims 90 dies"
+    },
+    "refresh": "Refrescar",
+    "loading": "Carregant el panell de decisions…",
+    "error": "Error carregant les mètriques de decisions.",
+    "kpi": {
+      "openDecisions": "Decisions obertes",
+      "highSeverityOpen": "Alta severitat obertes",
+      "actedRate": "Taxa d'acció",
+      "dismissedRate": "Taxa de descart",
+      "avgTimeToAction": "Temps mitjà fins a l'acció"
+    },
+    "cards": {
+      "byStatus": "Decisions per estat",
+      "byType": "Decisions per tipus",
+      "highSeverityOpenTitle": "Decisions d'alta severitat obertes",
+      "highSeverityOpenDesc": "Nombre de decisions d'alta severitat actualment obertes o reconegudes.",
+      "viewInInbox": "Veure a la safata",
+      "feedbackDistTitle": "Distribució del feedback",
+      "feedbackDistDesc": "Percentatge de decisions amb feedback explícit marcat com a útil o erroni en aquest període.",
+      "feedbackUseful": "Útil",
+      "feedbackWrong": "Erroni",
+      "timeToActionTitle": "Distribució del temps fins a l'acció",
+      "timeToActionDesc": "Quina rapidesa es té al actuar o descartar decisions després de crear-les.",
+      "recentActivityTitle": "Activitat recent de decisions",
+      "recentActivityEmpty": "Cap activitat recent en aquest període.",
+      "open": "Obrir"
+    },
+    "empty": {
+      "noDecisions": "No hi ha decisions en aquest període",
+      "noClosed": "No hi ha decisions tancades en aquest període",
+      "noData": "Sense dades"
+    }
+  },
   "orders": {
     "empty": {
       "title": "Encara no tens comandes",

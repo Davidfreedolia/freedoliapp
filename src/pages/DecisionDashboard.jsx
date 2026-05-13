@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useWorkspace } from '../contexts/WorkspaceContext'
 import Header from '../components/Header'
 import AppToolbar from '../components/ui/AppToolbar'
@@ -22,12 +23,6 @@ import {
 import { useNavigate } from 'react-router-dom'
 import { isScreenshotMode } from '../lib/ui/screenshotMode'
 
-const WINDOW_OPTIONS = [
-  { value: 7, label: 'Last 7 days' },
-  { value: 30, label: 'Last 30 days' },
-  { value: 90, label: 'Last 90 days' },
-]
-
 function formatPercent(value) {
   if (!Number.isFinite(value)) return '0%'
   return `${(value * 100).toFixed(1)}%`
@@ -42,9 +37,16 @@ function formatHours(value) {
 }
 
 export default function DecisionDashboard() {
+  const { t } = useTranslation()
   const { activeOrgId } = useWorkspace()
   const { isMobile } = useBreakpoint()
   const navigate = useNavigate()
+
+  const WINDOW_OPTIONS = [
+    { value: 7,  label: t('decisionDashboardPage.window.last7') },
+    { value: 30, label: t('decisionDashboardPage.window.last30') },
+    { value: 90, label: t('decisionDashboardPage.window.last90') },
+  ]
 
   const [windowDays, setWindowDays] = useState(30)
   const [loading, setLoading] = useState(false)
@@ -110,12 +112,12 @@ export default function DecisionDashboard() {
         title={
           <span className="page-title-with-icon">
             <TrendingUp size={22} />
-            Decision Dashboard
+            {t('decisionDashboardPage.title')}
           </span>
         }
         rightSlot={
           <Button type="button" variant="primary" size="sm" onClick={handleViewInbox}>
-            Open Decision Inbox
+            {t('decisionDashboardPage.openInbox')}
           </Button>
         }
       />
@@ -150,7 +152,7 @@ export default function DecisionDashboard() {
             </AppToolbar.Left>
             <AppToolbar.Right>
               <Button type="button" variant="secondary" size="sm" onClick={load}>
-                Refresh
+                {t('decisionDashboardPage.refresh')}
               </Button>
             </AppToolbar.Right>
           </AppToolbar>
@@ -158,12 +160,12 @@ export default function DecisionDashboard() {
 
         {loading && !isScreenshotMode() && (
           <div style={{ padding: 32, textAlign: 'center', color: 'var(--text-2)' }}>
-            Loading decision dashboard…
+            {t('decisionDashboardPage.loading')}
           </div>
         )}
         {error && !loading && (
           <div style={{ padding: 32, textAlign: 'center', color: 'var(--danger-1)' }}>
-            Error loading decision metrics.
+            {t('decisionDashboardPage.error')}
           </div>
         )}
         {!loading && !error && (
@@ -179,31 +181,31 @@ export default function DecisionDashboard() {
             >
               <KpiCard
                 icon={<ListChecks size={20} />}
-                label="Open decisions"
+                label={t('decisionDashboardPage.kpi.openDecisions')}
                 value={openCount}
                 tone="neutral"
               />
               <KpiCard
                 icon={<AlertTriangle size={20} />}
-                label="High severity open"
+                label={t('decisionDashboardPage.kpi.highSeverityOpen')}
                 value={highSeverityOpenCount}
                 tone="danger"
               />
               <KpiCard
                 icon={<Activity size={20} />}
-                label="Acted rate"
+                label={t('decisionDashboardPage.kpi.actedRate')}
                 value={formatPercent(actedRate)}
                 tone="success"
               />
               <KpiCard
                 icon={<BarChart3 size={20} />}
-                label="Dismissed rate"
+                label={t('decisionDashboardPage.kpi.dismissedRate')}
                 value={formatPercent(dismissedRate)}
                 tone="muted"
               />
               <KpiCard
                 icon={<Clock size={20} />}
-                label="Avg time-to-action"
+                label={t('decisionDashboardPage.kpi.avgTimeToAction')}
                 value={formatHours(avgTimeToActionHours)}
                 tone="neutral"
               />
@@ -218,15 +220,15 @@ export default function DecisionDashboard() {
                 marginBottom: 24,
               }}
             >
-              <Card title="Decisions by status" icon={<PieChart size={18} />}>
-                <SimpleBarList data={byStatus} emptyLabel="No decisions in window" />
+              <Card title={t('decisionDashboardPage.cards.byStatus')} icon={<PieChart size={18} />}>
+                <SimpleBarList data={byStatus} emptyLabel={t('decisionDashboardPage.empty.noDecisions')} />
               </Card>
-              <Card title="Decisions by type" icon={<BarChart3 size={18} />}>
-                <SimpleBarList data={byType} emptyLabel="No decisions in window" />
+              <Card title={t('decisionDashboardPage.cards.byType')} icon={<BarChart3 size={18} />}>
+                <SimpleBarList data={byType} emptyLabel={t('decisionDashboardPage.empty.noDecisions')} />
               </Card>
-              <Card title="High severity open decisions" icon={<AlertTriangle size={18} />}>
+              <Card title={t('decisionDashboardPage.cards.highSeverityOpenTitle')} icon={<AlertTriangle size={18} />}>
                 <p style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 10, lineHeight: 1.5 }}>
-                  Count of high severity decisions that are currently open or acknowledged.
+                  {t('decisionDashboardPage.cards.highSeverityOpenDesc')}
                 </p>
                 <div style={{ fontSize: 34, fontWeight: 800, color: 'var(--danger-1)', letterSpacing: '-0.02em', lineHeight: 1 }}>
                   {highSeverityOpenCount}
@@ -238,41 +240,45 @@ export default function DecisionDashboard() {
                   onClick={() => navigate('/app/decisions')}
                   style={{ marginTop: 12 }}
                 >
-                  View in Inbox
+                  {t('decisionDashboardPage.cards.viewInInbox')}
                 </Button>
               </Card>
-              <Card title="Feedback distribution" icon={<Activity size={18} />}>
+              <Card title={t('decisionDashboardPage.cards.feedbackDistTitle')} icon={<Activity size={18} />}>
                 <p style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 12, lineHeight: 1.5 }}>
-                  Share of decisions with explicit feedback marked as useful or wrong in this window.
+                  {t('decisionDashboardPage.cards.feedbackDistDesc')}
                 </p>
                 <div style={{ display: 'flex', gap: 16, fontSize: 13 }}>
                   <div style={{ flex: 1, padding: 12, borderRadius: 10, background: 'rgba(63,191,154,0.08)' }}>
-                    <div style={{ fontSize: 11, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Useful</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>
+                      {t('decisionDashboardPage.cards.feedbackUseful')}
+                    </div>
                     <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--success-1)', marginTop: 4, letterSpacing: '-0.02em' }}>
                       {formatPercent(feedbackUsefulRate)}
                     </div>
                   </div>
                   <div style={{ flex: 1, padding: 12, borderRadius: 10, background: 'rgba(229,83,83,0.08)' }}>
-                    <div style={{ fontSize: 11, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Wrong</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>
+                      {t('decisionDashboardPage.cards.feedbackWrong')}
+                    </div>
                     <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--danger-1)', marginTop: 4, letterSpacing: '-0.02em' }}>
                       {formatPercent(feedbackWrongRate)}
                     </div>
                   </div>
                 </div>
               </Card>
-              <Card title="Time-to-action distribution" icon={<Clock size={18} />}>
+              <Card title={t('decisionDashboardPage.cards.timeToActionTitle')} icon={<Clock size={18} />}>
                 <p style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 12, lineHeight: 1.5 }}>
-                  How quickly decisions are acted on or dismissed after creation.
+                  {t('decisionDashboardPage.cards.timeToActionDesc')}
                 </p>
-                <SimpleBarList data={timeToActionBuckets} emptyLabel="No closed decisions in window" />
+                <SimpleBarList data={timeToActionBuckets} emptyLabel={t('decisionDashboardPage.empty.noClosed')} />
               </Card>
             </div>
 
             {/* Recent activity */}
-            <Card title="Recent decision activity" icon={<Activity size={18} />}>
+            <Card title={t('decisionDashboardPage.cards.recentActivityTitle')} icon={<Activity size={18} />}>
               {recent.length === 0 ? (
                 <div style={{ fontSize: 13, color: 'var(--text-2)', fontStyle: 'italic' }}>
-                  No recent activity in this window.
+                  {t('decisionDashboardPage.cards.recentActivityEmpty')}
                 </div>
               ) : (
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -308,7 +314,7 @@ export default function DecisionDashboard() {
                         size="xs"
                         onClick={(e) => { e.stopPropagation(); handleOpenDecision(item.decisionId) }}
                       >
-                        Open
+                        {t('decisionDashboardPage.cards.open')}
                       </Button>
                     </li>
                   ))}

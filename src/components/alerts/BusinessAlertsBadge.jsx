@@ -3,6 +3,7 @@
  * Consumeix useBusinessAlerts; accions Acknowledge / Resolve; sense barreja amb OPS/SHIPMENT.
  */
 import React, { useState, useRef, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { AlertTriangle } from 'lucide-react'
 import { useWorkspace } from '../../contexts/WorkspaceContext'
 import { useBusinessAlerts } from '../../hooks/useBusinessAlerts'
@@ -158,6 +159,7 @@ function AlertRow({ alert, activeOrgId, onAcknowledge, onResolve, onCreateTaskRe
 }
 
 export default function BusinessAlertsBadge() {
+  const { t } = useTranslation()
   const { activeOrgId } = useWorkspace()
   const { alerts, count, loading, error, refetch, acknowledge, resolve } = useBusinessAlerts(activeOrgId, {
     listLimit: 25,
@@ -265,7 +267,7 @@ export default function BusinessAlertsBadge() {
           <div
             style={{
               padding: '8px 10px',
-              borderBottom: '1px solid var(--border-1, #1f2933)',
+              borderBottom: '1px solid var(--border-1, #D8E1DE)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
@@ -278,10 +280,10 @@ export default function BusinessAlertsBadge() {
                 fontWeight: 600,
                 textTransform: 'uppercase',
                 letterSpacing: 0.6,
-                color: 'var(--text-secondary, #9ca3af)',
+                color: 'var(--text-2, #5F7476)',
               }}
             >
-              Business alerts
+              {t('businessAlerts.title')}
             </span>
             <button
               type="button"
@@ -291,10 +293,10 @@ export default function BusinessAlertsBadge() {
                 background: 'transparent',
                 cursor: 'pointer',
                 fontSize: 11,
-                color: 'var(--text-secondary, #9ca3af)',
+                color: 'var(--text-2, #5F7476)',
               }}
             >
-              Close
+              {t('businessAlerts.close')}
             </button>
           </div>
           <div
@@ -302,22 +304,22 @@ export default function BusinessAlertsBadge() {
               maxHeight: 340,
               overflowY: 'auto',
               padding: '8px',
-              backgroundColor: 'var(--surface-bg, #020617)',
+              backgroundColor: 'var(--surface-bg, #ffffff)',
             }}
           >
             {loading && (
-              <div style={{ padding: 10, fontSize: 12, color: 'var(--text-secondary, #9ca3af)' }}>
-                Loading…
+              <div style={{ padding: 10, fontSize: 12, color: 'var(--text-2, #5F7476)' }}>
+                {t('businessAlerts.loading')}
               </div>
             )}
             {error && !loading && (
-              <div style={{ padding: 10, fontSize: 12, color: 'var(--danger-1, #b91c1c)' }}>
+              <div style={{ padding: 10, fontSize: 12, color: 'var(--danger-1, #E55353)' }}>
                 {error}
               </div>
             )}
             {!loading && !error && (!alerts || alerts.length === 0) && (
-              <div style={{ padding: 10, fontSize: 12, color: 'var(--text-secondary, #9ca3af)' }}>
-                No business alerts.
+              <div style={{ padding: 10, fontSize: 12, color: 'var(--text-2, #5F7476)' }}>
+                {t('businessAlerts.empty')}
               </div>
             )}
             {taskMessage && (

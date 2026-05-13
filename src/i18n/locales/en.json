@@ -1267,6 +1267,83 @@
       "openDecision": "Open decision"
     }
   },
+  "decisionsDropdown": {
+    "title": "Decisions",
+    "close": "Close",
+    "loading": "Loading decisions…",
+    "error": "Error loading decision notifications.",
+    "empty": "No new decisions."
+  },
+  "businessAlerts": {
+    "title": "Business alerts",
+    "close": "Close",
+    "loading": "Loading…",
+    "empty": "No business alerts."
+  },
+  "statusBadge": {
+    "blocked": "Blocked",
+    "info": "Info"
+  },
+  "decisionsInbox": {
+    "title": "Decision Inbox"
+  },
+  "decisionDetail": {
+    "selectPrompt": "Select a decision to view details.",
+    "context": "Context",
+    "fields": {
+      "status": "Status",
+      "severity": "Severity",
+      "confidence": "Confidence",
+      "source": "Source"
+    },
+    "feedback": {
+      "prompt": "Was this decision helpful?",
+      "useful": "Useful",
+      "notUseful": "Not useful",
+      "wrong": "Wrong decision",
+      "thanks": "Thank you for your feedback."
+    }
+  },
+  "decisionDashboardPage": {
+    "title": "Decision Dashboard",
+    "openInbox": "Open Decision Inbox",
+    "window": {
+      "last7": "Last 7 days",
+      "last30": "Last 30 days",
+      "last90": "Last 90 days"
+    },
+    "refresh": "Refresh",
+    "loading": "Loading decision dashboard…",
+    "error": "Error loading decision metrics.",
+    "kpi": {
+      "openDecisions": "Open decisions",
+      "highSeverityOpen": "High severity open",
+      "actedRate": "Acted rate",
+      "dismissedRate": "Dismissed rate",
+      "avgTimeToAction": "Avg time-to-action"
+    },
+    "cards": {
+      "byStatus": "Decisions by status",
+      "byType": "Decisions by type",
+      "highSeverityOpenTitle": "High severity open decisions",
+      "highSeverityOpenDesc": "Count of high severity decisions that are currently open or acknowledged.",
+      "viewInInbox": "View in Inbox",
+      "feedbackDistTitle": "Feedback distribution",
+      "feedbackDistDesc": "Share of decisions with explicit feedback marked as useful or wrong in this window.",
+      "feedbackUseful": "Useful",
+      "feedbackWrong": "Wrong",
+      "timeToActionTitle": "Time-to-action distribution",
+      "timeToActionDesc": "How quickly decisions are acted on or dismissed after creation.",
+      "recentActivityTitle": "Recent decision activity",
+      "recentActivityEmpty": "No recent activity in this window.",
+      "open": "Open"
+    },
+    "empty": {
+      "noDecisions": "No decisions in window",
+      "noClosed": "No closed decisions in window",
+      "noData": "No data"
+    }
+  },
   "orders": {
     "empty": {
       "title": "No orders yet",

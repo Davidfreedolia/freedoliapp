@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import { useWorkspace } from '../contexts/WorkspaceContext'
 import { getDecisionInboxPage } from '../lib/decisions/getDecisionInboxPage'
@@ -10,6 +11,7 @@ import DecisionDetail from '../components/decisions/DecisionDetail'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 
 export default function Decisions() {
+  const { t } = useTranslation()
   const { activeOrgId } = useWorkspace()
   const { isMobile } = useBreakpoint()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -160,7 +162,7 @@ export default function Decisions() {
 
   return (
     <div style={{ padding: 16, height: '100%', boxSizing: 'border-box' }}>
-      <h1 style={{ fontSize: 20, marginBottom: 8 }}>Decision Inbox</h1>
+      <h1 style={{ fontSize: 20, marginBottom: 8 }}>{t('decisionsInbox.title')}</h1>
       <div style={layoutStyle}>
         <div style={{ flexBasis: isMobile ? 'auto' : '35%', maxWidth: isMobile ? '100%' : '360px' }}>
           <DecisionList

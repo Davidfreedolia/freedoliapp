@@ -1,7 +1,9 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import DecisionNotificationItem from './DecisionNotificationItem'
 
 export default function DecisionDropdown({ items, loading, error, onItemClick, onClose, onCreateTask }) {
+  const { t } = useTranslation()
   return (
     <div
       style={{
@@ -35,10 +37,10 @@ export default function DecisionDropdown({ items, loading, error, onItemClick, o
             fontWeight: 600,
             textTransform: 'uppercase',
             letterSpacing: 0.6,
-            color: 'var(--text-secondary, #9ca3af)',
+            color: 'var(--text-2, #5F7476)',
           }}
         >
-          Decisions
+          {t('decisionsDropdown.title')}
         </span>
         <button
           type="button"
@@ -48,10 +50,10 @@ export default function DecisionDropdown({ items, loading, error, onItemClick, o
             background: 'transparent',
             cursor: 'pointer',
             fontSize: 11,
-            color: 'var(--text-secondary, #9ca3af)',
+            color: 'var(--text-2, #5F7476)',
           }}
         >
-          Close
+          {t('decisionsDropdown.close')}
         </button>
       </div>
       <div
@@ -59,7 +61,7 @@ export default function DecisionDropdown({ items, loading, error, onItemClick, o
           maxHeight: 320,
           overflowY: 'auto',
           padding: '6px 6px 8px',
-          backgroundColor: 'var(--surface-bg, #020617)',
+          backgroundColor: 'var(--surface-bg, #ffffff)',
         }}
       >
         {loading && (
@@ -67,10 +69,10 @@ export default function DecisionDropdown({ items, loading, error, onItemClick, o
             style={{
               padding: 10,
               fontSize: 12,
-              color: 'var(--text-secondary, #9ca3af)',
+              color: 'var(--text-2, #5F7476)',
             }}
           >
-            Loading decisions…
+            {t('decisionsDropdown.loading')}
           </div>
         )}
         {error && !loading && (
@@ -78,10 +80,10 @@ export default function DecisionDropdown({ items, loading, error, onItemClick, o
             style={{
               padding: 10,
               fontSize: 12,
-              color: 'var(--status-critical, #b91c1c)',
+              color: 'var(--danger-1, #E55353)',
             }}
           >
-            Error loading decision notifications.
+            {t('decisionsDropdown.error')}
           </div>
         )}
         {!loading && !error && (!items || items.length === 0) && (
@@ -89,10 +91,10 @@ export default function DecisionDropdown({ items, loading, error, onItemClick, o
             style={{
               padding: 10,
               fontSize: 12,
-              color: 'var(--text-secondary, #9ca3af)',
+              color: 'var(--text-2, #5F7476)',
             }}
           >
-            No new decisions.
+            {t('decisionsDropdown.empty')}
           </div>
         )}
         {!loading && !error && items && items.length > 0 && (
