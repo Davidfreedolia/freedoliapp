@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { 
+import { useTranslation } from 'react-i18next'
+import {
   ArrowLeft,
   Save,
   Download,
@@ -31,6 +32,7 @@ import { useBreakpoint } from '../hooks/useBreakpoint'
 import { safeJsonArray } from '../lib/safeJson'
 
 export default function Briefing() {
+  const { t } = useTranslation()
   const { projectId } = useParams()
   const navigate = useNavigate()
   const { darkMode, activeOrgId } = useApp()
@@ -273,7 +275,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
             </span>
           }
         />
-        <div style={styles.loading}>Carregant...</div>
+        <div style={styles.loading}>{t('common.loading')}</div>
       </div>
     )
   }
@@ -284,7 +286,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
         title={
           <span className="page-title-with-icon">
             <FileText size={22} />
-            Briefing del Producte
+            {t('briefing.title')}
           </span>
         }
       />
@@ -296,17 +298,17 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
             <div className="toolbar-group">
               <Button variant="secondary" size="sm" onClick={() => navigate(-1)} style={styles.backButton}>
                 <ArrowLeft size={18} />
-                Tornar
+                {t('common.buttons.back')}
               </Button>
             </div>
           </AppToolbar.Left>
           <AppToolbar.Right>
             <div style={styles.toolbarRight} className="toolbar-group">
               <Button variant="primary" size="sm" onClick={handleSave} disabled={saving} style={styles.saveButton}>
-                {saving ? 'Guardant...' : <><Save size={18} /> Guardar</>}
+                {saving ? t('common.saving') : <><Save size={18} /> {t('common.save')}</>}
               </Button>
               <Button variant="secondary" size="sm" onClick={handleGeneratePdf} disabled={generating} style={styles.pdfButton}>
-                {generating ? 'Generant...' : <><Download size={18} /> Descarregar PDF</>}
+                {generating ? t('briefing.generating') : <><Download size={18} /> {t('briefing.downloadPdf')}</>}
               </Button>
             </div>
           </AppToolbar.Right>

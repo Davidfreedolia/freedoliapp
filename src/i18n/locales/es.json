@@ -167,23 +167,117 @@
     }
   },
   "automations": {
+    "inbox": {
+      "title": "Bandeja de automatizaciones",
+      "subtitle": "Revisa propuestas, aprobaciones e intenciones de ejecución para la org {{orgId}}.",
+      "role": "rol: {{role}}",
+      "approved": "Aprobada",
+      "rejected": "Rechazada",
+      "approveBlocked": "Aprobación bloqueada: {{reason}}",
+      "rejectBlocked": "Rechazo bloqueado: {{reason}}",
+      "filters": {
+        "status": "Estado",
+        "actionType": "Tipo de acción",
+        "allStatuses": "Todos los estados",
+        "allActionTypes": "Todos los tipos"
+      },
+      "empty": "No hay propuestas con estos filtros."
+    },
+    "activity": {
+      "title": "Actividad de automatizaciones",
+      "subtitle": "Eventos recientes de propuestas de automatización de la org {{orgId}}.",
+      "empty": "No hay eventos recientes.",
+      "proposalLine": "propuesta {{id}}",
+      "executionLine": "ejecución {{id}}"
+    },
+    "activityFilters": {
+      "eventType": "Tipo de evento",
+      "allEvents": "Todos los eventos"
+    },
+    "analytics": {
+      "title": "Analítica de automatizaciones",
+      "subtitle": "Embudo, velocidad, fiabilidad y riesgo de las propuestas de automatización.",
+      "metricsTitle": "Métricas",
+      "funnelTitle": "Embudo de propuestas",
+      "velocityTitle": "Velocidad",
+      "reliabilityTitle": "Fiabilidad de ejecución",
+      "riskTitle": "Distribución del riesgo",
+      "empty": "No hay datos de analítica."
+    },
+    "proposalDetail": {
+      "back": "Volver a la bandeja",
+      "context": "Contexto de la propuesta",
+      "payload": "Carga útil",
+      "ruleSource": "Origen de la regla",
+      "timeline": "Cronología operativa",
+      "timelineHint": "Muestra el estado operativo del producto (no el estado de automatización).",
+      "events": "Historial de eventos",
+      "noEvents": "Sin eventos.",
+      "decisionLine": "Decisión: {{title}} · estado {{status}}",
+      "approvalPanel": "Aprobación",
+      "executionPanel": "Ejecución",
+      "notFound": "No se encontró la propuesta."
+    },
+    "common": {
+      "approve": "Aprobar",
+      "reject": "Rechazar",
+      "execute": "Ejecutar",
+      "view": "Ver",
+      "loading": "Cargando…"
+    },
+    "metrics": {
+      "emptyTitle": "Todavía no hay datos de automatización",
+      "emptyDesc": "La analítica aparecerá cuando el sistema empiece a generar propuestas.",
+      "totalProposals": "Total de propuestas",
+      "pendingApproval": "Pendientes de aprobación",
+      "approved": "Aprobadas",
+      "queued": "En cola para ejecutar",
+      "executed": "Ejecutadas",
+      "executionFailed": "Ejecución fallida",
+      "executionsSucceeded": "Ejecuciones con éxito",
+      "executionsFailed": "Ejecuciones fallidas",
+      "successRate": "Tasa de éxito %"
+    },
+    "funnel": {
+      "title": "Embudo de automatización",
+      "stages": {
+        "decisionsWithProposals": "Decisiones con propuestas",
+        "proposals": "Propuestas",
+        "pendingApproval": "Pendientes de aprobación",
+        "approved": "Aprobadas",
+        "queued": "En cola",
+        "executed": "Ejecutadas"
+      }
+    },
+    "velocity": {
+      "title": "Velocidad de propuestas (últimos 14 días)"
+    },
+    "risk": {
+      "title": "Distribución del riesgo",
+      "bands": {
+        "low": "bajo",
+        "medium": "medio",
+        "high": "alto",
+        "critical": "crítico"
+      }
+    },
     "execution": {
       "title": "Ejecución",
       "triggerButton": "Iniciar ejecución",
-      "empty": "Aún no hay ejecuciones.",
+      "empty": "Aún no hay ninguna ejecución.",
       "missingActor": "Falta el usuario que ejecuta la acción",
       "succeeded": "Ejecución completada correctamente",
       "failed": "La ejecución ha fallado",
       "blocked": "Ejecución bloqueada: {{reason}}",
       "unknownReason": "desconocido",
       "duplicateIntent": "Ya existe una intención de ejecución (en cola o en curso)",
-      "triggerFailed": "No se pudo iniciar la ejecución",
+      "triggerFailed": "No se ha podido iniciar la ejecución",
       "modeLine": "Modo: {{mode}}",
       "startFinishLine": "Inicio: {{start}} · Fin: {{finish}}",
       "errorLabel": "Error",
       "resultLabel": "Resultado",
       "retryButton": "Reintentar ejecución",
-      "retryFailed": "El reintento falló",
+      "retryFailed": "Ha fallado el reintento",
       "status": {
         "queued": "En cola",
         "running": "En ejecución",
@@ -197,6 +291,41 @@
         "manual_trigger": "Disparador manual",
         "approved_trigger": "Disparador aprobado",
         "automatic_trigger": "Disparador automático"
+      }
+    },
+    "proposalCard": {
+      "thumbnail": "Miniatura",
+      "riskUnknown": "riesgo: —",
+      "decision": "Decisión",
+      "source": "Origen",
+      "decisionId": "Decisión {{id}}"
+    },
+    "executionReliability": {
+      "title": "Fiabilidad de ejecución",
+      "successRate": "Tasa de éxito: {{rate}}",
+      "statuses": {
+        "succeeded": "completadas",
+        "failed": "fallidas",
+        "running": "en ejecución",
+        "queued": "en cola"
+      }
+    },
+    "approval": {
+      "title": "Aprobación",
+      "noSteps": "No hay pasos de aprobación.",
+      "step": "Paso {{step}}",
+      "role": "rol {{role}}",
+      "approver": "aprobador {{approver}}",
+      "approveFailed": "Ha fallado la aprobación",
+      "rejectFailed": "Ha fallado el rechazo"
+    },
+    "progress": {
+      "stages": {
+        "decision": "Decisión",
+        "proposal": "Propuesta",
+        "approval": "Aprobación",
+        "execution": "Ejecución",
+        "result": "Resultado"
       }
     }
   },
@@ -1347,119 +1476,6 @@
   },
   "decisionsInbox": {
     "title": "Bandeja de decisiones"
-  },
-  "automations": {
-    "inbox": {
-      "title": "Bandeja de automatizaciones",
-      "subtitle": "Revisa propuestas, aprobaciones e intenciones de ejecución para la org {{orgId}}.",
-      "role": "rol: {{role}}",
-      "approved": "Aprobada",
-      "rejected": "Rechazada",
-      "approveBlocked": "Aprobación bloqueada: {{reason}}",
-      "rejectBlocked": "Rechazo bloqueado: {{reason}}",
-      "filters": {
-        "status": "Estado",
-        "actionType": "Tipo de acción",
-        "allStatuses": "Todos los estados",
-        "allActionTypes": "Todos los tipos"
-      },
-      "empty": "No hay propuestas con estos filtros."
-    },
-    "activity": {
-      "title": "Actividad de automatizaciones",
-      "subtitle": "Eventos recientes de propuestas de automatización de la org {{orgId}}.",
-      "empty": "No hay eventos recientes.",
-      "proposalLine": "propuesta {{id}}",
-      "executionLine": "ejecución {{id}}"
-    },
-    "activityFilters": {
-      "eventType": "Tipo de evento",
-      "allEvents": "Todos los eventos"
-    },
-    "analytics": {
-      "title": "Analítica de automatizaciones",
-      "subtitle": "Embudo, velocidad, fiabilidad y riesgo de las propuestas de automatización.",
-      "metricsTitle": "Métricas",
-      "funnelTitle": "Embudo de propuestas",
-      "velocityTitle": "Velocidad",
-      "reliabilityTitle": "Fiabilidad de ejecución",
-      "riskTitle": "Distribución del riesgo",
-      "empty": "No hay datos de analítica."
-    },
-    "proposalDetail": {
-      "back": "Volver a la bandeja",
-      "context": "Contexto de la propuesta",
-      "payload": "Carga útil",
-      "ruleSource": "Origen de la regla",
-      "timeline": "Cronología operativa",
-      "timelineHint": "Muestra el estado operativo del producto (no el estado de automatización).",
-      "events": "Historial de eventos",
-      "noEvents": "Sin eventos.",
-      "decisionLine": "Decisión: {{title}} · estado {{status}}",
-      "approvalPanel": "Aprobación",
-      "executionPanel": "Ejecución",
-      "notFound": "No se encontró la propuesta."
-    },
-    "common": {
-      "approve": "Aprobar",
-      "reject": "Rechazar",
-      "execute": "Ejecutar",
-      "view": "Ver",
-      "loading": "Cargando…"
-    },
-    "metrics": {
-      "emptyTitle": "Todavía no hay datos de automatización",
-      "emptyDesc": "La analítica aparecerá cuando el sistema empiece a generar propuestas.",
-      "totalProposals": "Total de propuestas",
-      "pendingApproval": "Pendientes de aprobación",
-      "approved": "Aprobadas",
-      "queued": "En cola para ejecutar",
-      "executed": "Ejecutadas",
-      "executionFailed": "Ejecución fallida",
-      "executionsSucceeded": "Ejecuciones con éxito",
-      "executionsFailed": "Ejecuciones fallidas",
-      "successRate": "Tasa de éxito %"
-    },
-    "funnel": {
-      "title": "Embudo de automatización",
-      "stages": {
-        "decisionsWithProposals": "Decisiones con propuestas",
-        "proposals": "Propuestas",
-        "pendingApproval": "Pendientes de aprobación",
-        "approved": "Aprobadas",
-        "queued": "En cola",
-        "executed": "Ejecutadas"
-      }
-    },
-    "velocity": {
-      "title": "Velocidad de propuestas (últimos 14 días)"
-    },
-    "risk": {
-      "title": "Distribución del riesgo",
-      "bands": {
-        "low": "bajo",
-        "medium": "medio",
-        "high": "alto",
-        "critical": "crítico"
-      }
-    },
-    "execution": {
-      "title": "Fiabilidad de ejecución",
-      "successRate": "Tasa de éxito: {{rate}}",
-      "statuses": {
-        "succeeded": "con éxito",
-        "failed": "fallidas",
-        "running": "ejecutando",
-        "queued": "en cola"
-      }
-    },
-    "proposalCard": {
-      "thumbnail": "Miniatura",
-      "riskUnknown": "riesgo: —",
-      "decision": "Decisión",
-      "source": "Origen",
-      "decisionId": "Decisión {{id}}"
-    }
   },
   "projectDetail": {
     "loadingProject": "Cargando proyecto…"
@@ -2793,5 +2809,28 @@
     "already_have_account": "¿Ya tienes cuenta?",
     "sign_in": "Inicia sesión",
     "or": "o"
+  },
+  "operationalTimeline": {
+    "supplier": "Proveedor",
+    "production": "Producción",
+    "transit": "En tránsito",
+    "warehouse": "Almacén",
+    "amazon": "Amazon",
+    "completed": "Completado"
+  },
+  "errorBoundary": {
+    "title": "Algo ha fallado",
+    "subtitle": "Se ha producido un error inesperado",
+    "message": "Se ha producido un error inesperado.",
+    "unknown": "Error desconocido",
+    "debugTitle": "Detalles del error (debug)",
+    "technicalDetails": "Detalles técnicos",
+    "reload": "Recargar sección",
+    "goHome": "Ir al inicio"
+  },
+  "briefing": {
+    "title": "Briefing del Producto",
+    "generating": "Generando…",
+    "downloadPdf": "Descargar PDF"
   }
 }

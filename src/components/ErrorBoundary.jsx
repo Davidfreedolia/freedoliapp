@@ -1,4 +1,5 @@
 import React from 'react'
+import i18n from 'i18next'
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
 import { safeJsonArray } from '../lib/safeJson'
 
@@ -145,14 +146,14 @@ class ErrorBoundary extends React.Component {
                   fontWeight: '600',
                   color: 'var(--text-1)'
                 }}>
-                  Alguna cosa ha fallat
+                  {i18n.t('errorBoundary.title')}
                 </h2>
                 <p style={{
                   margin: '4px 0 0',
                   fontSize: '14px',
                   color: '#6b7280'
                 }}>
-                  S'ha produït un error inesperat
+                  {i18n.t('errorBoundary.subtitle')}
                 </p>
               </div>
             </div>
@@ -170,8 +171,8 @@ class ErrorBoundary extends React.Component {
                 lineHeight: '1.5'
               }}>
                 {debugErrors
-                  ? (this.state.error?.message || 'Error desconegut')
-                  : 'S\'ha produït un error inesperat.'}
+                  ? (this.state.error?.message || i18n.t('errorBoundary.unknown'))
+                  : i18n.t('errorBoundary.message')}
               </p>
               {debugErrors && this.state.errorId && (
                 <p style={{
@@ -197,7 +198,7 @@ class ErrorBoundary extends React.Component {
                 maxHeight: '300px',
                 overflow: 'auto'
               }}>
-                <div style={{ marginBottom: '8px', fontWeight: '600' }}>Debug error</div>
+                <div style={{ marginBottom: '8px', fontWeight: '600' }}>{i18n.t('errorBoundary.debugTitle')}</div>
                 <div style={{ marginBottom: '8px' }}>
                   {String(this.state.error?.message ?? this.state.error ?? 'Unknown error')}
                 </div>
@@ -235,7 +236,7 @@ class ErrorBoundary extends React.Component {
                 overflow: 'auto'
               }}>
                 <summary style={{ cursor: 'pointer', marginBottom: '8px' }}>
-                  Detalls tècnics
+                  {i18n.t('errorBoundary.technicalDetails')}
                 </summary>
                 <pre style={{
                   margin: 0,
@@ -272,7 +273,7 @@ class ErrorBoundary extends React.Component {
                 onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'var(--cta-1)'}
               >
                 <RefreshCw size={16} />
-                Recarregar secció
+                {i18n.t('errorBoundary.reload')}
               </button>
               <button
                 onClick={this.handleGoHome}
@@ -298,7 +299,7 @@ class ErrorBoundary extends React.Component {
                 }}
               >
                 <Home size={16} />
-                Anar a l'inici
+                {i18n.t('errorBoundary.goHome')}
               </button>
             </div>
           </div>

@@ -15,10 +15,10 @@ export default function AutomationExecutionReliability({ stats }) {
   const { t } = useTranslation()
   const s = stats || {}
   const data = [
-    { status: t('automations.execution.statuses.succeeded'), count: s.succeeded ?? 0 },
-    { status: t('automations.execution.statuses.failed'),    count: s.failed ?? 0 },
-    { status: t('automations.execution.statuses.running'),   count: s.running ?? 0 },
-    { status: t('automations.execution.statuses.queued'),    count: s.queued ?? 0 },
+    { status: t('automations.executionReliability.statuses.succeeded'), count: s.succeeded ?? 0 },
+    { status: t('automations.executionReliability.statuses.failed'),    count: s.failed ?? 0 },
+    { status: t('automations.executionReliability.statuses.running'),   count: s.running ?? 0 },
+    { status: t('automations.executionReliability.statuses.queued'),    count: s.queued ?? 0 },
   ]
 
   const denom = (s.succeeded ?? 0) + (s.failed ?? 0)
@@ -28,8 +28,8 @@ export default function AutomationExecutionReliability({ stats }) {
   return (
     <Card className="ui-card--elevated" style={{ padding: 16 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-1, #111827)' }}>{t('automations.execution.title')}</div>
-        <div style={{ fontSize: 12, color: 'var(--text-2, #6b7280)' }}>{t('automations.execution.successRate', { rate: successRate })}</div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-1, #111827)' }}>{t('automations.executionReliability.title')}</div>
+        <div style={{ fontSize: 12, color: 'var(--text-2, #6b7280)' }}>{t('automations.executionReliability.successRate', { rate: successRate })}</div>
       </div>
       <div style={{ width: '100%', height: 220 }}>
         <ResponsiveContainer>

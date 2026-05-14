@@ -1,15 +1,9 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { AUTOMATION_PROGRESS_STAGES } from '../../../lib/automations/constants/stages'
 
-const DEFAULT_LABELS = {
-  decision: 'Decision',
-  proposal: 'Proposal',
-  approval: 'Approval',
-  execution: 'Execution',
-  result: 'Result',
-}
-
 export default function AutomationProgressBar({ currentStage, steps }) {
+  const { t } = useTranslation()
   const stageList = Array.isArray(steps) && steps.length ? steps : AUTOMATION_PROGRESS_STAGES
   const idx = Math.max(0, stageList.findIndex((s) => s === currentStage))
   const activeIdx = idx === -1 ? 0 : idx
@@ -19,9 +13,10 @@ export default function AutomationProgressBar({ currentStage, steps }) {
       {stageList.map((stage, i) => {
         const done = i < activeIdx
         const active = i === activeIdx
-        const dotBg = done ? 'var(--accent, #4f46e5)' : active ? 'var(--accent, #4f46e5)' : 'var(--border-color, #e5e7eb)'
-        const dotBorder = done || active ? 'var(--accent, #4f46e5)' : 'var(--border-color, #e5e7eb)'
+        const dotBg = done ? 'var(--brand-1, #1F5F63)' : active ? 'var(--brand-1, #1F5F63)' : 'var(--border-color, #e5e7eb)'
+        const dotBorder = done || active ? 'var(--brand-1, #1F5F63)' : 'var(--border-color, #e5e7eb)'
         const labelColor = active ? 'var(--text-1, #111827)' : 'var(--text-2, #6b7280)'
+        const label = t(`automations.progress.stages.${stage}`, { defaultValue: stage })
 
         return (
           <React.Fragment key={stage}>
@@ -36,7 +31,7 @@ export default function AutomationProgressBar({ currentStage, steps }) {
                 }}
               />
               <div style={{ marginTop: 6, fontSize: 12, color: labelColor, fontWeight: active ? 600 : 500 }}>
-                {DEFAULT_LABELS[stage] ?? stage}
+                {label}
               </div>
             </div>
             {i < stageList.length - 1 && (
@@ -45,7 +40,7 @@ export default function AutomationProgressBar({ currentStage, steps }) {
                 style={{
                   flex: 1,
                   height: 2,
-                  background: i < activeIdx ? 'var(--accent, #4f46e5)' : 'var(--border-color, #e5e7eb)',
+                  background: i < activeIdx ? 'var(--brand-1, #1F5F63)' : 'var(--border-color, #e5e7eb)',
                   borderRadius: 999,
                 }}
               />
@@ -56,4 +51,3 @@ export default function AutomationProgressBar({ currentStage, steps }) {
     </div>
   )
 }
-

@@ -167,19 +167,113 @@
     }
   },
   "automations": {
+    "inbox": {
+      "title": "Automation Inbox",
+      "subtitle": "Review proposals, approvals, and execution intents for org {{orgId}}.",
+      "role": "role: {{role}}",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "approveBlocked": "Approve blocked: {{reason}}",
+      "rejectBlocked": "Reject blocked: {{reason}}",
+      "filters": {
+        "status": "Status",
+        "actionType": "Action type",
+        "allStatuses": "All statuses",
+        "allActionTypes": "All action types"
+      },
+      "empty": "No proposals match the current filters."
+    },
+    "activity": {
+      "title": "Automation Activity",
+      "subtitle": "Recent automation proposal events for org {{orgId}}.",
+      "empty": "No recent events.",
+      "proposalLine": "proposal {{id}}",
+      "executionLine": "execution {{id}}"
+    },
+    "activityFilters": {
+      "eventType": "Event type",
+      "allEvents": "All events"
+    },
+    "analytics": {
+      "title": "Automation analytics",
+      "subtitle": "Funnel, velocity, reliability and risk distribution of automation proposals.",
+      "metricsTitle": "Metrics",
+      "funnelTitle": "Proposal funnel",
+      "velocityTitle": "Velocity",
+      "reliabilityTitle": "Execution reliability",
+      "riskTitle": "Risk distribution",
+      "empty": "No analytics data."
+    },
+    "proposalDetail": {
+      "back": "Back to inbox",
+      "context": "Proposal Context",
+      "payload": "Proposal Payload",
+      "ruleSource": "Rule Source",
+      "timeline": "Operational Timeline",
+      "timelineHint": "This shows product operational status (not automation status).",
+      "events": "Event History",
+      "noEvents": "No events.",
+      "decisionLine": "Decision: {{title}} · status {{status}}",
+      "approvalPanel": "Approval",
+      "executionPanel": "Execution",
+      "notFound": "Proposal not found."
+    },
+    "common": {
+      "approve": "Approve",
+      "reject": "Reject",
+      "execute": "Execute",
+      "view": "View",
+      "loading": "Loading…"
+    },
+    "metrics": {
+      "emptyTitle": "No automation data yet",
+      "emptyDesc": "Automation analytics will appear once the system starts generating proposals.",
+      "totalProposals": "Total proposals",
+      "pendingApproval": "Pending approval",
+      "approved": "Approved",
+      "queued": "Queued for execution",
+      "executed": "Executed",
+      "executionFailed": "Execution failed",
+      "executionsSucceeded": "Executions succeeded",
+      "executionsFailed": "Executions failed",
+      "successRate": "Success rate %"
+    },
+    "funnel": {
+      "title": "Automation funnel",
+      "stages": {
+        "decisionsWithProposals": "Decisions with proposals",
+        "proposals": "Proposals",
+        "pendingApproval": "Pending approval",
+        "approved": "Approved",
+        "queued": "Queued",
+        "executed": "Executed"
+      }
+    },
+    "velocity": {
+      "title": "Proposal velocity (last 14 days)"
+    },
+    "risk": {
+      "title": "Risk distribution",
+      "bands": {
+        "low": "low",
+        "medium": "medium",
+        "high": "high",
+        "critical": "critical"
+      }
+    },
     "execution": {
       "title": "Execution",
       "triggerButton": "Trigger execution",
-      "empty": "No executions yet.",
-      "missingActor": "Missing executing user",
+      "empty": "No execution yet.",
+      "missingActor": "Missing actor for the action",
       "succeeded": "Execution succeeded",
       "failed": "Execution failed",
       "blocked": "Execution blocked: {{reason}}",
       "unknownReason": "unknown",
       "duplicateIntent": "An execution intent already exists (queued or running)",
-      "triggerFailed": "Couldn’t trigger execution",
+      "triggerFailed": "Could not trigger execution",
       "modeLine": "Mode: {{mode}}",
-      "startFinishLine": "Start: {{start}} · End: {{finish}}",
+      "startFinishLine": "Start: {{start}} · Finish: {{finish}}",
       "errorLabel": "Error",
       "resultLabel": "Result",
       "retryButton": "Retry execution",
@@ -197,6 +291,41 @@
         "manual_trigger": "Manual trigger",
         "approved_trigger": "Approved trigger",
         "automatic_trigger": "Automatic trigger"
+      }
+    },
+    "proposalCard": {
+      "thumbnail": "Thumbnail",
+      "riskUnknown": "risk: —",
+      "decision": "Decision",
+      "source": "Source",
+      "decisionId": "Decision {{id}}"
+    },
+    "executionReliability": {
+      "title": "Execution reliability",
+      "successRate": "Success rate: {{rate}}",
+      "statuses": {
+        "succeeded": "succeeded",
+        "failed": "failed",
+        "running": "running",
+        "queued": "queued"
+      }
+    },
+    "approval": {
+      "title": "Approval",
+      "noSteps": "No approval steps.",
+      "step": "Step {{step}}",
+      "role": "role {{role}}",
+      "approver": "approver {{approver}}",
+      "approveFailed": "Approve failed",
+      "rejectFailed": "Reject failed"
+    },
+    "progress": {
+      "stages": {
+        "decision": "Decision",
+        "proposal": "Proposal",
+        "approval": "Approval",
+        "execution": "Execution",
+        "result": "Result"
       }
     }
   },
@@ -1332,119 +1461,6 @@
   },
   "decisionsInbox": {
     "title": "Decision Inbox"
-  },
-  "automations": {
-    "inbox": {
-      "title": "Automation Inbox",
-      "subtitle": "Review proposals, approvals, and execution intents for org {{orgId}}.",
-      "role": "role: {{role}}",
-      "approved": "Approved",
-      "rejected": "Rejected",
-      "approveBlocked": "Approve blocked: {{reason}}",
-      "rejectBlocked": "Reject blocked: {{reason}}",
-      "filters": {
-        "status": "Status",
-        "actionType": "Action type",
-        "allStatuses": "All statuses",
-        "allActionTypes": "All action types"
-      },
-      "empty": "No proposals match the current filters."
-    },
-    "activity": {
-      "title": "Automation Activity",
-      "subtitle": "Recent automation proposal events for org {{orgId}}.",
-      "empty": "No recent events.",
-      "proposalLine": "proposal {{id}}",
-      "executionLine": "execution {{id}}"
-    },
-    "activityFilters": {
-      "eventType": "Event type",
-      "allEvents": "All events"
-    },
-    "analytics": {
-      "title": "Automation analytics",
-      "subtitle": "Funnel, velocity, reliability and risk distribution of automation proposals.",
-      "metricsTitle": "Metrics",
-      "funnelTitle": "Proposal funnel",
-      "velocityTitle": "Velocity",
-      "reliabilityTitle": "Execution reliability",
-      "riskTitle": "Risk distribution",
-      "empty": "No analytics data."
-    },
-    "proposalDetail": {
-      "back": "Back to inbox",
-      "context": "Proposal Context",
-      "payload": "Proposal Payload",
-      "ruleSource": "Rule Source",
-      "timeline": "Operational Timeline",
-      "timelineHint": "This shows product operational status (not automation status).",
-      "events": "Event History",
-      "noEvents": "No events.",
-      "decisionLine": "Decision: {{title}} · status {{status}}",
-      "approvalPanel": "Approval",
-      "executionPanel": "Execution",
-      "notFound": "Proposal not found."
-    },
-    "common": {
-      "approve": "Approve",
-      "reject": "Reject",
-      "execute": "Execute",
-      "view": "View",
-      "loading": "Loading…"
-    },
-    "metrics": {
-      "emptyTitle": "No automation data yet",
-      "emptyDesc": "Automation analytics will appear once the system starts generating proposals.",
-      "totalProposals": "Total proposals",
-      "pendingApproval": "Pending approval",
-      "approved": "Approved",
-      "queued": "Queued for execution",
-      "executed": "Executed",
-      "executionFailed": "Execution failed",
-      "executionsSucceeded": "Executions succeeded",
-      "executionsFailed": "Executions failed",
-      "successRate": "Success rate %"
-    },
-    "funnel": {
-      "title": "Automation funnel",
-      "stages": {
-        "decisionsWithProposals": "Decisions with proposals",
-        "proposals": "Proposals",
-        "pendingApproval": "Pending approval",
-        "approved": "Approved",
-        "queued": "Queued",
-        "executed": "Executed"
-      }
-    },
-    "velocity": {
-      "title": "Proposal velocity (last 14 days)"
-    },
-    "risk": {
-      "title": "Risk distribution",
-      "bands": {
-        "low": "low",
-        "medium": "medium",
-        "high": "high",
-        "critical": "critical"
-      }
-    },
-    "execution": {
-      "title": "Execution reliability",
-      "successRate": "Success rate: {{rate}}",
-      "statuses": {
-        "succeeded": "succeeded",
-        "failed": "failed",
-        "running": "running",
-        "queued": "queued"
-      }
-    },
-    "proposalCard": {
-      "thumbnail": "Thumbnail",
-      "riskUnknown": "risk: —",
-      "decision": "Decision",
-      "source": "Source",
-      "decisionId": "Decision {{id}}"
-    }
   },
   "projectDetail": {
     "loadingProject": "Loading project…"
@@ -2778,5 +2794,28 @@
     "already_have_account": "Already have an account?",
     "sign_in": "Sign in",
     "or": "or"
+  },
+  "operationalTimeline": {
+    "supplier": "Supplier",
+    "production": "Production",
+    "transit": "In transit",
+    "warehouse": "Warehouse",
+    "amazon": "Amazon",
+    "completed": "Completed"
+  },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "subtitle": "An unexpected error occurred",
+    "message": "An unexpected error occurred.",
+    "unknown": "Unknown error",
+    "debugTitle": "Error details (debug)",
+    "technicalDetails": "Technical details",
+    "reload": "Reload section",
+    "goHome": "Go home"
+  },
+  "briefing": {
+    "title": "Product Briefing",
+    "generating": "Generating…",
+    "downloadPdf": "Download PDF"
   }
 }

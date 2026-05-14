@@ -167,6 +167,100 @@
     }
   },
   "automations": {
+    "inbox": {
+      "title": "Safata d'automatitzacions",
+      "subtitle": "Revisa propostes, aprovacions i intencions d'execució per a l'org {{orgId}}.",
+      "role": "rol: {{role}}",
+      "approved": "Aprovada",
+      "rejected": "Rebutjada",
+      "approveBlocked": "Aprovació bloquejada: {{reason}}",
+      "rejectBlocked": "Rebuig bloquejat: {{reason}}",
+      "filters": {
+        "status": "Estat",
+        "actionType": "Tipus d'acció",
+        "allStatuses": "Tots els estats",
+        "allActionTypes": "Tots els tipus"
+      },
+      "empty": "No hi ha propostes amb aquests filtres."
+    },
+    "activity": {
+      "title": "Activitat d'automatitzacions",
+      "subtitle": "Esdeveniments recents de propostes d'automatització de l'org {{orgId}}.",
+      "empty": "No hi ha esdeveniments recents.",
+      "proposalLine": "proposta {{id}}",
+      "executionLine": "execució {{id}}"
+    },
+    "activityFilters": {
+      "eventType": "Tipus d'esdeveniment",
+      "allEvents": "Tots els esdeveniments"
+    },
+    "analytics": {
+      "title": "Analítica d'automatitzacions",
+      "subtitle": "Embut, velocitat, fiabilitat i risc de les propostes d'automatització.",
+      "metricsTitle": "Mètriques",
+      "funnelTitle": "Embut de propostes",
+      "velocityTitle": "Velocitat",
+      "reliabilityTitle": "Fiabilitat d'execució",
+      "riskTitle": "Distribució del risc",
+      "empty": "No hi ha dades d'analítica."
+    },
+    "proposalDetail": {
+      "back": "Tornar a la safata",
+      "context": "Context de la proposta",
+      "payload": "Càrrega útil",
+      "ruleSource": "Origen de la regla",
+      "timeline": "Cronologia operativa",
+      "timelineHint": "Mostra l'estat operatiu del producte (no l'estat d'automatització).",
+      "events": "Historial d'esdeveniments",
+      "noEvents": "Sense esdeveniments.",
+      "decisionLine": "Decisió: {{title}} · estat {{status}}",
+      "approvalPanel": "Aprovació",
+      "executionPanel": "Execució",
+      "notFound": "No s'ha trobat la proposta."
+    },
+    "common": {
+      "approve": "Aprovar",
+      "reject": "Rebutjar",
+      "execute": "Executar",
+      "view": "Veure",
+      "loading": "Carregant…"
+    },
+    "metrics": {
+      "emptyTitle": "Encara no hi ha dades d'automatització",
+      "emptyDesc": "L'analítica apareixerà quan el sistema comenci a generar propostes.",
+      "totalProposals": "Total de propostes",
+      "pendingApproval": "Pendents d'aprovació",
+      "approved": "Aprovades",
+      "queued": "En cua per executar",
+      "executed": "Executades",
+      "executionFailed": "Execució fallida",
+      "executionsSucceeded": "Execucions amb èxit",
+      "executionsFailed": "Execucions fallides",
+      "successRate": "Taxa d'èxit %"
+    },
+    "funnel": {
+      "title": "Embut d'automatització",
+      "stages": {
+        "decisionsWithProposals": "Decisions amb propostes",
+        "proposals": "Propostes",
+        "pendingApproval": "Pendents d'aprovació",
+        "approved": "Aprovades",
+        "queued": "En cua",
+        "executed": "Executades"
+      }
+    },
+    "velocity": {
+      "title": "Velocitat de propostes (últims 14 dies)"
+    },
+    "risk": {
+      "title": "Distribució del risc",
+      "bands": {
+        "low": "baix",
+        "medium": "mitjà",
+        "high": "alt",
+        "critical": "crític"
+      }
+    },
     "execution": {
       "title": "Execució",
       "triggerButton": "Iniciar execució",
@@ -197,6 +291,41 @@
         "manual_trigger": "Disparador manual",
         "approved_trigger": "Disparador aprovat",
         "automatic_trigger": "Disparador automàtic"
+      }
+    },
+    "proposalCard": {
+      "thumbnail": "Miniatura",
+      "riskUnknown": "risc: —",
+      "decision": "Decisió",
+      "source": "Origen",
+      "decisionId": "Decisió {{id}}"
+    },
+    "executionReliability": {
+      "title": "Fiabilitat d'execució",
+      "successRate": "Taxa d'èxit: {{rate}}",
+      "statuses": {
+        "succeeded": "amb èxit",
+        "failed": "fallides",
+        "running": "executant",
+        "queued": "en cua"
+      }
+    },
+    "approval": {
+      "title": "Aprovació",
+      "noSteps": "No hi ha cap pas d'aprovació.",
+      "step": "Pas {{step}}",
+      "role": "rol {{role}}",
+      "approver": "aprovador {{approver}}",
+      "approveFailed": "Ha fallat l'aprovació",
+      "rejectFailed": "Ha fallat el rebuig"
+    },
+    "progress": {
+      "stages": {
+        "decision": "Decisió",
+        "proposal": "Proposta",
+        "approval": "Aprovació",
+        "execution": "Execució",
+        "result": "Resultat"
       }
     }
   },
@@ -1533,119 +1662,6 @@
   "decisionsInbox": {
     "title": "Safata de decisions"
   },
-  "automations": {
-    "inbox": {
-      "title": "Safata d'automatitzacions",
-      "subtitle": "Revisa propostes, aprovacions i intencions d'execució per a l'org {{orgId}}.",
-      "role": "rol: {{role}}",
-      "approved": "Aprovada",
-      "rejected": "Rebutjada",
-      "approveBlocked": "Aprovació bloquejada: {{reason}}",
-      "rejectBlocked": "Rebuig bloquejat: {{reason}}",
-      "filters": {
-        "status": "Estat",
-        "actionType": "Tipus d'acció",
-        "allStatuses": "Tots els estats",
-        "allActionTypes": "Tots els tipus"
-      },
-      "empty": "No hi ha propostes amb aquests filtres."
-    },
-    "activity": {
-      "title": "Activitat d'automatitzacions",
-      "subtitle": "Esdeveniments recents de propostes d'automatització de l'org {{orgId}}.",
-      "empty": "No hi ha esdeveniments recents.",
-      "proposalLine": "proposta {{id}}",
-      "executionLine": "execució {{id}}"
-    },
-    "activityFilters": {
-      "eventType": "Tipus d'esdeveniment",
-      "allEvents": "Tots els esdeveniments"
-    },
-    "analytics": {
-      "title": "Analítica d'automatitzacions",
-      "subtitle": "Embut, velocitat, fiabilitat i risc de les propostes d'automatització.",
-      "metricsTitle": "Mètriques",
-      "funnelTitle": "Embut de propostes",
-      "velocityTitle": "Velocitat",
-      "reliabilityTitle": "Fiabilitat d'execució",
-      "riskTitle": "Distribució del risc",
-      "empty": "No hi ha dades d'analítica."
-    },
-    "proposalDetail": {
-      "back": "Tornar a la safata",
-      "context": "Context de la proposta",
-      "payload": "Càrrega útil",
-      "ruleSource": "Origen de la regla",
-      "timeline": "Cronologia operativa",
-      "timelineHint": "Mostra l'estat operatiu del producte (no l'estat d'automatització).",
-      "events": "Historial d'esdeveniments",
-      "noEvents": "Sense esdeveniments.",
-      "decisionLine": "Decisió: {{title}} · estat {{status}}",
-      "approvalPanel": "Aprovació",
-      "executionPanel": "Execució",
-      "notFound": "No s'ha trobat la proposta."
-    },
-    "common": {
-      "approve": "Aprovar",
-      "reject": "Rebutjar",
-      "execute": "Executar",
-      "view": "Veure",
-      "loading": "Carregant…"
-    },
-    "metrics": {
-      "emptyTitle": "Encara no hi ha dades d'automatització",
-      "emptyDesc": "L'analítica apareixerà quan el sistema comenci a generar propostes.",
-      "totalProposals": "Total de propostes",
-      "pendingApproval": "Pendents d'aprovació",
-      "approved": "Aprovades",
-      "queued": "En cua per executar",
-      "executed": "Executades",
-      "executionFailed": "Execució fallida",
-      "executionsSucceeded": "Execucions amb èxit",
-      "executionsFailed": "Execucions fallides",
-      "successRate": "Taxa d'èxit %"
-    },
-    "funnel": {
-      "title": "Embut d'automatització",
-      "stages": {
-        "decisionsWithProposals": "Decisions amb propostes",
-        "proposals": "Propostes",
-        "pendingApproval": "Pendents d'aprovació",
-        "approved": "Aprovades",
-        "queued": "En cua",
-        "executed": "Executades"
-      }
-    },
-    "velocity": {
-      "title": "Velocitat de propostes (últims 14 dies)"
-    },
-    "risk": {
-      "title": "Distribució del risc",
-      "bands": {
-        "low": "baix",
-        "medium": "mitjà",
-        "high": "alt",
-        "critical": "crític"
-      }
-    },
-    "execution": {
-      "title": "Fiabilitat d'execució",
-      "successRate": "Taxa d'èxit: {{rate}}",
-      "statuses": {
-        "succeeded": "amb èxit",
-        "failed": "fallides",
-        "running": "executant",
-        "queued": "en cua"
-      }
-    },
-    "proposalCard": {
-      "thumbnail": "Miniatura",
-      "riskUnknown": "risc: —",
-      "decision": "Decisió",
-      "source": "Origen",
-      "decisionId": "Decisió {{id}}"
-    }
-  },
   "projectDetail": {
     "loadingProject": "Carregant projecte…"
   },
@@ -2978,5 +2994,28 @@
     "already_have_account": "Ja tens compte?",
     "sign_in": "Inicia sessió",
     "or": "o"
+  },
+  "operationalTimeline": {
+    "supplier": "Proveïdor",
+    "production": "Producció",
+    "transit": "En trànsit",
+    "warehouse": "Magatzem",
+    "amazon": "Amazon",
+    "completed": "Completat"
+  },
+  "errorBoundary": {
+    "title": "Alguna cosa ha fallat",
+    "subtitle": "S'ha produït un error inesperat",
+    "message": "S'ha produït un error inesperat.",
+    "unknown": "Error desconegut",
+    "debugTitle": "Detalls de l'error (debug)",
+    "technicalDetails": "Detalls tècnics",
+    "reload": "Recarregar secció",
+    "goHome": "Anar a l'inici"
+  },
+  "briefing": {
+    "title": "Briefing del Producte",
+    "generating": "Generant…",
+    "downloadPdf": "Descarregar PDF"
   }
 }

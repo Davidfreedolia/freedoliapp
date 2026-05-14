@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+import i18n from 'i18next'
 import { CheckCircle2, XCircle, AlertTriangle, X } from 'lucide-react'
 
 let toastId = 0
@@ -100,7 +101,7 @@ export default function ToastContainer({ darkMode }) {
             <span style={{ flex: 1, fontSize: '14px', lineHeight: 1.5, fontWeight: 500 }}>{toast.message}</span>
             <button
               onClick={() => removeToast(toast.id)}
-              aria-label="Close"
+              aria-label={i18n.t('common.close', 'Close')}
               style={{
                 background: 'none',
                 border: 'none',
