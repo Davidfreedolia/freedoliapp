@@ -7,5 +7,41 @@
       "destination": "https://freedoliapp.com/$1",
       "permanent": true
     }
+  ],
+  "headers": [
+    {
+      "//": "Baseline security headers — applied to every response. Conservative set that does not risk breaking the app (no enforcing CSP yet; that needs Report-Only first). Each header maps to a Mozilla Observatory / Lighthouse a11y/security check.",
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), payment=(self \"https://js.stripe.com\"), usb=(), magnetometer=(), gyroscope=(), accelerometer=()" },
+        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin-allow-popups" },
+        { "key": "X-DNS-Prefetch-Control", "value": "on" }
+      ]
+    },
+    {
+      "//": "Hashed Vite assets are content-addressed — safe to cache for a year.",
+      "source": "/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "//": "Brand assets and static images get a long cache too. Names are stable.",
+      "source": "/images/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=2592000" }
+      ]
+    },
+    {
+      "//": "llms.txt and robots.txt: daily cache so updates propagate fast.",
+      "source": "/(llms.txt|robots.txt)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=86400" }
+      ]
+    }
   ]
 }
