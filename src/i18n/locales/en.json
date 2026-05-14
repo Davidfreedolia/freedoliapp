@@ -1387,6 +1387,52 @@
       "loading": "Loading…"
     }
   },
+  "projectDetail": {
+    "loadingProject": "Loading project…"
+  },
+  "operationsPlanning": {
+    "title": "Operations Planning",
+    "subtitle": "Plan reorder priorities using live inventory intelligence",
+    "day": "{{n}} day",
+    "days": "{{n}} days",
+    "reorder": {
+      "title": "Reorder Planning",
+      "empty": "No reorder candidates right now.",
+      "cols": {
+        "product": "Product / ASIN",
+        "units": "Units",
+        "coverage": "Coverage",
+        "stockout": "Stockout",
+        "reorder": "Reorder",
+        "leadTime": "Lead time",
+        "confidence": "Confidence",
+        "issues": "Issues"
+      }
+    },
+    "stockRisk": {
+      "title": "Stock Risk",
+      "subtitle": "Identify products with imminent stockout risk",
+      "empty": "No stockout risks detected.",
+      "cols": {
+        "daysOfCover": "Days of cover",
+        "predicted": "Predicted stockout",
+        "severity": "Severity"
+      }
+    },
+    "cashImpact": {
+      "title": "Cash Impact",
+      "subtitle": "Estimate near-term cash impact of operational planning",
+      "empty": "No cash forecast data available.",
+      "kpi": {
+        "today": "Cash today",
+        "in30Days": "Cash in 30 days"
+      },
+      "cols": {
+        "date": "Date",
+        "balance": "Cash balance"
+      }
+    }
+  },
   "alertsBadge": {
     "title": "Alerts ({{count}})",
     "more": "+{{count}} more",

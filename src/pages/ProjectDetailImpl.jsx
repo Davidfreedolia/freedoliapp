@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, lazy, Suspense } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ArrowLeft, AlertCircle } from 'lucide-react'
 import Header from '../components/Header'
 import PageGutter from '../components/ui/PageGutter'
@@ -41,6 +42,7 @@ const getCurrentPhaseId = (project) => {
 }
 
 export default function ProjectDetailImpl() {
+  const { t } = useTranslation()
   const { id } = useParams()
   const navigate = useNavigate()
   const [project, setProject] = useState(null)
@@ -129,7 +131,7 @@ export default function ProjectDetailImpl() {
       <>
         <Header />
         <PageGutter>
-          <div style={{ padding: 48, color: 'var(--text-2)' }}>Carregant projecte…</div>
+          <div style={{ padding: 48, color: 'var(--text-2)' }}>{t('projectDetail.loadingProject')}</div>
         </PageGutter>
       </>
     )

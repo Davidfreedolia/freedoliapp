@@ -3,6 +3,7 @@
  * Data from getReorderCandidates, detectStockoutRisk, getCashflowForecast only; no client-side calculations.
  */
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useWorkspace } from '../contexts/WorkspaceContext'
 import { supabase } from '../lib/supabase'
 import { getReorderCandidates } from '../lib/inventory/getReorderCandidates'
@@ -14,28 +15,25 @@ const LIMIT = 500
 const STOCKOUT_LOOKBACK_DAYS = 30
 const CASH_FORECAST_DAYS = 30
 
-function formatCurrencyEUR(amount) {
-  if (amount == null || !Number.isFinite(amount)) return '—'
-  return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount)
+function localeFor(lng) {
+  return lng === 'es' ? 'es-ES' : lng === 'en' ? 'en-GB' : 'ca-ES'
 }
 
-function formatDateReadable(dateStr) {
+function formatCurrencyEUR(amount, lng) {
+  if (amount == null || !Number.isFinite(amount)) return '—'
+  return new Intl.NumberFormat(localeFor(lng), { style: 'currency', currency: 'EUR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount)
+}
+
+function formatDateReadable(dateStr, lng) {
   if (!dateStr || typeof dateStr !== 'string') return '—'
   const d = new Date(dateStr + 'Z')
   if (Number.isNaN(d.getTime())) return dateStr
-  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+  return d.toLocaleDateString(localeFor(lng), { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
 function formatNum(v) {
   if (v == null || !Number.isFinite(v)) return '—'
   return Number(v)
-}
-
-function formatDays(v) {
-  if (v == null || !Number.isFinite(v)) return '—'
-  const n = Number(v)
-  if (n < 0) return '—'
-  return n <= 1 ? `${n} day` : `${Math.round(n)} days`
 }
 
 async function getWorkspaceAsins(supabaseClient, orgId) {
@@ -65,6 +63,13 @@ function predictedStockoutDate(daysOfCover) {
 }
 
 export default function OperationsPlanning() {
+  const { t, i18n } = useTranslation()
+  const formatDays = (v) => {
+    if (v == null || !Number.isFinite(v)) return '—'
+    const n = Number(v)
+    if (n < 0) return '—'
+    return n <= 1 ? t('operationsPlanning.day', { n }) : t('operationsPlanning.days', { n: Math.round(n) })
+  }
   const { activeOrgId } = useWorkspace()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -173,13 +178,13 @@ export default function OperationsPlanning() {
     return (
       <div style={styles.page}>
         <header style={styles.header}>
-          <h1 style={styles.title}>Operations Planning</h1>
-          <p style={styles.subtitle}>Plan reorder priorities using live inventory intelligence</p>
+          <h1 style={styles.title}>{t('operationsPlanning.title')}</h1>
+          <p style={styles.subtitle}>{t('operationsPlanning.subtitle')}</p>
         </header>
         <div style={styles.errorWrap}>
           <p style={styles.errorText}>{error}</p>
           <Button variant="primary" size="md" onClick={load}>
-            Tornar a intentar
+            {t('common.retry')}
           </Button>
         </div>
       </div>
@@ -189,30 +194,30 @@ export default function OperationsPlanning() {
   return (
     <div style={styles.page}>
       <header style={styles.header}>
-        <h1 style={styles.title}>Operations Planning</h1>
-        <p style={styles.subtitle}>Plan reorder priorities using live inventory intelligence</p>
+        <h1 style={styles.title}>{t('operationsPlanning.title')}</h1>
+        <p style={styles.subtitle}>{t('operationsPlanning.subtitle')}</p>
       </header>
 
       {/* Reorder Planning View */}
       <section style={styles.section} aria-labelledby="reorder-heading">
-        <h2 id="reorder-heading" style={styles.sectionTitle}>Reorder Planning</h2>
+        <h2 id="reorder-heading" style={styles.sectionTitle}>{t('operationsPlanning.reorder.title')}</h2>
         {loading ? (
-          <div style={styles.loading}>Loading…</div>
+          <div style={styles.loading}>{t('common.loading')}</div>
         ) : reorderEmpty ? (
-          <div style={styles.empty}>No reorder candidates right now.</div>
+          <div style={styles.empty}>{t('operationsPlanning.reorder.empty')}</div>
         ) : (
           <div style={styles.tableWrap}>
             <table style={styles.table}>
               <thead>
                 <tr>
-                  <th style={styles.th}>Product / ASIN</th>
-                  <th style={styles.th}>Units</th>
-                  <th style={styles.th}>Coverage</th>
-                  <th style={styles.th}>Stockout</th>
-                  <th style={styles.th}>Reorder</th>
-                  <th style={styles.th}>Lead time</th>
-                  <th style={styles.th}>Confidence</th>
-                  <th style={styles.th}>Issues</th>
+                  <th style={styles.th}>{t('operationsPlanning.reorder.cols.product')}</th>
+                  <th style={styles.th}>{t('operationsPlanning.reorder.cols.units')}</th>
+                  <th style={styles.th}>{t('operationsPlanning.reorder.cols.coverage')}</th>
+                  <th style={styles.th}>{t('operationsPlanning.reorder.cols.stockout')}</th>
+                  <th style={styles.th}>{t('operationsPlanning.reorder.cols.reorder')}</th>
+                  <th style={styles.th}>{t('operationsPlanning.reorder.cols.leadTime')}</th>
+                  <th style={styles.th}>{t('operationsPlanning.reorder.cols.confidence')}</th>
+                  <th style={styles.th}>{t('operationsPlanning.reorder.cols.issues')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -236,29 +241,29 @@ export default function OperationsPlanning() {
 
       {/* Stock Risk View — D22.4 */}
       <section style={styles.section} aria-labelledby="stock-risk-heading">
-        <h2 id="stock-risk-heading" style={styles.sectionTitle}>Stock Risk</h2>
-        <p style={styles.sectionSubtitle}>Identify products with imminent stockout risk</p>
+        <h2 id="stock-risk-heading" style={styles.sectionTitle}>{t('operationsPlanning.stockRisk.title')}</h2>
+        <p style={styles.sectionSubtitle}>{t('operationsPlanning.stockRisk.subtitle')}</p>
         {stockRiskLoading ? (
-          <div style={styles.loading}>Loading…</div>
+          <div style={styles.loading}>{t('common.loading')}</div>
         ) : stockRiskError ? (
           <div style={styles.errorInSection}>
             <p style={styles.errorText}>{stockRiskError}</p>
             <Button variant="secondary" size="sm" onClick={loadStockRisk}>
-              Tornar a intentar
+              {t('common.retry')}
             </Button>
           </div>
         ) : stockRiskRows.length === 0 ? (
-          <div style={styles.empty}>No stockout risks detected.</div>
+          <div style={styles.empty}>{t('operationsPlanning.stockRisk.empty')}</div>
         ) : (
           <div style={styles.tableWrap}>
             <table style={styles.table}>
               <thead>
                 <tr>
-                  <th style={styles.th}>Product / ASIN</th>
-                  <th style={styles.th}>Units</th>
-                  <th style={styles.th}>Days of cover</th>
-                  <th style={styles.th}>Predicted stockout</th>
-                  <th style={styles.th}>Severity</th>
+                  <th style={styles.th}>{t('operationsPlanning.reorder.cols.product')}</th>
+                  <th style={styles.th}>{t('operationsPlanning.reorder.cols.units')}</th>
+                  <th style={styles.th}>{t('operationsPlanning.stockRisk.cols.daysOfCover')}</th>
+                  <th style={styles.th}>{t('operationsPlanning.stockRisk.cols.predicted')}</th>
+                  <th style={styles.th}>{t('operationsPlanning.stockRisk.cols.severity')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -279,44 +284,44 @@ export default function OperationsPlanning() {
 
       {/* Cash Impact View — D22.5 */}
       <section style={styles.section} aria-labelledby="cash-impact-heading">
-        <h2 id="cash-impact-heading" style={styles.sectionTitle}>Cash Impact</h2>
-        <p style={styles.sectionSubtitle}>Estimate near-term cash impact of operational planning</p>
+        <h2 id="cash-impact-heading" style={styles.sectionTitle}>{t('operationsPlanning.cashImpact.title')}</h2>
+        <p style={styles.sectionSubtitle}>{t('operationsPlanning.cashImpact.subtitle')}</p>
         {cashImpactLoading ? (
-          <div style={styles.loading}>Loading…</div>
+          <div style={styles.loading}>{t('common.loading')}</div>
         ) : cashImpactError ? (
           <div style={styles.errorInSection}>
             <p style={styles.errorText}>{cashImpactError}</p>
             <Button variant="secondary" size="sm" onClick={loadCashImpact}>
-              Tornar a intentar
+              {t('common.retry')}
             </Button>
           </div>
         ) : cashImpactData.length === 0 ? (
-          <div style={styles.empty}>No cash forecast data available.</div>
+          <div style={styles.empty}>{t('operationsPlanning.cashImpact.empty')}</div>
         ) : (
           <>
             <div style={styles.kpiRow}>
               <div style={styles.kpiBox}>
-                <span style={styles.kpiLabel}>Cash today</span>
-                <span style={styles.kpiValue}>{formatCurrencyEUR(cashImpactData[0]?.cashBalance)}</span>
+                <span style={styles.kpiLabel}>{t('operationsPlanning.cashImpact.kpi.today')}</span>
+                <span style={styles.kpiValue}>{formatCurrencyEUR(cashImpactData[0]?.cashBalance, i18n.language)}</span>
               </div>
               <div style={styles.kpiBox}>
-                <span style={styles.kpiLabel}>Cash in 30 days</span>
-                <span style={styles.kpiValue}>{formatCurrencyEUR(cashImpactData[cashImpactData.length - 1]?.cashBalance)}</span>
+                <span style={styles.kpiLabel}>{t('operationsPlanning.cashImpact.kpi.in30Days')}</span>
+                <span style={styles.kpiValue}>{formatCurrencyEUR(cashImpactData[cashImpactData.length - 1]?.cashBalance, i18n.language)}</span>
               </div>
             </div>
             <div style={styles.tableWrap}>
               <table style={styles.table}>
                 <thead>
                   <tr>
-                    <th style={styles.th}>Date</th>
-                    <th style={styles.th}>Cash balance</th>
+                    <th style={styles.th}>{t('operationsPlanning.cashImpact.cols.date')}</th>
+                    <th style={styles.th}>{t('operationsPlanning.cashImpact.cols.balance')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {cashImpactData.map((row) => (
                     <tr key={row.date}>
-                      <td style={styles.td}>{formatDateReadable(row.date)}</td>
-                      <td style={styles.td}>{formatCurrencyEUR(row.cashBalance)}</td>
+                      <td style={styles.td}>{formatDateReadable(row.date, i18n.language)}</td>
+                      <td style={styles.td}>{formatCurrencyEUR(row.cashBalance, i18n.language)}</td>
                     </tr>
                   ))}
                 </tbody>

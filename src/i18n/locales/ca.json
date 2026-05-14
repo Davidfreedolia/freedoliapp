@@ -1587,6 +1587,52 @@
       "loading": "Carregant…"
     }
   },
+  "projectDetail": {
+    "loadingProject": "Carregant projecte…"
+  },
+  "operationsPlanning": {
+    "title": "Planificació d'operacions",
+    "subtitle": "Planifica prioritats de reposició amb intel·ligència d'inventari en directe",
+    "day": "{{n}} dia",
+    "days": "{{n}} dies",
+    "reorder": {
+      "title": "Planificació de reposicions",
+      "empty": "No hi ha candidats a reposició ara mateix.",
+      "cols": {
+        "product": "Producte / ASIN",
+        "units": "Unitats",
+        "coverage": "Cobertura",
+        "stockout": "Trencament",
+        "reorder": "Reposició",
+        "leadTime": "Termini",
+        "confidence": "Confiança",
+        "issues": "Incidències"
+      }
+    },
+    "stockRisk": {
+      "title": "Risc d'estoc",
+      "subtitle": "Identifica productes amb risc imminent de trencament d'estoc",
+      "empty": "No s'han detectat riscos de trencament d'estoc.",
+      "cols": {
+        "daysOfCover": "Dies de cobertura",
+        "predicted": "Trencament previst",
+        "severity": "Severitat"
+      }
+    },
+    "cashImpact": {
+      "title": "Impacte en caixa",
+      "subtitle": "Estima l'impacte a curt termini en caixa de la planificació operativa",
+      "empty": "No hi ha dades de previsió de caixa disponibles.",
+      "kpi": {
+        "today": "Caixa avui",
+        "in30Days": "Caixa en 30 dies"
+      },
+      "cols": {
+        "date": "Data",
+        "balance": "Saldo de caixa"
+      }
+    }
+  },
   "alertsBadge": {
     "title": "Alertes ({{count}})",
     "more": "+{{count}} més",

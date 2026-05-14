@@ -1402,6 +1402,52 @@
       "loading": "Cargando…"
     }
   },
+  "projectDetail": {
+    "loadingProject": "Cargando proyecto…"
+  },
+  "operationsPlanning": {
+    "title": "Planificación de operaciones",
+    "subtitle": "Planifica prioridades de reposición con inteligencia de inventario en vivo",
+    "day": "{{n}} día",
+    "days": "{{n}} días",
+    "reorder": {
+      "title": "Planificación de reposiciones",
+      "empty": "No hay candidatos a reposición ahora mismo.",
+      "cols": {
+        "product": "Producto / ASIN",
+        "units": "Unidades",
+        "coverage": "Cobertura",
+        "stockout": "Rotura",
+        "reorder": "Reposición",
+        "leadTime": "Plazo",
+        "confidence": "Confianza",
+        "issues": "Incidencias"
+      }
+    },
+    "stockRisk": {
+      "title": "Riesgo de stock",
+      "subtitle": "Identifica productos con riesgo inminente de rotura de stock",
+      "empty": "No se han detectado riesgos de rotura de stock.",
+      "cols": {
+        "daysOfCover": "Días de cobertura",
+        "predicted": "Rotura prevista",
+        "severity": "Severidad"
+      }
+    },
+    "cashImpact": {
+      "title": "Impacto en caja",
+      "subtitle": "Estima el impacto a corto plazo en caja de la planificación operativa",
+      "empty": "No hay datos de previsión de caja disponibles.",
+      "kpi": {
+        "today": "Caja hoy",
+        "in30Days": "Caja en 30 días"
+      },
+      "cols": {
+        "date": "Fecha",
+        "balance": "Saldo de caja"
+      }
+    }
+  },
   "alertsBadge": {
     "title": "Alertas ({{count}})",
     "more": "+{{count}} más",
