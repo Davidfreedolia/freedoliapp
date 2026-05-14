@@ -2912,5 +2912,110 @@
       "received": "Received",
       "rejected": "Rejected"
     }
+  },
+  "phaseContent": {
+    "phaseOf": "PHASE {{current}} OF {{total}}",
+    "required": "REQUIRED",
+    "requiredChecksWarning": "Check all required items to advance.",
+    "completePhase": "Complete {{phase}} phase",
+    "action": "Action",
+    "validation": "Validation",
+    "asin": {
+      "captured": "Image captured from Amazon",
+      "useAsThumb": "Use as thumbnail",
+      "captureFailed": "Could not capture image for {{asin}}",
+      "searching": "Searching image for {{asin}}…"
+    },
+    "research": {
+      "ideaMarket": "Idea & market",
+      "ideaLabel": "Idea / product description",
+      "ideaPlaceholder": "What do you want to sell? For whom? What need does it solve?",
+      "asinRefLabel": "Reference ASIN (optional)",
+      "productUrlLabel": "Product / reference URL",
+      "thumbLabel": "Project image (thumbnail)",
+      "thumbPlaceholder": "Drag the product or packaging image · It will replace the card thumbnail",
+      "launchAi": "Launch AI research",
+      "check": "I have reviewed the market data and research results."
+    },
+    "viability": {
+      "decision": "Decision",
+      "discard": "Discard",
+      "targetPrice": "Target sale price (€)",
+      "targetMargin": "Target margin (%)",
+      "notes": "Evaluation notes",
+      "notesPlaceholder": "Risks, opportunities, hypotheses...",
+      "fbaCalc": "FBA calculator",
+      "loadingCalc": "Loading calculator…",
+      "check": "I have confirmed the product is viable at target margins."
+    },
+    "suppliers": {
+      "linked": "Linked suppliers",
+      "manageFrom": "Manage suppliers linked to this project from the Suppliers page.",
+      "open": "Open",
+      "unitPrice": "Negotiated unit price (€)",
+      "moq": "Agreed MOQ",
+      "quotes": "Supplier quotes",
+      "loadingQuotes": "Loading quotes…",
+      "check": "I have selected the supplier and have agreed price and MOQ."
+    },
+    "samples": {
+      "orderReceive": "Sample order & receipt",
+      "orderDate": "Order date",
+      "receiveDate": "Receive date",
+      "cost": "Sample cost (€)",
+      "tracking": "Tracking number",
+      "reviewResult": "Review result",
+      "pending": "— Pending —",
+      "approved": "Approved",
+      "changes": "Requires changes",
+      "rejected": "Rejected",
+      "check": "Samples are approved and I can proceed to production."
+    },
+    "production": {
+      "linkedPos": "Linked Purchase Orders",
+      "dataTitle": "Production data",
+      "qty": "Production quantity",
+      "totalCost": "Total cost (€)",
+      "eta": "Estimated delivery date",
+      "tracking": "Shipping tracking",
+      "statusLabel": "Production status",
+      "statusPending": "— Pending —",
+      "statusConfirmed": "Confirmed",
+      "statusInProd": "In production",
+      "statusShipped": "Shipped",
+      "statusReceived": "Received",
+      "check": "I have received production and it is in warehouse or en route to FBA."
+    },
+    "listing": {
+      "title": "Amazon listing",
+      "titleLabel": "Listing title",
+      "titlePlaceholder": "Full commercial title...",
+      "bullets": "Bullet points (one per line, max 5)",
+      "finalPrice": "Final sale price (€)",
+      "statusLabel": "Listing status",
+      "statusPreparing": "Preparing",
+      "statusPendingReview": "Pending Amazon review",
+      "statusActive": "Active",
+      "imagesTitle": "Listing images",
+      "mainImage": "Main listing image",
+      "mainImagePlaceholder": "Main image · white background · 2000×2000px",
+      "secondaryImage": "Secondary / lifestyle image",
+      "secondaryImagePlaceholder": "Drag lifestyle or detail image",
+      "aplusTitle": "A+ content",
+      "aplusModule": "A+ Module {{n}}",
+      "aplusPlaceholder": "Banner / A+ module {{n}}",
+      "check": "The listing is published and active on Amazon."
+    },
+    "live": {
+      "revenue": "Revenue (month)",
+      "unitsSold": "Units sold",
+      "netMargin": "Net margin",
+      "ppcCost": "PPC cost",
+      "productLive": "Product live",
+      "quickAccess": "Quick access",
+      "productFinances": "Product finances",
+      "inventoryLink": "Inventory",
+      "tracking": "Product live — track metrics and alerts from the Dashboard."
+    }
   }
 }

@@ -3112,5 +3112,110 @@
       "received": "Rebuda",
       "rejected": "Rebutjada"
     }
+  },
+  "phaseContent": {
+    "phaseOf": "FASE {{current}} DE {{total}}",
+    "required": "OBLIGATORI",
+    "requiredChecksWarning": "Marca tots els checks obligatoris per avançar.",
+    "completePhase": "Completar fase de {{phase}}",
+    "action": "Acció",
+    "validation": "Validació",
+    "asin": {
+      "captured": "Imatge capturada d'Amazon",
+      "useAsThumb": "Usar com a miniatura",
+      "captureFailed": "No s'ha pogut capturar la imatge per a {{asin}}",
+      "searching": "Cercant imatge per a {{asin}}…"
+    },
+    "research": {
+      "ideaMarket": "Idea i mercat",
+      "ideaLabel": "Idea / descripció del producte",
+      "ideaPlaceholder": "Què vols vendre? Per qui? Quina necessitat resol?",
+      "asinRefLabel": "ASIN de referència (opcional)",
+      "productUrlLabel": "URL del producte / referència",
+      "thumbLabel": "Imatge del projecte (miniatura)",
+      "thumbPlaceholder": "Arrossega la imatge del producte o del packaging · Substituirà la miniatura de la targeta",
+      "launchAi": "Llançar recerca IA",
+      "check": "He revisat les dades de mercat i els resultats de la recerca."
+    },
+    "viability": {
+      "decision": "Decisió",
+      "discard": "Descartar",
+      "targetPrice": "Preu de venda objectiu (€)",
+      "targetMargin": "Marge objectiu (%)",
+      "notes": "Notes d'avaluació",
+      "notesPlaceholder": "Riscos, oportunitats, hipòtesis...",
+      "fbaCalc": "Calculadora FBA",
+      "loadingCalc": "Carregant calculadora…",
+      "check": "He confirmat que el producte és viable amb els marges objectiu."
+    },
+    "suppliers": {
+      "linked": "Proveïdors vinculats",
+      "manageFrom": "Gestiona els proveïdors vinculats a aquest projecte des de la pàgina de Proveïdors.",
+      "open": "Obrir",
+      "unitPrice": "Preu negociat unitari (€)",
+      "moq": "MOQ acordat",
+      "quotes": "Cotitzacions de proveïdors",
+      "loadingQuotes": "Carregant cotitzacions…",
+      "check": "He seleccionat el proveïdor i tinc el preu i MOQ acordats."
+    },
+    "samples": {
+      "orderReceive": "Comanda i recepció de mostres",
+      "orderDate": "Data de comanda",
+      "receiveDate": "Data de recepció",
+      "cost": "Cost de les mostres (€)",
+      "tracking": "Tracking number",
+      "reviewResult": "Resultat de la revisió",
+      "pending": "— Pendent —",
+      "approved": "Aprovada",
+      "changes": "Requereix canvis",
+      "rejected": "Rebutjada",
+      "check": "Les mostres han estat aprovades i puc passar a producció."
+    },
+    "production": {
+      "linkedPos": "Purchase Orders vinculades",
+      "dataTitle": "Dades de producció",
+      "qty": "Quantitat de producció",
+      "totalCost": "Cost total (€)",
+      "eta": "Data estimada de lliurament",
+      "tracking": "Tracking enviament",
+      "statusLabel": "Estat de la producció",
+      "statusPending": "— Pendent —",
+      "statusConfirmed": "Confirmat",
+      "statusInProd": "En producció",
+      "statusShipped": "Enviat",
+      "statusReceived": "Rebut",
+      "check": "He rebut la producció i està al magatzem o en camí a FBA."
+    },
+    "listing": {
+      "title": "Llistat Amazon",
+      "titleLabel": "Títol del listing",
+      "titlePlaceholder": "Títol comercial complet...",
+      "bullets": "Bullet points (un per línia, màx 5)",
+      "finalPrice": "Preu de venda final (€)",
+      "statusLabel": "Estat del listing",
+      "statusPreparing": "En preparació",
+      "statusPendingReview": "Pendent revisió Amazon",
+      "statusActive": "Actiu",
+      "imagesTitle": "Imatges del listing",
+      "mainImage": "Imatge principal del listing",
+      "mainImagePlaceholder": "Imatge principal · fons blanc · 2000×2000px",
+      "secondaryImage": "Imatge secundària / lifestyle",
+      "secondaryImagePlaceholder": "Arrossega imatge lifestyle o detall",
+      "aplusTitle": "Contingut A+",
+      "aplusModule": "Mòdul A+ {{n}}",
+      "aplusPlaceholder": "Banner / mòdul A+ {{n}}",
+      "check": "El listing està publicat i actiu a Amazon."
+    },
+    "live": {
+      "revenue": "Revenue (mes)",
+      "unitsSold": "Unitats venudes",
+      "netMargin": "Marge net",
+      "ppcCost": "PPC cost",
+      "productLive": "Producte en venda",
+      "quickAccess": "Accessos ràpids",
+      "productFinances": "Finances del producte",
+      "inventoryLink": "Inventari",
+      "tracking": "Producte en venda — fes seguiment de mètriques i alertes des del Dashboard."
+    }
   }
 }

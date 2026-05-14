@@ -2927,5 +2927,110 @@
       "received": "Recibida",
       "rejected": "Rechazada"
     }
+  },
+  "phaseContent": {
+    "phaseOf": "FASE {{current}} DE {{total}}",
+    "required": "OBLIGATORIO",
+    "requiredChecksWarning": "Marca todos los checks obligatorios para avanzar.",
+    "completePhase": "Completar fase de {{phase}}",
+    "action": "Acción",
+    "validation": "Validación",
+    "asin": {
+      "captured": "Imagen capturada de Amazon",
+      "useAsThumb": "Usar como miniatura",
+      "captureFailed": "No se ha podido capturar la imagen para {{asin}}",
+      "searching": "Buscando imagen para {{asin}}…"
+    },
+    "research": {
+      "ideaMarket": "Idea y mercado",
+      "ideaLabel": "Idea / descripción del producto",
+      "ideaPlaceholder": "¿Qué quieres vender? ¿Para quién? ¿Qué necesidad resuelve?",
+      "asinRefLabel": "ASIN de referencia (opcional)",
+      "productUrlLabel": "URL del producto / referencia",
+      "thumbLabel": "Imagen del proyecto (miniatura)",
+      "thumbPlaceholder": "Arrastra la imagen del producto o del packaging · Sustituirá la miniatura de la tarjeta",
+      "launchAi": "Lanzar búsqueda IA",
+      "check": "He revisado los datos de mercado y los resultados de la búsqueda."
+    },
+    "viability": {
+      "decision": "Decisión",
+      "discard": "Descartar",
+      "targetPrice": "Precio de venta objetivo (€)",
+      "targetMargin": "Margen objetivo (%)",
+      "notes": "Notas de evaluación",
+      "notesPlaceholder": "Riesgos, oportunidades, hipótesis...",
+      "fbaCalc": "Calculadora FBA",
+      "loadingCalc": "Cargando calculadora…",
+      "check": "He confirmado que el producto es viable con los márgenes objetivo."
+    },
+    "suppliers": {
+      "linked": "Proveedores vinculados",
+      "manageFrom": "Gestiona los proveedores vinculados a este proyecto desde la página de Proveedores.",
+      "open": "Abrir",
+      "unitPrice": "Precio negociado unitario (€)",
+      "moq": "MOQ acordado",
+      "quotes": "Cotizaciones de proveedores",
+      "loadingQuotes": "Cargando cotizaciones…",
+      "check": "He seleccionado el proveedor y tengo el precio y MOQ acordados."
+    },
+    "samples": {
+      "orderReceive": "Pedido y recepción de muestras",
+      "orderDate": "Fecha de pedido",
+      "receiveDate": "Fecha de recepción",
+      "cost": "Coste de las muestras (€)",
+      "tracking": "Tracking number",
+      "reviewResult": "Resultado de la revisión",
+      "pending": "— Pendiente —",
+      "approved": "Aprobada",
+      "changes": "Requiere cambios",
+      "rejected": "Rechazada",
+      "check": "Las muestras han sido aprobadas y puedo pasar a producción."
+    },
+    "production": {
+      "linkedPos": "Purchase Orders vinculadas",
+      "dataTitle": "Datos de producción",
+      "qty": "Cantidad de producción",
+      "totalCost": "Coste total (€)",
+      "eta": "Fecha estimada de entrega",
+      "tracking": "Tracking envío",
+      "statusLabel": "Estado de la producción",
+      "statusPending": "— Pendiente —",
+      "statusConfirmed": "Confirmado",
+      "statusInProd": "En producción",
+      "statusShipped": "Enviado",
+      "statusReceived": "Recibido",
+      "check": "He recibido la producción y está en el almacén o de camino a FBA."
+    },
+    "listing": {
+      "title": "Listado Amazon",
+      "titleLabel": "Título del listing",
+      "titlePlaceholder": "Título comercial completo...",
+      "bullets": "Bullet points (uno por línea, máx 5)",
+      "finalPrice": "Precio de venta final (€)",
+      "statusLabel": "Estado del listing",
+      "statusPreparing": "En preparación",
+      "statusPendingReview": "Pendiente revisión Amazon",
+      "statusActive": "Activo",
+      "imagesTitle": "Imágenes del listing",
+      "mainImage": "Imagen principal del listing",
+      "mainImagePlaceholder": "Imagen principal · fondo blanco · 2000×2000px",
+      "secondaryImage": "Imagen secundaria / lifestyle",
+      "secondaryImagePlaceholder": "Arrastra imagen lifestyle o detalle",
+      "aplusTitle": "Contenido A+",
+      "aplusModule": "Módulo A+ {{n}}",
+      "aplusPlaceholder": "Banner / módulo A+ {{n}}",
+      "check": "El listing está publicado y activo en Amazon."
+    },
+    "live": {
+      "revenue": "Revenue (mes)",
+      "unitsSold": "Unidades vendidas",
+      "netMargin": "Margen neto",
+      "ppcCost": "Coste PPC",
+      "productLive": "Producto en venta",
+      "quickAccess": "Accesos rápidos",
+      "productFinances": "Finanzas del producto",
+      "inventoryLink": "Inventario",
+      "tracking": "Producto en venta — haz seguimiento de métricas y alertas desde el Dashboard."
+    }
   }
 }
