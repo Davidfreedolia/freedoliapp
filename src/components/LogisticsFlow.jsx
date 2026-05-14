@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
-import { 
-  Factory, 
-  Truck, 
-  Ship, 
-  Warehouse, 
-  Package, 
+import { useTranslation } from 'react-i18next'
+import {
+  Factory,
+  Truck,
+  Ship,
+  Warehouse,
+  Package,
   ChevronRight,
   MapPin,
   Calendar,
@@ -19,25 +20,26 @@ import { useApp } from '../context/AppContext'
 import { supabase } from '../lib/supabase'
 import Button from './Button'
 
-// Estats del flux
-const FLOW_STATES = {
-  pending: { label: 'Pendent', color: '#9ca3af', icon: Clock },
-  in_progress: { label: 'En curs', color: '#f59e0b', icon: AlertCircle },
-  completed: { label: 'Completat', color: '#22c55e', icon: CheckCircle }
-}
-
-// Etapes del flux logístic
-const LOGISTICS_STAGES = [
-  { id: 'production', name: 'Producció', icon: Factory, color: '#8b5cf6', description: 'Fabricant produeix la comanda' },
-  { id: 'pickup', name: 'Recollida', icon: Truck, color: '#f59e0b', description: 'Transitari recull de fàbrica' },
-  { id: 'forwarder_warehouse', name: 'Magatzem Transitari', icon: Warehouse, color: '#3b82f6', description: 'Consolidació i preparació' },
-  { id: 'shipping', name: 'Enviament', icon: Ship, color: '#06b6d4', description: 'Transport internacional' },
-  { id: 'customs', name: 'Duanes', icon: Package, color: '#ec4899', description: 'Despatx aduaner' },
-  { id: 'amazon', name: 'Amazon FBA', icon: Package, color: '#ff9900', description: 'Lliurat a magatzem Amazon' }
-]
-
 export default function LogisticsFlow({ orderId, projectId, compact = false }) {
+  const { t } = useTranslation()
   const { darkMode, activeOrgId } = useApp()
+
+  // Estats del flux
+  const FLOW_STATES = {
+    pending:     { label: t('logisticsFlow.states.pending'),     color: '#9ca3af', icon: Clock },
+    in_progress: { label: t('logisticsFlow.states.in_progress'), color: 'var(--warning-1)', icon: AlertCircle },
+    completed:   { label: t('logisticsFlow.states.completed'),   color: 'var(--success-1)', icon: CheckCircle }
+  }
+
+  // Etapes del flux logístic
+  const LOGISTICS_STAGES = [
+    { id: 'production',           name: t('logisticsFlow.stages.production.name'),         icon: Factory,   color: 'var(--phase-2)', description: t('logisticsFlow.stages.production.desc') },
+    { id: 'pickup',               name: t('logisticsFlow.stages.pickup.name'),             icon: Truck,     color: 'var(--phase-3)', description: t('logisticsFlow.stages.pickup.desc') },
+    { id: 'forwarder_warehouse',  name: t('logisticsFlow.stages.forwarder_warehouse.name'),icon: Warehouse, color: 'var(--phase-6)', description: t('logisticsFlow.stages.forwarder_warehouse.desc') },
+    { id: 'shipping',             name: t('logisticsFlow.stages.shipping.name'),           icon: Ship,      color: 'var(--brand-2)', description: t('logisticsFlow.stages.shipping.desc') },
+    { id: 'customs',              name: t('logisticsFlow.stages.customs.name'),            icon: Package,   color: 'var(--phase-1)', description: t('logisticsFlow.stages.customs.desc') },
+    { id: 'amazon',               name: t('logisticsFlow.stages.amazon.name'),             icon: Package,   color: '#FF9900',        description: t('logisticsFlow.stages.amazon.desc') }
+  ]
   const [flowData, setFlowData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
@@ -124,7 +126,7 @@ export default function LogisticsFlow({ orderId, projectId, compact = false }) {
       setEditing(false)
     } catch (err) {
       console.error('Error guardant flux:', err)
-      alert('Error guardant el flux logístic')
+      alert(t('logisticsFlow.saveError'))
     }
   }
 
@@ -155,7 +157,7 @@ export default function LogisticsFlow({ orderId, projectId, compact = false }) {
   if (loading) {
     return (
       <div style={{ padding: '20px', textAlign: 'center', color: '#6b7280' }}>
-        Carregant flux logístic...
+        {t('logisticsFlow.loading')}
       </div>
     )
   }
@@ -220,20 +222,20 @@ export default function LogisticsFlow({ orderId, projectId, compact = false }) {
       {/* Header */}
       <div style={styles.header}>
         <h3 style={{ ...styles.title, color: darkMode ? '#ffffff' : '#111827' }}>
-          <Ship size={20} color="#3b82f6" />
-          Flux Logístic
+          <Ship size={20} color="var(--brand-2)" />
+          {t('logisticsFlow.title')}
         </h3>
         {!editing ? (
           <button onClick={() => setEditing(true)} style={styles.editBtn}>
-            <Edit size={14} /> Editar
+            <Edit size={14} /> {t('common.edit')}
           </button>
         ) : (
           <div style={{ display: 'flex', gap: '8px' }}>
             <button onClick={() => { setEditing(false); setEditData(flowData?.stages || {}) }} style={styles.cancelBtn}>
-              <X size={14} /> Cancel·lar
+              <X size={14} /> {t('common.cancel')}
             </button>
             <Button variant="primary" onClick={handleSave}>
-              <Save size={14} /> Guardar
+              <Save size={14} /> {t('common.save')}
             </Button>
           </div>
         )}
@@ -293,15 +295,15 @@ export default function LogisticsFlow({ orderId, projectId, compact = false }) {
                           color: darkMode ? '#ffffff' : '#111827'
                         }}
                       >
-                        <option value="pending">Pendent</option>
-                        <option value="in_progress">En curs</option>
-                        <option value="completed">Completat</option>
+                        <option value="pending">{t('logisticsFlow.states.pending')}</option>
+                        <option value="in_progress">{t('logisticsFlow.states.in_progress')}</option>
+                        <option value="completed">{t('logisticsFlow.states.completed')}</option>
                       </select>
                       <input
                         type="date"
                         value={stageData.date || ''}
                         onChange={e => updateStage(stage.id, 'date', e.target.value)}
-                        placeholder="Data"
+                        placeholder={t('logisticsFlow.fields.date')}
                         style={{
                           ...styles.input,
                           backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
@@ -312,7 +314,7 @@ export default function LogisticsFlow({ orderId, projectId, compact = false }) {
                         type="text"
                         value={stageData.location || ''}
                         onChange={e => updateStage(stage.id, 'location', e.target.value)}
-                        placeholder="Ubicació"
+                        placeholder={t('logisticsFlow.fields.location')}
                         style={{
                           ...styles.input,
                           backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',

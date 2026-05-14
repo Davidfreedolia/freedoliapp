@@ -3017,5 +3017,64 @@
     "title": "Briefing del Producte",
     "generating": "Generant…",
     "downloadPdf": "Descarregar PDF"
+  },
+  "worldClocks": {
+    "local": "Local",
+    "china": "Xina",
+    "remove": "Eliminar",
+    "removeAria": "Eliminar zona horària",
+    "add": "Afegir",
+    "addAria": "Afegir zona horària"
+  },
+  "legalIndex": {
+    "title": "Legal",
+    "subtitle": "Aquí pots consultar els documents legals principals que regeixen l'ús de FREEDOLIAPP.",
+    "privacy": "Política de privacitat",
+    "terms": "Termes del servei",
+    "cookies": "Política de cookies",
+    "dpa": "Acord de tractament de dades (DPA)"
+  },
+  "demoMode": {
+    "banner": "Demo"
+  },
+  "logisticsFlow": {
+    "title": "Flux Logístic",
+    "loading": "Carregant flux logístic…",
+    "saveError": "Error guardant el flux logístic",
+    "states": {
+      "pending": "Pendent",
+      "in_progress": "En curs",
+      "completed": "Completat"
+    },
+    "stages": {
+      "production": {
+        "name": "Producció",
+        "desc": "Fabricant produeix la comanda"
+      },
+      "pickup": {
+        "name": "Recollida",
+        "desc": "Transitari recull de fàbrica"
+      },
+      "forwarder_warehouse": {
+        "name": "Magatzem Transitari",
+        "desc": "Consolidació i preparació"
+      },
+      "shipping": {
+        "name": "Enviament",
+        "desc": "Transport internacional"
+      },
+      "customs": {
+        "name": "Duanes",
+        "desc": "Despatx duaner"
+      },
+      "amazon": {
+        "name": "Amazon FBA",
+        "desc": "Lliurat a magatzem Amazon"
+      }
+    },
+    "fields": {
+      "date": "Data",
+      "location": "Ubicació"
+    }
   }
 }

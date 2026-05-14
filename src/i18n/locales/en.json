@@ -2817,5 +2817,64 @@
     "title": "Product Briefing",
     "generating": "Generating…",
     "downloadPdf": "Download PDF"
+  },
+  "worldClocks": {
+    "local": "Local",
+    "china": "China",
+    "remove": "Remove",
+    "removeAria": "Remove timezone",
+    "add": "Add",
+    "addAria": "Add timezone"
+  },
+  "legalIndex": {
+    "title": "Legal",
+    "subtitle": "Here you can find the main legal documents that govern the use of FREEDOLIAPP.",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "cookies": "Cookie Policy",
+    "dpa": "Data Processing Agreement"
+  },
+  "demoMode": {
+    "banner": "Demo"
+  },
+  "logisticsFlow": {
+    "title": "Logistics Flow",
+    "loading": "Loading logistics flow…",
+    "saveError": "Error saving the logistics flow",
+    "states": {
+      "pending": "Pending",
+      "in_progress": "In progress",
+      "completed": "Completed"
+    },
+    "stages": {
+      "production": {
+        "name": "Production",
+        "desc": "Manufacturer produces the order"
+      },
+      "pickup": {
+        "name": "Pickup",
+        "desc": "Freight forwarder picks up from factory"
+      },
+      "forwarder_warehouse": {
+        "name": "Forwarder Warehouse",
+        "desc": "Consolidation and preparation"
+      },
+      "shipping": {
+        "name": "Shipping",
+        "desc": "International transport"
+      },
+      "customs": {
+        "name": "Customs",
+        "desc": "Customs clearance"
+      },
+      "amazon": {
+        "name": "Amazon FBA",
+        "desc": "Delivered to Amazon warehouse"
+      }
+    },
+    "fields": {
+      "date": "Date",
+      "location": "Location"
+    }
   }
 }

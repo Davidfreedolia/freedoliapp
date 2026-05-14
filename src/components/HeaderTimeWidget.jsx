@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Clock, Plus, X } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { useBreakpoint } from '../hooks/useBreakpoint'
@@ -59,6 +60,7 @@ function getTimezoneLabel(timezone) {
  * Shows Local + China time + "Add timezone" button
  */
 export default function HeaderTimeWidget() {
+  const { t } = useTranslation()
   const { darkMode } = useApp()
   const { isMobile } = useBreakpoint()
   const [currentTime, setCurrentTime] = useState(new Date())
@@ -121,8 +123,8 @@ export default function HeaderTimeWidget() {
 
   // Build list of timezones to display (Local + China + custom)
   const displayTimezones = [
-    { timezone: localTimezone, label: 'Local', isRequired: true },
-    { timezone: 'Asia/Shanghai', label: 'China', isRequired: true },
+    { timezone: localTimezone, label: t('worldClocks.local'), isRequired: true },
+    { timezone: 'Asia/Shanghai', label: t('worldClocks.china'), isRequired: true },
     ...customTimezones.map(tz => ({
       timezone: tz,
       label: getTimezoneLabel(tz),
@@ -247,8 +249,8 @@ export default function HeaderTimeWidget() {
             <button
               onClick={() => handleRemoveTimezone(timezone)}
               style={removeButtonStyle}
-              title="Eliminar"
-              aria-label="Eliminar zona horaria"
+              title={t('worldClocks.remove')}
+              aria-label={t('worldClocks.removeAria')}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = 'var(--color-bg)'
               }}
@@ -267,8 +269,8 @@ export default function HeaderTimeWidget() {
           <button
             onClick={() => setShowAddDropdown(!showAddDropdown)}
             style={addButtonStyle}
-            title="Afegir zona horaria"
-            aria-label="Afegir zona horaria"
+            title={t('worldClocks.addAria')}
+            aria-label={t('worldClocks.addAria')}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = 'var(--color-bg)'
               e.currentTarget.style.color = 'var(--color-text)'
@@ -279,7 +281,7 @@ export default function HeaderTimeWidget() {
             }}
           >
             <Plus size={14} />
-            <span>Afegir</span>
+            <span>{t('worldClocks.add')}</span>
           </button>
           
           {showAddDropdown && (

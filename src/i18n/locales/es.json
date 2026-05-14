@@ -2832,5 +2832,64 @@
     "title": "Briefing del Producto",
     "generating": "Generando…",
     "downloadPdf": "Descargar PDF"
+  },
+  "worldClocks": {
+    "local": "Local",
+    "china": "China",
+    "remove": "Eliminar",
+    "removeAria": "Eliminar zona horaria",
+    "add": "Añadir",
+    "addAria": "Añadir zona horaria"
+  },
+  "legalIndex": {
+    "title": "Legal",
+    "subtitle": "Aquí puedes consultar los documentos legales principales que rigen el uso de FREEDOLIAPP.",
+    "privacy": "Política de privacidad",
+    "terms": "Términos del servicio",
+    "cookies": "Política de cookies",
+    "dpa": "Acuerdo de tratamiento de datos (DPA)"
+  },
+  "demoMode": {
+    "banner": "Demo"
+  },
+  "logisticsFlow": {
+    "title": "Flujo Logístico",
+    "loading": "Cargando flujo logístico…",
+    "saveError": "Error guardando el flujo logístico",
+    "states": {
+      "pending": "Pendiente",
+      "in_progress": "En curso",
+      "completed": "Completado"
+    },
+    "stages": {
+      "production": {
+        "name": "Producción",
+        "desc": "El fabricante produce el pedido"
+      },
+      "pickup": {
+        "name": "Recogida",
+        "desc": "El transitario recoge de fábrica"
+      },
+      "forwarder_warehouse": {
+        "name": "Almacén Transitario",
+        "desc": "Consolidación y preparación"
+      },
+      "shipping": {
+        "name": "Envío",
+        "desc": "Transporte internacional"
+      },
+      "customs": {
+        "name": "Aduanas",
+        "desc": "Despacho aduanero"
+      },
+      "amazon": {
+        "name": "Amazon FBA",
+        "desc": "Entregado al almacén de Amazon"
+      }
+    },
+    "fields": {
+      "date": "Fecha",
+      "location": "Ubicación"
+    }
   }
 }

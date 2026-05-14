@@ -1,7 +1,9 @@
+import { useTranslation } from 'react-i18next'
 import { Info } from 'lucide-react'
 import { isDemoMode } from '../demo/demoMode'
 
 export default function DemoModeBanner({ darkMode }) {
+  const { t } = useTranslation()
   if (!isDemoMode()) return null
 
   return (
@@ -24,7 +26,7 @@ export default function DemoModeBanner({ darkMode }) {
       cursor: 'default'
     }}>
       <Info size={14} />
-      <span>Demo</span>
+      <span>{t('demoMode.banner')}</span>
     </div>
   )
 }

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useApp } from '../context/AppContext'
 import { Clock, Plus, X } from 'lucide-react'
 import { useBreakpoint } from '../hooks/useBreakpoint'
@@ -69,6 +70,7 @@ function getTimezoneLabel(timezone) {
 }
 
 export default function WorldClocks() {
+  const { t } = useTranslation()
   const { darkMode } = useApp()
   const { isMobile } = useBreakpoint()
   const [currentTime, setCurrentTime] = useState(new Date())
@@ -137,8 +139,8 @@ export default function WorldClocks() {
 
   // Build list of timezones to display
   const displayTimezones = [
-    { timezone: localTimezone, label: 'Local', isRequired: true },
-    { timezone: 'Asia/Shanghai', label: 'China', isRequired: true },
+    { timezone: localTimezone, label: t('worldClocks.local'), isRequired: true },
+    { timezone: 'Asia/Shanghai', label: t('worldClocks.china'), isRequired: true },
     ...customTimezones.map(tz => ({
       timezone: tz,
       label: getTimezoneLabel(tz),
@@ -261,8 +263,8 @@ export default function WorldClocks() {
             <button
               onClick={() => handleRemoveTimezone(timezone)}
               style={styles.removeButton}
-              title="Eliminar"
-              aria-label="Eliminar zona horaria"
+              title={t('worldClocks.remove')}
+              aria-label={t('worldClocks.removeAria')}
             >
               <X size={12} />
             </button>
@@ -275,11 +277,11 @@ export default function WorldClocks() {
           <button
             onClick={() => setShowAddDropdown(!showAddDropdown)}
             style={styles.addButton}
-            title="Afegir zona horaria"
-            aria-label="Afegir zona horaria"
+            title={t('worldClocks.addAria')}
+            aria-label={t('worldClocks.addAria')}
           >
             <Plus size={14} />
-            {!isMobile && <span>Afegir</span>}
+            {!isMobile && <span>{t('worldClocks.add')}</span>}
           </button>
           
           {showAddDropdown && (
