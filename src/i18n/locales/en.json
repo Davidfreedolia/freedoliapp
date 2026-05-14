@@ -3161,5 +3161,48 @@
       "restored": "Project restored",
       "error": "Error: {{error}}"
     }
+  },
+  "amazonImports": {
+    "title": "Amazon Imports",
+    "description": "Upload Amazon CSV reports (Settlement, etc.) and process them into the ledger.",
+    "connected": "Connected",
+    "redirecting": "Redirecting…",
+    "connectAmazon": "Connect Amazon (SP-API)",
+    "reportType": "Report type",
+    "uploading": "Uploading…",
+    "dropHint": "Drag a .csv file here or click to select",
+    "recentJobs": "Recent jobs (max 20)",
+    "refresh": "Refresh",
+    "emptyJobs": "No imports yet. Upload a CSV to get started.",
+    "process": "Process",
+    "processingInProgress": "Processing…",
+    "viewOps": "View ops",
+    "headers": {
+      "region": "Region",
+      "sellerId": "Seller ID",
+      "status": "Status",
+      "lastSync": "Last sync",
+      "file": "File",
+      "marketplace": "Marketplace",
+      "totalParsed": "Total / Parsed",
+      "date": "Date",
+      "error": "Error",
+      "actions": "Actions"
+    },
+    "toasts": {
+      "loadError": "Error loading imports",
+      "spapiConnected": "Amazon SP-API connection established",
+      "spapiError": "SP-API: {{message}}",
+      "onlyCsv": "Only .csv files are allowed",
+      "jobCreateFailed": "Could not create job",
+      "uploaded": "File uploaded successfully",
+      "uploadError": "Error uploading file",
+      "processing": "Processing in progress",
+      "processError": "Error processing",
+      "selectOrg": "Select an organization",
+      "invalidSession": "Invalid session",
+      "oauthFailed": "Could not start OAuth",
+      "connectError": "Error connecting with Amazon SP-API"
+    }
   }
 }

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { FileSpreadsheet, Upload, RefreshCw, Play, ExternalLink, Link2 } from 'lucide-react'
 import Header from '../components/Header'
 import Button from '../components/Button'
@@ -19,6 +20,7 @@ function sha256Hex(buffer) {
 }
 
 export default function AmazonImports() {
+  const { t } = useTranslation()
   const { darkMode } = useApp()
   const { activeOrgId } = useWorkspace() || {}
   const [jobs, setJobs] = useState([])
@@ -46,7 +48,7 @@ export default function AmazonImports() {
       setJobs(data || [])
     } catch (err) {
       console.error('Error loading amazon import jobs:', err)
-      showToast(err?.message || 'Error carregant imports', 'error')
+      showToast(err?.message || t('amazonImports.toasts.loadError'), 'error')
     } finally {
       setLoading(false)
     }
@@ -92,11 +94,11 @@ export default function AmazonImports() {
     const spapi = params.get('spapi')
     const message = params.get('message')
     if (spapi === 'success') {
-      showToast('Connexió Amazon SP-API connectada', 'success')
+      showToast(t('amazonImports.toasts.spapiConnected'), 'success')
       loadSpapiConnections()
       window.history.replaceState({}, '', window.location.pathname)
     } else if (spapi === 'error' && message) {
-      showToast(`SP-API: ${decodeURIComponent(message)}`, 'error')
+      showToast(t('amazonImports.toasts.spapiError', { message: decodeURIComponent(message) }), 'error')
       window.history.replaceState({}, '', window.location.pathname)
     }
   }, [loadSpapiConnections])
@@ -109,7 +111,7 @@ export default function AmazonImports() {
 
   const handleFile = async (file) => {
     if (!file || !file.name.toLowerCase().endsWith('.csv')) {
-      showToast('Només es permeten fitxers .csv', 'error')
+      showToast(t('amazonImports.toasts.onlyCsv'), 'error')
       return
     }
     setUploading(true)
@@ -125,7 +127,7 @@ export default function AmazonImports() {
       if (rpcErr) throw rpcErr
       const out = Array.isArray(row) ? row[0] : row
       if (!out?.job_id || !out?.org_id) {
-        showToast('No s\'ha pogut crear el job', 'error')
+        showToast(t('amazonImports.toasts.jobCreateFailed'), 'error')
         return
       }
       const path = `org/${out.org_id}/amazon/imports/${out.job_id}.csv`
@@ -134,11 +136,11 @@ export default function AmazonImports() {
         contentType: file.type || 'text/csv'
       })
       if (upErr) throw upErr
-      showToast('Fitxer pujat correctament', 'success')
+      showToast(t('amazonImports.toasts.uploaded'), 'success')
       await loadJobs()
     } catch (err) {
       console.error('Upload error:', err)
-      showToast(err?.message || 'Error pujant el fitxer', 'error')
+      showToast(err?.message || t('amazonImports.toasts.uploadError'), 'error')
     } finally {
       setUploading(false)
     }
@@ -167,11 +169,11 @@ export default function AmazonImports() {
       })
       if (error) throw error
       if (data?.error) throw new Error(data.error)
-      showToast('Processament en curs', 'success')
+      showToast(t('amazonImports.toasts.processing'), 'success')
       await loadJobs()
     } catch (err) {
       console.error('Process error:', err)
-      showToast(err?.message || 'Error en processar', 'error')
+      showToast(err?.message || t('amazonImports.toasts.processError'), 'error')
       await loadJobs()
     } finally {
       setProcessingId(null)
@@ -227,14 +229,14 @@ export default function AmazonImports() {
 
   const handleConnectAmazon = async () => {
     if (!activeOrgId) {
-      showToast('Selecciona una organització', 'error')
+      showToast(t('amazonImports.toasts.selectOrg'), 'error')
       return
     }
     setConnecting(true)
     try {
       const userId = await getCurrentUserId()
       if (!userId) {
-        showToast('Sessió no vàlida', 'error')
+        showToast(t('amazonImports.toasts.invalidSession'), 'error')
         return
       }
       const { data, error } = await supabase.functions.invoke('spapi-oauth-init', {
@@ -246,7 +248,7 @@ export default function AmazonImports() {
       const state = data?.state
       const redirectUri = data?.redirect_uri
       if (!consentUrl || !state) {
-        showToast('No s\'ha pogut iniciar OAuth', 'error')
+        showToast(t('amazonImports.toasts.oauthFailed'), 'error')
         return
       }
       sessionStorage.setItem(SPAPI_STATE_KEY, state)
@@ -254,7 +256,7 @@ export default function AmazonImports() {
       window.location.href = consentUrl
     } catch (err) {
       console.error('SP-API init error:', err)
-      showToast(err?.message || 'Error connectant amb Amazon SP-API', 'error')
+      showToast(err?.message || t('amazonImports.toasts.connectError'), 'error')
     } finally {
       setConnecting(false)
     }
@@ -263,8 +265,8 @@ export default function AmazonImports() {
   return (
     <div style={containerStyle}>
       <Header
-        title="Amazon Imports"
-        description="Puja informes CSV d’Amazon (Settlement, etc.) i processa’ls al ledger."
+        title={t('amazonImports.title')}
+        description={t('amazonImports.description')}
         icon={FileSpreadsheet}
       />
 
@@ -274,7 +276,7 @@ export default function AmazonImports() {
           Amazon SP-API
         </h3>
         {spapiConnections.length > 0 ? (
-          <p style={{ margin: '0 0 12px', fontSize: 13, color: '#22c55e' }}>Connected</p>
+          <p style={{ margin: '0 0 12px', fontSize: 13, color: 'var(--success-1)' }}>{t('amazonImports.connected')}</p>
         ) : null}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
           <Button
@@ -285,7 +287,7 @@ export default function AmazonImports() {
             style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
           >
             <Link2 size={14} />
-            {connecting ? 'Redirecting…' : 'Connect Amazon (SP-API)'}
+            {connecting ? t('amazonImports.redirecting') : t('amazonImports.connectAmazon')}
           </Button>
         </div>
         {spapiConnections.length > 0 && (
@@ -293,10 +295,10 @@ export default function AmazonImports() {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
               <thead>
                 <tr>
-                  <th style={thStyle}>Region</th>
-                  <th style={thStyle}>Seller ID</th>
-                  <th style={thStyle}>Status</th>
-                  <th style={thStyle}>Last sync</th>
+                  <th style={thStyle}>{t('amazonImports.headers.region')}</th>
+                  <th style={thStyle}>{t('amazonImports.headers.sellerId')}</th>
+                  <th style={thStyle}>{t('amazonImports.headers.status')}</th>
+                  <th style={thStyle}>{t('amazonImports.headers.lastSync')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -318,7 +320,7 @@ export default function AmazonImports() {
       <div style={cardStyle}>
         <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 16 }}>
           <div>
-            <label style={{ fontSize: 12, color: '#6b7280', display: 'block', marginBottom: 4 }}>Marketplace</label>
+            <label style={{ fontSize: 12, color: '#6b7280', display: 'block', marginBottom: 4 }}>{t('amazonImports.headers.marketplace')}</label>
             <input
               type="text"
               value={marketplace}
@@ -333,7 +335,7 @@ export default function AmazonImports() {
             />
           </div>
           <div>
-            <label style={{ fontSize: 12, color: '#6b7280', display: 'block', marginBottom: 4 }}>Report type</label>
+            <label style={{ fontSize: 12, color: '#6b7280', display: 'block', marginBottom: 4 }}>{t('amazonImports.reportType')}</label>
             <input
               type="text"
               value={reportType}
@@ -364,7 +366,7 @@ export default function AmazonImports() {
           />
           <Upload size={32} style={{ marginBottom: 8, opacity: 0.7 }} />
           <p style={{ margin: 0, fontSize: 14, color: '#6b7280' }}>
-            {uploading ? 'Pujant...' : 'Arrossega un fitxer .csv aquí o clica per seleccionar'}
+            {uploading ? t('amazonImports.uploading') : t('amazonImports.dropHint')}
           </p>
         </div>
       </div>
@@ -373,31 +375,31 @@ export default function AmazonImports() {
       <div style={cardStyle}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
           <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: darkMode ? '#e5e7eb' : '#374151' }}>
-            Últims jobs (màx. 20)
+            {t('amazonImports.recentJobs')}
           </h3>
           <Button variant="secondary" size="sm" onClick={loadJobs} disabled={loading}>
             <RefreshCw size={14} />
-            Actualitzar
+            {t('amazonImports.refresh')}
           </Button>
         </div>
         {loading ? (
-          <div style={{ padding: '24px', fontSize: 13, color: '#6b7280' }}>Carregant...</div>
+          <div style={{ padding: '24px', fontSize: 13, color: '#6b7280' }}>{t('common.loading')}</div>
         ) : jobs.length === 0 ? (
           <div style={{ padding: '24px', fontSize: 13, color: '#6b7280' }}>
-            Encara no hi ha cap import. Puja un CSV per començar.
+            {t('amazonImports.emptyJobs')}
           </div>
         ) : (
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
               <thead>
                 <tr>
-                  <th style={thStyle}>Fitxer</th>
-                  <th style={thStyle}>Marketplace</th>
-                  <th style={thStyle}>Status</th>
-                  <th style={thStyle}>Total / Parsed</th>
-                  <th style={thStyle}>Data</th>
-                  <th style={thStyle}>Error</th>
-                  <th style={thStyle}>Accions</th>
+                  <th style={thStyle}>{t('amazonImports.headers.file')}</th>
+                  <th style={thStyle}>{t('amazonImports.headers.marketplace')}</th>
+                  <th style={thStyle}>{t('amazonImports.headers.status')}</th>
+                  <th style={thStyle}>{t('amazonImports.headers.totalParsed')}</th>
+                  <th style={thStyle}>{t('amazonImports.headers.date')}</th>
+                  <th style={thStyle}>{t('amazonImports.headers.error')}</th>
+                  <th style={thStyle}>{t('amazonImports.headers.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -426,7 +428,7 @@ export default function AmazonImports() {
                           style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
                         >
                           <Play size={14} />
-                          {processingId === job.id ? 'Processant…' : 'Process'}
+                          {processingId === job.id ? t('amazonImports.processingInProgress') : t('amazonImports.process')}
                         </Button>
                       )}
                       <a
@@ -434,7 +436,7 @@ export default function AmazonImports() {
                         style={{ marginLeft: 8, fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 4 }}
                       >
                         <ExternalLink size={12} />
-                        View ops
+                        {t('amazonImports.viewOps')}
                       </a>
                     </td>
                   </tr>

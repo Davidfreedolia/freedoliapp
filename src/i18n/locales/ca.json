@@ -3361,5 +3361,48 @@
       "restored": "Projecte restaurat",
       "error": "Error: {{error}}"
     }
+  },
+  "amazonImports": {
+    "title": "Importacions Amazon",
+    "description": "Puja informes CSV d'Amazon (Settlement, etc.) i processa'ls al ledger.",
+    "connected": "Connectat",
+    "redirecting": "Redirigint…",
+    "connectAmazon": "Connectar Amazon (SP-API)",
+    "reportType": "Tipus d'informe",
+    "uploading": "Pujant…",
+    "dropHint": "Arrossega un fitxer .csv aquí o clica per seleccionar",
+    "recentJobs": "Últims jobs (màx. 20)",
+    "refresh": "Actualitzar",
+    "emptyJobs": "Encara no hi ha cap import. Puja un CSV per començar.",
+    "process": "Processar",
+    "processingInProgress": "Processant…",
+    "viewOps": "Veure ops",
+    "headers": {
+      "region": "Regió",
+      "sellerId": "Seller ID",
+      "status": "Estat",
+      "lastSync": "Última sincronització",
+      "file": "Fitxer",
+      "marketplace": "Marketplace",
+      "totalParsed": "Total / Parsejat",
+      "date": "Data",
+      "error": "Error",
+      "actions": "Accions"
+    },
+    "toasts": {
+      "loadError": "Error carregant imports",
+      "spapiConnected": "Connexió Amazon SP-API connectada",
+      "spapiError": "SP-API: {{message}}",
+      "onlyCsv": "Només es permeten fitxers .csv",
+      "jobCreateFailed": "No s'ha pogut crear el job",
+      "uploaded": "Fitxer pujat correctament",
+      "uploadError": "Error pujant el fitxer",
+      "processing": "Processament en curs",
+      "processError": "Error en processar",
+      "selectOrg": "Selecciona una organització",
+      "invalidSession": "Sessió no vàlida",
+      "oauthFailed": "No s'ha pogut iniciar OAuth",
+      "connectError": "Error connectant amb Amazon SP-API"
+    }
   }
 }
