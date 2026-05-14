@@ -39,6 +39,7 @@ import Header from '../components/Header'
 import Button from '../components/Button'
 import GTINPoolSection from '../components/GTINPoolSection'
 import AiConnectionSection from '../components/ai/AiConnectionSection'
+import KeepaConnectionSection from '../components/keepa/KeepaConnectionSection'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { useBillingUsage } from '../hooks/useBillingUsage'
 import { getModalStyles } from '../utils/responsiveStyles'
@@ -1405,7 +1406,10 @@ export default function Settings() {
 
         {/* AI (BYOK) Tab */}
         {activeTab === 'ai' && (
-          <AiConnectionSection darkMode={darkMode} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <AiConnectionSection darkMode={darkMode} />
+            <KeepaConnectionSection darkMode={darkMode} />
+          </div>
         )}
 
         {/* Privacy Tab — GDPR controls */}

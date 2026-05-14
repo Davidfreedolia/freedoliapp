@@ -24,7 +24,21 @@ Llista viva de coses que **només pots fer tu** (no es poden fer des de codi). C
 > - `stripe-portal-session` → v7 ACTIVE
 > - `asin-enrich` → v13 ACTIVE
 > - `ai-research-analyst` → v5 ACTIVE
-> - `ai-quote-analyst` → v2 ACTIVE (creada nova)
+> - `ai-quote-analyst` → v2 ACTIVE (nova: comparativa IA de pressupostos)
+> - `keepa-history` → v1 ACTIVE (nova: BYOC Keepa, llest sense cap cost)
+
+### Keepa BYOC — quan vulguis activar la versió compartida ($19/mes)
+
+La integració Keepa està desplegada en mode **BYOC** (Bring Your Own Connection):
+- Avui: cap usuari té cost. Si algun usuari connecta la SEVA pròpia clau Keepa
+  des de Settings → IA → "Connectar Keepa", el sistema fa servir el seu compte.
+- Quan tu pagar el plan Keepa Developer ($19/mes a [keepa.com](https://keepa.com/#!api))
+  i vulguis oferir-ho a tots els clients sense que ells s'hi subscriguin:
+  1. Ves a Supabase Dashboard → Edge Functions → Manage Secrets
+  2. Afegeix `KEEPA_API_KEY=<la-teva-clau>`
+  3. Es tornarà el "system fallback" per a tots els orgs sense BYOC
+
+Sense aquesta variable d'entorn, els usuaris només veuen Keepa si connecten la seva clau.
 >
 > Si en el futur cal tornar a desplegar manualment després d'un canvi al codi, fes servir l'opció A o B de sota.
 

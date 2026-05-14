@@ -2302,6 +2302,26 @@
       "releaseError": "Error liberando GTIN",
       "confirmRelease": "¿Estás seguro de que quieres liberar este GTIN? Se podrá asignar a otro proyecto."
     },
+    "keepa": {
+      "title": "Historial de precios y BSR (Keepa)",
+      "pitch": "Conecta tu clave Keepa para ver el historial completo de precios, BSR, ratings y reviews de cualquier ASIN dentro de las investigaciones. Coste: $19/mes en tu cuenta Keepa.",
+      "connectCta": "Conectar Keepa",
+      "getKey": "Obtener clave en keepa.com",
+      "apiKeyLabel": "Clave API Keepa",
+      "apiKeyPlaceholder": "Pega aquí la clave de keepa.com",
+      "errorInvalid": "La clave no parece válida.",
+      "changeKey": "Cambiar clave",
+      "disconnect": "Desconectar",
+      "disconnecting": "Desconectando…",
+      "confirmDisconnect": "¿Seguro que quieres desconectar Keepa? Perderás los gráficos de historial.",
+      "badge": {
+        "connected": "Conectado"
+      },
+      "connected": {
+        "service": "Servicio",
+        "keyMasked": "Clave"
+      }
+    },
     "privacy": {
       "tab": "Privacidad",
       "title": "Privacidad y tus datos",
@@ -2496,6 +2516,20 @@
     "executiveSummary": "Resumen ejecutivo",
     "noSummary": "Sin resumen disponible.",
     "sources": "Fuentes utilizadas",
+    "keepa": {
+      "title": "Snapshot Keepa",
+      "byoc": "Conexión propia",
+      "shared": "Compartido",
+      "connectPitch": "Conecta Keepa para ver el historial de precios, BSR, valoraciones y reviews de este ASIN.",
+      "openSettings": "Conectar en Settings",
+      "upstreamError": "No se ha podido leer Keepa ahora mismo. Inténtalo más tarde.",
+      "tokensLeft": "Tokens Keepa restantes: {{count}}",
+      "priceAmazon": "Precio Amazon",
+      "newPrice": "3rd party",
+      "bsr": "BSR",
+      "rating": "Valoración",
+      "reviews": "Reviews"
+    },
     "sections": {
       "market": "Mercado",
       "costs": "Costes",

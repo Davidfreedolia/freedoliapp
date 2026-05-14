@@ -2487,6 +2487,26 @@
       "releaseError": "Error alliberant GTIN",
       "confirmRelease": "Estàs segur que vols alliberar aquest GTIN? Es podrà assignar a un altre projecte."
     },
+    "keepa": {
+      "title": "Historial de preus i BSR (Keepa)",
+      "pitch": "Connecta la teva clau Keepa per veure l'historial complet de preus, BSR, ratings i reviews de qualsevol ASIN dins les recerques. Cost: $19/mes al teu compte Keepa.",
+      "connectCta": "Connectar Keepa",
+      "getKey": "Obtenir clau a keepa.com",
+      "apiKeyLabel": "Clau API Keepa",
+      "apiKeyPlaceholder": "Enganxa aquí la clau de keepa.com",
+      "errorInvalid": "La clau no sembla vàlida.",
+      "changeKey": "Canviar clau",
+      "disconnect": "Desconnectar",
+      "disconnecting": "Desconnectant…",
+      "confirmDisconnect": "Segur que vols desconnectar Keepa? Perdràs els gràfics d'historial.",
+      "badge": {
+        "connected": "Connectat"
+      },
+      "connected": {
+        "service": "Servei",
+        "keyMasked": "Clau"
+      }
+    },
     "privacy": {
       "tab": "Privacitat",
       "title": "Privacitat i les teves dades",
@@ -2681,6 +2701,20 @@
     "executiveSummary": "Resum executiu",
     "noSummary": "Sense resum disponible.",
     "sources": "Fonts utilitzades",
+    "keepa": {
+      "title": "Snapshot Keepa",
+      "byoc": "Connexió pròpia",
+      "shared": "Compartit",
+      "connectPitch": "Connecta Keepa per veure l'historial de preus, BSR, valoracions i reviews d'aquest ASIN.",
+      "openSettings": "Connectar a Settings",
+      "upstreamError": "No s'ha pogut llegir Keepa ara mateix. Torna-ho a provar més tard.",
+      "tokensLeft": "Tokens Keepa restants: {{count}}",
+      "priceAmazon": "Preu Amazon",
+      "newPrice": "3rd party",
+      "bsr": "BSR",
+      "rating": "Valoració",
+      "reviews": "Reviews"
+    },
     "sections": {
       "market": "Mercat",
       "costs": "Costos",

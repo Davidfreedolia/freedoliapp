@@ -2287,6 +2287,26 @@
       "releaseError": "Error releasing GTIN",
       "confirmRelease": "Are you sure you want to release this GTIN? It can be assigned to another project."
     },
+    "keepa": {
+      "title": "Price + BSR history (Keepa)",
+      "pitch": "Connect your Keepa key to see full price, BSR, rating and review history of any ASIN inside your research. Cost: $19/mo on your Keepa account.",
+      "connectCta": "Connect Keepa",
+      "getKey": "Get a key at keepa.com",
+      "apiKeyLabel": "Keepa API key",
+      "apiKeyPlaceholder": "Paste your keepa.com key here",
+      "errorInvalid": "Key does not look valid.",
+      "changeKey": "Change key",
+      "disconnect": "Disconnect",
+      "disconnecting": "Disconnecting…",
+      "confirmDisconnect": "Disconnect Keepa? You will lose the history charts.",
+      "badge": {
+        "connected": "Connected"
+      },
+      "connected": {
+        "service": "Service",
+        "keyMasked": "Key"
+      }
+    },
     "privacy": {
       "tab": "Privacy",
       "title": "Privacy and your data",
@@ -2481,6 +2501,20 @@
     "executiveSummary": "Executive summary",
     "noSummary": "No summary available.",
     "sources": "Sources used",
+    "keepa": {
+      "title": "Keepa snapshot",
+      "byoc": "Own key",
+      "shared": "Shared",
+      "connectPitch": "Connect Keepa to see price, BSR, rating and reviews history for this ASIN.",
+      "openSettings": "Connect in Settings",
+      "upstreamError": "Could not reach Keepa right now. Try again later.",
+      "tokensLeft": "Keepa tokens left: {{count}}",
+      "priceAmazon": "Amazon price",
+      "newPrice": "3rd party",
+      "bsr": "BSR",
+      "rating": "Rating",
+      "reviews": "Reviews"
+    },
     "sections": {
       "market": "Market",
       "costs": "Costs",

@@ -4,6 +4,7 @@ import { AlertTriangle, CheckCircle2, XCircle, FileText, Rocket, Save } from 'lu
 import jsPDF from 'jspdf'
 import 'jspdf-autotable'
 import Button from '../Button'
+import KeepaSnapshot from '../keepa/KeepaSnapshot'
 
 /**
  * ResearchReport — visualitza un informe de viabilitat IA (ai_analysis)
@@ -190,6 +191,13 @@ export default function ResearchReport({ report, meta = {}, onSaveAsBriefing, on
           </Button>
         </div>
       </section>
+
+      {/* Keepa snapshot (price + BSR + rating + reviews) — only renders when
+          an org has connected Keepa OR the platform has a fallback key.
+          Silently collapses otherwise. */}
+      {meta.asin && (
+        <KeepaSnapshot asin={meta.asin} marketplace={meta.marketplace || 'ES'} darkMode={darkMode} />
+      )}
 
       {/* Market */}
       {report?.market && section(
