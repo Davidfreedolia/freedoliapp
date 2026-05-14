@@ -2440,6 +2440,26 @@
       "releasedSuccess": "GTIN alliberat correctament",
       "releaseError": "Error alliberant GTIN",
       "confirmRelease": "Estàs segur que vols alliberar aquest GTIN? Es podrà assignar a un altre projecte."
+    },
+    "privacy": {
+      "tab": "Privacitat",
+      "title": "Privacitat i les teves dades",
+      "description": "Aquí pots exercir els teus drets GDPR: descarregar totes les teves dades (Art. 20 — portabilitat) o sol·licitar l'eliminació del teu compte (Art. 17 — dret a l'oblit).",
+      "export": {
+        "title": "Descarregar les meves dades",
+        "description": "Genera un fitxer JSON amb totes les dades del teu workspace actiu. Es processa al teu navegador, no s'envia enlloc.",
+        "cta": "Descarregar JSON",
+        "success": "Dades descarregades correctament",
+        "error": "No s'han pogut descarregar les dades: {{error}}"
+      },
+      "delete": {
+        "title": "Eliminar el meu compte",
+        "description": "Crearà una sol·licitud d'eliminació. T'enviarem un correu de confirmació i processarem la baixa en un termini màxim de 30 dies. Aquesta acció és irreversible un cop processada.",
+        "cta": "Sol·licitar eliminació",
+        "confirm": "Estàs segur? Aquesta acció enviarà una sol·licitud de baixa permanent del teu compte i et tancarà la sessió immediatament.",
+        "success": "Sol·licitud rebuda. Et tanquem la sessió i et contactarem aviat.",
+        "error": "No s'ha pogut enviar la sol·licitud: {{error}}"
+      }
     }
   },
   "projects": {

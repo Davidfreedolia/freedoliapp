@@ -2240,6 +2240,26 @@
       "releasedSuccess": "GTIN released successfully",
       "releaseError": "Error releasing GTIN",
       "confirmRelease": "Are you sure you want to release this GTIN? It can be assigned to another project."
+    },
+    "privacy": {
+      "tab": "Privacy",
+      "title": "Privacy and your data",
+      "description": "Exercise your GDPR rights: download all your data (Art. 20 — portability) or request account deletion (Art. 17 — right to erasure).",
+      "export": {
+        "title": "Download my data",
+        "description": "Generates a JSON file containing all data in your active workspace. Processed in your browser; nothing is sent anywhere.",
+        "cta": "Download JSON",
+        "success": "Data downloaded successfully",
+        "error": "Could not download data: {{error}}"
+      },
+      "delete": {
+        "title": "Delete my account",
+        "description": "Files a deletion request. We will send you a confirmation email and complete the erasure within 30 days. This action is irreversible once processed.",
+        "cta": "Request deletion",
+        "confirm": "Are you sure? This will file a permanent account-deletion request and sign you out immediately.",
+        "success": "Request received. Signing you out — we will be in touch shortly.",
+        "error": "Could not file the request: {{error}}"
+      }
     }
   },
   "projects": {

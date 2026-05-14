@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { isDemoMode } from '../demo/demoMode'
 import { createWorkspace } from '../lib/workspace/createWorkspace'
+import { setSentryUser, setSentryContext } from '../lib/sentry'
 
 const STORAGE_KEY = 'freedoli_active_org_id'
 const STORAGE_USER_KEY = 'freedoli_active_org_user_id'
@@ -296,6 +297,14 @@ export function WorkspaceProvider({ children }) {
     } = supabase.auth.onAuthStateChange((event, session) => {
       if (cancelled) return
       const hasSessionUser = Boolean(session?.user)
+      // Push the authenticated user into Sentry so subsequent errors carry
+      // an identifier. We pass only `id` by default (email gated behind a
+      // separate env flag) — see src/lib/sentry.js.
+      if (hasSessionUser) {
+        setSentryUser({ id: session.user.id, email: session.user.email })
+      } else if (event === 'SIGNED_OUT') {
+        setSentryUser(null)
+      }
       // Re-run only when we receive an authenticated session state.
       if (
         hasSessionUser &&
@@ -360,6 +369,12 @@ export function WorkspaceProvider({ children }) {
       localStorage.setItem(STORAGE_USER_KEY, session.user.id)
     } catch (_) {}
   }, [persistActiveOrg])
+
+  // Reflect workspace state on Sentry events so we can scope errors per
+  // tenant during support. activeOrgId only — no PII.
+  useEffect(() => {
+    setSentryContext('workspace', { activeOrgId, membershipCount: memberships.length })
+  }, [activeOrgId, memberships.length])
 
   const value = {
     activeOrgId,

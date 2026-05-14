@@ -2,6 +2,7 @@ import React from 'react'
 import i18n from 'i18next'
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
 import { safeJsonArray } from '../lib/safeJson'
+import { captureException as sentryCapture } from '../lib/sentry'
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -86,6 +87,17 @@ class ErrorBoundary extends React.Component {
     } catch {
       // Ignore localStorage errors
     }
+
+    // Forward to Sentry with our boundary context attached. Sentry's global
+    // handler would catch many of these too, but this gives us the React
+    // component stack as `errorInfo.componentStack` which the global handler
+    // doesn't see.
+    sentryCapture(error, {
+      tags: { boundary: this.props.context || 'unknown', error_id: errorId },
+      contexts: {
+        react: { componentStack: errorInfo?.componentStack },
+      },
+    })
 
     return errorId
   }

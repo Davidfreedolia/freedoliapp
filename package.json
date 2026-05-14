@@ -18,6 +18,8 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
     "@fontsource/roboto": "^5.2.9",
+    "@sentry/react": "^10.53.1",
+    "@sentry/vite-plugin": "^5.3.0",
     "@supabase/supabase-js": "^2.39.0",
     "bootstrap": "^5.3.8",
     "date-fns": "^3.0.0",

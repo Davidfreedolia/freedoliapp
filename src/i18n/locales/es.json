@@ -2255,6 +2255,26 @@
       "releasedSuccess": "GTIN liberado correctamente",
       "releaseError": "Error liberando GTIN",
       "confirmRelease": "¿Estás seguro de que quieres liberar este GTIN? Se podrá asignar a otro proyecto."
+    },
+    "privacy": {
+      "tab": "Privacidad",
+      "title": "Privacidad y tus datos",
+      "description": "Aquí puedes ejercer tus derechos GDPR: descargar todos tus datos (Art. 20 — portabilidad) o solicitar la eliminación de tu cuenta (Art. 17 — derecho al olvido).",
+      "export": {
+        "title": "Descargar mis datos",
+        "description": "Genera un archivo JSON con todos los datos de tu workspace activo. Se procesa en tu navegador, no se envía a ningún sitio.",
+        "cta": "Descargar JSON",
+        "success": "Datos descargados correctamente",
+        "error": "No se han podido descargar los datos: {{error}}"
+      },
+      "delete": {
+        "title": "Eliminar mi cuenta",
+        "description": "Creará una solicitud de eliminación. Te enviaremos un correo de confirmación y procesaremos la baja en un plazo máximo de 30 días. Esta acción es irreversible una vez procesada.",
+        "cta": "Solicitar eliminación",
+        "confirm": "¿Estás seguro? Esta acción enviará una solicitud de baja permanente de tu cuenta y te cerrará la sesión inmediatamente.",
+        "success": "Solicitud recibida. Te cerramos la sesión y te contactaremos pronto.",
+        "error": "No se ha podido enviar la solicitud: {{error}}"
+      }
     }
   },
   "projects": {

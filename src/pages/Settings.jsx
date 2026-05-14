@@ -24,7 +24,9 @@ import {
   ExternalLink,
   Settings as SettingsIcon,
   Users,
-  Sparkles
+  Sparkles,
+  ShieldCheck,
+  Download
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { getCompanySettings, updateCompanySettings, uploadCompanyLogo, deleteCompanyLogo, supabase, getAuditLogs, updateLanguage, getCurrentUserId } from '../lib/supabase'
@@ -32,6 +34,7 @@ import { getOrgEntitlements, assertOrgWithinLimit, hasOrgFeature, getOrgFeatureL
 import { isSeatLimitDisabled } from '../lib/featureFlags'
 import { createStripePortalSession, createStripeCheckoutSession } from '../lib/billingApi'
 import { clearDemoData, generateDemoData, checkDemoExists } from '../lib/demoSeed'
+import { downloadMyData, requestAccountDeletion } from '../lib/gdpr'
 import Header from '../components/Header'
 import Button from '../components/Button'
 import GTINPoolSection from '../components/GTINPoolSection'
@@ -574,6 +577,17 @@ export default function Settings() {
             }}
           >
             <Sparkles size={18} /> {t('settings.ai.tab', 'IA')}
+          </Button>
+          <Button
+            variant={activeTab === 'privacy' ? 'primary' : 'ghost'}
+            size="sm"
+            onClick={() => setActiveTab('privacy')}
+            style={{
+              ...styles.tab,
+              color: activeTab === 'privacy' ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280')
+            }}
+          >
+            <ShieldCheck size={18} /> {t('settings.privacy.tab')}
           </Button>
         </div>
 
@@ -1392,6 +1406,86 @@ export default function Settings() {
         {/* AI (BYOK) Tab */}
         {activeTab === 'ai' && (
           <AiConnectionSection darkMode={darkMode} />
+        )}
+
+        {/* Privacy Tab — GDPR controls */}
+        {activeTab === 'privacy' && (
+          <div style={{...styles.section, backgroundColor: darkMode ? '#15151f' : '#ffffff'}}>
+            <div style={styles.sectionHeader}>
+              <h2 style={{...styles.sectionTitle, color: darkMode ? '#ffffff' : '#111827'}}>
+                <ShieldCheck size={20} /> {t('settings.privacy.title')}
+              </h2>
+            </div>
+            <p style={{ fontSize: 14, color: darkMode ? '#9ca3af' : '#6b7280', marginBottom: 24, lineHeight: 1.6 }}>
+              {t('settings.privacy.description')}
+            </p>
+
+            {/* Export data — GDPR Art. 20 */}
+            <div style={{
+              padding: 20, marginBottom: 20,
+              border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+              borderRadius: 12,
+              background: darkMode ? '#1f1f2e' : '#f9fafb',
+            }}>
+              <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 8, color: darkMode ? '#ffffff' : '#111827' }}>
+                <Download size={16} style={{ marginRight: 6, verticalAlign: '-3px' }} />
+                {t('settings.privacy.export.title')}
+              </h3>
+              <p style={{ fontSize: 13, color: darkMode ? '#9ca3af' : '#6b7280', marginBottom: 16, lineHeight: 1.5 }}>
+                {t('settings.privacy.export.description')}
+              </p>
+              <Button
+                variant="secondary"
+                size="md"
+                onClick={async () => {
+                  try {
+                    await downloadMyData(activeOrgId)
+                    showToast(t('settings.privacy.export.success'), 'success')
+                  } catch (err) {
+                    console.error('Export failed:', err)
+                    showToast(t('settings.privacy.export.error', { error: err.message || 'unknown' }), 'error')
+                  }
+                }}
+              >
+                <Download size={16} /> {t('settings.privacy.export.cta')}
+              </Button>
+            </div>
+
+            {/* Account deletion — GDPR Art. 17 */}
+            <div style={{
+              padding: 20,
+              border: `1px solid ${darkMode ? 'rgba(229,83,83,0.3)' : 'rgba(229,83,83,0.4)'}`,
+              borderRadius: 12,
+              background: darkMode ? 'rgba(229,83,83,0.06)' : 'rgba(229,83,83,0.04)',
+            }}>
+              <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 8, color: 'var(--danger-1, #B0413F)' }}>
+                <Trash2 size={16} style={{ marginRight: 6, verticalAlign: '-3px' }} />
+                {t('settings.privacy.delete.title')}
+              </h3>
+              <p style={{ fontSize: 13, color: darkMode ? '#9ca3af' : '#6b7280', marginBottom: 16, lineHeight: 1.5 }}>
+                {t('settings.privacy.delete.description')}
+              </p>
+              <Button
+                variant="danger"
+                size="md"
+                onClick={async () => {
+                  const confirmed = window.confirm(t('settings.privacy.delete.confirm'))
+                  if (!confirmed) return
+                  try {
+                    await requestAccountDeletion({ activeOrgId })
+                    showToast(t('settings.privacy.delete.success'), 'success')
+                    // requestAccountDeletion signs the user out; redirect to landing.
+                    setTimeout(() => { window.location.href = '/' }, 1500)
+                  } catch (err) {
+                    console.error('Delete request failed:', err)
+                    showToast(t('settings.privacy.delete.error', { error: err.message || 'unknown' }), 'error')
+                  }
+                }}
+              >
+                <Trash2 size={16} /> {t('settings.privacy.delete.cta')}
+              </Button>
+            </div>
+          </div>
         )}
       </div>
 

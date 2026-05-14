@@ -9,6 +9,12 @@ import './styles/tokens.css'
 import './styles/ui.css'
 import './index.css'
 import './styles/components/toolbar.css'
+import { initSentry } from './lib/sentry'
+
+// Boot error monitoring before React mounts so we capture render errors too.
+// No-ops automatically when VITE_SENTRY_DSN is unset (e.g. local dev).
+initSentry()
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <App />
