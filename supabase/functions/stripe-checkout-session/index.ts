@@ -2,6 +2,16 @@
 
 import Stripe from "npm:stripe@17";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { rateLimit, tooManyRequests, callerIp } from "../_shared/rateLimit.ts";
+
+// Per-user token bucket: 5 checkouts per minute burst, refilling at 1/min.
+// Enough for a normal upgrade flow; tight enough to stop a script from
+// drilling Stripe.
+const checkoutLimiter = rateLimit({
+  id: "stripe-checkout-session",
+  capacity: 5,
+  refillPerSecond: 1 / 60,
+});
 
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY")!;
 const SITE_URL = Deno.env.get("SITE_URL") || Deno.env.get("APP_BASE_URL") || "https://freedoliapp.com";
@@ -42,9 +52,16 @@ Deno.serve(async (req: Request) => {
 
   const { data: userData, error: userErr } = await supabaseUser.auth.getUser();
   if (userErr || !userData?.user) {
+    // Throttle by IP for unauthenticated probes — stops credential spraying.
+    const ipGuard = checkoutLimiter(`ip:${callerIp(req)}`);
+    if (!ipGuard.allowed) return tooManyRequests(ipGuard, corsHeaders);
     return jsonResponse({ error: "Invalid JWT" }, 401);
   }
   const userId = userData.user.id;
+
+  // Authenticated rate limit: 5 checkouts/min/user.
+  const userGuard = checkoutLimiter(`user:${userId}`);
+  if (!userGuard.allowed) return tooManyRequests(userGuard, corsHeaders);
 
   let body: { org_id?: string; plan?: string };
   try {
@@ -108,6 +125,21 @@ Deno.serve(async (req: Request) => {
   const trialEndsAt = billing?.trial_ends_at ? Math.floor(new Date(billing.trial_ends_at).getTime() / 1000) : null;
   const useTrial = billing?.status === "trialing" && trialEndsAt != null && trialEndsAt > now;
 
+  // EU VAT / OSS support — driven by Stripe Tax.
+  //
+  // When the seller is a registered EU business, Stripe collects VAT on
+  // checkout based on the customer's billing address. Activation requires:
+  //   1) Seller registered with Hisenda + the OSS (One-Stop Shop) regime.
+  //   2) Stripe Tax enabled in the Dashboard (Settings → Tax).
+  //   3) STRIPE_ENABLE_AUTOMATIC_TAX=true in the function secrets.
+  //
+  // Without all three, automatic_tax must stay OFF — otherwise Stripe
+  // refuses to create the checkout session ("Tax is not active for this
+  // account"). The flag below makes the code path opt-in so this function
+  // keeps working today and only flips the switch once the seller is
+  // registered.
+  const automaticTaxEnabled = (Deno.env.get("STRIPE_ENABLE_AUTOMATIC_TAX") || "").toLowerCase() === "true";
+
   const sessionParams: Stripe.Checkout.SessionCreateParams = {
     mode: "subscription",
     customer: customerId,
@@ -119,6 +151,16 @@ Deno.serve(async (req: Request) => {
       ...(useTrial && trialEndsAt ? { trial_end: trialEndsAt } : {}),
     },
     metadata: { org_id: orgId, plan: planNorm },
+    // When enabled, Stripe asks for the billing address and applies the
+    // correct VAT rate (and optionally collects EU VAT IDs for B2B).
+    ...(automaticTaxEnabled
+      ? {
+          automatic_tax: { enabled: true },
+          tax_id_collection: { enabled: true },
+          customer_update: { address: "auto", name: "auto" },
+          billing_address_collection: "required",
+        }
+      : {}),
   };
 
   const session = await stripe.checkout.sessions.create(sessionParams);

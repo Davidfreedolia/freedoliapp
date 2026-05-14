@@ -2,6 +2,14 @@
 
 import Stripe from "npm:stripe@17";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { rateLimit, tooManyRequests, callerIp } from "../_shared/rateLimit.ts";
+
+// 10 portal sessions/min/user — generous, but stops loops.
+const portalLimiter = rateLimit({
+  id: "stripe-portal-session",
+  capacity: 10,
+  refillPerSecond: 1 / 30,
+});
 
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY")!;
 const SITE_URL = Deno.env.get("SITE_URL") || Deno.env.get("APP_BASE_URL") || "https://freedoliapp.com";
@@ -34,9 +42,13 @@ Deno.serve(async (req: Request) => {
 
   const { data: userData, error: userErr } = await supabaseUser.auth.getUser();
   if (userErr || !userData?.user) {
+    const ipGuard = portalLimiter(`ip:${callerIp(req)}`);
+    if (!ipGuard.allowed) return tooManyRequests(ipGuard, corsHeaders);
     return jsonResponse({ error: "Invalid JWT" }, 401);
   }
   const userId = userData.user.id;
+  const userGuard = portalLimiter(`user:${userId}`);
+  if (!userGuard.allowed) return tooManyRequests(userGuard, corsHeaders);
 
   let body: { org_id?: string };
   try {

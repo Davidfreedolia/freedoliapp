@@ -2,10 +2,20 @@
 // Replaces Vercel serverless /api/asin-enrich. Invoke with body: { asin, market? }.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { rateLimit, tooManyRequests, callerIp } from "../_shared/rateLimit.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+
+// Each call scrapes Amazon and (optionally) calls OpenAI. Cap at 20 per
+// user per minute — fast enough for legitimate research bursts, slow
+// enough to discourage scraping farms.
+const enrichLimiter = rateLimit({
+  id: "asin-enrich",
+  capacity: 20,
+  refillPerSecond: 1 / 3,
+});
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -31,8 +41,12 @@ Deno.serve(async (req: Request) => {
   });
   const { data: userData, error: userErr } = await supabase.auth.getUser();
   if (userErr || !userData?.user) {
+    const ipGuard = enrichLimiter(`ip:${callerIp(req)}`);
+    if (!ipGuard.allowed) return tooManyRequests(ipGuard, corsHeaders);
     return jsonResponse({ error: "Invalid JWT" }, 401);
   }
+  const userGuard = enrichLimiter(`user:${userData.user.id}`);
+  if (!userGuard.allowed) return tooManyRequests(userGuard, corsHeaders);
 
   let body: { asin?: string; market?: string };
   try {

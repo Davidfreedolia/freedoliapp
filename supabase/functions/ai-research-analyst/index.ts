@@ -25,6 +25,17 @@ import {
   isSupportedProvider,
   type AiProvider,
 } from '../_shared/aiAdapter.ts'
+import { rateLimit, tooManyRequests, callerIp } from '../_shared/rateLimit.ts'
+
+// AI calls are the most expensive thing in our stack: every successful
+// invocation costs cents in Anthropic/OpenAI tokens. Burst limit 6 per
+// user per minute, refill at 1/min. Authenticated only — there's no
+// reason for an unauthenticated user to call this.
+const aiLimiter = rateLimit({
+  id: 'ai-research-analyst',
+  capacity: 6,
+  refillPerSecond: 1 / 60,
+})
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!
@@ -176,7 +187,15 @@ Deno.serve(async (req: Request) => {
     auth: { persistSession: false },
   })
   const { data: userData, error: userErr } = await supabase.auth.getUser()
-  if (userErr || !userData?.user) return jsonResponse({ error: 'Invalid JWT' }, 401)
+  if (userErr || !userData?.user) {
+    // Rate-limit unauthenticated probes too (by IP) to slow down anyone
+    // trying to discover whether the function exists.
+    const ipGuard = aiLimiter(`ip:${callerIp(req)}`)
+    if (!ipGuard.allowed) return tooManyRequests(ipGuard, corsHeaders)
+    return jsonResponse({ error: 'Invalid JWT' }, 401)
+  }
+  const userGuard = aiLimiter(`user:${userData.user.id}`)
+  if (!userGuard.allowed) return tooManyRequests(userGuard, corsHeaders)
 
   let body: Record<string, unknown>
   try {

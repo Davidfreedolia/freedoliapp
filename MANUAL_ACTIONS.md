@@ -24,6 +24,7 @@ Llista viva de coses que **només pots fer tu** (no es poden fer des de codi). C
 - [ ] Configurar Stripe Tax (Settings → Tax → Activate)
 - [ ] Pujar les claus live (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `VITE_STRIPE_PUBLISHABLE_KEY`) a Vercel + Supabase Functions
 - [ ] Re-crear el webhook de Stripe apuntant a la URL live de la funció `stripe_webhook`
+- [ ] **Activar `STRIPE_ENABLE_AUTOMATIC_TAX=true`** com a secret a Supabase Functions per a la funció `stripe-checkout-session`. El codi ja està pre-cablejat (veure commit) — només cal flipar el flag i Stripe començarà a cobrar VAT automàticament basat en l'adreça del client + recollirà el VAT ID B2B.
 
 ---
 
