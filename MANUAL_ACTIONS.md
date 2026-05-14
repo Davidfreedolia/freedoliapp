@@ -18,6 +18,30 @@ Llista viva de coses que **només pots fer tu** (no es poden fer des de codi). C
 
 > Mentrestant: 5-10 beta testers gratis ≠ activitat econòmica. **Cap pagament real** fins a aquí.
 
+### Re-deploy Supabase Edge Functions (rate limiting + Stripe tax pre-wire)
+Necessari **immediatament** perquè el codi nou de rate-limiting + el flag de Stripe automatic_tax estigui actiu. Vercel només desplega el frontend; les Functions són un deploy a part.
+
+Opció A — via Supabase CLI (instal·lat? `npm i -g supabase`):
+```
+supabase login
+supabase link --project-ref edjwsrkcxcktnbbskpjy
+supabase functions deploy stripe-checkout-session
+supabase functions deploy stripe-portal-session
+supabase functions deploy ai-research-analyst
+supabase functions deploy asin-enrich
+```
+
+Opció B — manualment al dashboard de Supabase:
+- Edge Functions → cada una de les 4 → "Deploy" amb el codi més recent
+
+Després verifica que cap usuari diu que les seves crides fallen amb 429 inesperat — els límits són:
+- Stripe checkout: 5/min/user
+- Stripe portal: 10/min/user
+- AI research: 6/min/user (cost per crida $$$)
+- ASIN enrich: 20/min/user
+
+Si trobes que algun és massa restrictiu, edita `supabase/functions/_shared/rateLimit.ts` o el `capacity`/`refillPerSecond` de la funció concreta.
+
 ### Stripe live mode (depèn de l'alta)
 - [ ] Quan tinguis l'alta, ves a Stripe Dashboard → Account Status → activar pagaments en viu
 - [ ] Verificar identitat (DNI/escriptura SL)
