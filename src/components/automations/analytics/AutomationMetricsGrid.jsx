@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import Card from '../../ui/Card'
 
 function MetricCard({ label, value, loading }) {
@@ -12,21 +13,34 @@ function MetricCard({ label, value, loading }) {
 }
 
 export default function AutomationMetricsGrid({ summary, loading, empty }) {
+  const { t } = useTranslation()
   if (empty) {
     return (
       <Card className="ui-card--elevated" style={{ padding: '1rem 1.25rem' }}>
         <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-1, #111827)', marginBottom: 4 }}>
-          No automation data yet
+          {t('automations.metrics.emptyTitle')}
         </div>
         <div style={{ fontSize: 13, color: 'var(--text-2, #6b7280)' }}>
-          Automation analytics will appear once the system starts generating proposals.
+          {t('automations.metrics.emptyDesc')}
         </div>
       </Card>
     )
   }
 
+  const labels = {
+    total: t('automations.metrics.totalProposals'),
+    pending: t('automations.metrics.pendingApproval'),
+    approved: t('automations.metrics.approved'),
+    queued: t('automations.metrics.queued'),
+    executed: t('automations.metrics.executed'),
+    execFailed: t('automations.metrics.executionFailed'),
+    execSucceeded: t('automations.metrics.executionsSucceeded'),
+    execFailed2: t('automations.metrics.executionsFailed'),
+    successRate: t('automations.metrics.successRate'),
+  }
+
   if (loading || !summary) {
-    const skeletons = ['Total proposals', 'Pending approval', 'Approved', 'Queued']
+    const skeletons = [labels.total, labels.pending, labels.approved, labels.queued]
     return (
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
         {skeletons.map((label) => (
@@ -41,15 +55,15 @@ export default function AutomationMetricsGrid({ summary, loading, empty }) {
     typeof s.executionSuccessRate === 'number' ? `${Math.round(s.executionSuccessRate * 100)}%` : '—'
 
   const cards = [
-    { key: 'proposalsTotal', label: 'Total proposals', value: s.proposalsTotal },
-    { key: 'pending', label: 'Pending approval', value: s.proposalsPendingApproval },
-    { key: 'approved', label: 'Approved', value: s.proposalsApproved },
-    { key: 'queued', label: 'Queued for execution', value: s.proposalsQueued },
-    { key: 'executed', label: 'Executed', value: s.proposalsExecuted },
-    { key: 'execFailed', label: 'Execution failed', value: s.proposalsExecutionFailed },
-    { key: 'execSucceeded', label: 'Executions succeeded', value: s.executionsSucceeded },
-    { key: 'execFailed2', label: 'Executions failed', value: s.executionsFailed },
-    { key: 'execRate', label: 'Success rate %', value: successRate },
+    { key: 'proposalsTotal', label: labels.total, value: s.proposalsTotal },
+    { key: 'pending', label: labels.pending, value: s.proposalsPendingApproval },
+    { key: 'approved', label: labels.approved, value: s.proposalsApproved },
+    { key: 'queued', label: labels.queued, value: s.proposalsQueued },
+    { key: 'executed', label: labels.executed, value: s.proposalsExecuted },
+    { key: 'execFailed', label: labels.execFailed, value: s.proposalsExecutionFailed },
+    { key: 'execSucceeded', label: labels.execSucceeded, value: s.executionsSucceeded },
+    { key: 'execFailed2', label: labels.execFailed2, value: s.executionsFailed },
+    { key: 'execRate', label: labels.successRate, value: successRate },
   ]
 
   return (
@@ -60,4 +74,3 @@ export default function AutomationMetricsGrid({ summary, loading, empty }) {
     </div>
   )
 }
-

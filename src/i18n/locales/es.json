@@ -1400,6 +1400,52 @@
       "execute": "Ejecutar",
       "view": "Ver",
       "loading": "Cargando…"
+    },
+    "metrics": {
+      "emptyTitle": "Todavía no hay datos de automatización",
+      "emptyDesc": "La analítica aparecerá cuando el sistema empiece a generar propuestas.",
+      "totalProposals": "Total de propuestas",
+      "pendingApproval": "Pendientes de aprobación",
+      "approved": "Aprobadas",
+      "queued": "En cola para ejecutar",
+      "executed": "Ejecutadas",
+      "executionFailed": "Ejecución fallida",
+      "executionsSucceeded": "Ejecuciones con éxito",
+      "executionsFailed": "Ejecuciones fallidas",
+      "successRate": "Tasa de éxito %"
+    },
+    "funnel": {
+      "title": "Embudo de automatización",
+      "stages": {
+        "decisionsWithProposals": "Decisiones con propuestas",
+        "proposals": "Propuestas",
+        "pendingApproval": "Pendientes de aprobación",
+        "approved": "Aprobadas",
+        "queued": "En cola",
+        "executed": "Ejecutadas"
+      }
+    },
+    "velocity": {
+      "title": "Velocidad de propuestas (últimos 14 días)"
+    },
+    "risk": {
+      "title": "Distribución del riesgo",
+      "bands": {
+        "low": "bajo",
+        "medium": "medio",
+        "high": "alto",
+        "critical": "crítico"
+      }
+    },
+    "execution": {
+      "title": "Fiabilidad de ejecución",
+      "successRate": "Tasa de éxito: {{rate}}",
+      "statuses": {
+        "succeeded": "con éxito",
+        "failed": "fallidas",
+        "running": "ejecutando",
+        "queued": "en cola"
+      }
     }
   },
   "projectDetail": {

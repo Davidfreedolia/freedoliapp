@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import Card from '../../ui/Card'
 import {
   ResponsiveContainer,
@@ -11,12 +12,13 @@ import {
 } from 'recharts'
 
 export default function AutomationExecutionReliability({ stats }) {
+  const { t } = useTranslation()
   const s = stats || {}
   const data = [
-    { status: 'succeeded', count: s.succeeded ?? 0 },
-    { status: 'failed', count: s.failed ?? 0 },
-    { status: 'running', count: s.running ?? 0 },
-    { status: 'queued', count: s.queued ?? 0 },
+    { status: t('automations.execution.statuses.succeeded'), count: s.succeeded ?? 0 },
+    { status: t('automations.execution.statuses.failed'),    count: s.failed ?? 0 },
+    { status: t('automations.execution.statuses.running'),   count: s.running ?? 0 },
+    { status: t('automations.execution.statuses.queued'),    count: s.queued ?? 0 },
   ]
 
   const denom = (s.succeeded ?? 0) + (s.failed ?? 0)
@@ -26,8 +28,8 @@ export default function AutomationExecutionReliability({ stats }) {
   return (
     <Card className="ui-card--elevated" style={{ padding: 16 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-1, #111827)' }}>Execution reliability</div>
-        <div style={{ fontSize: 12, color: 'var(--text-2, #6b7280)' }}>Success rate: {successRate}</div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-1, #111827)' }}>{t('automations.execution.title')}</div>
+        <div style={{ fontSize: 12, color: 'var(--text-2, #6b7280)' }}>{t('automations.execution.successRate', { rate: successRate })}</div>
       </div>
       <div style={{ width: '100%', height: 220 }}>
         <ResponsiveContainer>
@@ -36,11 +38,10 @@ export default function AutomationExecutionReliability({ stats }) {
             <XAxis dataKey="status" tick={{ fontSize: 11 }} />
             <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
             <Tooltip />
-            <Bar dataKey="count" fill="#10b981" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="count" fill="#3FBF9A" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
     </Card>
   )
 }
-

@@ -1585,6 +1585,52 @@
       "execute": "Executar",
       "view": "Veure",
       "loading": "Carregant…"
+    },
+    "metrics": {
+      "emptyTitle": "Encara no hi ha dades d'automatització",
+      "emptyDesc": "L'analítica apareixerà quan el sistema comenci a generar propostes.",
+      "totalProposals": "Total de propostes",
+      "pendingApproval": "Pendents d'aprovació",
+      "approved": "Aprovades",
+      "queued": "En cua per executar",
+      "executed": "Executades",
+      "executionFailed": "Execució fallida",
+      "executionsSucceeded": "Execucions amb èxit",
+      "executionsFailed": "Execucions fallides",
+      "successRate": "Taxa d'èxit %"
+    },
+    "funnel": {
+      "title": "Embut d'automatització",
+      "stages": {
+        "decisionsWithProposals": "Decisions amb propostes",
+        "proposals": "Propostes",
+        "pendingApproval": "Pendents d'aprovació",
+        "approved": "Aprovades",
+        "queued": "En cua",
+        "executed": "Executades"
+      }
+    },
+    "velocity": {
+      "title": "Velocitat de propostes (últims 14 dies)"
+    },
+    "risk": {
+      "title": "Distribució del risc",
+      "bands": {
+        "low": "baix",
+        "medium": "mitjà",
+        "high": "alt",
+        "critical": "crític"
+      }
+    },
+    "execution": {
+      "title": "Fiabilitat d'execució",
+      "successRate": "Taxa d'èxit: {{rate}}",
+      "statuses": {
+        "succeeded": "amb èxit",
+        "failed": "fallides",
+        "running": "executant",
+        "queued": "en cua"
+      }
     }
   },
   "projectDetail": {

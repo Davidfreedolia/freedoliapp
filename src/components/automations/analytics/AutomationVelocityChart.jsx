@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import Card from '../../ui/Card'
 import {
   ResponsiveContainer,
@@ -11,12 +12,13 @@ import {
 } from 'recharts'
 
 export default function AutomationVelocityChart({ velocity }) {
+  const { t } = useTranslation()
   const data = Array.isArray(velocity) ? velocity : []
 
   return (
     <Card className="ui-card--elevated" style={{ padding: 16 }}>
       <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-1, #111827)', marginBottom: 8 }}>
-        Proposal velocity (last 14 days)
+        {t('automations.velocity.title')}
       </div>
       <div style={{ width: '100%', height: 220 }}>
         <ResponsiveContainer>
@@ -25,11 +27,10 @@ export default function AutomationVelocityChart({ velocity }) {
             <XAxis dataKey="date" tick={{ fontSize: 11 }} />
             <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
             <Tooltip />
-            <Line type="monotone" dataKey="proposals" stroke="#4f46e5" strokeWidth={2} dot={{ r: 2 }} />
+            <Line type="monotone" dataKey="proposals" stroke="#1F5F63" strokeWidth={2} dot={{ r: 2 }} />
           </LineChart>
         </ResponsiveContainer>
       </div>
     </Card>
   )
 }
-

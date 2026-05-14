@@ -1385,6 +1385,52 @@
       "execute": "Execute",
       "view": "View",
       "loading": "Loading…"
+    },
+    "metrics": {
+      "emptyTitle": "No automation data yet",
+      "emptyDesc": "Automation analytics will appear once the system starts generating proposals.",
+      "totalProposals": "Total proposals",
+      "pendingApproval": "Pending approval",
+      "approved": "Approved",
+      "queued": "Queued for execution",
+      "executed": "Executed",
+      "executionFailed": "Execution failed",
+      "executionsSucceeded": "Executions succeeded",
+      "executionsFailed": "Executions failed",
+      "successRate": "Success rate %"
+    },
+    "funnel": {
+      "title": "Automation funnel",
+      "stages": {
+        "decisionsWithProposals": "Decisions with proposals",
+        "proposals": "Proposals",
+        "pendingApproval": "Pending approval",
+        "approved": "Approved",
+        "queued": "Queued",
+        "executed": "Executed"
+      }
+    },
+    "velocity": {
+      "title": "Proposal velocity (last 14 days)"
+    },
+    "risk": {
+      "title": "Risk distribution",
+      "bands": {
+        "low": "low",
+        "medium": "medium",
+        "high": "high",
+        "critical": "critical"
+      }
+    },
+    "execution": {
+      "title": "Execution reliability",
+      "successRate": "Success rate: {{rate}}",
+      "statuses": {
+        "succeeded": "succeeded",
+        "failed": "failed",
+        "running": "running",
+        "queued": "queued"
+      }
     }
   },
   "projectDetail": {
