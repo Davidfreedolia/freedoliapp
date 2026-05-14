@@ -77,22 +77,22 @@ import { deriveOrderOperationalCard } from '../lib/orders/deriveOrderOperational
 
 // PO status visuals (labels from i18n: orders.status.*)
 const PO_STATUS_META = {
-  draft: { color: '#6b7280', icon: Edit },
-  sent: { color: '#3b82f6', icon: Send },
-  confirmed: { color: '#8b5cf6', icon: CheckCircle },
-  partial_paid: { color: '#f59e0b', icon: DollarSign },
-  paid: { color: '#22c55e', icon: DollarSign },
-  in_production: { color: '#ec4899', icon: Package },
-  shipped: { color: '#06b6d4', icon: Truck },
-  received: { color: '#10b981', icon: CheckCircle },
-  cancelled: { color: '#ef4444', icon: AlertCircle }
+  draft: { color: 'var(--text-2)', icon: Edit },
+  sent: { color: 'var(--cta-1)', icon: Send },
+  confirmed: { color: 'var(--brand-1)', icon: CheckCircle },
+  partial_paid: { color: 'var(--warning-1)', icon: DollarSign },
+  paid: { color: 'var(--success-1)', icon: DollarSign },
+  in_production: { color: 'var(--coral-1)', icon: Package },
+  shipped: { color: 'var(--brand-2)', icon: Truck },
+  received: { color: 'var(--success-1)', icon: CheckCircle },
+  cancelled: { color: 'var(--danger-1)', icon: AlertCircle }
 }
 
 const RISK_META = {
-  high: { color: '#dc2626', background: 'rgba(220, 38, 38, 0.12)' },
-  medium: { color: '#d97706', background: 'rgba(217, 119, 6, 0.12)' },
+  high: { color: 'var(--danger-1)', background: 'rgba(220, 38, 38, 0.12)' },
+  medium: { color: 'var(--warning-1)', background: 'rgba(217, 119, 6, 0.12)' },
   low: { color: '#0f766e', background: 'rgba(15, 118, 110, 0.12)' },
-  done: { color: '#2563eb', background: 'rgba(37, 99, 235, 0.12)' }
+  done: { color: 'var(--brand-1)', background: 'rgba(37, 99, 235, 0.12)' }
 }
 
 export default function Orders() {
@@ -711,13 +711,13 @@ export default function Orders() {
       >
         <div style={styles.orderCardHeader}>
           <div>
-            <div style={{ fontWeight: '600', color: darkMode ? '#ffffff' : '#111827', marginBottom: '4px' }}>
+            <div style={{ fontWeight: '600', color: darkMode ? '#ffffff' : 'var(--text-1)', marginBottom: '4px' }}>
               {order.po_number}
             </div>
-            <div style={{ fontSize: '14px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
+            <div style={{ fontSize: '14px', color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
               {order.project?.name || '-'}
             </div>
-            <div style={{ fontSize: '13px', color: darkMode ? '#6b7280' : '#6b7280', marginTop: '4px' }}>
+            <div style={{ fontSize: '13px', color: darkMode ? 'var(--text-2)' : 'var(--text-2)', marginTop: '4px' }}>
               {order.supplier?.name || '-'}
             </div>
           </div>
@@ -750,7 +750,7 @@ export default function Orders() {
         <div style={styles.orderCardBody}>
           <div style={styles.operationalRow}>
             <span style={styles.operationalLabel}>{t('orders.operational.fields.total')}</span>
-            <strong style={{ color: darkMode ? '#ffffff' : '#111827' }}>
+            <strong style={{ color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
               {formatCurrency(order.total_amount, order.currency)}
             </strong>
           </div>
@@ -772,13 +772,13 @@ export default function Orders() {
           </div>
           <div style={styles.operationalPanel}>
             <span style={styles.operationalPanelLabel}>{t('orders.operational.fields.blocker')}</span>
-            <strong style={{ color: darkMode ? '#ffffff' : '#111827' }}>{blockerHint}</strong>
+            <strong style={{ color: darkMode ? '#ffffff' : 'var(--text-1)' }}>{blockerHint}</strong>
           </div>
           <div style={styles.operationalPanel}>
             <span style={styles.operationalPanelLabel}>{t('orders.operational.fields.nextAction')}</span>
             <strong style={{ color: status.color }}>{nextActionLabel}</strong>
           </div>
-          <div style={{ fontSize: '12px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
+          <div style={{ fontSize: '12px', color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
             {t('orders.card.date')}: {formatDate(order.order_date)}
           </div>
         </div>
@@ -828,7 +828,7 @@ export default function Orders() {
                 onClick={() => setMenuOpen(menuOpen === order.id ? null : order.id)}
                 style={styles.iconButton}
               >
-                <MoreVertical size={18} color="#9ca3af" />
+                <MoreVertical size={18} color='var(--muted-1)' />
               </Button>
               {menuOpen === order.id && (
                 <div style={{ ...styles.menu, backgroundColor: darkMode ? '#1f1f2e' : '#ffffff' }}>
@@ -872,14 +872,14 @@ export default function Orders() {
         ...styles.content,
         padding: isMobile ? '16px' : '32px'
       }}>
-        <p style={{ margin: '0 0 16px', fontSize: 13, color: darkMode ? '#9ca3af' : '#4b5563' }}>
+        <p style={{ margin: '0 0 16px', fontSize: 13, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
           {t('orders.intro')}
         </p>
         {/* Toolbar */}
         <div style={styles.toolbar} className="toolbar-row">
           <div style={styles.searchGroup} className="toolbar-group">
             <div style={styles.searchContainer} className="toolbar-search">
-              <Search size={18} color="#9ca3af" />
+              <Search size={18} color='var(--muted-1)' />
               <input
                 type="text"
                 placeholder={t('orders.searchPlaceholder')}
@@ -1040,7 +1040,7 @@ export default function Orders() {
               return (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                   {groups.map(({ status, items: groupItems }) => {
-                    const meta = PO_STATUS_META[status] || { color: '#6b7280' }
+                    const meta = PO_STATUS_META[status] || { color: 'var(--text-2)' }
                     const label = STATUS_ORDER.includes(status) ? t(`orders.status.${status}`) : t('orders.statusOther', { defaultValue: 'Other' })
                     const isCollapsed = collapsedOrderGroups.has(status)
                     const toggleGroup = () => setCollapsedOrderGroups(prev => {
@@ -1060,7 +1060,7 @@ export default function Orders() {
                             width: '100%', padding: '6px 10px', marginBottom: isCollapsed ? 0 : 8,
                             background: 'transparent', border: 'none', cursor: 'pointer',
                             borderRadius: 8, textAlign: 'left',
-                            color: darkMode ? '#d1d5db' : '#374151'
+                            color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
                           }}
                         >
                           {isCollapsed
@@ -1108,7 +1108,7 @@ export default function Orders() {
                                 {groupItems.map(order => {
                                   const stKey = PO_STATUS_META[order.status] ? order.status : 'draft'
                                   const st = PO_STATUS_META[stKey]
-                                  const stColor = st?.color || '#6b7280'
+                                  const stColor = st?.color || 'var(--text-2)'
                                   const fmtEta = order.expected_delivery
                                     ? new Date(order.expected_delivery).toLocaleDateString('ca-ES', { day: '2-digit', month: 'short' })
                                     : (order.eta ? new Date(order.eta).toLocaleDateString('ca-ES', { day: '2-digit', month: 'short' }) : '—')
@@ -1175,14 +1175,14 @@ export default function Orders() {
                             ? 'rgba(110, 203, 195, 0.12)'
                             : 'var(--surface-bg)',
                           borderLeft: isSelected
-                            ? '3px solid #6ECBC3'
+                            ? '3px solid var(--brand-2)'
                             : '3px solid transparent'
                         }}
                         onClick={() => setSelectedOrderId(order.id)}
                         onMouseEnter={() => !isSelected && setSelectedOrderId(order.id)}
                       >
                         <div style={styles.splitRowTop}>
-                          <span style={{ ...styles.splitRowPo, color: darkMode ? '#ffffff' : '#111827' }}>
+                          <span style={{ ...styles.splitRowPo, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
                             {order.po_number}
                           </span>
                           <span style={{
@@ -1264,7 +1264,7 @@ export default function Orders() {
           }} onClick={e => e.stopPropagation()}>
             {loadingDetail ? (
               <div style={styles.modalLoading}>
-                <Loader size={32} color="#4f46e5" className="spin" />
+                <Loader size={32} color="var(--brand-1)" className="spin" />
                 <p>{t('common.loading')}</p>
               </div>
             ) : selectedOrder && (
@@ -1272,10 +1272,10 @@ export default function Orders() {
                 {/* Header */}
                 <div style={styles.detailHeader}>
                   <div>
-                    <h2 style={{ ...styles.detailTitle, color: darkMode ? '#ffffff' : '#111827' }}>
+                    <h2 style={{ ...styles.detailTitle, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
                       {selectedOrder.po_number}
                     </h2>
-                    <p style={{ margin: '4px 0 0', color: '#6b7280', fontSize: '14px' }}>
+                    <p style={{ margin: '4px 0 0', color: 'var(--text-2)', fontSize: '14px' }}>
                       {selectedOrder.project?.name}
                       {selectedOrder.project_id && (
                         <button
@@ -1284,7 +1284,7 @@ export default function Orders() {
                           style={{
                             marginLeft: 8,
                             fontSize: '13px',
-                            color: '#4f46e5',
+                            color: 'var(--brand-1)',
                             textDecoration: 'underline',
                             background: 'none',
                             border: 'none',
@@ -1338,19 +1338,19 @@ export default function Orders() {
                       <h4 style={styles.detailSectionTitle}>📅 {t('orders.detail.sections.generalInfo')}</h4>
                       <div style={styles.detailRow}>
                         <span style={styles.detailLabel}>{t('orders.detail.fields.date')}:</span>
-                        <span style={{ color: darkMode ? '#ffffff' : '#111827' }}>{formatDate(selectedOrder.order_date)}</span>
+                        <span style={{ color: darkMode ? '#ffffff' : 'var(--text-1)' }}>{formatDate(selectedOrder.order_date)}</span>
                       </div>
                       <div style={styles.detailRow}>
                         <span style={styles.detailLabel}>{t('orders.detail.fields.quoteRef')}:</span>
-                        <span style={{ color: darkMode ? '#ffffff' : '#111827' }}>{selectedOrder.quote_ref || '-'}</span>
+                        <span style={{ color: darkMode ? '#ffffff' : 'var(--text-1)' }}>{selectedOrder.quote_ref || '-'}</span>
                       </div>
                       <div style={styles.detailRow}>
                         <span style={styles.detailLabel}>{t('orders.detail.fields.currency')}:</span>
-                        <span style={{ color: darkMode ? '#ffffff' : '#111827' }}>{selectedOrder.currency || 'USD'}</span>
+                        <span style={{ color: darkMode ? '#ffffff' : 'var(--text-1)' }}>{selectedOrder.currency || 'USD'}</span>
                       </div>
                       <div style={styles.detailRow}>
                         <span style={styles.detailLabel}>{t('orders.detail.fields.incoterm')}:</span>
-                        <span style={{ color: darkMode ? '#ffffff' : '#111827' }}>{selectedOrder.incoterm} {selectedOrder.incoterm_location}</span>
+                        <span style={{ color: darkMode ? '#ffffff' : 'var(--text-1)' }}>{selectedOrder.incoterm} {selectedOrder.incoterm_location}</span>
                       </div>
                     </div>
 
@@ -1363,7 +1363,7 @@ export default function Orders() {
                             type="button"
                             onClick={() => navigate('/app/suppliers')}
                             style={{
-                              color: darkMode ? '#e5e7eb' : '#111827',
+                              color: darkMode ? 'var(--border-1)' : 'var(--text-1)',
                               fontWeight: 500,
                               background: 'none',
                               border: 'none',
@@ -1375,16 +1375,16 @@ export default function Orders() {
                             {selectedOrder.supplier.name}
                           </button>
                         ) : (
-                          <span style={{ color: darkMode ? '#ffffff' : '#111827', fontWeight: '500' }}>-</span>
+                          <span style={{ color: darkMode ? '#ffffff' : 'var(--text-1)', fontWeight: '500' }}>-</span>
                         )}
                       </div>
                       <div style={styles.detailRow}>
                         <span style={styles.detailLabel}>{t('orders.detail.fields.contact')}:</span>
-                        <span style={{ color: darkMode ? '#ffffff' : '#111827' }}>{selectedOrder.supplier?.contact_name || '-'}</span>
+                        <span style={{ color: darkMode ? '#ffffff' : 'var(--text-1)' }}>{selectedOrder.supplier?.contact_name || '-'}</span>
                       </div>
                       <div style={styles.detailRow}>
                         <span style={styles.detailLabel}>{t('orders.detail.fields.email')}:</span>
-                        <span style={{ color: darkMode ? '#ffffff' : '#111827' }}>{selectedOrder.supplier?.email || '-'}</span>
+                        <span style={{ color: darkMode ? '#ffffff' : 'var(--text-1)' }}>{selectedOrder.supplier?.email || '-'}</span>
                       </div>
                     </div>
                   </div>
@@ -1392,11 +1392,11 @@ export default function Orders() {
                   {/* Entrega */}
                   <div style={styles.detailSection}>
                     <h4 style={styles.detailSectionTitle}>🚚 {t('orders.detail.sections.deliveryAddress')}</h4>
-                    <p style={{ margin: 0, color: darkMode ? '#ffffff' : '#111827' }}>
+                    <p style={{ margin: 0, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
                       {selectedOrder.delivery_address || '-'}
                     </p>
                     {selectedOrder.delivery_contact && (
-                      <p style={{ margin: '4px 0 0', color: '#6b7280', fontSize: '13px' }}>
+                      <p style={{ margin: '4px 0 0', color: 'var(--text-2)', fontSize: '13px' }}>
                         👤 {selectedOrder.delivery_contact} {selectedOrder.delivery_phone && `• 📱 ${selectedOrder.delivery_phone}`}
                       </p>
                     )}
@@ -1422,7 +1422,7 @@ export default function Orders() {
                           if (items.length === 0) {
                             return (
                               <tr>
-                                <td colSpan={5} style={{ ...styles.itemsTd, textAlign: 'center', color: darkMode ? '#9ca3af' : '#6b7280' }}>
+                                <td colSpan={5} style={{ ...styles.itemsTd, textAlign: 'center', color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
                                   {t('orders.detail.empty.noItems')}
                                 </td>
                               </tr>
@@ -1432,10 +1432,10 @@ export default function Orders() {
                           return items.map((item, i) => (
                               <tr key={i}>
                                 <td style={styles.itemsTd}>{item?.ref || '-'}</td>
-                                <td style={{ ...styles.itemsTd, color: darkMode ? '#ffffff' : '#111827' }}>{item?.description || '-'}</td>
+                                <td style={{ ...styles.itemsTd, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>{item?.description || '-'}</td>
                                 <td style={styles.itemsTd}>{item?.qty || 0} {item?.unit || ''}</td>
                                 <td style={styles.itemsTd}>{formatCurrency(item?.unit_price || 0, selectedOrder?.currency || 'EUR')}</td>
-                                <td style={{ ...styles.itemsTd, fontWeight: '600', color: darkMode ? '#ffffff' : '#111827' }}>
+                                <td style={{ ...styles.itemsTd, fontWeight: '600', color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
                                   {formatCurrency((parseFloat(item?.qty) || 0) * (parseFloat(item?.unit_price) || 0), selectedOrder?.currency || 'EUR')}
                                 </td>
                               </tr>
@@ -1445,7 +1445,7 @@ export default function Orders() {
                       <tfoot>
                         <tr>
                           <td colSpan={4} style={{ ...styles.itemsTd, textAlign: 'right', fontWeight: '600' }}>{t('orders.detail.fields.total')}:</td>
-                          <td style={{ ...styles.itemsTd, fontWeight: '700', color: '#4f46e5', fontSize: '16px' }}>
+                          <td style={{ ...styles.itemsTd, fontWeight: '700', color: 'var(--brand-1)', fontSize: '16px' }}>
                             {formatCurrency(selectedOrder.total_amount, selectedOrder.currency)}
                           </td>
                         </tr>
@@ -1542,7 +1542,7 @@ export default function Orders() {
                     <h4 style={styles.detailSectionTitle}>📦 {t('orders.detail.sections.manufacturerPack')}</h4>
                     <p style={{ 
                       fontSize: '13px', 
-                      color: darkMode ? '#9ca3af' : '#6b7280',
+                      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
                       marginBottom: '12px'
                     }}>
                       {t('orders.detail.manufacturerPackHelp')}
@@ -1581,7 +1581,7 @@ export default function Orders() {
                   {selectedOrder.notes && (
                     <div style={styles.detailSection}>
                       <h4 style={styles.detailSectionTitle}>📝 {t('orders.detail.sections.notes')}</h4>
-                      <p style={{ margin: 0, color: darkMode ? '#ffffff' : '#111827', whiteSpace: 'pre-wrap' }}>
+                      <p style={{ margin: 0, color: darkMode ? '#ffffff' : 'var(--text-1)', whiteSpace: 'pre-wrap' }}>
                         {selectedOrder.notes}
                       </p>
                     </div>
@@ -1605,7 +1605,7 @@ export default function Orders() {
                         margin: '0 0 12px 0',
                         fontSize: '14px',
                         fontWeight: '600',
-                        color: darkMode ? '#ffffff' : '#111827'
+                        color: darkMode ? '#ffffff' : 'var(--text-1)'
                       }}>
                         {t('orders.detail.whySupplier')}
                       </h4>
@@ -1614,7 +1614,7 @@ export default function Orders() {
                         entityId={selectedOrder.id} 
                         darkMode={darkMode}
                         allowedDecisions={[
-                          { value: 'go', label: t('orders.detail.decision.go'), icon: CheckCircle2, color: '#10b981' }
+                          { value: 'go', label: t('orders.detail.decision.go'), icon: CheckCircle2, color: 'var(--success-1)' }
                         ]}
                       />
                     </div>
@@ -1673,7 +1673,7 @@ export default function Orders() {
             <div style={styles.detailHeader}>
               <h3 style={{
                 ...styles.detailTitle,
-                color: darkMode ? '#ffffff' : '#111827'
+                color: darkMode ? '#ffffff' : 'var(--text-1)'
               }}>
                 {t('orders.labels.modalTitle')}
               </h3>
@@ -1694,7 +1694,7 @@ export default function Orders() {
                     marginBottom: '6px',
                     fontSize: '13px',
                     fontWeight: '500',
-                    color: darkMode ? '#e5e7eb' : '#374151'
+                    color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
                   }}>
                     {t('orders.labels.quantity')}
                   </label>
@@ -1708,9 +1708,9 @@ export default function Orders() {
                       padding: '10px 12px',
                       borderRadius: '8px',
                       border: '1px solid',
-                      borderColor: darkMode ? '#374151' : '#d1d5db',
-                      backgroundColor: darkMode ? '#15151f' : '#f9fafb',
-                      color: darkMode ? '#ffffff' : '#111827',
+                      borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)',
+                      backgroundColor: darkMode ? '#15151f' : 'var(--surface-bg-2)',
+                      color: darkMode ? '#ffffff' : 'var(--text-1)',
                       fontSize: '14px'
                     }}
                   />
@@ -1721,7 +1721,7 @@ export default function Orders() {
                     marginBottom: '6px',
                     fontSize: '13px',
                     fontWeight: '500',
-                    color: darkMode ? '#e5e7eb' : '#374151'
+                    color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
                   }}>
                     {t('orders.labels.template')}
                   </label>
@@ -1733,9 +1733,9 @@ export default function Orders() {
                       padding: '10px 12px',
                       borderRadius: '8px',
                       border: '1px solid',
-                      borderColor: darkMode ? '#374151' : '#d1d5db',
-                      backgroundColor: darkMode ? '#15151f' : '#f9fafb',
-                      color: darkMode ? '#ffffff' : '#111827',
+                      borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)',
+                      backgroundColor: darkMode ? '#15151f' : 'var(--surface-bg-2)',
+                      color: darkMode ? '#ffffff' : 'var(--text-1)',
                       fontSize: '14px'
                     }}
                   >
@@ -1755,7 +1755,7 @@ export default function Orders() {
                       checked={labelsConfig.includeSku}
                       onChange={e => setLabelsConfig({ ...labelsConfig, includeSku: e.target.checked })}
                     />
-                    <span style={{ fontSize: '13px', color: darkMode ? '#e5e7eb' : '#374151' }}>{t('orders.labels.includeSku')}</span>
+                    <span style={{ fontSize: '13px', color: darkMode ? 'var(--border-1)' : 'var(--text-1)' }}>{t('orders.labels.includeSku')}</span>
                   </label>
                   <label style={{
                     display: 'flex',
@@ -1768,7 +1768,7 @@ export default function Orders() {
                       checked={labelsConfig.includeName}
                       onChange={e => setLabelsConfig({ ...labelsConfig, includeName: e.target.checked })}
                     />
-                    <span style={{ fontSize: '13px', color: darkMode ? '#e5e7eb' : '#374151' }}>{t('orders.labels.includeName')}</span>
+                    <span style={{ fontSize: '13px', color: darkMode ? 'var(--border-1)' : 'var(--text-1)' }}>{t('orders.labels.includeName')}</span>
                   </label>
                   <label style={{
                     display: 'flex',
@@ -1781,7 +1781,7 @@ export default function Orders() {
                       checked={labelsConfig.testPrint}
                       onChange={e => setLabelsConfig({ ...labelsConfig, testPrint: e.target.checked })}
                     />
-                    <span style={{ fontSize: '13px', color: darkMode ? '#e5e7eb' : '#374151' }}>{t('orders.labels.testPrint')}</span>
+                    <span style={{ fontSize: '13px', color: darkMode ? 'var(--border-1)' : 'var(--text-1)' }}>{t('orders.labels.testPrint')}</span>
                   </label>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '12px' }}>
@@ -1791,7 +1791,7 @@ export default function Orders() {
                       marginBottom: '6px',
                       fontSize: '13px',
                       fontWeight: '500',
-                      color: darkMode ? '#e5e7eb' : '#374151'
+                      color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
                     }}>
                       {t('orders.labels.offsetX')}
                     </label>
@@ -1805,9 +1805,9 @@ export default function Orders() {
                         padding: '10px 12px',
                         borderRadius: '8px',
                         border: '1px solid',
-                        borderColor: darkMode ? '#374151' : '#d1d5db',
-                        backgroundColor: darkMode ? '#15151f' : '#f9fafb',
-                        color: darkMode ? '#ffffff' : '#111827',
+                        borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)',
+                        backgroundColor: darkMode ? '#15151f' : 'var(--surface-bg-2)',
+                        color: darkMode ? '#ffffff' : 'var(--text-1)',
                         fontSize: '14px'
                       }}
                     />
@@ -1818,7 +1818,7 @@ export default function Orders() {
                       marginBottom: '6px',
                       fontSize: '13px',
                       fontWeight: '500',
-                      color: darkMode ? '#e5e7eb' : '#374151'
+                      color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
                     }}>
                       {t('orders.labels.offsetY')}
                     </label>
@@ -1832,9 +1832,9 @@ export default function Orders() {
                         padding: '10px 12px',
                         borderRadius: '8px',
                         border: '1px solid',
-                        borderColor: darkMode ? '#374151' : '#d1d5db',
-                        backgroundColor: darkMode ? '#15151f' : '#f9fafb',
-                        color: darkMode ? '#ffffff' : '#111827',
+                        borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)',
+                        backgroundColor: darkMode ? '#15151f' : 'var(--surface-bg-2)',
+                        color: darkMode ? '#ffffff' : 'var(--text-1)',
                         fontSize: '14px'
                       }}
                     />
@@ -1877,14 +1877,14 @@ const styles = {
   filters: { display: 'inline-flex', alignItems: 'center', gap: '12px', flexWrap: 'nowrap' },
   filterButton: { height: 'var(--btn-h-sm)' },
   toolbarRight: { display: 'inline-flex', alignItems: 'center', gap: '12px', marginLeft: 'auto', flexWrap: 'nowrap' },
-  newButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', backgroundColor: '#1F4E5F', color: '#F4F7F3', border: '1px solid #1F4E5F', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
+  newButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', backgroundColor: 'var(--brand-1)', color: 'var(--bg-app)', border: '1px solid var(--brand-1)', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
   statsRow: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px', marginBottom: '24px' },
   statCard: { display: 'flex', alignItems: 'center', gap: '16px', padding: '20px', borderRadius: '12px', border: 'none', boxShadow: 'var(--shadow-soft)' },
-  statValue: { display: 'block', fontSize: '20px', fontWeight: '600', color: '#1F4E5F' },
-  statLabel: { fontSize: '12px', color: '#6b7280' },
-  loading: { padding: '64px', textAlign: 'center', color: '#6b7280' },
+  statValue: { display: 'block', fontSize: '20px', fontWeight: '600', color: 'var(--brand-1)' },
+  statLabel: { fontSize: '12px', color: 'var(--text-2)' },
+  loading: { padding: '64px', textAlign: 'center', color: 'var(--text-2)' },
   empty: { padding: '64px', textAlign: 'center', borderRadius: '16px', border: 'none', boxShadow: 'var(--shadow-soft)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' },
-  createButton: { display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', backgroundColor: '#1F4E5F', color: '#F4F7F3', border: '1px solid #1F4E5F', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
+  createButton: { display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', backgroundColor: 'var(--brand-1)', color: 'var(--bg-app)', border: '1px solid var(--brand-1)', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
   ordersGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' },
   ordersList: { display: 'flex', flexDirection: 'column', gap: '12px' },
   splitLayout: { display: 'grid', gridTemplateColumns: 'minmax(260px, 320px) 1fr', gap: '0', border: '1px solid var(--border-1)', borderRadius: '12px', overflow: 'hidden' },
@@ -1899,12 +1899,12 @@ const styles = {
   splitEmpty: { display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: 200, padding: '24px', color: 'var(--text-2)', fontSize: 14 },
   orderCard: { padding: '16px', borderRadius: '16px', border: 'none', boxShadow: 'var(--shadow-soft)' },
   orderCardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' },
-  orderCardBody: { display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: '#6b7280' },
+  orderCardBody: { display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: 'var(--text-2)' },
   riskBadge: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '4px 10px', borderRadius: '999px', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.06em' },
   operationalRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' },
-  operationalLabel: { fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#9ca3af' },
+  operationalLabel: { fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--muted-1)' },
   operationalPanel: { display: 'flex', flexDirection: 'column', gap: '4px', padding: '10px 12px', borderRadius: '12px', backgroundColor: 'rgba(148, 163, 184, 0.08)' },
-  operationalPanelLabel: { fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#9ca3af' },
+  operationalPanelLabel: { fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--muted-1)' },
   orderCardActions: { display: 'flex', gap: '8px', marginTop: '12px', alignItems: 'center', flexWrap: 'wrap' },
   iconButton: { padding: '0', width: 'var(--btn-h-sm)', minWidth: 'var(--btn-h-sm)' },
   menu: { position: 'absolute', right: 0, top: '100%', minWidth: '140px', borderRadius: '10px', border: '1px solid rgba(31, 78, 95, 0.12)', boxShadow: 'var(--shadow-soft-hover)', zIndex: 10 },
@@ -1913,7 +1913,7 @@ const styles = {
   // Modal Detall
   modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' },
   detailModal: { width: '100%', maxWidth: '900px', maxHeight: '90vh', borderRadius: '16px', border: '1px solid var(--border-color)', overflow: 'hidden', display: 'flex', flexDirection: 'column' },
-  modalLoading: { padding: '64px', textAlign: 'center', color: '#6b7280', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' },
+  modalLoading: { padding: '64px', textAlign: 'center', color: 'var(--text-2)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' },
   detailHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '20px 24px', borderBottom: '1px solid var(--border-color)' },
   detailTitle: { margin: 0, fontSize: '20px', fontWeight: '600' },
   detailHeaderRight: { display: 'flex', alignItems: 'center', gap: '12px' },
@@ -1923,13 +1923,13 @@ const styles = {
   detailBody: { padding: '24px', overflowY: 'auto', flex: 1 },
   detailGrid: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '24px', marginBottom: '24px' },
   detailSection: { marginBottom: '24px' },
-  detailSectionTitle: { margin: '0 0 12px', fontSize: '14px', fontWeight: '600', color: '#6b7280' },
+  detailSectionTitle: { margin: '0 0 12px', fontSize: '14px', fontWeight: '600', color: 'var(--text-2)' },
   detailRow: { display: 'flex', gap: '8px', marginBottom: '8px', fontSize: '14px' },
-  detailLabel: { color: '#9ca3af', minWidth: '80px' },
+  detailLabel: { color: 'var(--muted-1)', minWidth: '80px' },
   itemsTable: { width: '100%', borderCollapse: 'collapse', fontSize: '13px' },
-  itemsTh: { padding: '10px 12px', textAlign: 'left', backgroundColor: 'var(--bg-secondary)', fontWeight: '600', color: '#6b7280' },
-  itemsTd: { padding: '10px 12px', borderBottom: '1px solid var(--border-color)', color: '#6b7280' },
-  shippingGrid: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', fontSize: '14px', color: '#6b7280' }
+  itemsTh: { padding: '10px 12px', textAlign: 'left', backgroundColor: 'var(--bg-secondary)', fontWeight: '600', color: 'var(--text-2)' },
+  itemsTd: { padding: '10px 12px', borderBottom: '1px solid var(--border-color)', color: 'var(--text-2)' },
+  shippingGrid: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', fontSize: '14px', color: 'var(--text-2)' }
 }
 
 /**
@@ -1970,7 +1970,7 @@ function SplitPODetail({ summary, detail, loading, darkMode, onOpenFull, onOpenP
                 <button
                   type="button"
                   onClick={() => data?.project_id && onOpenProject(data.project_id)}
-                  style={{ background: 'none', border: 'none', color: 'var(--accent-primary, #3b82f6)', textDecoration: 'underline', cursor: 'pointer', padding: 0, fontSize: 13 }}
+                  style={{ background: 'none', border: 'none', color: 'var(--accent-primary, var(--cta-1))', textDecoration: 'underline', cursor: 'pointer', padding: 0, fontSize: 13 }}
                 >
                   {data.project.name}
                 </button>

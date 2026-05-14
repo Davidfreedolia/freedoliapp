@@ -166,7 +166,7 @@ export default function CustomizeDashboardModal({ isOpen, onClose, onSave }) {
         <div style={styles.header}>
           <h2 style={{
             ...styles.title,
-            color: darkMode ? '#ffffff' : '#111827'
+            color: darkMode ? '#ffffff' : 'var(--text-1)'
           }}>
             Personalitzar Dashboard
           </h2>
@@ -174,7 +174,7 @@ export default function CustomizeDashboardModal({ isOpen, onClose, onSave }) {
             onClick={onClose}
             style={{
               ...styles.closeButton,
-              color: darkMode ? '#9ca3af' : '#6b7280'
+              color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
             }}
           >
             <X size={20} />
@@ -184,7 +184,7 @@ export default function CustomizeDashboardModal({ isOpen, onClose, onSave }) {
         <div style={styles.content}>
           <p style={{
             ...styles.description,
-            color: darkMode ? '#9ca3af' : '#6b7280'
+            color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
           }}>
             Activa o desactiva els widgets que vols veure al Dashboard
           </p>
@@ -196,7 +196,7 @@ export default function CustomizeDashboardModal({ isOpen, onClose, onSave }) {
               <div style={styles.section}>
                 <h3 style={{
                   ...styles.sectionTitle,
-                  color: darkMode ? '#ffffff' : '#111827'
+                  color: darkMode ? '#ffffff' : 'var(--text-1)'
                 }}>
                   Widgets Principals
                 </h3>
@@ -206,20 +206,20 @@ export default function CustomizeDashboardModal({ isOpen, onClose, onSave }) {
                       key={widget.id}
                       style={{
                         ...styles.widgetItem,
-                        backgroundColor: darkMode ? '#15151f' : '#f9fafb',
-                        borderColor: darkMode ? '#374151' : '#e5e7eb'
+                        backgroundColor: darkMode ? '#15151f' : 'var(--surface-bg-2)',
+                        borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
                       }}
                     >
                       <div style={styles.widgetInfo}>
                         <div style={{
                           ...styles.widgetName,
-                          color: darkMode ? '#ffffff' : '#111827'
+                          color: darkMode ? '#ffffff' : 'var(--text-1)'
                         }}>
                           {widget.name}
                         </div>
                         <div style={{
                           ...styles.widgetDescription,
-                          color: darkMode ? '#6b7280' : '#9ca3af'
+                          color: darkMode ? 'var(--text-2)' : 'var(--muted-1)'
                         }}>
                           {widget.description}
                         </div>
@@ -228,8 +228,8 @@ export default function CustomizeDashboardModal({ isOpen, onClose, onSave }) {
                         onClick={() => handleToggle(widget.id)}
                         style={{
                           ...styles.toggleButton,
-                          backgroundColor: widgets[widget.id] ? '#22c55e' : (darkMode ? '#374151' : '#e5e7eb'),
-                          color: widgets[widget.id] ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280')
+                          backgroundColor: widgets[widget.id] ? 'var(--success-1)' : (darkMode ? 'var(--text-1)' : 'var(--border-1)'),
+                          color: widgets[widget.id] ? '#ffffff' : (darkMode ? 'var(--muted-1)' : 'var(--text-2)')
                         }}
                       >
                         {widgets[widget.id] && <Check size={16} />}
@@ -242,7 +242,7 @@ export default function CustomizeDashboardModal({ isOpen, onClose, onSave }) {
               <div style={styles.section}>
                 <h3 style={{
                   ...styles.sectionTitle,
-                  color: darkMode ? '#ffffff' : '#111827'
+                  color: darkMode ? '#ffffff' : 'var(--text-1)'
                 }}>
                   Daily Ops Widgets
                 </h3>
@@ -256,20 +256,20 @@ export default function CustomizeDashboardModal({ isOpen, onClose, onSave }) {
                         key={widget.id}
                         style={{
                           ...styles.widgetItem,
-                          backgroundColor: darkMode ? '#15151f' : '#f9fafb',
-                          borderColor: darkMode ? '#374151' : '#e5e7eb'
+                          backgroundColor: darkMode ? '#15151f' : 'var(--surface-bg-2)',
+                          borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
                         }}
                       >
                         <div style={styles.widgetInfo}>
                           <div style={{
                             ...styles.widgetName,
-                            color: darkMode ? '#ffffff' : '#111827'
+                            color: darkMode ? '#ffffff' : 'var(--text-1)'
                           }}>
                             {widget.name}
                           </div>
                           <div style={{
                             ...styles.widgetDescription,
-                            color: darkMode ? '#6b7280' : '#9ca3af'
+                            color: darkMode ? 'var(--text-2)' : 'var(--muted-1)'
                           }}>
                             {widget.description}
                           </div>
@@ -303,8 +303,8 @@ export default function CustomizeDashboardModal({ isOpen, onClose, onSave }) {
                             onClick={() => handleToggleDailyOps(widget.id)}
                             style={{
                               ...styles.toggleButton,
-                              backgroundColor: enabledWidgets[widget.id] ? '#22c55e' : (darkMode ? '#374151' : '#e5e7eb'),
-                              color: enabledWidgets[widget.id] ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280')
+                              backgroundColor: enabledWidgets[widget.id] ? 'var(--success-1)' : (darkMode ? 'var(--text-1)' : 'var(--border-1)'),
+                              color: enabledWidgets[widget.id] ? '#ffffff' : (darkMode ? 'var(--muted-1)' : 'var(--text-2)')
                             }}
                           >
                             {enabledWidgets[widget.id] && <Check size={16} />}
@@ -319,18 +319,18 @@ export default function CustomizeDashboardModal({ isOpen, onClose, onSave }) {
               <div style={styles.section}>
                 <h3 style={{
                   ...styles.sectionTitle,
-                  color: darkMode ? '#ffffff' : '#111827'
+                  color: darkMode ? '#ffffff' : 'var(--text-1)'
                 }}>
                   Configuració
                 </h3>
                 <div style={{
                   ...styles.configItem,
-                  backgroundColor: darkMode ? '#15151f' : '#f9fafb',
-                  borderColor: darkMode ? '#374151' : '#e5e7eb'
+                  backgroundColor: darkMode ? '#15151f' : 'var(--surface-bg-2)',
+                  borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
                 }}>
                   <label style={{
                     ...styles.configLabel,
-                    color: darkMode ? '#ffffff' : '#111827'
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}>
                     Dies per considerar tracking stale:
                   </label>
@@ -343,8 +343,8 @@ export default function CustomizeDashboardModal({ isOpen, onClose, onSave }) {
                     style={{
                       ...styles.configInput,
                       backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
-                      color: darkMode ? '#ffffff' : '#111827',
-                      borderColor: darkMode ? '#374151' : '#d1d5db'
+                      color: darkMode ? '#ffffff' : 'var(--text-1)',
+                      borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
                     }}
                   />
                 </div>
@@ -355,14 +355,14 @@ export default function CustomizeDashboardModal({ isOpen, onClose, onSave }) {
 
         <div style={{
           ...styles.footer,
-          borderTopColor: darkMode ? '#374151' : '#e5e7eb'
+          borderTopColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
         }}>
           <button
             onClick={onClose}
             style={{
               ...styles.cancelButton,
-              backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6',
-              color: darkMode ? '#9ca3af' : '#6b7280'
+              backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+              color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
             }}
           >
             {t('common.cancel')}
@@ -372,7 +372,7 @@ export default function CustomizeDashboardModal({ isOpen, onClose, onSave }) {
             disabled={saving}
             style={{
               ...styles.saveButton,
-              backgroundColor: '#4f46e5',
+              backgroundColor: 'var(--brand-1)',
               opacity: saving ? 0.6 : 1
             }}
           >
@@ -442,7 +442,7 @@ const styles = {
   loading: {
     padding: '48px',
     textAlign: 'center',
-    color: '#6b7280'
+    color: 'var(--text-2)'
   },
   widgetsList: {
     display: 'flex',

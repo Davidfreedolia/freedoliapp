@@ -58,7 +58,7 @@ export default function HomeProfitTrend({ data = [], loading }) {
               type="monotone"
               dataKey="netProfit"
               name="Net Profit"
-              stroke="var(--color-primary, #2563eb)"
+              stroke="var(--color-primary, var(--brand-1))"
               strokeWidth={2}
               dot={false}
             />

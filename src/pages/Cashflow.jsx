@@ -141,7 +141,7 @@ export default function Cashflow() {
                       type="monotone"
                       dataKey="cashBalance"
                       name="Caixa"
-                      stroke="var(--color-primary, #2563eb)"
+                      stroke="var(--color-primary, var(--brand-1))"
                       strokeWidth={2}
                       dot={false}
                     />

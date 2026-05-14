@@ -14,7 +14,7 @@ const STEP_COLORS = [
   '#8db33a', // Fase 4 - Verd-groc   (Mostres)
   '#38a169', // Fase 5 - Verd        (Producció)
   '#2fa4a9', // Fase 6 - Teal        (Listing)
-  '#6ecbc3', // Fase 7 - Menta       (Live)
+  'var(--brand-2)', // Fase 7 - Menta       (Live)
 ]
 
 export default function ProjectMiniPipeline({ phase, totalSteps = 7 }) {
@@ -29,7 +29,7 @@ export default function ProjectMiniPipeline({ phase, totalSteps = 7 }) {
           step === current ? 'is-current' :
           'is-upcoming'
 
-        const color = STEP_COLORS[step - 1] || '#6ecbc3'
+        const color = STEP_COLORS[step - 1] || 'var(--brand-2)'
 
         const inlineStyle =
           status === 'is-done'

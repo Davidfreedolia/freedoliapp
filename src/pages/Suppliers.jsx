@@ -52,10 +52,10 @@ import { isScreenshotMode } from '../lib/ui/screenshotMode'
 
 // Tipus de proveïdors
 const SUPPLIER_TYPES = [
-  { id: 'manufacturer', name: 'Fabricant', icon: Building2, color: '#4f46e5' },
-  { id: 'trading', name: 'Trading Company', icon: Package, color: '#8b5cf6' },
-  { id: 'agent', name: 'Agent de Compres', icon: Users, color: '#06b6d4' },
-  { id: 'freight', name: 'Transitari', icon: Truck, color: '#f59e0b' }
+  { id: 'manufacturer', name: 'Fabricant', icon: Building2, color: 'var(--brand-1)' },
+  { id: 'trading', name: 'Trading Company', icon: Package, color: 'var(--brand-1)' },
+  { id: 'agent', name: 'Agent de Compres', icon: Users, color: 'var(--brand-2)' },
+  { id: 'freight', name: 'Transitari', icon: Truck, color: 'var(--warning-1)' }
 ]
 
 // Incoterms
@@ -97,14 +97,14 @@ const DAY_MS = 24 * 60 * 60 * 1000
 const OPERATIONAL_STATUS_META = {
   active: { color: '#0f766e', background: 'rgba(15, 118, 110, 0.12)' },
   watch: { color: '#b45309', background: 'rgba(180, 83, 9, 0.12)' },
-  inactive: { color: '#6b7280', background: 'rgba(107, 114, 128, 0.12)' }
+  inactive: { color: 'var(--text-2)', background: 'rgba(107, 114, 128, 0.12)' }
 }
 
 const RISK_LEVEL_META = {
-  high: { color: '#dc2626', background: 'rgba(220, 38, 38, 0.12)' },
-  medium: { color: '#d97706', background: 'rgba(217, 119, 6, 0.12)' },
-  low: { color: '#2563eb', background: 'rgba(37, 99, 235, 0.12)' },
-  none: { color: '#6b7280', background: 'rgba(107, 114, 128, 0.12)' }
+  high: { color: 'var(--danger-1)', background: 'rgba(220, 38, 38, 0.12)' },
+  medium: { color: 'var(--warning-1)', background: 'rgba(217, 119, 6, 0.12)' },
+  low: { color: 'var(--brand-1)', background: 'rgba(37, 99, 235, 0.12)' },
+  none: { color: 'var(--text-2)', background: 'rgba(107, 114, 128, 0.12)' }
 }
 
 const EMPTY_OPERATIONAL_SUMMARY = {
@@ -572,7 +572,7 @@ export default function Suppliers() {
             <TypeIcon size={20} color={typeInfo.color} />
           </div>
           <div style={styles.cardTitleArea}>
-            <h3 style={{ ...styles.cardTitle, color: darkMode ? '#ffffff' : '#111827' }}>
+            <h3 style={{ ...styles.cardTitle, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
               {supplier.name}
             </h3>
             <span style={{ ...styles.typeBadge, backgroundColor: `${typeInfo.color}15`, color: typeInfo.color }}>
@@ -637,8 +637,8 @@ export default function Suppliers() {
 
         {/* Location */}
         <div style={styles.cardRow}>
-          <MapPin size={14} color="#6b7280" />
-          <span style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
+          <MapPin size={14} color='var(--text-2)' />
+          <span style={{ color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
             {supplier.city}, {supplier.country}
           </span>
         </div>
@@ -646,16 +646,16 @@ export default function Suppliers() {
         {/* Contact */}
         {supplier.contact_name && (
           <div style={styles.cardRow}>
-            <Users size={14} color="#6b7280" />
-            <span style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>{supplier.contact_name}</span>
+            <Users size={14} color='var(--text-2)' />
+            <span style={{ color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>{supplier.contact_name}</span>
           </div>
         )}
 
         {/* Phone/WhatsApp */}
         {(supplier.phone || supplier.whatsapp) && (
           <div style={styles.cardRow}>
-            <Phone size={14} color="#6b7280" />
-            <span style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
+            <Phone size={14} color='var(--text-2)' />
+            <span style={{ color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
               {supplier.phone || supplier.whatsapp}
             </span>
           </div>
@@ -671,31 +671,31 @@ export default function Suppliers() {
         </div>
 
         <div style={styles.operationalMetricsGrid}>
-          <div style={{ ...styles.operationalMetricCard, backgroundColor: darkMode ? '#0f1118' : '#f8fafc' }}>
-            <MessageCircle size={14} color="#2563eb" />
+          <div style={{ ...styles.operationalMetricCard, backgroundColor: darkMode ? '#0f1118' : 'var(--surface-bg-2)' }}>
+            <MessageCircle size={14} color="var(--brand-1)" />
             <div>
-              <div style={{ ...styles.operationalMetricValue, color: darkMode ? '#ffffff' : '#111827' }}>{operational.openQuotesCount}</div>
+              <div style={{ ...styles.operationalMetricValue, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>{operational.openQuotesCount}</div>
               <div style={styles.operationalMetricLabel}>{t('suppliersPage.operational.metrics.openQuotes')}</div>
             </div>
           </div>
-          <div style={{ ...styles.operationalMetricCard, backgroundColor: darkMode ? '#0f1118' : '#f8fafc' }}>
-            <Package size={14} color="#d97706" />
+          <div style={{ ...styles.operationalMetricCard, backgroundColor: darkMode ? '#0f1118' : 'var(--surface-bg-2)' }}>
+            <Package size={14} color="var(--warning-1)" />
             <div>
-              <div style={{ ...styles.operationalMetricValue, color: darkMode ? '#ffffff' : '#111827' }}>{operational.pendingSamplesCount}</div>
+              <div style={{ ...styles.operationalMetricValue, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>{operational.pendingSamplesCount}</div>
               <div style={styles.operationalMetricLabel}>{t('suppliersPage.operational.metrics.pendingSamples')}</div>
             </div>
           </div>
-          <div style={{ ...styles.operationalMetricCard, backgroundColor: darkMode ? '#0f1118' : '#f8fafc' }}>
-            <Building2 size={14} color="#7c3aed" />
+          <div style={{ ...styles.operationalMetricCard, backgroundColor: darkMode ? '#0f1118' : 'var(--surface-bg-2)' }}>
+            <Building2 size={14} color="var(--brand-1)" />
             <div>
-              <div style={{ ...styles.operationalMetricValue, color: darkMode ? '#ffffff' : '#111827' }}>{operational.activePosCount}</div>
+              <div style={{ ...styles.operationalMetricValue, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>{operational.activePosCount}</div>
               <div style={styles.operationalMetricLabel}>{t('suppliersPage.operational.metrics.activePos')}</div>
             </div>
           </div>
-          <div style={{ ...styles.operationalMetricCard, backgroundColor: darkMode ? '#0f1118' : '#f8fafc' }}>
-            <Truck size={14} color="#0891b2" />
+          <div style={{ ...styles.operationalMetricCard, backgroundColor: darkMode ? '#0f1118' : 'var(--surface-bg-2)' }}>
+            <Truck size={14} color="var(--brand-2)" />
             <div>
-              <div style={{ ...styles.operationalMetricValue, color: darkMode ? '#ffffff' : '#111827' }}>{operational.activeShipmentsCount}</div>
+              <div style={{ ...styles.operationalMetricValue, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>{operational.activeShipmentsCount}</div>
               <div style={styles.operationalMetricLabel}>{t('suppliersPage.operational.metrics.activeShipments')}</div>
             </div>
           </div>
@@ -704,13 +704,13 @@ export default function Suppliers() {
         <div style={styles.operationalFooter}>
           <div style={styles.operationalFooterBlock}>
             <span style={styles.operationalFooterLabel}>{t('suppliersPage.operational.nextActionLabel')}</span>
-            <strong style={{ color: darkMode ? '#ffffff' : '#111827' }}>
+            <strong style={{ color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
               {t(`suppliersPage.operational.nextAction.${operational.nextAction}`)}
             </strong>
           </div>
           <div style={styles.operationalFooterBlock}>
             <span style={styles.operationalFooterLabel}>{t('suppliersPage.operational.lastActivityLabel')}</span>
-            <strong style={{ color: darkMode ? '#ffffff' : '#111827' }}>
+            <strong style={{ color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
               {formatLastActivity(operational.lastActivityAt)}
             </strong>
           </div>
@@ -741,7 +741,7 @@ export default function Suppliers() {
         <div style={styles.toolbar} className="toolbar-row">
           <div style={styles.searchGroup} className="toolbar-group">
             <div style={styles.searchContainer} className="toolbar-search">
-              <Search size={18} color="#9ca3af" />
+              <Search size={18} color='var(--muted-1)' />
               <input
                 type="text"
                 placeholder={t('suppliersPage.searchPlaceholder')}
@@ -891,7 +891,7 @@ export default function Suppliers() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                   {groups.map(({ key, items: groupItems }) => {
                     const meta = OPERATIONAL_STATUS_META[key] || OPERATIONAL_STATUS_META.inactive
-                    const color = meta?.color || '#6b7280'
+                    const color = meta?.color || 'var(--text-2)'
                     return (
                       <div key={key} style={{ border: '1px solid var(--border)', borderRadius: 10, background: 'var(--surface-bg)', overflow: 'hidden' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 14px', background: 'var(--surface-bg-2)', borderBottom: '1px solid var(--border)' }}>
@@ -915,13 +915,13 @@ export default function Suppliers() {
                                 const typeInfo = SUPPLIER_TYPES.find(tt => tt.id === supplier.type) || SUPPLIER_TYPES[0]
                                 const ops = operationalBySupplier[supplier.id]
                                 const opsMeta = OPERATIONAL_STATUS_META[ops?.operationalStatus] || OPERATIONAL_STATUS_META.inactive
-                                const opsColor = opsMeta?.color || '#6b7280'
+                                const opsColor = opsMeta?.color || 'var(--text-2)'
                                 const poCount = ops?.activePOCount ?? ops?.active_po_count ?? 0
                                 const td = { padding: '0 12px', height: 46, fontSize: 13, color: 'var(--text-1)', borderBottom: '1px solid var(--border)', verticalAlign: 'middle', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
                                 return (
                                   <tr key={supplier.id} onClick={() => navigate('/app/suppliers/' + supplier.id)} style={{ cursor: 'pointer' }} className="fd-table-row">
                                     <td style={{ ...td, fontWeight: 600 }}>{supplier.name || '—'}</td>
-                                    <td style={td}><span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 999, fontSize: 11, fontWeight: 600, background: (typeInfo.color||'#6b7280')+'1a', color: typeInfo.color||'#6b7280' }}>{typeInfo.name}</span></td>
+                                    <td style={td}><span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 999, fontSize: 11, fontWeight: 600, background: (typeInfo.color||'var(--text-2)')+'1a', color: typeInfo.color||'var(--text-2)' }}>{typeInfo.name}</span></td>
                                     <td style={{ ...td, color: 'var(--text-2)' }}>{supplier.country || '—'}</td>
                                     <td style={{ ...td, color: 'var(--text-2)', textAlign: 'center' }}>{poCount > 0 ? poCount : '—'}</td>
                                     <td style={td}><span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '2px 8px', borderRadius: 999, fontSize: 11, fontWeight: 600, background: opsColor+'1a', color: opsColor }}>{opsMeta?.label || ops?.operationalStatus || 'Inactiu'}</span></td>
@@ -947,7 +947,7 @@ export default function Suppliers() {
         <div style={styles.modalOverlay} onClick={() => { setShowModal(false); setEditingSupplier(null) }}>
           <div style={{ ...styles.modal, backgroundColor: 'var(--surface-bg)' }} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeader}>
-              <h3 style={{ ...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827' }}>
+              <h3 style={{ ...styles.modalTitle, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
                 {editingSupplier.id ? 'Editar Proveïdor' : 'Nou Proveïdor'}
               </h3>
               <Button
@@ -970,7 +970,7 @@ export default function Suppliers() {
                     value={editingSupplier.name}
                     onChange={e => setEditingSupplier({ ...editingSupplier, name: e.target.value })}
                     placeholder="Ex: Huizhou Ziyuan Houseware"
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }}
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }}
                   />
                 </div>
 
@@ -980,7 +980,7 @@ export default function Suppliers() {
                   <select
                     value={editingSupplier.type}
                     onChange={e => setEditingSupplier({ ...editingSupplier, type: e.target.value })}
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }}
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }}
                   >
                     {SUPPLIER_TYPES.filter(t => t.id !== 'freight').map(t => (
                       <option key={t.id} value={t.id}>{t.name}</option>
@@ -996,7 +996,7 @@ export default function Suppliers() {
                     value={editingSupplier.contact_name}
                     onChange={e => setEditingSupplier({ ...editingSupplier, contact_name: e.target.value })}
                     placeholder="Ex: Lucy Wang"
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }}
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }}
                   />
                 </div>
 
@@ -1006,7 +1006,7 @@ export default function Suppliers() {
                   <select
                     value={editingSupplier.country}
                     onChange={e => setEditingSupplier({ ...editingSupplier, country: e.target.value, city: '' })}
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }}
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }}
                   >
                     {Object.keys(COUNTRIES_CITIES).map(c => (
                       <option key={c} value={c}>{c}</option>
@@ -1027,7 +1027,7 @@ export default function Suppliers() {
                           setEditingSupplier({ ...editingSupplier, city: e.target.value })
                         }
                       }}
-                      style={{ ...styles.input, flex: 1, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }}
+                      style={{ ...styles.input, flex: 1, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }}
                     >
                       <option value="">Selecciona...</option>
                       {getCitiesForCountry(editingSupplier.country).map(c => (
@@ -1043,7 +1043,7 @@ export default function Suppliers() {
                         value={newCityName}
                         onChange={e => setNewCityName(e.target.value)}
                         placeholder="Nom de la ciutat"
-                        style={{ ...styles.input, flex: 1, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }}
+                        style={{ ...styles.input, flex: 1, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }}
                       />
                       <Button variant="secondary" size="sm" onClick={handleAddCustomCity} style={styles.addCityBtn}>Afegir</Button>
                       <Button variant="ghost" size="sm" onClick={() => { setShowCustomCityInput(false); setNewCityName('') }} style={styles.cancelCityBtn}>✕</Button>
@@ -1059,7 +1059,7 @@ export default function Suppliers() {
                     value={editingSupplier.email}
                     onChange={e => setEditingSupplier({ ...editingSupplier, email: e.target.value })}
                     placeholder="email@example.com"
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }}
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }}
                   />
                 </div>
 
@@ -1071,7 +1071,7 @@ export default function Suppliers() {
                     value={editingSupplier.phone}
                     onChange={e => setEditingSupplier({ ...editingSupplier, phone: e.target.value })}
                     placeholder="+86 123 456 7890"
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }}
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }}
                   />
                 </div>
 
@@ -1083,7 +1083,7 @@ export default function Suppliers() {
                     value={editingSupplier.whatsapp}
                     onChange={e => setEditingSupplier({ ...editingSupplier, whatsapp: e.target.value })}
                     placeholder="+86 123 456 7890"
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }}
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }}
                   />
                 </div>
 
@@ -1095,7 +1095,7 @@ export default function Suppliers() {
                     value={editingSupplier.wechat}
                     onChange={e => setEditingSupplier({ ...editingSupplier, wechat: e.target.value })}
                     placeholder="wechat_id"
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }}
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }}
                   />
                 </div>
 
@@ -1105,7 +1105,7 @@ export default function Suppliers() {
                   <select
                     value={editingSupplier.payment_terms}
                     onChange={e => setEditingSupplier({ ...editingSupplier, payment_terms: e.target.value })}
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }}
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }}
                   >
                     {PAYMENT_TERMS.map(t => (
                       <option key={t} value={t}>{t}</option>
@@ -1119,7 +1119,7 @@ export default function Suppliers() {
                   <select
                     value={editingSupplier.incoterm}
                     onChange={e => setEditingSupplier({ ...editingSupplier, incoterm: e.target.value })}
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }}
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }}
                   >
                     {INCOTERMS.map(i => (
                       <option key={i} value={i}>{i}</option>
@@ -1135,7 +1135,7 @@ export default function Suppliers() {
                     value={editingSupplier.incoterm_location}
                     onChange={e => setEditingSupplier({ ...editingSupplier, incoterm_location: e.target.value })}
                     placeholder="Ex: Shenzhen Port"
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }}
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }}
                   />
                 </div>
 
@@ -1147,7 +1147,7 @@ export default function Suppliers() {
                     value={editingSupplier.lead_time_days}
                     onChange={e => setEditingSupplier({ ...editingSupplier, lead_time_days: parseInt(e.target.value) || 0 })}
                     placeholder="30"
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }}
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }}
                   />
                 </div>
 
@@ -1164,7 +1164,7 @@ export default function Suppliers() {
                         onClick={() => setEditingSupplier({ ...editingSupplier, rating: i })}
                         style={styles.starButton}
                       >
-                        <Star size={20} fill={i <= editingSupplier.rating ? '#f59e0b' : 'none'} color={i <= editingSupplier.rating ? '#f59e0b' : '#d1d5db'} />
+                        <Star size={20} fill={i <= editingSupplier.rating ? 'var(--warning-1)' : 'none'} color={i <= editingSupplier.rating ? 'var(--warning-1)' : 'var(--border-1)'} />
                       </Button>
                     ))}
                   </div>
@@ -1178,7 +1178,7 @@ export default function Suppliers() {
                     value={editingSupplier.address}
                     onChange={e => setEditingSupplier({ ...editingSupplier, address: e.target.value })}
                     placeholder="Adreça completa..."
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }}
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }}
                   />
                 </div>
 
@@ -1190,7 +1190,7 @@ export default function Suppliers() {
                     onChange={e => setEditingSupplier({ ...editingSupplier, notes: e.target.value })}
                     rows={3}
                     placeholder="Notes addicionals..."
-                    style={{ ...styles.input, ...styles.textarea, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }}
+                    style={{ ...styles.input, ...styles.textarea, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }}
                   />
                 </div>
               </div>
@@ -1244,12 +1244,12 @@ const styles = {
   filterSelect: { height: 'var(--btn-h-sm)', padding: '0 12px', borderRadius: 'var(--btn-radius)', border: '1px solid var(--btn-secondary-border)', backgroundColor: 'var(--btn-ghost-bg)', color: 'var(--btn-secondary-fg)', fontSize: '14px', outline: 'none', cursor: 'pointer', boxShadow: 'var(--btn-shadow)' },
   filterButton: { height: 'var(--btn-h-sm)' },
   toolbarRight: { display: 'inline-flex', alignItems: 'center', gap: '12px', marginLeft: 'auto', flexWrap: 'nowrap' },
-  newButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', backgroundColor: '#1F4E5F', color: '#F4F7F3', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
+  newButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', backgroundColor: 'var(--brand-1)', color: 'var(--bg-app)', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
   statsRow: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '24px' },
   statCard: { display: 'flex', alignItems: 'center', gap: '16px', padding: '20px', borderRadius: '12px', border: 'none', boxShadow: 'var(--shadow-soft)' },
-  statValue: { display: 'block', fontSize: '24px', fontWeight: '600', color: '#1F4E5F' },
-  statLabel: { fontSize: '12px', color: '#6b7280' },
-  loading: { padding: '64px', textAlign: 'center', color: '#6b7280' },
+  statValue: { display: 'block', fontSize: '24px', fontWeight: '600', color: 'var(--brand-1)' },
+  statLabel: { fontSize: '12px', color: 'var(--text-2)' },
+  loading: { padding: '64px', textAlign: 'center', color: 'var(--text-2)' },
   empty: { padding: '64px', textAlign: 'center', borderRadius: '16px', border: 'none', boxShadow: 'var(--shadow-soft)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' },
   suppliersGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' },
   suppliersList: { display: 'flex', flexDirection: 'column', gap: '12px' },
@@ -1270,12 +1270,12 @@ const styles = {
   statusBadge: { display: 'inline-flex', alignItems: 'center', padding: '4px 10px', borderRadius: '999px', fontSize: '11px', fontWeight: '600' },
   operationalMetricsGrid: { display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '10px', marginBottom: '14px' },
   operationalMetricCard: { display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '10px' },
-  operationalMetricValue: { fontSize: '16px', fontWeight: '700', color: '#111827', lineHeight: 1.1 },
-  operationalMetricLabel: { fontSize: '11px', color: '#6b7280', lineHeight: 1.2 },
+  operationalMetricValue: { fontSize: '16px', fontWeight: '700', color: 'var(--text-1)', lineHeight: 1.1 },
+  operationalMetricLabel: { fontSize: '11px', color: 'var(--text-2)', lineHeight: 1.2 },
   operationalFooter: { display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '12px', marginBottom: '8px' },
   operationalFooterBlock: { display: 'flex', flexDirection: 'column', gap: '4px' },
-  operationalFooterLabel: { fontSize: '11px', color: '#6b7280' },
-  menuButton: { padding: '0', width: 'var(--btn-h-sm)', minWidth: 'var(--btn-h-sm)', color: '#9ca3af' },
+  operationalFooterLabel: { fontSize: '11px', color: 'var(--text-2)' },
+  menuButton: { padding: '0', width: 'var(--btn-h-sm)', minWidth: 'var(--btn-h-sm)', color: 'var(--muted-1)' },
   menu: { position: 'absolute', right: 0, top: '100%', minWidth: '120px', borderRadius: '10px', border: '1px solid rgba(31, 78, 95, 0.12)', boxShadow: 'var(--shadow-soft-hover)', zIndex: 10 },
   menuItem: { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', justifyContent: 'flex-start', padding: '0 var(--btn-pad-x)', fontSize: '13px' },
   menuItemDanger: { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', justifyContent: 'flex-start', padding: '0 var(--btn-pad-x)', fontSize: '13px' },
@@ -1289,7 +1289,7 @@ const styles = {
   modalFooter: { display: 'flex', justifyContent: 'flex-end', gap: '12px', padding: '20px 24px', borderTop: '1px solid var(--border-color)' },
   formGrid: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' },
   formGroup: { display: 'flex', flexDirection: 'column', gap: '6px' },
-  label: { fontSize: '12px', fontWeight: '500', color: '#6b7280' },
+  label: { fontSize: '12px', fontWeight: '500', color: 'var(--text-2)' },
   input: { padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '14px', outline: 'none' },
   textarea: { resize: 'vertical', minHeight: '80px' },
   cancelButton: { minWidth: '120px' },

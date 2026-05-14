@@ -112,7 +112,7 @@ export default function ProtectedRoute({ children }) {
         justifyContent: 'center',
         backgroundColor: '#f8f9fc',
       }}>
-        <div style={{ fontSize: '16px', color: '#6b7280' }}>{t('common.loading')}</div>
+        <div style={{ fontSize: '16px', color: 'var(--text-2)' }}>{t('common.loading')}</div>
       </div>
     )
   }

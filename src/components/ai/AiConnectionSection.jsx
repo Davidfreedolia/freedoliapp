@@ -62,8 +62,8 @@ export default function AiConnectionSection({ darkMode = false }) {
     }
   }
 
-  const muted = darkMode ? '#9aa1b4' : '#6b7280'
-  const ink = darkMode ? '#e6e9f2' : '#1f2937'
+  const muted = darkMode ? '#9aa1b4' : 'var(--text-2)'
+  const ink = darkMode ? '#e6e9f2' : 'var(--text-1)'
   const borderColor = darkMode ? '#2a2a3a' : 'rgba(31,95,99,0.14)'
   const cardBg = darkMode ? '#1b1b2a' : '#ffffff'
 
@@ -81,7 +81,7 @@ export default function AiConnectionSection({ darkMode = false }) {
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, gap: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Sparkles size={18} color="var(--brand-1,#1F5F63)" />
+          <Sparkles size={18} color="var(--brand-1,var(--brand-1))" />
           <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>
             {t('settings.ai.title', 'Potencia la teva IA')}
           </h3>

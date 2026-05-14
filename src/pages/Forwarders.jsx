@@ -268,7 +268,7 @@ export default function Forwarders() {
             disabled={!editable}
             style={styles.starButton}
           >
-            <Star size={16} fill={i <= rating ? '#f59e0b' : 'none'} color={i <= rating ? '#f59e0b' : '#d1d5db'} />
+            <Star size={16} fill={i <= rating ? 'var(--warning-1)' : 'none'} color={i <= rating ? 'var(--warning-1)' : 'var(--border-1)'} />
           </Button>
         ))}
       </div>
@@ -291,10 +291,10 @@ export default function Forwarders() {
         {/* Header */}
         <div style={styles.forwarderHeader}>
           <div style={styles.forwarderIcon}>
-            <Truck size={24} color="#1F4E5F" />
+            <Truck size={24} color='var(--brand-1)' />
           </div>
           <div style={styles.forwarderInfo}>
-            <h3 style={{ ...styles.forwarderName, color: darkMode ? '#ffffff' : '#111827' }}>
+            <h3 style={{ ...styles.forwarderName, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
               {forwarder.name}
             </h3>
             <div style={styles.forwarderMeta}>
@@ -373,7 +373,7 @@ export default function Forwarders() {
         {isExpanded && (
           <div style={styles.warehousesSection}>
             <div style={styles.warehousesHeader}>
-              <h4 style={{ color: darkMode ? '#ffffff' : '#111827', margin: 0 }}>
+              <h4 style={{ color: darkMode ? '#ffffff' : 'var(--text-1)', margin: 0 }}>
                 Magatzems de {forwarder.name}
               </h4>
               <Button variant="secondary" size="sm" onClick={() => handleNewWarehouse(forwarder.id)} style={styles.addWarehouseBtn}>
@@ -382,17 +382,17 @@ export default function Forwarders() {
             </div>
             
             {forwarderWarehouses.length === 0 ? (
-              <p style={{ color: '#6b7280', fontSize: '14px' }}>No hi ha magatzems configurats</p>
+              <p style={{ color: 'var(--text-2)', fontSize: '14px' }}>No hi ha magatzems configurats</p>
             ) : (
               <div style={styles.warehousesList}>
                 {forwarderWarehouses.map(warehouse => (
                   <div key={warehouse.id} style={{
                     ...styles.warehouseItem,
-                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
+                    backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)'
                   }}>
                     <div>
-                      <strong style={{ color: darkMode ? '#ffffff' : '#111827' }}>{warehouse.name}</strong>
-                      <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#6b7280' }}>
+                      <strong style={{ color: darkMode ? '#ffffff' : 'var(--text-1)' }}>{warehouse.name}</strong>
+                      <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--text-2)' }}>
                         {warehouse.address}, {warehouse.city}, {warehouse.country}
                       </p>
                     </div>
@@ -612,7 +612,7 @@ export default function Forwarders() {
         <div style={styles.toolbar} className="toolbar-row">
           <div style={styles.searchGroup} className="toolbar-group">
             <div style={styles.searchContainer} className="toolbar-search">
-              <Search size={18} color="#9ca3af" />
+              <Search size={18} color='var(--muted-1)' />
               <input
                 type="text"
                 placeholder="Buscar transitaris..."
@@ -664,8 +664,8 @@ export default function Forwarders() {
           <div style={styles.loading}>Carregant...</div>
         ) : filteredForwarders.length === 0 ? (
           <div style={{ ...styles.empty, backgroundColor: 'var(--surface-bg)' }}>
-            <Truck size={48} color="#d1d5db" />
-            <p style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>No hi ha transitaris. Crea el primer!</p>
+            <Truck size={48} color='var(--border-1)' />
+            <p style={{ color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>No hi ha transitaris. Crea el primer!</p>
             <Button onClick={handleNewForwarder}>
               <Plus size={18} /> Afegir Transitari
             </Button>
@@ -704,7 +704,7 @@ export default function Forwarders() {
                               <td style={{ ...td, fontWeight: 600 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                   <div style={{ width: 28, height: 28, borderRadius: 6, background: 'rgba(31,78,95,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                    <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#1F4E5F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                                    <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke='var(--brand-1)' strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
                                   </div>
                                   {forwarder.name || '—'}
                                 </div>
@@ -733,7 +733,7 @@ export default function Forwarders() {
         <div style={{...styles.modalOverlay, ...modalStyles.overlay}}>
           <div style={{ ...styles.modal, ...modalStyles.modal }} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeader}>
-              <h3 style={{ ...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827' }}>
+              <h3 style={{ ...styles.modalTitle, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
                 {editingForwarder.id ? 'Editar Transitari' : 'Nou Transitari'}
               </h3>
               <Button variant="ghost" size="sm" onClick={() => { setShowForwarderModal(false); setEditingForwarder(null); setShowCustomCityInput(false) }} style={styles.closeButton}>
@@ -748,42 +748,42 @@ export default function Forwarders() {
                   <label style={styles.label}>Nom empresa *</label>
                   <input type="text" value={editingForwarder.name} onChange={e => setEditingForwarder({...editingForwarder, name: e.target.value})}
                     placeholder="Ex: Shenzhen Wingspeed International Logistics"
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }} />
                 </div>
 
                 {/* Contacte */}
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Persona contacte</label>
                   <input type="text" value={editingForwarder.contact_name} onChange={e => setEditingForwarder({...editingForwarder, contact_name: e.target.value})}
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }} />
                 </div>
 
                 {/* Email */}
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Email</label>
                   <input type="email" value={editingForwarder.email} onChange={e => setEditingForwarder({...editingForwarder, email: e.target.value})}
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }} />
                 </div>
 
                 {/* Telèfon */}
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Telèfon</label>
                   <input type="tel" value={editingForwarder.phone} onChange={e => setEditingForwarder({...editingForwarder, phone: e.target.value})}
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }} />
                 </div>
 
                 {/* WhatsApp */}
                 <div style={styles.formGroup}>
                   <label style={styles.label}>WhatsApp</label>
                   <input type="tel" value={editingForwarder.whatsapp || ''} onChange={e => setEditingForwarder({...editingForwarder, whatsapp: e.target.value})}
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }} />
                 </div>
 
                 {/* WeChat */}
                 <div style={styles.formGroup}>
                   <label style={styles.label}>WeChat</label>
                   <input type="text" value={editingForwarder.wechat || ''} onChange={e => setEditingForwarder({...editingForwarder, wechat: e.target.value})}
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }} />
                 </div>
 
                 {/* País */}
@@ -794,7 +794,7 @@ export default function Forwarders() {
                     setEditingForwarder({...editingForwarder, country: newCountry, city: ''})
                     setAvailableCities(getCitiesForCountry(newCountry))
                   }}
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }}>
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
                     {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
@@ -811,7 +811,7 @@ export default function Forwarders() {
                         setEditingForwarder({...editingForwarder, city: e.target.value})
                       }
                     }}
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }}>
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
                     <option value="">Selecciona...</option>
                     {availableCities.map(c => <option key={c} value={c}>{c}</option>)}
                     <option value="__add_new__">➕ Afegir nova ciutat...</option>
@@ -823,7 +823,7 @@ export default function Forwarders() {
                         value={newCityName}
                         onChange={e => setNewCityName(e.target.value)}
                         placeholder="Nom de la ciutat"
-                        style={{ ...styles.input, flex: 1, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }}
+                        style={{ ...styles.input, flex: 1, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }}
                       />
                       <Button variant="secondary" size="sm" onClick={handleAddCustomCity} style={styles.addCityBtn}>Afegir</Button>
                       <Button variant="ghost" size="sm" onClick={() => { setShowCustomCityInput(false); setNewCityName('') }} style={styles.cancelCityBtn}>✕</Button>
@@ -836,14 +836,14 @@ export default function Forwarders() {
                   <label style={styles.label}>Adreça completa</label>
                   <input type="text" value={editingForwarder.address || ''} onChange={e => setEditingForwarder({...editingForwarder, address: e.target.value})}
                     placeholder="Adreça completa de l'empresa..."
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }} />
                 </div>
 
                 {/* Payment Terms */}
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Condicions Pagament</label>
                   <select value={editingForwarder.payment_terms || ''} onChange={e => setEditingForwarder({...editingForwarder, payment_terms: e.target.value})}
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }}>
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
                     <option value="">Selecciona...</option>
                     {PAYMENT_TERMS.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
@@ -853,7 +853,7 @@ export default function Forwarders() {
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Incoterm</label>
                   <select value={editingForwarder.incoterm || ''} onChange={e => setEditingForwarder({...editingForwarder, incoterm: e.target.value})}
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }}>
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
                     <option value="">Selecciona...</option>
                     {INCOTERMS.map(i => <option key={i} value={i}>{i}</option>)}
                   </select>
@@ -864,7 +864,7 @@ export default function Forwarders() {
                   <label style={styles.label}>Web</label>
                   <input type="url" value={editingForwarder.website || ''} onChange={e => setEditingForwarder({...editingForwarder, website: e.target.value})}
                     placeholder="https://..."
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }} />
                 </div>
 
                 {/* Valoració */}
@@ -877,7 +877,7 @@ export default function Forwarders() {
                 <div style={{ ...styles.formGroup, gridColumn: 'span 2' }}>
                   <label style={styles.label}>Notes</label>
                   <textarea value={editingForwarder.notes || ''} onChange={e => setEditingForwarder({...editingForwarder, notes: e.target.value})} rows={2}
-                    style={{ ...styles.input, ...styles.textarea, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
+                    style={{ ...styles.input, ...styles.textarea, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }} />
                 </div>
               </div>
             </div>
@@ -899,7 +899,7 @@ export default function Forwarders() {
         <div style={{...styles.modalOverlay, ...modalStyles.overlay}}>
           <div style={{ ...styles.modal, ...modalStyles.modal }} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeader}>
-              <h3 style={{ ...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827' }}>
+              <h3 style={{ ...styles.modalTitle, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
                 {editingWarehouse.id ? 'Editar Magatzem' : 'Nou Magatzem'}
               </h3>
               <Button variant="ghost" size="sm" onClick={() => { setShowWarehouseModal(false); setEditingWarehouse(null) }} style={styles.closeButton}>
@@ -912,42 +912,42 @@ export default function Forwarders() {
                 <div style={{ ...styles.formGroup, gridColumn: 'span 2' }}>
                   <label style={styles.label}>Nom del magatzem *</label>
                   <input type="text" value={editingWarehouse.name} onChange={e => setEditingWarehouse({...editingWarehouse, name: e.target.value})}
-                    placeholder="Ex: Magatzem Shenzhen" style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
+                    placeholder="Ex: Magatzem Shenzhen" style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }} />
                 </div>
                 <div style={{ ...styles.formGroup, gridColumn: 'span 2' }}>
                   <label style={styles.label}>Adreça completa</label>
                   <textarea value={editingWarehouse.address} onChange={e => setEditingWarehouse({...editingWarehouse, address: e.target.value})} rows={2}
-                    style={{ ...styles.input, ...styles.textarea, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
+                    style={{ ...styles.input, ...styles.textarea, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }} />
                 </div>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Ciutat</label>
                   <input type="text" value={editingWarehouse.city} onChange={e => setEditingWarehouse({...editingWarehouse, city: e.target.value})}
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }} />
                 </div>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>País</label>
                   <input type="text" value={editingWarehouse.country} onChange={e => setEditingWarehouse({...editingWarehouse, country: e.target.value})}
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }} />
                 </div>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Contacte</label>
                   <input type="text" value={editingWarehouse.contact_name} onChange={e => setEditingWarehouse({...editingWarehouse, contact_name: e.target.value})}
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }} />
                 </div>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Telèfon contacte</label>
                   <input type="tel" value={editingWarehouse.contact_phone} onChange={e => setEditingWarehouse({...editingWarehouse, contact_phone: e.target.value})}
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }} />
                 </div>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Email contacte</label>
                   <input type="email" value={editingWarehouse.contact_email} onChange={e => setEditingWarehouse({...editingWarehouse, contact_email: e.target.value})}
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }} />
                 </div>
                 <div style={{ ...styles.formGroup, gridColumn: 'span 2' }}>
                   <label style={styles.label}>Notes</label>
                   <textarea value={editingWarehouse.notes || ''} onChange={e => setEditingWarehouse({...editingWarehouse, notes: e.target.value})} rows={2}
-                    style={{ ...styles.input, ...styles.textarea, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
+                    style={{ ...styles.input, ...styles.textarea, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }} />
                 </div>
               </div>
             </div>
@@ -996,12 +996,12 @@ const styles = {
   filters: { display: 'inline-flex', alignItems: 'center', gap: '12px', flexWrap: 'nowrap' },
   filterButton: { height: 'var(--btn-h-sm)' },
   toolbarRight: { display: 'inline-flex', alignItems: 'center', gap: '12px', marginLeft: 'auto', flexWrap: 'nowrap' },
-  newButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', backgroundColor: '#1F4E5F', color: '#F4F7F3', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
+  newButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', backgroundColor: 'var(--brand-1)', color: 'var(--bg-app)', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
   statsRow: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '24px' },
   statCard: { display: 'flex', alignItems: 'center', gap: '16px', padding: '20px', borderRadius: '12px', border: 'none', boxShadow: 'var(--shadow-soft)' },
-  statValue: { display: 'block', fontSize: '24px', fontWeight: '600', color: '#1F4E5F' },
-  statLabel: { fontSize: '12px', color: '#6b7280' },
-  loading: { padding: '64px', textAlign: 'center', color: '#6b7280' },
+  statValue: { display: 'block', fontSize: '24px', fontWeight: '600', color: 'var(--brand-1)' },
+  statLabel: { fontSize: '12px', color: 'var(--text-2)' },
+  loading: { padding: '64px', textAlign: 'center', color: 'var(--text-2)' },
   empty: { padding: '64px', textAlign: 'center', borderRadius: '16px', border: 'none', boxShadow: 'var(--shadow-soft)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' },
   forwardersList: { display: 'flex', flexDirection: 'column', gap: '16px' },
   forwardersGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' },
@@ -1014,10 +1014,10 @@ const styles = {
   forwarderIcon: { width: '48px', height: '48px', borderRadius: '12px', backgroundColor: 'rgba(31, 78, 95, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' },
   forwarderInfo: { flex: 1 },
   forwarderName: { margin: '0 0 4px', fontSize: '16px', fontWeight: '600' },
-  forwarderMeta: { display: 'flex', gap: '16px', fontSize: '13px', color: '#6b7280', marginTop: '4px' },
+  forwarderMeta: { display: 'flex', gap: '16px', fontSize: '13px', color: 'var(--text-2)', marginTop: '4px' },
   forwarderActions: { display: 'flex', alignItems: 'center', gap: '16px' },
-  warehouseCount: { padding: '4px 10px', backgroundColor: 'rgba(31, 78, 95, 0.08)', color: '#1F4E5F', borderRadius: '12px', fontSize: '12px', fontWeight: '500' },
-  menuButton: { padding: '0', width: 'var(--btn-h-sm)', minWidth: 'var(--btn-h-sm)', color: '#9ca3af' },
+  warehouseCount: { padding: '4px 10px', backgroundColor: 'rgba(31, 78, 95, 0.08)', color: 'var(--brand-1)', borderRadius: '12px', fontSize: '12px', fontWeight: '500' },
+  menuButton: { padding: '0', width: 'var(--btn-h-sm)', minWidth: 'var(--btn-h-sm)', color: 'var(--muted-1)' },
   menu: { position: 'absolute', right: 0, top: '100%', minWidth: '120px', borderRadius: '10px', border: '1px solid rgba(31, 78, 95, 0.12)', boxShadow: 'var(--shadow-soft-hover)', zIndex: 10 },
   menuItem: { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', justifyContent: 'flex-start', padding: '0 var(--btn-pad-x)', fontSize: '13px' },
   menuItemDanger: { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', justifyContent: 'flex-start', padding: '0 var(--btn-pad-x)', fontSize: '13px' },
@@ -1036,7 +1036,7 @@ const styles = {
   modalFooter: { display: 'flex', justifyContent: 'flex-end', gap: '12px', padding: '20px 24px', borderTop: '1px solid var(--border-color)' },
   formGrid: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' },
   formGroup: { display: 'flex', flexDirection: 'column', gap: '6px' },
-  label: { fontSize: '12px', fontWeight: '500', color: '#6b7280' },
+  label: { fontSize: '12px', fontWeight: '500', color: 'var(--text-2)' },
   input: { padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '14px', outline: 'none' },
   textarea: { resize: 'vertical', minHeight: '60px' },
   cancelButton: { minWidth: '120px' },

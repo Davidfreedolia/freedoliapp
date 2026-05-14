@@ -6,11 +6,11 @@ import { useApp } from '../../../context/AppContext'
 
 const STATUS_META = {
   draft:        { label: 'Esborrany',     color: '#94a3b8', icon: Clock },
-  confirmed:    { label: 'Confirmat',     color: '#3b82f6', icon: Package },
-  in_production:{ label: 'En producció',  color: '#d97706', icon: Package },
-  shipped:      { label: 'Enviat',        color: '#8b5cf6', icon: Truck },
-  received:     { label: 'Rebut',         color: '#10b981', icon: CheckCircle2 },
-  cancelled:    { label: 'Cancel·lat',    color: '#ef4444', icon: AlertCircle },
+  confirmed:    { label: 'Confirmat',     color: 'var(--cta-1)', icon: Package },
+  in_production:{ label: 'En producció',  color: 'var(--warning-1)', icon: Package },
+  shipped:      { label: 'Enviat',        color: 'var(--brand-1)', icon: Truck },
+  received:     { label: 'Rebut',         color: 'var(--success-1)', icon: CheckCircle2 },
+  cancelled:    { label: 'Cancel·lat',    color: 'var(--danger-1)', icon: AlertCircle },
 }
 
 export default function ProjectPOSection({ projectId }) {

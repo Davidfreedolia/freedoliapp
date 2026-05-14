@@ -27,7 +27,7 @@ export default function AutomationVelocityChart({ velocity }) {
             <XAxis dataKey="date" tick={{ fontSize: 11 }} />
             <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
             <Tooltip />
-            <Line type="monotone" dataKey="proposals" stroke="#1F5F63" strokeWidth={2} dot={{ r: 2 }} />
+            <Line type="monotone" dataKey="proposals" stroke="var(--brand-1)" strokeWidth={2} dot={{ r: 2 }} />
           </LineChart>
         </ResponsiveContainer>
       </div>

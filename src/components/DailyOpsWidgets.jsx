@@ -67,16 +67,16 @@ export function WaitingManufacturerWidget({ darkMode, limit = 10 }) {
         backgroundColor: darkMode ? '#15151f' : '#ffffff'
       }}>
         <div style={widgetStyles.header}>
-          <Package size={20} color="#f59e0b" />
+          <Package size={20} color="var(--warning-1)" />
           <h3 style={{
             ...widgetStyles.title,
-            color: darkMode ? '#ffffff' : '#111827'
+            color: darkMode ? '#ffffff' : 'var(--text-1)'
           }}>
             {t('dashboard.waitingManufacturer.title')}
           </h3>
         </div>
         <div style={widgetStyles.empty}>
-          <p style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
+          <p style={{ color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
             {t('dashboard.waitingManufacturer.empty')}
           </p>
         </div>
@@ -90,10 +90,10 @@ export function WaitingManufacturerWidget({ darkMode, limit = 10 }) {
       backgroundColor: darkMode ? '#15151f' : '#ffffff'
     }}>
       <div style={widgetStyles.header}>
-        <Package size={20} color="#f59e0b" />
+        <Package size={20} color="var(--warning-1)" />
           <h3 style={{
             ...widgetStyles.title,
-            color: darkMode ? '#ffffff' : '#111827'
+            color: darkMode ? '#ffffff' : 'var(--text-1)'
           }}>
             {t('dashboard.waitingManufacturer.title')} ({data.length})
           </h3>
@@ -106,35 +106,35 @@ export function WaitingManufacturerWidget({ darkMode, limit = 10 }) {
               key={po.id}
               style={{
                 ...widgetStyles.item,
-                borderColor: darkMode ? '#374151' : '#e5e7eb'
+                borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
               }}
             >
               <div style={widgetStyles.itemContent}>
                 <div style={widgetStyles.itemHeader}>
                   <span style={{
                     ...widgetStyles.poNumber,
-                    color: darkMode ? '#ffffff' : '#111827'
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}>
                     {po.po_number}
                   </span>
                   <span style={{
                     ...widgetStyles.daysBadge,
                     backgroundColor: daysSince > 3 ? '#fee2e2' : '#fef3c7',
-                    color: daysSince > 3 ? '#991b1b' : '#92400e'
+                    color: daysSince > 3 ? 'var(--danger-1)' : '#92400e'
                   }}>
                     {daysSince}d
                   </span>
                 </div>
                 <div style={{
                   ...widgetStyles.itemText,
-                  color: darkMode ? '#9ca3af' : '#6b7280'
+                  color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
                 }}>
                   {po.projects?.name || 'Sense projecte'}
                   {po.projects?.sku_internal && ` (${po.projects.sku_internal})`}
                 </div>
                 <div style={{
                   ...widgetStyles.itemText,
-                  color: darkMode ? '#9ca3af' : '#6b7280',
+                  color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
                   fontSize: '12px'
                 }}>
                   {po.suppliers?.name || 'Sense proveïdor'}
@@ -159,7 +159,7 @@ export function WaitingManufacturerWidget({ darkMode, limit = 10 }) {
                   disabled={actionLoading === po.id}
                   style={{
                     ...widgetStyles.quickActionButton,
-                    backgroundColor: '#10b981',
+                    backgroundColor: 'var(--success-1)',
                     color: '#ffffff',
                     opacity: actionLoading === po.id ? 0.6 : 1
                   }}
@@ -171,7 +171,7 @@ export function WaitingManufacturerWidget({ darkMode, limit = 10 }) {
                   onClick={() => navigate(`/app/orders?po=${po.id}`)}
                   style={{
                     ...widgetStyles.actionButton,
-                    backgroundColor: '#4f46e5',
+                    backgroundColor: 'var(--brand-1)',
                     color: '#ffffff'
                   }}
                 >
@@ -228,16 +228,16 @@ export function PosNotAmazonReadyWidget({ darkMode, limit = 10 }) {
         backgroundColor: darkMode ? '#15151f' : '#ffffff'
       }}>
         <div style={widgetStyles.header}>
-          <AlertTriangle size={20} color="#ef4444" />
+          <AlertTriangle size={20} color="var(--danger-1)" />
           <h3 style={{
             ...widgetStyles.title,
-            color: darkMode ? '#ffffff' : '#111827'
+            color: darkMode ? '#ffffff' : 'var(--text-1)'
           }}>
             {t('dashboard.posNotAmazonReady.title')}
           </h3>
         </div>
         <div style={widgetStyles.empty}>
-          <p style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
+          <p style={{ color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
             {t('dashboard.posNotAmazonReady.empty')}
           </p>
         </div>
@@ -251,10 +251,10 @@ export function PosNotAmazonReadyWidget({ darkMode, limit = 10 }) {
       backgroundColor: darkMode ? '#15151f' : '#ffffff'
     }}>
       <div style={widgetStyles.header}>
-        <AlertTriangle size={20} color="#ef4444" />
+        <AlertTriangle size={20} color="var(--danger-1)" />
         <h3 style={{
           ...widgetStyles.title,
-          color: darkMode ? '#ffffff' : '#111827'
+          color: darkMode ? '#ffffff' : 'var(--text-1)'
         }}>
           {t('dashboard.posNotAmazonReady.title')} ({data.length})
         </h3>
@@ -265,28 +265,28 @@ export function PosNotAmazonReadyWidget({ darkMode, limit = 10 }) {
             key={po.id}
             style={{
               ...widgetStyles.item,
-              borderColor: darkMode ? '#374151' : '#e5e7eb'
+              borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
             }}
           >
             <div style={widgetStyles.itemContent}>
               <div style={widgetStyles.itemHeader}>
                 <span style={{
                   ...widgetStyles.poNumber,
-                  color: darkMode ? '#ffffff' : '#111827'
+                  color: darkMode ? '#ffffff' : 'var(--text-1)'
                 }}>
                   {po.po_number}
                 </span>
                 <span style={{
                   ...widgetStyles.missingBadge,
                   backgroundColor: '#fee2e2',
-                  color: '#991b1b'
+                  color: 'var(--danger-1)'
                 }}>
                   Missing {po.missingCount}
                 </span>
               </div>
               <div style={{
                 ...widgetStyles.itemText,
-                color: darkMode ? '#9ca3af' : '#6b7280'
+                color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
               }}>
                 {po.project?.name || 'Sense projecte'}
                 {po.project?.sku_internal && ` (${po.project.sku_internal})`}
@@ -294,7 +294,7 @@ export function PosNotAmazonReadyWidget({ darkMode, limit = 10 }) {
               {po.missing && po.missing.length > 0 && (
                 <div style={{
                   ...widgetStyles.missingFields,
-                  color: darkMode ? '#fca5a5' : '#dc2626',
+                  color: darkMode ? '#fca5a5' : 'var(--danger-1)',
                   fontSize: '12px'
                 }}>
                   {po.missing.slice(0, 2).join(', ')}
@@ -310,7 +310,7 @@ export function PosNotAmazonReadyWidget({ darkMode, limit = 10 }) {
               }}
               style={{
                 ...widgetStyles.actionButton,
-                backgroundColor: '#ef4444',
+                backgroundColor: 'var(--danger-1)',
                 color: '#ffffff'
               }}
             >
@@ -364,16 +364,16 @@ export function ShipmentsInTransitWidget({ darkMode, limit = 10 }) {
         backgroundColor: darkMode ? '#15151f' : '#ffffff'
       }}>
         <div style={widgetStyles.header}>
-          <Truck size={20} color="#3b82f6" />
+          <Truck size={20} color="var(--cta-1)" />
           <h3 style={{
             ...widgetStyles.title,
-            color: darkMode ? '#ffffff' : '#111827'
+            color: darkMode ? '#ffffff' : 'var(--text-1)'
           }}>
             {t('dashboard.shipmentsInTransit.title')}
           </h3>
         </div>
         <div style={widgetStyles.empty}>
-          <p style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
+          <p style={{ color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
             {t('dashboard.shipmentsInTransit.tableNotExists')}
           </p>
         </div>
@@ -399,16 +399,16 @@ export function ShipmentsInTransitWidget({ darkMode, limit = 10 }) {
         backgroundColor: darkMode ? '#15151f' : '#ffffff'
       }}>
         <div style={widgetStyles.header}>
-          <Truck size={20} color="#3b82f6" />
+          <Truck size={20} color="var(--cta-1)" />
           <h3 style={{
             ...widgetStyles.title,
-            color: darkMode ? '#ffffff' : '#111827'
+            color: darkMode ? '#ffffff' : 'var(--text-1)'
           }}>
             {t('dashboard.shipmentsInTransit.title')}
           </h3>
         </div>
         <div style={widgetStyles.empty}>
-          <p style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
+          <p style={{ color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
             {t('dashboard.shipmentsInTransit.empty')}
           </p>
         </div>
@@ -422,10 +422,10 @@ export function ShipmentsInTransitWidget({ darkMode, limit = 10 }) {
       backgroundColor: darkMode ? '#15151f' : '#ffffff'
     }}>
       <div style={widgetStyles.header}>
-        <Truck size={20} color="#3b82f6" />
+        <Truck size={20} color="var(--cta-1)" />
         <h3 style={{
           ...widgetStyles.title,
-          color: darkMode ? '#ffffff' : '#111827'
+          color: darkMode ? '#ffffff' : 'var(--text-1)'
         }}>
           {t('dashboard.shipmentsInTransit.title')} ({data.length})
         </h3>
@@ -438,14 +438,14 @@ export function ShipmentsInTransitWidget({ darkMode, limit = 10 }) {
               key={shipment.id}
               style={{
                 ...widgetStyles.item,
-                borderColor: darkMode ? '#374151' : '#e5e7eb'
+                borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
               }}
             >
               <div style={widgetStyles.itemContent}>
                 <div style={widgetStyles.itemHeader}>
                   <span style={{
                     ...widgetStyles.poNumber,
-                    color: darkMode ? '#ffffff' : '#111827'
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}>
                     {shipment.po_number}
                   </span>
@@ -453,7 +453,7 @@ export function ShipmentsInTransitWidget({ darkMode, limit = 10 }) {
                     <span style={{
                       ...widgetStyles.daysBadge,
                       backgroundColor: daysToEta < 0 ? '#fee2e2' : '#dbeafe',
-                      color: daysToEta < 0 ? '#991b1b' : '#1e40af'
+                      color: daysToEta < 0 ? 'var(--danger-1)' : 'var(--brand-1)'
                     }}>
                       {daysToEta < 0 ? `${Math.abs(daysToEta)}d late` : `${daysToEta}d to ETA`}
                     </span>
@@ -461,14 +461,14 @@ export function ShipmentsInTransitWidget({ darkMode, limit = 10 }) {
                 </div>
                 <div style={{
                   ...widgetStyles.itemText,
-                  color: darkMode ? '#9ca3af' : '#6b7280'
+                  color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
                 }}>
                   {shipment.carrier || 'Sense carrier'}
                 </div>
                 {shipment.tracking_number && (
                   <div style={{
                     ...widgetStyles.itemText,
-                    color: darkMode ? '#9ca3af' : '#6b7280',
+                    color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
                     fontSize: '12px',
                     fontFamily: 'monospace'
                   }}>
@@ -478,7 +478,7 @@ export function ShipmentsInTransitWidget({ darkMode, limit = 10 }) {
                 {shipment.pro_number && (
                   <div style={{
                     ...widgetStyles.itemText,
-                    color: darkMode ? '#9ca3af' : '#6b7280',
+                    color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
                     fontSize: '12px',
                     fontFamily: 'monospace'
                   }}>
@@ -488,7 +488,7 @@ export function ShipmentsInTransitWidget({ darkMode, limit = 10 }) {
                 {shipment.eta_date && (
                   <div style={{
                     ...widgetStyles.itemText,
-                    color: darkMode ? '#9ca3af' : '#6b7280',
+                    color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
                     fontSize: '12px',
                     display: 'flex',
                     alignItems: 'center',
@@ -544,16 +544,16 @@ export function ResearchNoDecisionWidget({ darkMode, limit = 10 }) {
         backgroundColor: darkMode ? '#15151f' : '#ffffff'
       }}>
         <div style={widgetStyles.header}>
-          <Search size={20} color="#8b5cf6" />
+          <Search size={20} color="var(--brand-1)" />
           <h3 style={{
             ...widgetStyles.title,
-            color: darkMode ? '#ffffff' : '#111827'
+            color: darkMode ? '#ffffff' : 'var(--text-1)'
           }}>
             {t('dashboard.researchNoDecision.title')}
           </h3>
         </div>
         <div style={widgetStyles.empty}>
-          <p style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
+          <p style={{ color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
             {t('dashboard.researchNoDecision.empty')}
           </p>
         </div>
@@ -567,10 +567,10 @@ export function ResearchNoDecisionWidget({ darkMode, limit = 10 }) {
       backgroundColor: darkMode ? '#15151f' : '#ffffff'
     }}>
       <div style={widgetStyles.header}>
-        <Search size={20} color="#8b5cf6" />
+        <Search size={20} color="var(--brand-1)" />
         <h3 style={{
           ...widgetStyles.title,
-          color: darkMode ? '#ffffff' : '#111827'
+          color: darkMode ? '#ffffff' : 'var(--text-1)'
         }}>
           {t('dashboard.researchNoDecision.title')} ({data.length})
         </h3>
@@ -581,28 +581,28 @@ export function ResearchNoDecisionWidget({ darkMode, limit = 10 }) {
             key={project.id}
             style={{
               ...widgetStyles.item,
-              borderColor: darkMode ? '#374151' : '#e5e7eb'
+              borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
             }}
           >
             <div style={widgetStyles.itemContent}>
               <div style={widgetStyles.itemHeader}>
                 <span style={{
                   ...widgetStyles.poNumber,
-                  color: darkMode ? '#ffffff' : '#111827'
+                  color: darkMode ? '#ffffff' : 'var(--text-1)'
                 }}>
                   {project.name}
                 </span>
                 <span style={{
                   ...widgetStyles.badge,
                   backgroundColor: '#f3e8ff',
-                  color: '#7c3aed'
+                  color: 'var(--brand-1)'
                 }}>
                   No decision
                 </span>
               </div>
               <div style={{
                 ...widgetStyles.itemText,
-                color: darkMode ? '#9ca3af' : '#6b7280'
+                color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
               }}>
                 {project.sku_internal && `SKU: ${project.sku_internal}`}
                 {!project.sku_internal && project.project_code && `Code: ${project.project_code}`}
@@ -612,7 +612,7 @@ export function ResearchNoDecisionWidget({ darkMode, limit = 10 }) {
               onClick={() => navigate(`/app/projects/${project.id}`)}
               style={{
                 ...widgetStyles.actionButton,
-                backgroundColor: '#8b5cf6',
+                backgroundColor: 'var(--brand-1)',
                 color: '#ffffff'
               }}
             >
@@ -667,16 +667,16 @@ export function StaleTrackingWidget({ darkMode, limit = 10, staleDays = 7 }) {
         backgroundColor: darkMode ? '#15151f' : '#ffffff'
       }}>
         <div style={widgetStyles.header}>
-          <Clock size={20} color="#f59e0b" />
+          <Clock size={20} color="var(--warning-1)" />
           <h3 style={{
             ...widgetStyles.title,
-            color: darkMode ? '#ffffff' : '#111827'
+            color: darkMode ? '#ffffff' : 'var(--text-1)'
           }}>
             {t('dashboard.staleTracking.title')}
           </h3>
         </div>
         <div style={widgetStyles.empty}>
-          <p style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
+          <p style={{ color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
             {t('dashboard.staleTracking.empty')}
           </p>
         </div>
@@ -690,10 +690,10 @@ export function StaleTrackingWidget({ darkMode, limit = 10, staleDays = 7 }) {
       backgroundColor: darkMode ? '#15151f' : '#ffffff'
     }}>
       <div style={widgetStyles.header}>
-        <Clock size={20} color="#f59e0b" />
+        <Clock size={20} color="var(--warning-1)" />
         <h3 style={{
           ...widgetStyles.title,
-          color: darkMode ? '#ffffff' : '#111827'
+          color: darkMode ? '#ffffff' : 'var(--text-1)'
         }}>
           {t('dashboard.staleTracking.title')} ({data.length})
         </h3>
@@ -704,28 +704,28 @@ export function StaleTrackingWidget({ darkMode, limit = 10, staleDays = 7 }) {
             key={po.id}
             style={{
               ...widgetStyles.item,
-              borderColor: darkMode ? '#374151' : '#e5e7eb'
+              borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
             }}
           >
             <div style={widgetStyles.itemContent}>
               <div style={widgetStyles.itemHeader}>
                 <span style={{
                   ...widgetStyles.poNumber,
-                  color: darkMode ? '#ffffff' : '#111827'
+                  color: darkMode ? '#ffffff' : 'var(--text-1)'
                 }}>
                   {po.po_number}
                 </span>
                 <span style={{
                   ...widgetStyles.daysBadge,
                   backgroundColor: '#fee2e2',
-                  color: '#991b1b'
+                  color: 'var(--danger-1)'
                 }}>
                   {po.daysStale}d stale
                 </span>
               </div>
               <div style={{
                 ...widgetStyles.itemText,
-                color: darkMode ? '#9ca3af' : '#6b7280',
+                color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
                 fontFamily: 'monospace',
                 fontSize: '12px'
               }}>
@@ -734,7 +734,7 @@ export function StaleTrackingWidget({ darkMode, limit = 10, staleDays = 7 }) {
               {po.projects && (
                 <div style={{
                   ...widgetStyles.itemText,
-                  color: darkMode ? '#9ca3af' : '#6b7280',
+                  color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
                   fontSize: '12px'
                 }}>
                   {po.projects.name}
@@ -745,7 +745,7 @@ export function StaleTrackingWidget({ darkMode, limit = 10, staleDays = 7 }) {
               onClick={() => navigate(`/app/orders`)}
               style={{
                 ...widgetStyles.actionButton,
-                backgroundColor: '#f59e0b',
+                backgroundColor: 'var(--warning-1)',
                 color: '#ffffff'
               }}
             >
@@ -779,7 +779,7 @@ const widgetStyles = {
   loading: {
     padding: '24px',
     textAlign: 'center',
-    color: '#6b7280'
+    color: 'var(--text-2)'
   },
   empty: {
     padding: '24px',

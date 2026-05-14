@@ -26,7 +26,7 @@ export default function ProjectDetailRoute() {
             width: '48px',
             height: '48px',
             border: '4px solid #e5e7eb',
-            borderTop: '4px solid #4f46e5',
+            borderTop: '4px solid var(--brand-1)',
             borderRadius: '50%',
             animation: 'spin 1s linear infinite',
             margin: '0 auto 16px'
@@ -34,7 +34,7 @@ export default function ProjectDetailRoute() {
           <p style={{
             margin: 0,
             fontSize: '14px',
-            color: '#6b7280'
+            color: 'var(--text-2)'
           }}>
             Carregant projecte...
           </p>

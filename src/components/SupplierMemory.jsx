@@ -36,11 +36,11 @@ export default function SupplierMemory({ supplierId, darkMode }) {
       <div style={{
         padding: '16px',
         borderRadius: '8px',
-        backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-        border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+        backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+        border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
         marginTop: '16px'
       }}>
-        <div style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '13px' }}>{t('supplierMemory.loading')}</div>
+        <div style={{ color: darkMode ? 'var(--muted-1)' : 'var(--text-2)', fontSize: '13px' }}>{t('supplierMemory.loading')}</div>
       </div>
     )
   }
@@ -60,15 +60,15 @@ export default function SupplierMemory({ supplierId, darkMode }) {
     <div style={{
       padding: '16px',
       borderRadius: '8px',
-      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       marginTop: '16px'
     }}>
       <h4 style={{
         margin: '0 0 12px 0',
         fontSize: '14px',
         fontWeight: '600',
-        color: darkMode ? '#ffffff' : '#111827'
+        color: darkMode ? '#ffffff' : 'var(--text-1)'
       }}>
         {t('supplierMemory.title')}
       </h4>
@@ -115,11 +115,11 @@ export default function SupplierMemory({ supplierId, darkMode }) {
           padding: '12px',
           borderRadius: '6px',
           backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-          border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+          border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
         }}>
           <div style={{
             fontSize: '11px',
-            color: darkMode ? '#9ca3af' : '#6b7280',
+            color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
             marginBottom: '4px'
           }}>
             {t('supplierMemory.metrics.quotesSent')}
@@ -127,7 +127,7 @@ export default function SupplierMemory({ supplierId, darkMode }) {
           <div style={{
             fontSize: '20px',
             fontWeight: '600',
-            color: darkMode ? '#ffffff' : '#111827'
+            color: darkMode ? '#ffffff' : 'var(--text-1)'
           }}>
             {metrics.quotesSent}
           </div>
@@ -138,11 +138,11 @@ export default function SupplierMemory({ supplierId, darkMode }) {
           padding: '12px',
           borderRadius: '6px',
           backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-          border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+          border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
         }}>
           <div style={{
             fontSize: '11px',
-            color: darkMode ? '#9ca3af' : '#6b7280',
+            color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
             marginBottom: '4px'
           }}>
             {t('supplierMemory.metrics.quotesSelected')}
@@ -150,14 +150,14 @@ export default function SupplierMemory({ supplierId, darkMode }) {
           <div style={{
             fontSize: '20px',
             fontWeight: '600',
-            color: darkMode ? '#ffffff' : '#111827'
+            color: darkMode ? '#ffffff' : 'var(--text-1)'
           }}>
             {metrics.quotesSelected}
           </div>
           {metrics.quotesSent > 0 && (
             <div style={{
               fontSize: '10px',
-              color: darkMode ? '#9ca3af' : '#6b7280',
+              color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
               marginTop: '2px'
             }}>
               {t('supplierMemory.metrics.winRate', { rate: Math.round((metrics.quotesSelected / metrics.quotesSent) * 100) })}
@@ -171,11 +171,11 @@ export default function SupplierMemory({ supplierId, darkMode }) {
             padding: '12px',
             borderRadius: '6px',
             backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-            border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+            border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
           }}>
             <div style={{
               fontSize: '11px',
-              color: darkMode ? '#9ca3af' : '#6b7280',
+              color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
               marginBottom: '4px',
               display: 'flex',
               alignItems: 'center',
@@ -187,7 +187,7 @@ export default function SupplierMemory({ supplierId, darkMode }) {
             <div style={{
               fontSize: '20px',
               fontWeight: '600',
-              color: metrics.avgPriceDeviation > 0 ? '#ef4444' : '#10b981',
+              color: metrics.avgPriceDeviation > 0 ? 'var(--danger-1)' : 'var(--success-1)',
               display: 'flex',
               alignItems: 'center',
               gap: '4px'
@@ -198,7 +198,7 @@ export default function SupplierMemory({ supplierId, darkMode }) {
             </div>
             <div style={{
               fontSize: '10px',
-              color: darkMode ? '#9ca3af' : '#6b7280',
+              color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
               marginTop: '2px'
             }}>
               {t('supplierMemory.metrics.samples', { count: metrics.priceDeviationsCount })}
@@ -212,11 +212,11 @@ export default function SupplierMemory({ supplierId, darkMode }) {
             padding: '12px',
             borderRadius: '6px',
             backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-            border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+            border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
           }}>
             <div style={{
               fontSize: '11px',
-              color: darkMode ? '#9ca3af' : '#6b7280',
+              color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
               marginBottom: '4px',
               display: 'flex',
               alignItems: 'center',
@@ -228,7 +228,7 @@ export default function SupplierMemory({ supplierId, darkMode }) {
             <div style={{
               fontSize: '20px',
               fontWeight: '600',
-              color: metrics.avgLeadTimeDeviation > 0 ? '#ef4444' : '#10b981',
+              color: metrics.avgLeadTimeDeviation > 0 ? 'var(--danger-1)' : 'var(--success-1)',
               display: 'flex',
               alignItems: 'center',
               gap: '4px'
@@ -239,7 +239,7 @@ export default function SupplierMemory({ supplierId, darkMode }) {
             </div>
             <div style={{
               fontSize: '10px',
-              color: darkMode ? '#9ca3af' : '#6b7280',
+              color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
               marginTop: '2px'
             }}>
               {t('supplierMemory.metrics.samples', { count: metrics.leadTimeDeviationsCount })}
@@ -254,10 +254,10 @@ export default function SupplierMemory({ supplierId, darkMode }) {
           marginTop: '12px',
           padding: '8px 12px',
           borderRadius: '6px',
-          backgroundColor: darkMode ? '#1f293720' : '#f3f4f6',
-          border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+          backgroundColor: darkMode ? '#1f293720' : 'var(--surface-bg-2)',
+          border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
           fontSize: '12px',
-          color: darkMode ? '#9ca3af' : '#6b7280'
+          color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
         }}>
           {t('supplierMemory.needMoreData', { count: minSamples })}
         </div>

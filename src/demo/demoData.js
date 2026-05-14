@@ -691,7 +691,7 @@ export const demoFinanceCategories = [
     id: 'demo-cat-tools',
     name: 'Tools & Software',
     type: 'expense',
-    color: '#6b7280',
+    color: 'var(--text-2)',
     icon: 'Monitor',
     sort_order: 4,
     is_system: false

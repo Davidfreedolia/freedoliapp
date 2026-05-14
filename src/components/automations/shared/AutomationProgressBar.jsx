@@ -13,8 +13,8 @@ export default function AutomationProgressBar({ currentStage, steps }) {
       {stageList.map((stage, i) => {
         const done = i < activeIdx
         const active = i === activeIdx
-        const dotBg = done ? 'var(--brand-1, #1F5F63)' : active ? 'var(--brand-1, #1F5F63)' : 'var(--border-color, #e5e7eb)'
-        const dotBorder = done || active ? 'var(--brand-1, #1F5F63)' : 'var(--border-color, #e5e7eb)'
+        const dotBg = done ? 'var(--brand-1, var(--brand-1))' : active ? 'var(--brand-1, var(--brand-1))' : 'var(--border-color, #e5e7eb)'
+        const dotBorder = done || active ? 'var(--brand-1, var(--brand-1))' : 'var(--border-color, #e5e7eb)'
         const labelColor = active ? 'var(--text-1, #111827)' : 'var(--text-2, #6b7280)'
         const label = t(`automations.progress.stages.${stage}`, { defaultValue: stage })
 
@@ -40,7 +40,7 @@ export default function AutomationProgressBar({ currentStage, steps }) {
                 style={{
                   flex: 1,
                   height: 2,
-                  background: i < activeIdx ? 'var(--brand-1, #1F5F63)' : 'var(--border-color, #e5e7eb)',
+                  background: i < activeIdx ? 'var(--brand-1, var(--brand-1))' : 'var(--border-color, #e5e7eb)',
                   borderRadius: 999,
                 }}
               />

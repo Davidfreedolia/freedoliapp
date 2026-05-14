@@ -145,10 +145,10 @@ export default function ProjectDetailImpl() {
           <div style={{
             margin: '24px 0',
             padding: 16,
-            border: '1px solid var(--danger, #dc2626)',
+            border: '1px solid var(--danger, var(--danger-1))',
             borderRadius: 10,
             background: 'var(--danger-bg, #dc262611)',
-            color: 'var(--danger, #dc2626)',
+            color: 'var(--danger, var(--danger-1))',
             display: 'flex',
             alignItems: 'center',
             gap: 10
@@ -196,10 +196,10 @@ export default function ProjectDetailImpl() {
           <div role="status" style={{
             margin: '0 0 16px',
             padding: '10px 14px',
-            border: '1px solid var(--warning, #d97706)',
+            border: '1px solid var(--warning, var(--warning-1))',
             borderRadius: 10,
             background: 'var(--warning-bg, #d9770611)',
-            color: 'var(--warning, #d97706)',
+            color: 'var(--warning, var(--warning-1))',
             display: 'flex',
             alignItems: 'center',
             gap: 8,

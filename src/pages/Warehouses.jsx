@@ -63,10 +63,10 @@ const AMAZON_FBA_WAREHOUSES = [
 const WAREHOUSE_TYPES = [
   { id: 'amazon_fba', icon: '📦', color: '#ff9900' },
   { id: 'amazon_fbm', icon: '📦', color: '#ff9900' },
-  { id: 'forwarder', icon: '🚚', color: '#3b82f6' },
-  { id: '3pl', icon: '🏢', color: '#8b5cf6' },
-  { id: 'own', icon: '🏠', color: '#22c55e' },
-  { id: 'custom', icon: '🏭', color: '#6b7280' }
+  { id: 'forwarder', icon: '🚚', color: 'var(--cta-1)' },
+  { id: '3pl', icon: '🏢', color: 'var(--brand-1)' },
+  { id: 'own', icon: '🏠', color: 'var(--success-1)' },
+  { id: 'custom', icon: '🏭', color: 'var(--text-2)' }
 ]
 
 export default function Warehouses() {
@@ -184,7 +184,7 @@ export default function Warehouses() {
                 }}
                 style={styles.menuButton}
               >
-                <MoreVertical size={18} color="#9ca3af" />
+                <MoreVertical size={18} color='var(--muted-1)' />
               </Button>
               {menuOpen === warehouse.id && (
                 <div 
@@ -223,7 +223,7 @@ export default function Warehouses() {
           )}
         </div>
 
-        <h3 style={{ ...styles.warehouseName, color: darkMode ? '#ffffff' : '#111827' }}>
+        <h3 style={{ ...styles.warehouseName, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
           {warehouse.name}
         </h3>
 
@@ -417,7 +417,7 @@ export default function Warehouses() {
         <div style={styles.toolbar} className="toolbar-row">
           <div style={styles.searchGroup} className="toolbar-group">
             <div style={styles.searchContainer} className="toolbar-search">
-              <Search size={18} color="#9ca3af" />
+              <Search size={18} color='var(--muted-1)' />
               <input
                 type="text"
                 placeholder="Buscar magatzems..."
@@ -491,8 +491,8 @@ export default function Warehouses() {
           <div style={styles.loading}>{t('common.loading')}</div>
         ) : filteredWarehouses.length === 0 ? (
           <div style={{ ...styles.empty, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <Warehouse size={48} color="#d1d5db" />
-            <p style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
+            <Warehouse size={48} color='var(--border-1)' />
+            <p style={{ color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
               {searchTerm || filterType ? t('warehousesPage.emptyFiltered') : t('warehousesPage.emptyDefault')}
             </p>
             <div style={{ display: 'flex', gap: '12px' }}>
@@ -547,7 +547,7 @@ export default function Warehouses() {
         <div style={{...styles.modalOverlay, ...modalStyles.overlay}} onClick={() => setShowModal(false)}>
           <div style={{ ...styles.modal, ...modalStyles.modal }} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeader}>
-              <h3 style={{ ...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827' }}>
+              <h3 style={{ ...styles.modalTitle, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
                 {editingWarehouse.id ? t('warehousesPage.editWarehouse') : t('warehousesPage.newWarehouse')}
               </h3>
               <Button variant="ghost" size="sm" onClick={() => setShowModal(false)} style={styles.closeButton}>
@@ -560,12 +560,12 @@ export default function Warehouses() {
                 <div style={styles.formGroup}>
                   <label style={styles.label}>{t('warehousesPage.form.name')}</label>
                   <input type="text" value={editingWarehouse.name} onChange={e => setEditingWarehouse({...editingWarehouse, name: e.target.value})}
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }} />
                 </div>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>{t('warehousesPage.form.type')}</label>
                   <select value={editingWarehouse.type} onChange={e => setEditingWarehouse({...editingWarehouse, type: e.target.value})}
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }}>
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
                     {WAREHOUSE_TYPES.map((wt) => (
                       <option key={wt.id} value={wt.id}>{wt.icon} {t(`warehousesPage.types.${wt.id}`)}</option>
                     ))}
@@ -574,32 +574,32 @@ export default function Warehouses() {
                 <div style={{ ...styles.formGroup, gridColumn: 'span 2' }}>
                   <label style={styles.label}>{t('warehousesPage.form.address')}</label>
                   <textarea value={editingWarehouse.address} onChange={e => setEditingWarehouse({...editingWarehouse, address: e.target.value})} rows={2}
-                    style={{ ...styles.input, ...styles.textarea, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
+                    style={{ ...styles.input, ...styles.textarea, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }} />
                 </div>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>{t('warehousesPage.form.city')}</label>
                   <input type="text" value={editingWarehouse.city} onChange={e => setEditingWarehouse({...editingWarehouse, city: e.target.value})}
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }} />
                 </div>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>{t('warehousesPage.form.country')}</label>
                   <input type="text" value={editingWarehouse.country} onChange={e => setEditingWarehouse({...editingWarehouse, country: e.target.value})}
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }} />
                 </div>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>{t('warehousesPage.form.contactName')}</label>
                   <input type="text" value={editingWarehouse.contact_name} onChange={e => setEditingWarehouse({...editingWarehouse, contact_name: e.target.value})}
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }} />
                 </div>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>{t('warehousesPage.form.phone')}</label>
                   <input type="tel" value={editingWarehouse.contact_phone} onChange={e => setEditingWarehouse({...editingWarehouse, contact_phone: e.target.value})}
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }} />
                 </div>
                 <div style={{ ...styles.formGroup, gridColumn: 'span 2' }}>
                   <label style={styles.label}>{t('warehousesPage.form.email')}</label>
                   <input type="email" value={editingWarehouse.contact_email} onChange={e => setEditingWarehouse({...editingWarehouse, contact_email: e.target.value})}
-                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827' }} />
+                    style={{ ...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)' }} />
                 </div>
               </div>
             </div>
@@ -628,7 +628,7 @@ export default function Warehouses() {
         <div style={{...styles.modalOverlay, ...modalStyles.overlay}} onClick={() => setShowAmazonModal(false)}>
           <div style={{ ...styles.modal, ...styles.amazonModal, ...modalStyles.modal, maxWidth: isMobile ? '100%' : '700px' }} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeader}>
-              <h3 style={{ ...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827' }}>
+              <h3 style={{ ...styles.modalTitle, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
                 📦 {t('warehousesPage.modalAmazonTitle')}
               </h3>
               <Button variant="ghost" size="sm" onClick={() => setShowAmazonModal(false)} style={styles.closeButton}>
@@ -637,18 +637,18 @@ export default function Warehouses() {
             </div>
 
             <div style={{ ...styles.modalBody, maxHeight: '60vh', overflowY: 'auto' }}>
-              <p style={{ color: '#6b7280', fontSize: '13px', marginBottom: '16px' }}>
+              <p style={{ color: 'var(--text-2)', fontSize: '13px', marginBottom: '16px' }}>
                 {t('warehousesPage.modalAmazonHint')}
               </p>
               
               {Object.entries(amazonByCountry).map(([country, whs]) => (
                 <div key={country} style={styles.countrySection}>
-                  <h4 style={{ ...styles.countryTitle, color: darkMode ? '#ffffff' : '#111827' }}>
+                  <h4 style={{ ...styles.countryTitle, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
                     {country === 'España' ? '🇪🇸' : country === 'Alemanya' ? '🇩🇪' : country === 'França' ? '🇫🇷' : country === 'Itàlia' ? '🇮🇹' : country === 'UK' ? '🇬🇧' : country === 'Polònia' ? '🇵🇱' : '🇺🇸'} {country}
                   </h4>
                   <div style={styles.amazonList}>
                     {whs.map(w => (
-                      <label key={w.code} style={{ ...styles.amazonItem, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb' }}>
+                      <label key={w.code} style={{ ...styles.amazonItem, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)' }}>
                         <input
                           type="checkbox"
                           checked={selectedAmazonWarehouses.includes(w.code)}
@@ -656,8 +656,8 @@ export default function Warehouses() {
                           style={styles.checkbox}
                         />
                         <div>
-                          <span style={{ fontWeight: '500', color: darkMode ? '#ffffff' : '#111827' }}>{w.code}</span>
-                          <span style={{ color: '#6b7280', fontSize: '12px', marginLeft: '8px' }}>{w.city}</span>
+                          <span style={{ fontWeight: '500', color: darkMode ? '#ffffff' : 'var(--text-1)' }}>{w.code}</span>
+                          <span style={{ color: 'var(--text-2)', fontSize: '12px', marginLeft: '8px' }}>{w.city}</span>
                         </div>
                       </label>
                     ))}
@@ -667,7 +667,7 @@ export default function Warehouses() {
             </div>
 
             <div style={styles.modalFooter}>
-              <span style={{ color: '#6b7280', fontSize: '13px' }}>
+              <span style={{ color: 'var(--text-2)', fontSize: '13px' }}>
                 {t('warehousesPage.selectedCount', { count: selectedAmazonWarehouses.length })}
               </span>
               <div style={{ display: 'flex', gap: '12px' }}>
@@ -718,14 +718,14 @@ const styles = {
   filterButton: { height: 'var(--btn-h-sm)' },
   toolbarRight: { display: 'inline-flex', alignItems: 'center', gap: '12px', marginLeft: 'auto', flexWrap: 'nowrap' },
   amazonButton: { minWidth: '160px' },
-  newButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', backgroundColor: '#1F4E5F', color: '#F4F7F3', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
+  newButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', backgroundColor: 'var(--brand-1)', color: 'var(--bg-app)', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
   statsRow: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' },
   statCard: { display: 'flex', alignItems: 'center', gap: '16px', padding: '20px', borderRadius: '12px', border: 'none', boxShadow: 'var(--shadow-soft)' },
-  statValue: { display: 'block', fontSize: '24px', fontWeight: '600', color: '#1F4E5F' },
-  statLabel: { fontSize: '13px', color: '#6b7280' },
-  loading: { padding: '64px', textAlign: 'center', color: '#6b7280' },
+  statValue: { display: 'block', fontSize: '24px', fontWeight: '600', color: 'var(--brand-1)' },
+  statLabel: { fontSize: '13px', color: 'var(--text-2)' },
+  loading: { padding: '64px', textAlign: 'center', color: 'var(--text-2)' },
   empty: { padding: '64px', textAlign: 'center', borderRadius: '16px', border: 'none', boxShadow: 'var(--shadow-soft)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' },
-  createButton: { display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', backgroundColor: '#1F4E5F', color: '#F4F7F3', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
+  createButton: { display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', backgroundColor: 'var(--brand-1)', color: 'var(--bg-app)', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
   warehousesGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' },
   warehousesList: { display: 'flex', flexDirection: 'column', gap: '12px' },
   splitLayout: { display: 'grid', gridTemplateColumns: 'minmax(280px, 360px) 1fr', gap: '20px' },
@@ -741,8 +741,8 @@ const styles = {
   menuItemDanger: { display: 'flex', alignItems: 'center', gap: '8px', width: '100%', justifyContent: 'flex-start', padding: '0 var(--btn-pad-x)', fontSize: '13px' },
   warehouseName: { margin: '0 0 12px 0', fontSize: '16px', fontWeight: '600' },
   warehouseDetails: { display: 'flex', flexDirection: 'column', gap: '6px' },
-  detailRow: { margin: 0, display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#6b7280' },
-  addressRow: { margin: 0, fontSize: '12px', color: '#9ca3af', paddingLeft: '20px' },
+  detailRow: { margin: 0, display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--text-2)' },
+  addressRow: { margin: 0, fontSize: '12px', color: 'var(--muted-1)', paddingLeft: '20px' },
   // Modal
   modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
   modal: { width: '100%', maxWidth: '600px', maxHeight: '90vh', borderRadius: '16px', border: '1px solid var(--border-color)', overflow: 'hidden' },
@@ -754,11 +754,11 @@ const styles = {
   modalFooter: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', padding: '20px 24px', borderTop: '1px solid var(--border-color)' },
   formGrid: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' },
   formGroup: { display: 'flex', flexDirection: 'column', gap: '6px' },
-  label: { fontSize: '12px', fontWeight: '500', color: '#6b7280' },
+  label: { fontSize: '12px', fontWeight: '500', color: 'var(--text-2)' },
   input: { padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '14px', outline: 'none' },
   textarea: { resize: 'vertical', minHeight: '60px' },
-  cancelButton: { padding: '10px 20px', backgroundColor: 'transparent', color: '#6b7280', border: '1px solid var(--border-color)', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' },
-  saveButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: '#4f46e5', color: '#ffffff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
+  cancelButton: { padding: '10px 20px', backgroundColor: 'transparent', color: 'var(--text-2)', border: '1px solid var(--border-color)', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' },
+  saveButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: 'var(--brand-1)', color: '#ffffff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
   amazonSaveButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: '#ff9900', color: '#ffffff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
   countrySection: { marginBottom: '20px' },
   countryTitle: { margin: '0 0 8px 0', fontSize: '14px', fontWeight: '600' },

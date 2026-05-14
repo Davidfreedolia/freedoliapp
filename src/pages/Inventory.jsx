@@ -51,13 +51,13 @@ const ACTIVE_SHIPMENT_STATUSES = new Set([
 const DECISION_META = {
   reorder: {
     label: 'reorder',
-    tone: '#dc2626',
+    tone: 'var(--danger-1)',
     background: 'rgba(220, 38, 38, 0.12)',
     hint: 'Cobertura baixa i inbound insuficient.'
   },
   watch: {
     label: 'watch',
-    tone: '#d97706',
+    tone: 'var(--warning-1)',
     background: 'rgba(217, 119, 6, 0.12)',
     hint: 'Cal seguir-ho de prop abans de comprar més.'
   },
@@ -69,7 +69,7 @@ const DECISION_META = {
   },
   let_die: {
     label: 'let die',
-    tone: '#6b7280',
+    tone: 'var(--text-2)',
     background: 'rgba(107, 114, 128, 0.14)',
     hint: 'Sense demanda recent i sense inbound rellevant.'
   }
@@ -421,10 +421,10 @@ export default function Inventory() {
       >
         <div style={styles.cardHeader}>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontWeight: 700, color: darkMode ? '#ffffff' : '#111827', marginBottom: 4 }}>
+            <div style={{ fontWeight: 700, color: darkMode ? '#ffffff' : 'var(--text-1)', marginBottom: 4 }}>
               {item.sku}
             </div>
-            <div style={{ fontSize: 14, color: darkMode ? '#d1d5db' : '#374151', marginBottom: 6 }}>
+            <div style={{ fontSize: 14, color: darkMode ? 'var(--border-1)' : 'var(--text-1)', marginBottom: 6 }}>
               {item.product_name || 'Sense nom'}
             </div>
             {item.project && (
@@ -461,15 +461,15 @@ export default function Inventory() {
           <div style={styles.metricGrid}>
             <div style={styles.metricCell}>
               <span style={styles.metricLabel}>Stock actual</span>
-              <strong style={{ color: darkMode ? '#ffffff' : '#111827' }}>{formatNumber(item.currentStock)}</strong>
+              <strong style={{ color: darkMode ? '#ffffff' : 'var(--text-1)' }}>{formatNumber(item.currentStock)}</strong>
             </div>
             <div style={styles.metricCell}>
               <span style={styles.metricLabel}>Inbound</span>
-              <strong style={{ color: darkMode ? '#ffffff' : '#111827' }}>{formatNumber(item.inboundStock)}</strong>
+              <strong style={{ color: darkMode ? '#ffffff' : 'var(--text-1)' }}>{formatNumber(item.inboundStock)}</strong>
             </div>
             <div style={styles.metricCell}>
               <span style={styles.metricLabel}>Total visible</span>
-              <strong style={{ color: darkMode ? '#ffffff' : '#111827' }}>{formatNumber(item.totalVisible)}</strong>
+              <strong style={{ color: darkMode ? '#ffffff' : 'var(--text-1)' }}>{formatNumber(item.totalVisible)}</strong>
             </div>
             <div style={styles.metricCell}>
               <span style={styles.metricLabel}>Senyal</span>
@@ -483,22 +483,22 @@ export default function Inventory() {
           <div style={styles.metricGrid}>
             <div style={styles.metricCell}>
               <span style={styles.metricLabel}>Vendes mitjanes/dia</span>
-              <strong style={{ color: darkMode ? '#ffffff' : '#111827' }}>{formatRate(item.averageDailySales)}</strong>
+              <strong style={{ color: darkMode ? '#ffffff' : 'var(--text-1)' }}>{formatRate(item.averageDailySales)}</strong>
             </div>
             <div style={styles.metricCell}>
               <span style={styles.metricLabel}>Cobertura estimada</span>
-              <strong style={{ color: darkMode ? '#ffffff' : '#111827' }}>{formatCoverage(item.daysOfCoverage)}</strong>
+              <strong style={{ color: darkMode ? '#ffffff' : 'var(--text-1)' }}>{formatCoverage(item.daysOfCoverage)}</strong>
             </div>
             <div style={styles.metricCell}>
               <span style={styles.metricLabel}>ETA pròxima</span>
-              <strong style={{ color: darkMode ? '#ffffff' : '#111827' }}>{formatShortDate(item.nextEta)}</strong>
+              <strong style={{ color: darkMode ? '#ffffff' : 'var(--text-1)' }}>{formatShortDate(item.nextEta)}</strong>
             </div>
             <div style={styles.metricCell}>
               <span style={styles.metricLabel}>Destí inbound</span>
-              <strong style={{ color: darkMode ? '#ffffff' : '#111827' }}>{item.activeInbound ? item.inboundDestination : 'Sense inbound actiu'}</strong>
+              <strong style={{ color: darkMode ? '#ffffff' : 'var(--text-1)' }}>{item.activeInbound ? item.inboundDestination : 'Sense inbound actiu'}</strong>
             </div>
           </div>
-          <div style={{ ...styles.decisionHint, color: darkMode ? '#9ca3af' : '#6b7280' }}>
+          <div style={{ ...styles.decisionHint, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
             {item.decision.hint}
           </div>
         </div>
@@ -557,10 +557,10 @@ export default function Inventory() {
       }}>
         <div style={styles.readOnlyBanner}>
           <div>
-            <div style={{ fontWeight: 700, color: darkMode ? '#ffffff' : '#111827', marginBottom: 4 }}>
+            <div style={{ fontWeight: 700, color: darkMode ? '#ffffff' : 'var(--text-1)', marginBottom: 4 }}>
               Vista operativa de lectura
             </div>
-            <div style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: 13 }}>
+            <div style={{ color: darkMode ? 'var(--muted-1)' : 'var(--text-2)', fontSize: 13 }}>
               Inventory ara prioritza stock actual, inbound, velocitat de venda i decisió simple de reabastiment.
             </div>
           </div>
@@ -571,37 +571,37 @@ export default function Inventory() {
           gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(170px, 1fr))'
         }}>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <Package size={24} color="#4f46e5" />
+            <Package size={24} color="var(--brand-1)" />
             <div>
-              <span style={{ ...styles.statValue, color: '#4f46e5' }}>{stats.activeSkus}</span>
+              <span style={{ ...styles.statValue, color: 'var(--brand-1)' }}>{stats.activeSkus}</span>
               <span style={styles.statLabel}>SKUs actius</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <Warehouse size={24} color="#22c55e" />
+            <Warehouse size={24} color="var(--success-1)" />
             <div>
-              <span style={{ ...styles.statValue, color: '#22c55e' }}>{formatNumber(stats.currentStockTotal)}</span>
+              <span style={{ ...styles.statValue, color: 'var(--success-1)' }}>{formatNumber(stats.currentStockTotal)}</span>
               <span style={styles.statLabel}>Stock actual total</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <Truck size={24} color="#2563eb" />
+            <Truck size={24} color="var(--brand-1)" />
             <div>
-              <span style={{ ...styles.statValue, color: '#2563eb' }}>{formatNumber(stats.inboundTotal)}</span>
+              <span style={{ ...styles.statValue, color: 'var(--brand-1)' }}>{formatNumber(stats.inboundTotal)}</span>
               <span style={styles.statLabel}>Inbound total</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <AlertTriangle size={24} color="#ef4444" />
+            <AlertTriangle size={24} color="var(--danger-1)" />
             <div>
-              <span style={{ ...styles.statValue, color: '#ef4444' }}>{stats.criticalCoverage}</span>
+              <span style={{ ...styles.statValue, color: 'var(--danger-1)' }}>{stats.criticalCoverage}</span>
               <span style={styles.statLabel}>Cobertura crítica</span>
             </div>
           </div>
           <div style={{ ...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-            <TrendingUp size={24} color="#d97706" />
+            <TrendingUp size={24} color="var(--warning-1)" />
             <div>
-              <span style={{ ...styles.statValue, color: '#d97706' }}>{stats.reorderSuggested}</span>
+              <span style={{ ...styles.statValue, color: 'var(--warning-1)' }}>{stats.reorderSuggested}</span>
               <span style={styles.statLabel}>Reorders suggerits</span>
             </div>
           </div>
@@ -610,7 +610,7 @@ export default function Inventory() {
         <div style={styles.toolbar} className="toolbar-row">
           <div style={styles.searchGroup} className="toolbar-group">
             <div style={styles.searchContainer} className="toolbar-search">
-              <Search size={18} color="#9ca3af" />
+              <Search size={18} color='var(--muted-1)' />
               <input
                 type="text"
                 placeholder="Buscar SKU o producte..."
@@ -694,7 +694,7 @@ export default function Inventory() {
                 return acc
               }, [])
               const uncategorised = filteredInventory.filter(item => !DECISION_ORDER.some(k => DECISION_META[k].label === item.decision?.label))
-              if (uncategorised.length > 0) groups.push({ key: 'other', meta: { label: 'Other', tone: '#6b7280', background: 'rgba(107, 114, 128, 0.14)' }, items: uncategorised })
+              if (uncategorised.length > 0) groups.push({ key: 'other', meta: { label: 'Other', tone: 'var(--text-2)', background: 'rgba(107, 114, 128, 0.14)' }, items: uncategorised })
               return (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                   {groups.map(({ key, meta, items: groupItems }) => {
@@ -715,7 +715,7 @@ export default function Inventory() {
                             width: '100%', padding: '6px 10px', marginBottom: isCollapsed ? 0 : 8,
                             background: 'transparent', border: 'none', cursor: 'pointer',
                             borderRadius: 8, textAlign: 'left',
-                            color: darkMode ? '#d1d5db' : '#374151'
+                            color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
                           }}
                         >
                           {isCollapsed
@@ -748,7 +748,7 @@ export default function Inventory() {
                               </thead>
                               <tbody>
                                 {groupItems.map(item => {
-                                  const decColor = item.decision?.tone || '#6b7280'
+                                  const decColor = item.decision?.tone || 'var(--text-2)'
                                   const coverage = item.coverageDays != null ? `${item.coverageDays}d` : (item.coverage_days != null ? `${item.coverage_days}d` : '—')
                                   const stockQty = item.total_units ?? item.quantity ?? item.qty ?? item.units ?? '—'
                                   const td = { padding: '0 12px', height: 46, fontSize: 13, color: 'var(--text-1)', borderBottom: '1px solid var(--border)', verticalAlign: 'middle', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
@@ -827,7 +827,7 @@ const styles = {
   statsRow: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '16px', marginBottom: '24px' },
   statCard: { display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', borderRadius: '12px', border: 'none', boxShadow: 'var(--shadow-soft)' },
   statValue: { display: 'block', fontSize: '20px', fontWeight: '600' },
-  statLabel: { fontSize: '11px', color: '#6b7280' },
+  statLabel: { fontSize: '11px', color: 'var(--text-2)' },
   toolbar: { display: 'flex', marginBottom: '24px' },
   searchGroup: { display: 'inline-flex', alignItems: 'center', gap: '12px', flexWrap: 'nowrap' },
   searchContainer: { flex: '0 0 auto', width: '320px', minWidth: '240px' },
@@ -843,16 +843,16 @@ const styles = {
   splitEmpty: { padding: '24px', borderRadius: '16px', backgroundColor: 'var(--surface-bg)', boxShadow: 'var(--shadow-soft)', color: 'var(--muted)' },
   inventoryCard: { padding: '18px', borderRadius: '18px', border: '1px solid rgba(148, 163, 184, 0.10)', boxShadow: 'var(--shadow-soft)', display: 'flex', flexDirection: 'column', gap: '14px' },
   cardHeader: { display: 'flex', justifyContent: 'space-between', gap: '16px', alignItems: 'flex-start' },
-  projectBadge: { display: 'inline-block', marginTop: '4px', padding: '2px 8px', backgroundColor: '#4f46e510', color: '#4f46e5', borderRadius: '999px', fontSize: '11px' },
+  projectBadge: { display: 'inline-block', marginTop: '4px', padding: '2px 8px', backgroundColor: '#4f46e510', color: 'var(--brand-1)', borderRadius: '999px', fontSize: '11px' },
   decisionBadge: { padding: '6px 10px', borderRadius: '999px', fontSize: '12px', fontWeight: '700', letterSpacing: '0.2px', textTransform: 'lowercase', whiteSpace: 'nowrap' },
   section: { display: 'flex', flexDirection: 'column', gap: '10px' },
-  sectionTitle: { fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#6b7280', fontWeight: 700 },
+  sectionTitle: { fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-2)', fontWeight: 700 },
   metricGrid: { display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '10px' },
   metricCell: { display: 'flex', flexDirection: 'column', gap: '4px', padding: '12px', borderRadius: '12px', backgroundColor: 'rgba(148, 163, 184, 0.08)' },
-  metricLabel: { fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#6b7280' },
+  metricLabel: { fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-2)' },
   decisionHint: { fontSize: '12px', lineHeight: 1.5 },
   locationRow: { display: 'flex', flexWrap: 'wrap', gap: '8px' },
-  locationPill: { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 10px', borderRadius: '999px', fontSize: '12px', color: '#374151', backgroundColor: 'rgba(148, 163, 184, 0.10)' },
+  locationPill: { display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 10px', borderRadius: '999px', fontSize: '12px', color: 'var(--text-1)', backgroundColor: 'rgba(148, 163, 184, 0.10)' },
   cardFooter: { display: 'flex', gap: '8px', flexWrap: 'wrap' },
   linkButton: { boxShadow: 'none' }
 }

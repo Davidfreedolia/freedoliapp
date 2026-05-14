@@ -6,10 +6,10 @@ import useT from '../hooks/useT'
 
 const COLORS = {
   yellow: { bg: '#fef3c7', border: '#fbbf24', text: '#78350f' },
-  blue: { bg: '#dbeafe', border: '#3b82f6', text: '#1e3a8a' },
-  green: { bg: '#d1fae5', border: '#22c55e', text: '#14532d' },
-  pink: { bg: '#fce7f3', border: '#ec4899', text: '#831843' },
-  orange: { bg: '#fed7aa', border: '#f97316', text: '#7c2d12' },
+  blue: { bg: '#dbeafe', border: 'var(--cta-1)', text: '#1e3a8a' },
+  green: { bg: '#d1fae5', border: 'var(--success-1)', text: '#14532d' },
+  pink: { bg: '#fce7f3', border: 'var(--coral-1)', text: '#831843' },
+  orange: { bg: '#fed7aa', border: 'var(--warning-1)', text: '#7c2d12' },
   purple: { bg: '#e9d5ff', border: '#a855f7', text: '#581c87' }
 }
 

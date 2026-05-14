@@ -105,7 +105,7 @@ export function TestimonialsCarousel() {
             className="card border-0 shadow-sm p-4 flex-shrink-0"
             style={{ width: 310, borderRadius: 16 }}
           >
-            <div style={{ color: '#f59e0b', fontSize: 18, letterSpacing: 2, marginBottom: 12 }}>
+            <div style={{ color: 'var(--warning-1)', fontSize: 18, letterSpacing: 2, marginBottom: 12 }}>
               ★★★★★
             </div>
             <p className="text-muted fst-italic mb-4" style={{ fontSize: 14 }}>

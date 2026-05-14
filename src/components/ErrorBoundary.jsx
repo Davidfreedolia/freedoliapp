@@ -149,7 +149,7 @@ class ErrorBoundary extends React.Component {
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <AlertTriangle size={24} color="#ef4444" />
+                <AlertTriangle size={24} color="var(--danger-1)" />
               </div>
               <div>
                 <h2 style={{
@@ -163,7 +163,7 @@ class ErrorBoundary extends React.Component {
                 <p style={{
                   margin: '4px 0 0',
                   fontSize: '14px',
-                  color: '#6b7280'
+                  color: 'var(--text-2)'
                 }}>
                   {i18n.t('errorBoundary.subtitle')}
                 </p>
@@ -172,14 +172,14 @@ class ErrorBoundary extends React.Component {
 
             <div style={{
               padding: '16px',
-              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+              backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
               borderRadius: '8px',
               marginBottom: '24px'
             }}>
               <p style={{
                 margin: 0,
                 fontSize: '14px',
-                color: darkMode ? '#9ca3af' : '#6b7280',
+                color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
                 lineHeight: '1.5'
               }}>
                 {debugErrors
@@ -190,7 +190,7 @@ class ErrorBoundary extends React.Component {
                 <p style={{
                   margin: '8px 0 0',
                   fontSize: '12px',
-                  color: '#9ca3af',
+                  color: 'var(--muted-1)',
                   fontFamily: 'monospace'
                 }}>
                   ID: {this.state.errorId}
@@ -202,11 +202,11 @@ class ErrorBoundary extends React.Component {
               <div style={{
                 marginBottom: '24px',
                 padding: '16px',
-                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
                 borderRadius: '8px',
                 fontSize: '12px',
                 fontFamily: 'monospace',
-                color: darkMode ? '#9ca3af' : '#6b7280',
+                color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
                 maxHeight: '300px',
                 overflow: 'auto'
               }}>
@@ -239,11 +239,11 @@ class ErrorBoundary extends React.Component {
               <details style={{
                 marginBottom: '24px',
                 padding: '16px',
-                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
                 borderRadius: '8px',
                 fontSize: '12px',
                 fontFamily: 'monospace',
-                color: darkMode ? '#9ca3af' : '#6b7280',
+                color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
                 maxHeight: '200px',
                 overflow: 'auto'
               }}>

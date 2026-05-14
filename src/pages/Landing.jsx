@@ -187,7 +187,7 @@ export default function Landing() {
         {mobileMenuOpen && (
           <div className="d-md-none" style={{
             position: 'absolute', top: '100%', left: 0, right: 0,
-            background: '#1F5F63', borderTop: '1px solid rgba(255,255,255,0.12)',
+            background: 'var(--brand-1)', borderTop: '1px solid rgba(255,255,255,0.12)',
             padding: '12px 20px 20px', display: 'flex', flexDirection: 'column', gap: 4,
             zIndex: 999,
           }}>
@@ -234,7 +234,7 @@ export default function Landing() {
             bottom: '-40%',
             left: '-10%',
             right: '-10%',
-            background: 'linear-gradient(135deg, #1F5F63 0%, #0d3a3d 50%, #1a2a2e 100%)',
+            background: 'linear-gradient(135deg, var(--brand-1) 0%, #0d3a3d 50%, #1a2a2e 100%)',
             zIndex: 0,
             willChange: 'transform',
           }}
@@ -272,7 +272,7 @@ export default function Landing() {
                   display: 'inline-flex', alignItems: 'center', gap: 6,
                   background: 'rgba(110,203,195,0.18)', border: '1px solid rgba(110,203,195,0.4)',
                   borderRadius: 20, padding: '5px 14px', fontSize: 13, fontWeight: 600,
-                  color: '#6ECBC3', letterSpacing: '0.01em',
+                  color: 'var(--brand-2)', letterSpacing: '0.01em',
                 }}>
                   {t('hero.badge')}
                 </span>
@@ -284,7 +284,7 @@ export default function Landing() {
                 <a
                   href="/register"
                   className="btn btn-lg px-5 py-3 fw-semibold"
-                  style={{ background: '#6ECBC3', color: '#0d3a3d', borderRadius: 12 }}
+                  style={{ background: 'var(--brand-2)', color: '#0d3a3d', borderRadius: 12 }}
                 >
                   {t('hero.cta_primary')}
                 </a>
@@ -305,7 +305,7 @@ export default function Landing() {
                   { value: t('hero.stat3.value'), label: t('hero.stat3.label') },
                 ].map((s, i) => (
                   <div key={i}>
-                    <div style={{ fontSize: 26, fontWeight: 800, color: '#6ECBC3', lineHeight: 1 }}>{s.value}</div>
+                    <div style={{ fontSize: 26, fontWeight: 800, color: 'var(--brand-2)', lineHeight: 1 }}>{s.value}</div>
                     <div style={{ fontSize: 12, opacity: 0.7, marginTop: 3 }}>{s.label}</div>
                   </div>
                 ))}
@@ -376,7 +376,7 @@ export default function Landing() {
                   style={{ animation: `fd-fade-up 0.5s ${0.05 * i}s both` }}
                 >
                   <div className="ld-feature-card__icon">
-                    <f.Icon size={22} color="#1F5F63" />
+                    <f.Icon size={22} color="var(--brand-1)" />
                   </div>
                   <h3 className="ld-feature-card__title">{t(f.titleKey)}</h3>
                   <p className="ld-feature-card__desc mb-0">{t(f.textKey)}</p>
@@ -412,7 +412,7 @@ export default function Landing() {
                 <div className="py-3">
                   <div
                     className="fw-bold mb-2"
-                    style={{ fontSize: 48, lineHeight: 1, color: '#6ECBC3' }}
+                    style={{ fontSize: 48, lineHeight: 1, color: 'var(--brand-2)' }}
                   >
                     {i}
                   </div>

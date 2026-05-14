@@ -36,16 +36,16 @@ export default function CookiePreferences({ initialPrefs, onClose, onSave }) {
         <h2 id="cookie-prefs-title" style={{ fontSize: 18, margin: 0, marginBottom: 8 }}>
           Cookie preferences
         </h2>
-        <p style={{ fontSize: 13, color: '#4b5563', marginBottom: 16 }}>
+        <p style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 16 }}>
           Choose how FREEDOLIAPP uses cookies. Essential cookies are always on because they are needed for the site to function.
         </p>
 
         <div style={{ marginBottom: 12 }}>
           <div style={{ fontWeight: 600, fontSize: 13 }}>Essential cookies</div>
-          <p style={{ fontSize: 12, color: '#6b7280', margin: '4px 0 0' }}>
+          <p style={{ fontSize: 12, color: 'var(--text-2)', margin: '4px 0 0' }}>
             Required for authentication, security and core functionality. Always active.
           </p>
-          <div style={{ marginTop: 6, fontSize: 12, color: '#059669', fontWeight: 600 }}>
+          <div style={{ marginTop: 6, fontSize: 12, color: 'var(--success-1)', fontWeight: 600 }}>
             Always on
           </div>
         </div>
@@ -54,7 +54,7 @@ export default function CookiePreferences({ initialPrefs, onClose, onSave }) {
           <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
             <div>
               <div style={{ fontWeight: 600, fontSize: 13 }}>Analytics cookies</div>
-              <p style={{ fontSize: 12, color: '#6b7280', margin: '4px 0 0' }}>
+              <p style={{ fontSize: 12, color: 'var(--text-2)', margin: '4px 0 0' }}>
                 Help us understand how the product is used so we can improve it. Optional.
               </p>
             </div>
@@ -74,7 +74,7 @@ export default function CookiePreferences({ initialPrefs, onClose, onSave }) {
               borderRadius: 999,
               border: '1px solid #e5e7eb',
               background: '#FFFFFF',
-              color: '#374151',
+              color: 'var(--text-1)',
               padding: '6px 12px',
               fontSize: 13,
               cursor: 'pointer',
@@ -88,8 +88,8 @@ export default function CookiePreferences({ initialPrefs, onClose, onSave }) {
             style={{
               borderRadius: 999,
               border: 'none',
-              background: '#111827',
-              color: '#F9FAFB',
+              background: 'var(--text-1)',
+              color: 'var(--surface-bg-2)',
               padding: '6px 14px',
               fontSize: 13,
               fontWeight: 600,

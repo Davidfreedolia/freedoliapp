@@ -23,12 +23,12 @@ export default function ShipmentDetailDrawer({ shipment, darkMode, onClose, onSy
   const { t } = useTranslation()
   const [packages, setPackages] = useState([])
   const SHIPMENT_STATUS_COLOR = {
-    draft: { bg: '#6b7280', label: t('orders.shipmentsPanel.status.draft') },
-    in_transit: { bg: '#f59e0b', label: t('orders.shipmentsPanel.status.inTransit') },
-    customs: { bg: '#8b5cf6', label: t('orders.shipmentsPanel.status.customs') },
-    delivered: { bg: '#22c55e', label: t('orders.shipmentsPanel.status.delivered') },
-    exception: { bg: '#ef4444', label: t('orders.shipmentsPanel.status.exception') },
-    cancelled: { bg: '#6b7280', label: t('orders.shipmentsPanel.status.cancelled') }
+    draft: { bg: 'var(--text-2)', label: t('orders.shipmentsPanel.status.draft') },
+    in_transit: { bg: 'var(--warning-1)', label: t('orders.shipmentsPanel.status.inTransit') },
+    customs: { bg: 'var(--brand-1)', label: t('orders.shipmentsPanel.status.customs') },
+    delivered: { bg: 'var(--success-1)', label: t('orders.shipmentsPanel.status.delivered') },
+    exception: { bg: 'var(--danger-1)', label: t('orders.shipmentsPanel.status.exception') },
+    cancelled: { bg: 'var(--text-2)', label: t('orders.shipmentsPanel.status.cancelled') }
   }
 
   const [alerts, setAlerts] = useState([])
@@ -156,7 +156,7 @@ export default function ShipmentDetailDrawer({ shipment, darkMode, onClose, onSy
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
             <Truck size={18} color="var(--muted-1)" />
-            <span style={{ fontSize: 14, fontWeight: 600, color: darkMode ? '#e5e7eb' : '#111827' }}>
+            <span style={{ fontSize: 14, fontWeight: 600, color: darkMode ? 'var(--border-1)' : 'var(--text-1)' }}>
               {t('orders.shipmentsPanel.drawer.shipmentId', { id: shortId })}
             </span>
             <span
@@ -172,7 +172,7 @@ export default function ShipmentDetailDrawer({ shipment, darkMode, onClose, onSy
               {statusMeta.label}
             </span>
           </div>
-          <div style={{ fontSize: 12, color: darkMode ? '#9ca3af' : '#6b7280' }}>
+          <div style={{ fontSize: 12, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
             {destinationLabel()} · {t('orders.shipmentsPanel.eta', { date: formatDate(shipment.eta_estimated) })}
           </div>
         </div>
@@ -205,8 +205,8 @@ export default function ShipmentDetailDrawer({ shipment, darkMode, onClose, onSy
                 fontWeight: 600,
                 padding: '4px 8px',
                 borderRadius: 8,
-                backgroundColor: darkMode ? 'var(--surface-bg-2)' : '#f3f4f6',
-                color: darkMode ? '#e5e7eb' : '#374151',
+                backgroundColor: darkMode ? 'var(--surface-bg-2)' : 'var(--surface-bg-2)',
+                color: darkMode ? 'var(--border-1)' : 'var(--text-1)',
                 border: '1px solid var(--border-1)'
               }}
             >
@@ -232,11 +232,11 @@ export default function ShipmentDetailDrawer({ shipment, darkMode, onClose, onSy
       )}
 
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: '0 16px 16px' }}>
-        <h4 style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 600, color: darkMode ? '#e5e7eb' : '#374151' }}>
+        <h4 style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 600, color: darkMode ? 'var(--border-1)' : 'var(--text-1)' }}>
           {t('orders.shipmentsPanel.drawer.packages')}
         </h4>
         {loadingPackages ? (
-          <div style={{ padding: 12, fontSize: 13, color: darkMode ? '#9ca3af' : '#6b7280' }}>{t('common.loading')}</div>
+          <div style={{ padding: 12, fontSize: 13, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>{t('common.loading')}</div>
         ) : (
           <div style={{ marginBottom: 16, minHeight: 80 }}>
             <PackageList
@@ -248,7 +248,7 @@ export default function ShipmentDetailDrawer({ shipment, darkMode, onClose, onSy
           </div>
         )}
 
-        <h4 style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 600, color: darkMode ? '#e5e7eb' : '#374151' }}>
+        <h4 style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 600, color: darkMode ? 'var(--border-1)' : 'var(--text-1)' }}>
           {t('orders.shipmentsPanel.drawer.trackingEvents')}
         </h4>
         <div style={{ flex: 1, minHeight: 120, overflow: 'auto' }}>

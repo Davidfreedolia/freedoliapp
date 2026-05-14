@@ -17,10 +17,10 @@ import { showToast } from './Toast'
 
 const COLORS = [
   { value: 'yellow', label: 'Groc', bg: '#fef3c7', border: '#fbbf24' },
-  { value: 'blue', label: 'Blau', bg: '#dbeafe', border: '#3b82f6' },
-  { value: 'green', label: 'Verd', bg: '#d1fae5', border: '#22c55e' },
-  { value: 'pink', label: 'Rosa', bg: '#fce7f3', border: '#ec4899' },
-  { value: 'orange', label: 'Taronja', bg: '#fed7aa', border: '#f97316' },
+  { value: 'blue', label: 'Blau', bg: '#dbeafe', border: 'var(--cta-1)' },
+  { value: 'green', label: 'Verd', bg: '#d1fae5', border: 'var(--success-1)' },
+  { value: 'pink', label: 'Rosa', bg: '#fce7f3', border: 'var(--coral-1)' },
+  { value: 'orange', label: 'Taronja', bg: '#fed7aa', border: 'var(--warning-1)' },
   { value: 'purple', label: 'Morat', bg: '#e9d5ff', border: '#a855f7' }
 ]
 
@@ -215,7 +215,7 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
                 padding: '12px',
                 minWidth: '200px',
                 maxWidth: '300px',
-                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                boxShadow: 'var(--shadow-popover)',
                 pointerEvents: 'auto',
                 position: 'relative'
               }}
@@ -225,14 +225,14 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
                   fontWeight: '600',
                   fontSize: '14px',
                   marginBottom: '6px',
-                  color: darkMode ? '#111827' : '#111827'
+                  color: darkMode ? 'var(--text-1)' : 'var(--text-1)'
                 }}>
                   {note.title}
                 </div>
               )}
               <div style={{
                 fontSize: '13px',
-                color: darkMode ? '#374151' : '#4b5563',
+                color: darkMode ? 'var(--text-1)' : 'var(--text-2)',
                 whiteSpace: 'pre-wrap',
                 wordBreak: 'break-word'
               }}>
@@ -250,7 +250,7 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
                   borderRadius: '4px',
                   fontSize: '11px',
                   fontWeight: '500',
-                  color: '#3b82f6'
+                  color: 'var(--cta-1)'
                 }}>
                   <Link2 size={12} />
                   {t('stickyNotes.taskLinked', 'Tasca vinculada')}
@@ -282,7 +282,7 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
                         <button
                           onClick={() => handlePlan(note.id, planDate)}
                           style={{
-                            background: '#4f46e5',
+                            background: 'var(--brand-1)',
                             border: 'none',
                             cursor: 'pointer',
                             padding: '4px 8px',
@@ -325,7 +325,7 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
                           }}
                           title={t('stickyNotes.plan', 'Planificar')}
                         >
-                          <Calendar size={14} color="#f59e0b" />
+                          <Calendar size={14} color="var(--warning-1)" />
                         </button>
                         <button
                           onClick={() => handleConvertToTask(note)}
@@ -339,7 +339,7 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
                           }}
                           title={t('stickyNotes.convertToTask', 'Convertir a tasca')}
                         >
-                          <CheckSquare size={14} color="#4f46e5" />
+                          <CheckSquare size={14} color="var(--brand-1)" />
                         </button>
                       </>
                     )}
@@ -359,7 +359,7 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
                       }}
                       title={t('stickyNotes.openTask', 'Obrir tasca')}
                     >
-                      <ExternalLink size={14} color="#3b82f6" />
+                      <ExternalLink size={14} color="var(--cta-1)" />
                     </button>
                     <button
                       onClick={() => handleUnlink(note.id)}
@@ -373,7 +373,7 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
                       }}
                       title={t('stickyNotes.unlink', 'Desvincular')}
                     >
-                      <Unlink size={14} color="#6b7280" />
+                      <Unlink size={14} color='var(--text-2)' />
                     </button>
                   </>
                 )}
@@ -389,7 +389,7 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
                   }}
                   title={t('stickyNotes.markDone', 'Marcar com fet')}
                 >
-                  <Check size={14} color="#22c55e" />
+                  <Check size={14} color="var(--success-1)" />
                 </button>
                 <button
                   onClick={() => handleDelete(note.id)}
@@ -403,7 +403,7 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
                   }}
                   title={t('stickyNotes.delete', 'Eliminar')}
                 >
-                  <X size={14} color="#ef4444" />
+                  <X size={14} color="var(--danger-1)" />
                 </button>
               </div>
             </div>
@@ -419,7 +419,7 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
       backgroundColor: darkMode ? '#15151f' : '#ffffff',
       borderRadius: '12px',
       padding: '20px',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       height: '100%',
       display: 'flex',
       flexDirection: 'column'
@@ -433,7 +433,7 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
     title: {
       fontSize: '18px',
       fontWeight: '600',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       margin: 0
     },
     addButton: {
@@ -441,17 +441,17 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
       alignItems: 'center',
       gap: '6px',
       padding: '6px 12px',
-      backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       borderRadius: '6px',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       cursor: 'pointer',
       fontSize: '14px',
       fontWeight: '500'
     },
     addForm: {
-      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       borderRadius: '8px',
       padding: '12px',
       marginBottom: '16px'
@@ -460,9 +460,9 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
       width: '100%',
       padding: '8px',
       backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       borderRadius: '6px',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       fontSize: '14px',
       marginBottom: '8px'
     },
@@ -470,9 +470,9 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
       width: '100%',
       padding: '8px',
       backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       borderRadius: '6px',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       fontSize: '14px',
       minHeight: '60px',
       resize: 'vertical',
@@ -532,12 +532,12 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
     noteTitle: {
       fontWeight: '600',
       fontSize: '14px',
-      color: darkMode ? '#111827' : '#111827',
+      color: darkMode ? 'var(--text-1)' : 'var(--text-1)',
       flex: 1
     },
     noteContent: {
       fontSize: '13px',
-      color: darkMode ? '#374151' : '#4b5563',
+      color: darkMode ? 'var(--text-1)' : 'var(--text-2)',
       whiteSpace: 'pre-wrap',
       wordBreak: 'break-word',
       marginBottom: '8px'
@@ -563,7 +563,7 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
       justifyContent: 'center',
       alignItems: 'center',
       padding: '40px',
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       fontSize: '14px'
     },
     empty: {
@@ -572,7 +572,7 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
       alignItems: 'center',
       justifyContent: 'center',
       padding: '40px',
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       fontSize: '14px',
       textAlign: 'center'
     }
@@ -630,8 +630,8 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
               }}
               style={{
                 ...styles.button,
-                backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6',
-                color: darkMode ? '#ffffff' : '#111827'
+                backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                color: darkMode ? '#ffffff' : 'var(--text-1)'
               }}
             >
               {t('common.cancel', 'Cancel·lar')}
@@ -640,7 +640,7 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
               onClick={handleAddNote}
               style={{
                 ...styles.button,
-                backgroundColor: '#4f46e5',
+                backgroundColor: 'var(--brand-1)',
                 color: '#ffffff'
               }}
             >
@@ -719,7 +719,7 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
                     borderRadius: '4px',
                     fontSize: '12px',
                     fontWeight: '500',
-                    color: '#3b82f6'
+                    color: 'var(--cta-1)'
                   }}>
                     <Link2 size={14} />
                     {t('stickyNotes.taskLinked', 'Tasca vinculada')}
@@ -738,7 +738,7 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
                     borderRadius: '4px',
                     fontSize: '12px',
                     fontWeight: '500',
-                    color: '#f59e0b'
+                    color: 'var(--warning-1)'
                   }}>
                     <Calendar size={14} />
                     {new Date(note.due_date).toLocaleDateString()}
@@ -759,16 +759,16 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
                               fontSize: '12px',
                               padding: '6px',
                               borderRadius: '4px',
-                              border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+                              border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
                               backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
-                              color: darkMode ? '#ffffff' : '#111827'
+                              color: darkMode ? '#ffffff' : 'var(--text-1)'
                             }}
                           />
                           <button
                             onClick={() => handlePlan(note.id, planDate)}
                             style={{
                               ...styles.actionButton,
-                              backgroundColor: '#4f46e5',
+                              backgroundColor: 'var(--brand-1)',
                               color: '#ffffff',
                               padding: '6px 12px'
                             }}
@@ -795,14 +795,14 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
                             style={styles.actionButton}
                             title={t('stickyNotes.plan', 'Planificar')}
                           >
-                            <Calendar size={16} color="#f59e0b" />
+                            <Calendar size={16} color="var(--warning-1)" />
                           </button>
                           <button
                             onClick={() => handleConvertToTask(note)}
                             style={styles.actionButton}
                             title={t('stickyNotes.convertToTask', 'Convertir a tasca')}
                           >
-                            <CheckSquare size={16} color="#4f46e5" />
+                            <CheckSquare size={16} color="var(--brand-1)" />
                           </button>
                         </>
                       )}
@@ -815,14 +815,14 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
                         style={styles.actionButton}
                         title={t('stickyNotes.openTask', 'Obrir tasca')}
                       >
-                        <ExternalLink size={16} color="#3b82f6" />
+                        <ExternalLink size={16} color="var(--cta-1)" />
                       </button>
                       <button
                         onClick={() => handleUnlink(note.id)}
                         style={styles.actionButton}
                         title={t('stickyNotes.unlink', 'Desvincular')}
                       >
-                        <Unlink size={16} color="#6b7280" />
+                        <Unlink size={16} color='var(--text-2)' />
                       </button>
                     </>
                   )}
@@ -831,14 +831,14 @@ export default function StickyNotesWidget({ darkMode, showOverlay = false }) {
                     style={styles.actionButton}
                     title={t('stickyNotes.markDone', 'Marcar com fet')}
                   >
-                    <Check size={16} color="#22c55e" />
+                    <Check size={16} color="var(--success-1)" />
                   </button>
                   <button
                     onClick={() => handleDelete(note.id)}
                     style={styles.actionButton}
                     title={t('stickyNotes.delete', 'Eliminar')}
                   >
-                    <Trash2 size={16} color="#ef4444" />
+                    <Trash2 size={16} color="var(--danger-1)" />
                   </button>
                 </div>
               </div>

@@ -38,22 +38,22 @@ export default function DeleteConfirmationModal({
       maxWidth: '480px',
       backgroundColor: darkMode ? '#15151f' : '#ffffff',
       borderRadius: '16px',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       overflow: 'hidden',
-      boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
+      boxShadow: 'var(--shadow-modal)'
     },
     header: {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
       padding: '20px 24px',
-      borderBottom: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+      borderBottom: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
     },
     title: {
       margin: 0,
       fontSize: '18px',
       fontWeight: '600',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       display: 'flex',
       alignItems: 'center',
       gap: '8px'
@@ -62,7 +62,7 @@ export default function DeleteConfirmationModal({
       background: 'none',
       border: 'none',
       cursor: 'pointer',
-      color: '#6b7280',
+      color: 'var(--text-2)',
       padding: '4px',
       display: 'flex',
       alignItems: 'center'
@@ -76,13 +76,13 @@ export default function DeleteConfirmationModal({
       gap: '12px',
       padding: '16px',
       backgroundColor: darkMode ? '#1f1f2e' : '#fef3c7',
-      border: `1px solid ${darkMode ? '#374151' : '#fde68a'}`,
+      border: `1px solid ${darkMode ? 'var(--text-1)' : '#fde68a'}`,
       borderRadius: '8px',
       marginBottom: '20px'
     },
     warningIcon: {
       flexShrink: 0,
-      color: '#f59e0b'
+      color: 'var(--warning-1)'
     },
     warningText: {
       fontSize: '14px',
@@ -91,11 +91,11 @@ export default function DeleteConfirmationModal({
     },
     entityName: {
       fontWeight: '600',
-      color: darkMode ? '#ffffff' : '#111827'
+      color: darkMode ? '#ffffff' : 'var(--text-1)'
     },
     message: {
       fontSize: '14px',
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       marginBottom: '16px',
       lineHeight: '1.5'
     },
@@ -104,7 +104,7 @@ export default function DeleteConfirmationModal({
       justifyContent: 'flex-end',
       gap: '12px',
       padding: '20px 24px',
-      borderTop: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+      borderTop: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
     },
     button: {
       padding: '10px 20px',
@@ -120,13 +120,13 @@ export default function DeleteConfirmationModal({
     },
     cancelButton: {
       backgroundColor: 'transparent',
-      color: darkMode ? '#9ca3af' : '#6b7280',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
     },
     confirmButton: {
-      backgroundColor: '#ef4444',
+      backgroundColor: 'var(--danger-1)',
       color: '#ffffff',
-      border: '1px solid #dc2626'
+      border: '1px solid var(--danger-1)'
     },
     buttonDisabled: {
       opacity: 0.5,
@@ -139,7 +139,7 @@ export default function DeleteConfirmationModal({
       <div style={styles.modal} onClick={e => e.stopPropagation()}>
         <div style={styles.header}>
           <h3 style={styles.title}>
-            <AlertTriangle size={20} color="#ef4444" />
+            <AlertTriangle size={20} color="var(--danger-1)" />
             {t('deleteModal.title', { entity: titleEntity })}
           </h3>
           <Button variant="ghost" onClick={onClose} disabled={isDeleting} aria-label={t('deleteModal.closeAria')}>

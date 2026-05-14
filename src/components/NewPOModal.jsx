@@ -368,7 +368,7 @@ export default function NewPOModal({
           <div>
             <h2 style={{
               ...styles.title,
-              color: darkMode ? '#ffffff' : '#111827'
+              color: darkMode ? '#ffffff' : 'var(--text-1)'
             }}>
               {editingOrder ? t('orders.newPoModal.title.edit') : t('orders.newPoModal.title.create')}
             </h2>
@@ -385,7 +385,7 @@ export default function NewPOModal({
         <div style={styles.body}>
           {/* SECCIÓ 1: Projecte i Proveïdor */}
           <div style={styles.section}>
-            <h3 style={{...styles.sectionTitle, color: darkMode ? '#ffffff' : '#111827'}}>
+            <h3 style={{...styles.sectionTitle, color: darkMode ? '#ffffff' : 'var(--text-1)'}}>
               <FileText size={18} />
               {t('orders.newPoModal.sections.basicInfo')}
             </h3>
@@ -399,8 +399,8 @@ export default function NewPOModal({
                   disabled={generatingPO}
                   style={{
                     ...styles.input,
-                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                    color: darkMode ? '#ffffff' : '#111827'
+                    backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}
                 >
                   <option value="">{t('orders.newPoModal.placeholders.selectProject')}</option>
@@ -420,8 +420,8 @@ export default function NewPOModal({
                   disabled
                   style={{
                     ...styles.input,
-                    backgroundColor: darkMode ? '#1f1f2e' : '#e5e7eb',
-                    color: '#4f46e5',
+                    backgroundColor: darkMode ? '#1f1f2e' : 'var(--border-1)',
+                    color: 'var(--brand-1)',
                     fontWeight: '600',
                     fontFamily: 'monospace'
                   }}
@@ -446,8 +446,8 @@ export default function NewPOModal({
                   }}
                   style={{
                     ...styles.input,
-                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                    color: darkMode ? '#ffffff' : '#111827'
+                    backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}
                 >
                   <option value="">{t('orders.newPoModal.placeholders.selectSupplier')}</option>
@@ -467,8 +467,8 @@ export default function NewPOModal({
                   onChange={e => setFormData({...formData, order_date: e.target.value})}
                   style={{
                     ...styles.input,
-                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                    color: darkMode ? '#ffffff' : '#111827'
+                    backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}
                 />
               </div>
@@ -482,8 +482,8 @@ export default function NewPOModal({
                   placeholder={t('orders.newPoModal.placeholders.quoteRef')}
                   style={{
                     ...styles.input,
-                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                    color: darkMode ? '#ffffff' : '#111827'
+                    backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}
                 />
               </div>
@@ -495,8 +495,8 @@ export default function NewPOModal({
                   onChange={e => setFormData({...formData, currency: e.target.value})}
                   style={{
                     ...styles.input,
-                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                    color: darkMode ? '#ffffff' : '#111827'
+                    backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}
                 >
                   {CURRENCIES.map(c => (
@@ -509,7 +509,7 @@ export default function NewPOModal({
 
           {/* SECCIÓ 2: Adreça d'entrega */}
           <div style={styles.section}>
-            <h3 style={{...styles.sectionTitle, color: darkMode ? '#ffffff' : '#111827'}}>
+            <h3 style={{...styles.sectionTitle, color: darkMode ? '#ffffff' : 'var(--text-1)'}}>
               <Truck size={18} />
               {t('orders.newPoModal.sections.deliveryAddress')}
             </h3>
@@ -523,8 +523,8 @@ export default function NewPOModal({
                   onChange={e => handleWarehouseChange(e.target.value)}
                   style={{
                     ...styles.input,
-                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                    color: darkMode ? '#ffffff' : '#111827'
+                    backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}
                 >
                   <option value="">{t('orders.newPoModal.placeholders.selectWarehouse')}</option>
@@ -549,8 +549,8 @@ export default function NewPOModal({
                   style={{
                     ...styles.input,
                     ...styles.textarea,
-                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                    color: darkMode ? '#ffffff' : '#111827'
+                    backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}
                 />
               </div>
@@ -563,8 +563,8 @@ export default function NewPOModal({
                   placeholder={t('orders.newPoModal.placeholders.contact')}
                   style={{
                     ...styles.input,
-                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                    color: darkMode ? '#ffffff' : '#111827'
+                    backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}
                 />
               </div>
@@ -577,8 +577,8 @@ export default function NewPOModal({
                   placeholder="+86..."
                   style={{
                     ...styles.input,
-                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                    color: darkMode ? '#ffffff' : '#111827'
+                    backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}
                 />
               </div>
@@ -590,8 +590,8 @@ export default function NewPOModal({
                   onChange={e => setFormData({...formData, delivery_email: e.target.value})}
                   style={{
                     ...styles.input,
-                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                    color: darkMode ? '#ffffff' : '#111827'
+                    backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}
                 />
               </div>
@@ -600,7 +600,7 @@ export default function NewPOModal({
 
           {/* SECCIÓ 3: Termes Comercials */}
           <div style={styles.section}>
-            <h3 style={{...styles.sectionTitle, color: darkMode ? '#ffffff' : '#111827'}}>
+            <h3 style={{...styles.sectionTitle, color: darkMode ? '#ffffff' : 'var(--text-1)'}}>
               <Building2 size={18} />
               {t('orders.newPoModal.sections.commercialTerms')}
             </h3>
@@ -615,8 +615,8 @@ export default function NewPOModal({
                   placeholder={t('orders.newPoModal.placeholders.paymentTerms')}
                   style={{
                     ...styles.input,
-                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                    color: darkMode ? '#ffffff' : '#111827'
+                    backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}
                 />
               </div>
@@ -629,8 +629,8 @@ export default function NewPOModal({
                     style={{
                       ...styles.input,
                       width: '100px',
-                      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                      color: darkMode ? '#ffffff' : '#111827'
+                      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                      color: darkMode ? '#ffffff' : 'var(--text-1)'
                     }}
                   >
                     {INCOTERMS.map(i => (
@@ -645,8 +645,8 @@ export default function NewPOModal({
                     style={{
                       ...styles.input,
                       flex: 1,
-                      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                      color: darkMode ? '#ffffff' : '#111827'
+                      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                      color: darkMode ? '#ffffff' : 'var(--text-1)'
                     }}
                   />
                 </div>
@@ -660,8 +660,8 @@ export default function NewPOModal({
                   placeholder={t('orders.newPoModal.placeholders.sampleLeadTime')}
                   style={{
                     ...styles.input,
-                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                    color: darkMode ? '#ffffff' : '#111827'
+                    backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}
                 />
               </div>
@@ -674,8 +674,8 @@ export default function NewPOModal({
                   placeholder={t('orders.newPoModal.placeholders.productionLeadTime')}
                   style={{
                     ...styles.input,
-                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                    color: darkMode ? '#ffffff' : '#111827'
+                    backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}
                 />
               </div>
@@ -688,8 +688,8 @@ export default function NewPOModal({
                   placeholder={t('orders.newPoModal.placeholders.quoteValidity')}
                   style={{
                     ...styles.input,
-                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                    color: darkMode ? '#ffffff' : '#111827'
+                    backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}
                 />
               </div>
@@ -699,7 +699,7 @@ export default function NewPOModal({
           {/* SECCIÓ 4: Productes */}
           <div style={styles.section}>
             <div style={styles.sectionHeader}>
-              <h3 style={{...styles.sectionTitle, color: darkMode ? '#ffffff' : '#111827', margin: 0}}>
+              <h3 style={{...styles.sectionTitle, color: darkMode ? '#ffffff' : 'var(--text-1)', margin: 0}}>
                 <Package size={18} />
                 {t('orders.newPoModal.sections.productDetails')}
               </h3>
@@ -723,7 +723,7 @@ export default function NewPOModal({
                 
                 {formData.items.map((item, index) => (
                   <div key={index} style={styles.itemRow}>
-                    <span style={{width: '40px', minWidth: '40px', flexShrink: 0, color: '#6b7280'}}>{item.ref}</span>
+                    <span style={{width: '40px', minWidth: '40px', flexShrink: 0, color: 'var(--text-2)'}}>{item.ref}</span>
                     <input
                       type="text"
                       value={item.description}
@@ -733,8 +733,8 @@ export default function NewPOModal({
                         ...styles.itemInput,
                         flex: '2 1 0',
                         minWidth: 0,
-                        backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                        color: darkMode ? '#ffffff' : '#111827'
+                        backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                        color: darkMode ? '#ffffff' : 'var(--text-1)'
                       }}
                     />
                     <input
@@ -748,8 +748,8 @@ export default function NewPOModal({
                         minWidth: '80px',
                         flexShrink: 0,
                         textAlign: 'right',
-                        backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                        color: darkMode ? '#ffffff' : '#111827'
+                        backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                        color: darkMode ? '#ffffff' : 'var(--text-1)'
                       }}
                     />
                     <select
@@ -760,8 +760,8 @@ export default function NewPOModal({
                         width: '80px',
                         minWidth: '80px',
                         flexShrink: 0,
-                        backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                        color: darkMode ? '#ffffff' : '#111827'
+                        backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                        color: darkMode ? '#ffffff' : 'var(--text-1)'
                       }}
                     >
                       {UNITS.map(u => (
@@ -780,8 +780,8 @@ export default function NewPOModal({
                         minWidth: '100px',
                         flexShrink: 0,
                         textAlign: 'right',
-                        backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                        color: darkMode ? '#ffffff' : '#111827'
+                        backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                        color: darkMode ? '#ffffff' : 'var(--text-1)'
                       }}
                     />
                     <span style={{
@@ -790,7 +790,7 @@ export default function NewPOModal({
                       flexShrink: 0,
                       textAlign: 'right',
                       fontWeight: '600',
-                      color: darkMode ? '#ffffff' : '#111827'
+                      color: darkMode ? '#ffffff' : 'var(--text-1)'
                     }}>
                       {calculateLineTotal(item).toFixed(2)}
                     </span>
@@ -816,7 +816,7 @@ export default function NewPOModal({
                     textAlign: 'right',
                     fontWeight: '700',
                     fontSize: '18px',
-                    color: '#4f46e5'
+                    color: 'var(--brand-1)'
                   }}>
                     {calculateTotal().toFixed(2)}
                   </span>
@@ -828,7 +828,7 @@ export default function NewPOModal({
 
           {/* SECCIÓ 5: Shipping Specs */}
           <div style={styles.section}>
-            <h3 style={{...styles.sectionTitle, color: darkMode ? '#ffffff' : '#111827'}}>
+            <h3 style={{...styles.sectionTitle, color: darkMode ? '#ffffff' : 'var(--text-1)'}}>
               <Calculator size={18} />
               {t('orders.newPoModal.sections.shippingSpecs')}
             </h3>
@@ -843,8 +843,8 @@ export default function NewPOModal({
                   placeholder={t('orders.newPoModal.placeholders.totalCartons')}
                   style={{
                     ...styles.input,
-                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                    color: darkMode ? '#ffffff' : '#111827'
+                    backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}
                 />
               </div>
@@ -857,8 +857,8 @@ export default function NewPOModal({
                   placeholder={t('orders.newPoModal.placeholders.netWeight')}
                   style={{
                     ...styles.input,
-                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                    color: darkMode ? '#ffffff' : '#111827'
+                    backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}
                 />
               </div>
@@ -871,8 +871,8 @@ export default function NewPOModal({
                   placeholder={t('orders.newPoModal.placeholders.grossWeight')}
                   style={{
                     ...styles.input,
-                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                    color: darkMode ? '#ffffff' : '#111827'
+                    backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}
                 />
               </div>
@@ -885,8 +885,8 @@ export default function NewPOModal({
                   placeholder={t('orders.newPoModal.placeholders.totalVolume')}
                   style={{
                     ...styles.input,
-                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                    color: darkMode ? '#ffffff' : '#111827'
+                    backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}
                 />
               </div>
@@ -899,8 +899,8 @@ export default function NewPOModal({
                   placeholder={t('orders.newPoModal.placeholders.cartonSize')}
                   style={{
                     ...styles.input,
-                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                    color: darkMode ? '#ffffff' : '#111827'
+                    backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}
                 />
               </div>
@@ -913,8 +913,8 @@ export default function NewPOModal({
                   placeholder={t('orders.newPoModal.placeholders.shippingMark')}
                   style={{
                     ...styles.input,
-                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                    color: darkMode ? '#ffffff' : '#111827'
+                    backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}
                 />
               </div>
@@ -932,8 +932,8 @@ export default function NewPOModal({
                 placeholder="ABC123456789"
                 style={{
                   ...styles.input,
-                  backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                  color: darkMode ? '#ffffff' : '#111827'
+                  backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                  color: darkMode ? '#ffffff' : 'var(--text-1)'
                 }}
               />
             </div>
@@ -944,8 +944,8 @@ export default function NewPOModal({
                 onChange={e => setFormData({...formData, logistics_status: e.target.value})}
                 style={{
                   ...styles.input,
-                  backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                  color: darkMode ? '#ffffff' : '#111827'
+                  backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                  color: darkMode ? '#ffffff' : 'var(--text-1)'
                 }}
               >
                 <option value="">{t('orders.newPoModal.placeholders.selectLogisticsStatus')}</option>
@@ -970,8 +970,8 @@ export default function NewPOModal({
               style={{
                 ...styles.input,
                 ...styles.textarea,
-                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                color: darkMode ? '#ffffff' : '#111827'
+                backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                color: darkMode ? '#ffffff' : 'var(--text-1)'
               }}
             />
           </div>
@@ -1021,7 +1021,7 @@ export default function NewPOModal({
             {!formData.po_number && !loading && (
               <span style={{
                 fontSize: '11px',
-                color: '#6b7280',
+                color: 'var(--text-2)',
                 fontStyle: 'italic'
               }}>
                 {t('orders.newPoModal.hints.selectProjectToContinue')}
@@ -1078,7 +1078,7 @@ const styles = {
     marginTop: '4px',
     padding: '4px 10px',
     backgroundColor: '#4f46e515',
-    color: '#4f46e5',
+    color: 'var(--brand-1)',
     borderRadius: '6px',
     fontSize: '14px',
     fontWeight: '600',
@@ -1088,7 +1088,7 @@ const styles = {
     background: 'none',
     border: 'none',
     cursor: 'pointer',
-    color: '#6b7280',
+    color: 'var(--text-2)',
     padding: '4px'
   },
   body: {
@@ -1136,7 +1136,7 @@ const styles = {
   label: {
     fontSize: '12px',
     fontWeight: '500',
-    color: '#6b7280',
+    color: 'var(--text-2)',
     whiteSpace: 'nowrap',
     overflow: 'visible',
     textOverflow: 'clip'
@@ -1164,7 +1164,7 @@ const styles = {
     gap: '6px',
     padding: '8px 12px',
     backgroundColor: '#4f46e515',
-    color: '#4f46e5',
+    color: 'var(--brand-1)',
     border: 'none',
     borderRadius: '8px',
     fontSize: '13px',
@@ -1192,7 +1192,7 @@ const styles = {
     fontSize: '11px',
     fontWeight: '600',
     textTransform: 'uppercase',
-    color: '#6b7280',
+    color: 'var(--text-2)',
     minWidth: 0,
     boxSizing: 'border-box'
   },
@@ -1222,7 +1222,7 @@ const styles = {
     justifyContent: 'center',
     background: 'none',
     border: 'none',
-    color: '#ef4444',
+    color: 'var(--danger-1)',
     cursor: 'pointer',
     borderRadius: '6px',
     boxSizing: 'border-box'

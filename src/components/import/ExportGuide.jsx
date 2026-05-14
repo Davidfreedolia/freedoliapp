@@ -99,8 +99,8 @@ export default function ExportGuide({ sourceId = 'generic', sourceLabel = '', is
   if (!isOpen) return null
 
   const steps = STEPS_BY_SOURCE[sourceId] || STEPS_BY_SOURCE.generic
-  const muted = darkMode ? '#9aa1b4' : '#6b7280'
-  const ink = darkMode ? '#e6e9f2' : '#1f2937'
+  const muted = darkMode ? '#9aa1b4' : 'var(--text-2)'
+  const ink = darkMode ? '#e6e9f2' : 'var(--text-1)'
   const borderColor = darkMode ? '#2a2a3a' : 'rgba(31,95,99,0.14)'
 
   return (
@@ -118,11 +118,11 @@ export default function ExportGuide({ sourceId = 'generic', sourceLabel = '', is
         width: '100%', maxWidth: 520, maxHeight: '85vh', overflowY: 'auto',
         backgroundColor: darkMode ? '#15151f' : '#ffffff',
         borderRadius: 16, padding: 20,
-        boxShadow: '0 20px 60px rgba(0,0,0,0.35)', color: ink,
+        boxShadow: 'var(--shadow-modal)', color: ink,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
           <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>
-            <ExternalLink size={16} style={{ verticalAlign: -3, marginRight: 6 }} color="var(--brand-1,#1F5F63)" />
+            <ExternalLink size={16} style={{ verticalAlign: -3, marginRight: 6 }} color="var(--brand-1,var(--brand-1))" />
             {t('dataImport.guide.title', { defaultValue: 'Com exportar de {{source}}', source: sourceLabel || sourceId })}
           </h3>
           <button onClick={onClose} aria-label="close" style={{
@@ -140,7 +140,7 @@ export default function ExportGuide({ sourceId = 'generic', sourceLabel = '', is
               <div style={{
                 flexShrink: 0,
                 width: 26, height: 26, borderRadius: '50%',
-                backgroundColor: 'var(--brand-1,#1F5F63)',
+                backgroundColor: 'var(--brand-1,var(--brand-1))',
                 color: '#ffffff',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: 12, fontWeight: 700,

@@ -106,8 +106,8 @@ export default function FileUploader({ folderId, onUploadComplete, label = 'Arro
       <div
         style={{
           ...styles.dropZone,
-          backgroundColor: isDragging ? '#4f46e510' : (darkMode ? '#1f1f2e' : '#f9fafb'),
-          borderColor: isDragging ? '#4f46e5' : '#d1d5db'
+          backgroundColor: isDragging ? '#4f46e510' : (darkMode ? '#1f1f2e' : 'var(--surface-bg-2)'),
+          borderColor: isDragging ? 'var(--brand-1)' : 'var(--border-1)'
         }}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -116,14 +116,14 @@ export default function FileUploader({ folderId, onUploadComplete, label = 'Arro
       >
         {uploading ? (
           <div style={styles.uploadingState}>
-            <Loader size={24} color="#4f46e5" style={{ animation: 'spin 1s linear infinite' }} />
-            <span style={{ color: '#4f46e5' }}>Pujant...</span>
+            <Loader size={24} color="var(--brand-1)" style={{ animation: 'spin 1s linear infinite' }} />
+            <span style={{ color: 'var(--brand-1)' }}>Pujant...</span>
           </div>
         ) : (
           <>
-            <Upload size={24} color={isDragging ? '#4f46e5' : '#9ca3af'} />
-            <span style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>{label}</span>
-            <span style={{ color: '#9ca3af', fontSize: '12px' }}>Màxim 10MB per arxiu</span>
+            <Upload size={24} color={isDragging ? 'var(--brand-1)' : 'var(--muted-1)'} />
+            <span style={{ color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>{label}</span>
+            <span style={{ color: 'var(--muted-1)', fontSize: '12px' }}>Màxim 10MB per arxiu</span>
           </>
         )}
       </div>
@@ -144,9 +144,9 @@ export default function FileUploader({ folderId, onUploadComplete, label = 'Arro
               ...styles.uploadedItem,
               backgroundColor: darkMode ? '#1f1f2e' : '#f0fdf4'
             }}>
-              <Check size={16} color="#22c55e" />
-              <span style={{ color: darkMode ? '#ffffff' : '#111827', flex: 1 }}>{file.name}</span>
-              <span style={{ color: '#22c55e', fontSize: '12px' }}>Completat</span>
+              <Check size={16} color="var(--success-1)" />
+              <span style={{ color: darkMode ? '#ffffff' : 'var(--text-1)', flex: 1 }}>{file.name}</span>
+              <span style={{ color: 'var(--success-1)', fontSize: '12px' }}>Completat</span>
             </div>
           ))}
           <Button variant="danger" onClick={clearCompleted}>
@@ -211,7 +211,7 @@ const styles = {
     alignSelf: 'flex-start',
     padding: '6px 12px',
     backgroundColor: 'transparent',
-    color: '#6b7280',
+    color: 'var(--text-2)',
     border: '1px solid #d1d5db',
     borderRadius: '6px',
     fontSize: '12px',
@@ -221,7 +221,7 @@ const styles = {
     marginTop: '12px',
     padding: '10px 12px',
     backgroundColor: '#fef2f2',
-    color: '#ef4444',
+    color: 'var(--danger-1)',
     borderRadius: '8px',
     fontSize: '14px',
     display: 'flex',

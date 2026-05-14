@@ -67,13 +67,13 @@ export default function HelpAssistant({ darkMode = false }) {
   if (hidden) return null
 
   // Palette per FreedoliApp guidelines (canvas — NO canviar).
-  const ACCENT = '#6ECBC3' // Turquesa — primary CTA
-  const PETROL = '#1F5F63'
+  const ACCENT = 'var(--brand-2)' // Turquesa — primary CTA
+  const PETROL = 'var(--brand-1)'
   const cardBg = darkMode ? 'rgba(255,255,255,0.05)' : '#FFFFFF'
   const pageBg = darkMode ? 'var(--bg-dark, #15151f)' : '#F6F8F3'
   const ink = darkMode ? '#E8E8ED' : '#1A1A2E'
-  const muted = darkMode ? '#9CA3AF' : '#6B7280'
-  const border = darkMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'
+  const muted = darkMode ? 'var(--muted-1)' : 'var(--text-2)'
+  const border = darkMode ? 'rgba(255,255,255,0.1)' : 'var(--border-1)'
 
   const handleContactSubmit = (e) => {
     e.preventDefault()

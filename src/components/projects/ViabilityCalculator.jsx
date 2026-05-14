@@ -87,9 +87,9 @@ export default function ViabilityCalculator({ projectId, darkMode, phaseStyle, o
   }
 
   const statusStyles = {
-    green: { color: '#16a34a', borderColor: '#16a34a' },
-    yellow: { color: '#f59e0b', borderColor: '#f59e0b' },
-    red: { color: '#ef4444', borderColor: '#ef4444' }
+    green: { color: 'var(--success-1)', borderColor: 'var(--success-1)' },
+    yellow: { color: 'var(--warning-1)', borderColor: 'var(--warning-1)' },
+    red: { color: 'var(--danger-1)', borderColor: 'var(--danger-1)' }
   }
 
   return (
@@ -103,7 +103,7 @@ export default function ViabilityCalculator({ projectId, darkMode, phaseStyle, o
           <h4 style={{
             margin: 0,
             fontSize: '15px',
-            color: darkMode ? '#ffffff' : '#111827'
+            color: darkMode ? '#ffffff' : 'var(--text-1)'
           }}>
             Calculadora de viabilitat
           </h4>
@@ -214,7 +214,7 @@ const styles = {
   },
   inputLabel: {
     fontSize: '12px',
-    color: '#6b7280'
+    color: 'var(--text-2)'
   },
   input: {
     padding: '8px 10px',
@@ -237,11 +237,11 @@ const styles = {
   },
   outputLabel: {
     fontSize: '11px',
-    color: '#6b7280'
+    color: 'var(--text-2)'
   },
   outputValue: {
     fontSize: '13px',
-    color: '#111827'
+    color: 'var(--text-1)'
   },
   footerRow: {
     display: 'flex',
@@ -254,14 +254,14 @@ const styles = {
     gap: '6px',
     padding: '8px 14px',
     borderRadius: '10px',
-    border: '1px solid #4f46e5',
-    backgroundColor: '#4f46e5',
+    border: '1px solid var(--brand-1)',
+    backgroundColor: 'var(--brand-1)',
     color: '#ffffff',
     fontSize: '13px',
     cursor: 'pointer'
   },
   savedText: {
     fontSize: '12px',
-    color: '#16a34a'
+    color: 'var(--success-1)'
   }
 }

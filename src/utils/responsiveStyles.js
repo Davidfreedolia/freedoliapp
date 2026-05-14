@@ -75,7 +75,7 @@ export const getModalStyles = (isMobile, darkMode) => {
       background: 'none',
       border: 'none',
       cursor: 'pointer',
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       padding: '4px',
       display: 'flex',
       alignItems: 'center',

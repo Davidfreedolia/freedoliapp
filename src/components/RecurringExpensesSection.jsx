@@ -330,7 +330,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
       backgroundColor: darkMode ? '#15151f' : '#ffffff',
       borderRadius: '12px',
       padding: '24px',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
     },
     header: {
       display: 'flex',
@@ -341,7 +341,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
     title: {
       fontSize: '20px',
       fontWeight: '600',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       margin: 0
     },
     kpis: {
@@ -352,19 +352,19 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
     },
     kpiCard: {
       padding: '16px',
-      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
       borderRadius: '8px',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
     },
     kpiLabel: {
       fontSize: '12px',
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       marginBottom: '8px'
     },
     kpiValue: {
       fontSize: '24px',
       fontWeight: '700',
-      color: darkMode ? '#ffffff' : '#111827'
+      color: darkMode ? '#ffffff' : 'var(--text-1)'
     },
     actions: {
       display: 'flex',
@@ -388,17 +388,17 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
     th: {
       textAlign: 'left',
       padding: '12px',
-      borderBottom: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      borderBottom: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       fontSize: '12px',
       fontWeight: '600',
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       textTransform: 'uppercase'
     },
     td: {
       padding: '12px',
-      borderBottom: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      borderBottom: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       fontSize: '14px',
-      color: darkMode ? '#ffffff' : '#111827'
+      color: darkMode ? '#ffffff' : 'var(--text-1)'
     },
     badge: {
       padding: '4px 8px',
@@ -436,7 +436,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
     modalTitle: {
       fontSize: '18px',
       fontWeight: '600',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       margin: 0
     },
     formGroup: {
@@ -446,25 +446,25 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
       display: 'block',
       fontSize: '14px',
       fontWeight: '500',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       marginBottom: '6px'
     },
     input: {
       width: '100%',
       padding: '10px 12px',
       borderRadius: '6px',
-      border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`,
-      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-      color: darkMode ? '#ffffff' : '#111827',
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
+      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       fontSize: '14px'
     },
     select: {
       width: '100%',
       padding: '10px 12px',
       borderRadius: '6px',
-      border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`,
-      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-      color: darkMode ? '#ffffff' : '#111827',
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
+      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       fontSize: '14px',
       cursor: 'pointer'
     },
@@ -485,7 +485,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
             onClick={handleNew}
             style={{
               ...styles.button,
-              backgroundColor: '#22c55e',
+              backgroundColor: 'var(--success-1)',
               color: '#ffffff'
             }}
           >
@@ -499,19 +499,19 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
       <div style={styles.kpis}>
         <div style={styles.kpiCard}>
           <div style={styles.kpiLabel}>{t('recurringExpenses.kpis.pending')}</div>
-          <div style={{ ...styles.kpiValue, color: '#ef4444' }}>
+          <div style={{ ...styles.kpiValue, color: 'var(--danger-1)' }}>
             {kpis.pending.count} ({formatCurrency(kpis.pending.amount)})
           </div>
         </div>
         <div style={styles.kpiCard}>
           <div style={styles.kpiLabel}>{t('recurringExpenses.kpis.paid')}</div>
-          <div style={{ ...styles.kpiValue, color: '#22c55e' }}>
+          <div style={{ ...styles.kpiValue, color: 'var(--success-1)' }}>
             {kpis.paid.count} ({formatCurrency(kpis.paid.amount)})
           </div>
         </div>
         <div style={styles.kpiCard}>
           <div style={styles.kpiLabel}>{t('recurringExpenses.kpis.upcoming')}</div>
-          <div style={{ ...styles.kpiValue, color: '#3b82f6' }}>
+          <div style={{ ...styles.kpiValue, color: 'var(--cta-1)' }}>
             {kpis.upcoming.count} ({formatCurrency(kpis.upcoming.amount)})
           </div>
         </div>
@@ -519,11 +519,11 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
 
       {/* Table */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '40px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
+        <div style={{ textAlign: 'center', padding: '40px', color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
           {t('common.loading')}
         </div>
       ) : recurringExpenses.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '40px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
+        <div style={{ textAlign: 'center', padding: '40px', color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
           {t('recurringExpenses.empty')}
         </div>
       ) : (
@@ -555,7 +555,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
                   <span style={{
                     ...styles.badge,
                     backgroundColor: recurring.is_active ? '#22c55e15' : '#6b728015',
-                    color: recurring.is_active ? '#22c55e' : '#6b7280'
+                    color: recurring.is_active ? 'var(--success-1)' : 'var(--text-2)'
                   }}>
                     {recurring.is_active ? t('recurringExpenses.active') : t('recurringExpenses.inactive')}
                   </span>
@@ -568,7 +568,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
                         background: 'none',
                         border: 'none',
                         cursor: 'pointer',
-                        color: '#3b82f6',
+                        color: 'var(--cta-1)',
                         padding: '4px',
                         display: 'flex',
                         alignItems: 'center',
@@ -584,7 +584,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
                         background: 'none',
                         border: 'none',
                         cursor: 'pointer',
-                        color: '#4f46e5',
+                        color: 'var(--brand-1)',
                         padding: '4px'
                       }}
                     >
@@ -596,7 +596,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
                         background: 'none',
                         border: 'none',
                         cursor: 'pointer',
-                        color: '#ef4444',
+                        color: 'var(--danger-1)',
                         padding: '4px'
                       }}
                     >
@@ -624,7 +624,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
-                  color: darkMode ? '#9ca3af' : '#6b7280'
+                  color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
                 }}
               >
                 <X size={20} />
@@ -775,7 +775,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
                   style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                 />
                 <span>Auto-generar cada mes</span>
-                <span style={{ fontSize: '12px', color: darkMode ? '#9ca3af' : '#6b7280', marginLeft: '8px' }}>
+                <span style={{ fontSize: '12px', color: darkMode ? 'var(--muted-1)' : 'var(--text-2)', marginLeft: '8px' }}>
                   (P1: funcionalitat automàtica pendent)
                 </span>
               </label>
@@ -787,8 +787,8 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
                 style={{
                   ...styles.button,
                   backgroundColor: 'transparent',
-                  color: darkMode ? '#9ca3af' : '#6b7280',
-                  border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`
+                  color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
+                  border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
                 }}
               >
                 Cancel·lar
@@ -798,7 +798,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
                 disabled={saving}
                 style={{
                   ...styles.button,
-                  backgroundColor: '#4f46e5',
+                  backgroundColor: 'var(--brand-1)',
                   color: '#ffffff'
                 }}
               >
@@ -822,7 +822,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
-                  color: darkMode ? '#9ca3af' : '#6b7280'
+                  color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
                 }}
               >
                 <X size={20} />
@@ -849,8 +849,8 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
                 style={{
                   ...styles.button,
                   backgroundColor: 'transparent',
-                  color: darkMode ? '#9ca3af' : '#6b7280',
-                  border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`
+                  color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
+                  border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
                 }}
               >
                 Cancel·lar
@@ -860,7 +860,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
                 disabled={creatingSupplier || !newSupplierName.trim()}
                 style={{
                   ...styles.button,
-                  backgroundColor: '#4f46e5',
+                  backgroundColor: 'var(--brand-1)',
                   color: '#ffffff',
                   opacity: (creatingSupplier || !newSupplierName.trim()) ? 0.6 : 1
                 }}
@@ -889,7 +889,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
                   disabled={!!getCurrentMonthOccurrence()}
                   style={{
                     ...styles.button,
-                    backgroundColor: getCurrentMonthOccurrence() ? '#9ca3af' : '#22c55e',
+                    backgroundColor: getCurrentMonthOccurrence() ? 'var(--muted-1)' : 'var(--success-1)',
                     color: '#ffffff',
                     fontSize: '13px',
                     padding: '6px 12px',
@@ -910,7 +910,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
                     background: 'none',
                     border: 'none',
                     cursor: 'pointer',
-                    color: darkMode ? '#9ca3af' : '#6b7280'
+                    color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
                   }}
                 >
                   <X size={20} />
@@ -920,11 +920,11 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
             
             <div style={{ maxHeight: '60vh', overflowY: 'auto' }}>
               {loadingOccurrences ? (
-                <div style={{ textAlign: 'center', padding: '40px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
+                <div style={{ textAlign: 'center', padding: '40px', color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
                   Carregant...
                 </div>
               ) : occurrences.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '40px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
+                <div style={{ textAlign: 'center', padding: '40px', color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
                   No hi ha instàncies. Genera una per començar.
                 </div>
               ) : (
@@ -944,9 +944,9 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
                       const monthDate = new Date(occ.month)
                       const monthName = monthDate.toLocaleDateString('ca-ES', { month: 'long', year: 'numeric' })
                       const statusColors = {
-                        expected: { bg: '#3b82f615', color: '#3b82f6' },
-                        invoice_missing: { bg: '#f59e0b15', color: '#f59e0b' },
-                        paid: { bg: '#22c55e15', color: '#22c55e' }
+                        expected: { bg: '#3b82f615', color: 'var(--cta-1)' },
+                        invoice_missing: { bg: '#f59e0b15', color: 'var(--warning-1)' },
+                        paid: { bg: '#22c55e15', color: 'var(--success-1)' }
                       }
                       const statusLabels = {
                         expected: 'Esperat',
@@ -983,7 +983,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
                                       background: 'none',
                                       border: 'none',
                                       cursor: 'pointer',
-                                      color: '#3b82f6',
+                                      color: 'var(--cta-1)',
                                       padding: '4px',
                                       display: 'flex',
                                       alignItems: 'center',
@@ -1001,7 +1001,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
                                       background: 'none',
                                       border: 'none',
                                       cursor: 'pointer',
-                                      color: '#22c55e',
+                                      color: 'var(--success-1)',
                                       padding: '4px',
                                       display: 'flex',
                                       alignItems: 'center',
@@ -1028,9 +1028,9 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
                 <div style={{ 
                   marginTop: '24px', 
                   padding: '16px', 
-                  backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                  backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
                   borderRadius: '8px',
-                  border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+                  border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
                 }}>
                   <div style={{ 
                     display: 'flex', 
@@ -1041,7 +1041,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
                     <h4 style={{ 
                       fontSize: '14px', 
                       fontWeight: '600', 
-                      color: darkMode ? '#ffffff' : '#111827',
+                      color: darkMode ? '#ffffff' : 'var(--text-1)',
                       margin: 0
                     }}>
                       Factures - {new Date(selectedOccurrenceForReceipt.month).toLocaleDateString('ca-ES', { month: 'long', year: 'numeric' })}
@@ -1055,7 +1055,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
                         background: 'none',
                         border: 'none',
                         cursor: 'pointer',
-                        color: darkMode ? '#9ca3af' : '#6b7280',
+                        color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
                         padding: '4px'
                       }}
                     >

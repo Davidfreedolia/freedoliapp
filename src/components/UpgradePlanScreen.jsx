@@ -35,7 +35,7 @@ export default function UpgradePlanScreen({ featureKey, currentPlan, pageLabel }
           display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
           marginBottom: 16,
         }}>
-          <Lock size={28} color="var(--brand-1,#1F5F63)" />
+          <Lock size={28} color="var(--brand-1,var(--brand-1))" />
         </div>
         <h1 style={{ margin: '0 0 8px', fontSize: 22, color: 'var(--ink-1,#1f2937)', fontWeight: 700 }}>
           {t('upgrade.title', 'Funció no disponible al teu pla')}
@@ -54,7 +54,7 @@ export default function UpgradePlanScreen({ featureKey, currentPlan, pageLabel }
         {currentPlan && (
           <div style={{
             display: 'inline-block', padding: '6px 12px', borderRadius: 999,
-            backgroundColor: 'rgba(31,95,99,0.08)', color: 'var(--brand-1,#1F5F63)',
+            backgroundColor: 'rgba(31,95,99,0.08)', color: 'var(--brand-1,var(--brand-1))',
             fontSize: 12, fontWeight: 600, marginBottom: 16,
           }}>
             {t('upgrade.currentPlan', 'Pla actual')}: {currentPlan}

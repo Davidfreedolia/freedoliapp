@@ -95,13 +95,13 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
   const getPriorityColor = (priority) => {
     switch (priority) {
       case 'high':
-        return '#ef4444'
+        return 'var(--danger-1)'
       case 'normal':
-        return '#f59e0b'
+        return 'var(--warning-1)'
       case 'low':
-        return '#6b7280'
+        return 'var(--text-2)'
       default:
-        return '#6b7280'
+        return 'var(--text-2)'
     }
   }
 
@@ -112,15 +112,15 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
     const diffDays = Math.ceil((due - now) / (1000 * 60 * 60 * 24))
     
     if (diffDays < 0) {
-      return { text: `Overdue ${Math.abs(diffDays)} days`, color: '#ef4444' }
+      return { text: `Overdue ${Math.abs(diffDays)} days`, color: 'var(--danger-1)' }
     } else if (diffDays === 0) {
-      return { text: 'Due today', color: '#f59e0b' }
+      return { text: 'Due today', color: 'var(--warning-1)' }
     } else if (diffDays === 1) {
-      return { text: 'Due tomorrow', color: '#f59e0b' }
+      return { text: 'Due tomorrow', color: 'var(--warning-1)' }
     } else {
       return { 
         text: format(due, 'MMM d, yyyy', { locale: es }) || format(due, 'MMM d, yyyy'), 
-        color: '#6b7280' 
+        color: 'var(--text-2)' 
       }
     }
   }
@@ -133,7 +133,7 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
       <div style={sectionStyles.header}>
         <h3 style={{
           ...sectionStyles.title,
-          color: darkMode ? '#ffffff' : '#111827'
+          color: darkMode ? '#ffffff' : 'var(--text-1)'
         }}>
           <CheckCircle2 size={18} />
           Tasks
@@ -152,8 +152,8 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
       {showAddForm && (
         <div style={{
           ...sectionStyles.form,
-          backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-          borderColor: darkMode ? '#374151' : '#d1d5db'
+          backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+          borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
         }}>
           <input
             type="text"
@@ -163,8 +163,8 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
             style={{
               ...sectionStyles.input,
               backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-              color: darkMode ? '#ffffff' : '#111827',
-              borderColor: darkMode ? '#374151' : '#d1d5db'
+              color: darkMode ? '#ffffff' : 'var(--text-1)',
+              borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
             }}
           />
           <textarea
@@ -175,8 +175,8 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
             style={{
               ...sectionStyles.textarea,
               backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-              color: darkMode ? '#ffffff' : '#111827',
-              borderColor: darkMode ? '#374151' : '#d1d5db'
+              color: darkMode ? '#ffffff' : 'var(--text-1)',
+              borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
             }}
           />
           <div style={sectionStyles.formRow}>
@@ -187,8 +187,8 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
               style={{
                 ...sectionStyles.input,
                 backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-                color: darkMode ? '#ffffff' : '#111827',
-                borderColor: darkMode ? '#374151' : '#d1d5db',
+                color: darkMode ? '#ffffff' : 'var(--text-1)',
+                borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)',
                 flex: 1
               }}
             />
@@ -198,8 +198,8 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
               style={{
                 ...sectionStyles.select,
                 backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-                color: darkMode ? '#ffffff' : '#111827',
-                borderColor: darkMode ? '#374151' : '#d1d5db'
+                color: darkMode ? '#ffffff' : 'var(--text-1)',
+                borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
               }}
             >
               <option value="low">Low</option>
@@ -236,7 +236,7 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
         <div style={sectionStyles.loading}>{t('common.loading')}</div>
       ) : tasks.length === 0 ? (
         <div style={sectionStyles.empty}>
-          <p style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
+          <p style={{ color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
             No tasks yet
           </p>
         </div>
@@ -249,14 +249,14 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
             return (
               <div key={task.id} className="project-task-item" style={{
                 ...sectionStyles.taskItem,
-                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                borderColor: darkMode ? '#374151' : '#d1d5db'
+                backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
               }}>
                 <div style={sectionStyles.taskContent}>
                   <div style={sectionStyles.taskHeader}>
                     <span style={{
                       ...sectionStyles.taskTitle,
-                      color: darkMode ? '#ffffff' : '#111827'
+                      color: darkMode ? '#ffffff' : 'var(--text-1)'
                     }}>
                       {task.title}
                     </span>
@@ -274,7 +274,7 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
                   {task.notes && (
                     <p style={{
                       ...sectionStyles.taskNotes,
-                      color: darkMode ? '#9ca3af' : '#6b7280'
+                      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
                     }}>
                       {task.notes}
                     </p>
@@ -296,7 +296,7 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
                     onClick={() => handleMarkDone(task.id)}
                     style={{
                       ...sectionStyles.actionButton,
-                      color: '#22c55e'
+                      color: 'var(--success-1)'
                     }}
                     title="Mark done"
                   >
@@ -306,7 +306,7 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
                     onClick={() => handleSnooze(task.id)}
                     style={{
                       ...sectionStyles.actionButton,
-                      color: '#f59e0b'
+                      color: 'var(--warning-1)'
                     }}
                     title="Snooze +3d"
                   >
@@ -316,7 +316,7 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
                     onClick={() => handleDelete(task.id)}
                     style={{
                       ...sectionStyles.actionButton,
-                      color: '#ef4444'
+                      color: 'var(--danger-1)'
                     }}
                     title="Delete"
                   >
@@ -359,7 +359,7 @@ const sectionStyles = {
     alignItems: 'center',
     gap: '6px',
     padding: '8px 12px',
-    backgroundColor: '#4f46e5',
+    backgroundColor: 'var(--brand-1)',
     color: '#ffffff',
     border: 'none',
     borderRadius: '6px',
@@ -414,7 +414,7 @@ const sectionStyles = {
     gap: '6px',
     padding: '8px 12px',
     backgroundColor: 'transparent',
-    color: '#6b7280',
+    color: 'var(--text-2)',
     border: '1px solid var(--border-color)',
     borderRadius: '6px',
     fontSize: '13px',
@@ -422,7 +422,7 @@ const sectionStyles = {
   },
   saveButton: {
     padding: '8px 16px',
-    backgroundColor: '#4f46e5',
+    backgroundColor: 'var(--brand-1)',
     color: '#ffffff',
     border: 'none',
     borderRadius: '6px',
@@ -433,7 +433,7 @@ const sectionStyles = {
   loading: {
     padding: '40px',
     textAlign: 'center',
-    color: '#6b7280'
+    color: 'var(--text-2)'
   },
   empty: {
     padding: '40px',

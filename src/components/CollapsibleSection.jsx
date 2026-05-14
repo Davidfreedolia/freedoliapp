@@ -22,7 +22,7 @@ export default function CollapsibleSection({
   const [isOpen, setIsOpen] = useState(defaultOpen)
   const phaseSurface = getPhaseSurfaceStyles(phaseStyle, { darkMode, borderWidth: 2 })
   const hasPhaseStyle = phaseSurface?.hasPhaseStyle
-  const headerHoverBg = phaseSurface?.headerHoverBg || (darkMode ? '#1f1f2e' : '#f9fafb')
+  const headerHoverBg = phaseSurface?.headerHoverBg || (darkMode ? '#1f1f2e' : 'var(--surface-bg-2)')
   const cardBackground = hasPhaseStyle ? phaseSurface.cardStyle.background : (darkMode ? '#15151f' : '#ffffff')
   const cardBorderLeft = hasPhaseStyle ? phaseSurface.cardStyle.borderLeft : undefined
   const contentBackground = hasPhaseStyle ? phaseSurface.contentStyle.background : (darkMode ? '#0f0f15' : '#fafafa')
@@ -68,7 +68,7 @@ export default function CollapsibleSection({
           {Icon && (
             <Icon 
               size={20} 
-              color={darkMode ? '#9ca3af' : '#6b7280'}
+              color={darkMode ? 'var(--muted-1)' : 'var(--text-2)'}
               style={{ flexShrink: 0 }}
             />
           )}
@@ -76,7 +76,7 @@ export default function CollapsibleSection({
             margin: 0,
             fontSize: '16px',
             fontWeight: '600',
-            color: darkMode ? '#ffffff' : '#111827'
+            color: darkMode ? '#ffffff' : 'var(--text-1)'
           }}>
             {title}
           </h3>
@@ -84,13 +84,13 @@ export default function CollapsibleSection({
         {isOpen ? (
           <ChevronDown 
             size={20} 
-            color={darkMode ? '#9ca3af' : '#6b7280'}
+            color={darkMode ? 'var(--muted-1)' : 'var(--text-2)'}
             style={{ flexShrink: 0, transition: 'transform 0.2s ease' }}
           />
         ) : (
           <ChevronRight 
             size={20} 
-            color={darkMode ? '#9ca3af' : '#6b7280'}
+            color={darkMode ? 'var(--muted-1)' : 'var(--text-2)'}
             style={{ flexShrink: 0, transition: 'transform 0.2s ease' }}
           />
         )}

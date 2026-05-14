@@ -1061,7 +1061,7 @@ export default function Projects() {
                             cursor: 'pointer',
                             padding: 12,
                             borderRadius: 10,
-                            border: `1.5px solid ${isSel ? 'var(--accent-primary, #3b82f6)' : 'var(--border-1)'}`,
+                            border: `1.5px solid ${isSel ? 'var(--accent-primary, var(--cta-1))' : 'var(--border-1)'}`,
                             background: isSel ? 'var(--surface-bg-2)' : 'var(--surface-bg)',
                             display: 'flex',
                             flexDirection: 'column',

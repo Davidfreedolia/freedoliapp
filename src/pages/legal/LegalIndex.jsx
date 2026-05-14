@@ -7,7 +7,7 @@ export default function LegalIndex() {
   return (
     <main style={{ maxWidth: 720, margin: '0 auto', padding: '2rem 1.5rem' }}>
       <h1 style={{ fontSize: 24, marginBottom: '1rem' }}>{t('legalIndex.title')}</h1>
-      <p style={{ fontSize: 14, color: '#4b5563', marginBottom: '1.5rem' }}>
+      <p style={{ fontSize: 14, color: 'var(--text-2)', marginBottom: '1.5rem' }}>
         {t('legalIndex.subtitle')}
       </p>
       <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: 14 }}>

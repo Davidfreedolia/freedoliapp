@@ -1,10 +1,13 @@
 import { useTranslation } from 'react-i18next'
 
+// Tonal palette aligned with brand tokens.
+// Text uses AA-compliant darker shades of the brand color over the soft bg.
+// rgba uses the same RGB triples as --brand-1, --success-1, --warning-1, --danger-1.
 const STATUS_TONES = {
-  info:    { bg: 'rgba(31, 95, 99, 0.10)',   text: '#1F5F63', border: 'rgba(31, 95, 99, 0.22)' },
-  success: { bg: 'rgba(63, 191, 154, 0.14)', text: '#2B7A66', border: 'rgba(63, 191, 154, 0.32)' },
-  warning: { bg: 'rgba(240, 180, 41, 0.18)', text: '#7A5F22', border: 'rgba(240, 180, 41, 0.40)' },
-  error:   { bg: 'rgba(229, 83, 83, 0.12)',  text: '#B0413F', border: 'rgba(229, 83, 83, 0.32)' }
+  info:    { bg: 'rgba(31, 95, 99, 0.10)',   text: 'var(--brand-1)',          border: 'rgba(31, 95, 99, 0.22)' },
+  success: { bg: 'rgba(63, 191, 154, 0.14)', text: 'var(--success-ink, #2B7A66)', border: 'rgba(63, 191, 154, 0.32)' },
+  warning: { bg: 'rgba(240, 180, 41, 0.18)', text: 'var(--warning-ink, #7A5F22)', border: 'rgba(240, 180, 41, 0.40)' },
+  error:   { bg: 'rgba(229, 83, 83, 0.12)',  text: 'var(--danger-ink, #B0413F)',  border: 'rgba(229, 83, 83, 0.32)' }
 }
 
 const getTone = ({ status, decision }) => {

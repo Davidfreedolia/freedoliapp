@@ -9,7 +9,7 @@ export default function PageLoader({ darkMode = false, fullScreen = false }) {
   return (
     <div
       className={`data-state data-state--page${fullScreen ? ' layout-fullstate' : ''}`}
-      style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}
+      style={{ color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}
     >
       <div className="data-state__icon" aria-hidden="true">
         <Loader size={30} className="spin" style={{

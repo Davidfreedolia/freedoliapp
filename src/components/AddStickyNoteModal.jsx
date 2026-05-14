@@ -10,10 +10,10 @@ import { getModalStyles } from '../utils/responsiveStyles'
 
 const COLORS = [
   { value: 'yellow', label: 'Groc', bg: '#fef3c7', border: '#fbbf24' },
-  { value: 'blue', label: 'Blau', bg: '#dbeafe', border: '#3b82f6' },
-  { value: 'green', label: 'Verd', bg: '#d1fae5', border: '#22c55e' },
-  { value: 'pink', label: 'Rosa', bg: '#fce7f3', border: '#ec4899' },
-  { value: 'orange', label: 'Taronja', bg: '#fed7aa', border: '#f97316' },
+  { value: 'blue', label: 'Blau', bg: '#dbeafe', border: 'var(--cta-1)' },
+  { value: 'green', label: 'Verd', bg: '#d1fae5', border: 'var(--success-1)' },
+  { value: 'pink', label: 'Rosa', bg: '#fce7f3', border: 'var(--coral-1)' },
+  { value: 'orange', label: 'Taronja', bg: '#fed7aa', border: 'var(--warning-1)' },
   { value: 'purple', label: 'Morat', bg: '#e9d5ff', border: '#a855f7' }
 ]
 
@@ -70,7 +70,7 @@ export default function AddStickyNoteModal({ isOpen, onClose, onSuccess, darkMod
         <div style={styles.header}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <StickyNote size={24} color="#5F4B00" />
-            <h2 style={{...styles.title, color: darkMode ? '#ffffff' : '#111827'}}>
+            <h2 style={{...styles.title, color: darkMode ? '#ffffff' : 'var(--text-1)'}}>
               {t('stickyNotes.add', 'Afegir nota')}
             </h2>
           </div>
@@ -81,7 +81,7 @@ export default function AddStickyNoteModal({ isOpen, onClose, onSuccess, darkMod
 
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.field}>
-            <label style={{...styles.label, color: darkMode ? '#ffffff' : '#111827'}}>
+            <label style={{...styles.label, color: darkMode ? '#ffffff' : 'var(--text-1)'}}>
               {t('stickyNotes.titlePlaceholder', 'Títol')} ({t('common.optional', 'Opcional')})
             </label>
             <input
@@ -92,14 +92,14 @@ export default function AddStickyNoteModal({ isOpen, onClose, onSuccess, darkMod
               style={{
                 ...styles.input,
                 backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
-                borderColor: darkMode ? '#374151' : '#e5e7eb',
-                color: darkMode ? '#ffffff' : '#111827'
+                borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)',
+                color: darkMode ? '#ffffff' : 'var(--text-1)'
               }}
             />
           </div>
 
           <div style={styles.field}>
-            <label style={{...styles.label, color: darkMode ? '#ffffff' : '#111827'}}>
+            <label style={{...styles.label, color: darkMode ? '#ffffff' : 'var(--text-1)'}}>
               {t('stickyNotes.contentPlaceholder', 'Contingut')} *
             </label>
             <textarea
@@ -111,14 +111,14 @@ export default function AddStickyNoteModal({ isOpen, onClose, onSuccess, darkMod
               style={{
                 ...styles.textarea,
                 backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
-                borderColor: darkMode ? '#374151' : '#e5e7eb',
-                color: darkMode ? '#ffffff' : '#111827'
+                borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)',
+                color: darkMode ? '#ffffff' : 'var(--text-1)'
               }}
             />
           </div>
 
           <div style={styles.field}>
-            <label style={{...styles.label, color: darkMode ? '#ffffff' : '#111827'}}>
+            <label style={{...styles.label, color: darkMode ? '#ffffff' : 'var(--text-1)'}}>
               Color
             </label>
             <div style={styles.colorSelector}>
@@ -146,8 +146,8 @@ export default function AddStickyNoteModal({ isOpen, onClose, onSuccess, darkMod
               style={{
                 ...styles.button,
                 ...styles.cancelButton,
-                backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6',
-                color: darkMode ? '#ffffff' : '#111827'
+                backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                color: darkMode ? '#ffffff' : 'var(--text-1)'
               }}
             >
               {t('common.cancel', 'Cancel·lar')}
@@ -215,7 +215,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: '4px',
-    color: '#6b7280'
+    color: 'var(--text-2)'
   },
   form: {
     display: 'flex',

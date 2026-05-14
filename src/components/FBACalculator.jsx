@@ -33,9 +33,9 @@ function pct(n) {
 }
 
 function marginColor(m) {
-  if (m >= 30) return '#10b981'
-  if (m >= 15) return '#f59e0b'
-  return '#ef4444'
+  if (m >= 30) return 'var(--success-1)'
+  if (m >= 15) return 'var(--warning-1)'
+  return 'var(--danger-1)'
 }
 
 function NumInput({ label, value, onChange, unit = '', placeholder = '0', step = '0.01', min = '0' }) {
@@ -190,18 +190,18 @@ export default function FBACalculator() {
                 Desglossament EU · {SIZE_TIER_LABELS[result.sizeTier] || result.sizeTier}
               </div>
               <ResultRow label="Preu de venda" value={fmt(Number(sellingPrice))} />
-              <ResultRow label="Cost producte (COGS)" value={`–${fmt(Number(cogs) || 0)}`} tone="#ef4444" />
+              <ResultRow label="Cost producte (COGS)" value={`–${fmt(Number(cogs) || 0)}`} tone="var(--danger-1)" />
               <ResultRow
                 label="Taxa FBA (fulfillment)"
                 value={`–${fmt(result.fulfillmentFee)}`}
-                tone="#ef4444"
+                tone="var(--danger-1)"
               />
               <ResultRow
                 label={`Taxa referral (${Math.round((REFERRAL_RATES[categoryKey]?.rate || 0.15) * 100)}%)`}
                 value={`–${fmt(result.referralFee)}`}
-                tone="#ef4444"
+                tone="var(--danger-1)"
               />
-              <ResultRow label="Total costos" value={`–${fmt(result.totalCosts)}`} tone="#ef4444" />
+              <ResultRow label="Total costos" value={`–${fmt(result.totalCosts)}`} tone="var(--danger-1)" />
               <div style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
                 padding: '10px 0 4px', marginTop: 2
@@ -225,7 +225,7 @@ export default function FBACalculator() {
                   flex: 1, textAlign: 'center', padding: '8px 4px',
                   background: marginColor(result.roi > 0 ? result.roi / 2 : -1) + '15', borderRadius: 8,
                 }}>
-                  <div style={{ fontSize: 18, fontWeight: 800, color: result.roi >= 0 ? '#10b981' : '#ef4444' }}>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: result.roi >= 0 ? 'var(--success-1)' : 'var(--danger-1)' }}>
                     {pct(result.roi)}
                   </div>
                   <div style={{ fontSize: 10, color: 'var(--text-2)', marginTop: 2 }}>ROI</div>
@@ -235,7 +235,7 @@ export default function FBACalculator() {
                 <div style={{
                   marginTop: 10, padding: '8px 10px', borderRadius: 8,
                   background: '#ef444415', border: '1px solid #ef444433',
-                  fontSize: 12, color: '#ef4444', lineHeight: 1.4
+                  fontSize: 12, color: 'var(--danger-1)', lineHeight: 1.4
                 }}>
                   ⚠️ Marge inferior al 15%. Negocia millor el COGS o ajusta el preu de venda.
                 </div>
@@ -244,7 +244,7 @@ export default function FBACalculator() {
                 <div style={{
                   marginTop: 10, padding: '8px 10px', borderRadius: 8,
                   background: '#10b98115', border: '1px solid #10b98133',
-                  fontSize: 12, color: '#10b981', lineHeight: 1.4
+                  fontSize: 12, color: 'var(--success-1)', lineHeight: 1.4
                 }}>
                   ✅ Marge excel·lent. El producte compleix l'objectiu de rendibilitat.
                 </div>

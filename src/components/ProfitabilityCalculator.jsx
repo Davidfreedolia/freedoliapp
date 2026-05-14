@@ -80,11 +80,11 @@ const ProfitabilityCalculator = React.forwardRef(function ProfitabilityCalculato
       
       // Actualitzar badge
       if (calculated.decision === 'GO') {
-        setBadge({ type: 'go', label: 'GO', color: '#10b981', icon: CheckCircle2 })
+        setBadge({ type: 'go', label: 'GO', color: 'var(--success-1)', icon: CheckCircle2 })
       } else if (calculated.decision === 'RISKY') {
-        setBadge({ type: 'risky', label: 'RISKY', color: '#f59e0b', icon: AlertTriangle })
+        setBadge({ type: 'risky', label: 'RISKY', color: 'var(--warning-1)', icon: AlertTriangle })
       } else if (calculated.decision === 'NO-GO') {
-        setBadge({ type: 'no-go', label: 'NO-GO', color: '#ef4444', icon: XCircle })
+        setBadge({ type: 'no-go', label: 'NO-GO', color: 'var(--danger-1)', icon: XCircle })
       } else {
         setBadge(null)
       }
@@ -399,13 +399,13 @@ const ProfitabilityCalculator = React.forwardRef(function ProfitabilityCalculato
       padding: '24px',
       borderRadius: '12px',
       backgroundColor: darkMode ? '#15151f' : '#ffffff',
-      border: `1px solid ${darkMode ? '#2a2a3a' : '#e5e7eb'}`,
+      border: `1px solid ${darkMode ? '#2a2a3a' : 'var(--border-1)'}`,
       marginBottom: '24px'
     },
     cardTitle: {
       fontSize: '18px',
       fontWeight: '600',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       marginBottom: '20px',
       display: 'flex',
       alignItems: 'center',
@@ -429,38 +429,38 @@ const ProfitabilityCalculator = React.forwardRef(function ProfitabilityCalculato
     label: {
       fontSize: '13px',
       fontWeight: '500',
-      color: darkMode ? '#9ca3af' : '#6b7280'
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
     },
     input: {
       padding: '10px 12px',
       borderRadius: '6px',
-      border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`,
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       fontSize: '14px',
       width: '100%'
     },
     resultsBox: {
       padding: '20px',
       borderRadius: '8px',
-      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
     },
     resultItem: {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
       padding: '12px 0',
-      borderBottom: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+      borderBottom: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
     },
     resultLabel: {
       fontSize: '14px',
-      color: darkMode ? '#9ca3af' : '#6b7280'
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
     },
     resultValue: {
       fontSize: '16px',
       fontWeight: '600',
-      color: darkMode ? '#ffffff' : '#111827'
+      color: darkMode ? '#ffffff' : 'var(--text-1)'
     },
     badge: {
       display: 'inline-flex',
@@ -474,7 +474,7 @@ const ProfitabilityCalculator = React.forwardRef(function ProfitabilityCalculato
     },
     saveButton: {
       padding: '12px 24px',
-      backgroundColor: '#4f46e5',
+      backgroundColor: 'var(--brand-1)',
       color: '#ffffff',
       border: 'none',
       borderRadius: '6px',
@@ -513,7 +513,7 @@ const ProfitabilityCalculator = React.forwardRef(function ProfitabilityCalculato
   if (loading) {
     return (
       <div style={styles.card}>
-        <div style={{ textAlign: 'center', padding: '40px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
+        <div style={{ textAlign: 'center', padding: '40px', color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
           {t('profitabilityWidget.loading')}
         </div>
       </div>
@@ -531,8 +531,8 @@ const ProfitabilityCalculator = React.forwardRef(function ProfitabilityCalculato
       {showAsinCapture && (
         <div style={{
           ...styles.asinSection,
-          backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-          border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+          backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+          border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
           borderRadius: '8px',
           padding: '16px',
           marginBottom: '24px'
@@ -543,12 +543,12 @@ const ProfitabilityCalculator = React.forwardRef(function ProfitabilityCalculato
           gap: '8px',
           marginBottom: '12px'
         }}>
-          <Link2 size={16} color={darkMode ? '#9ca3af' : '#6b7280'} />
+          <Link2 size={16} color={darkMode ? 'var(--muted-1)' : 'var(--text-2)'} />
           <label style={{
             ...styles.label,
             fontSize: '14px',
             fontWeight: '600',
-            color: darkMode ? '#ffffff' : '#111827'
+            color: darkMode ? '#ffffff' : 'var(--text-1)'
           }}>
             Amazon ASIN Capture
           </label>
@@ -580,7 +580,7 @@ const ProfitabilityCalculator = React.forwardRef(function ProfitabilityCalculato
               disabled={capturingAsin || !asinInput.trim()}
               style={{
                 ...styles.captureButton,
-                backgroundColor: '#4f46e5',
+                backgroundColor: 'var(--brand-1)',
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: '6px',
@@ -605,15 +605,15 @@ const ProfitabilityCalculator = React.forwardRef(function ProfitabilityCalculato
               gap: '8px',
               flex: 1
             }}>
-              <CheckCircle2 size={16} color="#10b981" />
+              <CheckCircle2 size={16} color="var(--success-1)" />
               <span style={{
                 fontSize: '14px',
-                color: darkMode ? '#ffffff' : '#111827',
+                color: darkMode ? '#ffffff' : 'var(--text-1)',
                 fontWeight: '500'
               }}>
                 ASIN capturat: <strong>{capturedAsin}</strong>
                 {asinMarketplace && (
-                  <span style={{ color: darkMode ? '#9ca3af' : '#6b7280', marginLeft: '8px' }}>
+                  <span style={{ color: darkMode ? 'var(--muted-1)' : 'var(--text-2)', marginLeft: '8px' }}>
                     ({asinMarketplace.toUpperCase()})
                   </span>
                 )}
@@ -624,7 +624,7 @@ const ProfitabilityCalculator = React.forwardRef(function ProfitabilityCalculato
                 onClick={handleOpenOnAmazon}
                 style={{
                   ...styles.captureButton,
-                  backgroundColor: '#f59e0b',
+                  backgroundColor: 'var(--warning-1)',
                   color: '#ffffff',
                   border: 'none',
                   borderRadius: '6px',
@@ -645,8 +645,8 @@ const ProfitabilityCalculator = React.forwardRef(function ProfitabilityCalculato
                 style={{
                   ...styles.captureButton,
                   backgroundColor: 'transparent',
-                  color: darkMode ? '#9ca3af' : '#6b7280',
-                  border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`,
+                  color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
+                  border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
                   borderRadius: '6px',
                   padding: '8px 12px',
                   fontSize: '13px',
@@ -667,7 +667,7 @@ const ProfitabilityCalculator = React.forwardRef(function ProfitabilityCalculato
             backgroundColor: '#fee2e2',
             border: '1px solid #fecaca',
             borderRadius: '6px',
-            color: '#991b1b',
+            color: 'var(--danger-1)',
             fontSize: '13px',
             display: 'flex',
             alignItems: 'center',
@@ -809,7 +809,7 @@ const ProfitabilityCalculator = React.forwardRef(function ProfitabilityCalculato
               style={styles.input}
               placeholder="0.00"
             />
-            <span style={{ fontSize: '11px', color: darkMode ? '#6b7280' : '#9ca3af', marginTop: '2px' }}>
+            <span style={{ fontSize: '11px', color: darkMode ? 'var(--text-2)' : 'var(--muted-1)', marginTop: '2px' }}>
               Costos fixos totals (ex: desenvolupament, tooling, etc.)
             </span>
           </div>
@@ -826,12 +826,12 @@ const ProfitabilityCalculator = React.forwardRef(function ProfitabilityCalculato
                 {saving ? 'Guardant...' : 'Guardar'}
               </button>
               {saveStatus === 'saved' && (
-                <div style={{ marginTop: '8px', fontSize: '12px', color: '#10b981' }}>
+                <div style={{ marginTop: '8px', fontSize: '12px', color: 'var(--success-1)' }}>
                   ✅ Guardat
                 </div>
               )}
               {saveStatus === 'error' && (
-                <div style={{ marginTop: '8px', fontSize: '12px', color: '#ef4444' }}>
+                <div style={{ marginTop: '8px', fontSize: '12px', color: 'var(--danger-1)' }}>
                   ❌ Error: {saveError || 'Error desconegut'}
                 </div>
               )}
@@ -862,7 +862,7 @@ const ProfitabilityCalculator = React.forwardRef(function ProfitabilityCalculato
                   <span style={styles.resultLabel}>Net Profit:</span>
                   <span style={{
                     ...styles.resultValue,
-                    color: results.net_profit >= 0 ? '#10b981' : '#ef4444'
+                    color: results.net_profit >= 0 ? 'var(--success-1)' : 'var(--danger-1)'
                   }}>
                     {formatCurrency(results.net_profit)}
                   </span>
@@ -871,13 +871,13 @@ const ProfitabilityCalculator = React.forwardRef(function ProfitabilityCalculato
                 <div style={{
                   ...styles.resultItem,
                   paddingTop: '16px',
-                  borderTop: `2px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+                  borderTop: `2px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
                 }}>
                   <span style={styles.resultLabel}>Margin:</span>
                   <span style={{
                     ...styles.resultValue,
-                    color: results.margin_percent >= 30 ? '#10b981' :
-                           results.margin_percent >= 15 ? '#f59e0b' : '#ef4444'
+                    color: results.margin_percent >= 30 ? 'var(--success-1)' :
+                           results.margin_percent >= 15 ? 'var(--warning-1)' : 'var(--danger-1)'
                   }}>
                     {formatPercent(results.margin_percent)}
                   </span>
@@ -890,12 +890,12 @@ const ProfitabilityCalculator = React.forwardRef(function ProfitabilityCalculato
                   </span>
                   <span style={{
                     ...styles.resultValue,
-                    color: results.roi_product >= 50 ? '#10b981' :
-                           results.roi_product >= 20 ? '#f59e0b' : '#ef4444'
+                    color: results.roi_product >= 50 ? 'var(--success-1)' :
+                           results.roi_product >= 20 ? 'var(--warning-1)' : 'var(--danger-1)'
                   }}>
                     {formatPercent(results.roi_product)}
                   </span>
-                  <span style={{ fontSize: '11px', color: darkMode ? '#6b7280' : '#9ca3af', marginLeft: '8px' }}>
+                  <span style={{ fontSize: '11px', color: darkMode ? 'var(--text-2)' : 'var(--muted-1)', marginLeft: '8px' }}>
                     (excl. fees)
                   </span>
                 </div>
@@ -904,12 +904,12 @@ const ProfitabilityCalculator = React.forwardRef(function ProfitabilityCalculato
                   <span style={styles.resultLabel}>ROI Total:</span>
                   <span style={{
                     ...styles.resultValue,
-                    color: results.roi_total >= 50 ? '#10b981' :
-                           results.roi_total >= 20 ? '#f59e0b' : '#ef4444'
+                    color: results.roi_total >= 50 ? 'var(--success-1)' :
+                           results.roi_total >= 20 ? 'var(--warning-1)' : 'var(--danger-1)'
                   }}>
                     {formatPercent(results.roi_total)}
                   </span>
-                  <span style={{ fontSize: '11px', color: darkMode ? '#6b7280' : '#9ca3af', marginLeft: '8px' }}>
+                  <span style={{ fontSize: '11px', color: darkMode ? 'var(--text-2)' : 'var(--muted-1)', marginLeft: '8px' }}>
                     (incl. fees)
                   </span>
                 </div>

@@ -183,9 +183,9 @@ export default function Profit() {
         />
         <div style={styles.content}>
           <div style={{ ...styles.errorContainer, padding: '2rem', textAlign: 'center' }}>
-            <AlertCircle size={32} color="#f59e0b" />
-            <h3 style={{ color: darkMode ? '#ffffff' : '#111827', margin: '12px 0' }}>Profit no disponible</h3>
-            <p style={{ color: '#6b7280' }}>Aquesta funcionalitat no està inclosa al teu pla. Fes upgrade per accedir.</p>
+            <AlertCircle size={32} color="var(--warning-1)" />
+            <h3 style={{ color: darkMode ? '#ffffff' : 'var(--text-1)', margin: '12px 0' }}>Profit no disponible</h3>
+            <p style={{ color: 'var(--text-2)' }}>Aquesta funcionalitat no està inclosa al teu pla. Fes upgrade per accedir.</p>
           </div>
         </div>
       </div>
@@ -246,7 +246,7 @@ export default function Profit() {
             <div style={styles.marginAlertsLoading}>Carregant alertes...</div>
           ) : marginAlertsError ? (
             <div style={styles.marginAlertsError}>
-              <AlertCircle size={18} color="#ef4444" />
+              <AlertCircle size={18} color="var(--danger-1)" />
               <span>{marginAlertsError}</span>
             </div>
           ) : marginAlerts.length === 0 ? (
@@ -279,14 +279,14 @@ export default function Profit() {
 
         <section style={styles.stockoutSection} aria-labelledby="stockout-risk-heading">
           <h2 id="stockout-risk-heading" style={styles.stockoutTitle}>
-            <AlertTriangle size={20} style={{ color: 'var(--stockout-alert-amber, #f59e0b)' }} />
+            <AlertTriangle size={20} style={{ color: 'var(--stockout-alert-amber, var(--warning-1))' }} />
             Stockout risk
           </h2>
           {stockoutAlertsLoading ? (
             <div style={styles.stockoutLoading}>Carregant alertes...</div>
           ) : stockoutAlertsError ? (
             <div style={styles.stockoutError}>
-              <AlertCircle size={18} color="#ef4444" />
+              <AlertCircle size={18} color="var(--danger-1)" />
               <span>{stockoutAlertsError}</span>
             </div>
           ) : stockoutAlerts.length === 0 ? (
@@ -326,7 +326,7 @@ export default function Profit() {
             <div style={styles.trendLoading}>Carregant tendència...</div>
           ) : trendError ? (
             <div style={styles.trendError}>
-              <AlertCircle size={20} color="#ef4444" />
+              <AlertCircle size={20} color="var(--danger-1)" />
               <span>{trendError}</span>
               <Button variant="secondary" size="sm" onClick={loadTrendData}>Tornar a intentar</Button>
             </div>
@@ -340,7 +340,7 @@ export default function Profit() {
                   <XAxis dataKey="date" tick={{ fontSize: 12, fill: 'var(--text-2)' }} />
                   <YAxis tick={{ fontSize: 12, fill: 'var(--text-2)' }} tickFormatter={(v) => formatCurrency(v).replace(/\s/g, '')} />
                   <Tooltip formatter={(v) => formatCurrency(v)} labelFormatter={(label) => label} />
-                  <Line type="monotone" dataKey="netProfit" name="Net Profit" stroke="var(--color-primary, #2563eb)" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="netProfit" name="Net Profit" stroke="var(--color-primary, var(--brand-1))" strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -409,7 +409,7 @@ const styles = {
     boxShadow: 'var(--btn-shadow)',
   },
   refreshBtn: { padding: '0', width: 'var(--btn-h-sm)', minWidth: 'var(--btn-h-sm)' },
-  loading: { padding: '64px', textAlign: 'center', color: '#6b7280' },
+  loading: { padding: '64px', textAlign: 'center', color: 'var(--text-2)' },
   errorContainer: { padding: '64px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' },
   retryButton: { minWidth: '160px' },
   tableWrap: { overflowX: 'auto', border: '1px solid var(--border-color)', borderRadius: 'var(--btn-radius)' },
@@ -418,18 +418,18 @@ const styles = {
   thRight: { textAlign: 'right', padding: '12px 16px', borderBottom: '1px solid var(--border-color)', fontWeight: 600, color: 'var(--text-1)' },
   td: { padding: '12px 16px', borderBottom: '1px solid var(--border-color)', color: 'var(--text-1)' },
   tdRight: { textAlign: 'right', padding: '12px 16px', borderBottom: '1px solid var(--border-color)', color: 'var(--text-1)' },
-  emptyCell: { padding: '24px', textAlign: 'center', color: '#6b7280' },
+  emptyCell: { padding: '24px', textAlign: 'center', color: 'var(--text-2)' },
   trendSection: { marginBottom: '32px' },
   trendTitle: { display: 'flex', alignItems: 'center', gap: '8px', fontSize: '18px', fontWeight: 600, color: 'var(--text-1)', marginBottom: '16px' },
-  trendLoading: { padding: '32px', textAlign: 'center', color: '#6b7280' },
-  trendError: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', padding: '32px', textAlign: 'center', color: '#6b7280' },
-  trendEmpty: { padding: '32px', textAlign: 'center', color: '#6b7280' },
+  trendLoading: { padding: '32px', textAlign: 'center', color: 'var(--text-2)' },
+  trendError: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', padding: '32px', textAlign: 'center', color: 'var(--text-2)' },
+  trendEmpty: { padding: '32px', textAlign: 'center', color: 'var(--text-2)' },
   chartWrap: { width: '100%', border: '1px solid var(--border-color)', borderRadius: 'var(--btn-radius)', padding: '16px', backgroundColor: 'var(--surface-1, #fff)' },
   marginAlertsSection: { marginBottom: '32px' },
   marginAlertsTitle: { display: 'flex', alignItems: 'center', gap: '8px', fontSize: '16px', fontWeight: 600, color: 'var(--margin-alert-coral, #e07a5f)', marginBottom: '12px' },
-  marginAlertsLoading: { padding: '16px', textAlign: 'center', color: '#6b7280', fontSize: '14px' },
-  marginAlertsError: { display: 'flex', alignItems: 'center', gap: '8px', padding: '16px', fontSize: '14px', color: '#ef4444' },
-  marginAlertsEmpty: { padding: '16px', fontSize: '14px', color: '#6b7280', border: '1px solid var(--border-color)', borderRadius: 'var(--btn-radius)', backgroundColor: 'var(--surface-1, #fff)' },
+  marginAlertsLoading: { padding: '16px', textAlign: 'center', color: 'var(--text-2)', fontSize: '14px' },
+  marginAlertsError: { display: 'flex', alignItems: 'center', gap: '8px', padding: '16px', fontSize: '14px', color: 'var(--danger-1)' },
+  marginAlertsEmpty: { padding: '16px', fontSize: '14px', color: 'var(--text-2)', border: '1px solid var(--border-color)', borderRadius: 'var(--btn-radius)', backgroundColor: 'var(--surface-1, #fff)' },
   marginAlertsWrap: { border: '1px solid var(--margin-alert-coral, #e07a5f)', borderRadius: 'var(--btn-radius)', overflow: 'hidden', backgroundColor: 'rgba(224, 122, 95, 0.06)' },
   marginAlertsTable: { width: '100%', borderCollapse: 'collapse', fontSize: '13px' },
   marginAlertsTh: { textAlign: 'left', padding: '8px 12px', borderBottom: '1px solid rgba(224, 122, 95, 0.3)', fontWeight: 600, color: 'var(--margin-alert-coral, #e07a5f)' },
@@ -437,14 +437,14 @@ const styles = {
   marginAlertsTd: { padding: '8px 12px', borderBottom: '1px solid rgba(224, 122, 95, 0.2)', color: 'var(--text-1)' },
   marginAlertsTdR: { textAlign: 'right', padding: '8px 12px', borderBottom: '1px solid rgba(224, 122, 95, 0.2)', color: 'var(--text-1)' },
   stockoutSection: { marginBottom: '32px' },
-  stockoutTitle: { display: 'flex', alignItems: 'center', gap: '8px', fontSize: '16px', fontWeight: 600, color: 'var(--stockout-alert-amber, #f59e0b)', marginBottom: '12px' },
-  stockoutLoading: { padding: '16px', textAlign: 'center', color: '#6b7280', fontSize: '14px' },
-  stockoutError: { display: 'flex', alignItems: 'center', gap: '8px', padding: '16px', fontSize: '14px', color: '#ef4444' },
-  stockoutEmpty: { padding: '16px', fontSize: '14px', color: '#6b7280', border: '1px solid var(--border-color)', borderRadius: 'var(--btn-radius)', backgroundColor: 'var(--surface-1, #fff)' },
+  stockoutTitle: { display: 'flex', alignItems: 'center', gap: '8px', fontSize: '16px', fontWeight: 600, color: 'var(--stockout-alert-amber, var(--warning-1))', marginBottom: '12px' },
+  stockoutLoading: { padding: '16px', textAlign: 'center', color: 'var(--text-2)', fontSize: '14px' },
+  stockoutError: { display: 'flex', alignItems: 'center', gap: '8px', padding: '16px', fontSize: '14px', color: 'var(--danger-1)' },
+  stockoutEmpty: { padding: '16px', fontSize: '14px', color: 'var(--text-2)', border: '1px solid var(--border-color)', borderRadius: 'var(--btn-radius)', backgroundColor: 'var(--surface-1, #fff)' },
   stockoutWrap: { border: '1px solid rgba(245, 158, 11, 0.5)', borderRadius: 'var(--btn-radius)', overflow: 'hidden', backgroundColor: 'rgba(245, 158, 11, 0.06)' },
   stockoutTable: { width: '100%', borderCollapse: 'collapse', fontSize: '13px' },
-  stockoutTh: { textAlign: 'left', padding: '8px 12px', borderBottom: '1px solid rgba(245, 158, 11, 0.3)', fontWeight: 600, color: 'var(--stockout-alert-amber, #f59e0b)' },
-  stockoutThR: { textAlign: 'right', padding: '8px 12px', borderBottom: '1px solid rgba(245, 158, 11, 0.3)', fontWeight: 600, color: 'var(--stockout-alert-amber, #f59e0b)' },
+  stockoutTh: { textAlign: 'left', padding: '8px 12px', borderBottom: '1px solid rgba(245, 158, 11, 0.3)', fontWeight: 600, color: 'var(--stockout-alert-amber, var(--warning-1))' },
+  stockoutThR: { textAlign: 'right', padding: '8px 12px', borderBottom: '1px solid rgba(245, 158, 11, 0.3)', fontWeight: 600, color: 'var(--stockout-alert-amber, var(--warning-1))' },
   stockoutTd: { padding: '8px 12px', borderBottom: '1px solid rgba(245, 158, 11, 0.2)', color: 'var(--text-1)' },
   stockoutTdR: { textAlign: 'right', padding: '8px 12px', borderBottom: '1px solid rgba(245, 158, 11, 0.2)', color: 'var(--text-1)' },
 }

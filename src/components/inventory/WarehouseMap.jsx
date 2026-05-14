@@ -75,9 +75,9 @@ function colorDot(color, label) {
   })
 }
 
-const iconFba = colorDot('#22c55e', 'A')     // Amazon FBA
-const iconOwn = colorDot('#2563eb', 'W')     // 3PL / own warehouse
-const iconGeneric = colorDot('#6b7280', '·') // fallback
+const iconFba = colorDot('var(--success-1)', 'A')     // Amazon FBA
+const iconOwn = colorDot('var(--brand-1)', 'W')     // 3PL / own warehouse
+const iconGeneric = colorDot('var(--text-2)', '·') // fallback
 
 function resolveCoords(wh) {
   // explicit lat/lng first (even though column doesn't exist today, be defensive)
@@ -174,13 +174,13 @@ export default function WarehouseMap({
                   <div style={{ fontWeight: 700, marginBottom: 2 }}>
                     {wh.name || 'Magatzem sense nom'}
                   </div>
-                  <div style={{ fontSize: 11, color: '#6b7280', marginBottom: 6 }}>
+                  <div style={{ fontSize: 11, color: 'var(--text-2)', marginBottom: 6 }}>
                     {fba ? 'Amazon FBA' : '3PL / Propi'}
                     {wh.city ? ` · ${wh.city}` : ''}
                     {wh.country ? ` · ${wh.country}` : ''}
                   </div>
                   {stockItems.length === 0 ? (
-                    <div style={{ fontSize: 12, color: '#9ca3af' }}>
+                    <div style={{ fontSize: 12, color: 'var(--muted-1)' }}>
                       Sense stock assignat.
                     </div>
                   ) : (
@@ -189,7 +189,7 @@ export default function WarehouseMap({
                         display: 'flex',
                         justifyContent: 'space-between',
                         fontSize: 11,
-                        color: '#6b7280',
+                        color: 'var(--text-2)',
                         borderBottom: '1px solid #e5e7eb',
                         paddingBottom: 4,
                         marginBottom: 4,
@@ -253,12 +253,12 @@ export default function WarehouseMap({
         background: darkMode ? 'rgba(21,21,31,.92)' : 'rgba(255,255,255,.92)',
         boxShadow: '0 2px 10px rgba(0,0,0,.15)',
         fontSize: 12,
-        color: darkMode ? '#e5e7eb' : '#374151'
+        color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
       }}>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
           <span style={{
             width: 12, height: 12, borderRadius: '50%',
-            background: '#22c55e', border: '2px solid #fff',
+            background: 'var(--success-1)', border: '2px solid #fff',
             boxShadow: '0 1px 3px rgba(0,0,0,.3)'
           }} />
           Amazon FBA
@@ -266,7 +266,7 @@ export default function WarehouseMap({
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
           <span style={{
             width: 12, height: 12, borderRadius: '50%',
-            background: '#2563eb', border: '2px solid #fff',
+            background: 'var(--brand-1)', border: '2px solid #fff',
             boxShadow: '0 1px 3px rgba(0,0,0,.3)'
           }} />
           3PL / Propi
@@ -281,7 +281,7 @@ export default function WarehouseMap({
           alignItems: 'center',
           justifyContent: 'center',
           background: darkMode ? 'rgba(21,21,31,.7)' : 'rgba(255,255,255,.7)',
-          color: darkMode ? '#e5e7eb' : '#374151',
+          color: darkMode ? 'var(--border-1)' : 'var(--text-1)',
           fontSize: 14,
           zIndex: 400,
           pointerEvents: 'none'

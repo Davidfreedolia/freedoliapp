@@ -22,12 +22,12 @@ export default function ShipmentsPanel({ poId, orgId, darkMode, onShipmentSynced
   const { t } = useTranslation()
   const [shipments, setShipments] = useState([])
   const SHIPMENT_STATUS_COLOR = {
-    draft: { bg: '#6b7280', label: t('orders.shipmentsPanel.status.draft') },
-    in_transit: { bg: '#f59e0b', label: t('orders.shipmentsPanel.status.inTransit') },
-    customs: { bg: '#8b5cf6', label: t('orders.shipmentsPanel.status.customs') },
-    delivered: { bg: '#22c55e', label: t('orders.shipmentsPanel.status.delivered') },
-    exception: { bg: '#ef4444', label: t('orders.shipmentsPanel.status.exception') },
-    cancelled: { bg: '#6b7280', label: t('orders.shipmentsPanel.status.cancelled') }
+    draft: { bg: 'var(--text-2)', label: t('orders.shipmentsPanel.status.draft') },
+    in_transit: { bg: 'var(--warning-1)', label: t('orders.shipmentsPanel.status.inTransit') },
+    customs: { bg: 'var(--brand-1)', label: t('orders.shipmentsPanel.status.customs') },
+    delivered: { bg: 'var(--success-1)', label: t('orders.shipmentsPanel.status.delivered') },
+    exception: { bg: 'var(--danger-1)', label: t('orders.shipmentsPanel.status.exception') },
+    cancelled: { bg: 'var(--text-2)', label: t('orders.shipmentsPanel.status.cancelled') }
   }
 
   const [loading, setLoading] = useState(true)
@@ -115,20 +115,20 @@ export default function ShipmentsPanel({ poId, orgId, darkMode, onShipmentSynced
   return (
     <>
       <div style={{ marginBottom: 16 }}>
-        <h4 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 600, color: darkMode ? '#e5e7eb' : '#374151' }}>
+        <h4 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 600, color: darkMode ? 'var(--border-1)' : 'var(--text-1)' }}>
           {t('orders.shipmentsPanel.title')}
         </h4>
         {loading ? (
-          <div style={{ padding: 24, fontSize: 13, color: darkMode ? '#9ca3af' : '#6b7280' }}>{t('common.loading')}</div>
+          <div style={{ padding: 24, fontSize: 13, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>{t('common.loading')}</div>
         ) : !shipments.length ? (
           <div
             style={{
               padding: 24,
               borderRadius: 12,
               border: '1px solid var(--border-1)',
-              backgroundColor: darkMode ? 'var(--surface-bg-2)' : '#f9fafb',
+              backgroundColor: darkMode ? 'var(--surface-bg-2)' : 'var(--surface-bg-2)',
               fontSize: 13,
-              color: darkMode ? '#9ca3af' : '#6b7280'
+              color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
             }}
           >
             {t('orders.shipmentsPanel.empty')}
@@ -213,7 +213,7 @@ function ShipmentCard({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 8 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <Truck size={16} color="var(--muted-1)" />
-          <span style={{ fontSize: 13, fontWeight: 600, color: darkMode ? '#e5e7eb' : '#111827' }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: darkMode ? 'var(--border-1)' : 'var(--text-1)' }}>
             {shipment.id?.slice(0, 8)}
           </span>
           <span
@@ -230,14 +230,14 @@ function ShipmentCard({
           </span>
         </div>
       </div>
-      <div style={{ fontSize: 12, color: darkMode ? '#9ca3af' : '#6b7280', marginBottom: 8 }}>
+      <div style={{ fontSize: 12, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)', marginBottom: 8 }}>
         {destinationLabel}
       </div>
-      <div style={{ fontSize: 12, color: darkMode ? '#9ca3af' : '#6b7280', marginBottom: 12 }}>
+      <div style={{ fontSize: 12, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)', marginBottom: 12 }}>
         {packageCount != null ? t('orders.shipmentsPanel.packageCount', { count: packageCount }) : '—'}
         {(lastSync || shipment.updated_at) && ` · ${t('orders.shipmentsPanel.lastUpdate', { date: formatDate(lastSync || shipment.updated_at) })}`}
       </div>
-      <div style={{ fontSize: 12, color: darkMode ? '#9ca3af' : '#6b7280', marginBottom: 12 }}>
+      <div style={{ fontSize: 12, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)', marginBottom: 12 }}>
         {t('orders.shipmentsPanel.eta', { date: formatDate(shipment.eta_estimated) })}
       </div>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>

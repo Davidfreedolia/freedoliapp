@@ -156,8 +156,8 @@ export default function DataImportWizard({ darkMode = false }) {
   }
 
   const cardBg = darkMode ? 'rgba(255,255,255,0.05)' : '#FFFFFF'
-  const border = darkMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'
-  const muted = darkMode ? '#9CA3AF' : '#6B7280'
+  const border = darkMode ? 'rgba(255,255,255,0.1)' : 'var(--border-1)'
+  const muted = darkMode ? 'var(--muted-1)' : 'var(--text-2)'
   const ink = darkMode ? '#E8E8ED' : '#1A1A2E'
   const pageBg = darkMode ? 'var(--bg-dark, #15151f)' : '#F6F8F3'
   const shell = {
@@ -193,7 +193,7 @@ export default function DataImportWizard({ darkMode = false }) {
         style={{
           backgroundColor: selected ? 'rgba(110,203,195,0.12)' : (darkMode ? 'rgba(255,255,255,0.03)' : '#FFFFFF'),
           color: ink,
-          borderColor: selected ? '#6ECBC3' : border,
+          borderColor: selected ? 'var(--brand-2)' : border,
         }}
       >
         {s.recommended && (
@@ -307,7 +307,7 @@ export default function DataImportWizard({ darkMode = false }) {
                       style={{
                         backgroundColor: subType === st.id ? 'rgba(110,203,195,0.12)' : cardBg,
                         color: ink,
-                        borderColor: subType === st.id ? '#6ECBC3' : border,
+                        borderColor: subType === st.id ? 'var(--brand-2)' : border,
                         minHeight: 44,
                       }}
                     >
@@ -327,7 +327,7 @@ export default function DataImportWizard({ darkMode = false }) {
                 width: '100%', maxWidth: 540,
               }}
             >
-              <Upload size={32} color="#6ECBC3" />
+              <Upload size={32} color="var(--brand-2)" />
               <strong style={{ fontSize: 15, color: ink }}>
                 {file ? file.name : t('dataImport.upload.drop', 'Fes clic o arrossega un fitxer aquí')}
               </strong>
@@ -395,7 +395,7 @@ export default function DataImportWizard({ darkMode = false }) {
                 backgroundColor: 'rgba(110,203,195,0.14)', color: ink, fontSize: 13,
                 display: 'flex', alignItems: 'center', gap: 8,
               }}>
-                <Sparkles size={14} color="#6ECBC3" />
+                <Sparkles size={14} color="var(--brand-2)" />
                 <span>
                   {t('dataImport.autoDetect.hint', {
                     defaultValue: 'Detectat com a {{source}}{{subType}}.',
@@ -465,7 +465,7 @@ export default function DataImportWizard({ darkMode = false }) {
             </div>
 
             <details style={{ marginTop: 10 }}>
-              <summary style={{ cursor: 'pointer', fontSize: 12, color: '#1F5F63', fontWeight: 600 }}>
+              <summary style={{ cursor: 'pointer', fontSize: 12, color: 'var(--brand-1)', fontWeight: 600 }}>
                 {t('dataImport.mapping.preview', 'Previsualització (3 files)')}
               </summary>
               <pre style={{
@@ -481,7 +481,7 @@ export default function DataImportWizard({ darkMode = false }) {
 
         {step === STEP_DONE && summary && (
           <div className="wizard-step">
-            <CheckCircle2 size={56} color="#6ECBC3" style={{ marginBottom: 10 }} />
+            <CheckCircle2 size={56} color="var(--brand-2)" style={{ marginBottom: 10 }} />
             <h2 className="wizard-step__title" style={{ color: ink }}>
               {t('dataImport.done.title', 'Importació completada')}
             </h2>

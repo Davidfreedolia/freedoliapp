@@ -14,16 +14,16 @@ export default function PackageList({ packages, selectedPackageId, onSelectPacka
   const { t } = useTranslation()
   const list = useMemo(() => Array.isArray(packages) ? packages : [], [packages])
   const PACKAGE_STATUS_COLOR = {
-    pending: { bg: '#6b7280', label: t('orders.shipmentsPanel.packageStatus.pending') },
-    in_transit: { bg: '#f59e0b', label: t('orders.shipmentsPanel.packageStatus.inTransit') },
-    delivered: { bg: '#22c55e', label: t('orders.shipmentsPanel.packageStatus.delivered') },
-    exception: { bg: '#ef4444', label: t('orders.shipmentsPanel.packageStatus.exception') },
-    cancelled: { bg: '#6b7280', label: t('orders.shipmentsPanel.packageStatus.cancelled') }
+    pending: { bg: 'var(--text-2)', label: t('orders.shipmentsPanel.packageStatus.pending') },
+    in_transit: { bg: 'var(--warning-1)', label: t('orders.shipmentsPanel.packageStatus.inTransit') },
+    delivered: { bg: 'var(--success-1)', label: t('orders.shipmentsPanel.packageStatus.delivered') },
+    exception: { bg: 'var(--danger-1)', label: t('orders.shipmentsPanel.packageStatus.exception') },
+    cancelled: { bg: 'var(--text-2)', label: t('orders.shipmentsPanel.packageStatus.cancelled') }
   }
 
   if (!list.length) {
     return (
-      <div style={{ padding: 12, fontSize: 13, color: darkMode ? '#9ca3af' : '#6b7280' }}>
+      <div style={{ padding: 12, fontSize: 13, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
         {t('orders.shipmentsPanel.drawer.noPackages')}
       </div>
     )
@@ -46,12 +46,12 @@ export default function PackageList({ packages, selectedPackageId, onSelectPacka
               padding: 12,
               borderRadius: 10,
               border: `1px solid ${isSelected ? 'var(--primary-1)' : 'var(--border-1)'}`,
-              backgroundColor: isSelected ? (darkMode ? 'rgba(79,70,229,0.15)' : 'rgba(79,70,229,0.08)') : (darkMode ? 'var(--surface-bg-2)' : '#f9fafb'),
+              backgroundColor: isSelected ? (darkMode ? 'rgba(79,70,229,0.15)' : 'rgba(79,70,229,0.08)') : (darkMode ? 'var(--surface-bg-2)' : 'var(--surface-bg-2)'),
               cursor: 'pointer'
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: darkMode ? '#e5e7eb' : '#111827' }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: darkMode ? 'var(--border-1)' : 'var(--text-1)' }}>
                 {pkg.tracking_number || '—'}
               </span>
               <span
@@ -67,7 +67,7 @@ export default function PackageList({ packages, selectedPackageId, onSelectPacka
                 {meta.label}
               </span>
             </div>
-            <div style={{ fontSize: 12, color: darkMode ? '#9ca3af' : '#6b7280' }}>
+            <div style={{ fontSize: 12, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
               {pkg.carrier_name && <span>{pkg.carrier_name} · </span>}
               {t('orders.shipmentsPanel.drawer.lastSync', { date: formatDate(pkg.last_tracking_sync_at) })}
             </div>

@@ -141,8 +141,8 @@ export default function ResearchWizard({
   const overlayBg = 'rgba(0,0,0,0.55)'
   const modalBg = darkMode ? '#15151f' : '#ffffff'
   const borderColor = darkMode ? '#2a2a3a' : 'rgba(31,95,99,0.14)'
-  const muted = darkMode ? '#9aa1b4' : '#6b7280'
-  const ink = darkMode ? '#e6e9f2' : '#1f2937'
+  const muted = darkMode ? '#9aa1b4' : 'var(--text-2)'
+  const ink = darkMode ? '#e6e9f2' : 'var(--text-1)'
 
   const inputStyle = {
     width: '100%',
@@ -176,7 +176,7 @@ export default function ResearchWizard({
           maxHeight: '92vh',
           backgroundColor: modalBg,
           borderRadius: 16,
-          boxShadow: '0 20px 60px rgba(0,0,0,0.35)',
+          boxShadow: 'var(--shadow-modal)',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
@@ -188,7 +188,7 @@ export default function ResearchWizard({
           padding: '16px 20px', borderBottom: `1px solid ${borderColor}`,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Sparkles size={18} color="var(--brand-1,#1F5F63)" />
+            <Sparkles size={18} color="var(--brand-1,var(--brand-1))" />
             <h2 style={{ margin: 0, fontSize: 16, color: ink, fontWeight: 700 }}>
               {t('research.wizard.title', 'Recerca IA de producte')}
             </h2>
@@ -332,7 +332,7 @@ export default function ResearchWizard({
                       backgroundColor: 'rgba(110,203,195,0.14)', color: ink,
                       display: 'flex', alignItems: 'center', gap: 10, fontSize: 13,
                     }}>
-                      <Sparkles size={14} color="var(--brand-1,#1F5F63)" />
+                      <Sparkles size={14} color="var(--brand-1,var(--brand-1))" />
                       <span style={{ flex: 1 }}>
                         {t('research.quota.remainingBanner', {
                           defaultValue: 'Aquesta anàlisi s\'ha fet amb la teva quota gratuïta ({{remaining}} de {{limit}} restants).',

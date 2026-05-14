@@ -1045,7 +1045,7 @@ export default function Finances() {
 
   const getCategoryInfo = (categoryId, type) => {
     const catList = type === 'income' ? categories.income : categories.expense
-    return catList.find(c => c.id === categoryId) || { name: 'Sense categoria', color: '#6b7280', icon: 'Receipt' }
+    return catList.find(c => c.id === categoryId) || { name: 'Sense categoria', color: 'var(--text-2)', icon: 'Receipt' }
   }
 
   // Base filter/input styles using design tokens
@@ -1289,32 +1289,32 @@ export default function Finances() {
         {/* Stats Cards */}
         <div style={styles.statsRow}>
           <div style={{...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff'}}>
-            <TrendingUp size={28} color="#22c55e" />
+            <TrendingUp size={28} color="var(--success-1)" />
             <div>
-              <span style={{...styles.statValue, color: '#22c55e'}}>{formatCurrency(stats.totalIncome)}</span>
+              <span style={{...styles.statValue, color: 'var(--success-1)'}}>{formatCurrency(stats.totalIncome)}</span>
               <span style={styles.statLabel}>Ingressos</span>
             </div>
           </div>
           <div style={{...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff'}}>
-            <TrendingDown size={28} color="#ef4444" />
+            <TrendingDown size={28} color="var(--danger-1)" />
             <div>
-              <span style={{...styles.statValue, color: '#ef4444'}}>{formatCurrency(stats.totalExpense)}</span>
+              <span style={{...styles.statValue, color: 'var(--danger-1)'}}>{formatCurrency(stats.totalExpense)}</span>
               <span style={styles.statLabel}>Despeses</span>
             </div>
           </div>
           <div style={{...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff'}}>
-            <DollarSign size={28} color={stats.profit >= 0 ? '#22c55e' : '#ef4444'} />
+            <DollarSign size={28} color={stats.profit >= 0 ? 'var(--success-1)' : 'var(--danger-1)'} />
             <div>
-              <span style={{...styles.statValue, color: stats.profit >= 0 ? '#22c55e' : '#ef4444'}}>
+              <span style={{...styles.statValue, color: stats.profit >= 0 ? 'var(--success-1)' : 'var(--danger-1)'}}>
                 {formatCurrency(stats.profit)}
               </span>
               <span style={styles.statLabel}>Benefici</span>
             </div>
           </div>
           <div style={{...styles.statCard, backgroundColor: darkMode ? '#15151f' : '#ffffff'}}>
-            <BookIcon size={28} color="#4f46e5" />
+            <BookIcon size={28} color="var(--brand-1)" />
             <div>
-              <span style={{...styles.statValue, color: '#4f46e5'}}>{formatCurrency(stats.balance)}</span>
+              <span style={{...styles.statValue, color: 'var(--brand-1)'}}>{formatCurrency(stats.balance)}</span>
               <span style={styles.statLabel}>Saldo</span>
             </div>
           </div>
@@ -1332,19 +1332,19 @@ export default function Finances() {
             border: 'var(--border)', // Unified border
             margin: '24px 0'
           }}>
-            <AlertCircle size={48} color="#ef4444" style={{ margin: '0 auto 16px' }} />
+            <AlertCircle size={48} color="var(--danger-1)" style={{ margin: '0 auto 16px' }} />
             <h3 style={{
               margin: '0 0 8px',
               fontSize: '18px',
               fontWeight: '600',
-              color: darkMode ? '#ffffff' : '#111827'
+              color: darkMode ? '#ffffff' : 'var(--text-1)'
             }}>
               Error carregant les finances
                   </h3>
             <p style={{
               margin: '0 0 24px',
               fontSize: '14px',
-              color: '#6b7280'
+              color: 'var(--text-2)'
             }}>
               {error}
             </p>
@@ -1363,33 +1363,33 @@ export default function Finances() {
                   <thead>
                     <tr>
                   {visibleColumns.includes('date') && (
-                      <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Data</th>
+                      <th style={{...styles.th, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'}}>Data</th>
                   )}
                   {visibleColumns.includes('type') && (
-                    <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Tipus</th>
+                    <th style={{...styles.th, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'}}>Tipus</th>
                   )}
                   {visibleColumns.includes('category') && (
-                      <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Categoria</th>
+                      <th style={{...styles.th, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'}}>Categoria</th>
                   )}
                   {visibleColumns.includes('description') && (
-                      <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Descripció</th>
+                      <th style={{...styles.th, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'}}>Descripció</th>
                   )}
                   {visibleColumns.includes('project') && (
-                      <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Projecte</th>
+                      <th style={{...styles.th, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'}}>Projecte</th>
                   )}
                   {visibleColumns.includes('amount') && (
-                      <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Import</th>
+                      <th style={{...styles.th, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'}}>Import</th>
                   )}
                   {visibleColumns.includes('balance') && (
-                    <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Saldo</th>
+                    <th style={{...styles.th, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'}}>Saldo</th>
                   )}
-                      <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>Accions</th>
+                      <th style={{...styles.th, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'}}>Accions</th>
                     </tr>
                   </thead>
                   <tbody>
                 {filteredLedger.length === 0 ? (
                   <tr>
-                    <td colSpan={visibleColumns.length + 1} style={{...styles.td, textAlign: 'center', padding: '48px', color: '#6b7280'}}>
+                    <td colSpan={visibleColumns.length + 1} style={{...styles.td, textAlign: 'center', padding: '48px', color: 'var(--text-2)'}}>
                       No hi ha transaccions
                     </td>
                   </tr>
@@ -1412,7 +1412,7 @@ export default function Finances() {
                         }}
                       >
                         {visibleColumns.includes('date') && (
-                          <td style={{...styles.td, color: darkMode ? '#9ca3af' : '#6b7280'}}>
+                          <td style={{...styles.td, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'}}>
                             {formatDate(item.date)}
                           </td>
                         )}
@@ -1421,7 +1421,7 @@ export default function Finances() {
                             <span style={{
                               ...styles.typeBadge,
                               backgroundColor: item.type === 'income' ? '#22c55e15' : '#ef444415',
-                              color: item.type === 'income' ? '#22c55e' : '#ef4444'
+                              color: item.type === 'income' ? 'var(--success-1)' : 'var(--danger-1)'
                             }}>
                               {item.type === 'income' ? 'Ingrés' : 'Despesa'}
                             </span>
@@ -1449,11 +1449,11 @@ export default function Finances() {
                           </td>
                         )}
                         {visibleColumns.includes('description') && (
-                          <td style={{...styles.td, color: darkMode ? '#ffffff' : '#111827'}}>
+                          <td style={{...styles.td, color: darkMode ? '#ffffff' : 'var(--text-1)'}}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                               <span>{item.description || '-'}</span>
                               {item.order_id && (
-                                <span style={{fontSize: '11px', color: '#6b7280'}}>
+                                <span style={{fontSize: '11px', color: 'var(--text-2)'}}>
                                   Order: {item.order_id}
                                 </span>
                               )}
@@ -1461,14 +1461,14 @@ export default function Finances() {
                           </td>
                         )}
                         {visibleColumns.includes('project') && (
-                          <td style={{...styles.td, color: darkMode ? '#9ca3af' : '#6b7280'}}>
+                          <td style={{...styles.td, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'}}>
                             {item.project?.name || '-'}
                           </td>
                         )}
                         {visibleColumns.includes('amount') && (
                           <td style={{
                             ...styles.td,
-                            color: item.amount >= 0 ? '#22c55e' : '#ef4444',
+                            color: item.amount >= 0 ? 'var(--success-1)' : 'var(--danger-1)',
                             fontWeight: '600'
                           }}>
                             {item.amount >= 0 ? '+' : ''}{formatCurrency(item.amount, item.currency)}
@@ -1477,7 +1477,7 @@ export default function Finances() {
                         {visibleColumns.includes('balance') && (
                           <td style={{
                             ...styles.td,
-                            color: item.balance >= 0 ? '#22c55e' : '#ef4444',
+                            color: item.balance >= 0 ? 'var(--success-1)' : 'var(--danger-1)',
                             fontWeight: '600'
                           }}>
                             {formatCurrency(item.balance, item.currency)}
@@ -1574,7 +1574,7 @@ export default function Finances() {
         <div style={{...styles.modalOverlay, ...modalStyles.overlay}} onClick={() => setShowCategoryModal(false)}>
           <div style={{...styles.modal, ...modalStyles.modal}} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeader}>
-              <h3 style={{...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827'}}>
+              <h3 style={{...styles.modalTitle, color: darkMode ? '#ffffff' : 'var(--text-1)'}}>
                 Gestionar Categories
               </h3>
               <Button variant="ghost" size="sm" onClick={() => setShowCategoryModal(false)} style={styles.closeButton}>
@@ -1831,7 +1831,7 @@ export default function Finances() {
         <div style={{...styles.modalOverlay, ...modalStyles.overlay}} onClick={() => setShowViewModal(false)}>
           <div style={{...styles.modal, ...modalStyles.modal}} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeader}>
-              <h3 style={{...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827'}}>
+              <h3 style={{...styles.modalTitle, color: darkMode ? '#ffffff' : 'var(--text-1)'}}>
                 {editingView.id ? 'Editar Vista' : 'Nova Vista'}
               </h3>
               <Button variant="ghost" size="sm" onClick={() => setShowViewModal(false)} style={styles.closeButton}>
@@ -1849,8 +1849,8 @@ export default function Finances() {
                   placeholder="Ex: Q1 2024, Amazon Sales, etc."
                   style={{
                     ...styles.input,
-                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                    color: darkMode ? '#ffffff' : '#111827'
+                    backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}
                   />
                 </div>
@@ -1904,7 +1904,7 @@ export default function Finances() {
         >
           <div style={{...styles.modal, ...modalStyles.modal, maxWidth: '700px'}} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeader}>
-              <h3 style={{...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827'}}>
+              <h3 style={{...styles.modalTitle, color: darkMode ? '#ffffff' : 'var(--text-1)'}}>
                 {editingTransaction.id 
                   ? `Editar ${editingTransaction.type === 'income' ? 'Ingrés' : 'Despesa'}` 
                   : `Nova ${editingTransaction.type === 'income' ? 'Ingrés' : 'Despesa'}`}
@@ -1931,8 +1931,8 @@ export default function Finances() {
                     onChange={e => setEditingTransaction({...editingTransaction, project_id: e.target.value || null})}
                     style={{
                       ...styles.input,
-                      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                      color: darkMode ? '#ffffff' : '#111827'
+                      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                      color: darkMode ? '#ffffff' : 'var(--text-1)'
                     }}
                   >
                     <option value="">Selecciona...</option>
@@ -1957,8 +1957,8 @@ export default function Finances() {
                     }}
                     style={{
                       ...styles.input,
-                      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                      color: darkMode ? '#ffffff' : '#111827'
+                      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                      color: darkMode ? '#ffffff' : 'var(--text-1)'
                     }}
                   >
                     <option value="">Selecciona...</option>
@@ -1967,7 +1967,7 @@ export default function Finances() {
                     ))}
                     <option value="__create_new__" style={{ 
                       fontStyle: 'italic', 
-                      color: darkMode ? '#4f46e5' : '#4f46e5',
+                      color: darkMode ? 'var(--brand-1)' : 'var(--brand-1)',
                       fontWeight: '500'
                     }}>
                       + Crear nova categoria
@@ -1984,8 +1984,8 @@ export default function Finances() {
                     onChange={e => setEditingTransaction({...editingTransaction, amount: e.target.value})}
                     style={{
                       ...styles.input,
-                      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                      color: darkMode ? '#ffffff' : '#111827'
+                      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                      color: darkMode ? '#ffffff' : 'var(--text-1)'
                     }}
                   />
                 </div>
@@ -1997,8 +1997,8 @@ export default function Finances() {
                     onChange={e => setEditingTransaction({...editingTransaction, currency: e.target.value})}
                     style={{
                       ...styles.input,
-                      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                      color: darkMode ? '#ffffff' : '#111827'
+                      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                      color: darkMode ? '#ffffff' : 'var(--text-1)'
                     }}
                   >
                     <option value="EUR">EUR</option>
@@ -2015,8 +2015,8 @@ export default function Finances() {
                     onChange={e => setEditingTransaction({...editingTransaction, date: e.target.value})}
                     style={{
                       ...styles.input,
-                      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                      color: darkMode ? '#ffffff' : '#111827'
+                      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                      color: darkMode ? '#ffffff' : 'var(--text-1)'
                     }}
                   />
                 </div>
@@ -2029,8 +2029,8 @@ export default function Finances() {
                       onChange={e => setEditingTransaction({...editingTransaction, payment_status: e.target.value})}
                       style={{
                         ...styles.input,
-                        backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                        color: darkMode ? '#ffffff' : '#111827'
+                        backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                        color: darkMode ? '#ffffff' : 'var(--text-1)'
                       }}
                     >
                       <option value="pending">Pendent</option>
@@ -2049,8 +2049,8 @@ export default function Finances() {
                         onChange={e => setEditingTransaction({...editingTransaction, platform: e.target.value})}
                         style={{
                           ...styles.input,
-                          backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                          color: darkMode ? '#ffffff' : '#111827'
+                          backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                          color: darkMode ? '#ffffff' : 'var(--text-1)'
                         }}
                   >
                     <option value="amazon">Amazon</option>
@@ -2064,8 +2064,8 @@ export default function Finances() {
                         onChange={e => setEditingTransaction({...editingTransaction, marketplace: e.target.value})}
                         style={{
                           ...styles.input,
-                          backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                          color: darkMode ? '#ffffff' : '#111827'
+                          backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                          color: darkMode ? '#ffffff' : 'var(--text-1)'
                         }}
                   >
                     <option value="ES">Espanya</option>
@@ -2085,8 +2085,8 @@ export default function Finances() {
                     placeholder="ID comanda Amazon..."
                         style={{
                           ...styles.input,
-                          backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                          color: darkMode ? '#ffffff' : '#111827'
+                          backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                          color: darkMode ? '#ffffff' : 'var(--text-1)'
                         }}
                   />
                 </div>
@@ -2101,8 +2101,8 @@ export default function Finances() {
                       onChange={e => setEditingTransaction({...editingTransaction, supplier_id: e.target.value || null})}
                       style={{
                         ...styles.input,
-                        backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                        color: darkMode ? '#ffffff' : '#111827'
+                        backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                        color: darkMode ? '#ffffff' : 'var(--text-1)'
                       }}
                     >
                       <option value="">Selecciona...</option>
@@ -2122,8 +2122,8 @@ export default function Finances() {
                     placeholder="Descripció de la transacció..."
                     style={{
                       ...styles.input,
-                      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                      color: darkMode ? '#ffffff' : '#111827'
+                      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                      color: darkMode ? '#ffffff' : 'var(--text-1)'
                     }}
                   />
                 </div>
@@ -2137,8 +2137,8 @@ export default function Finances() {
                     placeholder="Nº factura, PO..."
                     style={{
                       ...styles.input,
-                      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                      color: darkMode ? '#ffffff' : '#111827'
+                      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                      color: darkMode ? '#ffffff' : 'var(--text-1)'
                     }}
                   />
                 </div>
@@ -2152,8 +2152,8 @@ export default function Finances() {
                     style={{
                       ...styles.input,
                       ...styles.textarea,
-                      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                      color: darkMode ? '#ffffff' : '#111827'
+                      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                      color: darkMode ? '#ffffff' : 'var(--text-1)'
                     }}
                   />
                 </div>
@@ -2216,7 +2216,7 @@ export default function Finances() {
             onClick={e => e.stopPropagation()}
           >
             <div style={styles.modalHeader}>
-              <h3 style={{...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827'}}>
+              <h3 style={{...styles.modalTitle, color: darkMode ? '#ffffff' : 'var(--text-1)'}}>
                 Crear nova categoria
               </h3>
               <Button
@@ -2250,13 +2250,13 @@ export default function Finances() {
                   autoFocus
                   style={{
                     ...styles.input,
-                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                    color: darkMode ? '#ffffff' : '#111827'
+                    backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}
                 />
                 <p style={{
                   fontSize: '12px',
-                  color: '#6b7280',
+                  color: 'var(--text-2)',
                   margin: '4px 0 0 0'
                 }}>
                   Tipus: {editingTransaction?.type === 'income' ? 'Ingrés' : 'Despesa'}
@@ -2349,14 +2349,14 @@ function QAPanel({ darkMode, onDebugReceiptsChange }) {
       width: '360px',
       zIndex: 9999,
       backgroundColor: darkMode ? '#15151f' : '#ffffff',
-      color: darkMode ? '#ffffff' : '#111827',
-      border: `1px solid ${darkMode ? '#2a2a3a' : '#e5e7eb'}`,
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
+      border: `1px solid ${darkMode ? '#2a2a3a' : 'var(--border-1)'}`,
       borderRadius: '12px',
       boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
       padding: '16px'
     }}>
       <div style={{ fontWeight: '600', marginBottom: '8px' }}>QA Panel (Finances)</div>
-      <div style={{ fontSize: '12px', color: darkMode ? '#9ca3af' : '#6b7280', marginBottom: '12px' }}>
+      <div style={{ fontSize: '12px', color: darkMode ? 'var(--muted-1)' : 'var(--text-2)', marginBottom: '12px' }}>
         Visible només amb localStorage.qaPanel = 1
       </div>
 
@@ -2417,7 +2417,7 @@ function QAPanel({ darkMode, onDebugReceiptsChange }) {
           <div style={{
             marginTop: '10px',
             padding: '10px',
-            backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+            backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
             borderRadius: '8px',
             fontSize: '12px'
           }}>
@@ -2468,7 +2468,7 @@ function QAPanel({ darkMode, onDebugReceiptsChange }) {
         <div style={{ fontSize: '13px', marginBottom: '6px' }}>Last error</div>
         <div style={{
           padding: '10px',
-          backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+          backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
           borderRadius: '8px',
           maxHeight: '160px',
           overflow: 'auto',
@@ -2482,7 +2482,7 @@ function QAPanel({ darkMode, onDebugReceiptsChange }) {
               {qaLastError.componentStack && <pre style={{ whiteSpace: 'pre-wrap' }}>{qaLastError.componentStack}</pre>}
             </>
           ) : (
-            <div style={{ color: '#6b7280' }}>No error captured</div>
+            <div style={{ color: 'var(--text-2)' }}>No error captured</div>
           )}
         </div>
         <div style={{ marginTop: '8px', display: 'flex', gap: '8px' }}>
@@ -2682,12 +2682,12 @@ const styles = {
   },
   statLabel: {
     fontSize: '12px',
-    color: '#6b7280'
+    color: 'var(--text-2)'
   },
   loading: {
     padding: '64px',
     textAlign: 'center',
-    color: '#6b7280'
+    color: 'var(--text-2)'
   },
   tableContainer: {
     borderRadius: 'var(--radius-ui)', // Unified radius
@@ -2743,7 +2743,7 @@ const styles = {
     border: 'none',
     cursor: 'pointer',
     padding: '8px',
-    color: '#9ca3af'
+    color: 'var(--muted-1)'
   },
   menu: {
     position: 'absolute',
@@ -2809,7 +2809,7 @@ const styles = {
     background: 'none',
     border: 'none',
     cursor: 'pointer',
-    color: '#6b7280',
+    color: 'var(--text-2)',
     padding: '4px'
   },
   modalBody: {
@@ -2839,7 +2839,7 @@ const styles = {
   label: {
     fontSize: '12px',
     fontWeight: '500',
-    color: '#6b7280'
+    color: 'var(--text-2)'
   },
   input: {
     padding: '10px 12px',
@@ -2921,7 +2921,7 @@ const styles = {
     border: 'none',
     cursor: 'pointer',
     padding: '4px',
-    color: '#6b7280'
+    color: 'var(--text-2)'
   },
   categoryForm: {
     display: 'flex',

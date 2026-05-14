@@ -98,12 +98,12 @@ export default function AmazonReadinessBadge({
     return (
       <div style={{
         padding: '16px',
-        backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+        backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
         borderRadius: '12px',
-        border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+        border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
         marginBottom: '24px'
       }}>
-        <div style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '14px' }}>{t('amazonReadiness.loading')}</div>
+        <div style={{ color: darkMode ? 'var(--muted-1)' : 'var(--text-2)', fontSize: '14px' }}>{t('amazonReadiness.loading')}</div>
       </div>
     )
   }
@@ -113,23 +113,23 @@ export default function AmazonReadinessBadge({
   // Estilos según estado
   const statusConfig = {
     ready: {
-      color: '#22c55e',
+      color: 'var(--success-1)',
       bgColor: darkMode ? '#1a3a2a' : '#f0fdf4',
-      borderColor: '#22c55e',
+      borderColor: 'var(--success-1)',
       icon: CheckCircle2,
       label: t('amazonReadiness.status.ready')
     },
     partial: {
-      color: '#f59e0b',
+      color: 'var(--warning-1)',
       bgColor: darkMode ? '#3a2e1a' : '#fffbeb',
-      borderColor: '#f59e0b',
+      borderColor: 'var(--warning-1)',
       icon: AlertCircle,
       label: t('amazonReadiness.status.partial')
     },
     not_ready: {
-      color: '#ef4444',
+      color: 'var(--danger-1)',
       bgColor: darkMode ? '#3a1a1a' : '#fef2f2',
-      borderColor: '#ef4444',
+      borderColor: 'var(--danger-1)',
       icon: XCircle,
       label: t('amazonReadiness.status.notReady')
     }
@@ -167,7 +167,7 @@ export default function AmazonReadinessBadge({
       <p style={{
         margin: '0 0 16px 0',
         fontSize: '14px',
-        color: darkMode ? '#e5e7eb' : '#374151',
+        color: darkMode ? 'var(--border-1)' : 'var(--text-1)',
         lineHeight: '1.5'
       }}>
         {message}

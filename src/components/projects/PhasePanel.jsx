@@ -71,7 +71,7 @@ export default function PhasePanel({
         }
 
         const borderColor = selected
-          ? 'var(--accent-primary, #3b82f6)'
+          ? 'var(--accent-primary, var(--cta-1))'
           : 'var(--border-1)'
         const bg = selected
           ? 'var(--surface-bg-2)'
@@ -110,9 +110,9 @@ export default function PhasePanel({
                   ? 'var(--accent-bg, #3b82f622)'
                   : 'var(--surface-bg-2)',
                 color: completedFlag
-                  ? 'var(--success, #10b981)'
+                  ? 'var(--success, var(--success-1))'
                   : currentFlag
-                  ? 'var(--accent-primary, #3b82f6)'
+                  ? 'var(--accent-primary, var(--cta-1))'
                   : 'var(--text-2)',
                 display: 'flex',
                 alignItems: 'center',
@@ -133,8 +133,8 @@ export default function PhasePanel({
                 marginBottom: 2
               }}>
                 <span>FASE {meta.id}</span>
-                {completedFlag && <span style={{ color: 'var(--success, #10b981)' }}>· Completada</span>}
-                {currentFlag && !completedFlag && <span style={{ color: 'var(--accent-primary, #3b82f6)' }}>· Actual</span>}
+                {completedFlag && <span style={{ color: 'var(--success, var(--success-1))' }}>· Completada</span>}
+                {currentFlag && !completedFlag && <span style={{ color: 'var(--accent-primary, var(--cta-1))' }}>· Actual</span>}
                 {lockedFlag && <span>· Bloquejada</span>}
               </div>
               <div style={{

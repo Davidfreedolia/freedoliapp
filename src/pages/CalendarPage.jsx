@@ -23,14 +23,14 @@ moment.locale('ca'); configureLocale('ca')
 
 /* ─── Color scheme per tipus ─────────────────────────────────────────────── */
 export const TYPE_META = {
-  milestone:  { bg: '#7c3aed', fg: '#fff', label: 'Milestone' },
-  meeting:    { bg: '#3b82f6', fg: '#fff', label: 'Reunió' },
-  deadline:   { bg: '#ef4444', fg: '#fff', label: 'Deadline' },
-  delivery:   { bg: '#10b981', fg: '#fff', label: 'Lliurament' },
-  production: { bg: '#f59e0b', fg: '#fff', label: 'Producció' },
-  sample:     { bg: '#0891b2', fg: '#fff', label: 'Mostres' },
-  launch:     { bg: '#ec4899', fg: '#fff', label: 'Llançament' },
-  review:     { bg: '#8b5cf6', fg: '#fff', label: 'Revisió' },
+  milestone:  { bg: 'var(--brand-1)', fg: '#fff', label: 'Milestone' },
+  meeting:    { bg: 'var(--cta-1)', fg: '#fff', label: 'Reunió' },
+  deadline:   { bg: 'var(--danger-1)', fg: '#fff', label: 'Deadline' },
+  delivery:   { bg: 'var(--success-1)', fg: '#fff', label: 'Lliurament' },
+  production: { bg: 'var(--warning-1)', fg: '#fff', label: 'Producció' },
+  sample:     { bg: 'var(--brand-2)', fg: '#fff', label: 'Mostres' },
+  launch:     { bg: 'var(--coral-1)', fg: '#fff', label: 'Llançament' },
+  review:     { bg: 'var(--brand-1)', fg: '#fff', label: 'Revisió' },
   other:      { bg: '#64748b', fg: '#fff', label: 'Altre' },
 }
 const getTypeMeta = (type) => TYPE_META[type] || TYPE_META.other
@@ -79,8 +79,8 @@ function GanttView({ events, dateRange, darkMode, onEventClick }) {
 
   const border = darkMode ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)'
   const surfaceBg  = darkMode ? '#1a2327' : '#fff'
-  const surface2   = darkMode ? '#151d21' : '#f9fafb'
-  const textColor  = darkMode ? '#e2e8f0' : '#1e293b'
+  const surface2   = darkMode ? '#151d21' : 'var(--surface-bg-2)'
+  const textColor  = darkMode ? 'var(--border-1)' : '#1e293b'
   const text2Color = darkMode ? '#94a3b8' : '#64748b'
 
   return (
@@ -404,7 +404,7 @@ export default function CalendarPage() {
   }, [showFilters])
 
   const bg    = darkMode ? '#15151f' : '#fff'
-  const bdr   = darkMode ? '#2d3748' : '#e5e7eb'
+  const bdr   = darkMode ? '#2d3748' : 'var(--border-1)'
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
@@ -521,7 +521,7 @@ export default function CalendarPage() {
         )}
 
         {!loading && error && (
-          <div style={{ padding: 20, borderRadius: 10, background: '#fee2e2', color: '#dc2626', fontSize: 13 }}>
+          <div style={{ padding: 20, borderRadius: 10, background: '#fee2e2', color: 'var(--danger-1)', fontSize: 13 }}>
             Error: {error}
           </div>
         )}
@@ -575,7 +575,7 @@ export default function CalendarPage() {
 /* ── Style helpers ─────────────────────────────────────────────────────────── */
 const navBtnStyle = (dark) => ({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-  padding: '5px 8px', border: `1px solid ${dark ? '#374151' : '#e5e7eb'}`,
+  padding: '5px 8px', border: `1px solid ${dark ? 'var(--text-1)' : 'var(--border-1)'}`,
   borderRadius: 7, background: 'var(--surface-bg)',
   color: 'var(--text-1)', cursor: 'pointer', fontSize: 13, fontWeight: 500
 })
@@ -585,7 +585,7 @@ const filterLabelStyle = {
 }
 const filterSelectStyle = (dark) => ({
   width: '100%', padding: '7px 10px',
-  background: dark ? '#1f1f2e' : '#f9fafb',
-  border: `1px solid ${dark ? '#374151' : '#e5e7eb'}`,
+  background: dark ? '#1f1f2e' : 'var(--surface-bg-2)',
+  border: `1px solid ${dark ? 'var(--text-1)' : 'var(--border-1)'}`,
   borderRadius: 7, color: 'var(--text-1)', fontSize: 13, cursor: 'pointer', outline: 'none'
 })

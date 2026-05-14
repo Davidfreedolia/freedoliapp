@@ -17,7 +17,7 @@ export function ResponsiveTable({
       <div style={{
         padding: '48px',
         textAlign: 'center',
-        color: darkMode ? '#9ca3af' : '#6b7280'
+        color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
       }}>
         {emptyMessage}
       </div>
@@ -65,7 +65,7 @@ export function ResponsiveTable({
         minWidth: isTablet ? '600px' : '800px'
       }}>
         <thead>
-          <tr style={{ backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb' }}>
+          <tr style={{ backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)' }}>
             {visibleColumns.map((col, idx) => (
               <th
                 key={idx}
@@ -76,7 +76,7 @@ export function ResponsiveTable({
                   fontWeight: '600',
                   textTransform: 'uppercase',
                   borderBottom: '1px solid var(--border-color)',
-                  color: darkMode ? '#9ca3af' : '#6b7280'
+                  color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
                 }}
               >
                 {col.header}

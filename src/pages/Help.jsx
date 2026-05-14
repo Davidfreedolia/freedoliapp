@@ -50,7 +50,7 @@ export default function Help() {
   const styles = {
     container: {
       minHeight: '100vh',
-      backgroundColor: darkMode ? '#0f0f1a' : '#f9fafb',
+      backgroundColor: darkMode ? '#0f0f1a' : 'var(--surface-bg-2)',
       padding: isMobile ? '16px' : '24px',
       paddingTop: '80px'
     },
@@ -60,7 +60,7 @@ export default function Help() {
     title: {
       fontSize: isMobile ? '24px' : '32px',
       fontWeight: '700',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       marginBottom: '8px',
       display: 'flex',
       alignItems: 'center',
@@ -68,7 +68,7 @@ export default function Help() {
     },
     subtitle: {
       fontSize: '16px',
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       marginBottom: '24px'
     },
     searchContainer: {
@@ -80,9 +80,9 @@ export default function Help() {
       padding: '12px 16px',
       paddingRight: '40px',
       borderRadius: '8px',
-      border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`,
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       fontSize: '14px'
     },
     searchIcon: {
@@ -90,7 +90,7 @@ export default function Help() {
       right: '12px',
       top: '50%',
       transform: 'translateY(-50%)',
-      color: darkMode ? '#9ca3af' : '#6b7280'
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
     },
     sectionsList: {
       display: 'flex',
@@ -99,7 +99,7 @@ export default function Help() {
     },
     sectionCard: {
       backgroundColor: darkMode ? '#15151f' : '#ffffff',
-      border: `1px solid ${darkMode ? '#2a2a3a' : '#e5e7eb'}`,
+      border: `1px solid ${darkMode ? '#2a2a3a' : 'var(--border-1)'}`,
       borderRadius: '8px',
       padding: '16px',
       cursor: 'pointer',
@@ -113,64 +113,64 @@ export default function Help() {
     sectionTitle: {
       fontSize: '18px',
       fontWeight: '600',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       marginBottom: '4px'
     },
     sectionShort: {
       fontSize: '14px',
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       marginBottom: '8px'
     },
     chevron: {
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       transition: 'transform 0.2s',
       transform: selectedSection ? 'rotate(90deg)' : 'rotate(0deg)'
     },
     fieldsList: {
       marginTop: '16px',
       paddingTop: '16px',
-      borderTop: `1px solid ${darkMode ? '#2a2a3a' : '#e5e7eb'}`,
+      borderTop: `1px solid ${darkMode ? '#2a2a3a' : 'var(--border-1)'}`,
       display: 'flex',
       flexDirection: 'column',
       gap: '16px'
     },
     fieldItem: {
       padding: '12px',
-      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
       borderRadius: '6px',
-      border: `1px solid ${darkMode ? '#2a2a3a' : '#e5e7eb'}`
+      border: `1px solid ${darkMode ? '#2a2a3a' : 'var(--border-1)'}`
     },
     fieldTitle: {
       fontSize: '15px',
       fontWeight: '600',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       marginBottom: '6px'
     },
     fieldLong: {
       fontSize: '13px',
-      color: darkMode ? '#d1d5db' : '#374151',
+      color: darkMode ? 'var(--border-1)' : 'var(--text-1)',
       lineHeight: '1.6',
       marginBottom: '8px'
     },
     fieldExample: {
       fontSize: '12px',
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       fontStyle: 'italic',
       padding: '8px',
-      backgroundColor: darkMode ? '#111827' : '#f3f4f6',
+      backgroundColor: darkMode ? 'var(--text-1)' : 'var(--surface-bg-2)',
       borderRadius: '4px',
       marginTop: '8px'
     },
     emptyState: {
       textAlign: 'center',
       padding: '48px 24px',
-      color: darkMode ? '#9ca3af' : '#6b7280'
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
     },
     emptyTitle: {
       fontSize: '18px',
       fontWeight: '600',
       marginBottom: '8px',
-      color: darkMode ? '#ffffff' : '#111827'
+      color: darkMode ? '#ffffff' : 'var(--text-1)'
     }
   }
 
@@ -235,7 +235,7 @@ export default function Help() {
                       ...styles.fieldLong,
                       marginBottom: '16px',
                       padding: '12px',
-                      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+                      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
                       borderRadius: '6px'
                     }}>
                       {sectionLong}

@@ -15,6 +15,7 @@
 :root {
   /* System typography */
   --font-sans: 'Roboto', system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --font-mono: 'Roboto Mono', ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
   --text-base-color: var(--text-1);
   --text-muted-color: var(--muted-1);
   --text-size-base: 14px;
@@ -72,6 +73,12 @@
 
   --coral-1: var(--c-coral-500);
   --soft-yellow: var(--c-yellow-200);
+
+  /* AA-compliant ink shades for text on soft status backgrounds */
+  --success-ink: #2B7A66;
+  --warning-ink: #7A5F22;
+  --danger-ink:  #B0413F;
+  --info-ink:    var(--brand-1);
   --accent-1: var(--c-accent);
   --accent-action: var(--accent-1);
   --accent-active: var(--coral-1);
@@ -97,6 +104,8 @@
   --focus-ring-offset: 0 0 0 2px var(--surface-bg), 0 0 0 4px var(--focus-ring);
   --shadow-soft: 0 10px 30px rgba(31, 95, 99, 0.10);
   --shadow-soft-2: 0 8px 20px rgba(31, 95, 99, 0.08);
+  --shadow-modal: 0 20px 60px rgba(15, 36, 38, 0.22);
+  --shadow-popover: 0 12px 36px rgba(15, 36, 38, 0.14);
   --switch-thumb-bg: var(--c-white-warm);
 
   /* Freedoliapp Palette */
@@ -290,6 +299,8 @@ body.dark {
   --focus-ring: var(--c-teal-300);
   --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.35);
   --shadow-soft-2: 0 8px 20px rgba(0, 0, 0, 0.28);
+  --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.55);
+  --shadow-popover: 0 12px 36px rgba(0, 0, 0, 0.45);
   --switch-thumb-bg: var(--c-white-warm);
 
   /* Semantic Color Tokens - Dark Mode */
@@ -332,6 +343,12 @@ body.dark {
   --color-warning-soft-bg: rgba(240, 180, 41, 0.14);
   --color-warning-soft-text: #F6E5B0;
   --color-warning-soft-border: rgba(240, 180, 41, 0.28);
+
+  /* Status ink shades (lighter in dark mode for contrast) */
+  --success-ink: #7FE0BD;
+  --warning-ink: #F6D77A;
+  --danger-ink:  #F4A0A0;
+  --info-ink:    var(--brand-2);
 
   /* Background System - Dark Mode */
   --page-bg: var(--bg-app);

@@ -70,12 +70,12 @@ export default function HelpModal({ isOpen, onClose, darkMode }) {
         {/* Header */}
         <div style={modalStyles.header}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <BookOpen size={24} color={darkMode ? '#ffffff' : '#111827'} />
+            <BookOpen size={24} color={darkMode ? '#ffffff' : 'var(--text-1)'} />
             <h2 style={{
               margin: 0,
               fontSize: '20px',
               fontWeight: '600',
-              color: darkMode ? '#ffffff' : '#111827'
+              color: darkMode ? '#ffffff' : 'var(--text-1)'
             }}>
               {tSafe('help.title', 'Help & Documentation')}
             </h2>
@@ -84,7 +84,7 @@ export default function HelpModal({ isOpen, onClose, darkMode }) {
             onClick={onClose}
             style={modalStyles.closeButton}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = darkMode ? '#2a2a3a' : '#f3f4f6'
+              e.currentTarget.style.backgroundColor = darkMode ? '#2a2a3a' : 'var(--surface-bg-2)'
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = 'transparent'
@@ -98,7 +98,7 @@ export default function HelpModal({ isOpen, onClose, darkMode }) {
         {/* Search */}
         <div style={{
           padding: '16px 24px',
-          borderBottom: `1px solid ${darkMode ? '#2a2a3a' : '#e5e7eb'}`
+          borderBottom: `1px solid ${darkMode ? '#2a2a3a' : 'var(--border-1)'}`
         }}>
           <div style={{
             position: 'relative',
@@ -110,7 +110,7 @@ export default function HelpModal({ isOpen, onClose, darkMode }) {
               style={{
                 position: 'absolute',
                 left: '12px',
-                color: darkMode ? '#9ca3af' : '#6b7280'
+                color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
               }}
             />
             <input
@@ -122,9 +122,9 @@ export default function HelpModal({ isOpen, onClose, darkMode }) {
                 width: '100%',
                 padding: '10px 12px 10px 40px',
                 borderRadius: '8px',
-                border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`,
-                backgroundColor: darkMode ? '#15151f' : '#f9fafb',
-                color: darkMode ? '#ffffff' : '#111827',
+                border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
+                backgroundColor: darkMode ? '#15151f' : 'var(--surface-bg-2)',
+                color: darkMode ? '#ffffff' : 'var(--text-1)',
                 fontSize: '14px',
                 outline: 'none'
               }}
@@ -142,7 +142,7 @@ export default function HelpModal({ isOpen, onClose, darkMode }) {
             <div style={{
               padding: '48px',
               textAlign: 'center',
-              color: darkMode ? '#9ca3af' : '#6b7280'
+              color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
             }}>
               {tSafe('help.noResults', 'No results found')}
             </div>
@@ -163,7 +163,7 @@ export default function HelpModal({ isOpen, onClose, darkMode }) {
                         padding: '16px',
                         textAlign: 'left',
                         backgroundColor: isOpen 
-                          ? (darkMode ? '#1f1f2e' : '#f3f4f6')
+                          ? (darkMode ? '#1f1f2e' : 'var(--surface-bg-2)')
                           : 'transparent',
                         border: 'none',
                         borderRadius: '8px',
@@ -171,7 +171,7 @@ export default function HelpModal({ isOpen, onClose, darkMode }) {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        color: darkMode ? '#ffffff' : '#111827',
+                        color: darkMode ? '#ffffff' : 'var(--text-1)',
                         fontSize: '16px',
                         fontWeight: '500',
                         transition: 'background-color 0.2s'
@@ -189,7 +189,7 @@ export default function HelpModal({ isOpen, onClose, darkMode }) {
                     {isOpen && (
                       <div style={{
                         padding: '0 16px 16px 16px',
-                        color: darkMode ? '#d1d5db' : '#6b7280',
+                        color: darkMode ? 'var(--border-1)' : 'var(--text-2)',
                         fontSize: '14px',
                         lineHeight: '1.6'
                       }}>
@@ -207,20 +207,20 @@ export default function HelpModal({ isOpen, onClose, darkMode }) {
                                 padding: '12px',
                                 backgroundColor: darkMode ? '#15151f' : '#ffffff',
                                 borderRadius: '8px',
-                                border: `1px solid ${darkMode ? '#2a2a3a' : '#e5e7eb'}`
+                                border: `1px solid ${darkMode ? '#2a2a3a' : 'var(--border-1)'}`
                               }}>
                                 <h4 style={{
                                   margin: '0 0 4px',
                                   fontSize: '14px',
                                   fontWeight: '600',
-                                  color: darkMode ? '#ffffff' : '#111827'
+                                  color: darkMode ? '#ffffff' : 'var(--text-1)'
                                 }}>
                                   {tSafe(field.title, field.title)}
                                 </h4>
                                 <p style={{
                                   margin: 0,
                                   fontSize: '13px',
-                                  color: darkMode ? '#9ca3af' : '#6b7280'
+                                  color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
                                 }}>
                                   {tSafe(field.long, field.long)}
                                 </p>

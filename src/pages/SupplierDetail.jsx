@@ -22,10 +22,10 @@ import { DataLoading, DataError } from '../components/dataStates'
 
 // Consistent with Suppliers.jsx type definitions
 const SUPPLIER_TYPES = {
-  manufacturer: { name: 'Fabricant', icon: Building2, color: '#1F5F63' },
-  trading: { name: 'Trading Company', icon: Package, color: '#1F5F63' },
-  agent: { name: 'Agent de Compres', icon: Users, color: '#1F5F63' },
-  freight: { name: 'Transitari', icon: Truck, color: '#1F5F63' }
+  manufacturer: { name: 'Fabricant', icon: Building2, color: 'var(--brand-1)' },
+  trading: { name: 'Trading Company', icon: Package, color: 'var(--brand-1)' },
+  agent: { name: 'Agent de Compres', icon: Users, color: 'var(--brand-1)' },
+  freight: { name: 'Transitari', icon: Truck, color: 'var(--brand-1)' }
 }
 
 const PO_STATUS_LABELS = {
@@ -42,14 +42,14 @@ const PO_STATUS_LABELS = {
 
 const PO_STATUS_COLORS = {
   draft: 'var(--text-2)',
-  sent: '#3b82f6',
-  confirmed: '#8b5cf6',
-  partial_paid: '#f59e0b',
-  paid: '#22c55e',
-  in_production: '#ec4899',
+  sent: 'var(--cta-1)',
+  confirmed: 'var(--brand-1)',
+  partial_paid: 'var(--warning-1)',
+  paid: 'var(--success-1)',
+  in_production: 'var(--coral-1)',
   shipped: 'var(--c-teal-300)',
-  received: '#10b981',
-  cancelled: 'var(--danger-1, #F26C6C)'
+  received: 'var(--success-1)',
+  cancelled: 'var(--danger-1, var(--coral-1))'
 }
 
 function StarRating({ rating }) {
@@ -59,8 +59,8 @@ function StarRating({ rating }) {
         <Star
           key={i}
           size={14}
-          fill={i <= rating ? '#f59e0b' : 'none'}
-          color={i <= rating ? '#f59e0b' : 'var(--border-1)'}
+          fill={i <= rating ? 'var(--warning-1)' : 'none'}
+          color={i <= rating ? 'var(--warning-1)' : 'var(--border-1)'}
         />
       ))}
     </div>

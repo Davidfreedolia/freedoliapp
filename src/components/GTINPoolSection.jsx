@@ -377,14 +377,14 @@ export default function GTINPoolSection({ darkMode }) {
         <div style={{ flex: 1 }}>
           <h2 style={{
             ...styles.title,
-            color: darkMode ? '#ffffff' : '#111827'
+            color: darkMode ? '#ffffff' : 'var(--text-1)'
           }}>
             <Barcode size={24} />
             GTIN Pool
           </h2>
           <p style={{
             ...styles.subtitle,
-            color: darkMode ? '#9ca3af' : '#6b7280'
+            color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
           }}>
             {t('settings.gtinPool.description')}
           </p>
@@ -406,33 +406,33 @@ export default function GTINPoolSection({ darkMode }) {
         <div style={{
           ...styles.statCard,
           backgroundColor: darkMode ? '#15151f' : '#ffffff',
-          borderColor: darkMode ? '#374151' : '#e5e7eb'
+          borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
         }}>
-          <Package size={20} color="#4f46e5" />
+          <Package size={20} color="var(--brand-1)" />
           <div>
-            <span style={{...styles.statValue, color: '#4f46e5'}}>{stats.total}</span>
+            <span style={{...styles.statValue, color: 'var(--brand-1)'}}>{stats.total}</span>
             <span style={styles.statLabel}>{t('common.total')}</span>
           </div>
         </div>
         <div style={{
           ...styles.statCard,
           backgroundColor: darkMode ? '#15151f' : '#ffffff',
-          borderColor: darkMode ? '#374151' : '#e5e7eb'
+          borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
         }}>
-          <CheckCircle2 size={20} color="#22c55e" />
+          <CheckCircle2 size={20} color="var(--success-1)" />
           <div>
-            <span style={{...styles.statValue, color: '#22c55e'}}>{stats.available}</span>
+            <span style={{...styles.statValue, color: 'var(--success-1)'}}>{stats.available}</span>
             <span style={styles.statLabel}>{t('settings.gtinPool.available')}</span>
           </div>
         </div>
         <div style={{
           ...styles.statCard,
           backgroundColor: darkMode ? '#15151f' : '#ffffff',
-          borderColor: darkMode ? '#374151' : '#e5e7eb'
+          borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
         }}>
-          <Package size={20} color="#f59e0b" />
+          <Package size={20} color="var(--warning-1)" />
           <div>
-            <span style={{...styles.statValue, color: '#f59e0b'}}>{stats.assigned}</span>
+            <span style={{...styles.statValue, color: 'var(--warning-1)'}}>{stats.assigned}</span>
             <span style={styles.statLabel}>{t('settings.gtinPool.assigned')}</span>
           </div>
         </div>
@@ -440,11 +440,11 @@ export default function GTINPoolSection({ darkMode }) {
           <div style={{
             ...styles.alertCard,
             backgroundColor: darkMode ? '#7f1d1d' : '#fef2f2',
-            borderColor: '#ef4444'
+            borderColor: 'var(--danger-1)'
           }}>
-            <AlertTriangle size={20} color="#ef4444" />
+            <AlertTriangle size={20} color="var(--danger-1)" />
             <div>
-              <span style={{...styles.alertText, color: '#ef4444'}}>
+              <span style={{...styles.alertText, color: 'var(--danger-1)'}}>
                 Només {stats.available} disponibles
               </span>
               <span style={styles.alertLabel}>Considera comprar més</span>
@@ -460,11 +460,11 @@ export default function GTINPoolSection({ darkMode }) {
       }}>
         <div style={{
           ...styles.searchContainer,
-          backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+          backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
           width: isMobile ? '100%' : 'auto',
           marginBottom: isMobile ? '12px' : '0'
         }}>
-          <Search size={18} color="#9ca3af" />
+          <Search size={18} color='var(--muted-1)' />
           <input
             type="text"
             placeholder={t('settings.gtinPool.searchPlaceholder')}
@@ -472,7 +472,7 @@ export default function GTINPoolSection({ darkMode }) {
             onChange={e => setSearchTerm(e.target.value)}
             style={{
               ...styles.searchInput,
-              color: darkMode ? '#ffffff' : '#111827'
+              color: darkMode ? '#ffffff' : 'var(--text-1)'
             }}
           />
         </div>
@@ -490,9 +490,9 @@ export default function GTINPoolSection({ darkMode }) {
               onClick={() => setStatusFilter(null)}
               style={{
                 ...styles.filterButton,
-                backgroundColor: statusFilter === null ? '#4f46e5' : (darkMode ? '#1f1f2e' : '#ffffff'),
-                color: statusFilter === null ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280'),
-                borderColor: statusFilter === null ? '#4f46e5' : 'var(--border-color)',
+                backgroundColor: statusFilter === null ? 'var(--brand-1)' : (darkMode ? '#1f1f2e' : '#ffffff'),
+                color: statusFilter === null ? '#ffffff' : (darkMode ? 'var(--muted-1)' : 'var(--text-2)'),
+                borderColor: statusFilter === null ? 'var(--brand-1)' : 'var(--border-color)',
                 flex: isMobile ? 1 : 'none'
               }}
             >
@@ -502,9 +502,9 @@ export default function GTINPoolSection({ darkMode }) {
               onClick={() => setStatusFilter('available')}
               style={{
                 ...styles.filterButton,
-                backgroundColor: statusFilter === 'available' ? '#22c55e' : (darkMode ? '#1f1f2e' : '#ffffff'),
-                color: statusFilter === 'available' ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280'),
-                borderColor: statusFilter === 'available' ? '#22c55e' : 'var(--border-color)',
+                backgroundColor: statusFilter === 'available' ? 'var(--success-1)' : (darkMode ? '#1f1f2e' : '#ffffff'),
+                color: statusFilter === 'available' ? '#ffffff' : (darkMode ? 'var(--muted-1)' : 'var(--text-2)'),
+                borderColor: statusFilter === 'available' ? 'var(--success-1)' : 'var(--border-color)',
                 flex: isMobile ? 1 : 'none'
               }}
             >
@@ -514,9 +514,9 @@ export default function GTINPoolSection({ darkMode }) {
               onClick={() => setStatusFilter('assigned')}
               style={{
                 ...styles.filterButton,
-                backgroundColor: statusFilter === 'assigned' ? '#f59e0b' : (darkMode ? '#1f1f2e' : '#ffffff'),
-                color: statusFilter === 'assigned' ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280'),
-                borderColor: statusFilter === 'assigned' ? '#f59e0b' : 'var(--border-color)',
+                backgroundColor: statusFilter === 'assigned' ? 'var(--warning-1)' : (darkMode ? '#1f1f2e' : '#ffffff'),
+                color: statusFilter === 'assigned' ? '#ffffff' : (darkMode ? 'var(--muted-1)' : 'var(--text-2)'),
+                borderColor: statusFilter === 'assigned' ? 'var(--warning-1)' : 'var(--border-color)',
                 flex: isMobile ? 1 : 'none'
               }}
             >
@@ -537,8 +537,8 @@ export default function GTINPoolSection({ darkMode }) {
           ...styles.empty,
           backgroundColor: darkMode ? '#15151f' : '#ffffff'
         }}>
-          <Barcode size={48} color="#9ca3af" />
-          <p style={{ color: '#6b7280' }}>
+          <Barcode size={48} color='var(--muted-1)' />
+          <p style={{ color: 'var(--text-2)' }}>
             {gtins.length === 0 
               ? 'No hi ha codis GTIN al pool. Importa\'n alguns per començar.'
               : 'No hi ha codis que coincideixin amb els filtres.'
@@ -554,14 +554,14 @@ export default function GTINPoolSection({ darkMode }) {
               style={{
                 ...styles.gtinCard,
                 backgroundColor: darkMode ? '#15151f' : '#ffffff',
-                borderColor: darkMode ? '#374151' : '#e5e7eb'
+                borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
               }}
             >
               <div style={styles.cardHeader}>
                 <div>
                   <div style={{
                     ...styles.cardGtinCode,
-                    color: darkMode ? '#ffffff' : '#111827'
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}>
                     {gtin.gtin_code || 'GTIN_EXEMPT'}
                   </div>
@@ -569,14 +569,14 @@ export default function GTINPoolSection({ darkMode }) {
                     <span style={{
                       ...styles.badge,
                       backgroundColor: gtin.gtin_type === 'EAN' ? '#4f46e515' : '#f59e0b15',
-                      color: gtin.gtin_type === 'EAN' ? '#4f46e5' : '#f59e0b'
+                      color: gtin.gtin_type === 'EAN' ? 'var(--brand-1)' : 'var(--warning-1)'
                     }}>
                       {gtin.gtin_type}
                     </span>
                     <span style={{
                       ...styles.badge,
                       backgroundColor: gtin.status === 'available' ? '#22c55e15' : '#f59e0b15',
-                      color: gtin.status === 'available' ? '#22c55e' : '#f59e0b'
+                      color: gtin.status === 'available' ? 'var(--success-1)' : 'var(--warning-1)'
                     }}>
                       {gtin.status === 'available' ? t('settings.gtinPool.statusAvailable') : t('settings.gtinPool.statusAssigned')}
                     </span>
@@ -596,7 +596,7 @@ export default function GTINPoolSection({ darkMode }) {
                     }}
                     style={{
                       ...styles.projectLink,
-                      color: '#4f46e5'
+                      color: 'var(--brand-1)'
                     }}
                   >
                     {gtin.projects.name}
@@ -609,7 +609,7 @@ export default function GTINPoolSection({ darkMode }) {
               {gtin.notes && (
                 <div style={styles.cardRow}>
                   <span style={styles.cardLabel}>{t('settings.gtinPool.notes')}:</span>
-                  <span style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>{gtin.notes}</span>
+                  <span style={{ color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>{gtin.notes}</span>
                 </div>
               )}
               
@@ -620,7 +620,7 @@ export default function GTINPoolSection({ darkMode }) {
                     display: 'flex',
                     alignItems: 'center',
                     gap: '6px',
-                    color: '#6b7280',
+                    color: 'var(--text-2)',
                     fontSize: '12px'
                   }} title="Assignat: bloquejat">
                     <Lock size={14} />
@@ -630,7 +630,7 @@ export default function GTINPoolSection({ darkMode }) {
                   // Available: show delete button
                   <button
                     onClick={() => handleDeleteGtin(gtin.id)}
-                    style={{...styles.actionButton, color: '#ef4444'}}
+                    style={{...styles.actionButton, color: 'var(--danger-1)'}}
                     title="Eliminar GTIN"
                   >
                     <Trash2 size={14} />
@@ -649,13 +649,13 @@ export default function GTINPoolSection({ darkMode }) {
         }}>
           <table style={styles.table}>
             <thead>
-              <tr style={{ backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb' }}>
-                <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>{t('settings.gtinPool.code')}</th>
-                <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>{t('settings.gtinPool.type')}</th>
-                <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>{t('settings.gtinPool.status')}</th>
-                <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>{t('settings.gtinPool.assignedProject')}</th>
-                <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>{t('settings.gtinPool.notes')}</th>
-                <th style={{...styles.th, color: darkMode ? '#9ca3af' : '#6b7280'}}>{t('common.actions')}</th>
+              <tr style={{ backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)' }}>
+                <th style={{...styles.th, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'}}>{t('settings.gtinPool.code')}</th>
+                <th style={{...styles.th, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'}}>{t('settings.gtinPool.type')}</th>
+                <th style={{...styles.th, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'}}>{t('settings.gtinPool.status')}</th>
+                <th style={{...styles.th, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'}}>{t('settings.gtinPool.assignedProject')}</th>
+                <th style={{...styles.th, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'}}>{t('settings.gtinPool.notes')}</th>
+                <th style={{...styles.th, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'}}>{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -665,7 +665,7 @@ export default function GTINPoolSection({ darkMode }) {
                     ...styles.td,
                     fontFamily: 'monospace',
                     fontWeight: '600',
-                    color: darkMode ? '#ffffff' : '#111827'
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}>
                     {gtin.gtin_code || 'GTIN_EXEMPT'}
                   </td>
@@ -673,7 +673,7 @@ export default function GTINPoolSection({ darkMode }) {
                     <span style={{
                       ...styles.badge,
                       backgroundColor: gtin.gtin_type === 'EAN' ? '#4f46e515' : '#f59e0b15',
-                      color: gtin.gtin_type === 'EAN' ? '#4f46e5' : '#f59e0b'
+                      color: gtin.gtin_type === 'EAN' ? 'var(--brand-1)' : 'var(--warning-1)'
                     }}>
                       {gtin.gtin_type}
                     </span>
@@ -682,7 +682,7 @@ export default function GTINPoolSection({ darkMode }) {
                     <span style={{
                       ...styles.badge,
                       backgroundColor: gtin.status === 'available' ? '#22c55e15' : '#f59e0b15',
-                      color: gtin.status === 'available' ? '#22c55e' : '#f59e0b'
+                      color: gtin.status === 'available' ? 'var(--success-1)' : 'var(--warning-1)'
                     }}>
                       {gtin.status === 'available' ? t('settings.gtinPool.statusAvailable') : t('settings.gtinPool.statusAssigned')}
                     </span>
@@ -698,7 +698,7 @@ export default function GTINPoolSection({ darkMode }) {
                         }}
                         style={{
                           ...styles.projectLink,
-                          color: '#4f46e5'
+                          color: 'var(--brand-1)'
                         }}
                       >
                         {gtin.projects.name}
@@ -706,10 +706,10 @@ export default function GTINPoolSection({ darkMode }) {
                         <ExternalLink size={12} style={{ marginLeft: '4px', verticalAlign: 'middle' }} />
                       </a>
                     ) : (
-                      <span style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>-</span>
+                      <span style={{ color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>-</span>
                     )}
                   </td>
-                  <td style={{...styles.td, color: darkMode ? '#9ca3af' : '#6b7280'}}>
+                  <td style={{...styles.td, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'}}>
                     {gtin.notes || '-'}
                   </td>
                   <td style={styles.td}>
@@ -720,7 +720,7 @@ export default function GTINPoolSection({ darkMode }) {
                           display: 'flex',
                           alignItems: 'center',
                           gap: '6px',
-                          color: '#6b7280',
+                          color: 'var(--text-2)',
                           fontSize: '12px',
                           padding: '6px 12px'
                         }} title="Assignat: bloquejat">
@@ -731,7 +731,7 @@ export default function GTINPoolSection({ darkMode }) {
                         // Available: show delete button
                         <button
                           onClick={() => handleDeleteGtin(gtin.id)}
-                          style={{...styles.actionButton, color: '#ef4444'}}
+                          style={{...styles.actionButton, color: 'var(--danger-1)'}}
                           title="Eliminar GTIN"
                         >
                           <Trash2 size={14} />
@@ -759,7 +759,7 @@ export default function GTINPoolSection({ darkMode }) {
             <div style={styles.modalHeader}>
               <h3 style={{
                 ...styles.modalTitle,
-                color: darkMode ? '#ffffff' : '#111827'
+                color: darkMode ? '#ffffff' : 'var(--text-1)'
               }}>
                 <FileSpreadsheet size={20} />
                 {t('settings.gtinPool.importFromExcel')}
@@ -780,7 +780,7 @@ export default function GTINPoolSection({ darkMode }) {
                 <div>
                   <p style={{
                     ...styles.helpText,
-                    color: darkMode ? '#9ca3af' : '#6b7280',
+                    color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
                     marginBottom: '16px'
                   }}>
                     Formats acceptats:<br />
@@ -796,7 +796,7 @@ export default function GTINPoolSection({ darkMode }) {
                       012345678905,8437012345678,SKU-001,FNSKU-001<br />
                       ,8437012345679,SKU-002,
                     </code>
-                    <small style={{ display: 'block', marginTop: '8px', color: darkMode ? '#6b7280' : '#9ca3af' }}>
+                    <small style={{ display: 'block', marginTop: '8px', color: darkMode ? 'var(--text-2)' : 'var(--muted-1)' }}>
                       EAN i UPC poden estar a la mateixa fila. Les columnes SKU/FNSKU s'ignoren (només s'importen els GTINs al pool).
                     </small>
                   </p>
@@ -804,12 +804,12 @@ export default function GTINPoolSection({ darkMode }) {
                     onClick={() => fileInputRef.current?.click()}
                     style={{
                       ...styles.uploadZone,
-                      borderColor: darkMode ? '#374151' : '#d1d5db',
-                      backgroundColor: darkMode ? '#15151f' : '#f9fafb'
+                      borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)',
+                      backgroundColor: darkMode ? '#15151f' : 'var(--surface-bg-2)'
                     }}
                   >
-                    <Upload size={32} color="#9ca3af" />
-                    <p style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
+                    <Upload size={32} color='var(--muted-1)' />
+                    <p style={{ color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
                       {t('settings.gtinPool.clickToSelectFile')}
                     </p>
                     <input
@@ -825,22 +825,22 @@ export default function GTINPoolSection({ darkMode }) {
                 <div>
                   <div style={styles.previewStats}>
                     <div style={styles.previewStat}>
-                      <CheckCircle2 size={20} color="#22c55e" />
+                      <CheckCircle2 size={20} color="var(--success-1)" />
                       <span>{importPreview.valid} {t('settings.gtinPool.valid')}</span>
                     </div>
                     <div style={styles.previewStat}>
-                      <AlertTriangle size={20} color="#ef4444" />
+                      <AlertTriangle size={20} color="var(--danger-1)" />
                       <span>{importPreview.invalid} {t('settings.gtinPool.invalid')}</span>
                     </div>
                     {importPreview.duplicates.length > 0 && (
                       <div style={styles.previewStat}>
-                        <AlertTriangle size={20} color="#f59e0b" />
+                        <AlertTriangle size={20} color="var(--warning-1)" />
                         <span>{importPreview.duplicates.length} {t('settings.gtinPool.duplicatesInFile')}</span>
                       </div>
                     )}
                     {importPreview.conflicts.length > 0 && (
                       <div style={styles.previewStat}>
-                        <AlertTriangle size={20} color="#ef4444" />
+                        <AlertTriangle size={20} color="var(--danger-1)" />
                         <span>{importPreview.conflicts.length} {t('settings.gtinPool.alreadyExist')}</span>
                       </div>
                     )}
@@ -863,12 +863,12 @@ export default function GTINPoolSection({ darkMode }) {
                             <td style={styles.td}>{row.gtin_code}</td>
                             <td style={styles.td}>{row.gtin_type}</td>
                             <td style={styles.td}>
-                              {!row.valid && <span style={{ color: '#ef4444' }}>{t('settings.gtinPool.invalid')}</span>}
+                              {!row.valid && <span style={{ color: 'var(--danger-1)' }}>{t('settings.gtinPool.invalid')}</span>}
                               {importPreview.conflicts.includes(row.gtin_code) && (
-                                <span style={{ color: '#f59e0b' }}>{t('settings.gtinPool.alreadyExist')}</span>
+                                <span style={{ color: 'var(--warning-1)' }}>{t('settings.gtinPool.alreadyExist')}</span>
                               )}
                               {row.valid && !importPreview.conflicts.includes(row.gtin_code) && (
-                                <span style={{ color: '#22c55e' }}>✓ {t('settings.gtinPool.valid')}</span>
+                                <span style={{ color: 'var(--success-1)' }}>✓ {t('settings.gtinPool.valid')}</span>
                               )}
                             </td>
                           </tr>
@@ -876,7 +876,7 @@ export default function GTINPoolSection({ darkMode }) {
                       </tbody>
                     </table>
                     {importPreview.rows.length > 20 && (
-                      <p style={{ color: '#6b7280', fontSize: '12px', marginTop: '8px' }}>
+                      <p style={{ color: 'var(--text-2)', fontSize: '12px', marginTop: '8px' }}>
                         ... {t('common.and')} {importPreview.rows.length - 20} {t('common.more')}
                       </p>
                     )}
@@ -957,7 +957,7 @@ const styles = {
     alignItems: 'center',
     gap: '8px',
     padding: '12px 24px',
-    backgroundColor: '#4f46e5',
+    backgroundColor: 'var(--brand-1)',
     color: '#ffffff',
     border: 'none',
     borderRadius: '10px',
@@ -988,7 +988,7 @@ const styles = {
   },
   statLabel: {
     fontSize: '12px',
-    color: '#6b7280'
+    color: 'var(--text-2)'
   },
   alertCard: {
     display: 'flex',
@@ -1005,7 +1005,7 @@ const styles = {
   },
   alertLabel: {
     fontSize: '12px',
-    color: '#6b7280'
+    color: 'var(--text-2)'
   },
   toolbar: {
     display: 'flex',
@@ -1064,12 +1064,12 @@ const styles = {
     border: '1px solid var(--border-color)',
     borderRadius: '10px',
     cursor: 'pointer',
-    color: '#6b7280'
+    color: 'var(--text-2)'
   },
   loading: {
     padding: '64px',
     textAlign: 'center',
-    color: '#6b7280'
+    color: 'var(--text-2)'
   },
   empty: {
     padding: '64px',
@@ -1104,7 +1104,7 @@ const styles = {
   td: {
     padding: '12px',
     fontSize: '14px',
-    color: '#6b7280'
+    color: 'var(--text-2)'
   },
   badge: {
     padding: '4px 10px',
@@ -1119,7 +1119,7 @@ const styles = {
     borderRadius: '6px',
     fontSize: '12px',
     cursor: 'pointer',
-    color: '#ef4444'
+    color: 'var(--danger-1)'
   },
   modalOverlay: {
     position: 'fixed',
@@ -1163,7 +1163,7 @@ const styles = {
     background: 'none',
     border: 'none',
     cursor: 'pointer',
-    color: '#6b7280',
+    color: 'var(--text-2)',
     padding: '4px'
   },
   modalBody: {
@@ -1219,7 +1219,7 @@ const styles = {
   cancelButton: {
     padding: '10px 20px',
     backgroundColor: 'transparent',
-    color: '#6b7280',
+    color: 'var(--text-2)',
     border: '1px solid var(--border-color)',
     borderRadius: '8px',
     fontSize: '14px',
@@ -1227,7 +1227,7 @@ const styles = {
   },
   confirmButton: {
     padding: '10px 20px',
-    backgroundColor: '#4f46e5',
+    backgroundColor: 'var(--brand-1)',
     color: '#ffffff',
     border: 'none',
     borderRadius: '8px',
@@ -1273,7 +1273,7 @@ const styles = {
   cardLabel: {
     fontSize: '12px',
     fontWeight: '500',
-    color: '#6b7280',
+    color: 'var(--text-2)',
     textTransform: 'uppercase'
   },
   cardActions: {

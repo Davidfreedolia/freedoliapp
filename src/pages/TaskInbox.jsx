@@ -16,11 +16,11 @@ import { ca } from 'date-fns/locale'
 
 // Paleta corporativa
 const C = {
-  petrol:     '#1F5F63',
-  turquesa:   '#6ECBC3',
+  petrol:     'var(--brand-1)',
+  turquesa:   'var(--brand-2)',
   turqHover:  '#4FBFB7',
   offwhite:   '#F6F8F3',
-  coral:      '#F26C6C',
+  coral:      'var(--coral-1)',
   muted:      '#8A9FAF',
   border:     '#E2EAE8',
   borderDark: '#2A3F42',

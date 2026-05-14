@@ -57,7 +57,7 @@ export default function PhaseContent({
         <div style={{
           width: 44, height: 44, borderRadius: 10,
           background: 'var(--accent-bg, #3b82f622)',
-          color: 'var(--accent-primary, #3b82f6)',
+          color: 'var(--accent-primary, var(--cta-1))',
           display: 'flex', alignItems: 'center', justifyContent: 'center'
         }}>
           <Icon size={22} />
@@ -92,7 +92,7 @@ export default function PhaseContent({
           display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap'
         }}>
           {!allRequiredChecked && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--warning, #d97706)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--warning, var(--warning-1))' }}>
               <AlertCircle size={14} />
               {t('phaseContent.requiredChecksWarning')}
             </div>
@@ -105,7 +105,7 @@ export default function PhaseContent({
               marginLeft: 'auto',
               display: 'inline-flex', alignItems: 'center', gap: 8,
               padding: '12px 18px',
-              background: allRequiredChecked ? 'var(--accent-primary, #3b82f6)' : 'var(--surface-bg-2)',
+              background: allRequiredChecked ? 'var(--accent-primary, var(--cta-1))' : 'var(--surface-bg-2)',
               color: allRequiredChecked ? '#fff' : 'var(--text-2)',
               border: 'none', borderRadius: 10,
               fontSize: 14, fontWeight: 600,
@@ -155,7 +155,7 @@ function Check({ id, checks, setCheck, label, required = true, t }) {
     <label style={{
       display: 'flex', alignItems: 'center', gap: 10,
       padding: '10px 12px',
-      border: `1.5px solid ${checked ? 'var(--success, #10b981)' : 'var(--border-1)'}`,
+      border: `1.5px solid ${checked ? 'var(--success, var(--success-1))' : 'var(--border-1)'}`,
       borderRadius: 8,
       background: checked ? 'var(--success-bg, #10b98111)' : 'var(--surface-bg-2)',
       cursor: 'pointer', fontSize: 13, color: 'var(--text-1)',
@@ -164,7 +164,7 @@ function Check({ id, checks, setCheck, label, required = true, t }) {
       <input
         type="checkbox" checked={checked}
         onChange={(e) => setCheck(id, e.target.checked)}
-        style={{ width: 16, height: 16, accentColor: 'var(--success, #10b981)' }}
+        style={{ width: 16, height: 16, accentColor: 'var(--success, var(--success-1))' }}
       />
       <span>{label}</span>
       {required && <span style={{ fontSize: 10, color: 'var(--text-2)', marginLeft: 'auto' }}>{t ? t('phaseContent.required') : 'REQUIRED'}</span>}
@@ -420,9 +420,9 @@ function ResearchForm({ project, checks, setCheck, onUpdateProject, onOpenResear
         style={{
           display: 'inline-flex', alignItems: 'center', gap: 8,
           padding: '10px 14px',
-          border: '1.5px solid var(--accent-primary, #3b82f6)',
+          border: '1.5px solid var(--accent-primary, var(--cta-1))',
           background: 'var(--accent-bg, #3b82f622)',
-          color: 'var(--accent-primary, #3b82f6)',
+          color: 'var(--accent-primary, var(--cta-1))',
           borderRadius: 10, fontSize: 14, fontWeight: 600,
           cursor: 'pointer', alignSelf: 'flex-start'
         }}
@@ -456,7 +456,7 @@ function ViabilityForm({ project, checks, setCheck, onUpdateProject, t }) {
               onClick={() => onUpdateProject({ decision: opt })}
               style={{
                 padding: '12px 10px', borderRadius: 10,
-                border: `1.5px solid ${active ? 'var(--accent-primary, #3b82f6)' : 'var(--border-1)'}`,
+                border: `1.5px solid ${active ? 'var(--accent-primary, var(--cta-1))' : 'var(--border-1)'}`,
                 background: active ? 'var(--accent-bg, #3b82f622)' : 'var(--surface-bg-2)',
                 color: 'var(--text-1)', fontSize: 14, fontWeight: 600, cursor: 'pointer'
               }}
@@ -510,7 +510,7 @@ function SuppliersForm({ project, checks, setCheck, onUpdateProject, darkMode, t
         <span>{t('phaseContent.suppliers.manageFrom')}</span>
         <a
           href="/suppliers"
-          style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, color: 'var(--accent-primary, #3b82f6)', fontWeight: 600, textDecoration: 'none' }}
+          style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, color: 'var(--accent-primary, var(--cta-1))', fontWeight: 600, textDecoration: 'none' }}
         >
           {t('phaseContent.suppliers.open')} <ExternalLink size={14} />
         </a>
@@ -763,10 +763,10 @@ function LiveForm({ project, t }) {
       </div>
       <div style={{
         marginTop: 8, padding: 14,
-        border: '1.5px solid var(--accent-primary, #3b82f6)',
+        border: '1.5px solid var(--accent-primary, var(--cta-1))',
         background: 'var(--accent-bg, #3b82f622)',
         borderRadius: 10, display: 'flex', alignItems: 'center', gap: 10,
-        color: 'var(--accent-primary, #3b82f6)', fontSize: 13, fontWeight: 600
+        color: 'var(--accent-primary, var(--cta-1))', fontSize: 13, fontWeight: 600
       }}>
         <Rocket size={16} />
         {t('phaseContent.live.tracking')}

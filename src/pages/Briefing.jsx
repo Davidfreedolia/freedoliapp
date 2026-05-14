@@ -320,7 +320,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
           backgroundColor: darkMode ? '#15151f' : '#ffffff'
         }}>
           <div style={styles.sectionHeader}>
-            <h2 style={{ ...styles.sectionTitle, color: darkMode ? '#ffffff' : '#111827' }}>
+            <h2 style={{ ...styles.sectionTitle, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
               FREEDOLIA — TECHNICAL SHEET FOR THE PRODUCT
             </h2>
             <span style={styles.skuBadge}>{project?.sku || 'FRDL-XXXXXX'}</span>
@@ -333,7 +333,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
                 type="text"
                 value={briefing.po_ref}
                 onChange={e => setBriefing({...briefing, po_ref: e.target.value})}
-                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}}
               />
             </div>
             <div style={styles.formGroup}>
@@ -342,7 +342,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
                 type="date"
                 value={briefing.date}
                 onChange={e => setBriefing({...briefing, date: e.target.value})}
-                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}}
               />
             </div>
             <div style={styles.formGroup}>
@@ -351,7 +351,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
                 type="text"
                 value={briefing.quote_ref}
                 onChange={e => setBriefing({...briefing, quote_ref: e.target.value})}
-                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}}
               />
             </div>
           </div>
@@ -362,7 +362,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
           ...styles.section,
           backgroundColor: darkMode ? '#15151f' : '#ffffff'
         }}>
-          <h3 style={{...styles.sectionSubtitle, color: darkMode ? '#ffffff' : '#111827'}}>
+          <h3 style={{...styles.sectionSubtitle, color: darkMode ? '#ffffff' : 'var(--text-1)'}}>
             <Package size={18} /> PRODUCT DESCRIPTION / DESCRIPCIÓ DEL PRODUCTE
           </h3>
 
@@ -374,7 +374,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
                 value={briefing.product_name}
                 onChange={e => setBriefing({...briefing, product_name: e.target.value})}
                 placeholder="Ex: Velvet Hangers Set (20 Velvet Hangers + 20 Black Clips)"
-                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}}
               />
             </div>
             <div style={styles.formGroup}>
@@ -384,7 +384,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
                 value={briefing.model_number}
                 onChange={e => setBriefing({...briefing, model_number: e.target.value})}
                 placeholder="Ex: FREEDOLIA – VH20+CL20"
-                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}}
               />
             </div>
             <div style={styles.formGroup}>
@@ -394,7 +394,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
                 value={briefing.main_material}
                 onChange={e => setBriefing({...briefing, main_material: e.target.value})}
                 placeholder="Ex: Velvet-coated plastic hangers"
-                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}}
               />
             </div>
             <div style={styles.formGroup}>
@@ -404,7 +404,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
                 value={briefing.clips_material}
                 onChange={e => setBriefing({...briefing, clips_material: e.target.value})}
                 placeholder="Ex: Velvet-coated plastic"
-                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}}
               />
             </div>
             <div style={styles.formGroup}>
@@ -414,7 +414,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
                 value={briefing.hook_type}
                 onChange={e => setBriefing({...briefing, hook_type: e.target.value})}
                 placeholder="Ex: Silver metal hook"
-                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}}
               />
             </div>
             <div style={styles.formGroup}>
@@ -424,7 +424,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
                 value={briefing.color}
                 onChange={e => setBriefing({...briefing, color: e.target.value})}
                 placeholder="Ex: Black / Negre"
-                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}}
               />
             </div>
             <div style={styles.formGroup}>
@@ -434,7 +434,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
                 onChange={e => setBriefing({...briefing, product_dimensions: e.target.value})}
                 placeholder="Hanger size: 45 x 0.5 x 24 cm&#10;Clip size: 5.4 x 2 x 2.5 cm"
                 rows={2}
-                style={{...styles.input, ...styles.textarea, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                style={{...styles.input, ...styles.textarea, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}}
               />
             </div>
             <div style={styles.formGroup}>
@@ -444,7 +444,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
                 value={briefing.net_weight_per_set}
                 onChange={e => setBriefing({...briefing, net_weight_per_set: e.target.value})}
                 placeholder="Ex: Approx. 1.7 kg"
-                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}}
               />
             </div>
           </div>
@@ -455,7 +455,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
           ...styles.section,
           backgroundColor: darkMode ? '#15151f' : '#ffffff'
         }}>
-          <h3 style={{...styles.sectionSubtitle, color: darkMode ? '#ffffff' : '#111827'}}>
+          <h3 style={{...styles.sectionSubtitle, color: darkMode ? '#ffffff' : 'var(--text-1)'}}>
             <Package size={18} /> PACKAGING SIZE / MIDA DE L'EMBALATGE
           </h3>
 
@@ -467,7 +467,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
                 onChange={e => setBriefing({...briefing, individual_packaging: e.target.value})}
                 placeholder="Ex: Customized brown cardboard box"
                 rows={2}
-                style={{...styles.input, ...styles.textarea, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                style={{...styles.input, ...styles.textarea, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}}
               />
             </div>
             <div style={styles.formGroup}>
@@ -477,7 +477,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
                 value={briefing.packaging_size}
                 onChange={e => setBriefing({...briefing, packaging_size: e.target.value})}
                 placeholder="Ex: 43 x 34 x 7.5 cm"
-                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}}
               />
             </div>
             <div style={styles.formGroup}>
@@ -487,13 +487,13 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
                 onChange={e => setBriefing({...briefing, units_per_set: e.target.value})}
                 placeholder="Ex: 20 hangers + 20 clips + A6 printed cards"
                 rows={2}
-                style={{...styles.input, ...styles.textarea, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                style={{...styles.input, ...styles.textarea, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}}
               />
             </div>
           </div>
 
           {/* Carton Info */}
-          <h4 style={{...styles.subsectionTitle, color: darkMode ? '#9ca3af' : '#6b7280'}}>Carton Info / Informació de caixes</h4>
+          <h4 style={{...styles.subsectionTitle, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'}}>Carton Info / Informació de caixes</h4>
           <div style={styles.formGrid4}>
             <div style={styles.formGroup}>
               <label style={styles.label}>Total Sets</label>
@@ -502,7 +502,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
                 value={briefing.total_sets}
                 onChange={e => setBriefing({...briefing, total_sets: e.target.value})}
                 placeholder="Ex: 200 sets"
-                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}}
               />
             </div>
             <div style={styles.formGroup}>
@@ -512,7 +512,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
                 value={briefing.total_cartons}
                 onChange={e => setBriefing({...briefing, total_cartons: e.target.value})}
                 placeholder="Ex: 40 cartons"
-                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}}
               />
             </div>
             <div style={styles.formGroup}>
@@ -522,7 +522,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
                 value={briefing.sets_per_carton}
                 onChange={e => setBriefing({...briefing, sets_per_carton: e.target.value})}
                 placeholder="Ex: 5 sets per carton"
-                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}}
               />
             </div>
             <div style={styles.formGroup}>
@@ -532,7 +532,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
                 value={briefing.carton_dimensions}
                 onChange={e => setBriefing({...briefing, carton_dimensions: e.target.value})}
                 placeholder="Ex: 50 x 40 x 30 cm"
-                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}}
               />
             </div>
           </div>
@@ -543,7 +543,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
           ...styles.section,
           backgroundColor: darkMode ? '#15151f' : '#ffffff'
         }}>
-          <h3 style={{...styles.sectionSubtitle, color: darkMode ? '#ffffff' : '#111827'}}>
+          <h3 style={{...styles.sectionSubtitle, color: darkMode ? '#ffffff' : 'var(--text-1)'}}>
             <CheckCircle size={18} /> QUALITY REQUIREMENTS / REQUISITS DE QUALITAT
           </h3>
 
@@ -554,7 +554,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
                 value={briefing.quality_standards}
                 onChange={e => setBriefing({...briefing, quality_standards: e.target.value})}
                 rows={5}
-                style={{...styles.input, ...styles.textarea, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                style={{...styles.input, ...styles.textarea, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}}
               />
             </div>
             <div style={styles.formGroup}>
@@ -563,7 +563,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
                 value={briefing.labeling_requirements}
                 onChange={e => setBriefing({...briefing, labeling_requirements: e.target.value})}
                 rows={5}
-                style={{...styles.input, ...styles.textarea, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                style={{...styles.input, ...styles.textarea, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}}
               />
             </div>
           </div>
@@ -574,7 +574,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
           ...styles.section,
           backgroundColor: darkMode ? '#15151f' : '#ffffff'
         }}>
-          <h3 style={{...styles.sectionSubtitle, color: darkMode ? '#ffffff' : '#111827'}}>
+          <h3 style={{...styles.sectionSubtitle, color: darkMode ? '#ffffff' : 'var(--text-1)'}}>
             <Truck size={18} /> LOGISTICS & DELIVERY / LOGÍSTICA I ENTREGA
           </h3>
 
@@ -586,7 +586,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
                 value={briefing.delivery_address}
                 onChange={e => setBriefing({...briefing, delivery_address: e.target.value})}
                 placeholder="Ex: Wingspeed Logistics – Dongguan, China"
-                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}}
               />
             </div>
             <div style={styles.formGroup}>
@@ -596,7 +596,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
                 value={briefing.shipping_mark}
                 onChange={e => setBriefing({...briefing, shipping_mark: e.target.value})}
                 placeholder="Ex: FREEDOLIA – Attn: Vivi Wu"
-                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}}
               />
             </div>
             <div style={{...styles.formGroup, gridColumn: 'span 2'}}>
@@ -605,7 +605,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
                 value={briefing.important_notes}
                 onChange={e => setBriefing({...briefing, important_notes: e.target.value})}
                 rows={2}
-                style={{...styles.input, ...styles.textarea, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                style={{...styles.input, ...styles.textarea, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}}
               />
             </div>
           </div>
@@ -616,7 +616,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
           ...styles.section,
           backgroundColor: darkMode ? '#15151f' : '#ffffff'
         }}>
-          <h3 style={{...styles.sectionSubtitle, color: darkMode ? '#ffffff' : '#111827'}}>
+          <h3 style={{...styles.sectionSubtitle, color: darkMode ? '#ffffff' : 'var(--text-1)'}}>
             <AlertTriangle size={18} /> PRODUCT QUALITY SPECIFICATIONS / ESPECIFICACIONS DE QUALITAT
           </h3>
 
@@ -627,7 +627,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
                 value={briefing.quality_specs_en}
                 onChange={e => setBriefing({...briefing, quality_specs_en: e.target.value})}
                 rows={8}
-                style={{...styles.input, ...styles.textarea, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                style={{...styles.input, ...styles.textarea, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}}
               />
             </div>
             <div style={styles.formGroup}>
@@ -636,7 +636,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
                 value={briefing.quality_specs_ca}
                 onChange={e => setBriefing({...briefing, quality_specs_ca: e.target.value})}
                 rows={8}
-                style={{...styles.input, ...styles.textarea, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}
+                style={{...styles.input, ...styles.textarea, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}}
               />
             </div>
           </div>
@@ -647,7 +647,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
           ...styles.section,
           backgroundColor: darkMode ? '#15151f' : '#ffffff'
         }}>
-          <h3 style={{...styles.sectionSubtitle, color: darkMode ? '#ffffff' : '#111827'}}>
+          <h3 style={{...styles.sectionSubtitle, color: darkMode ? '#ffffff' : 'var(--text-1)'}}>
             <ImageIcon size={18} /> PRODUCT IMAGES / IMATGES DEL PRODUCTE
           </h3>
 
@@ -659,15 +659,15 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
             onClick={() => fileInputRef.current?.click()}
             style={{
               ...styles.dropZone,
-              borderColor: dragOver ? '#4f46e5' : (darkMode ? '#374151' : '#d1d5db'),
+              borderColor: dragOver ? 'var(--brand-1)' : (darkMode ? 'var(--text-1)' : 'var(--border-1)'),
               backgroundColor: dragOver ? (darkMode ? '#1f1f2e' : '#eef2ff') : 'transparent'
             }}
           >
-            <Upload size={32} color={dragOver ? '#4f46e5' : '#9ca3af'} />
-            <p style={{ margin: '8px 0 0', color: darkMode ? '#9ca3af' : '#6b7280' }}>
+            <Upload size={32} color={dragOver ? 'var(--brand-1)' : 'var(--muted-1)'} />
+            <p style={{ margin: '8px 0 0', color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
               Arrossega imatges aquí o clica per seleccionar
             </p>
-            <span style={{ fontSize: '12px', color: '#9ca3af' }}>PNG, JPG fins a 5MB</span>
+            <span style={{ fontSize: '12px', color: 'var(--muted-1)' }}>PNG, JPG fins a 5MB</span>
             <input
               ref={fileInputRef}
               type="file"
@@ -684,7 +684,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
               {briefing.images.map((img, index) => (
                 <div key={img.id} style={{
                   ...styles.imageCard,
-                  backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
+                  backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)'
                 }}>
                   <div style={styles.imagePreview}>
                     <img 
@@ -709,7 +709,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
                     style={{
                       ...styles.imageTitleInput,
                       backgroundColor: darkMode ? '#15151f' : '#ffffff',
-                      color: darkMode ? '#ffffff' : '#111827'
+                      color: darkMode ? '#ffffff' : 'var(--text-1)'
                     }}
                   />
                 </div>
@@ -725,7 +725,7 @@ En cas que no es realitzi una comanda posterior, totes les unitats defectuoses s
 const styles = {
   container: { flex: 1, display: 'flex', flexDirection: 'column' },
   content: { padding: '32px', overflowY: 'auto', maxWidth: '1200px', margin: '0 auto', width: '100%' },
-  loading: { padding: '64px', textAlign: 'center', color: '#6b7280' },
+  loading: { padding: '64px', textAlign: 'center', color: 'var(--text-2)' },
   toolbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' },
   toolbarRight: { display: 'inline-flex', gap: '12px', flexWrap: 'nowrap' },
   backButton: { minWidth: '120px' },
@@ -736,12 +736,12 @@ const styles = {
   sectionTitle: { margin: 0, fontSize: '16px', fontWeight: '600' },
   sectionSubtitle: { margin: '0 0 16px', fontSize: '14px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' },
   subsectionTitle: { margin: '20px 0 12px', fontSize: '13px', fontWeight: '500' },
-  skuBadge: { padding: '6px 12px', backgroundColor: '#4f46e515', color: '#4f46e5', borderRadius: '6px', fontSize: '13px', fontWeight: '600' },
+  skuBadge: { padding: '6px 12px', backgroundColor: '#4f46e515', color: 'var(--brand-1)', borderRadius: '6px', fontSize: '13px', fontWeight: '600' },
   formGrid2: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' },
   formGrid3: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' },
   formGrid4: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' },
   formGroup: { display: 'flex', flexDirection: 'column', gap: '6px' },
-  label: { fontSize: '12px', fontWeight: '500', color: '#6b7280' },
+  label: { fontSize: '12px', fontWeight: '500', color: 'var(--text-2)' },
   input: { padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '14px', outline: 'none' },
   textarea: { resize: 'vertical', minHeight: '60px', fontFamily: 'inherit' },
   dropZone: { padding: '40px', border: '2px dashed', borderRadius: '12px', textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s ease' },

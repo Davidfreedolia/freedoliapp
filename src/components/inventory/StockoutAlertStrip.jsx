@@ -10,7 +10,7 @@ import { supabase } from '../../lib/supabase'
 import { getStockoutAlerts } from '../../lib/inventory/getStockoutAlerts'
 import Button from '../Button'
 
-const AMBER = 'var(--stockout-alert-amber, #f59e0b)'
+const AMBER = 'var(--stockout-alert-amber, var(--warning-1))'
 
 export default function StockoutAlertStrip() {
   const { activeOrgId } = useWorkspace()

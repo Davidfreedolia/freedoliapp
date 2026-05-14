@@ -123,7 +123,7 @@ export default function FinanceExports() {
       <div style={{ ...cardStyle, display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
           <div>
-            <label style={{ fontSize: 12, color: '#6b7280', display: 'block', marginBottom: 4 }}>{t('financeExports.year')}</label>
+            <label style={{ fontSize: 12, color: 'var(--text-2)', display: 'block', marginBottom: 4 }}>{t('financeExports.year')}</label>
             <input
               type="number"
               value={year}
@@ -137,7 +137,7 @@ export default function FinanceExports() {
             />
           </div>
           <div>
-            <label style={{ fontSize: 12, color: '#6b7280', display: 'block', marginBottom: 4 }}>{t('financeExports.quarter')}</label>
+            <label style={{ fontSize: 12, color: 'var(--text-2)', display: 'block', marginBottom: 4 }}>{t('financeExports.quarter')}</label>
             <select
               value={quarter}
               onChange={e => setQuarter(parseInt(e.target.value, 10))}
@@ -179,15 +179,15 @@ export default function FinanceExports() {
 
       {/* Jobs table */}
       <div style={cardStyle}>
-        <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 600, color: darkMode ? '#e5e7eb' : '#374151' }}>
+        <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 600, color: darkMode ? 'var(--border-1)' : 'var(--text-1)' }}>
           {t('financeExports.recentJobsTitle')}
         </h3>
         {loading ? (
-          <div style={{ padding: '24px', fontSize: 13, color: '#6b7280' }}>
+          <div style={{ padding: '24px', fontSize: 13, color: 'var(--text-2)' }}>
             {t('financeExports.loadingJobs')}
           </div>
         ) : jobs.length === 0 ? (
-          <div style={{ padding: '24px', fontSize: 13, color: '#6b7280' }}>
+          <div style={{ padding: '24px', fontSize: 13, color: 'var(--text-2)' }}>
             {t('financeExports.emptyJobs')}
           </div>
         ) : (
@@ -214,7 +214,7 @@ export default function FinanceExports() {
                     <td style={tdStyle}>{job.base_currency}</td>
                     <td style={tdStyle}>{jobStatusLabel(job.status)}</td>
                     <td style={tdStyle}>{job.created_at ? new Date(job.created_at).toLocaleString() : dash}</td>
-                    <td style={{ ...tdStyle, color: job.error ? '#ef4444' : '#6b7280' }}>
+                    <td style={{ ...tdStyle, color: job.error ? 'var(--danger-1)' : 'var(--text-2)' }}>
                       {job.error || dash}
                     </td>
                     <td style={tdStyle}>
@@ -246,14 +246,14 @@ const thStyle = {
   borderBottom: '1px solid var(--border-color)',
   fontSize: 12,
   fontWeight: 600,
-  color: '#6b7280',
+  color: 'var(--text-2)',
   whiteSpace: 'nowrap'
 }
 
 const tdStyle = {
   padding: '8px 10px',
   borderBottom: '1px solid var(--border-color)',
-  color: '#374151',
+  color: 'var(--text-1)',
   whiteSpace: 'nowrap'
 }
 

@@ -35,18 +35,18 @@ export default function TrackingEventList({ packageId, darkMode }) {
 
   if (!packageId) {
     return (
-      <div style={{ padding: 12, fontSize: 13, color: darkMode ? '#9ca3af' : '#6b7280' }}>
+      <div style={{ padding: 12, fontSize: 13, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
         {t('orders.shipmentsPanel.drawer.selectPackage')}
       </div>
     )
   }
 
   if (loading) {
-    return <div style={{ padding: 12, fontSize: 13, color: darkMode ? '#9ca3af' : '#6b7280' }}>{t('common.loading')}</div>
+    return <div style={{ padding: 12, fontSize: 13, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>{t('common.loading')}</div>
   }
 
   if (!events.length) {
-    return <div style={{ padding: 12, fontSize: 13, color: darkMode ? '#9ca3af' : '#6b7280' }}>{t('orders.shipmentsPanel.drawer.noTrackingEvents')}</div>
+    return <div style={{ padding: 12, fontSize: 13, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>{t('orders.shipmentsPanel.drawer.noTrackingEvents')}</div>
   }
 
   const formatTime = (v) => {
@@ -63,17 +63,17 @@ export default function TrackingEventList({ packageId, darkMode }) {
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
         <thead>
           <tr>
-            <th style={{ textAlign: 'left', padding: '8px 10px', borderBottom: '1px solid var(--border-1)', color: darkMode ? '#9ca3af' : '#6b7280', fontWeight: 600 }}>{t('orders.shipmentsPanel.drawer.columns.date')}</th>
-            <th style={{ textAlign: 'left', padding: '8px 10px', borderBottom: '1px solid var(--border-1)', color: darkMode ? '#9ca3af' : '#6b7280', fontWeight: 600 }}>{t('orders.shipmentsPanel.drawer.columns.location')}</th>
-            <th style={{ textAlign: 'left', padding: '8px 10px', borderBottom: '1px solid var(--border-1)', color: darkMode ? '#9ca3af' : '#6b7280', fontWeight: 600 }}>{t('orders.shipmentsPanel.drawer.columns.status')}</th>
+            <th style={{ textAlign: 'left', padding: '8px 10px', borderBottom: '1px solid var(--border-1)', color: darkMode ? 'var(--muted-1)' : 'var(--text-2)', fontWeight: 600 }}>{t('orders.shipmentsPanel.drawer.columns.date')}</th>
+            <th style={{ textAlign: 'left', padding: '8px 10px', borderBottom: '1px solid var(--border-1)', color: darkMode ? 'var(--muted-1)' : 'var(--text-2)', fontWeight: 600 }}>{t('orders.shipmentsPanel.drawer.columns.location')}</th>
+            <th style={{ textAlign: 'left', padding: '8px 10px', borderBottom: '1px solid var(--border-1)', color: darkMode ? 'var(--muted-1)' : 'var(--text-2)', fontWeight: 600 }}>{t('orders.shipmentsPanel.drawer.columns.status')}</th>
           </tr>
         </thead>
         <tbody>
           {events.map((ev, i) => (
             <tr key={i}>
-              <td style={{ padding: '8px 10px', borderBottom: '1px solid var(--border-1)', color: darkMode ? '#e5e7eb' : '#374151' }}>{formatTime(ev.event_time)}</td>
-              <td style={{ padding: '8px 10px', borderBottom: '1px solid var(--border-1)', color: darkMode ? '#e5e7eb' : '#374151' }}>{ev.location || '—'}</td>
-              <td style={{ padding: '8px 10px', borderBottom: '1px solid var(--border-1)', color: darkMode ? '#e5e7eb' : '#374151' }}>{ev.status_description || ev.status_code || '—'}</td>
+              <td style={{ padding: '8px 10px', borderBottom: '1px solid var(--border-1)', color: darkMode ? 'var(--border-1)' : 'var(--text-1)' }}>{formatTime(ev.event_time)}</td>
+              <td style={{ padding: '8px 10px', borderBottom: '1px solid var(--border-1)', color: darkMode ? 'var(--border-1)' : 'var(--text-1)' }}>{ev.location || '—'}</td>
+              <td style={{ padding: '8px 10px', borderBottom: '1px solid var(--border-1)', color: darkMode ? 'var(--border-1)' : 'var(--text-1)' }}>{ev.status_description || ev.status_code || '—'}</td>
             </tr>
           ))}
         </tbody>

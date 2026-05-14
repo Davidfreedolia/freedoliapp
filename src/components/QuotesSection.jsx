@@ -614,12 +614,12 @@ export default function QuotesSection({ projectId, darkMode }) {
       {quotes.length > 0 && (
         <div style={{
           ...styles.quantitySelector,
-          backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-          borderColor: darkMode ? '#374151' : '#d1d5db'
+          backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+          borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
         }}>
           <label style={{
             ...styles.label,
-            color: darkMode ? '#e5e7eb' : '#374151'
+            color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
           }}>
             Target Quantity:
           </label>
@@ -631,13 +631,13 @@ export default function QuotesSection({ projectId, darkMode }) {
             style={{
               ...styles.quantityInput,
               backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-              color: darkMode ? '#ffffff' : '#111827',
-              borderColor: darkMode ? '#374151' : '#d1d5db'
+              color: darkMode ? '#ffffff' : 'var(--text-1)',
+              borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
             }}
           />
           <label style={{
             ...styles.label,
-            color: darkMode ? '#e5e7eb' : '#374151',
+            color: darkMode ? 'var(--border-1)' : 'var(--text-1)',
             marginLeft: '16px'
           }}>
             Project Shipping (€/unit):
@@ -651,8 +651,8 @@ export default function QuotesSection({ projectId, darkMode }) {
             style={{
               ...styles.quantityInput,
               backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-              color: darkMode ? '#ffffff' : '#111827',
-              borderColor: darkMode ? '#374151' : '#d1d5db'
+              color: darkMode ? '#ffffff' : 'var(--text-1)',
+              borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
             }}
           />
         </div>
@@ -662,13 +662,13 @@ export default function QuotesSection({ projectId, darkMode }) {
       {showAddForm && (
         <div style={{
           ...styles.form,
-          backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-          borderColor: darkMode ? '#374151' : '#d1d5db'
+          backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+          borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
         }}>
           <div style={styles.formHeader}>
             <h4 style={{
               ...styles.formTitle,
-              color: darkMode ? '#ffffff' : '#111827'
+              color: darkMode ? '#ffffff' : 'var(--text-1)'
             }}>
               Add New Quote
             </h4>
@@ -697,7 +697,7 @@ export default function QuotesSection({ projectId, darkMode }) {
           <div
             onDragOver={(e) => {
               e.preventDefault()
-              e.currentTarget.style.backgroundColor = darkMode ? '#2a2a3a' : '#e5e7eb'
+              e.currentTarget.style.backgroundColor = darkMode ? '#2a2a3a' : 'var(--border-1)'
             }}
             onDragLeave={(e) => {
               e.preventDefault()
@@ -712,11 +712,11 @@ export default function QuotesSection({ projectId, darkMode }) {
             style={{
               ...styles.uploadArea,
               backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-              borderColor: darkMode ? '#374151' : '#d1d5db'
+              borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
             }}
           >
-            <Upload size={24} color={darkMode ? '#9ca3af' : '#6b7280'} />
-            <p style={{ color: darkMode ? '#9ca3af' : '#6b7280', margin: '8px 0 0 0' }}>
+            <Upload size={24} color={darkMode ? 'var(--muted-1)' : 'var(--text-2)'} />
+            <p style={{ color: darkMode ? 'var(--muted-1)' : 'var(--text-2)', margin: '8px 0 0 0' }}>
               {newQuote.file_name || 'Drag & drop PDF/Excel or click to select'}
             </p>
             <input
@@ -739,8 +739,8 @@ export default function QuotesSection({ projectId, darkMode }) {
                 style={{
                   ...styles.input,
                   backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-                  color: darkMode ? '#ffffff' : '#111827',
-                  borderColor: darkMode ? '#374151' : '#d1d5db'
+                  color: darkMode ? '#ffffff' : 'var(--text-1)',
+                  borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
                 }}
               >
                 <option value="">Select supplier</option>
@@ -758,8 +758,8 @@ export default function QuotesSection({ projectId, darkMode }) {
                 style={{
                   ...styles.input,
                   backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-                  color: darkMode ? '#ffffff' : '#111827',
-                  borderColor: darkMode ? '#374151' : '#d1d5db'
+                  color: darkMode ? '#ffffff' : 'var(--text-1)',
+                  borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
                 }}
               >
                 {CURRENCIES.map(c => (
@@ -776,8 +776,8 @@ export default function QuotesSection({ projectId, darkMode }) {
                 style={{
                   ...styles.input,
                   backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-                  color: darkMode ? '#ffffff' : '#111827',
-                  borderColor: darkMode ? '#374151' : '#d1d5db'
+                  color: darkMode ? '#ffffff' : 'var(--text-1)',
+                  borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
                 }}
               >
                 <option value="">Select incoterm</option>
@@ -797,8 +797,8 @@ export default function QuotesSection({ projectId, darkMode }) {
                 style={{
                   ...styles.input,
                   backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-                  color: darkMode ? '#ffffff' : '#111827',
-                  borderColor: darkMode ? '#374151' : '#d1d5db'
+                  color: darkMode ? '#ffffff' : 'var(--text-1)',
+                  borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
                 }}
               />
             </div>
@@ -813,8 +813,8 @@ export default function QuotesSection({ projectId, darkMode }) {
                 style={{
                   ...styles.input,
                   backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-                  color: darkMode ? '#ffffff' : '#111827',
-                  borderColor: darkMode ? '#374151' : '#d1d5db'
+                  color: darkMode ? '#ffffff' : 'var(--text-1)',
+                  borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
                 }}
               />
             </div>
@@ -829,8 +829,8 @@ export default function QuotesSection({ projectId, darkMode }) {
                 style={{
                   ...styles.input,
                   backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-                  color: darkMode ? '#ffffff' : '#111827',
-                  borderColor: darkMode ? '#374151' : '#d1d5db'
+                  color: darkMode ? '#ffffff' : 'var(--text-1)',
+                  borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
                 }}
               />
             </div>
@@ -847,8 +847,8 @@ export default function QuotesSection({ projectId, darkMode }) {
                 style={{
                   ...styles.input,
                   backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-                  color: darkMode ? '#ffffff' : '#111827',
-                  borderColor: darkMode ? '#374151' : '#d1d5db'
+                  color: darkMode ? '#ffffff' : 'var(--text-1)',
+                  borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
                 }}
               />
             </div>
@@ -883,8 +883,8 @@ export default function QuotesSection({ projectId, darkMode }) {
                     style={{
                       ...styles.priceBreakInput,
                       backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-                      color: darkMode ? '#ffffff' : '#111827',
-                      borderColor: darkMode ? '#374151' : '#d1d5db'
+                      color: darkMode ? '#ffffff' : 'var(--text-1)',
+                      borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
                     }}
                   />
                   <input
@@ -897,8 +897,8 @@ export default function QuotesSection({ projectId, darkMode }) {
                     style={{
                       ...styles.priceBreakInput,
                       backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-                      color: darkMode ? '#ffffff' : '#111827',
-                      borderColor: darkMode ? '#374151' : '#d1d5db'
+                      color: darkMode ? '#ffffff' : 'var(--text-1)',
+                      borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
                     }}
                   />
                   {newQuote.price_breaks.length > 1 && (
@@ -924,8 +924,8 @@ export default function QuotesSection({ projectId, darkMode }) {
               style={{
                 ...styles.textarea,
                 backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-                color: darkMode ? '#ffffff' : '#111827',
-                borderColor: darkMode ? '#374151' : '#d1d5db'
+                color: darkMode ? '#ffffff' : 'var(--text-1)',
+                borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
               }}
             />
           </div>
@@ -1000,7 +1000,7 @@ export default function QuotesSection({ projectId, darkMode }) {
         <div style={styles.comparisonSection}>
           <h4 style={{
             ...styles.comparisonTitle,
-            color: darkMode ? '#ffffff' : '#111827'
+            color: darkMode ? '#ffffff' : 'var(--text-1)'
           }}>
             Comparison (Qty: {targetQuantity})
           </h4>
@@ -1148,7 +1148,7 @@ export default function QuotesSection({ projectId, darkMode }) {
 
       {quotesForTable.length === 0 && !manualDraft && (
         <div style={styles.empty}>
-          <p style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
+          <p style={{ color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
             Encara no hi ha cotitzacions. Afegeix la primera per comparar.
           </p>
         </div>
@@ -1167,7 +1167,7 @@ export default function QuotesSection({ projectId, darkMode }) {
 
       {showCreateSupplierModal && supplierPrefill && (
         <div style={styles.modalOverlay} onClick={() => { setShowCreateSupplierModal(false); setQuoteToLink(null) }}>
-          <div style={{ ...styles.modal, backgroundColor: darkMode ? '#111827' : '#ffffff' }} onClick={e => e.stopPropagation()}>
+          <div style={{ ...styles.modal, backgroundColor: darkMode ? 'var(--text-1)' : '#ffffff' }} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeader}>
               <h3 style={styles.modalTitle}>Crear proveïdor</h3>
               <button type="button" onClick={() => { setShowCreateSupplierModal(false); setQuoteToLink(null) }} style={styles.closeButton} aria-label="Tancar">
@@ -1257,7 +1257,7 @@ const styles = {
   loading: {
     padding: '40px',
     textAlign: 'center',
-    color: '#6b7280'
+    color: 'var(--text-2)'
   },
   empty: {
     padding: '40px',
@@ -1315,7 +1315,7 @@ const styles = {
   label: {
     fontSize: '13px',
     fontWeight: '500',
-    color: '#6b7280'
+    color: 'var(--text-2)'
   },
   quantityInput: {
     padding: '8px 12px',
@@ -1351,7 +1351,7 @@ const styles = {
     border: 'none',
     borderRadius: '6px',
     cursor: 'pointer',
-    color: '#6b7280'
+    color: 'var(--text-2)'
   },
   uploadArea: {
     display: 'flex',
@@ -1406,7 +1406,7 @@ const styles = {
     alignItems: 'center',
     gap: '4px',
     padding: '6px 12px',
-    backgroundColor: '#4f46e5',
+    backgroundColor: 'var(--brand-1)',
     color: '#ffffff',
     border: 'none',
     borderRadius: '6px',
@@ -1428,7 +1428,7 @@ const styles = {
   tableHeader: {
     fontSize: '12px',
     fontWeight: '600',
-    color: '#6b7280'
+    color: 'var(--text-2)'
   },
   priceBreaksRow: {
     display: 'grid',
@@ -1453,7 +1453,7 @@ const styles = {
     border: 'none',
     borderRadius: '6px',
     cursor: 'pointer',
-    color: '#ef4444'
+    color: 'var(--danger-1)'
   },
   formActions: {
     display: 'flex',
@@ -1463,7 +1463,7 @@ const styles = {
   cancelButton: {
     padding: '10px 20px',
     backgroundColor: 'transparent',
-    color: '#6b7280',
+    color: 'var(--text-2)',
     border: '1px solid var(--border-color)',
     borderRadius: '6px',
     fontSize: '14px',
@@ -1474,7 +1474,7 @@ const styles = {
     alignItems: 'center',
     gap: '6px',
     padding: '10px 20px',
-    backgroundColor: '#4f46e5',
+    backgroundColor: 'var(--brand-1)',
     color: '#ffffff',
     border: 'none',
     borderRadius: '6px',
@@ -1539,7 +1539,7 @@ const styles = {
     border: 'none',
     borderRadius: '6px',
     cursor: 'pointer',
-    color: '#ef4444'
+    color: 'var(--danger-1)'
   },
   quoteDetails: {
     display: 'flex',
@@ -1554,7 +1554,7 @@ const styles = {
   },
   detailLabel: {
     fontSize: '12px',
-    color: '#6b7280'
+    color: 'var(--text-2)'
   },
   detailValue: {
     fontSize: '14px',
@@ -1574,7 +1574,7 @@ const styles = {
   },
   profitabilityLabel: {
     fontSize: '12px',
-    color: '#6b7280'
+    color: 'var(--text-2)'
   },
   profitabilityValue: {
     fontSize: '14px',

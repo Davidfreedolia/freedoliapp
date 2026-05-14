@@ -34,11 +34,11 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
   ]
 
   const SHIPMENT_STATUSES = [
-    { value: 'planned', label: t('orders.shipmentTracking.statuses.planned'), color: '#6b7280', icon: Clock },
-    { value: 'booked', label: t('orders.shipmentTracking.statuses.booked'), color: '#3b82f6', icon: Calendar },
-    { value: 'picked_up', label: t('orders.shipmentTracking.statuses.pickedUp'), color: '#8b5cf6', icon: Package },
-    { value: 'in_transit', label: t('orders.shipmentTracking.statuses.inTransit'), color: '#f59e0b', icon: Truck },
-    { value: 'delivered', label: t('orders.shipmentTracking.statuses.delivered'), color: '#22c55e', icon: CheckCircle }
+    { value: 'planned', label: t('orders.shipmentTracking.statuses.planned'), color: 'var(--text-2)', icon: Clock },
+    { value: 'booked', label: t('orders.shipmentTracking.statuses.booked'), color: 'var(--cta-1)', icon: Calendar },
+    { value: 'picked_up', label: t('orders.shipmentTracking.statuses.pickedUp'), color: 'var(--brand-1)', icon: Package },
+    { value: 'in_transit', label: t('orders.shipmentTracking.statuses.inTransit'), color: 'var(--warning-1)', icon: Truck },
+    { value: 'delivered', label: t('orders.shipmentTracking.statuses.delivered'), color: 'var(--success-1)', icon: CheckCircle }
   ]
 
   const loadShipment = async () => {
@@ -121,7 +121,7 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
       <div style={styles.header}>
         <h4 style={{
           ...styles.title,
-          color: darkMode ? '#ffffff' : '#111827'
+          color: darkMode ? '#ffffff' : 'var(--text-1)'
         }}>
           <Truck size={18} />
           {t('orders.shipmentTracking.title')}
@@ -143,7 +143,7 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
         <div style={styles.formGroup}>
           <label style={{
             ...styles.label,
-            color: darkMode ? '#e5e7eb' : '#374151'
+            color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
           }}>
             {t('orders.shipmentTracking.fields.shipmentType')} *
           </label>
@@ -152,9 +152,9 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
             onChange={e => setFormData({ ...formData, shipment_type: e.target.value })}
             style={{
               ...styles.input,
-              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-              color: darkMode ? '#ffffff' : '#111827',
-              borderColor: darkMode ? '#374151' : '#d1d5db'
+              backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+              color: darkMode ? '#ffffff' : 'var(--text-1)',
+              borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
             }}
           >
             {SHIPMENT_TYPES.map(type => (
@@ -167,7 +167,7 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
         <div style={styles.formGroup}>
           <label style={{
             ...styles.label,
-            color: darkMode ? '#e5e7eb' : '#374151'
+            color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
           }}>
             {t('orders.shipmentTracking.fields.carrier')}
           </label>
@@ -178,9 +178,9 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
             placeholder={t('orders.shipmentTracking.placeholders.carrier')}
             style={{
               ...styles.input,
-              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-              color: darkMode ? '#ffffff' : '#111827',
-              borderColor: darkMode ? '#374151' : '#d1d5db'
+              backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+              color: darkMode ? '#ffffff' : 'var(--text-1)',
+              borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
             }}
           />
         </div>
@@ -190,7 +190,7 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
           <div style={styles.formGroup}>
             <label style={{
               ...styles.label,
-              color: darkMode ? '#e5e7eb' : '#374151'
+              color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
             }}>
               {t('orders.shipmentTracking.fields.trackingNumber')} {formData.status !== 'planned' && '*'}
             </label>
@@ -201,9 +201,9 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
               placeholder={t('orders.shipmentTracking.placeholders.trackingNumber')}
               style={{
                 ...styles.input,
-                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                color: darkMode ? '#ffffff' : '#111827',
-                borderColor: darkMode ? '#374151' : '#d1d5db'
+                backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                color: darkMode ? '#ffffff' : 'var(--text-1)',
+                borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
               }}
             />
           </div>
@@ -214,7 +214,7 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
           <div style={styles.formGroup}>
             <label style={{
               ...styles.label,
-              color: darkMode ? '#e5e7eb' : '#374151'
+              color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
             }}>
               {t('orders.shipmentTracking.fields.proNumber')} {formData.status !== 'planned' && '*'}
             </label>
@@ -225,9 +225,9 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
               placeholder={t('orders.shipmentTracking.placeholders.proNumber')}
               style={{
                 ...styles.input,
-                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                color: darkMode ? '#ffffff' : '#111827',
-                borderColor: darkMode ? '#374151' : '#d1d5db'
+                backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                color: darkMode ? '#ffffff' : 'var(--text-1)',
+                borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
               }}
             />
           </div>
@@ -241,7 +241,7 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
           <div style={styles.formGroup}>
             <label style={{
               ...styles.label,
-              color: darkMode ? '#e5e7eb' : '#374151'
+              color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
             }}>
               {t('orders.shipmentTracking.fields.pickupDate')}
             </label>
@@ -251,9 +251,9 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
               onChange={e => setFormData({ ...formData, pickup_date: e.target.value })}
               style={{
                 ...styles.input,
-                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                color: darkMode ? '#ffffff' : '#111827',
-                borderColor: darkMode ? '#374151' : '#d1d5db'
+                backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                color: darkMode ? '#ffffff' : 'var(--text-1)',
+                borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
               }}
             />
           </div>
@@ -261,7 +261,7 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
           <div style={styles.formGroup}>
             <label style={{
               ...styles.label,
-              color: darkMode ? '#e5e7eb' : '#374151'
+              color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
             }}>
               {t('orders.shipmentTracking.fields.etaDate')}
             </label>
@@ -271,9 +271,9 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
               onChange={e => setFormData({ ...formData, eta_date: e.target.value })}
               style={{
                 ...styles.input,
-                backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                color: darkMode ? '#ffffff' : '#111827',
-                borderColor: darkMode ? '#374151' : '#d1d5db'
+                backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                color: darkMode ? '#ffffff' : 'var(--text-1)',
+                borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
               }}
             />
           </div>
@@ -283,7 +283,7 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
         <div style={styles.formGroup}>
           <label style={{
             ...styles.label,
-            color: darkMode ? '#e5e7eb' : '#374151'
+            color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
           }}>
             {t('orders.shipmentTracking.fields.status')}
           </label>
@@ -292,9 +292,9 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
             onChange={e => setFormData({ ...formData, status: e.target.value })}
             style={{
               ...styles.input,
-              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-              color: darkMode ? '#ffffff' : '#111827',
-              borderColor: darkMode ? '#374151' : '#d1d5db'
+              backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+              color: darkMode ? '#ffffff' : 'var(--text-1)',
+              borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
             }}
           >
             {SHIPMENT_STATUSES.map(status => (
@@ -307,7 +307,7 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
         <div style={styles.formGroup}>
           <label style={{
             ...styles.label,
-            color: darkMode ? '#e5e7eb' : '#374151'
+            color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
           }}>
             {t('orders.shipmentTracking.fields.notes')}
           </label>
@@ -318,9 +318,9 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
             rows={3}
             style={{
               ...styles.textarea,
-              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-              color: darkMode ? '#ffffff' : '#111827',
-              borderColor: darkMode ? '#374151' : '#d1d5db'
+              backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+              color: darkMode ? '#ffffff' : 'var(--text-1)',
+              borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
             }}
           />
         </div>
@@ -330,7 +330,7 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
           <div style={styles.quickActions}>
             <span style={{
               ...styles.quickActionsLabel,
-              color: darkMode ? '#9ca3af' : '#6b7280'
+              color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
             }}>
               {t('orders.shipmentTracking.quickActions.title')}
             </span>
@@ -340,7 +340,7 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
                   onClick={() => handleQuickStatus('booked')}
                   style={{
                     ...styles.quickActionButton,
-                    backgroundColor: '#3b82f6',
+                    backgroundColor: 'var(--cta-1)',
                     color: '#ffffff'
                   }}
                 >
@@ -352,7 +352,7 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
                   onClick={() => handleQuickStatus('picked_up')}
                   style={{
                     ...styles.quickActionButton,
-                    backgroundColor: '#8b5cf6',
+                    backgroundColor: 'var(--brand-1)',
                     color: '#ffffff'
                   }}
                 >
@@ -364,7 +364,7 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
                   onClick={() => handleQuickStatus('in_transit')}
                   style={{
                     ...styles.quickActionButton,
-                    backgroundColor: '#f59e0b',
+                    backgroundColor: 'var(--warning-1)',
                     color: '#ffffff'
                   }}
                 >
@@ -376,7 +376,7 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
                   onClick={() => handleQuickStatus('delivered')}
                   style={{
                     ...styles.quickActionButton,
-                    backgroundColor: '#22c55e',
+                    backgroundColor: 'var(--success-1)',
                     color: '#ffffff'
                   }}
                 >
@@ -393,7 +393,7 @@ export default function ShipmentTrackingSection({ po, darkMode }) {
           disabled={saving}
           style={{
             ...styles.saveButton,
-            backgroundColor: '#4f46e5',
+            backgroundColor: 'var(--brand-1)',
             color: '#ffffff',
             opacity: saving ? 0.6 : 1,
             cursor: saving ? 'not-allowed' : 'pointer'
@@ -508,7 +508,7 @@ const styles = {
   loading: {
     padding: '24px',
     textAlign: 'center',
-    color: '#6b7280'
+    color: 'var(--text-2)'
   }
 }
 

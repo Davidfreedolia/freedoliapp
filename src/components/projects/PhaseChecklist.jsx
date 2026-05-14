@@ -170,14 +170,14 @@ export default function PhaseChecklist({
       <div style={{
         fontSize: '16px',
         fontWeight: '600',
-        color: darkMode ? '#ffffff' : '#111827',
+        color: darkMode ? '#ffffff' : 'var(--text-1)',
         marginBottom: '8px'
       }}>
         {t('projects.phaseChecklist.title')}
       </div>
 
       {loading && (
-        <div style={{ fontSize: '13px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
+        <div style={{ fontSize: '13px', color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
           {t('projects.phaseChecklist.loadingRequirements')}
         </div>
       )}
@@ -187,7 +187,7 @@ export default function PhaseChecklist({
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
-          color: '#16a34a',
+          color: 'var(--success-1)',
           fontSize: '14px'
         }}>
           <CheckCircle size={16} />
@@ -203,7 +203,7 @@ export default function PhaseChecklist({
               alignItems: 'center',
               gap: '8px',
               fontSize: '14px',
-              color: item.ok ? '#16a34a' : (darkMode ? '#fca5a5' : '#dc2626')
+              color: item.ok ? 'var(--success-1)' : (darkMode ? '#fca5a5' : 'var(--danger-1)')
             }}>
               {item.ok ? <CheckCircle size={16} /> : <AlertTriangle size={16} />}
               {item.label}

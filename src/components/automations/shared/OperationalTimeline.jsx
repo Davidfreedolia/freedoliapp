@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 const STAGE_KEYS = ['supplier', 'production', 'transit', 'warehouse', 'amazon', 'completed']
 const STAGE_MATCH = ['Supplier', 'Production', 'Transit', 'Warehouse', 'Amazon', 'Completed']
-const COLORS = ['#F26C6C', '#F08A3E', '#F0B429', '#2FA4A9', '#B8D94A', '#3FBF9A']
+const COLORS = ['var(--coral-1)', '#F08A3E', '#F0B429', '#2FA4A9', '#B8D94A', '#3FBF9A']
 
 /**
  * Operational timeline: real-world product state (not automation state).
@@ -17,7 +17,7 @@ export default function OperationalTimeline({ currentStage }) {
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%' }}>
       {STAGE_KEYS.map((key, i) => {
         const active = idx >= 0 ? i <= idx : false
-        const color = COLORS[i] ?? '#6b7280'
+        const color = COLORS[i] ?? 'var(--text-2)'
         const label = t(`operationalTimeline.${key}`)
         return (
           <React.Fragment key={key}>

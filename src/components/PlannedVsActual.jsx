@@ -34,19 +34,19 @@ export default function PlannedVsActual({ quote, po, shipment, darkMode }) {
     const badges = {
       better: {
         icon: TrendingDown,
-        color: '#10b981',
+        color: 'var(--success-1)',
         label: t('orders.plannedActual.badges.better'),
         bg: '#10b98120'
       },
       worse: {
         icon: TrendingUp,
-        color: '#ef4444',
+        color: 'var(--danger-1)',
         label: t('orders.plannedActual.badges.worse'),
         bg: '#ef444420'
       },
       on_target: {
         icon: Minus,
-        color: '#f59e0b',
+        color: 'var(--warning-1)',
         label: t('orders.plannedActual.badges.onTarget'),
         bg: '#f59e0b20'
       }
@@ -59,15 +59,15 @@ export default function PlannedVsActual({ quote, po, shipment, darkMode }) {
     <div style={{
       padding: '16px',
       borderRadius: '8px',
-      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       marginTop: '16px'
     }}>
       <h4 style={{
         margin: '0 0 12px 0',
         fontSize: '14px',
         fontWeight: '600',
-        color: darkMode ? '#ffffff' : '#111827'
+        color: darkMode ? '#ffffff' : 'var(--text-1)'
       }}>
         {t('orders.plannedActual.title')}
       </h4>
@@ -79,7 +79,7 @@ export default function PlannedVsActual({ quote, po, shipment, darkMode }) {
             padding: '12px',
             borderRadius: '6px',
             backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-            border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+            border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
           }}>
             <div style={{
               display: 'flex',
@@ -90,7 +90,7 @@ export default function PlannedVsActual({ quote, po, shipment, darkMode }) {
               <span style={{
                 fontSize: '13px',
                 fontWeight: '500',
-                color: darkMode ? '#e5e7eb' : '#374151'
+                color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
               }}>
                 {t('orders.plannedActual.sections.unitPrice')}
               </span>
@@ -119,11 +119,11 @@ export default function PlannedVsActual({ quote, po, shipment, darkMode }) {
               display: 'flex',
               justifyContent: 'space-between',
               fontSize: '12px',
-              color: darkMode ? '#9ca3af' : '#6b7280',
+              color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
               marginBottom: '4px'
             }}>
               <span>{t('orders.plannedActual.fields.planned')}:</span>
-              <span style={{ fontWeight: '500', color: darkMode ? '#ffffff' : '#111827' }}>
+              <span style={{ fontWeight: '500', color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
                 {quote.currency} {priceComparison.planned.toFixed(4)}
               </span>
             </div>
@@ -131,11 +131,11 @@ export default function PlannedVsActual({ quote, po, shipment, darkMode }) {
               display: 'flex',
               justifyContent: 'space-between',
               fontSize: '12px',
-              color: darkMode ? '#9ca3af' : '#6b7280',
+              color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
               marginBottom: '4px'
             }}>
               <span>{t('orders.plannedActual.fields.actual')}:</span>
-              <span style={{ fontWeight: '500', color: darkMode ? '#ffffff' : '#111827' }}>
+              <span style={{ fontWeight: '500', color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
                 {po.currency || quote.currency} {priceComparison.actual.toFixed(4)}
               </span>
             </div>
@@ -143,7 +143,7 @@ export default function PlannedVsActual({ quote, po, shipment, darkMode }) {
               display: 'flex',
               justifyContent: 'space-between',
               fontSize: '12px',
-              color: priceComparison.deltaPercent > 0 ? '#ef4444' : '#10b981',
+              color: priceComparison.deltaPercent > 0 ? 'var(--danger-1)' : 'var(--success-1)',
               fontWeight: '600'
             }}>
               <span>{t('orders.plannedActual.fields.delta')}:</span>
@@ -161,7 +161,7 @@ export default function PlannedVsActual({ quote, po, shipment, darkMode }) {
             padding: '12px',
             borderRadius: '6px',
             backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-            border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+            border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
           }}>
             <div style={{
               display: 'flex',
@@ -172,7 +172,7 @@ export default function PlannedVsActual({ quote, po, shipment, darkMode }) {
               <span style={{
                 fontSize: '13px',
                 fontWeight: '500',
-                color: darkMode ? '#e5e7eb' : '#374151'
+                color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
               }}>
                 {t('orders.plannedActual.sections.leadTime')}
               </span>
@@ -201,11 +201,11 @@ export default function PlannedVsActual({ quote, po, shipment, darkMode }) {
               display: 'flex',
               justifyContent: 'space-between',
               fontSize: '12px',
-              color: darkMode ? '#9ca3af' : '#6b7280',
+              color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
               marginBottom: '4px'
             }}>
               <span>{t('orders.plannedActual.fields.promised')}:</span>
-              <span style={{ fontWeight: '500', color: darkMode ? '#ffffff' : '#111827' }}>
+              <span style={{ fontWeight: '500', color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
                 {t('orders.plannedActual.days', { count: leadTimeComparison.promised })}
               </span>
             </div>
@@ -213,11 +213,11 @@ export default function PlannedVsActual({ quote, po, shipment, darkMode }) {
               display: 'flex',
               justifyContent: 'space-between',
               fontSize: '12px',
-              color: darkMode ? '#9ca3af' : '#6b7280',
+              color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
               marginBottom: '4px'
             }}>
               <span>{t('orders.plannedActual.fields.actual')}:</span>
-              <span style={{ fontWeight: '500', color: darkMode ? '#ffffff' : '#111827' }}>
+              <span style={{ fontWeight: '500', color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
                 {t('orders.plannedActual.days', { count: leadTimeComparison.actual })}
               </span>
             </div>
@@ -225,7 +225,7 @@ export default function PlannedVsActual({ quote, po, shipment, darkMode }) {
               display: 'flex',
               justifyContent: 'space-between',
               fontSize: '12px',
-              color: leadTimeComparison.delta > 0 ? '#ef4444' : '#10b981',
+              color: leadTimeComparison.delta > 0 ? 'var(--danger-1)' : 'var(--success-1)',
               fontWeight: '600'
             }}>
               <span>{t('orders.plannedActual.fields.delta')}:</span>

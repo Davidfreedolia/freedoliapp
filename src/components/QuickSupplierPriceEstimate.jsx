@@ -121,13 +121,13 @@ export default function QuickSupplierPriceEstimate({ projectId, darkMode, onCopy
       backgroundColor: darkMode ? '#15151f' : '#ffffff',
       borderRadius: '12px',
       padding: '24px',
-      border: `1px solid ${darkMode ? '#2a2a3a' : '#e5e7eb'}`,
+      border: `1px solid ${darkMode ? '#2a2a3a' : 'var(--border-1)'}`,
       marginBottom: '24px'
     },
     title: {
       fontSize: '18px',
       fontWeight: '600',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       marginBottom: '20px',
       display: 'flex',
       alignItems: 'center',
@@ -139,9 +139,9 @@ export default function QuickSupplierPriceEstimate({ projectId, darkMode, onCopy
       gap: '12px',
       marginBottom: '20px',
       padding: '16px',
-      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
       borderRadius: '8px',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
     },
     statItem: {
       display: 'flex',
@@ -150,20 +150,20 @@ export default function QuickSupplierPriceEstimate({ projectId, darkMode, onCopy
     },
     statLabel: {
       fontSize: '12px',
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       fontWeight: '500'
     },
     statValue: {
       fontSize: '18px',
       fontWeight: '700',
-      color: darkMode ? '#ffffff' : '#111827'
+      color: darkMode ? '#ffffff' : 'var(--text-1)'
     },
     addButton: {
       display: 'flex',
       alignItems: 'center',
       gap: '6px',
       padding: '10px 16px',
-      backgroundColor: '#4f46e5',
+      backgroundColor: 'var(--brand-1)',
       color: '#ffffff',
       border: 'none',
       borderRadius: '6px',
@@ -173,8 +173,8 @@ export default function QuickSupplierPriceEstimate({ projectId, darkMode, onCopy
       marginBottom: '16px'
     },
     form: {
-      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       borderRadius: '8px',
       padding: '16px',
       marginBottom: '16px',
@@ -190,22 +190,22 @@ export default function QuickSupplierPriceEstimate({ projectId, darkMode, onCopy
     label: {
       fontSize: '13px',
       fontWeight: '500',
-      color: darkMode ? '#9ca3af' : '#6b7280'
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
     },
     input: {
       padding: '8px 12px',
       borderRadius: '6px',
-      border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`,
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       fontSize: '14px'
     },
     select: {
       padding: '8px 12px',
       borderRadius: '6px',
-      border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`,
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       fontSize: '14px',
       cursor: 'pointer'
     },
@@ -232,8 +232,8 @@ export default function QuickSupplierPriceEstimate({ projectId, darkMode, onCopy
       gap: '12px'
     },
     estimateCard: {
-      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       borderRadius: '8px',
       padding: '16px',
       display: 'flex',
@@ -258,26 +258,26 @@ export default function QuickSupplierPriceEstimate({ projectId, darkMode, onCopy
       borderRadius: '6px',
       fontSize: '12px',
       fontWeight: '600',
-      backgroundColor: '#4f46e5',
+      backgroundColor: 'var(--brand-1)',
       color: '#ffffff'
     },
     priceText: {
       fontSize: '16px',
       fontWeight: '600',
-      color: darkMode ? '#ffffff' : '#111827'
+      color: darkMode ? '#ffffff' : 'var(--text-1)'
     },
     priceEUR: {
       fontSize: '14px',
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       marginLeft: '8px'
     },
     moqText: {
       fontSize: '13px',
-      color: darkMode ? '#9ca3af' : '#6b7280'
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
     },
     notesText: {
       fontSize: '13px',
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       fontStyle: 'italic'
     },
     estimateActions: {
@@ -295,28 +295,28 @@ export default function QuickSupplierPriceEstimate({ projectId, darkMode, onCopy
       display: 'flex',
       alignItems: 'center',
       gap: '6px',
-      backgroundColor: darkMode ? '#374151' : '#e5e7eb',
-      color: darkMode ? '#ffffff' : '#111827'
+      backgroundColor: darkMode ? 'var(--text-1)' : 'var(--border-1)',
+      color: darkMode ? '#ffffff' : 'var(--text-1)'
     },
     deleteButton: {
       backgroundColor: 'transparent',
       border: 'none',
       cursor: 'pointer',
       padding: '4px',
-      color: '#ef4444',
+      color: 'var(--danger-1)',
       display: 'flex',
       alignItems: 'center'
     },
     empty: {
       textAlign: 'center',
       padding: '40px',
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       fontSize: '14px'
     },
     loading: {
       textAlign: 'center',
       padding: '40px',
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       fontSize: '14px'
     }
   }
@@ -456,8 +456,8 @@ export default function QuickSupplierPriceEstimate({ projectId, darkMode, onCopy
               }}
               style={{
                 ...styles.button,
-                backgroundColor: darkMode ? '#374151' : '#e5e7eb',
-                color: darkMode ? '#ffffff' : '#111827'
+                backgroundColor: darkMode ? 'var(--text-1)' : 'var(--border-1)',
+                color: darkMode ? '#ffffff' : 'var(--text-1)'
               }}
             >
               Cancel·lar
@@ -466,7 +466,7 @@ export default function QuickSupplierPriceEstimate({ projectId, darkMode, onCopy
               onClick={handleAddEstimate}
               style={{
                 ...styles.button,
-                backgroundColor: '#4f46e5',
+                backgroundColor: 'var(--brand-1)',
                 color: '#ffffff'
               }}
             >

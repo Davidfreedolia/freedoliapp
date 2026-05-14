@@ -210,21 +210,21 @@ export default function AmazonImports() {
     borderBottom: '1px solid var(--border-color)',
     fontSize: 12,
     fontWeight: 600,
-    color: '#6b7280',
+    color: 'var(--text-2)',
     whiteSpace: 'nowrap'
   }
   const tdStyle = {
     padding: '8px 10px',
     borderBottom: '1px solid var(--border-color)',
-    color: '#374151',
+    color: 'var(--text-1)',
     whiteSpace: 'nowrap'
   }
 
   const statusColor = (s) => {
-    if (s === 'done') return '#22c55e'
-    if (s === 'failed') return '#ef4444'
-    if (['parsing', 'parsed', 'posting'].includes(s)) return '#f59e0b'
-    return '#6b7280'
+    if (s === 'done') return 'var(--success-1)'
+    if (s === 'failed') return 'var(--danger-1)'
+    if (['parsing', 'parsed', 'posting'].includes(s)) return 'var(--warning-1)'
+    return 'var(--text-2)'
   }
 
   const handleConnectAmazon = async () => {
@@ -272,7 +272,7 @@ export default function AmazonImports() {
 
       {/* SP-API connections */}
       <div style={cardStyle}>
-        <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 600, color: darkMode ? '#e5e7eb' : '#374151' }}>
+        <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 600, color: darkMode ? 'var(--border-1)' : 'var(--text-1)' }}>
           Amazon SP-API
         </h3>
         {spapiConnections.length > 0 ? (
@@ -320,7 +320,7 @@ export default function AmazonImports() {
       <div style={cardStyle}>
         <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 16 }}>
           <div>
-            <label style={{ fontSize: 12, color: '#6b7280', display: 'block', marginBottom: 4 }}>{t('amazonImports.headers.marketplace')}</label>
+            <label style={{ fontSize: 12, color: 'var(--text-2)', display: 'block', marginBottom: 4 }}>{t('amazonImports.headers.marketplace')}</label>
             <input
               type="text"
               value={marketplace}
@@ -335,7 +335,7 @@ export default function AmazonImports() {
             />
           </div>
           <div>
-            <label style={{ fontSize: 12, color: '#6b7280', display: 'block', marginBottom: 4 }}>{t('amazonImports.reportType')}</label>
+            <label style={{ fontSize: 12, color: 'var(--text-2)', display: 'block', marginBottom: 4 }}>{t('amazonImports.reportType')}</label>
             <input
               type="text"
               value={reportType}
@@ -365,7 +365,7 @@ export default function AmazonImports() {
             onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ''; }}
           />
           <Upload size={32} style={{ marginBottom: 8, opacity: 0.7 }} />
-          <p style={{ margin: 0, fontSize: 14, color: '#6b7280' }}>
+          <p style={{ margin: 0, fontSize: 14, color: 'var(--text-2)' }}>
             {uploading ? t('amazonImports.uploading') : t('amazonImports.dropHint')}
           </p>
         </div>
@@ -374,7 +374,7 @@ export default function AmazonImports() {
       {/* Jobs table */}
       <div style={cardStyle}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-          <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: darkMode ? '#e5e7eb' : '#374151' }}>
+          <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: darkMode ? 'var(--border-1)' : 'var(--text-1)' }}>
             {t('amazonImports.recentJobs')}
           </h3>
           <Button variant="secondary" size="sm" onClick={loadJobs} disabled={loading}>
@@ -383,9 +383,9 @@ export default function AmazonImports() {
           </Button>
         </div>
         {loading ? (
-          <div style={{ padding: '24px', fontSize: 13, color: '#6b7280' }}>{t('common.loading')}</div>
+          <div style={{ padding: '24px', fontSize: 13, color: 'var(--text-2)' }}>{t('common.loading')}</div>
         ) : jobs.length === 0 ? (
-          <div style={{ padding: '24px', fontSize: 13, color: '#6b7280' }}>
+          <div style={{ padding: '24px', fontSize: 13, color: 'var(--text-2)' }}>
             {t('amazonImports.emptyJobs')}
           </div>
         ) : (
@@ -415,7 +415,7 @@ export default function AmazonImports() {
                     <td style={tdStyle}>
                       {job.created_at ? new Date(job.created_at).toLocaleString() : '—'}
                     </td>
-                    <td style={{ ...tdStyle, color: job.error ? '#ef4444' : '#6b7280', maxWidth: 200 }}>
+                    <td style={{ ...tdStyle, color: job.error ? 'var(--danger-1)' : 'var(--text-2)', maxWidth: 200 }}>
                       {job.error ? String(job.error).slice(0, 60) + (job.error.length > 60 ? '…' : '') : '—'}
                     </td>
                     <td style={tdStyle}>

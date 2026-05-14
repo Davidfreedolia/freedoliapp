@@ -465,15 +465,15 @@ export default function Diagnostics() {
   const getStatusIcon = (status) => {
     switch (status) {
       case CHECK_STATUS.OK:
-        return <CheckCircle2 size={20} color="#22c55e" />
+        return <CheckCircle2 size={20} color="var(--success-1)" />
       case CHECK_STATUS.WARNING:
-        return <AlertTriangle size={20} color="#f59e0b" />
+        return <AlertTriangle size={20} color="var(--warning-1)" />
       case CHECK_STATUS.FAIL:
-        return <XCircle size={20} color="#ef4444" />
+        return <XCircle size={20} color="var(--danger-1)" />
       case CHECK_STATUS.RUNNING:
-        return <RefreshCw size={20} color="#3b82f6" className="animate-spin" />
+        return <RefreshCw size={20} color="var(--cta-1)" className="animate-spin" />
       default:
-        return <Play size={20} color="#9ca3af" />
+        return <Play size={20} color='var(--muted-1)' />
     }
   }
 
@@ -507,13 +507,13 @@ export default function Diagnostics() {
     title: {
       fontSize: '32px',
       fontWeight: '700',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       margin: 0,
       marginBottom: '8px'
     },
     subtitle: {
       fontSize: '16px',
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       margin: 0
     },
     actions: {
@@ -533,13 +533,13 @@ export default function Diagnostics() {
       gap: '8px'
     },
     primaryButton: {
-      backgroundColor: '#4f46e5',
+      backgroundColor: 'var(--brand-1)',
       color: '#ffffff'
     },
     secondaryButton: {
-      backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6',
-      color: darkMode ? '#ffffff' : '#111827',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
     },
     checksGrid: {
       display: 'grid',
@@ -551,7 +551,7 @@ export default function Diagnostics() {
       backgroundColor: darkMode ? '#15151f' : '#ffffff',
       borderRadius: '12px',
       padding: '20px',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
     },
     checkHeader: {
       display: 'flex',
@@ -562,7 +562,7 @@ export default function Diagnostics() {
     checkTitle: {
       fontSize: '18px',
       fontWeight: '600',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       margin: 0
     },
     checkStatus: {
@@ -571,7 +571,7 @@ export default function Diagnostics() {
       gap: '8px',
       fontSize: '14px',
       fontWeight: '500',
-      color: darkMode ? '#9ca3af' : '#6b7280'
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
     },
     checkActions: {
       display: 'flex',
@@ -581,10 +581,10 @@ export default function Diagnostics() {
     checkResult: {
       marginTop: '12px',
       padding: '12px',
-      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
       borderRadius: '8px',
       fontSize: '13px',
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       fontFamily: 'monospace',
       whiteSpace: 'pre-wrap',
       wordBreak: 'break-word'
@@ -595,7 +595,7 @@ export default function Diagnostics() {
       backgroundColor: darkMode ? '#7f1d1d' : '#fef2f2',
       borderRadius: '8px',
       fontSize: '13px',
-      color: '#ef4444',
+      color: 'var(--danger-1)',
       fontFamily: 'monospace',
       whiteSpace: 'pre-wrap',
       wordBreak: 'break-word'
@@ -604,33 +604,33 @@ export default function Diagnostics() {
       backgroundColor: darkMode ? '#15151f' : '#ffffff',
       borderRadius: '12px',
       padding: '20px',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       maxHeight: '400px',
       overflowY: 'auto'
     },
     consoleHeader: {
       fontSize: '16px',
       fontWeight: '600',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       marginBottom: '16px'
     },
     logEntry: {
       padding: '8px 0',
       fontSize: '13px',
       fontFamily: 'monospace',
-      borderBottom: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+      borderBottom: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
     },
     logMessage: {
-      color: darkMode ? '#9ca3af' : '#6b7280'
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
     },
     logSuccess: {
-      color: '#22c55e'
+      color: 'var(--success-1)'
     },
     logWarning: {
-      color: '#f59e0b'
+      color: 'var(--warning-1)'
     },
     logError: {
-      color: '#ef4444'
+      color: 'var(--danger-1)'
     }
   }
 
@@ -687,7 +687,7 @@ export default function Diagnostics() {
               <div style={styles.checkHeader}>
                 <div>
                   <h3 style={styles.checkTitle}>{check.name}</h3>
-                  <p style={{ fontSize: '12px', color: darkMode ? '#6b7280' : '#9ca3af', margin: '4px 0 0' }}>
+                  <p style={{ fontSize: '12px', color: darkMode ? 'var(--text-2)' : 'var(--muted-1)', margin: '4px 0 0' }}>
                     {check.description}
                   </p>
                 </div>
@@ -753,7 +753,7 @@ export default function Diagnostics() {
       <div style={styles.console}>
         <h3 style={styles.consoleHeader}>Console</h3>
         {logs.length === 0 ? (
-          <p style={{ color: darkMode ? '#6b7280' : '#9ca3af', fontSize: '14px' }}>
+          <p style={{ color: darkMode ? 'var(--text-2)' : 'var(--muted-1)', fontSize: '14px' }}>
             No logs yet. Run checks to see output.
           </p>
         ) : (
@@ -765,7 +765,7 @@ export default function Diagnostics() {
 
             return (
               <div key={idx} style={styles.logEntry}>
-                <span style={{ color: darkMode ? '#6b7280' : '#9ca3af', marginRight: '8px' }}>
+                <span style={{ color: darkMode ? 'var(--text-2)' : 'var(--muted-1)', marginRight: '8px' }}>
                   {new Date(log.timestamp).toLocaleTimeString()}
                 </span>
                 <span style={logStyle}>{log.message}</span>

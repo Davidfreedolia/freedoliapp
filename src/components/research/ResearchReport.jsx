@@ -22,7 +22,7 @@ export default function ResearchReport({ report, meta = {}, onSaveAsBriefing, on
     const s = Number(report?.viability_score ?? 0)
     if (s >= 70) return 'var(--success-1, #3FBF9A)'
     if (s >= 40) return 'var(--warning-1, #F2D94E)'
-    return 'var(--danger-1, #F26C6C)'
+    return 'var(--danger-1, var(--coral-1))'
   }, [report?.viability_score])
 
   const recoBadge = useMemo(() => {
@@ -97,8 +97,8 @@ export default function ResearchReport({ report, meta = {}, onSaveAsBriefing, on
 
   const cardBg = darkMode ? '#1b1b2a' : '#ffffff'
   const borderColor = darkMode ? '#2a2a3a' : 'rgba(31,95,99,0.14)'
-  const muted = darkMode ? '#9aa1b4' : '#6b7280'
-  const ink = darkMode ? '#e6e9f2' : '#1f2937'
+  const muted = darkMode ? '#9aa1b4' : 'var(--text-2)'
+  const ink = darkMode ? '#e6e9f2' : 'var(--text-1)'
 
   const section = (title, children, key) => (
     <section
@@ -273,7 +273,7 @@ export default function ResearchReport({ report, meta = {}, onSaveAsBriefing, on
                 const r = report.margins[k] || {}
                 const pctColor =
                   r.net_margin_pct >= 25 ? 'var(--success-1,#3FBF9A)' :
-                  r.net_margin_pct >= 10 ? 'var(--warning-1,#F2D94E)' : 'var(--danger-1,#F26C6C)'
+                  r.net_margin_pct >= 10 ? 'var(--warning-1,#F2D94E)' : 'var(--danger-1,var(--coral-1))'
                 return (
                   <tr key={k} style={{ borderBottom: `1px solid ${borderColor}` }}>
                     <td style={{ padding: '6px 8px', textTransform: 'capitalize' }}>{t(`research.margins.${k}`, k)}</td>

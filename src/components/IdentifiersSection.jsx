@@ -58,7 +58,7 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({
   const inputBorderColor = 'var(--border-1)'
   const inputSurfaceStyle = {
     backgroundColor: '#ffffff',
-    color: '#111827',
+    color: 'var(--text-1)',
     borderColor: inputBorderColor
   }
   const sectionSurfaceStyle = hasPhaseStyle
@@ -293,7 +293,7 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({
       <div style={styles.header}>
         <h3 style={{
           ...styles.title,
-          color: darkMode ? '#ffffff' : '#111827'
+          color: darkMode ? '#ffffff' : 'var(--text-1)'
         }}>
           <Barcode size={20} />
           Identificadors Amazon
@@ -304,8 +304,8 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({
               onClick={handleReleaseGtin}
               style={{
                 ...styles.releaseButton,
-                backgroundColor: darkMode ? '#374151' : '#e5e7eb',
-                color: darkMode ? '#9ca3af' : '#6b7280'
+                backgroundColor: darkMode ? 'var(--text-1)' : 'var(--border-1)',
+                color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
               }}
             >
               <X size={14} />
@@ -317,8 +317,8 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({
             disabled={availableGtins.length === 0}
             style={{
               ...styles.assignButton,
-              backgroundColor: availableGtins.length > 0 ? '#4f46e5' : (darkMode ? '#374151' : '#e5e7eb'),
-              color: availableGtins.length > 0 ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280'),
+              backgroundColor: availableGtins.length > 0 ? 'var(--brand-1)' : (darkMode ? 'var(--text-1)' : 'var(--border-1)'),
+              color: availableGtins.length > 0 ? '#ffffff' : (darkMode ? 'var(--muted-1)' : 'var(--text-2)'),
               cursor: availableGtins.length > 0 ? 'pointer' : 'not-allowed'
             }}
           >
@@ -333,7 +333,7 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({
         <div style={styles.formGroup}>
           <label style={{
             ...styles.label,
-            color: darkMode ? '#e5e7eb' : '#374151',
+            color: darkMode ? 'var(--border-1)' : 'var(--text-1)',
             display: 'flex',
             alignItems: 'center',
             gap: '4px'
@@ -361,7 +361,7 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({
           <div style={styles.formGroup}>
             <label style={{
               ...styles.label,
-              color: darkMode ? '#e5e7eb' : '#374151'
+              color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
             }}>
               Codi GTIN *
             </label>
@@ -384,7 +384,7 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({
             <div style={{
               padding: '12px',
               backgroundColor: darkMode ? '#1a3a2a' : '#f0fdf4',
-              border: `1px solid ${darkMode ? '#22c55e' : '#22c55e'}`,
+              border: `1px solid ${darkMode ? 'var(--success-1)' : 'var(--success-1)'}`,
               borderRadius: '8px',
               marginBottom: '16px'
             }}>
@@ -400,7 +400,7 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({
             <div style={styles.formGroup}>
               <label style={{
                 ...styles.label,
-                color: darkMode ? '#e5e7eb' : '#374151'
+                color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
               }}>
                 Raó d'Exempció *
               </label>
@@ -423,7 +423,7 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({
           <div style={styles.formGroup}>
             <label style={{
               ...styles.label,
-              color: darkMode ? '#e5e7eb' : '#374151',
+              color: darkMode ? 'var(--border-1)' : 'var(--text-1)',
               display: 'flex',
               alignItems: 'center',
               gap: '4px'
@@ -448,7 +448,7 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({
         <div style={styles.formGroup}>
           <label style={{
             ...styles.label,
-            color: darkMode ? '#e5e7eb' : '#374151',
+            color: darkMode ? 'var(--border-1)' : 'var(--text-1)',
             display: 'flex',
             alignItems: 'center',
             gap: '4px'
@@ -504,7 +504,7 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({
             <div style={styles.modalHeader}>
               <h3 style={{
                 ...styles.modalTitle,
-                color: darkMode ? '#ffffff' : '#111827'
+                color: darkMode ? '#ffffff' : 'var(--text-1)'
               }}>
                 {selectedGtinForAssign ? 'Assignar GTIN amb SKU/FNSKU' : 'Assignar GTIN del Pool'}
               </h3>
@@ -526,7 +526,7 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({
                   <div style={styles.gtinPreview}>
                     <div style={{
                       ...styles.gtinCode,
-                      color: darkMode ? '#ffffff' : '#111827',
+                      color: darkMode ? '#ffffff' : 'var(--text-1)',
                       fontSize: '18px',
                       marginBottom: '4px'
                     }}>
@@ -534,7 +534,7 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({
                     </div>
                     <div style={{
                       ...styles.gtinType,
-                      color: darkMode ? '#9ca3af' : '#6b7280'
+                      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
                     }}>
                       {selectedGtinForAssign.gtin_type}
                     </div>
@@ -543,7 +543,7 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({
                   <div style={styles.formGroup}>
                     <label style={{
                       ...styles.label,
-                      color: darkMode ? '#e5e7eb' : '#374151'
+                      color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
                     }}>
                       SKU Amazon *
                     </label>
@@ -562,7 +562,7 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({
                   <div style={styles.formGroup}>
                     <label style={{
                       ...styles.label,
-                      color: darkMode ? '#e5e7eb' : '#374151'
+                      color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
                     }}>
                       FNSKU Amazon (opcional)
                     </label>
@@ -627,19 +627,19 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({
                   {availableGtins.map(gtin => (
                     <div key={gtin.id} style={{
                       ...styles.gtinItem,
-                      borderColor: darkMode ? '#374151' : '#e5e7eb',
-                      backgroundColor: darkMode ? '#15151f' : '#f9fafb'
+                      borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)',
+                      backgroundColor: darkMode ? '#15151f' : 'var(--surface-bg-2)'
                     }}>
                       <div style={styles.gtinInfo}>
                         <div style={{
                           ...styles.gtinCode,
-                          color: darkMode ? '#ffffff' : '#111827'
+                          color: darkMode ? '#ffffff' : 'var(--text-1)'
                         }}>
                           {gtin.gtin_code || 'GTIN_EXEMPT'}
                         </div>
                         <div style={{
                           ...styles.gtinType,
-                          color: darkMode ? '#9ca3af' : '#6b7280'
+                          color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
                         }}>
                           {gtin.gtin_type}
                         </div>
@@ -648,7 +648,7 @@ const IdentifiersSection = forwardRef(function IdentifiersSection({
                         onClick={() => handleAssignFromPool(gtin.id)}
                         style={{
                           ...styles.assignGtinButton,
-                          backgroundColor: '#4f46e5',
+                          backgroundColor: 'var(--brand-1)',
                           color: '#ffffff'
                         }}
                       >
@@ -758,7 +758,7 @@ const styles = {
   loading: {
     padding: '24px',
     textAlign: 'center',
-    color: '#6b7280'
+    color: 'var(--text-2)'
   },
   modalOverlay: {
     position: 'fixed',
@@ -798,7 +798,7 @@ const styles = {
     background: 'none',
     border: 'none',
     fontSize: '24px',
-    color: '#6b7280',
+    color: 'var(--text-2)',
     cursor: 'pointer',
     padding: 0,
     width: '32px',
@@ -815,7 +815,7 @@ const styles = {
   emptyMessage: {
     textAlign: 'center',
     padding: '48px',
-    color: '#6b7280'
+    color: 'var(--text-2)'
   },
   gtinList: {
     display: 'flex',

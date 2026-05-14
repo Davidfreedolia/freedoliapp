@@ -31,14 +31,14 @@ import { useTranslation } from 'react-i18next'
 
 // Colors per categories
 const CATEGORY_COLORS = {
-  product_cost: '#ef4444',
-  shipping: '#f59e0b',
+  product_cost: 'var(--danger-1)',
+  shipping: 'var(--warning-1)',
   amazon_fees: '#ff9900',
-  marketing: '#8b5cf6',
-  samples: '#ec4899',
-  other: '#6b7280',
-  sale: '#22c55e',
-  refund: '#ef4444'
+  marketing: 'var(--brand-1)',
+  samples: 'var(--coral-1)',
+  other: 'var(--text-2)',
+  sale: 'var(--success-1)',
+  refund: 'var(--danger-1)'
 }
 
 export default function Analytics() {
@@ -281,9 +281,9 @@ export default function Analytics() {
         />
         <div style={styles.content}>
           <div style={{ ...styles.errorContainer, padding: '2rem', textAlign: 'center' }}>
-            <AlertCircle size={32} color="#f59e0b" />
-            <h3 style={{ color: darkMode ? '#ffffff' : '#111827', margin: '12px 0' }}>Analítica no disponible</h3>
-            <p style={{ color: '#6b7280' }}>Aquesta funcionalitat no està inclosa al teu pla. Fes upgrade per accedir.</p>
+            <AlertCircle size={32} color="var(--warning-1)" />
+            <h3 style={{ color: darkMode ? '#ffffff' : 'var(--text-1)', margin: '12px 0' }}>Analítica no disponible</h3>
+            <p style={{ color: 'var(--text-2)' }}>Aquesta funcionalitat no està inclosa al teu pla. Fes upgrade per accedir.</p>
           </div>
         </div>
       </div>
@@ -350,56 +350,56 @@ export default function Analytics() {
               <div style={{ ...styles.kpiCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
                 <div style={styles.kpiHeader}>
                   <div style={{ ...styles.kpiIcon, backgroundColor: '#22c55e20' }}>
-                    <TrendingUp size={24} color="#22c55e" />
+                    <TrendingUp size={24} color="var(--success-1)" />
                   </div>
                   <span style={styles.kpiLabel}>Ingressos</span>
                 </div>
-                <span style={{ ...styles.kpiValue, color: '#22c55e' }}>{formatCurrency(totalIncomes)}</span>
+                <span style={{ ...styles.kpiValue, color: 'var(--success-1)' }}>{formatCurrency(totalIncomes)}</span>
                 <div style={styles.kpiFooter}>
-                  <ArrowUpRight size={14} color="#22c55e" />
-                  <span style={{ color: '#22c55e' }}>{incomes.length} transaccions</span>
+                  <ArrowUpRight size={14} color="var(--success-1)" />
+                  <span style={{ color: 'var(--success-1)' }}>{incomes.length} transaccions</span>
                 </div>
               </div>
 
               <div style={{ ...styles.kpiCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
                 <div style={styles.kpiHeader}>
                   <div style={{ ...styles.kpiIcon, backgroundColor: '#ef444420' }}>
-                    <TrendingDown size={24} color="#ef4444" />
+                    <TrendingDown size={24} color="var(--danger-1)" />
                   </div>
                   <span style={styles.kpiLabel}>Despeses</span>
                 </div>
-                <span style={{ ...styles.kpiValue, color: '#ef4444' }}>{formatCurrency(totalExpenses)}</span>
+                <span style={{ ...styles.kpiValue, color: 'var(--danger-1)' }}>{formatCurrency(totalExpenses)}</span>
                 <div style={styles.kpiFooter}>
-                  <ArrowDownRight size={14} color="#ef4444" />
-                  <span style={{ color: '#ef4444' }}>{expenses.length} transaccions</span>
+                  <ArrowDownRight size={14} color="var(--danger-1)" />
+                  <span style={{ color: 'var(--danger-1)' }}>{expenses.length} transaccions</span>
                 </div>
               </div>
 
               <div style={{ ...styles.kpiCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
                 <div style={styles.kpiHeader}>
                   <div style={{ ...styles.kpiIcon, backgroundColor: profit >= 0 ? '#22c55e20' : '#ef444420' }}>
-                    <DollarSign size={24} color={profit >= 0 ? '#22c55e' : '#ef4444'} />
+                    <DollarSign size={24} color={profit >= 0 ? 'var(--success-1)' : 'var(--danger-1)'} />
                   </div>
                   <span style={styles.kpiLabel}>Benefici</span>
                 </div>
-                <span style={{ ...styles.kpiValue, color: profit >= 0 ? '#22c55e' : '#ef4444' }}>{formatCurrency(profit)}</span>
+                <span style={{ ...styles.kpiValue, color: profit >= 0 ? 'var(--success-1)' : 'var(--danger-1)' }}>{formatCurrency(profit)}</span>
                 <div style={styles.kpiFooter}>
-                  <Activity size={14} color="#6b7280" />
-                  <span style={{ color: '#6b7280' }}>Marge: {margin.toFixed(1)}%</span>
+                  <Activity size={14} color='var(--text-2)' />
+                  <span style={{ color: 'var(--text-2)' }}>Marge: {margin.toFixed(1)}%</span>
                 </div>
               </div>
 
               <div style={{ ...styles.kpiCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
                 <div style={styles.kpiHeader}>
                   <div style={{ ...styles.kpiIcon, backgroundColor: '#4f46e520' }}>
-                    <ShoppingCart size={24} color="#4f46e5" />
+                    <ShoppingCart size={24} color="var(--brand-1)" />
                   </div>
                   <span style={styles.kpiLabel}>Comandes (PO)</span>
                 </div>
-                <span style={{ ...styles.kpiValue, color: '#4f46e5' }}>{formatCurrency(totalOrders)}</span>
+                <span style={{ ...styles.kpiValue, color: 'var(--brand-1)' }}>{formatCurrency(totalOrders)}</span>
                 <div style={styles.kpiFooter}>
-                  <Package size={14} color="#6b7280" />
-                  <span style={{ color: '#6b7280' }}>{orders.length} ordres</span>
+                  <Package size={14} color='var(--text-2)' />
+                  <span style={{ color: 'var(--text-2)' }}>{orders.length} ordres</span>
                 </div>
               </div>
             </div>
@@ -408,8 +408,8 @@ export default function Analytics() {
             <div style={styles.chartsGrid}>
               {/* Despeses per categoria */}
               <div style={{ ...styles.chartCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-                <h3 style={{ ...styles.chartTitle, color: darkMode ? '#ffffff' : '#111827' }}>
-                  <PieChart size={18} color="#ef4444" />
+                <h3 style={{ ...styles.chartTitle, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
+                  <PieChart size={18} color="var(--danger-1)" />
                   Despeses per Categoria
                 </h3>
                 <div style={styles.categoryList}>
@@ -418,33 +418,33 @@ export default function Analytics() {
                       <div style={styles.categoryInfo}>
                         <span style={{
                           ...styles.categoryDot,
-                          backgroundColor: CATEGORY_COLORS[cat] || '#6b7280'
+                          backgroundColor: CATEGORY_COLORS[cat] || 'var(--text-2)'
                         }} />
-                        <span style={{ color: darkMode ? '#ffffff' : '#111827', textTransform: 'capitalize' }}>
+                        <span style={{ color: darkMode ? '#ffffff' : 'var(--text-1)', textTransform: 'capitalize' }}>
                           {cat.replace('_', ' ')}
                         </span>
                       </div>
                       <div style={styles.categoryValue}>
-                        <span style={{ color: darkMode ? '#ffffff' : '#111827', fontWeight: '600' }}>
+                        <span style={{ color: darkMode ? '#ffffff' : 'var(--text-1)', fontWeight: '600' }}>
                           {formatCurrency(amount)}
                         </span>
-                        <span style={{ color: '#6b7280', fontSize: '12px' }}>
+                        <span style={{ color: 'var(--text-2)', fontSize: '12px' }}>
                           {totalExpenses > 0 ? (amount / totalExpenses * 100).toFixed(1) : 0}%
                         </span>
                       </div>
-                      {renderProgressBar(amount, totalExpenses, CATEGORY_COLORS[cat] || '#6b7280')}
+                      {renderProgressBar(amount, totalExpenses, CATEGORY_COLORS[cat] || 'var(--text-2)')}
                     </div>
                   ))}
                   {Object.keys(expensesByCategory).length === 0 && (
-                    <p style={{ color: '#6b7280', textAlign: 'center' }}>No hi ha despeses</p>
+                    <p style={{ color: 'var(--text-2)', textAlign: 'center' }}>No hi ha despeses</p>
                   )}
                 </div>
               </div>
 
               {/* Ingressos per categoria */}
               <div style={{ ...styles.chartCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-                <h3 style={{ ...styles.chartTitle, color: darkMode ? '#ffffff' : '#111827' }}>
-                  <BarChart3 size={18} color="#22c55e" />
+                <h3 style={{ ...styles.chartTitle, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
+                  <BarChart3 size={18} color="var(--success-1)" />
                   Ingressos per Categoria
                 </h3>
                 <div style={styles.categoryList}>
@@ -453,33 +453,33 @@ export default function Analytics() {
                       <div style={styles.categoryInfo}>
                         <span style={{
                           ...styles.categoryDot,
-                          backgroundColor: cat === 'sale' ? '#22c55e' : (cat === 'refund' ? '#ef4444' : '#6b7280')
+                          backgroundColor: cat === 'sale' ? 'var(--success-1)' : (cat === 'refund' ? 'var(--danger-1)' : 'var(--text-2)')
                         }} />
-                        <span style={{ color: darkMode ? '#ffffff' : '#111827', textTransform: 'capitalize' }}>
+                        <span style={{ color: darkMode ? '#ffffff' : 'var(--text-1)', textTransform: 'capitalize' }}>
                           {cat === 'sale' ? 'Vendes' : cat === 'refund' ? 'Devolucions' : cat === 'reimbursement' ? 'Reemborsaments' : cat}
                         </span>
                       </div>
                       <div style={styles.categoryValue}>
-                        <span style={{ color: darkMode ? '#ffffff' : '#111827', fontWeight: '600' }}>
+                        <span style={{ color: darkMode ? '#ffffff' : 'var(--text-1)', fontWeight: '600' }}>
                           {formatCurrency(amount)}
                         </span>
-                        <span style={{ color: '#6b7280', fontSize: '12px' }}>
+                        <span style={{ color: 'var(--text-2)', fontSize: '12px' }}>
                           {totalIncomes > 0 ? (amount / totalIncomes * 100).toFixed(1) : 0}%
                         </span>
                       </div>
-                      {renderProgressBar(amount, totalIncomes, cat === 'sale' ? '#22c55e' : '#ef4444')}
+                      {renderProgressBar(amount, totalIncomes, cat === 'sale' ? 'var(--success-1)' : 'var(--danger-1)')}
                     </div>
                   ))}
                   {Object.keys(incomesByCategory).length === 0 && (
-                    <p style={{ color: '#6b7280', textAlign: 'center' }}>No hi ha ingressos</p>
+                    <p style={{ color: 'var(--text-2)', textAlign: 'center' }}>No hi ha ingressos</p>
                   )}
                 </div>
               </div>
 
               {/* Despeses per projecte */}
               <div style={{ ...styles.chartCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-                <h3 style={{ ...styles.chartTitle, color: darkMode ? '#ffffff' : '#111827' }}>
-                  <Package size={18} color="#4f46e5" />
+                <h3 style={{ ...styles.chartTitle, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
+                  <Package size={18} color="var(--brand-1)" />
                   Despeses per Projecte
                 </h3>
                 <div style={styles.categoryList}>
@@ -488,29 +488,29 @@ export default function Analytics() {
                     return (
                       <div key={projId} style={styles.categoryItem}>
                         <div style={styles.categoryInfo}>
-                          <span style={{ ...styles.categoryDot, backgroundColor: '#4f46e5' }} />
-                          <span style={{ color: darkMode ? '#ffffff' : '#111827' }}>
+                          <span style={{ ...styles.categoryDot, backgroundColor: 'var(--brand-1)' }} />
+                          <span style={{ color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
                             {proj?.name || (projId === 'global' ? '🌍 Global' : 'Sense projecte')}
                           </span>
                         </div>
                         <div style={styles.categoryValue}>
-                          <span style={{ color: darkMode ? '#ffffff' : '#111827', fontWeight: '600' }}>
+                          <span style={{ color: darkMode ? '#ffffff' : 'var(--text-1)', fontWeight: '600' }}>
                             {formatCurrency(amount)}
                           </span>
                         </div>
-                        {renderProgressBar(amount, totalExpenses, '#4f46e5')}
+                        {renderProgressBar(amount, totalExpenses, 'var(--brand-1)')}
                       </div>
                     )
                   })}
                   {Object.keys(expensesByProject).length === 0 && (
-                    <p style={{ color: '#6b7280', textAlign: 'center' }}>No hi ha despeses</p>
+                    <p style={{ color: 'var(--text-2)', textAlign: 'center' }}>No hi ha despeses</p>
                   )}
                 </div>
               </div>
 
               {/* Top Stock */}
               <div style={{ ...styles.chartCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-                <h3 style={{ ...styles.chartTitle, color: darkMode ? '#ffffff' : '#111827' }}>
+                <h3 style={{ ...styles.chartTitle, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
                   <Package size={18} color="#ff9900" />
                   Top Productes (Stock FBA)
                 </h3>
@@ -520,20 +520,20 @@ export default function Analytics() {
                       <div style={styles.categoryInfo}>
                         <span style={{
                           ...styles.rankBadge,
-                          backgroundColor: idx === 0 ? '#fbbf24' : (idx === 1 ? '#9ca3af' : (idx === 2 ? '#cd7f32' : '#6b7280'))
+                          backgroundColor: idx === 0 ? '#fbbf24' : (idx === 1 ? 'var(--muted-1)' : (idx === 2 ? '#cd7f32' : 'var(--text-2)'))
                         }}>
                           {idx + 1}
                         </span>
                         <div>
-                          <span style={{ color: darkMode ? '#ffffff' : '#111827', fontWeight: '500' }}>{item.sku}</span>
-                          <p style={{ margin: 0, fontSize: '11px', color: '#6b7280' }}>{item.product_name}</p>
+                          <span style={{ color: darkMode ? '#ffffff' : 'var(--text-1)', fontWeight: '500' }}>{item.sku}</span>
+                          <p style={{ margin: 0, fontSize: '11px', color: 'var(--text-2)' }}>{item.product_name}</p>
                         </div>
                       </div>
                       <span style={{ color: '#ff9900', fontWeight: '700' }}>{item.units_amazon_fba || 0}</span>
                     </div>
                   ))}
                   {topInventory.length === 0 && (
-                    <p style={{ color: '#6b7280', textAlign: 'center' }}>No hi ha inventari</p>
+                    <p style={{ color: 'var(--text-2)', textAlign: 'center' }}>No hi ha inventari</p>
                   )}
                 </div>
               </div>
@@ -541,22 +541,22 @@ export default function Analytics() {
 
             {/* Resum comandes */}
             <div style={{ ...styles.summaryCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-              <h3 style={{ ...styles.chartTitle, color: darkMode ? '#ffffff' : '#111827' }}>
-                <ShoppingCart size={18} color="#4f46e5" />
+              <h3 style={{ ...styles.chartTitle, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
+                <ShoppingCart size={18} color="var(--brand-1)" />
                 Resum Comandes (PO)
               </h3>
               <div style={styles.ordersGrid}>
                 {Object.entries(ordersByStatus).map(([status, count]) => (
                   <div key={status} style={{
                     ...styles.orderStatusCard,
-                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
+                    backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)'
                   }}>
-                    <span style={{ fontSize: '24px', fontWeight: '700', color: darkMode ? '#ffffff' : '#111827' }}>{count}</span>
-                    <span style={{ fontSize: '12px', color: '#6b7280', textTransform: 'capitalize' }}>{status.replace('_', ' ')}</span>
+                    <span style={{ fontSize: '24px', fontWeight: '700', color: darkMode ? '#ffffff' : 'var(--text-1)' }}>{count}</span>
+                    <span style={{ fontSize: '12px', color: 'var(--text-2)', textTransform: 'capitalize' }}>{status.replace('_', ' ')}</span>
                   </div>
                 ))}
                 {Object.keys(ordersByStatus).length === 0 && (
-                  <p style={{ color: '#6b7280', gridColumn: 'span 4' }}>No hi ha comandes</p>
+                  <p style={{ color: 'var(--text-2)', gridColumn: 'span 4' }}>No hi ha comandes</p>
                 )}
               </div>
             </div>
@@ -565,23 +565,23 @@ export default function Analytics() {
             <div style={styles.chartsGrid}>
               {/* Unassigned GTIN Codes */}
               <div style={{ ...styles.chartCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-                <h3 style={{ ...styles.chartTitle, color: darkMode ? '#ffffff' : '#111827' }}>
-                  <Barcode size={18} color="#4f46e5" />
+                <h3 style={{ ...styles.chartTitle, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
+                  <Barcode size={18} color="var(--brand-1)" />
                   Codis GTIN no Assignats ({unassignedGtins.length})
                 </h3>
                 <div style={styles.categoryList}>
                   {unassignedGtins.length === 0 ? (
-                    <p style={{ color: '#6b7280', textAlign: 'center' }}>Tots els codis estan assignats</p>
+                    <p style={{ color: 'var(--text-2)', textAlign: 'center' }}>Tots els codis estan assignats</p>
                   ) : (
                     unassignedGtins.slice(0, 10).map(gtin => (
                       <div key={gtin.id} style={styles.categoryItem}>
                         <div style={styles.categoryInfo}>
-                          <span style={{ ...styles.categoryDot, backgroundColor: '#4f46e5' }} />
+                          <span style={{ ...styles.categoryDot, backgroundColor: 'var(--brand-1)' }} />
                           <div>
-                            <span style={{ color: darkMode ? '#ffffff' : '#111827', fontWeight: '500', fontFamily: 'monospace' }}>
+                            <span style={{ color: darkMode ? '#ffffff' : 'var(--text-1)', fontWeight: '500', fontFamily: 'monospace' }}>
                               {gtin.gtin_code || 'GTIN_EXEMPT'}
                             </span>
-                            <p style={{ margin: 0, fontSize: '11px', color: '#6b7280' }}>{gtin.gtin_type}</p>
+                            <p style={{ margin: 0, fontSize: '11px', color: 'var(--text-2)' }}>{gtin.gtin_type}</p>
                           </div>
                         </div>
                       </div>
@@ -592,23 +592,23 @@ export default function Analytics() {
 
               {/* SKUs Missing GTIN */}
               <div style={{ ...styles.chartCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
-                <h3 style={{ ...styles.chartTitle, color: darkMode ? '#ffffff' : '#111827' }}>
-                  <AlertCircle size={18} color="#f59e0b" />
+                <h3 style={{ ...styles.chartTitle, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
+                  <AlertCircle size={18} color="var(--warning-1)" />
                   SKUs sense GTIN ({missingGtinProjects.length})
                 </h3>
                 <div style={styles.categoryList}>
                   {missingGtinProjects.length === 0 ? (
-                    <p style={{ color: '#6b7280', textAlign: 'center' }}>Tots els SKUs tenen GTIN</p>
+                    <p style={{ color: 'var(--text-2)', textAlign: 'center' }}>Tots els SKUs tenen GTIN</p>
                   ) : (
                     missingGtinProjects.slice(0, 10).map(project => (
                       <div key={project.id} style={styles.categoryItem}>
                         <div style={styles.categoryInfo}>
-                          <span style={{ ...styles.categoryDot, backgroundColor: '#f59e0b' }} />
+                          <span style={{ ...styles.categoryDot, backgroundColor: 'var(--warning-1)' }} />
                           <div>
-                            <span style={{ color: darkMode ? '#ffffff' : '#111827', fontWeight: '500' }}>
+                            <span style={{ color: darkMode ? '#ffffff' : 'var(--text-1)', fontWeight: '500' }}>
                               {project.name}
                             </span>
-                            <p style={{ margin: 0, fontSize: '11px', color: '#6b7280' }}>{project.project_code} / {project.sku}</p>
+                            <p style={{ margin: 0, fontSize: '11px', color: 'var(--text-2)' }}>{project.project_code} / {project.sku}</p>
                           </div>
                         </div>
                       </div>
@@ -622,19 +622,19 @@ export default function Analytics() {
             <div style={styles.metricsGrid}>
               <div style={{ ...styles.metricCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
                 <span style={styles.metricLabel}>Despesa mitjana</span>
-                <span style={{ ...styles.metricValue, color: '#ef4444' }}>
+                <span style={{ ...styles.metricValue, color: 'var(--danger-1)' }}>
                   {expenses.length > 0 ? formatCurrency(totalExpenses / expenses.length) : '€0'}
                 </span>
               </div>
               <div style={{ ...styles.metricCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
                 <span style={styles.metricLabel}>Ingrés mitjà</span>
-                <span style={{ ...styles.metricValue, color: '#22c55e' }}>
+                <span style={{ ...styles.metricValue, color: 'var(--success-1)' }}>
                   {incomes.length > 0 ? formatCurrency(totalIncomes / incomes.length) : '€0'}
                 </span>
               </div>
               <div style={{ ...styles.metricCard, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
                 <span style={styles.metricLabel}>PO mitjana</span>
-                <span style={{ ...styles.metricValue, color: '#4f46e5' }}>
+                <span style={{ ...styles.metricValue, color: 'var(--brand-1)' }}>
                   {orders.length > 0 ? formatCurrency(totalOrders / orders.length) : '€0'}
                 </span>
               </div>
@@ -656,7 +656,7 @@ const styles = {
   toolbar: { display: 'flex', marginBottom: '24px' },
   filterSelect: { height: 'var(--btn-h-sm)', padding: '0 12px', borderRadius: 'var(--btn-radius)', border: '1px solid var(--btn-secondary-border)', backgroundColor: 'var(--btn-ghost-bg)', color: 'var(--btn-secondary-fg)', fontSize: '14px', outline: 'none', cursor: 'pointer', boxShadow: 'var(--btn-shadow)' },
   refreshBtn: { padding: '0', width: 'var(--btn-h-sm)', minWidth: 'var(--btn-h-sm)' },
-  loading: { padding: '64px', textAlign: 'center', color: '#6b7280' },
+  loading: { padding: '64px', textAlign: 'center', color: 'var(--text-2)' },
   errorContainer: { padding: '64px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' },
   retryButton: { minWidth: '160px' },
   // KPIs
@@ -664,7 +664,7 @@ const styles = {
   kpiCard: { padding: '20px', borderRadius: '16px', border: '1px solid var(--border-color)' },
   kpiHeader: { display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' },
   kpiIcon: { width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  kpiLabel: { fontSize: '14px', color: '#6b7280' },
+  kpiLabel: { fontSize: '14px', color: 'var(--text-2)' },
   kpiValue: { fontSize: '28px', fontWeight: '700', display: 'block', marginBottom: '8px' },
   kpiFooter: { display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px' },
   // Charts
@@ -676,7 +676,7 @@ const styles = {
   categoryInfo: { display: 'flex', alignItems: 'center', gap: '8px' },
   categoryDot: { width: '10px', height: '10px', borderRadius: '50%' },
   categoryValue: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  progressContainer: { height: '6px', backgroundColor: '#e5e7eb', borderRadius: '3px', overflow: 'hidden' },
+  progressContainer: { height: '6px', backgroundColor: 'var(--border-1)', borderRadius: '3px', overflow: 'hidden' },
   progressBar: { height: '100%', borderRadius: '3px', transition: 'width 0.3s ease' },
   rankBadge: { width: '24px', height: '24px', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', fontSize: '12px', fontWeight: '700' },
   // Summary
@@ -686,6 +686,6 @@ const styles = {
   // Metrics
   metricsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' },
   metricCard: { padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)', textAlign: 'center' },
-  metricLabel: { display: 'block', fontSize: '12px', color: '#6b7280', marginBottom: '4px' },
+  metricLabel: { display: 'block', fontSize: '12px', color: 'var(--text-2)', marginBottom: '4px' },
   metricValue: { fontSize: '20px', fontWeight: '700' }
 }

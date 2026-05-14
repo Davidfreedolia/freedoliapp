@@ -162,7 +162,7 @@ export default function Billing() {
             </div>
           </div>
           {actionError && (
-            <div role="alert" style={{ marginTop: 16, padding: '10px 12px', background: 'var(--error-bg, #fef2f2)', color: 'var(--error-text, #b91c1c)', borderRadius: 6, fontSize: 14 }}>
+            <div role="alert" style={{ marginTop: 16, padding: '10px 12px', background: 'var(--error-bg, #fef2f2)', color: 'var(--error-text, var(--danger-1))', borderRadius: 6, fontSize: 14 }}>
               {actionError}
             </div>
           )}
@@ -197,7 +197,7 @@ export default function Billing() {
           {usageLoading ? (
             <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>{t('billing.loadingUsage')}</p>
           ) : usageError ? (
-            <p style={{ fontSize: 14, color: 'var(--error-text, #b91c1c)' }} role="alert">{usageError}</p>
+            <p style={{ fontSize: 14, color: 'var(--error-text, var(--danger-1))' }} role="alert">{usageError}</p>
           ) : usage ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

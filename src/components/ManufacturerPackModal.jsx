@@ -225,7 +225,7 @@ export default function ManufacturerPackModal({
       width: '90%',
       maxHeight: '90vh',
       overflowY: 'auto',
-      boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
+      boxShadow: 'var(--shadow-modal)'
     },
     header: {
       display: 'flex',
@@ -236,14 +236,14 @@ export default function ManufacturerPackModal({
     title: {
       fontSize: '18px',
       fontWeight: '600',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       margin: 0
     },
     closeButton: {
       background: 'none',
       border: 'none',
       cursor: 'pointer',
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       padding: '4px'
     },
     section: {
@@ -252,7 +252,7 @@ export default function ManufacturerPackModal({
     sectionTitle: {
       fontSize: '14px',
       fontWeight: '600',
-      color: darkMode ? '#e5e7eb' : '#374151',
+      color: darkMode ? 'var(--border-1)' : 'var(--text-1)',
       marginBottom: '12px'
     },
     checkboxGroup: {
@@ -270,9 +270,9 @@ export default function ManufacturerPackModal({
       width: '100%',
       padding: '8px 12px',
       borderRadius: '6px',
-      border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`,
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       backgroundColor: darkMode ? '#15151f' : '#ffffff',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       fontSize: '14px'
     },
     label: {
@@ -280,7 +280,7 @@ export default function ManufacturerPackModal({
       marginBottom: '6px',
       fontSize: '13px',
       fontWeight: '500',
-      color: darkMode ? '#e5e7eb' : '#374151'
+      color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
     },
     errorBox: {
       padding: '12px',
@@ -290,7 +290,7 @@ export default function ManufacturerPackModal({
       marginBottom: '16px'
     },
     errorText: {
-      color: '#991b1b',
+      color: 'var(--danger-1)',
       fontSize: '13px',
       margin: 0
     },
@@ -314,12 +314,12 @@ export default function ManufacturerPackModal({
       transition: 'opacity 0.2s'
     },
     buttonPrimary: {
-      backgroundColor: '#4f46e5',
+      backgroundColor: 'var(--brand-1)',
       color: '#ffffff'
     },
     buttonSecondary: {
-      backgroundColor: darkMode ? '#374151' : '#e5e7eb',
-      color: darkMode ? '#ffffff' : '#111827'
+      backgroundColor: darkMode ? 'var(--text-1)' : 'var(--border-1)',
+      color: darkMode ? '#ffffff' : 'var(--text-1)'
     },
     buttonDisabled: {
       opacity: 0.5,
@@ -344,7 +344,7 @@ export default function ManufacturerPackModal({
         {validationErrors.length > 0 && (
           <div style={styles.errorBox}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-              <AlertTriangle size={16} color="#991b1b" />
+              <AlertTriangle size={16} color="var(--danger-1)" />
               <strong style={styles.errorText}>{t('orders.manufacturerPack.validation.title')}</strong>
             </div>
             <ul style={{ margin: 0, paddingLeft: '20px' }}>
@@ -365,7 +365,7 @@ export default function ManufacturerPackModal({
                 checked={selection.includePO}
                 onChange={e => setSelection({ ...selection, includePO: e.target.checked })}
               />
-              <span style={{ color: darkMode ? '#e5e7eb' : '#374151' }}>{t('orders.manufacturerPack.documents.poPdf')}</span>
+              <span style={{ color: darkMode ? 'var(--border-1)' : 'var(--text-1)' }}>{t('orders.manufacturerPack.documents.poPdf')}</span>
             </label>
             
             <label style={styles.checkbox}>
@@ -377,12 +377,12 @@ export default function ManufacturerPackModal({
               />
               <span style={{ 
                 color: (readiness?.needs_fnsku !== false && (!identifiers || !identifiers.fnsku))
-                  ? '#9ca3af'
-                  : (darkMode ? '#e5e7eb' : '#374151')
+                  ? 'var(--muted-1)'
+                  : (darkMode ? 'var(--border-1)' : 'var(--text-1)')
               }}>
                 {t('orders.manufacturerPack.documents.fnskuLabelsPdf')}
                 {readiness?.needs_fnsku !== false && (!identifiers || !identifiers.fnsku) && (
-                  <span style={{ color: '#ef4444', fontSize: '12px', marginLeft: '8px' }}>
+                  <span style={{ color: 'var(--danger-1)', fontSize: '12px', marginLeft: '8px' }}>
                     ({t('orders.manufacturerPack.documents.fnskuRequired')})
                   </span>
                 )}
@@ -395,7 +395,7 @@ export default function ManufacturerPackModal({
                 checked={selection.includePackingList}
                 onChange={e => setSelection({ ...selection, includePackingList: e.target.checked })}
               />
-              <span style={{ color: darkMode ? '#e5e7eb' : '#374151' }}>{t('orders.manufacturerPack.documents.packingListPdf')}</span>
+              <span style={{ color: darkMode ? 'var(--border-1)' : 'var(--text-1)' }}>{t('orders.manufacturerPack.documents.packingListPdf')}</span>
             </label>
             
             <label style={styles.checkbox}>
@@ -407,12 +407,12 @@ export default function ManufacturerPackModal({
               />
               <span style={{ 
                 color: !readiness?.cartons_count
-                  ? '#9ca3af'
-                  : (darkMode ? '#e5e7eb' : '#374151')
+                  ? 'var(--muted-1)'
+                  : (darkMode ? 'var(--border-1)' : 'var(--text-1)')
               }}>
                 {t('orders.manufacturerPack.documents.cartonLabelsPdf')}
                 {!readiness?.cartons_count && (
-                  <span style={{ color: '#ef4444', fontSize: '12px', marginLeft: '8px' }}>
+                  <span style={{ color: 'var(--danger-1)', fontSize: '12px', marginLeft: '8px' }}>
                     ({t('orders.manufacturerPack.documents.cartonsCountRequired')})
                   </span>
                 )}
@@ -458,7 +458,7 @@ export default function ManufacturerPackModal({
             padding: '12px',
             borderRadius: '8px',
             backgroundColor: readiness.manufacturer_pack_sent_at ? '#d1fae5' : '#fef3c7',
-            border: `1px solid ${readiness.manufacturer_pack_sent_at ? '#10b981' : '#fbbf24'}`,
+            border: `1px solid ${readiness.manufacturer_pack_sent_at ? 'var(--success-1)' : '#fbbf24'}`,
             marginBottom: '16px',
             fontSize: '13px',
             color: readiness.manufacturer_pack_sent_at ? '#065f46' : '#92400e'
@@ -504,7 +504,7 @@ export default function ManufacturerPackModal({
                   style={{
                     marginTop: '8px',
                     padding: '6px 12px',
-                    backgroundColor: '#10b981',
+                    backgroundColor: 'var(--success-1)',
                     color: '#ffffff',
                     border: 'none',
                     borderRadius: '6px',

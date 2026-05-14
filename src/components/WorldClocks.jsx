@@ -179,21 +179,21 @@ export default function WorldClocks() {
       gap: '6px',
       padding: '6px 10px',
       borderRadius: '8px',
-      backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       fontSize: '13px',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       position: 'relative'
     },
     clockLabel: {
       fontWeight: '500',
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       fontSize: '12px'
     },
     clockTime: {
       fontFamily: 'monospace',
       fontWeight: '600',
-      color: darkMode ? '#ffffff' : '#111827'
+      color: darkMode ? '#ffffff' : 'var(--text-1)'
     },
     removeButton: {
       marginLeft: '4px',
@@ -203,7 +203,7 @@ export default function WorldClocks() {
       cursor: 'pointer',
       display: 'flex',
       alignItems: 'center',
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       borderRadius: '4px',
       transition: 'all 0.2s'
     },
@@ -213,11 +213,11 @@ export default function WorldClocks() {
       gap: '4px',
       padding: '6px 10px',
       borderRadius: '8px',
-      backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       cursor: 'pointer',
       fontSize: '13px',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       position: 'relative'
     },
     dropdown: {
@@ -226,7 +226,7 @@ export default function WorldClocks() {
       right: 0,
       marginTop: '8px',
       backgroundColor: darkMode ? '#15151f' : '#ffffff',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       borderRadius: '8px',
       boxShadow: darkMode ? '0 4px 6px rgba(0,0,0,0.3)' : '0 4px 6px rgba(0,0,0,0.1)',
       minWidth: '200px',
@@ -238,8 +238,8 @@ export default function WorldClocks() {
       padding: '10px 14px',
       cursor: 'pointer',
       fontSize: '13px',
-      color: darkMode ? '#ffffff' : '#111827',
-      borderBottom: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
+      borderBottom: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       transition: 'background-color 0.2s'
     },
     dropdownItemLast: {
@@ -256,7 +256,7 @@ export default function WorldClocks() {
     <div style={styles.container}>
       {displayTimezones.map(({ timezone, label, isRequired }) => (
         <div key={timezone} style={styles.clock}>
-          <Clock size={14} color={darkMode ? '#9ca3af' : '#6b7280'} />
+          <Clock size={14} color={darkMode ? 'var(--muted-1)' : 'var(--text-2)'} />
           <span style={styles.clockLabel}>{label}:</span>
           <span style={styles.clockTime}>{formatTime(timezone)}</span>
           {!isRequired && (
@@ -296,7 +296,7 @@ export default function WorldClocks() {
                     backgroundColor: 'transparent'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = darkMode ? '#1f1f2e' : '#f3f4f6'
+                    e.currentTarget.style.backgroundColor = darkMode ? '#1f1f2e' : 'var(--surface-bg-2)'
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = 'transparent'

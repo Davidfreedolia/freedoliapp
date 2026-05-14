@@ -35,7 +35,7 @@ export default function AutomationFunnel({ funnel }) {
             <XAxis dataKey="stage" tick={{ fontSize: 11 }} />
             <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
             <Tooltip />
-            <Bar dataKey="value" fill="#1F5F63" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="value" fill="var(--brand-1)" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

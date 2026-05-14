@@ -14,8 +14,8 @@ export default function ImportPreviewSummary({ preview, sourceLabel = '', curren
   const { t } = useTranslation()
   if (!preview) return null
 
-  const muted = darkMode ? '#9aa1b4' : '#6b7280'
-  const ink = darkMode ? '#e6e9f2' : '#1f2937'
+  const muted = darkMode ? '#9aa1b4' : 'var(--text-2)'
+  const ink = darkMode ? '#e6e9f2' : 'var(--text-1)'
   const borderColor = darkMode ? '#2a2a3a' : 'rgba(31,95,99,0.14)'
   const bg = darkMode ? '#11111a' : '#f7faf4'
 
@@ -53,7 +53,7 @@ export default function ImportPreviewSummary({ preview, sourceLabel = '', curren
       backgroundColor: darkMode ? '#0f0f17' : '#ffffff',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-        <Database size={16} color="var(--brand-1,#1F5F63)" />
+        <Database size={16} color="var(--brand-1,var(--brand-1))" />
         <strong style={{ color: ink, fontSize: 14 }}>
           {t('dataImport.preview.title', 'Resum de la importació')}
         </strong>
@@ -69,7 +69,7 @@ export default function ImportPreviewSummary({ preview, sourceLabel = '', curren
       }}>
         {preview.dateRange && (
           <div style={cardStyle}>
-            <CalendarDays size={18} color="var(--brand-1,#1F5F63)" />
+            <CalendarDays size={18} color="var(--brand-1,var(--brand-1))" />
             <div>
               <div style={labelStyle}>{t('dataImport.preview.period', 'Període')}</div>
               <div style={valueStyle}>
@@ -79,7 +79,7 @@ export default function ImportPreviewSummary({ preview, sourceLabel = '', curren
           </div>
         )}
         <div style={cardStyle}>
-          <Package size={18} color="var(--brand-1,#1F5F63)" />
+          <Package size={18} color="var(--brand-1,var(--brand-1))" />
           <div>
             <div style={labelStyle}>{t('dataImport.preview.products', 'Productes')}</div>
             <div style={valueStyle}>{preview.productsCount}</div>
@@ -96,7 +96,7 @@ export default function ImportPreviewSummary({ preview, sourceLabel = '', curren
         )}
         {preview.expensesTotal > 0 && (
           <div style={cardStyle}>
-            <TrendingDown size={18} color="#F26C6C" />
+            <TrendingDown size={18} color="var(--coral-1)" />
             <div>
               <div style={labelStyle}>{t('dataImport.preview.expenses', 'Despeses totals')}</div>
               <div style={valueStyle}>{fmt(preview.expensesTotal)}</div>
@@ -105,10 +105,10 @@ export default function ImportPreviewSummary({ preview, sourceLabel = '', curren
         )}
         {(preview.revenueTotal > 0 || preview.expensesTotal > 0) && (
           <div style={cardStyle}>
-            <Wallet size={18} color={netPositive ? '#3FBF9A' : '#F26C6C'} />
+            <Wallet size={18} color={netPositive ? '#3FBF9A' : 'var(--coral-1)'} />
             <div>
               <div style={labelStyle}>{t('dataImport.preview.net', 'Benefici net')}</div>
-              <div style={{ ...valueStyle, color: netPositive ? '#3FBF9A' : '#F26C6C' }}>
+              <div style={{ ...valueStyle, color: netPositive ? '#3FBF9A' : 'var(--coral-1)' }}>
                 {fmt(net)}
               </div>
             </div>

@@ -106,7 +106,7 @@ export default function ProjectsKanban({ projects = [], businessByProjectId = {}
             onDrop={handleDrop(phaseId)}
             style={{
               backgroundColor: isHover ? columnBgHover : columnBg,
-              border: `1px solid ${isHover ? 'var(--brand-2,#6ECBC3)' : borderColor}`,
+              border: `1px solid ${isHover ? 'var(--brand-2,var(--brand-2))' : borderColor}`,
               borderRadius: 12,
               padding: 10,
               minHeight: 300,
@@ -124,7 +124,7 @@ export default function ProjectsKanban({ projects = [], businessByProjectId = {}
                 {meta?.label || `Phase ${phaseId}`}
               </div>
               <span style={{
-                backgroundColor: 'rgba(31,95,99,0.12)', color: 'var(--brand-1,#1F5F63)',
+                backgroundColor: 'rgba(31,95,99,0.12)', color: 'var(--brand-1,var(--brand-1))',
                 borderRadius: 999, padding: '1px 8px', fontSize: 11, fontWeight: 700,
               }}>
                 {items.length}
@@ -175,7 +175,7 @@ export default function ProjectsKanban({ projects = [], businessByProjectId = {}
                             ? 'var(--success-1,#3FBF9A)'
                             : biz.marginPct >= 10
                               ? 'var(--warning-1,#F2D94E)'
-                              : 'var(--danger-1,#F26C6C)',
+                              : 'var(--danger-1,var(--coral-1))',
                           fontWeight: 600,
                         }}>
                           {biz.marginPct}%

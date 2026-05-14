@@ -455,9 +455,9 @@ export default function ReceiptUploader({
 
   const getFileIcon = (mimeType, fileName) => {
     if (mimeType === 'application/pdf' || fileName?.toLowerCase().endsWith('.pdf')) {
-      return <FileText size={18} color="#ef4444" />
+      return <FileText size={18} color="var(--danger-1)" />
     }
-    return <Image size={18} color="#3b82f6" />
+    return <Image size={18} color="var(--cta-1)" />
   }
 
 
@@ -502,45 +502,45 @@ export default function ReceiptUploader({
     container: {
       marginTop: '16px',
       padding: '16px',
-      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
       borderRadius: '8px',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
     },
     label: {
       fontSize: '14px',
       fontWeight: '500',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       marginBottom: '12px',
       display: 'block'
     },
     dropzone: {
-      border: `2px dashed ${dragActive ? '#4f46e5' : darkMode ? '#374151' : '#d1d5db'}`,
+      border: `2px dashed ${dragActive ? 'var(--brand-1)' : darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       borderRadius: '8px',
       padding: '24px',
       textAlign: 'center',
       cursor: expenseId ? 'pointer' : 'not-allowed',
       transition: 'all 0.2s',
       backgroundColor: dragActive 
-        ? (darkMode ? '#1f1f2e' : '#f3f4f6')
+        ? (darkMode ? '#1f1f2e' : 'var(--surface-bg-2)')
         : (darkMode ? '#0a0a0f' : '#ffffff'),
       opacity: expenseId ? 1 : 0.6
     },
     dropzoneDisabled: {
-      borderColor: darkMode ? '#374151' : '#d1d5db',
-      backgroundColor: darkMode ? '#0a0a0f' : '#f9fafb'
+      borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)',
+      backgroundColor: darkMode ? '#0a0a0f' : 'var(--surface-bg-2)'
     },
     uploadIcon: {
       margin: '0 auto 12px',
-      color: darkMode ? '#9ca3af' : '#6b7280'
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
     },
     uploadText: {
       fontSize: '14px',
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       marginBottom: '4px'
     },
     uploadHint: {
       fontSize: '12px',
-      color: darkMode ? '#6b7280' : '#9ca3af'
+      color: darkMode ? 'var(--text-2)' : 'var(--muted-1)'
     },
     fileInput: {
       display: 'none'
@@ -551,7 +551,7 @@ export default function ReceiptUploader({
       backgroundColor: '#fee2e2',
       border: '1px solid #fecaca',
       borderRadius: '6px',
-      color: '#991b1b',
+      color: 'var(--danger-1)',
       fontSize: '13px',
       display: 'flex',
       alignItems: 'center',
@@ -578,7 +578,7 @@ export default function ReceiptUploader({
     attachmentItem: {
       padding: '12px',
       backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       borderRadius: '6px',
       display: 'flex',
       alignItems: 'center',
@@ -599,14 +599,14 @@ export default function ReceiptUploader({
     attachmentName: {
       fontSize: '14px',
       fontWeight: '500',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap'
     },
     attachmentMeta: {
       fontSize: '12px',
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       marginTop: '2px'
     },
     attachmentActions: {
@@ -625,8 +625,8 @@ export default function ReceiptUploader({
       display: 'flex',
       alignItems: 'center',
       gap: '6px',
-      backgroundColor: darkMode ? '#374151' : '#e5e7eb',
-      color: darkMode ? '#ffffff' : '#111827',
+      backgroundColor: darkMode ? 'var(--text-1)' : 'var(--border-1)',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       transition: 'background-color 0.2s'
     },
     deleteButton: {
@@ -634,14 +634,14 @@ export default function ReceiptUploader({
       border: 'none',
       cursor: 'pointer',
       padding: '6px',
-      color: '#ef4444',
+      color: 'var(--danger-1)',
       display: 'flex',
       alignItems: 'center',
       transition: 'opacity 0.2s'
     },
     loadingText: {
       fontSize: '13px',
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       textAlign: 'center',
       padding: '12px'
     }
@@ -711,7 +711,7 @@ export default function ReceiptUploader({
           
           {uploading ? (
             <>
-              <Loader size={24} color="#4f46e5" style={{...styles.uploadIcon, animation: 'spin 1s linear infinite'}} />
+              <Loader size={24} color="var(--brand-1)" style={{...styles.uploadIcon, animation: 'spin 1s linear infinite'}} />
               <div style={styles.uploadText}>Pujant receipts...</div>
             </>
           ) : (
@@ -750,7 +750,7 @@ export default function ReceiptUploader({
                   style={{
                     padding: '12px',
                     backgroundColor: darkMode ? '#1f1f2e' : '#fee2e2',
-                    border: `1px solid ${darkMode ? '#374151' : '#fecaca'}`,
+                    border: `1px solid ${darkMode ? 'var(--text-1)' : '#fecaca'}`,
                     borderRadius: '6px',
                     marginBottom: '8px',
                     display: 'flex',
@@ -760,19 +760,19 @@ export default function ReceiptUploader({
                   }}
                 >
                   <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <AlertCircle size={16} color="#dc2626" style={{ flexShrink: 0 }} />
+                    <AlertCircle size={16} color="var(--danger-1)" style={{ flexShrink: 0 }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{
                         fontSize: '14px',
                         fontWeight: '500',
-                        color: darkMode ? '#ffffff' : '#991b1b',
+                        color: darkMode ? '#ffffff' : 'var(--danger-1)',
                         marginBottom: '4px'
                       }}>
                         {uploadInfo.file.name}
                       </div>
                       <div style={{
                         fontSize: '12px',
-                        color: darkMode ? '#fca5a5' : '#dc2626'
+                        color: darkMode ? '#fca5a5' : 'var(--danger-1)'
                       }}>
                         {uploadInfo.error}
                       </div>
@@ -786,7 +786,7 @@ export default function ReceiptUploader({
                       fontSize: '13px',
                       fontWeight: '500',
                       cursor: 'pointer',
-                      backgroundColor: '#4f46e5',
+                      backgroundColor: 'var(--brand-1)',
                       color: '#ffffff',
                       border: 'none',
                       display: 'flex',
@@ -813,8 +813,8 @@ export default function ReceiptUploader({
                 key={fileId}
                 style={{
                   padding: '12px',
-                  backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                  border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+                  backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                  border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
                   borderRadius: '6px',
                   marginBottom: '8px',
                   display: 'flex',
@@ -822,18 +822,18 @@ export default function ReceiptUploader({
                   gap: '12px'
                 }}
               >
-                <Loader size={18} color="#4f46e5" style={{ animation: 'spin 1s linear infinite' }} />
+                <Loader size={18} color="var(--brand-1)" style={{ animation: 'spin 1s linear infinite' }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{
                     fontSize: '14px',
                     fontWeight: '500',
-                    color: darkMode ? '#ffffff' : '#111827'
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}>
                     {uploadInfo.file.name}
                   </div>
                   <div style={{
                     fontSize: '12px',
-                    color: darkMode ? '#9ca3af' : '#6b7280',
+                    color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
                     marginTop: '2px'
                   }}>
                     Pujant...
@@ -854,12 +854,12 @@ export default function ReceiptUploader({
           }}>
             <thead>
               <tr style={{
-                borderBottom: `2px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+                borderBottom: `2px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
               }}>
                 <th style={{
                   textAlign: 'left',
                   padding: '12px',
-                  color: darkMode ? '#9ca3af' : '#6b7280',
+                  color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
                   fontWeight: '600',
                   fontSize: '12px',
                   textTransform: 'uppercase'
@@ -867,7 +867,7 @@ export default function ReceiptUploader({
                 <th style={{
                   textAlign: 'left',
                   padding: '12px',
-                  color: darkMode ? '#9ca3af' : '#6b7280',
+                  color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
                   fontWeight: '600',
                   fontSize: '12px',
                   textTransform: 'uppercase'
@@ -875,7 +875,7 @@ export default function ReceiptUploader({
                 <th style={{
                   textAlign: 'left',
                   padding: '12px',
-                  color: darkMode ? '#9ca3af' : '#6b7280',
+                  color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
                   fontWeight: '600',
                   fontSize: '12px',
                   textTransform: 'uppercase'
@@ -883,7 +883,7 @@ export default function ReceiptUploader({
                 <th style={{
                   textAlign: 'right',
                   padding: '12px',
-                  color: darkMode ? '#9ca3af' : '#6b7280',
+                  color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
                   fontWeight: '600',
                   fontSize: '12px',
                   textTransform: 'uppercase',
@@ -896,11 +896,11 @@ export default function ReceiptUploader({
                 <tr 
                   key={attachment.id}
                   style={{
-                    borderBottom: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+                    borderBottom: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
                     transition: 'background-color 0.2s'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = darkMode ? '#1f1f2e' : '#f9fafb'
+                    e.currentTarget.style.backgroundColor = darkMode ? '#1f1f2e' : 'var(--surface-bg-2)'
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = 'transparent'
@@ -909,12 +909,12 @@ export default function ReceiptUploader({
                   <td style={{ padding: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       {replacingFileId === attachment.id ? (
-                        <Loader size={18} color="#4f46e5" style={{ animation: 'spin 1s linear infinite' }} />
+                        <Loader size={18} color="var(--brand-1)" style={{ animation: 'spin 1s linear infinite' }} />
                       ) : (
                         getFileIcon(attachment.mime_type, attachment.file_name)
                       )}
                       <span style={{
-                        color: darkMode ? '#ffffff' : '#111827',
+                        color: darkMode ? '#ffffff' : 'var(--text-1)',
                         fontWeight: '500',
                         opacity: replacingFileId === attachment.id ? 0.6 : 1
                       }}>
@@ -923,7 +923,7 @@ export default function ReceiptUploader({
                       {replacingFileId === attachment.id && (
                         <span style={{
                           fontSize: '12px',
-                          color: '#4f46e5',
+                          color: 'var(--brand-1)',
                           fontStyle: 'italic'
                         }}>
                           (Substituint...)
@@ -933,13 +933,13 @@ export default function ReceiptUploader({
                   </td>
                   <td style={{
                     padding: '12px',
-                    color: darkMode ? '#9ca3af' : '#6b7280'
+                    color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
                   }}>
                     {formatFileSize(attachment.size)}
                   </td>
                   <td style={{
                     padding: '12px',
-                    color: darkMode ? '#9ca3af' : '#6b7280',
+                    color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
                     fontSize: '13px'
                   }}>
                     {formatDate(attachment.created_at)}
@@ -960,14 +960,14 @@ export default function ReceiptUploader({
                           border: 'none',
                           cursor: 'pointer',
                           padding: '6px',
-                          color: darkMode ? '#9ca3af' : '#6b7280',
+                          color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
                           display: 'flex',
                           alignItems: 'center',
                           borderRadius: '4px',
                           transition: 'background-color 0.2s'
                         }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = darkMode ? '#374151' : '#e5e7eb'
+                          e.currentTarget.style.backgroundColor = darkMode ? 'var(--text-1)' : 'var(--border-1)'
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.backgroundColor = 'transparent'
@@ -983,9 +983,9 @@ export default function ReceiptUploader({
                             top: '100%',
                             marginTop: '4px',
                             backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
-                            border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+                            border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
                             borderRadius: '8px',
-                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                            boxShadow: 'var(--shadow-popover)',
                             minWidth: '160px',
                             zIndex: 1000,
                             overflow: 'hidden'
@@ -1004,7 +1004,7 @@ export default function ReceiptUploader({
                               background: 'none',
                               border: 'none',
                               cursor: 'pointer',
-                              color: darkMode ? '#ffffff' : '#111827',
+                              color: darkMode ? '#ffffff' : 'var(--text-1)',
                               fontSize: '14px',
                               display: 'flex',
                               alignItems: 'center',
@@ -1012,7 +1012,7 @@ export default function ReceiptUploader({
                               transition: 'background-color 0.2s'
                             }}
                             onMouseEnter={(e) => {
-                              e.currentTarget.style.backgroundColor = darkMode ? '#374151' : '#f3f4f6'
+                              e.currentTarget.style.backgroundColor = darkMode ? 'var(--text-1)' : 'var(--surface-bg-2)'
                             }}
                             onMouseLeave={(e) => {
                               e.currentTarget.style.backgroundColor = 'transparent'
@@ -1034,7 +1034,7 @@ export default function ReceiptUploader({
                               background: 'none',
                               border: 'none',
                               cursor: replacingFileId === attachment.id ? 'not-allowed' : 'pointer',
-                              color: darkMode ? '#ffffff' : '#111827',
+                              color: darkMode ? '#ffffff' : 'var(--text-1)',
                               fontSize: '14px',
                               display: 'flex',
                               alignItems: 'center',
@@ -1044,7 +1044,7 @@ export default function ReceiptUploader({
                             }}
                             onMouseEnter={(e) => {
                               if (replacingFileId !== attachment.id) {
-                                e.currentTarget.style.backgroundColor = darkMode ? '#374151' : '#f3f4f6'
+                                e.currentTarget.style.backgroundColor = darkMode ? 'var(--text-1)' : 'var(--surface-bg-2)'
                               }
                             }}
                             onMouseLeave={(e) => {
@@ -1067,7 +1067,7 @@ export default function ReceiptUploader({
                               background: 'none',
                               border: 'none',
                               cursor: (replacingFileId === attachment.id || uploading) ? 'not-allowed' : 'pointer',
-                              color: darkMode ? '#ffffff' : '#111827',
+                              color: darkMode ? '#ffffff' : 'var(--text-1)',
                               fontSize: '14px',
                               display: 'flex',
                               alignItems: 'center',
@@ -1077,7 +1077,7 @@ export default function ReceiptUploader({
                             }}
                             onMouseEnter={(e) => {
                               if (replacingFileId !== attachment.id && !uploading) {
-                                e.currentTarget.style.backgroundColor = darkMode ? '#374151' : '#f3f4f6'
+                                e.currentTarget.style.backgroundColor = darkMode ? 'var(--text-1)' : 'var(--surface-bg-2)'
                               }
                             }}
                             onMouseLeave={(e) => {
@@ -1100,7 +1100,7 @@ export default function ReceiptUploader({
                               background: 'none',
                               border: 'none',
                               cursor: (replacingFileId === attachment.id || deleting) ? 'not-allowed' : 'pointer',
-                              color: '#ef4444',
+                              color: 'var(--danger-1)',
                               fontSize: '14px',
                               display: 'flex',
                               alignItems: 'center',
@@ -1110,7 +1110,7 @@ export default function ReceiptUploader({
                             }}
                             onMouseEnter={(e) => {
                               if (replacingFileId !== attachment.id && !deleting) {
-                                e.currentTarget.style.backgroundColor = darkMode ? '#374151' : '#fee2e2'
+                                e.currentTarget.style.backgroundColor = darkMode ? 'var(--text-1)' : '#fee2e2'
                               }
                             }}
                             onMouseLeave={(e) => {
@@ -1248,9 +1248,9 @@ export default function ReceiptUploader({
               maxWidth: '480px',
               backgroundColor: darkMode ? '#15151f' : '#ffffff',
               borderRadius: '16px',
-              border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+              border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
               overflow: 'hidden',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
+              boxShadow: 'var(--shadow-modal)'
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -1260,13 +1260,13 @@ export default function ReceiptUploader({
               justifyContent: 'space-between',
               alignItems: 'center',
               padding: '20px 24px',
-              borderBottom: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+              borderBottom: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
             }}>
               <h3 style={{
                 margin: 0,
                 fontSize: '18px',
                 fontWeight: '600',
-                color: darkMode ? '#ffffff' : '#111827'
+                color: darkMode ? '#ffffff' : 'var(--text-1)'
               }}>
                 Renombrar fitxer
               </h3>
@@ -1277,7 +1277,7 @@ export default function ReceiptUploader({
                   background: 'none',
                   border: 'none',
                   cursor: renaming ? 'not-allowed' : 'pointer',
-                  color: '#6b7280',
+                  color: 'var(--text-2)',
                   padding: '4px',
                   display: 'flex',
                   alignItems: 'center',
@@ -1294,7 +1294,7 @@ export default function ReceiptUploader({
                 display: 'block',
                 fontSize: '14px',
                 fontWeight: '500',
-                color: darkMode ? '#ffffff' : '#111827',
+                color: darkMode ? '#ffffff' : 'var(--text-1)',
                 marginBottom: '8px'
               }}>
                 Nom del fitxer
@@ -1308,18 +1308,18 @@ export default function ReceiptUploader({
                   width: '100%',
                   padding: '12px',
                   fontSize: '14px',
-                  backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                  color: darkMode ? '#ffffff' : '#111827',
-                  border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+                  backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                  color: darkMode ? '#ffffff' : 'var(--text-1)',
+                  border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
                   borderRadius: '8px',
                   outline: 'none',
                   transition: 'border-color 0.2s'
                 }}
                 onFocus={(e) => {
-                  e.target.style.borderColor = '#4f46e5'
+                  e.target.style.borderColor = 'var(--brand-1)'
                 }}
                 onBlur={(e) => {
-                  e.target.style.borderColor = darkMode ? '#374151' : '#e5e7eb'
+                  e.target.style.borderColor = darkMode ? 'var(--text-1)' : 'var(--border-1)'
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !renaming && newFileName.trim()) {
@@ -1339,7 +1339,7 @@ export default function ReceiptUploader({
               justifyContent: 'flex-end',
               gap: '12px',
               padding: '20px 24px',
-              borderTop: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+              borderTop: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
             }}>
               <button
                 onClick={handleCancelRename}
@@ -1351,8 +1351,8 @@ export default function ReceiptUploader({
                   fontWeight: '500',
                   cursor: renaming ? 'not-allowed' : 'pointer',
                   backgroundColor: 'transparent',
-                  color: darkMode ? '#9ca3af' : '#6b7280',
-                  border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+                  color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
+                  border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
                   transition: 'opacity 0.2s',
                   opacity: renaming ? 0.5 : 1
                 }}
@@ -1368,7 +1368,7 @@ export default function ReceiptUploader({
                   fontSize: '14px',
                   fontWeight: '500',
                   cursor: (renaming || !newFileName.trim()) ? 'not-allowed' : 'pointer',
-                  backgroundColor: (renaming || !newFileName.trim()) ? '#9ca3af' : '#4f46e5',
+                  backgroundColor: (renaming || !newFileName.trim()) ? 'var(--muted-1)' : 'var(--brand-1)',
                   color: '#ffffff',
                   border: 'none',
                   display: 'flex',

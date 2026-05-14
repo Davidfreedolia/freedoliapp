@@ -26,7 +26,7 @@ export default function LogisticsFlow({ orderId, projectId, compact = false }) {
 
   // Estats del flux
   const FLOW_STATES = {
-    pending:     { label: t('logisticsFlow.states.pending'),     color: '#9ca3af', icon: Clock },
+    pending:     { label: t('logisticsFlow.states.pending'),     color: 'var(--muted-1)', icon: Clock },
     in_progress: { label: t('logisticsFlow.states.in_progress'), color: 'var(--warning-1)', icon: AlertCircle },
     completed:   { label: t('logisticsFlow.states.completed'),   color: 'var(--success-1)', icon: CheckCircle }
   }
@@ -156,7 +156,7 @@ export default function LogisticsFlow({ orderId, projectId, compact = false }) {
 
   if (loading) {
     return (
-      <div style={{ padding: '20px', textAlign: 'center', color: '#6b7280' }}>
+      <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-2)' }}>
         {t('logisticsFlow.loading')}
       </div>
     )
@@ -176,7 +176,7 @@ export default function LogisticsFlow({ orderId, projectId, compact = false }) {
           <span style={{ color: currentStage.color, fontWeight: '500', fontSize: '13px' }}>
             {currentStage.name}
           </span>
-          <span style={{ color: '#6b7280', fontSize: '12px' }}>
+          <span style={{ color: 'var(--text-2)', fontSize: '12px' }}>
             {completedCount}/{LOGISTICS_STAGES.length}
           </span>
         </div>
@@ -194,15 +194,15 @@ export default function LogisticsFlow({ orderId, projectId, compact = false }) {
               <div key={stage.id} style={styles.compactStage}>
                 <div style={{
                   ...styles.compactIcon,
-                  backgroundColor: isCompleted ? `${stage.color}20` : (isInProgress ? `${stage.color}10` : '#f3f4f6'),
-                  borderColor: isCompleted || isInProgress ? stage.color : '#e5e7eb'
+                  backgroundColor: isCompleted ? `${stage.color}20` : (isInProgress ? `${stage.color}10` : 'var(--surface-bg-2)'),
+                  borderColor: isCompleted || isInProgress ? stage.color : 'var(--border-1)'
                 }}>
-                  <StageIcon size={12} color={isCompleted || isInProgress ? stage.color : '#9ca3af'} />
+                  <StageIcon size={12} color={isCompleted || isInProgress ? stage.color : 'var(--muted-1)'} />
                 </div>
                 {idx < LOGISTICS_STAGES.length - 1 && (
                   <div style={{
                     ...styles.compactConnector,
-                    backgroundColor: isCompleted ? stage.color : '#e5e7eb'
+                    backgroundColor: isCompleted ? stage.color : 'var(--border-1)'
                   }} />
                 )}
               </div>
@@ -221,7 +221,7 @@ export default function LogisticsFlow({ orderId, projectId, compact = false }) {
     }}>
       {/* Header */}
       <div style={styles.header}>
-        <h3 style={{ ...styles.title, color: darkMode ? '#ffffff' : '#111827' }}>
+        <h3 style={{ ...styles.title, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
           <Ship size={20} color="var(--brand-2)" />
           {t('logisticsFlow.title')}
         </h3>
@@ -256,8 +256,8 @@ export default function LogisticsFlow({ orderId, projectId, compact = false }) {
               {/* Stage node */}
               <div style={{
                 ...styles.stageNode,
-                backgroundColor: isCompleted ? `${stage.color}15` : (isInProgress ? `${stage.color}10` : (darkMode ? '#1f1f2e' : '#f9fafb')),
-                borderColor: isCompleted || isInProgress ? stage.color : (darkMode ? '#374151' : '#e5e7eb'),
+                backgroundColor: isCompleted ? `${stage.color}15` : (isInProgress ? `${stage.color}10` : (darkMode ? '#1f1f2e' : 'var(--surface-bg-2)')),
+                borderColor: isCompleted || isInProgress ? stage.color : (darkMode ? 'var(--text-1)' : 'var(--border-1)'),
                 boxShadow: isCurrent ? `0 0 0 3px ${stage.color}30` : 'none'
               }}>
                 <div style={{
@@ -269,7 +269,7 @@ export default function LogisticsFlow({ orderId, projectId, compact = false }) {
                 
                 <div style={styles.stageInfo}>
                   <div style={styles.stageHeader}>
-                    <span style={{ ...styles.stageName, color: darkMode ? '#ffffff' : '#111827' }}>
+                    <span style={{ ...styles.stageName, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
                       {stage.name}
                     </span>
                     <div style={{
@@ -292,7 +292,7 @@ export default function LogisticsFlow({ orderId, projectId, compact = false }) {
                         style={{
                           ...styles.input,
                           backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-                          color: darkMode ? '#ffffff' : '#111827'
+                          color: darkMode ? '#ffffff' : 'var(--text-1)'
                         }}
                       >
                         <option value="pending">{t('logisticsFlow.states.pending')}</option>
@@ -307,7 +307,7 @@ export default function LogisticsFlow({ orderId, projectId, compact = false }) {
                         style={{
                           ...styles.input,
                           backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-                          color: darkMode ? '#ffffff' : '#111827'
+                          color: darkMode ? '#ffffff' : 'var(--text-1)'
                         }}
                       />
                       <input
@@ -318,7 +318,7 @@ export default function LogisticsFlow({ orderId, projectId, compact = false }) {
                         style={{
                           ...styles.input,
                           backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-                          color: darkMode ? '#ffffff' : '#111827'
+                          color: darkMode ? '#ffffff' : 'var(--text-1)'
                         }}
                       />
                     </div>
@@ -344,12 +344,12 @@ export default function LogisticsFlow({ orderId, projectId, compact = false }) {
                 <div style={styles.connector}>
                   <div style={{
                     ...styles.connectorLine,
-                    backgroundColor: isCompleted ? stage.color : '#e5e7eb'
+                    backgroundColor: isCompleted ? stage.color : 'var(--border-1)'
                   }} />
-                  <ChevronRight size={16} color={isCompleted ? stage.color : '#d1d5db'} />
+                  <ChevronRight size={16} color={isCompleted ? stage.color : 'var(--border-1)'} />
                   <div style={{
                     ...styles.connectorLine,
-                    backgroundColor: isCompleted ? LOGISTICS_STAGES[idx + 1].color : '#e5e7eb'
+                    backgroundColor: isCompleted ? LOGISTICS_STAGES[idx + 1].color : 'var(--border-1)'
                   }} />
                 </div>
               )}
@@ -363,7 +363,7 @@ export default function LogisticsFlow({ orderId, projectId, compact = false }) {
         {Object.entries(FLOW_STATES).map(([key, state]) => (
           <div key={key} style={styles.legendItem}>
             <div style={{ ...styles.legendDot, backgroundColor: state.color }} />
-            <span style={{ color: '#6b7280', fontSize: '12px' }}>{state.label}</span>
+            <span style={{ color: 'var(--text-2)', fontSize: '12px' }}>{state.label}</span>
           </div>
         ))}
       </div>
@@ -398,7 +398,7 @@ const styles = {
     gap: '6px',
     padding: '8px 12px',
     backgroundColor: '#4f46e510',
-    color: '#4f46e5',
+    color: 'var(--brand-1)',
     border: 'none',
     borderRadius: '8px',
     fontSize: '13px',
@@ -410,7 +410,7 @@ const styles = {
     gap: '6px',
     padding: '8px 12px',
     backgroundColor: 'transparent',
-    color: '#6b7280',
+    color: 'var(--text-2)',
     border: '1px solid #e5e7eb',
     borderRadius: '8px',
     fontSize: '13px',
@@ -421,7 +421,7 @@ const styles = {
     alignItems: 'center',
     gap: '6px',
     padding: '8px 12px',
-    backgroundColor: '#22c55e',
+    backgroundColor: 'var(--success-1)',
     color: '#ffffff',
     border: 'none',
     borderRadius: '8px',
@@ -486,7 +486,7 @@ const styles = {
   stageDescription: {
     margin: '0 0 8px',
     fontSize: '12px',
-    color: '#6b7280',
+    color: 'var(--text-2)',
     lineHeight: '1.4'
   },
   stageDetails: {
@@ -499,7 +499,7 @@ const styles = {
     alignItems: 'center',
     gap: '4px',
     fontSize: '12px',
-    color: '#6b7280'
+    color: 'var(--text-2)'
   },
   editFields: {
     display: 'flex',
@@ -553,7 +553,7 @@ const styles = {
   progressBar: {
     width: '100%',
     height: '4px',
-    backgroundColor: '#e5e7eb',
+    backgroundColor: 'var(--border-1)',
     borderRadius: '2px',
     marginBottom: '8px',
     overflow: 'hidden'

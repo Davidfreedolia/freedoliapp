@@ -10,9 +10,9 @@ import { useBusinessAlerts } from '../../hooks/useBusinessAlerts'
 import { createOrGetTaskFromOrigin } from '../../lib/supabase'
 
 const SEVERITY_COLOR = {
-  critical: 'var(--danger-1, #dc2626)',
-  high: 'var(--danger-1, #dc2626)',
-  medium: 'var(--warning-1, #d97706)',
+  critical: 'var(--danger-1, var(--danger-1))',
+  high: 'var(--danger-1, var(--danger-1))',
+  medium: 'var(--warning-1, var(--warning-1))',
   low: 'var(--muted-2, #6b7280)',
 }
 
@@ -234,7 +234,7 @@ export default function BusinessAlertsBadge() {
               height: 16,
               padding: '0 4px',
               borderRadius: 999,
-              backgroundColor: 'var(--warning-1, #d97706)',
+              backgroundColor: 'var(--warning-1, var(--warning-1))',
               color: '#fff',
               fontSize: 10,
               fontWeight: 700,
@@ -329,7 +329,7 @@ export default function BusinessAlertsBadge() {
                   marginBottom: 6,
                   fontSize: 11,
                   borderRadius: 6,
-                  background: taskMessage.type === 'error' ? 'var(--danger-1, #dc2626)' : 'var(--success-1, #16a34a)',
+                  background: taskMessage.type === 'error' ? 'var(--danger-1, var(--danger-1))' : 'var(--success-1, var(--success-1))',
                   color: '#fff',
                 }}
               >

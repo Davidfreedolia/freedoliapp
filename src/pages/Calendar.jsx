@@ -182,8 +182,8 @@ export default function CalendarPage() {
     
     switch (event.type) {
       case 'task':
-        backgroundColor = event.priority === 'high' ? '#ef4444' : 
-                          event.priority === 'normal' ? '#f59e0b' : '#6b7280'
+        backgroundColor = event.priority === 'high' ? 'var(--danger-1)' : 
+                          event.priority === 'normal' ? 'var(--warning-1)' : 'var(--text-2)'
         borderColor = backgroundColor
         // Add purple border for tasks from sticky notes
         if (event.source === 'sticky_note') {
@@ -191,19 +191,19 @@ export default function CalendarPage() {
         }
         break
       case 'shipment':
-        backgroundColor = '#3b82f6'
-        borderColor = '#3b82f6'
+        backgroundColor = 'var(--cta-1)'
+        borderColor = 'var(--cta-1)'
         break
       case 'manufacturer':
-        backgroundColor = event.status === 'sent' ? '#22c55e' : '#f59e0b'
+        backgroundColor = event.status === 'sent' ? 'var(--success-1)' : 'var(--warning-1)'
         borderColor = backgroundColor
         break
       case 'quote':
-        backgroundColor = '#8b5cf6'
-        borderColor = '#8b5cf6'
+        backgroundColor = 'var(--brand-1)'
+        borderColor = 'var(--brand-1)'
         break
       case 'purchase_order':
-        backgroundColor = event.status === 'expected' ? '#f59e0b' : '#3b82f6'
+        backgroundColor = event.status === 'expected' ? 'var(--warning-1)' : 'var(--cta-1)'
         borderColor = backgroundColor
         break
     }
@@ -261,7 +261,7 @@ export default function CalendarPage() {
     title: {
       fontSize: isMobile ? '24px' : '32px',
       fontWeight: '700',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       margin: 0
     },
     filterButton: {
@@ -278,7 +278,7 @@ export default function CalendarPage() {
       right: isMobile ? 'auto' : '0',
       zIndex: 100,
       backgroundColor: darkMode ? '#15151f' : '#ffffff',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       borderRadius: '12px',
       padding: '20px',
       minWidth: isMobile ? '100%' : '300px',
@@ -291,7 +291,7 @@ export default function CalendarPage() {
     filterLabel: {
       fontSize: '13px',
       fontWeight: '600',
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       marginBottom: '8px',
       textTransform: 'uppercase',
       letterSpacing: '0.5px'
@@ -299,10 +299,10 @@ export default function CalendarPage() {
     select: {
       width: '100%',
       padding: '8px 12px',
-      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       borderRadius: '6px',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       fontSize: '14px',
       cursor: 'pointer'
     },
@@ -316,7 +316,7 @@ export default function CalendarPage() {
       alignItems: 'center',
       gap: '8px',
       fontSize: '14px',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       cursor: 'pointer'
     },
     checkbox: {
@@ -329,7 +329,7 @@ export default function CalendarPage() {
       backgroundColor: darkMode ? '#15151f' : '#ffffff',
       borderRadius: '12px',
       padding: isMobile ? '12px' : '20px',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       overflow: 'hidden'
     },
     loading: {
@@ -337,7 +337,7 @@ export default function CalendarPage() {
       justifyContent: 'center',
       alignItems: 'center',
       height: '400px',
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       fontSize: '16px'
     }
   }
@@ -361,7 +361,7 @@ export default function CalendarPage() {
           {showFilters && (
             <div style={styles.filterPanel}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: darkMode ? '#ffffff' : '#111827' }}>
+                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
                   {t('calendar.filters', 'Filtres')}
                 </h3>
                 <Button
@@ -528,7 +528,7 @@ export default function CalendarPage() {
           background-color: #2a2a3a;
         }
         .rbc-dark .rbc-toolbar button.rbc-active {
-          background-color: #4f46e5;
+          background-color: var(--brand-1);
           color: #ffffff;
         }
         .rbc-light .rbc-header {
@@ -553,7 +553,7 @@ export default function CalendarPage() {
           background-color: #f3f4f6;
         }
         .rbc-light .rbc-toolbar button.rbc-active {
-          background-color: #4f46e5;
+          background-color: var(--brand-1);
           color: #ffffff;
         }
       `}</style>

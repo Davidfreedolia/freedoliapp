@@ -96,15 +96,15 @@ export default function HelpIcon({ helpKey, size = 'small', style = {}, darkMode
           alignItems: 'center',
           cursor: 'pointer',
           marginLeft: '4px',
-          color: darkMode ? '#9ca3af' : '#6b7280',
+          color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
           transition: 'color 0.2s',
           ...style
         }}
         onMouseOver={(e) => {
-          e.currentTarget.style.color = darkMode ? '#d1d5db' : '#374151'
+          e.currentTarget.style.color = darkMode ? 'var(--border-1)' : 'var(--text-1)'
         }}
         onMouseOut={(e) => {
-          e.currentTarget.style.color = darkMode ? '#9ca3af' : '#6b7280'
+          e.currentTarget.style.color = darkMode ? 'var(--muted-1)' : 'var(--text-2)'
         }}
         aria-label={title}
         role="button"
@@ -129,8 +129,8 @@ export default function HelpIcon({ helpKey, size = 'small', style = {}, darkMode
             transform: 'translateX(-50%)',
             marginBottom: '8px',
             zIndex: 1000,
-            backgroundColor: darkMode ? '#1f2937' : '#111827',
-            color: darkMode ? '#f3f4f6' : '#ffffff',
+            backgroundColor: darkMode ? 'var(--text-1)' : 'var(--text-1)',
+            color: darkMode ? 'var(--surface-bg-2)' : '#ffffff',
             padding: '8px 12px',
             borderRadius: '6px',
             fontSize: '13px',
@@ -149,7 +149,7 @@ export default function HelpIcon({ helpKey, size = 'small', style = {}, darkMode
               transform: 'translateX(-50%) rotate(45deg)',
               width: '8px',
               height: '8px',
-              backgroundColor: darkMode ? '#1f2937' : '#111827',
+              backgroundColor: darkMode ? 'var(--text-1)' : 'var(--text-1)',
               marginTop: '-4px'
             }}
           />
@@ -167,8 +167,8 @@ export default function HelpIcon({ helpKey, size = 'small', style = {}, darkMode
             transform: 'translateX(-50%)',
             marginBottom: '8px',
             zIndex: 1001,
-            backgroundColor: darkMode ? '#1f2937' : '#ffffff',
-            border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+            backgroundColor: darkMode ? 'var(--text-1)' : '#ffffff',
+            border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
             borderRadius: '8px',
             padding: '16px',
             maxWidth: '320px',
@@ -182,7 +182,7 @@ export default function HelpIcon({ helpKey, size = 'small', style = {}, darkMode
                 margin: 0,
                 fontSize: '15px',
                 fontWeight: '600',
-                color: darkMode ? '#f3f4f6' : '#111827'
+                color: darkMode ? 'var(--surface-bg-2)' : 'var(--text-1)'
               }}
             >
               {title}
@@ -193,7 +193,7 @@ export default function HelpIcon({ helpKey, size = 'small', style = {}, darkMode
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                color: darkMode ? '#9ca3af' : '#6b7280',
+                color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
                 padding: '0',
                 display: 'flex',
                 alignItems: 'center',
@@ -209,7 +209,7 @@ export default function HelpIcon({ helpKey, size = 'small', style = {}, darkMode
               margin: '0 0 8px 0',
               fontSize: '13px',
               lineHeight: '1.5',
-              color: darkMode ? '#d1d5db' : '#374151'
+              color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
             }}
           >
             {long}
@@ -219,10 +219,10 @@ export default function HelpIcon({ helpKey, size = 'small', style = {}, darkMode
               style={{
                 marginTop: '8px',
                 padding: '8px',
-                backgroundColor: darkMode ? '#111827' : '#f3f4f6',
+                backgroundColor: darkMode ? 'var(--text-1)' : 'var(--surface-bg-2)',
                 borderRadius: '4px',
                 fontSize: '12px',
-                color: darkMode ? '#9ca3af' : '#6b7280',
+                color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
                 fontStyle: 'italic'
               }}
             >

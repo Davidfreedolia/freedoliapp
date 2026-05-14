@@ -204,7 +204,7 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
   const styles = {
     container: {
       borderRadius: '12px',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       padding: '20px',
       background: hasPhaseStyle
         ? phaseSurface.cardStyle.background
@@ -230,7 +230,7 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
       alignItems: 'center',
       gap: '6px',
       padding: '8px 16px',
-      backgroundColor: '#4f46e5',
+      backgroundColor: 'var(--brand-1)',
       color: '#ffffff',
       border: 'none',
       borderRadius: '8px',
@@ -246,20 +246,20 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
     loading: {
       padding: '40px',
       textAlign: 'center',
-      color: darkMode ? '#9ca3af' : '#6b7280'
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
     },
     empty: {
       padding: '40px',
       textAlign: 'center',
-      color: darkMode ? '#9ca3af' : '#6b7280'
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
     },
     table: {
       width: '100%',
       borderCollapse: 'collapse'
     },
     tableHeader: {
-      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-      borderBottom: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+      borderBottom: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
     },
     tableHeaderCell: {
       padding: '12px 16px',
@@ -267,15 +267,15 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
       fontSize: '12px',
       fontWeight: '600',
       textTransform: 'uppercase',
-      color: darkMode ? '#9ca3af' : '#6b7280'
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
     },
     tableRow: {
-      borderBottom: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+      borderBottom: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
     },
     tableCell: {
       padding: '14px 16px',
       fontSize: '14px',
-      color: darkMode ? '#ffffff' : '#111827'
+      color: darkMode ? '#ffffff' : 'var(--text-1)'
     },
     typeBadge: {
       display: 'inline-block',
@@ -293,7 +293,7 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
       background: 'none',
       border: 'none',
       cursor: 'pointer',
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       padding: '4px',
       display: 'flex',
       alignItems: 'center'
@@ -305,8 +305,8 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
       zIndex: 100,
       marginTop: '4px',
       borderRadius: '8px',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
-      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
+      boxShadow: 'var(--shadow-popover)',
       minWidth: '140px',
       overflow: 'hidden'
     },
@@ -321,11 +321,11 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
       textAlign: 'left',
       fontSize: '14px',
       cursor: 'pointer',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       backgroundColor: darkMode ? '#1f1f2e' : '#ffffff'
     },
     menuItemHover: {
-      backgroundColor: darkMode ? '#374151' : '#f9fafb'
+      backgroundColor: darkMode ? 'var(--text-1)' : 'var(--surface-bg-2)'
     },
     modalOverlay: {
       position: 'fixed',
@@ -345,7 +345,7 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
       maxWidth: '500px',
       backgroundColor: darkMode ? '#15151f' : '#ffffff',
       borderRadius: '16px',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       overflow: 'hidden'
     },
     modalHeader: {
@@ -353,19 +353,19 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
       justifyContent: 'space-between',
       alignItems: 'center',
       padding: '20px 24px',
-      borderBottom: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+      borderBottom: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
     },
     modalTitle: {
       margin: 0,
       fontSize: '18px',
       fontWeight: '600',
-      color: darkMode ? '#ffffff' : '#111827'
+      color: darkMode ? '#ffffff' : 'var(--text-1)'
     },
     modalClose: {
       background: 'none',
       border: 'none',
       cursor: 'pointer',
-      color: '#6b7280',
+      color: 'var(--text-2)',
       padding: '4px',
       display: 'flex',
       alignItems: 'center'
@@ -381,15 +381,15 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
       marginBottom: '8px',
       fontSize: '14px',
       fontWeight: '500',
-      color: darkMode ? '#ffffff' : '#111827'
+      color: darkMode ? '#ffffff' : 'var(--text-1)'
     },
     input: {
       width: '100%',
       padding: '10px 14px',
       borderRadius: '8px',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
-      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-      color: darkMode ? '#ffffff' : '#111827',
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
+      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       fontSize: '14px',
       fontFamily: 'inherit',
       outline: 'none'
@@ -398,9 +398,9 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
       width: '100%',
       padding: '10px 14px',
       borderRadius: '8px',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
-      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-      color: darkMode ? '#ffffff' : '#111827',
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
+      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       fontSize: '14px',
       fontFamily: 'inherit',
       outline: 'none',
@@ -411,9 +411,9 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
       width: '100%',
       padding: '10px 14px',
       borderRadius: '8px',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
-      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-      color: darkMode ? '#ffffff' : '#111827',
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
+      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       fontSize: '14px',
       fontFamily: 'inherit',
       outline: 'none',
@@ -424,7 +424,7 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
       justifyContent: 'flex-end',
       gap: '12px',
       padding: '20px 24px',
-      borderTop: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+      borderTop: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
     },
     button: {
       padding: '10px 20px',
@@ -439,11 +439,11 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
     },
     buttonCancel: {
       backgroundColor: 'transparent',
-      color: darkMode ? '#9ca3af' : '#6b7280',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
     },
     buttonSave: {
-      backgroundColor: '#4f46e5',
+      backgroundColor: 'var(--brand-1)',
       color: '#ffffff'
     },
     buttonDisabled: {
@@ -469,7 +469,7 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
   return (
     <div className="project-events-timeline" style={styles.container}>
       <div className="project-events-timeline__header" style={styles.header}>
-        <h3 className="project-events-timeline__title" style={{ ...styles.title, color: darkMode ? '#ffffff' : '#111827' }}>
+        <h3 className="project-events-timeline__title" style={{ ...styles.title, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
           <Calendar size={18} />
           {t('projectTimeline.title')}
         </h3>
@@ -536,7 +536,7 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
                               onClick={() => handleEditEvent(event)}
                               style={styles.menuItem}
                               onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = darkMode ? '#374151' : '#f9fafb'
+                                e.currentTarget.style.backgroundColor = darkMode ? 'var(--text-1)' : 'var(--surface-bg-2)'
                               }}
                               onMouseLeave={(e) => {
                                 e.currentTarget.style.backgroundColor = darkMode ? '#1f1f2e' : '#ffffff'
@@ -547,9 +547,9 @@ export default function ProjectEventsTimeline({ projectId, projectStatus, darkMo
                             </button>
                             <button
                               onClick={() => handleDeleteClick(event)}
-                              style={{ ...styles.menuItem, color: '#ef4444' }}
+                              style={{ ...styles.menuItem, color: 'var(--danger-1)' }}
                               onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = darkMode ? '#374151' : '#f9fafb'
+                                e.currentTarget.style.backgroundColor = darkMode ? 'var(--text-1)' : 'var(--surface-bg-2)'
                               }}
                               onMouseLeave={(e) => {
                                 e.currentTarget.style.backgroundColor = darkMode ? '#1f1f2e' : '#ffffff'

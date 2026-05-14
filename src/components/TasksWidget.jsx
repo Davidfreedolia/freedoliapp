@@ -140,18 +140,18 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
   const getPriorityColor = (priority) => {
     switch (priority) {
       case 'high':
-        return '#ef4444'
+        return 'var(--danger-1)'
       case 'normal':
-        return '#f59e0b'
+        return 'var(--warning-1)'
       case 'low':
-        return '#6b7280'
+        return 'var(--text-2)'
       default:
-        return '#6b7280'
+        return 'var(--text-2)'
     }
   }
 
   const getDueDateInfo = (dueDate) => {
-    if (!dueDate) return { text: t('tasks.noDueDate'), color: '#6b7280' }
+    if (!dueDate) return { text: t('tasks.noDueDate'), color: 'var(--text-2)' }
     
     const due = parseISO(dueDate)
     const now = new Date()
@@ -159,15 +159,15 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
     
     if (diffDays < 0) {
       const days = Math.abs(diffDays)
-      return { text: t('tasks.overdue', { days, count: days }), color: '#ef4444' }
+      return { text: t('tasks.overdue', { days, count: days }), color: 'var(--danger-1)' }
     } else if (diffDays === 0) {
-      return { text: t('tasks.dueToday'), color: '#f59e0b' }
+      return { text: t('tasks.dueToday'), color: 'var(--warning-1)' }
     } else if (diffDays === 1) {
-      return { text: t('tasks.dueTomorrow'), color: '#f59e0b' }
+      return { text: t('tasks.dueTomorrow'), color: 'var(--warning-1)' }
     } else if (diffDays <= 7) {
-      return { text: t('tasks.dueInDays', { days: diffDays }), color: '#f59e0b' }
+      return { text: t('tasks.dueInDays', { days: diffDays }), color: 'var(--warning-1)' }
     } else {
-      return { text: format(due, 'MMM d', { locale: es }) || format(due, 'MMM d'), color: '#6b7280' }
+      return { text: format(due, 'MMM d', { locale: es }) || format(due, 'MMM d'), color: 'var(--text-2)' }
     }
   }
 
@@ -189,10 +189,10 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
         backgroundColor: darkMode ? '#15151f' : '#ffffff'
       }}>
         <div style={widgetStyles.header}>
-          <CheckCircle2 size={20} color="#22c55e" />
+          <CheckCircle2 size={20} color="var(--success-1)" />
           <h3 style={{
             ...widgetStyles.title,
-            color: darkMode ? '#ffffff' : '#111827'
+            color: darkMode ? '#ffffff' : 'var(--text-1)'
           }}>
             {t('dashboard.tasks.title')}
           </h3>
@@ -201,7 +201,7 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
             style={{
               marginLeft: 'auto',
               fontSize: '12px',
-              color: darkMode ? '#818cf8' : '#6366f1',
+              color: darkMode ? '#818cf8' : 'var(--brand-1)',
               textDecoration: 'none',
               fontWeight: 500
             }}
@@ -210,14 +210,14 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
           </Link>
         </div>
         <div style={widgetStyles.empty}>
-          <p style={{ color: darkMode ? '#9ca3af' : '#6b7280' }}>
+          <p style={{ color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
             {t('dashboard.tasks.empty')}
           </p>
           <Link
             to="/app/inbox"
             style={{
               fontSize: '12px',
-              color: darkMode ? '#818cf8' : '#6366f1',
+              color: darkMode ? '#818cf8' : 'var(--brand-1)',
               textDecoration: 'none',
               fontWeight: 500,
               marginTop: '8px',
@@ -237,10 +237,10 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
       backgroundColor: darkMode ? '#15151f' : '#ffffff'
     }}>
       <div style={widgetStyles.header}>
-        <CheckCircle2 size={20} color="#22c55e" />
+        <CheckCircle2 size={20} color="var(--success-1)" />
         <h3 style={{
           ...widgetStyles.title,
-          color: darkMode ? '#ffffff' : '#111827'
+          color: darkMode ? '#ffffff' : 'var(--text-1)'
         }}>
             {t('dashboard.tasks.title')} ({tasks.length})
         </h3>
@@ -249,7 +249,7 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
           style={{
             marginLeft: 'auto',
             fontSize: '12px',
-            color: darkMode ? '#818cf8' : '#6366f1',
+            color: darkMode ? '#818cf8' : 'var(--brand-1)',
             textDecoration: 'none',
             fontWeight: 500
           }}
@@ -264,9 +264,9 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
               padding: '4px 8px',
               fontSize: '12px',
               backgroundColor: 'transparent',
-              border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`,
+              border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
               borderRadius: '6px',
-              color: darkMode ? '#9ca3af' : '#6b7280',
+              color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
               cursor: 'pointer'
             }}
           >
@@ -282,15 +282,15 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
           alignItems: 'center',
           gap: '8px',
           padding: '12px',
-          backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6',
+          backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
           borderRadius: '8px',
-          border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+          border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
           marginBottom: '12px'
         }}>
           <span style={{
             fontSize: '13px',
             fontWeight: '500',
-            color: darkMode ? '#ffffff' : '#111827'
+            color: darkMode ? '#ffffff' : 'var(--text-1)'
           }}>
             {selectedTasks.size} {t('tasks.selected')}
           </span>
@@ -300,7 +300,7 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
               disabled={bulkActionLoading}
               style={{
                 padding: '6px 12px',
-                backgroundColor: '#22c55e',
+                backgroundColor: 'var(--success-1)',
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: '6px',
@@ -317,7 +317,7 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
               disabled={bulkActionLoading}
               style={{
                 padding: '6px 12px',
-                backgroundColor: '#f59e0b',
+                backgroundColor: 'var(--warning-1)',
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: '6px',
@@ -334,7 +334,7 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
               disabled={bulkActionLoading}
               style={{
                 padding: '6px 12px',
-                backgroundColor: '#f59e0b',
+                backgroundColor: 'var(--warning-1)',
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: '6px',
@@ -351,8 +351,8 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
               style={{
                 padding: '6px 12px',
                 backgroundColor: 'transparent',
-                color: darkMode ? '#9ca3af' : '#6b7280',
-                border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`,
+                color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
+                border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
                 borderRadius: '6px',
                 fontSize: '12px',
                 cursor: 'pointer'
@@ -386,7 +386,7 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
                 <div style={widgetStyles.taskHeader}>
                   <span style={{
                     ...widgetStyles.taskTitle,
-                    color: darkMode ? '#ffffff' : '#111827'
+                    color: darkMode ? '#ffffff' : 'var(--text-1)'
                   }}>
                     {task.title}
                   </span>
@@ -406,7 +406,7 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
                 {task.notes && (
                   <p style={{
                     ...widgetStyles.taskNotes,
-                    color: darkMode ? '#9ca3af' : '#6b7280'
+                    color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
                   }}>
                     {task.notes}
                   </p>
@@ -421,7 +421,7 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
                   </span>
                   <span style={{
                     ...widgetStyles.metaItem,
-                    color: darkMode ? '#9ca3af' : '#6b7280'
+                    color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
                   }}>
                     {task.entity_type.replace('_', ' ')}
                   </span>
@@ -433,7 +433,7 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
                   disabled={actionLoading === task.id}
                   style={{
                     ...widgetStyles.actionButton,
-                    backgroundColor: '#22c55e',
+                    backgroundColor: 'var(--success-1)',
                     color: '#ffffff',
                     opacity: actionLoading === task.id ? 0.6 : 1
                   }}
@@ -446,7 +446,7 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
                   disabled={actionLoading === task.id}
                   style={{
                     ...widgetStyles.actionButton,
-                    backgroundColor: '#f59e0b',
+                    backgroundColor: 'var(--warning-1)',
                     color: '#ffffff',
                     opacity: actionLoading === task.id ? 0.6 : 1,
                     fontSize: '11px'
@@ -460,7 +460,7 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
                   disabled={actionLoading === task.id}
                   style={{
                     ...widgetStyles.actionButton,
-                    backgroundColor: '#f59e0b',
+                    backgroundColor: 'var(--warning-1)',
                     color: '#ffffff',
                     opacity: actionLoading === task.id ? 0.6 : 1,
                     fontSize: '11px'
@@ -474,8 +474,8 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
                   style={{
                     ...widgetStyles.actionButton,
                     backgroundColor: 'transparent',
-                    color: darkMode ? '#9ca3af' : '#6b7280',
-                    border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`
+                    color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
+                    border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
                   }}
                   title={t('tasks.inbox.openEntity')}
                 >
@@ -487,8 +487,8 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
                     style={{
                       ...widgetStyles.actionButton,
                       backgroundColor: 'transparent',
-                      color: darkMode ? '#818cf8' : '#6366f1',
-                      border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`,
+                      color: darkMode ? '#818cf8' : 'var(--brand-1)',
+                      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
                       fontSize: '11px',
                       padding: '4px 8px'
                     }}
@@ -528,7 +528,7 @@ const widgetStyles = {
   loading: {
     padding: '40px',
     textAlign: 'center',
-    color: '#6b7280'
+    color: 'var(--text-2)'
   },
   empty: {
     padding: '40px',

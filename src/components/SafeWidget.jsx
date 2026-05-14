@@ -40,9 +40,9 @@ class SafeWidget extends React.Component {
         }}
       >
         <div className="dashboard-safe-widget__icon">
-          <AlertTriangle size={24} color="#ef4444" />
+          <AlertTriangle size={24} color="var(--danger-1)" />
         </div>
-        <h3 className="dashboard-safe-widget__title" style={{ color: darkMode ? '#ffffff' : '#111827' }}>
+        <h3 className="dashboard-safe-widget__title" style={{ color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
           {widgetName} no disponible
         </h3>
         <p className="dashboard-safe-widget__message">

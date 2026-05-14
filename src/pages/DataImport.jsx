@@ -13,7 +13,7 @@ export default function DataImport() {
         <h1 style={{
           margin: 0, fontSize: 22, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8,
         }}>
-          <Database size={20} color="var(--brand-1,#1F5F63)" />
+          <Database size={20} color="var(--brand-1,var(--brand-1))" />
           {t('dataImport.page.title', 'Importar dades')}
         </h1>
         <p style={{ margin: '4px 0 0', color: 'var(--muted-1,#6b7280)', fontSize: 13 }}>

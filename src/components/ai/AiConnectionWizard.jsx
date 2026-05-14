@@ -40,9 +40,9 @@ export default function AiConnectionWizard({ isOpen, onClose, onCompleted, darkM
 
   if (!isOpen) return null
 
-  const muted = darkMode ? '#9CA3AF' : '#6B7280'
+  const muted = darkMode ? 'var(--muted-1)' : 'var(--text-2)'
   const ink = darkMode ? '#E8E8ED' : '#1A1A2E'
-  const border = darkMode ? 'rgba(255,255,255,0.1)' : '#E5E7EB'
+  const border = darkMode ? 'rgba(255,255,255,0.1)' : 'var(--border-1)'
   const modalBg = darkMode ? '#15151f' : '#F6F8F3'
   const surface = darkMode ? 'rgba(255,255,255,0.05)' : '#FFFFFF'
 
@@ -112,7 +112,7 @@ export default function AiConnectionWizard({ isOpen, onClose, onCompleted, darkM
       <div style={{
         width: '100%', maxWidth: 620, maxHeight: '92vh', overflow: 'hidden',
         backgroundColor: modalBg, borderRadius: 16,
-        boxShadow: '0 20px 60px rgba(0,0,0,0.35)', color: ink,
+        boxShadow: 'var(--shadow-modal)', color: ink,
         display: 'flex', flexDirection: 'column',
         fontFamily: 'Roboto, sans-serif',
       }}>
@@ -122,7 +122,7 @@ export default function AiConnectionWizard({ isOpen, onClose, onCompleted, darkM
           padding: '14px 20px', borderBottom: `1px solid ${border}`,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Sparkles size={16} color="#6ECBC3" />
+            <Sparkles size={16} color="var(--brand-2)" />
             <span style={{ fontSize: 13, fontWeight: 600, color: muted }}>
               {t('settings.ai.wizard.title', 'Connectar compte d\'IA')}
             </span>
@@ -162,7 +162,7 @@ export default function AiConnectionWizard({ isOpen, onClose, onCompleted, darkM
                       style={{
                         backgroundColor: selected ? 'rgba(110,203,195,0.12)' : surface,
                         color: ink,
-                        borderColor: selected ? '#6ECBC3' : border,
+                        borderColor: selected ? 'var(--brand-2)' : border,
                       }}
                     >
                       {p.recommended && (
@@ -233,7 +233,7 @@ export default function AiConnectionWizard({ isOpen, onClose, onCompleted, darkM
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{
-                      fontSize: 12, color: '#1F5F63',
+                      fontSize: 12, color: 'var(--brand-1)',
                       textDecoration: 'none', display: 'inline-flex', alignItems: 'center',
                       gap: 4, marginTop: 12,
                     }}
@@ -281,7 +281,7 @@ export default function AiConnectionWizard({ isOpen, onClose, onCompleted, darkM
           {/* STEP 3 — done */}
           {step === 3 && (
             <div className="wizard-step">
-              <CheckCircle2 size={56} color="#6ECBC3" style={{ marginBottom: 12 }} />
+              <CheckCircle2 size={56} color="var(--brand-2)" style={{ marginBottom: 12 }} />
               <h2 className="wizard-step__title" style={{ color: ink }}>
                 {t('settings.ai.wizard.doneTitle', 'Tot llest!')}
               </h2>

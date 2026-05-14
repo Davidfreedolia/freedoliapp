@@ -4,11 +4,11 @@ import { useApp } from '../context/AppContext'
 import { getDecisionLog, createDecisionLog, updateDecisionLog } from '../lib/supabase'
 
 const DECISION_OPTIONS = [
-  { value: 'go', label: 'GO', icon: CheckCircle2, color: '#10b981' },
-  { value: 'hold', label: 'HOLD', icon: Clock, color: '#f59e0b' },
-  { value: 'discarded', label: 'DISCARDED', icon: XCircle, color: '#ef4444' },
-  { value: 'selected', label: 'SELECTED', icon: CheckCircle2, color: '#3b82f6' },
-  { value: 'rejected', label: 'REJECTED', icon: XCircle, color: '#ef4444' }
+  { value: 'go', label: 'GO', icon: CheckCircle2, color: 'var(--success-1)' },
+  { value: 'hold', label: 'HOLD', icon: Clock, color: 'var(--warning-1)' },
+  { value: 'discarded', label: 'DISCARDED', icon: XCircle, color: 'var(--danger-1)' },
+  { value: 'selected', label: 'SELECTED', icon: CheckCircle2, color: 'var(--cta-1)' },
+  { value: 'rejected', label: 'REJECTED', icon: XCircle, color: 'var(--danger-1)' }
 ]
 
 const REASON_OPTIONS = {
@@ -128,12 +128,12 @@ export default function DecisionLog({ entityType, entityId, darkMode, requiredRe
     <div style={{
       ...styles.container,
       backgroundColor: darkMode ? '#15151f' : '#ffffff',
-      borderColor: darkMode ? '#374151' : '#d1d5db'
+      borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
     }}>
       <div style={styles.header}>
         <h4 style={{
           ...styles.title,
-          color: darkMode ? '#ffffff' : '#111827'
+          color: darkMode ? '#ffffff' : 'var(--text-1)'
         }}>
           Decision Log
         </h4>
@@ -150,8 +150,8 @@ export default function DecisionLog({ entityType, entityId, darkMode, requiredRe
       {showForm ? (
         <div style={{
           ...styles.form,
-          backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-          borderColor: darkMode ? '#374151' : '#d1d5db'
+          backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+          borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
         }}>
           <div style={styles.formGroup}>
             <label style={styles.label}>Decision *</label>
@@ -190,8 +190,8 @@ export default function DecisionLog({ entityType, entityId, darkMode, requiredRe
               style={{
                 ...styles.select,
                 backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-                color: darkMode ? '#ffffff' : '#111827',
-                borderColor: darkMode ? '#374151' : '#d1d5db'
+                color: darkMode ? '#ffffff' : 'var(--text-1)',
+                borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
               }}
             >
               <option value="">Select reason (optional)</option>
@@ -211,8 +211,8 @@ export default function DecisionLog({ entityType, entityId, darkMode, requiredRe
               style={{
                 ...styles.textarea,
                 backgroundColor: darkMode ? '#0a0a0f' : '#ffffff',
-                color: darkMode ? '#ffffff' : '#111827',
-                borderColor: darkMode ? '#374151' : '#d1d5db'
+                color: darkMode ? '#ffffff' : 'var(--text-1)',
+                borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
               }}
             />
           </div>
@@ -252,7 +252,7 @@ export default function DecisionLog({ entityType, entityId, darkMode, requiredRe
       ) : decision ? (
         <div style={{
           ...styles.decisionDisplay,
-          backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+          backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
           borderColor: decisionInfo.color
         }}>
           <div style={styles.decisionHeader}>
@@ -267,7 +267,7 @@ export default function DecisionLog({ entityType, entityId, darkMode, requiredRe
             </div>
             <span style={{
               ...styles.decisionDate,
-              color: darkMode ? '#9ca3af' : '#6b7280'
+              color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
             }}>
               {new Date(decision.created_at).toLocaleDateString()}
             </span>
@@ -275,7 +275,7 @@ export default function DecisionLog({ entityType, entityId, darkMode, requiredRe
           {decision.reason && (
             <div style={{
               ...styles.decisionReason,
-              color: darkMode ? '#e5e7eb' : '#374151'
+              color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
             }}>
               <strong>Reason:</strong> {decision.reason}
             </div>
@@ -283,7 +283,7 @@ export default function DecisionLog({ entityType, entityId, darkMode, requiredRe
           {decision.notes && (
             <div style={{
               ...styles.decisionNotes,
-              color: darkMode ? '#9ca3af' : '#6b7280'
+              color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
             }}>
               {decision.notes}
             </div>
@@ -291,7 +291,7 @@ export default function DecisionLog({ entityType, entityId, darkMode, requiredRe
         </div>
       ) : (
         <div style={styles.empty}>
-          <p style={{ color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '13px' }}>
+          <p style={{ color: darkMode ? 'var(--muted-1)' : 'var(--text-2)', fontSize: '13px' }}>
             No decision recorded yet
           </p>
         </div>
@@ -320,7 +320,7 @@ const styles = {
   },
   addButton: {
     padding: '6px 12px',
-    backgroundColor: '#4f46e5',
+    backgroundColor: 'var(--brand-1)',
     color: '#ffffff',
     border: 'none',
     borderRadius: '6px',
@@ -340,7 +340,7 @@ const styles = {
     display: 'block',
     fontSize: '12px',
     fontWeight: '500',
-    color: '#6b7280',
+    color: 'var(--text-2)',
     marginBottom: '8px'
   },
   decisionButtons: {
@@ -390,7 +390,7 @@ const styles = {
     gap: '4px',
     padding: '8px 12px',
     backgroundColor: 'transparent',
-    color: '#6b7280',
+    color: 'var(--text-2)',
     border: '1px solid var(--border-color)',
     borderRadius: '6px',
     fontSize: '12px',
@@ -401,7 +401,7 @@ const styles = {
     alignItems: 'center',
     gap: '4px',
     padding: '8px 16px',
-    backgroundColor: '#4f46e5',
+    backgroundColor: 'var(--brand-1)',
     color: '#ffffff',
     border: 'none',
     borderRadius: '6px',

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 const severityColors = {
   high: 'var(--danger-1, #E55353)',
   medium: 'var(--warning-1, #F0B429)',
-  low: 'var(--brand-1, #1F5F63)',
+  low: 'var(--brand-1, var(--brand-1))',
 }
 
 export default function DecisionNotificationItem({ item, onClick, onCreateTask }) {

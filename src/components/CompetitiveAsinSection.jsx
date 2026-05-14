@@ -327,7 +327,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
       <div style={styles.header}>
         <h3 style={{
           ...styles.title,
-          color: darkMode ? '#ffffff' : '#111827'
+          color: darkMode ? '#ffffff' : 'var(--text-1)'
         }}>
           <Barcode size={20} />
           {t('competitiveAsin.title')}
@@ -351,7 +351,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             <div style={styles.field}>
               <label style={{
                 ...styles.label,
-                color: darkMode ? '#e5e7eb' : '#374151'
+                color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
               }}>
                 {t('competitiveAsin.fields.competitorAsin')}
               </label>
@@ -364,7 +364,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
                   style={{
                     ...styles.input,
                     backgroundColor: '#ffffff',
-                    color: '#111827',
+                    color: 'var(--text-1)',
                     borderColor: inputBorderColor
                   }}
                 />
@@ -373,7 +373,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             <div style={styles.field}>
               <label style={{
                 ...styles.label,
-                color: darkMode ? '#e5e7eb' : '#374151'
+                color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
               }}>
                 {t('competitiveAsin.fields.amazonUrl')}
               </label>
@@ -385,7 +385,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
                 style={{
                   ...styles.input,
                   backgroundColor: '#ffffff',
-                  color: '#111827',
+                  color: 'var(--text-1)',
                   borderColor: inputBorderColor
                 }}
               />
@@ -405,7 +405,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             <div style={{
               marginTop: '8px',
               fontSize: '12px',
-              color: darkMode ? '#9ca3af' : '#6b7280'
+              color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
             }}>
               {t('competitiveAsin.helpers.needAsin')}
             </div>
@@ -413,7 +413,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
         ) : (
           <div style={{
             ...styles.asinCaptured,
-            color: darkMode ? '#e5e7eb' : '#111827'
+            color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
           }}>
             <div>
               {t('competitiveAsin.captured')}: <strong>{capturedAsin}</strong>
@@ -437,7 +437,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             marginBottom: '12px',
             fontSize: '14px',
             fontWeight: '600',
-            color: darkMode ? '#ffffff' : '#111827'
+            color: darkMode ? '#ffffff' : 'var(--text-1)'
           }}>
             {t('competitiveAsin.snapshotTitle')}
           </div>
@@ -445,7 +445,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
         <div style={styles.field}>
           <label style={{
             ...styles.label,
-            color: darkMode ? '#e5e7eb' : '#374151'
+            color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
           }}>{t('competitiveAsin.fields.competitorPrice')}</label>
           <input
             type="number"
@@ -455,7 +455,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             style={{
               ...styles.input,
               backgroundColor: '#ffffff',
-              color: '#111827',
+              color: 'var(--text-1)',
               borderColor: inputBorderColor
             }}
           />
@@ -463,7 +463,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
         <div style={styles.field}>
           <label style={{
             ...styles.label,
-            color: darkMode ? '#e5e7eb' : '#374151'
+            color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
           }}>{t('competitiveAsin.fields.estimatedCategory')}</label>
           <input
             type="text"
@@ -473,7 +473,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             style={{
               ...styles.input,
               backgroundColor: '#ffffff',
-              color: '#111827',
+              color: 'var(--text-1)',
               borderColor: inputBorderColor
             }}
           />
@@ -481,7 +481,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
         <div style={styles.field}>
           <label style={{
             ...styles.label,
-            color: darkMode ? '#e5e7eb' : '#374151'
+            color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
           }}>{t('competitiveAsin.fields.fbaSize')}</label>
           <select
             value={meta.size_tier}
@@ -489,7 +489,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             style={{
               ...styles.input,
               backgroundColor: '#ffffff',
-              color: '#111827',
+              color: 'var(--text-1)',
               borderColor: inputBorderColor
             }}
           >
@@ -501,7 +501,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
         <div style={styles.field}>
           <label style={{
             ...styles.label,
-            color: darkMode ? '#e5e7eb' : '#374151'
+            color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
           }}>{t('competitiveAsin.fields.estimatedWeight')}</label>
           <input
             type="number"
@@ -511,7 +511,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             style={{
               ...styles.input,
               backgroundColor: '#ffffff',
-              color: '#111827',
+              color: 'var(--text-1)',
               borderColor: inputBorderColor
             }}
           />
@@ -519,7 +519,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
         <div style={styles.field}>
           <label style={{
             ...styles.label,
-            color: darkMode ? '#e5e7eb' : '#374151'
+            color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
           }}>{t('competitiveAsin.fields.brand')}</label>
           <input
             type="text"
@@ -529,7 +529,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             style={{
               ...styles.input,
               backgroundColor: '#ffffff',
-              color: '#111827',
+              color: 'var(--text-1)',
               borderColor: inputBorderColor
             }}
           />
@@ -537,7 +537,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
         <div style={styles.field}>
           <label style={{
             ...styles.label,
-            color: darkMode ? '#e5e7eb' : '#374151'
+            color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
           }}>{t('competitiveAsin.fields.dimensionsOptional')}</label>
           <input
             type="text"
@@ -547,7 +547,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             style={{
               ...styles.input,
               backgroundColor: '#ffffff',
-              color: '#111827',
+              color: 'var(--text-1)',
               borderColor: inputBorderColor
             }}
           />
@@ -571,7 +571,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             </button>
             <span style={{
               ...styles.helper,
-              color: darkMode ? '#9ca3af' : '#6b7280'
+              color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
             }}>
               {t('competitiveAsin.helpers.savedLocally')}
             </span>
@@ -585,13 +585,13 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             margin: 0,
             fontSize: '15px',
             fontWeight: '600',
-            color: darkMode ? '#ffffff' : '#111827'
+            color: darkMode ? '#ffffff' : 'var(--text-1)'
           }}>
             {t('competitiveAsin.detailsTitle')}
           </h4>
           <span style={{
             fontSize: '12px',
-            color: darkMode ? '#9ca3af' : '#6b7280'
+            color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
           }}>
             {t('competitiveAsin.detailsSubtitle')}
           </span>
@@ -600,7 +600,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
         <div style={styles.field}>
           <label style={{
             ...styles.label,
-            color: darkMode ? '#e5e7eb' : '#374151'
+            color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
           }}>ASIN</label>
           <input
             type="text"
@@ -610,7 +610,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             style={{
               ...styles.input,
               backgroundColor: '#ffffff',
-              color: '#111827',
+              color: 'var(--text-1)',
               borderColor: inputBorderColor
             }}
           />
@@ -619,7 +619,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
         <div style={styles.field}>
           <label style={{
             ...styles.label,
-            color: darkMode ? '#e5e7eb' : '#374151'
+            color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
           }}>{t('competitiveAsin.fields.amazonUrl')}</label>
           <input
             type="text"
@@ -629,7 +629,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             style={{
               ...styles.input,
               backgroundColor: '#ffffff',
-              color: '#111827',
+              color: 'var(--text-1)',
               borderColor: inputBorderColor
             }}
           />
@@ -638,7 +638,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
         <div style={styles.field}>
           <label style={{
             ...styles.label,
-            color: darkMode ? '#e5e7eb' : '#374151'
+            color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
           }}>{t('competitiveAsin.fields.pasteDetails')}</label>
           <textarea
             value={detailsText}
@@ -647,7 +647,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             style={{
               ...styles.textarea,
               backgroundColor: '#ffffff',
-              color: '#111827',
+              color: 'var(--text-1)',
               borderColor: inputBorderColor
             }}
             rows={6}
@@ -677,7 +677,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
           <div style={styles.field}>
             <label style={{
               ...styles.label,
-              color: darkMode ? '#e5e7eb' : '#374151'
+              color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
             }}>{t('competitiveAsin.fields.brand')}</label>
             <input
               type="text"
@@ -686,7 +686,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
               style={{
                 ...styles.input,
                 backgroundColor: '#ffffff',
-                color: '#111827',
+                color: 'var(--text-1)',
                 borderColor: inputBorderColor
               }}
             />
@@ -694,7 +694,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
           <div style={styles.field}>
             <label style={{
               ...styles.label,
-              color: darkMode ? '#e5e7eb' : '#374151'
+              color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
             }}>{t('competitiveAsin.fields.model')}</label>
             <input
               type="text"
@@ -703,7 +703,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
               style={{
                 ...styles.input,
                 backgroundColor: '#ffffff',
-                color: '#111827',
+                color: 'var(--text-1)',
                 borderColor: inputBorderColor
               }}
             />
@@ -711,7 +711,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
           <div style={styles.field}>
             <label style={{
               ...styles.label,
-              color: darkMode ? '#e5e7eb' : '#374151'
+              color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
             }}>{t('competitiveAsin.fields.countryOfOrigin')}</label>
             <input
               type="text"
@@ -720,7 +720,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
               style={{
                 ...styles.input,
                 backgroundColor: '#ffffff',
-                color: '#111827',
+                color: 'var(--text-1)',
                 borderColor: inputBorderColor
               }}
             />
@@ -728,7 +728,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
           <div style={styles.field}>
             <label style={{
               ...styles.label,
-              color: darkMode ? '#e5e7eb' : '#374151'
+              color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
             }}>{t('competitiveAsin.fields.dimensionsCm')}</label>
             <input
               type="text"
@@ -737,7 +737,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
               style={{
                 ...styles.input,
                 backgroundColor: '#ffffff',
-                color: '#111827',
+                color: 'var(--text-1)',
                 borderColor: inputBorderColor
               }}
             />
@@ -745,7 +745,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
           <div style={styles.field}>
             <label style={{
               ...styles.label,
-              color: darkMode ? '#e5e7eb' : '#374151'
+              color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
             }}>{t('competitiveAsin.fields.weight')}</label>
             <input
               type="number"
@@ -754,7 +754,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
               style={{
                 ...styles.input,
                 backgroundColor: '#ffffff',
-                color: '#111827',
+                color: 'var(--text-1)',
                 borderColor: inputBorderColor
               }}
             />
@@ -762,7 +762,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
           <div style={styles.field}>
             <label style={{
               ...styles.label,
-              color: darkMode ? '#e5e7eb' : '#374151'
+              color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
             }}>{t('competitiveAsin.fields.bsrMain')}</label>
             <input
               type="text"
@@ -772,7 +772,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
               style={{
                 ...styles.input,
                 backgroundColor: '#ffffff',
-                color: '#111827',
+                color: 'var(--text-1)',
                 borderColor: inputBorderColor
               }}
             />
@@ -780,7 +780,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
           <div style={styles.field}>
             <label style={{
               ...styles.label,
-              color: darkMode ? '#e5e7eb' : '#374151'
+              color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
             }}>{t('competitiveAsin.fields.bsrMainCategory')}</label>
             <input
               type="text"
@@ -789,7 +789,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
               style={{
                 ...styles.input,
                 backgroundColor: '#ffffff',
-                color: '#111827',
+                color: 'var(--text-1)',
                 borderColor: inputBorderColor
               }}
             />
@@ -797,7 +797,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
           <div style={styles.field}>
             <label style={{
               ...styles.label,
-              color: darkMode ? '#e5e7eb' : '#374151'
+              color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
             }}>{t('competitiveAsin.fields.bsrSub')}</label>
             <input
               type="text"
@@ -807,7 +807,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
               style={{
                 ...styles.input,
                 backgroundColor: '#ffffff',
-                color: '#111827',
+                color: 'var(--text-1)',
                 borderColor: inputBorderColor
               }}
             />
@@ -815,7 +815,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
           <div style={styles.field}>
             <label style={{
               ...styles.label,
-              color: darkMode ? '#e5e7eb' : '#374151'
+              color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
             }}>{t('competitiveAsin.fields.bsrSubCategory')}</label>
             <input
               type="text"
@@ -824,7 +824,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
               style={{
                 ...styles.input,
                 backgroundColor: '#ffffff',
-                color: '#111827',
+                color: 'var(--text-1)',
                 borderColor: inputBorderColor
               }}
             />
@@ -832,7 +832,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
           <div style={styles.field}>
             <label style={{
               ...styles.label,
-              color: darkMode ? '#e5e7eb' : '#374151'
+              color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
             }}>{t('competitiveAsin.fields.rating')}</label>
             <input
               type="text"
@@ -841,7 +841,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
               style={{
                 ...styles.input,
                 backgroundColor: '#ffffff',
-                color: '#111827',
+                color: 'var(--text-1)',
                 borderColor: inputBorderColor
               }}
             />
@@ -849,7 +849,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
           <div style={styles.field}>
             <label style={{
               ...styles.label,
-              color: darkMode ? '#e5e7eb' : '#374151'
+              color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
             }}>{t('competitiveAsin.fields.reviewCount')}</label>
             <input
               type="text"
@@ -858,7 +858,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
               style={{
                 ...styles.input,
                 backgroundColor: '#ffffff',
-                color: '#111827',
+                color: 'var(--text-1)',
                 borderColor: inputBorderColor
               }}
             />
@@ -866,7 +866,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
           <div style={styles.field}>
             <label style={{
               ...styles.label,
-              color: darkMode ? '#e5e7eb' : '#374151'
+              color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
             }}>{t('competitiveAsin.fields.launchDate')}</label>
             <input
               type="text"
@@ -875,7 +875,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
               style={{
                 ...styles.input,
                 backgroundColor: '#ffffff',
-                color: '#111827',
+                color: 'var(--text-1)',
                 borderColor: inputBorderColor
               }}
             />
@@ -883,7 +883,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
           <div style={styles.field}>
             <label style={{
               ...styles.label,
-              color: darkMode ? '#e5e7eb' : '#374151'
+              color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
             }}>{t('competitiveAsin.fields.mainImageUrl')}</label>
             <input
               type="text"
@@ -893,7 +893,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
               style={{
                 ...styles.input,
                 backgroundColor: '#ffffff',
-                color: '#111827',
+                color: 'var(--text-1)',
                 borderColor: inputBorderColor
               }}
             />
@@ -919,7 +919,7 @@ const styles = {
   },
   loading: {
     fontSize: '14px',
-    color: '#6b7280'
+    color: 'var(--text-2)'
   },
   header: {
     display: 'flex',
@@ -940,7 +940,7 @@ const styles = {
     alignItems: 'center',
     gap: '6px',
     fontSize: '12px',
-    color: '#4f46e5',
+    color: 'var(--brand-1)',
     textDecoration: 'none'
   },
   asinBlock: {
@@ -958,16 +958,16 @@ const styles = {
     justifyContent: 'space-between',
     gap: '12px',
     fontSize: '14px',
-    color: '#111827'
+    color: 'var(--text-1)'
   },
   marketplace: {
     marginLeft: '8px',
-    color: '#6b7280',
+    color: 'var(--text-2)',
     fontSize: '12px'
   },
   captureButton: {
     padding: '10px 16px',
-    backgroundColor: '#4f46e5',
+    backgroundColor: 'var(--brand-1)',
     color: '#ffffff',
     border: 'none',
     borderRadius: '8px',
@@ -975,8 +975,8 @@ const styles = {
   },
   replaceButton: {
     padding: '8px 12px',
-    backgroundColor: '#e5e7eb',
-    color: '#374151',
+    backgroundColor: 'var(--border-1)',
+    color: 'var(--text-1)',
     border: 'none',
     borderRadius: '8px',
     fontSize: '12px',
@@ -984,7 +984,7 @@ const styles = {
   },
   error: {
     marginTop: '8px',
-    color: '#dc2626',
+    color: 'var(--danger-1)',
     fontSize: '13px'
   },
   metaGrid: {
@@ -1000,7 +1000,7 @@ const styles = {
   },
   label: {
     fontSize: '13px',
-    color: '#374151',
+    color: 'var(--text-1)',
     fontWeight: '500'
   },
   input: {
@@ -1017,7 +1017,7 @@ const styles = {
   },
   helper: {
     fontSize: '12px',
-    color: '#6b7280'
+    color: 'var(--text-2)'
   },
   detailsCard: {
     marginTop: '24px',
@@ -1055,14 +1055,14 @@ const styles = {
   },
   warningText: {
     fontSize: '12px',
-    color: '#f59e0b'
+    color: 'var(--warning-1)'
   },
   imagePreview: {
     marginTop: '8px',
     padding: '12px',
     borderRadius: '12px',
     border: '1px solid #e5e7eb',
-    backgroundColor: '#f9fafb',
+    backgroundColor: 'var(--surface-bg-2)',
     display: 'flex',
     justifyContent: 'center'
   },

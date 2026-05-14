@@ -38,7 +38,7 @@ export default function LazyPageWrapper({
           textAlign: 'center',
           backgroundColor: darkMode ? '#15151f' : '#ffffff',
           borderRadius: '16px',
-          border: `1px solid ${darkMode ? '#2a2a3a' : '#e5e7eb'}`,
+          border: `1px solid ${darkMode ? '#2a2a3a' : 'var(--border-1)'}`,
           padding: '32px'
         }}>
           <div style={{
@@ -51,20 +51,20 @@ export default function LazyPageWrapper({
             justifyContent: 'center',
             margin: '0 auto 16px'
           }}>
-            <AlertTriangle size={24} color="#ef4444" />
+            <AlertTriangle size={24} color="var(--danger-1)" />
           </div>
           <h2 style={{
             margin: '0 0 8px',
             fontSize: '20px',
             fontWeight: '600',
-            color: darkMode ? '#ffffff' : '#111827'
+            color: darkMode ? '#ffffff' : 'var(--text-1)'
           }}>
             Error carregant la pàgina
           </h2>
           <p style={{
             margin: '0 0 24px',
             fontSize: '14px',
-            color: '#6b7280'
+            color: 'var(--text-2)'
           }}>
             No s'ha pogut carregar aquesta pàgina
           </p>
@@ -76,7 +76,7 @@ export default function LazyPageWrapper({
               gap: '8px',
               margin: '0 auto',
               padding: '12px 24px',
-              backgroundColor: '#4f46e5',
+              backgroundColor: 'var(--brand-1)',
               color: '#ffffff',
               border: 'none',
               borderRadius: '8px',
@@ -108,14 +108,14 @@ export default function LazyPageWrapper({
           textAlign: 'center',
           backgroundColor: darkMode ? '#15151f' : '#ffffff',
           borderRadius: '16px',
-          border: `1px solid ${darkMode ? '#2a2a3a' : '#e5e7eb'}`,
+          border: `1px solid ${darkMode ? '#2a2a3a' : 'var(--border-1)'}`,
           padding: '32px'
         }}>
           <PageLoader darkMode={darkMode} />
           <p style={{
             margin: '16px 0 0',
             fontSize: '14px',
-            color: '#6b7280'
+            color: 'var(--text-2)'
           }}>
             La pàgina està tardant més del normal...
           </p>
@@ -128,8 +128,8 @@ export default function LazyPageWrapper({
               margin: '16px auto 0',
               padding: '8px 16px',
               backgroundColor: 'transparent',
-              color: '#6b7280',
-              border: `1px solid ${darkMode ? '#2a2a3a' : '#e5e7eb'}`,
+              color: 'var(--text-2)',
+              border: `1px solid ${darkMode ? '#2a2a3a' : 'var(--border-1)'}`,
               borderRadius: '8px',
               fontSize: '14px',
               cursor: 'pointer'

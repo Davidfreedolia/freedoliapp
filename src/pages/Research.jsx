@@ -61,7 +61,7 @@ export default function Research() {
 
   const scoreBadge = (score) => {
     const s = Number(score ?? 0)
-    const color = s >= 70 ? 'var(--success-1,#3FBF9A)' : s >= 40 ? 'var(--warning-1,#F2D94E)' : 'var(--danger-1,#F26C6C)'
+    const color = s >= 70 ? 'var(--success-1,#3FBF9A)' : s >= 40 ? 'var(--warning-1,#F2D94E)' : 'var(--danger-1,var(--coral-1))'
     return (
       <span style={{
         display: 'inline-block', minWidth: 36, padding: '2px 8px',
@@ -72,8 +72,8 @@ export default function Research() {
     )
   }
 
-  const muted = darkMode ? '#9aa1b4' : '#6b7280'
-  const ink = darkMode ? '#e6e9f2' : '#1f2937'
+  const muted = darkMode ? '#9aa1b4' : 'var(--text-2)'
+  const ink = darkMode ? '#e6e9f2' : 'var(--text-1)'
   const borderColor = darkMode ? '#2a2a3a' : 'rgba(31,95,99,0.14)'
   const cardBg = darkMode ? '#1b1b2a' : '#ffffff'
 
@@ -83,7 +83,7 @@ export default function Research() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, gap: 12, flexWrap: 'wrap' }}>
         <div>
           <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Sparkles size={20} color="var(--brand-1,#1F5F63)" />
+            <Sparkles size={20} color="var(--brand-1,var(--brand-1))" />
             {t('research.page.title', 'Recerca IA')}
           </h1>
           <p style={{ margin: '4px 0 0', color: muted, fontSize: 13 }}>
@@ -142,7 +142,7 @@ export default function Research() {
                   onClick={() => setSelected(r)}
                   style={{
                     padding: 12, borderRadius: 10, cursor: 'pointer',
-                    border: `1px solid ${selected?.id === r.id ? 'var(--brand-1,#1F5F63)' : borderColor}`,
+                    border: `1px solid ${selected?.id === r.id ? 'var(--brand-1,var(--brand-1))' : borderColor}`,
                     backgroundColor: cardBg, transition: 'border-color 0.15s ease',
                   }}
                 >

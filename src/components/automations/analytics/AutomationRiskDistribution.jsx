@@ -35,7 +35,7 @@ export default function AutomationRiskDistribution({ risk }) {
               {data.map((entry, index) => (
                 <Cell // eslint-disable-line react/no-array-index-key
                   key={`cell-${index}`}
-                  fill={COLORS[entry.bandKey] || '#e5e7eb'}
+                  fill={COLORS[entry.bandKey] || 'var(--border-1)'}
                 />
               ))}
             </Bar>

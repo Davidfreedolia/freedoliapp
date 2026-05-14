@@ -65,7 +65,7 @@ export default function AlertsBadge({ darkMode }) {
           alignItems: 'center',
           gap: '6px',
           padding: '6px 12px',
-          backgroundColor: highSeverityCount > 0 ? '#ef4444' : '#f59e0b',
+          backgroundColor: highSeverityCount > 0 ? 'var(--danger-1)' : 'var(--warning-1)',
           color: '#ffffff',
           border: 'none',
           borderRadius: '6px',
@@ -88,9 +88,9 @@ export default function AlertsBadge({ darkMode }) {
             marginTop: '8px',
             padding: '12px',
             backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
-            border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`,
+            border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
             borderRadius: '8px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            boxShadow: 'var(--shadow-popover)',
             minWidth: '280px',
             maxWidth: '400px',
             zIndex: 1000
@@ -104,13 +104,13 @@ export default function AlertsBadge({ darkMode }) {
             alignItems: 'center',
             marginBottom: '8px',
             paddingBottom: '8px',
-            borderBottom: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+            borderBottom: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
           }}>
             <h4 style={{
               margin: 0,
               fontSize: '13px',
               fontWeight: '600',
-              color: darkMode ? '#ffffff' : '#111827'
+              color: darkMode ? '#ffffff' : 'var(--text-1)'
             }}>
               {t('alertsBadge.title', { count: alerts.length })}
             </h4>
@@ -126,7 +126,7 @@ export default function AlertsBadge({ darkMode }) {
                 padding: '4px',
                 display: 'flex',
                 alignItems: 'center',
-                color: darkMode ? '#9ca3af' : '#6b7280'
+                color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
               }}
             >
               <X size={14} />
@@ -135,7 +135,7 @@ export default function AlertsBadge({ darkMode }) {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {alerts.slice(0, 5).map((alert, index) => {
-              const severityColor = alert.severity === 'high' ? '#ef4444' : '#f59e0b'
+              const severityColor = alert.severity === 'high' ? 'var(--danger-1)' : 'var(--warning-1)'
               
               return (
                 <div
@@ -151,16 +151,16 @@ export default function AlertsBadge({ darkMode }) {
                   style={{
                     padding: '8px',
                     borderRadius: '6px',
-                    backgroundColor: darkMode ? '#0a0a0f' : '#f9fafb',
+                    backgroundColor: darkMode ? '#0a0a0f' : 'var(--surface-bg-2)',
                     border: `1px solid ${severityColor}40`,
                     cursor: 'pointer',
                     transition: 'background-color 0.2s'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = darkMode ? '#1f1f2e' : '#f3f4f6'
+                    e.currentTarget.style.backgroundColor = darkMode ? '#1f1f2e' : 'var(--surface-bg-2)'
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = darkMode ? '#0a0a0f' : '#f9fafb'
+                    e.currentTarget.style.backgroundColor = darkMode ? '#0a0a0f' : 'var(--surface-bg-2)'
                   }}
                 >
                   <div style={{
@@ -188,7 +188,7 @@ export default function AlertsBadge({ darkMode }) {
                   </div>
                   <div style={{
                     fontSize: '12px',
-                    color: darkMode ? '#e5e7eb' : '#374151',
+                    color: darkMode ? 'var(--border-1)' : 'var(--text-1)',
                     marginBottom: '2px'
                   }}>
                     {alert.poNumber || alert.projectName}
@@ -196,7 +196,7 @@ export default function AlertsBadge({ darkMode }) {
                   </div>
                   <div style={{
                     fontSize: '11px',
-                    color: darkMode ? '#9ca3af' : '#6b7280'
+                    color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
                   }}>
                     {alert.message}
                   </div>
@@ -206,10 +206,10 @@ export default function AlertsBadge({ darkMode }) {
             {alerts.length > 5 && (
               <div style={{
                 fontSize: '11px',
-                color: darkMode ? '#9ca3af' : '#6b7280',
+                color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
                 textAlign: 'center',
                 paddingTop: '4px',
-                borderTop: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+                borderTop: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
               }}>
                 {t('alertsBadge.more', { count: alerts.length - 5 })}
               </div>

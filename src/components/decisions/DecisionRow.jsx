@@ -1,9 +1,9 @@
 import React from 'react'
 
 const severityColors = {
-  high: 'var(--status-critical, #b91c1c)',
-  medium: 'var(--status-warning, #d97706)',
-  low: 'var(--status-info, #2563eb)',
+  high: 'var(--status-critical, var(--danger-1))',
+  medium: 'var(--status-warning, var(--warning-1))',
+  low: 'var(--status-info, var(--brand-1))',
 }
 
 export default function DecisionRow({ item, selected, onSelect }) {

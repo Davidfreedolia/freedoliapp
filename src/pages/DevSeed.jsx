@@ -1020,7 +1020,7 @@ export default function DevSeed() {
     title: {
       fontSize: '32px',
       fontWeight: '700',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       margin: 0,
       marginBottom: '8px',
       display: 'flex',
@@ -1029,42 +1029,42 @@ export default function DevSeed() {
     },
     subtitle: {
       fontSize: '16px',
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       margin: 0
     },
     warning: {
       padding: '16px',
       backgroundColor: darkMode ? '#7f1d1d' : '#fef2f2',
-      border: `1px solid ${darkMode ? '#991b1b' : '#fecaca'}`,
+      border: `1px solid ${darkMode ? 'var(--danger-1)' : '#fecaca'}`,
       borderRadius: '8px',
       marginBottom: '24px',
       display: 'flex',
       alignItems: 'center',
       gap: '12px',
-      color: darkMode ? '#fca5a5' : '#991b1b'
+      color: darkMode ? '#fca5a5' : 'var(--danger-1)'
     },
     card: {
       backgroundColor: darkMode ? '#15151f' : '#ffffff',
       borderRadius: '12px',
       padding: '24px',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       marginBottom: '24px'
     },
     cardTitle: {
       fontSize: '18px',
       fontWeight: '600',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       margin: 0,
       marginBottom: '16px'
     },
     input: {
       width: '100%',
       padding: '12px 16px',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       borderRadius: '8px',
       fontSize: '14px',
       backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       marginBottom: '16px',
       boxSizing: 'border-box'
     },
@@ -1081,11 +1081,11 @@ export default function DevSeed() {
       marginRight: '12px'
     },
     primaryButton: {
-      backgroundColor: '#4f46e5',
+      backgroundColor: 'var(--brand-1)',
       color: '#ffffff'
     },
     dangerButton: {
-      backgroundColor: '#ef4444',
+      backgroundColor: 'var(--danger-1)',
       color: '#ffffff'
     },
     buttonGroup: {
@@ -1107,15 +1107,15 @@ export default function DevSeed() {
     },
     statusError: {
       backgroundColor: darkMode ? '#7f1d1d' : '#fee2e2',
-      color: darkMode ? '#fca5a5' : '#991b1b'
+      color: darkMode ? '#fca5a5' : 'var(--danger-1)'
     },
     statusInfo: {
       backgroundColor: darkMode ? '#1e3a8a' : '#dbeafe',
-      color: darkMode ? '#93c5fd' : '#1e40af'
+      color: darkMode ? '#93c5fd' : 'var(--brand-1)'
     },
     statusWarning: {
       backgroundColor: darkMode ? '#7c2d12' : '#fef2f2',
-      color: darkMode ? '#fca5a5' : '#991b1b'
+      color: darkMode ? '#fca5a5' : 'var(--danger-1)'
     },
     counts: {
       display: 'grid',
@@ -1125,19 +1125,19 @@ export default function DevSeed() {
     },
     countItem: {
       padding: '12px',
-      backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
+      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
       borderRadius: '8px',
       textAlign: 'center'
     },
     countLabel: {
       fontSize: '12px',
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       marginBottom: '4px'
     },
     countValue: {
       fontSize: '24px',
       fontWeight: '700',
-      color: darkMode ? '#ffffff' : '#111827'
+      color: darkMode ? '#ffffff' : 'var(--text-1)'
     }
   }
 
@@ -1167,7 +1167,7 @@ export default function DevSeed() {
 
       <div style={styles.card}>
         <h3 style={styles.cardTitle}>Generate Demo Data</h3>
-        <p style={{ color: darkMode ? '#9ca3af' : '#6b7280', marginBottom: '16px', fontSize: '14px' }}>
+        <p style={{ color: darkMode ? 'var(--muted-1)' : 'var(--text-2)', marginBottom: '16px', fontSize: '14px' }}>
           Type <strong>DEMO</strong> to confirm generation:
         </p>
         <input
@@ -1197,7 +1197,7 @@ export default function DevSeed() {
 
       <div style={styles.card}>
         <h3 style={styles.cardTitle}>Clear Demo Data</h3>
-        <p style={{ color: darkMode ? '#9ca3af' : '#6b7280', marginBottom: '16px', fontSize: '14px' }}>
+        <p style={{ color: darkMode ? 'var(--muted-1)' : 'var(--text-2)', marginBottom: '16px', fontSize: '14px' }}>
           Type <strong>CLEAR</strong> to confirm deletion of all data marked with <code>is_demo=true</code>
         </p>
         <input
@@ -1351,7 +1351,7 @@ export default function DevSeed() {
           <div style={{
             ...styles.status,
             backgroundColor: darkMode ? '#7c2d12' : '#fef2f2',
-            color: darkMode ? '#fca5a5' : '#991b1b',
+            color: darkMode ? '#fca5a5' : 'var(--danger-1)',
             marginTop: 0
           }}>
             <AlertTriangle size={20} />
@@ -1360,7 +1360,7 @@ export default function DevSeed() {
           <ul style={{ 
             marginTop: '12px', 
             paddingLeft: '24px',
-            color: darkMode ? '#fca5a5' : '#991b1b'
+            color: darkMode ? '#fca5a5' : 'var(--danger-1)'
           }}>
             {demoChecks.warnings.map((warning, idx) => (
               <li key={idx} style={{ marginBottom: '8px' }}>{warning}</li>

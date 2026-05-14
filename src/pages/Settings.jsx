@@ -518,7 +518,7 @@ export default function Settings() {
             onClick={() => setActiveTab('company')}
             style={{
               ...styles.tab,
-              color: activeTab === 'company' ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280')
+              color: activeTab === 'company' ? '#ffffff' : (darkMode ? 'var(--muted-1)' : 'var(--text-2)')
             }}
           >
             <Building2 size={18} /> Dades Empresa
@@ -529,7 +529,7 @@ export default function Settings() {
             onClick={() => setActiveTab('signatures')}
             style={{
               ...styles.tab,
-              color: activeTab === 'signatures' ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280')
+              color: activeTab === 'signatures' ? '#ffffff' : (darkMode ? 'var(--muted-1)' : 'var(--text-2)')
             }}
           >
             <PenTool size={18} /> Signatures
@@ -540,7 +540,7 @@ export default function Settings() {
             onClick={() => setActiveTab('gtin')}
             style={{
               ...styles.tab,
-              color: activeTab === 'gtin' ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280')
+              color: activeTab === 'gtin' ? '#ffffff' : (darkMode ? 'var(--muted-1)' : 'var(--text-2)')
             }}
           >
             <Barcode size={18} /> GTIN Pool
@@ -551,7 +551,7 @@ export default function Settings() {
             onClick={() => setActiveTab('audit')}
             style={{
               ...styles.tab,
-              color: activeTab === 'audit' ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280')
+              color: activeTab === 'audit' ? '#ffffff' : (darkMode ? 'var(--muted-1)' : 'var(--text-2)')
             }}
           >
             <FileText size={18} /> Audit Log
@@ -562,7 +562,7 @@ export default function Settings() {
             onClick={() => setActiveTab('workspace')}
             style={{
               ...styles.tab,
-              color: activeTab === 'workspace' ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280')
+              color: activeTab === 'workspace' ? '#ffffff' : (darkMode ? 'var(--muted-1)' : 'var(--text-2)')
             }}
           >
             <Users size={18} /> Workspace
@@ -573,7 +573,7 @@ export default function Settings() {
             onClick={() => setActiveTab('ai')}
             style={{
               ...styles.tab,
-              color: activeTab === 'ai' ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280')
+              color: activeTab === 'ai' ? '#ffffff' : (darkMode ? 'var(--muted-1)' : 'var(--text-2)')
             }}
           >
             <Sparkles size={18} /> {t('settings.ai.tab', 'IA')}
@@ -584,7 +584,7 @@ export default function Settings() {
             onClick={() => setActiveTab('privacy')}
             style={{
               ...styles.tab,
-              color: activeTab === 'privacy' ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280')
+              color: activeTab === 'privacy' ? '#ffffff' : (darkMode ? 'var(--muted-1)' : 'var(--text-2)')
             }}
           >
             <ShieldCheck size={18} /> {t('settings.privacy.tab')}
@@ -595,7 +595,7 @@ export default function Settings() {
         {activeTab === 'company' && (
           <div style={{...styles.section, backgroundColor: darkMode ? '#15151f' : '#ffffff'}}>
             <div style={styles.sectionHeader}>
-              <h2 style={{...styles.sectionTitle, color: darkMode ? '#ffffff' : '#111827'}}>
+              <h2 style={{...styles.sectionTitle, color: darkMode ? '#ffffff' : 'var(--text-1)'}}>
                 <Building2 size={20} /> Dades de l'Empresa
               </h2>
               <Button
@@ -616,11 +616,11 @@ export default function Settings() {
               padding: '20px',
               borderRadius: '12px',
               border: '1px solid var(--border-color)',
-              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
+              backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)'
             }}>
               <h3 style={{
                 ...styles.subsectionTitle,
-                color: darkMode ? '#ffffff' : '#111827',
+                color: darkMode ? '#ffffff' : 'var(--text-1)',
                 marginBottom: '16px'
               }}>
                 <Globe size={16} />
@@ -629,7 +629,7 @@ export default function Settings() {
               <div style={styles.formGroup}>
                 <label style={{
                   ...styles.label,
-                  color: darkMode ? '#e5e7eb' : '#374151'
+                  color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
                 }}>
                   {t('settings.languageSelectLabel')}
                 </label>
@@ -644,8 +644,8 @@ export default function Settings() {
                   style={{
                     ...styles.input,
                     backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
-                    color: darkMode ? '#ffffff' : '#111827',
-                    borderColor: darkMode ? '#374151' : '#d1d5db',
+                    color: darkMode ? '#ffffff' : 'var(--text-1)',
+                    borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)',
                     maxWidth: '300px'
                   }}
                 >
@@ -663,18 +663,18 @@ export default function Settings() {
               padding: '20px',
               borderRadius: '12px',
               border: '1px solid var(--border-color)',
-              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
+              backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)'
             }}>
               <h3 style={{
                 ...styles.subsectionTitle,
-                color: darkMode ? '#ffffff' : '#111827',
+                color: darkMode ? '#ffffff' : 'var(--text-1)',
                 marginBottom: '16px'
               }}>
                 <BookOpen size={16} />
                 Manual d'ús
               </h3>
               <p style={{
-                color: darkMode ? '#9ca3af' : '#6b7280',
+                color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
                 fontSize: '14px',
                 marginBottom: '16px'
               }}>
@@ -698,18 +698,18 @@ export default function Settings() {
               padding: '20px',
               borderRadius: '12px',
               border: '1px solid var(--border-color)',
-              backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
+              backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)'
             }}>
               <h3 style={{
                 ...styles.subsectionTitle,
-                color: darkMode ? '#ffffff' : '#111827',
+                color: darkMode ? '#ffffff' : 'var(--text-1)',
                 marginBottom: '16px'
               }}>
                 <Database size={16} />
                 Dades Demo
               </h3>
               <p style={{
-                color: darkMode ? '#9ca3af' : '#6b7280',
+                color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
                 fontSize: '14px',
                 marginBottom: '16px'
               }}>
@@ -721,7 +721,7 @@ export default function Settings() {
                   alignItems: 'center',
                   gap: '8px',
                   cursor: 'pointer',
-                  color: darkMode ? '#e5e7eb' : '#374151'
+                  color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
                 }}>
                   <input
                     type="checkbox"
@@ -892,84 +892,84 @@ export default function Settings() {
 
             {/* Dades generals */}
             <div style={styles.subsection}>
-              <h3 style={{...styles.subsectionTitle, color: darkMode ? '#9ca3af' : '#6b7280'}}>Informació General</h3>
+              <h3 style={{...styles.subsectionTitle, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'}}>Informació General</h3>
               <div style={styles.formGrid}>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Nom comercial</label>
-                  <input type="text" value={companyData.company_name} onChange={e => setCompanyData({...companyData, company_name: e.target.value})} placeholder="Ex: Freedolia" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}} />
+                  <input type="text" value={companyData.company_name} onChange={e => setCompanyData({...companyData, company_name: e.target.value})} placeholder="Ex: Freedolia" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}} />
                 </div>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Nom legal</label>
-                  <input type="text" value={companyData.legal_name} onChange={e => setCompanyData({...companyData, legal_name: e.target.value})} placeholder="Ex: David Castellà Gil" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}} />
+                  <input type="text" value={companyData.legal_name} onChange={e => setCompanyData({...companyData, legal_name: e.target.value})} placeholder="Ex: David Castellà Gil" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}} />
                 </div>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>NIF / CIF</label>
-                  <input type="text" value={companyData.tax_id} onChange={e => setCompanyData({...companyData, tax_id: e.target.value})} placeholder="Ex: 52626358N" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}} />
+                  <input type="text" value={companyData.tax_id} onChange={e => setCompanyData({...companyData, tax_id: e.target.value})} placeholder="Ex: 52626358N" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}} />
                 </div>
               </div>
             </div>
 
             {/* Adreça */}
             <div style={styles.subsection}>
-              <h3 style={{...styles.subsectionTitle, color: darkMode ? '#9ca3af' : '#6b7280'}}><MapPin size={16} /> Adreça Fiscal</h3>
+              <h3 style={{...styles.subsectionTitle, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'}}><MapPin size={16} /> Adreça Fiscal</h3>
               <div style={styles.formGrid}>
                 <div style={{...styles.formGroup, gridColumn: 'span 2'}}>
                   <label style={styles.label}>Adreça</label>
-                  <input type="text" value={companyData.address} onChange={e => setCompanyData({...companyData, address: e.target.value})} placeholder="Ex: c/ Josep Camprecios, 1, 1-2" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}} />
+                  <input type="text" value={companyData.address} onChange={e => setCompanyData({...companyData, address: e.target.value})} placeholder="Ex: c/ Josep Camprecios, 1, 1-2" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}} />
                 </div>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Codi postal</label>
-                  <input type="text" value={companyData.postal_code} onChange={e => setCompanyData({...companyData, postal_code: e.target.value})} placeholder="Ex: 08950" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}} />
+                  <input type="text" value={companyData.postal_code} onChange={e => setCompanyData({...companyData, postal_code: e.target.value})} placeholder="Ex: 08950" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}} />
                 </div>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Ciutat</label>
-                  <input type="text" value={companyData.city} onChange={e => setCompanyData({...companyData, city: e.target.value})} placeholder="Ex: Esplugues de Llobregat" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}} />
+                  <input type="text" value={companyData.city} onChange={e => setCompanyData({...companyData, city: e.target.value})} placeholder="Ex: Esplugues de Llobregat" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}} />
                 </div>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Província</label>
-                  <input type="text" value={companyData.province} onChange={e => setCompanyData({...companyData, province: e.target.value})} placeholder="Ex: Barcelona" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}} />
+                  <input type="text" value={companyData.province} onChange={e => setCompanyData({...companyData, province: e.target.value})} placeholder="Ex: Barcelona" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}} />
                 </div>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>País</label>
-                  <input type="text" value={companyData.country} onChange={e => setCompanyData({...companyData, country: e.target.value})} placeholder="Ex: España" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}} />
+                  <input type="text" value={companyData.country} onChange={e => setCompanyData({...companyData, country: e.target.value})} placeholder="Ex: España" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}} />
                 </div>
               </div>
             </div>
 
             {/* Contacte */}
             <div style={styles.subsection}>
-              <h3 style={{...styles.subsectionTitle, color: darkMode ? '#9ca3af' : '#6b7280'}}><Phone size={16} /> Contacte</h3>
+              <h3 style={{...styles.subsectionTitle, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'}}><Phone size={16} /> Contacte</h3>
               <div style={styles.formGrid}>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Telèfon</label>
-                  <input type="tel" value={companyData.phone} onChange={e => setCompanyData({...companyData, phone: e.target.value})} placeholder="Ex: +34 630 576 066" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}} />
+                  <input type="tel" value={companyData.phone} onChange={e => setCompanyData({...companyData, phone: e.target.value})} placeholder="Ex: +34 630 576 066" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}} />
                 </div>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Email</label>
-                  <input type="email" value={companyData.email} onChange={e => setCompanyData({...companyData, email: e.target.value})} placeholder="Ex: david@freedolia.com" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}} />
+                  <input type="email" value={companyData.email} onChange={e => setCompanyData({...companyData, email: e.target.value})} placeholder="Ex: david@freedolia.com" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}} />
                 </div>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Pàgina web</label>
-                  <input type="url" value={companyData.website} onChange={e => setCompanyData({...companyData, website: e.target.value})} placeholder="Ex: https://freedolia.com" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}} />
+                  <input type="url" value={companyData.website} onChange={e => setCompanyData({...companyData, website: e.target.value})} placeholder="Ex: https://freedolia.com" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}} />
                 </div>
               </div>
             </div>
 
             {/* Bancàries */}
             <div style={styles.subsection}>
-              <h3 style={{...styles.subsectionTitle, color: darkMode ? '#9ca3af' : '#6b7280'}}><CreditCard size={16} /> Dades Bancàries</h3>
+              <h3 style={{...styles.subsectionTitle, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'}}><CreditCard size={16} /> Dades Bancàries</h3>
               <div style={styles.formGrid}>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Banc</label>
-                  <input type="text" value={companyData.bank_name} onChange={e => setCompanyData({...companyData, bank_name: e.target.value})} placeholder="Ex: La Caixa" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}} />
+                  <input type="text" value={companyData.bank_name} onChange={e => setCompanyData({...companyData, bank_name: e.target.value})} placeholder="Ex: La Caixa" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}} />
                 </div>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>IBAN</label>
-                  <input type="text" value={companyData.bank_iban} onChange={e => setCompanyData({...companyData, bank_iban: e.target.value})} placeholder="Ex: ES12 3456 7890 1234 5678 9012" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}} />
+                  <input type="text" value={companyData.bank_iban} onChange={e => setCompanyData({...companyData, bank_iban: e.target.value})} placeholder="Ex: ES12 3456 7890 1234 5678 9012" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}} />
                 </div>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>SWIFT/BIC</label>
-                  <input type="text" value={companyData.bank_swift} onChange={e => setCompanyData({...companyData, bank_swift: e.target.value})} placeholder="Ex: CAIXESBBXXX" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}} />
+                  <input type="text" value={companyData.bank_swift} onChange={e => setCompanyData({...companyData, bank_swift: e.target.value})} placeholder="Ex: CAIXESBBXXX" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}} />
                 </div>
               </div>
             </div>
@@ -981,7 +981,7 @@ export default function Settings() {
           <div style={{...styles.section, backgroundColor: darkMode ? '#15151f' : '#ffffff'}}>
             <div style={styles.sectionHeader}>
               <div>
-                <h2 style={{...styles.sectionTitle, color: darkMode ? '#ffffff' : '#111827'}}>
+                <h2 style={{...styles.sectionTitle, color: darkMode ? '#ffffff' : 'var(--text-1)'}}>
                   <PenTool size={20} /> Signatures Digitals
                 </h2>
                 <p style={styles.sectionDescription}>Gestiona les signatures per als PDFs</p>
@@ -994,7 +994,7 @@ export default function Settings() {
             <div style={styles.signaturesGrid}>
               {signatures.length === 0 ? (
                 <div style={styles.emptySignatures}>
-                  <PenTool size={48} color="#d1d5db" />
+                  <PenTool size={48} color='var(--border-1)' />
                   <p>No hi ha signatures configurades</p>
                   <Button variant="primary" size="sm" onClick={handleNewSignature} style={styles.addButton}>
                     <Plus size={18} /> Afegir Signatura
@@ -1004,8 +1004,8 @@ export default function Settings() {
                 signatures.map(sig => (
                   <div key={sig.id} style={{
                     ...styles.signatureCard,
-                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb',
-                    borderColor: sig.is_default ? '#4f46e5' : 'var(--border-color)'
+                    backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+                    borderColor: sig.is_default ? 'var(--brand-1)' : 'var(--border-color)'
                   }}>
                     {sig.is_default && (
                       <span style={styles.defaultBadge}><Star size={12} /> Per defecte</span>
@@ -1020,7 +1020,7 @@ export default function Settings() {
                     </div>
                     
                     <div style={styles.signatureInfo}>
-                      <h4 style={{...styles.signatureName, color: darkMode ? '#ffffff' : '#111827'}}>{sig.name}</h4>
+                      <h4 style={{...styles.signatureName, color: darkMode ? '#ffffff' : 'var(--text-1)'}}>{sig.name}</h4>
                       {sig.role && <p style={styles.signatureRole}>{sig.role}</p>}
                       <p style={styles.signatureType}>{sig.type === 'buyer' ? '👤 Comprador' : '🏭 Proveïdor'}</p>
                     </div>
@@ -1072,7 +1072,7 @@ export default function Settings() {
         {activeTab === 'audit' && (
           <div style={{...styles.section, backgroundColor: darkMode ? '#15151f' : '#ffffff'}}>
             <div style={styles.sectionHeader}>
-              <h2 style={{...styles.sectionTitle, color: darkMode ? '#ffffff' : '#111827'}}>
+              <h2 style={{...styles.sectionTitle, color: darkMode ? '#ffffff' : 'var(--text-1)'}}>
                 <FileText size={20} /> Audit Log
               </h2>
               <div style={{ display: 'flex', gap: '8px' }}>
@@ -1082,8 +1082,8 @@ export default function Settings() {
                   onClick={() => setStatusFilter(null)}
                   style={{
                     ...styles.filterButton,
-                    color: statusFilter === null ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280'),
-                    borderColor: darkMode ? '#374151' : '#d1d5db'
+                    color: statusFilter === null ? '#ffffff' : (darkMode ? 'var(--muted-1)' : 'var(--text-2)'),
+                    borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
                   }}
                 >
                   Tots
@@ -1094,8 +1094,8 @@ export default function Settings() {
                   onClick={() => setStatusFilter('success')}
                   style={{
                     ...styles.filterButton,
-                    color: statusFilter === 'success' ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280'),
-                    borderColor: darkMode ? '#374151' : '#d1d5db'
+                    color: statusFilter === 'success' ? '#ffffff' : (darkMode ? 'var(--muted-1)' : 'var(--text-2)'),
+                    borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
                   }}
                 >
                   <CheckCircle2 size={14} /> Èxits
@@ -1106,8 +1106,8 @@ export default function Settings() {
                   onClick={() => setStatusFilter('error')}
                   style={{
                     ...styles.filterButton,
-                    color: statusFilter === 'error' ? '#ffffff' : (darkMode ? '#9ca3af' : '#6b7280'),
-                    borderColor: darkMode ? '#374151' : '#d1d5db'
+                    color: statusFilter === 'error' ? '#ffffff' : (darkMode ? 'var(--muted-1)' : 'var(--text-2)'),
+                    borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
                   }}
                 >
                   <AlertCircle size={14} /> Errors
@@ -1118,7 +1118,7 @@ export default function Settings() {
             {loadingLogs ? (
               <div style={styles.loading}>Carregant logs...</div>
             ) : auditLogs.length === 0 ? (
-              <div style={{ padding: '48px', textAlign: 'center', color: '#6b7280' }}>
+              <div style={{ padding: '48px', textAlign: 'center', color: 'var(--text-2)' }}>
                 No hi ha logs d'auditoria
               </div>
             ) : (
@@ -1126,8 +1126,8 @@ export default function Settings() {
                 {auditLogs.map(log => (
                   <div key={log.id} style={{
                     ...styles.auditLogItem,
-                    borderLeftColor: log.status === 'success' ? '#22c55e' : '#ef4444',
-                    backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
+                    borderLeftColor: log.status === 'success' ? 'var(--success-1)' : 'var(--danger-1)',
+                    backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)'
                   }}>
                     <div style={styles.auditLogHeader}>
                       <div style={{ flex: 1 }}>
@@ -1135,23 +1135,23 @@ export default function Settings() {
                           <span style={{
                             ...styles.statusBadge,
                             backgroundColor: log.status === 'success' ? '#22c55e15' : '#ef444415',
-                            color: log.status === 'success' ? '#22c55e' : '#ef4444'
+                            color: log.status === 'success' ? 'var(--success-1)' : 'var(--danger-1)'
                           }}>
                             {log.status === 'success' ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
                             {log.status === 'success' ? 'Èxit' : 'Error'}
                           </span>
-                          <span style={{ color: darkMode ? '#ffffff' : '#111827', fontWeight: '600' }}>
+                          <span style={{ color: darkMode ? '#ffffff' : 'var(--text-1)', fontWeight: '600' }}>
                             {log.entity_type} • {log.action}
                           </span>
                         </div>
                         {log.message && (
-                          <p style={{ margin: '4px 0', color: darkMode ? '#9ca3af' : '#6b7280', fontSize: '14px' }}>
+                          <p style={{ margin: '4px 0', color: darkMode ? 'var(--muted-1)' : 'var(--text-2)', fontSize: '14px' }}>
                             {log.message}
                           </p>
                         )}
                         {log.meta && Object.keys(log.meta).length > 0 && (
                           <details style={{ marginTop: '8px' }}>
-                            <summary style={{ cursor: 'pointer', color: '#6b7280', fontSize: '12px' }}>
+                            <summary style={{ cursor: 'pointer', color: 'var(--text-2)', fontSize: '12px' }}>
                               Detalls
                             </summary>
                             <pre style={{
@@ -1167,7 +1167,7 @@ export default function Settings() {
                           </details>
                         )}
                       </div>
-                      <span style={{ color: '#9ca3af', fontSize: '12px', whiteSpace: 'nowrap' }}>
+                      <span style={{ color: 'var(--muted-1)', fontSize: '12px', whiteSpace: 'nowrap' }}>
                         {new Date(log.created_at).toLocaleString('ca-ES')}
                       </span>
                     </div>
@@ -1182,7 +1182,7 @@ export default function Settings() {
         {activeTab === 'workspace' && (
           <div style={{ ...styles.section, backgroundColor: darkMode ? '#15151f' : '#ffffff' }}>
             <div style={styles.sectionHeader}>
-              <h2 style={{ ...styles.sectionTitle, color: darkMode ? '#ffffff' : '#111827' }}>
+              <h2 style={{ ...styles.sectionTitle, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
                 <Users size={20} /> Workspace
               </h2>
             </div>
@@ -1200,27 +1200,27 @@ export default function Settings() {
                   padding: '20px',
                   borderRadius: '12px',
                   border: '1px solid var(--border-color)',
-                  backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
+                  backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)'
                 }}>
-                  <h3 style={{ ...styles.subsectionTitle, color: darkMode ? '#ffffff' : '#111827', marginBottom: '16px' }}>
+                  <h3 style={{ ...styles.subsectionTitle, color: darkMode ? '#ffffff' : 'var(--text-1)', marginBottom: '16px' }}>
                     <CreditCard size={16} /> Subscription
                   </h3>
                   <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: '16px', marginBottom: '12px' }}>
                     <div>
                       <div style={{ fontSize: '12px', color: 'var(--muted-1)', marginBottom: '4px' }}>Plan</div>
-                      <div style={{ fontSize: '14px', fontWeight: 600, color: darkMode ? '#e5e7eb' : '#111827' }}>{org.plan_id ?? '—'}</div>
+                      <div style={{ fontSize: '14px', fontWeight: 600, color: darkMode ? 'var(--border-1)' : 'var(--text-1)' }}>{org.plan_id ?? '—'}</div>
                     </div>
                     <div>
                       <div style={{ fontSize: '12px', color: 'var(--muted-1)', marginBottom: '4px' }}>Status</div>
-                      <div style={{ fontSize: '14px', fontWeight: 600, color: darkMode ? '#e5e7eb' : '#111827' }}>{org.billing_status ?? '—'}</div>
+                      <div style={{ fontSize: '14px', fontWeight: 600, color: darkMode ? 'var(--border-1)' : 'var(--text-1)' }}>{org.billing_status ?? '—'}</div>
                     </div>
                     <div>
                       <div style={{ fontSize: '12px', color: 'var(--muted-1)', marginBottom: '4px' }}>Seats used</div>
-                      <div style={{ fontSize: '14px', fontWeight: 600, color: darkMode ? '#e5e7eb' : '#111827' }}>{seatsUsed}</div>
+                      <div style={{ fontSize: '14px', fontWeight: 600, color: darkMode ? 'var(--border-1)' : 'var(--text-1)' }}>{seatsUsed}</div>
                     </div>
                     <div>
                       <div style={{ fontSize: '12px', color: 'var(--muted-1)', marginBottom: '4px' }}>Seat limit</div>
-                      <div style={{ fontSize: '14px', fontWeight: 600, color: darkMode ? '#e5e7eb' : '#111827' }}>{seatLimit ?? '—'}</div>
+                      <div style={{ fontSize: '14px', fontWeight: 600, color: darkMode ? 'var(--border-1)' : 'var(--text-1)' }}>{seatLimit ?? '—'}</div>
                     </div>
                   </div>
                   {(org.stripe_customer_id || org.stripe_subscription_id) && (
@@ -1247,9 +1247,9 @@ export default function Settings() {
                   padding: '20px',
                   borderRadius: '12px',
                   border: '1px solid var(--border-color)',
-                  backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
+                  backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)'
                 }}>
-                  <h3 style={{ ...styles.subsectionTitle, color: darkMode ? '#ffffff' : '#111827', marginBottom: '16px' }}>
+                  <h3 style={{ ...styles.subsectionTitle, color: darkMode ? '#ffffff' : 'var(--text-1)', marginBottom: '16px' }}>
                     <Users size={16} /> Members
                   </h3>
                   {members.length === 0 ? (
@@ -1269,7 +1269,7 @@ export default function Settings() {
                               justifyContent: 'space-between',
                               gap: 12,
                               fontSize: 14,
-                              color: darkMode ? '#e5e7eb' : '#374151'
+                              color: darkMode ? 'var(--border-1)' : 'var(--text-1)'
                             }}
                           >
                             <div>
@@ -1292,7 +1292,7 @@ export default function Settings() {
                                   fontSize: 11,
                                   textTransform: 'capitalize',
                                   backgroundColor: isActive ? '#22c55e15' : isSuspended ? '#f9731615' : '#6b728015',
-                                  color: isActive ? '#16a34a' : isSuspended ? '#ea580c' : '#6b7280'
+                                  color: isActive ? 'var(--success-1)' : isSuspended ? 'var(--warning-1)' : 'var(--text-2)'
                                 }}
                               >
                                 {statusLabel}
@@ -1340,8 +1340,8 @@ export default function Settings() {
                         ...styles.input,
                         maxWidth: 280,
                         backgroundColor: darkMode ? '#15151f' : '#fff',
-                        color: darkMode ? '#fff' : '#111827',
-                        borderColor: darkMode ? '#374151' : '#d1d5db'
+                        color: darkMode ? '#fff' : 'var(--text-1)',
+                        borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
                       }}
                     />
                     <Button
@@ -1362,9 +1362,9 @@ export default function Settings() {
                   padding: '20px',
                   borderRadius: '12px',
                   border: '1px solid var(--border-color)',
-                  backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb'
+                  backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)'
                 }}>
-                  <h3 style={{ ...styles.subsectionTitle, color: darkMode ? '#ffffff' : '#111827', marginBottom: '12px' }}>
+                  <h3 style={{ ...styles.subsectionTitle, color: darkMode ? '#ffffff' : 'var(--text-1)', marginBottom: '12px' }}>
                     <Database size={16} /> Plan & features
                   </h3>
                   {workspaceEntitlementsLoading ? (
@@ -1412,26 +1412,26 @@ export default function Settings() {
         {activeTab === 'privacy' && (
           <div style={{...styles.section, backgroundColor: darkMode ? '#15151f' : '#ffffff'}}>
             <div style={styles.sectionHeader}>
-              <h2 style={{...styles.sectionTitle, color: darkMode ? '#ffffff' : '#111827'}}>
+              <h2 style={{...styles.sectionTitle, color: darkMode ? '#ffffff' : 'var(--text-1)'}}>
                 <ShieldCheck size={20} /> {t('settings.privacy.title')}
               </h2>
             </div>
-            <p style={{ fontSize: 14, color: darkMode ? '#9ca3af' : '#6b7280', marginBottom: 24, lineHeight: 1.6 }}>
+            <p style={{ fontSize: 14, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)', marginBottom: 24, lineHeight: 1.6 }}>
               {t('settings.privacy.description')}
             </p>
 
             {/* Export data — GDPR Art. 20 */}
             <div style={{
               padding: 20, marginBottom: 20,
-              border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+              border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
               borderRadius: 12,
-              background: darkMode ? '#1f1f2e' : '#f9fafb',
+              background: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
             }}>
-              <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 8, color: darkMode ? '#ffffff' : '#111827' }}>
+              <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 8, color: darkMode ? '#ffffff' : 'var(--text-1)' }}>
                 <Download size={16} style={{ marginRight: 6, verticalAlign: '-3px' }} />
                 {t('settings.privacy.export.title')}
               </h3>
-              <p style={{ fontSize: 13, color: darkMode ? '#9ca3af' : '#6b7280', marginBottom: 16, lineHeight: 1.5 }}>
+              <p style={{ fontSize: 13, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)', marginBottom: 16, lineHeight: 1.5 }}>
                 {t('settings.privacy.export.description')}
               </p>
               <Button
@@ -1462,7 +1462,7 @@ export default function Settings() {
                 <Trash2 size={16} style={{ marginRight: 6, verticalAlign: '-3px' }} />
                 {t('settings.privacy.delete.title')}
               </h3>
-              <p style={{ fontSize: 13, color: darkMode ? '#9ca3af' : '#6b7280', marginBottom: 16, lineHeight: 1.5 }}>
+              <p style={{ fontSize: 13, color: darkMode ? 'var(--muted-1)' : 'var(--text-2)', marginBottom: 16, lineHeight: 1.5 }}>
                 {t('settings.privacy.delete.description')}
               </p>
               <Button
@@ -1496,7 +1496,7 @@ export default function Settings() {
         <div style={{...styles.modalOverlay, ...modalStyles.overlay}} onClick={() => setShowSignatureModal(false)}>
           <div style={{...styles.modal, ...modalStyles.modal}} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeader}>
-              <h3 style={{...styles.modalTitle, color: darkMode ? '#ffffff' : '#111827'}}>
+              <h3 style={{...styles.modalTitle, color: darkMode ? '#ffffff' : 'var(--text-1)'}}>
                 {editingSignature.id ? 'Editar Signatura' : 'Nova Signatura'}
               </h3>
               <Button variant="ghost" size="sm" onClick={() => setShowSignatureModal(false)} style={styles.closeButton}>
@@ -1508,15 +1508,15 @@ export default function Settings() {
               <div style={styles.formGrid2}>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Nom *</label>
-                  <input type="text" value={editingSignature.name} onChange={e => setEditingSignature({...editingSignature, name: e.target.value})} placeholder="Ex: David Castellà Gil" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}} />
+                  <input type="text" value={editingSignature.name} onChange={e => setEditingSignature({...editingSignature, name: e.target.value})} placeholder="Ex: David Castellà Gil" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}} />
                 </div>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Càrrec</label>
-                  <input type="text" value={editingSignature.role} onChange={e => setEditingSignature({...editingSignature, role: e.target.value})} placeholder="Ex: Owner" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}} />
+                  <input type="text" value={editingSignature.role} onChange={e => setEditingSignature({...editingSignature, role: e.target.value})} placeholder="Ex: Owner" style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}} />
                 </div>
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Tipus</label>
-                  <select value={editingSignature.type} onChange={e => setEditingSignature({...editingSignature, type: e.target.value})} style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : '#f9fafb', color: darkMode ? '#ffffff' : '#111827'}}>
+                  <select value={editingSignature.type} onChange={e => setEditingSignature({...editingSignature, type: e.target.value})} style={{...styles.input, backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)', color: darkMode ? '#ffffff' : 'var(--text-1)'}}>
                     <option value="buyer">👤 Comprador (Freedolia)</option>
                     <option value="supplier">🏭 Proveïdor</option>
                   </select>
@@ -1538,7 +1538,7 @@ export default function Settings() {
                   onDrop={handleDrop}
                   style={{
                     ...styles.uploadZone, 
-                    borderColor: dragOver ? '#4f46e5' : (editingSignature.signature_image ? '#22c55e' : (darkMode ? '#374151' : '#d1d5db')),
+                    borderColor: dragOver ? 'var(--brand-1)' : (editingSignature.signature_image ? 'var(--success-1)' : (darkMode ? 'var(--text-1)' : 'var(--border-1)')),
                     backgroundColor: dragOver ? (darkMode ? '#1f1f2e' : '#eef2ff') : 'transparent'
                   }}
                 >
@@ -1546,11 +1546,11 @@ export default function Settings() {
                     <img src={editingSignature.signature_image} alt="Signatura" style={styles.uploadedImage} />
                   ) : (
                     <>
-                      <Upload size={32} color={dragOver ? '#4f46e5' : '#9ca3af'} />
-                      <p style={{margin: '8px 0 0', color: darkMode ? '#9ca3af' : '#6b7280'}}>
+                      <Upload size={32} color={dragOver ? 'var(--brand-1)' : 'var(--muted-1)'} />
+                      <p style={{margin: '8px 0 0', color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'}}>
                         {dragOver ? 'Deixa anar per pujar' : 'Arrossega la imatge aquí o clica per seleccionar'}
                       </p>
-                      <span style={{fontSize: '12px', color: '#9ca3af'}}>PNG amb fons transparent recomanat</span>
+                      <span style={{fontSize: '12px', color: 'var(--muted-1)'}}>PNG amb fons transparent recomanat</span>
                     </>
                   )}
                 </div>
@@ -1577,49 +1577,49 @@ export default function Settings() {
 const styles = {
   container: { flex: 1, display: 'flex', flexDirection: 'column' },
   content: { padding: '32px', overflowY: 'auto' },
-  loading: { padding: '64px', textAlign: 'center', color: '#6b7280' },
+  loading: { padding: '64px', textAlign: 'center', color: 'var(--text-2)' },
   tabs: { display: 'flex', gap: '8px', marginBottom: '24px' },
   tab: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
   section: { padding: '24px', borderRadius: '16px', border: '1px solid var(--border-color)' },
   sectionHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' },
   sectionTitle: { margin: 0, fontSize: '18px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '10px' },
-  sectionDescription: { margin: '4px 0 24px 0', fontSize: '14px', color: '#6b7280' },
+  sectionDescription: { margin: '4px 0 24px 0', fontSize: '14px', color: 'var(--text-2)' },
   subsection: { marginBottom: '24px' },
   subsectionTitle: { margin: '0 0 12px 0', fontSize: '14px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' },
   formGrid: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' },
   formGrid2: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' },
   formGroup: { display: 'flex', flexDirection: 'column', gap: '6px' },
-  label: { fontSize: '12px', fontWeight: '500', color: '#6b7280' },
+  label: { fontSize: '12px', fontWeight: '500', color: 'var(--text-2)' },
   input: { padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '14px', outline: 'none' },
-  checkboxLabel: { display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#6b7280', cursor: 'pointer', marginTop: '20px' },
-  saveButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: '#4f46e5', color: '#ffffff', border: '1px solid #3730a3', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
-  addButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: '#4f46e5', color: '#ffffff', border: '1px solid #3730a3', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
+  checkboxLabel: { display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: 'var(--text-2)', cursor: 'pointer', marginTop: '20px' },
+  saveButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: 'var(--brand-1)', color: '#ffffff', border: '1px solid #3730a3', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
+  addButton: { display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', backgroundColor: 'var(--brand-1)', color: '#ffffff', border: '1px solid #3730a3', borderRadius: '10px', fontSize: '14px', fontWeight: '500', cursor: 'pointer' },
   filterButton: { display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', border: '1px solid', borderRadius: '8px', fontSize: '13px', fontWeight: '500', cursor: 'pointer' },
   auditLogList: { display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '600px', overflowY: 'auto' },
   auditLogItem: { padding: '16px', borderRadius: '8px', border: '1px solid var(--border-color)', borderLeftWidth: '4px' },
   auditLogHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' },
   statusBadge: { padding: '4px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: '600' },
   signaturesGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' },
-  emptySignatures: { gridColumn: '1 / -1', padding: '48px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', color: '#6b7280' },
+  emptySignatures: { gridColumn: '1 / -1', padding: '48px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', color: 'var(--text-2)' },
   signatureCard: { padding: '16px', borderRadius: '12px', border: '2px solid', position: 'relative' },
-  defaultBadge: { position: 'absolute', top: '-10px', right: '12px', display: 'flex', alignItems: 'center', gap: '4px', padding: '4px 10px', backgroundColor: '#4f46e5', color: '#ffffff', borderRadius: '12px', fontSize: '11px', fontWeight: '600' },
+  defaultBadge: { position: 'absolute', top: '-10px', right: '12px', display: 'flex', alignItems: 'center', gap: '4px', padding: '4px 10px', backgroundColor: 'var(--brand-1)', color: '#ffffff', borderRadius: '12px', fontSize: '11px', fontWeight: '600' },
   signaturePreview: { height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px', backgroundColor: 'rgba(0,0,0,0.02)', borderRadius: '8px' },
   signatureImage: { maxHeight: '70px', maxWidth: '100%', objectFit: 'contain' },
-  noSignature: { color: '#9ca3af', fontSize: '13px' },
+  noSignature: { color: 'var(--muted-1)', fontSize: '13px' },
   signatureInfo: { marginBottom: '12px' },
   signatureName: { margin: '0 0 4px', fontSize: '16px', fontWeight: '600' },
-  signatureRole: { margin: 0, fontSize: '13px', color: '#6b7280' },
-  signatureType: { margin: '8px 0 0', fontSize: '12px', color: '#9ca3af' },
+  signatureRole: { margin: 0, fontSize: '13px', color: 'var(--text-2)' },
+  signatureType: { margin: '8px 0 0', fontSize: '12px', color: 'var(--muted-1)' },
   signatureActions: { display: 'flex', gap: '8px', justifyContent: 'flex-end' },
-  signatureActionBtn: { background: 'none', border: 'none', padding: '8px', cursor: 'pointer', color: '#6b7280', borderRadius: '8px' },
+  signatureActionBtn: { background: 'none', border: 'none', padding: '8px', cursor: 'pointer', color: 'var(--text-2)', borderRadius: '8px' },
   modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
   modal: { width: '100%', maxWidth: '500px', maxHeight: '90vh', borderRadius: '16px', border: '1px solid var(--border-color)', overflow: 'hidden' },
   modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid var(--border-color)' },
   modalTitle: { margin: 0, fontSize: '18px', fontWeight: '600' },
-  closeButton: { background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280' },
+  closeButton: { background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-2)' },
   modalBody: { padding: '24px', overflowY: 'auto' },
   modalFooter: { display: 'flex', justifyContent: 'flex-end', gap: '12px', padding: '20px 24px', borderTop: '1px solid var(--border-color)' },
-  cancelButton: { padding: '10px 20px', backgroundColor: 'transparent', color: '#6b7280', border: '1px solid var(--border-color)', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' },
+  cancelButton: { padding: '10px 20px', backgroundColor: 'transparent', color: 'var(--text-2)', border: '1px solid var(--border-color)', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' },
   uploadSection: { marginTop: '20px' },
   uploadZone: { padding: '32px', border: '2px dashed', borderRadius: '12px', textAlign: 'center', cursor: 'pointer' },
   uploadedImage: { maxHeight: '100px', maxWidth: '100%', objectFit: 'contain' }

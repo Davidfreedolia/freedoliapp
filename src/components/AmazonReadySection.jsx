@@ -74,8 +74,8 @@ export default function AmazonReadySection({ readiness, readyStatus, onUpdate, d
     container: {
       padding: '16px',
       borderRadius: '8px',
-      border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`,
-      backgroundColor: darkMode ? '#15151f' : '#f9fafb'
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
+      backgroundColor: darkMode ? '#15151f' : 'var(--surface-bg-2)'
     },
     statusBadge: {
       display: 'inline-flex',
@@ -92,11 +92,11 @@ export default function AmazonReadySection({ readiness, readyStatus, onUpdate, d
       padding: '12px',
       borderRadius: '6px',
       backgroundColor: darkMode ? '#1f1f2e' : '#fef2f2',
-      border: `1px solid ${darkMode ? '#374151' : '#fecaca'}`
+      border: `1px solid ${darkMode ? 'var(--text-1)' : '#fecaca'}`
     },
     missingItem: {
       fontSize: '13px',
-      color: darkMode ? '#fca5a5' : '#dc2626',
+      color: darkMode ? '#fca5a5' : 'var(--danger-1)',
       marginBottom: '4px'
     },
     formGrid: {
@@ -113,14 +113,14 @@ export default function AmazonReadySection({ readiness, readyStatus, onUpdate, d
     label: {
       fontSize: '12px',
       fontWeight: '500',
-      color: darkMode ? '#9ca3af' : '#6b7280'
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)'
     },
     input: {
       padding: '8px 12px',
       borderRadius: '6px',
-      border: `1px solid ${darkMode ? '#374151' : '#d1d5db'}`,
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       fontSize: '14px'
     },
     checkbox: {
@@ -132,7 +132,7 @@ export default function AmazonReadySection({ readiness, readyStatus, onUpdate, d
     },
     saveButton: {
       padding: '10px 20px',
-      backgroundColor: '#4f46e5',
+      backgroundColor: 'var(--brand-1)',
       color: '#ffffff',
       border: '1px solid #3730a3',
       borderRadius: '8px',
@@ -149,7 +149,7 @@ export default function AmazonReadySection({ readiness, readyStatus, onUpdate, d
       <div style={{
         ...styles.statusBadge,
         backgroundColor: readyStatus.ready ? '#dcfce7' : '#fef2f2',
-        color: readyStatus.ready ? '#166534' : '#991b1b'
+        color: readyStatus.ready ? '#166534' : 'var(--danger-1)'
       }}>
         {readyStatus.ready ? (
           <>
@@ -167,7 +167,7 @@ export default function AmazonReadySection({ readiness, readyStatus, onUpdate, d
       {/* Missing Items */}
       {readyStatus.missing.length > 0 && (
         <div style={styles.missingList}>
-          <strong style={{ fontSize: '13px', color: darkMode ? '#fca5a5' : '#dc2626', marginBottom: '8px', display: 'block' }}>
+          <strong style={{ fontSize: '13px', color: darkMode ? '#fca5a5' : 'var(--danger-1)', marginBottom: '8px', display: 'block' }}>
             {t('orders.amazonReadySection.missingTitle')}
           </strong>
           {readyStatus.missing.map((item, idx) => (
@@ -184,7 +184,7 @@ export default function AmazonReadySection({ readiness, readyStatus, onUpdate, d
             checked={formData.needs_fnsku}
             onChange={e => setFormData({ ...formData, needs_fnsku: e.target.checked })}
           />
-          <span style={{ fontSize: '13px', color: darkMode ? '#e5e7eb' : '#374151' }}>
+          <span style={{ fontSize: '13px', color: darkMode ? 'var(--border-1)' : 'var(--text-1)' }}>
             {t('orders.amazonReadySection.fields.needsFnsku')}
           </span>
         </div>
@@ -299,11 +299,11 @@ export default function AmazonReadySection({ readiness, readyStatus, onUpdate, d
 
       {/* Labels Info */}
       {readiness?.labels_generated_at && (
-        <div style={{ marginTop: '16px', padding: '12px', borderRadius: '6px', backgroundColor: darkMode ? '#1f1f2e' : '#f0f9ff', border: `1px solid ${darkMode ? '#374151' : '#bae6fd'}` }}>
+        <div style={{ marginTop: '16px', padding: '12px', borderRadius: '6px', backgroundColor: darkMode ? '#1f1f2e' : '#f0f9ff', border: `1px solid ${darkMode ? 'var(--text-1)' : '#bae6fd'}` }}>
           <div style={{ fontSize: '12px', fontWeight: '500', color: darkMode ? '#93c5fd' : '#0369a1', marginBottom: '4px' }}>
             {t('orders.amazonReadySection.labels.generated')}
           </div>
-          <div style={{ fontSize: '13px', color: darkMode ? '#e5e7eb' : '#374151' }}>
+          <div style={{ fontSize: '13px', color: darkMode ? 'var(--border-1)' : 'var(--text-1)' }}>
             {new Date(readiness.labels_generated_at).toLocaleString(locale)} • {t('orders.amazonReadySection.labels.summary', {
               count: readiness.labels_qty,
               template: readiness.labels_template || 'N/A'

@@ -1245,7 +1245,7 @@ export default function Dashboard() {
                     borderRadius: '8px',
                     padding: '16px',
                     border: editLayout ? '2px dashed var(--brand-primary)' : '1px solid',
-                    borderColor: editLayout ? 'var(--brand-primary)' : (darkMode ? '#374151' : '#e5e7eb'),
+                    borderColor: editLayout ? 'var(--brand-primary)' : (darkMode ? 'var(--text-1)' : 'var(--border-1)'),
                     height: '100%',
                     overflow: 'auto',
                     boxSizing: 'border-box',

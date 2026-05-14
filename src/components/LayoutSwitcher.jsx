@@ -65,6 +65,6 @@ const styles = {
   },
   buttonActive: {
     backgroundColor: 'rgba(110, 203, 195, 0.15)',
-    borderColor: '#6ECBC3'
+    borderColor: 'var(--brand-2)'
   }
 }

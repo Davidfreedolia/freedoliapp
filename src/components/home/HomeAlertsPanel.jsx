@@ -26,7 +26,7 @@ export default function HomeAlertsPanel({ title, items = [], type, emptyMessage 
         padding: '1rem 1.25rem',
         borderRadius: 8,
         background: 'var(--card-bg, #f9fafb)',
-        border: `1px solid ${type === 'margin' ? 'var(--margin-alert-coral, #e07a5f)' : 'var(--stockout-alert-amber, #f59e0b)'}`,
+        border: `1px solid ${type === 'margin' ? 'var(--margin-alert-coral, #e07a5f)' : 'var(--stockout-alert-amber, var(--warning-1))'}`,
       }}
     >
       <div
@@ -43,7 +43,7 @@ export default function HomeAlertsPanel({ title, items = [], type, emptyMessage 
         <AlertTriangle
           size={18}
           style={{
-            color: type === 'margin' ? 'var(--margin-alert-coral, #e07a5f)' : 'var(--stockout-alert-amber, #f59e0b)',
+            color: type === 'margin' ? 'var(--margin-alert-coral, #e07a5f)' : 'var(--stockout-alert-amber, var(--warning-1))',
             flexShrink: 0,
           }}
         />

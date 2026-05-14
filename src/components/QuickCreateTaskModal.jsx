@@ -79,19 +79,19 @@ export default function QuickCreateTaskModal({ isOpen, onClose, onSave, defaultD
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      borderBottom: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
+      borderBottom: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`
     },
     title: {
       margin: 0,
       fontSize: '18px',
       fontWeight: '600',
-      color: darkMode ? '#ffffff' : '#111827'
+      color: darkMode ? '#ffffff' : 'var(--text-1)'
     },
     closeButton: {
       background: 'none',
       border: 'none',
       cursor: 'pointer',
-      color: darkMode ? '#9ca3af' : '#6b7280',
+      color: darkMode ? 'var(--muted-1)' : 'var(--text-2)',
       padding: '4px',
       display: 'flex',
       alignItems: 'center'
@@ -107,27 +107,27 @@ export default function QuickCreateTaskModal({ isOpen, onClose, onSave, defaultD
       fontSize: '14px',
       fontWeight: '500',
       marginBottom: '8px',
-      color: darkMode ? '#ffffff' : '#111827'
+      color: darkMode ? '#ffffff' : 'var(--text-1)'
     },
     input: {
       width: '100%',
       padding: '12px 16px',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       borderRadius: '8px',
       fontSize: '14px',
       backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       outline: 'none',
       boxSizing: 'border-box'
     },
     select: {
       width: '100%',
       padding: '12px 16px',
-      border: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`,
+      border: `1px solid ${darkMode ? 'var(--text-1)' : 'var(--border-1)'}`,
       borderRadius: '8px',
       fontSize: '14px',
       backgroundColor: darkMode ? '#1f1f2e' : '#ffffff',
-      color: darkMode ? '#ffffff' : '#111827',
+      color: darkMode ? '#ffffff' : 'var(--text-1)',
       outline: 'none',
       cursor: 'pointer',
       boxSizing: 'border-box'
@@ -150,11 +150,11 @@ export default function QuickCreateTaskModal({ isOpen, onClose, onSave, defaultD
       gap: '8px'
     },
     cancelButton: {
-      backgroundColor: darkMode ? '#1f1f2e' : '#f3f4f6',
-      color: darkMode ? '#ffffff' : '#111827'
+      backgroundColor: darkMode ? '#1f1f2e' : 'var(--surface-bg-2)',
+      color: darkMode ? '#ffffff' : 'var(--text-1)'
     },
     saveButton: {
-      backgroundColor: '#4f46e5',
+      backgroundColor: 'var(--brand-1)',
       color: '#ffffff'
     }
   }
