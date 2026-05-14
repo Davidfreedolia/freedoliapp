@@ -2891,5 +2891,41 @@
       "date": "Fecha",
       "location": "Ubicación"
     }
+  },
+  "samplesSection": {
+    "title": "Muestras",
+    "empty": "Aún no hay muestras. Marca cotizaciones como MUESTRAS desde Proveedores.",
+    "bulkGenerate": "Generar pedido de muestras ({{count}})",
+    "viewPo": "Ver PO",
+    "openLink": "Abrir",
+    "bulkResult": {
+      "created": "POs creadas: {{count}}",
+      "linked": "Enlazadas: {{count}}",
+      "skipped": "Omitidas: {{count}}"
+    },
+    "headers": {
+      "supplier": "Proveedor",
+      "incoterm": "Incoterm",
+      "moq": "MOQ",
+      "unitPrice": "Precio unidad",
+      "leadTime": "Lead time",
+      "status": "Estado",
+      "date": "Fecha",
+      "choice": "Elección",
+      "shipping": "Envío",
+      "actions": "Acciones"
+    },
+    "choices": {
+      "shortlist": "PRESELECC.",
+      "winner": "GANA"
+    },
+    "actions": {
+      "tracking": "Tracking",
+      "createSamplePo": "Crear PO muestra",
+      "poCreated": "PO creada",
+      "requested": "Solicitada",
+      "received": "Recibida",
+      "rejected": "Rechazada"
+    }
   }
 }

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { Package } from 'lucide-react'
 import {
@@ -76,6 +77,7 @@ function getDemoSamplesForLayout() {
 }
 
 export default function SamplesSection({ projectId, darkMode }) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [list, setList] = useState([])
   const [loading, setLoading] = useState(true)
@@ -277,10 +279,10 @@ export default function SamplesSection({ projectId, darkMode }) {
         <div className="samples-header">
           <h2 className="samples-title">
             <Package className="samples-title__icon" />
-            Mostres
+            {t('samplesSection.title')}
           </h2>
         </div>
-        <p className="samples-loading">Carregant...</p>
+        <p className="samples-loading">{t('common.loading')}</p>
       </div>
     )
   }
@@ -290,7 +292,7 @@ export default function SamplesSection({ projectId, darkMode }) {
       <div className="samples-header">
         <h2 className="samples-title">
           <Package className="samples-title__icon" />
-          Mostres
+          {t('samplesSection.title')}
         </h2>
         {rowsForTable.length > 0 && (
           <div className="samples-bulk-actions">
@@ -300,7 +302,7 @@ export default function SamplesSection({ projectId, darkMode }) {
               disabled={selectedIds.size === 0 || bulkLoading}
               onClick={handleBulkGenerateSamplePos}
             >
-              Generar comanda de mostres ({selectedIds.size})
+              {t('samplesSection.bulkGenerate', { count: selectedIds.size })}
             </button>
           </div>
         )}
@@ -309,11 +311,11 @@ export default function SamplesSection({ projectId, darkMode }) {
       {bulkResult && (
         <div className="samples-bulk-result">
           <p className="samples-bulk-result__summary">
-            POs creades: {Array.isArray(bulkResult.created_pos) ? bulkResult.created_pos.length : 0}
+            {t('samplesSection.bulkResult.created', { count: Array.isArray(bulkResult.created_pos) ? bulkResult.created_pos.length : 0 })}
             {' · '}
-            Enllaçades: {Array.isArray(bulkResult.linked) ? bulkResult.linked.length : 0}
+            {t('samplesSection.bulkResult.linked', { count: Array.isArray(bulkResult.linked) ? bulkResult.linked.length : 0 })}
             {' · '}
-            Omeses: {Array.isArray(bulkResult.skipped) ? bulkResult.skipped.length : 0}
+            {t('samplesSection.bulkResult.skipped', { count: Array.isArray(bulkResult.skipped) ? bulkResult.skipped.length : 0 })}
           </p>
           {Array.isArray(bulkResult.created_pos) && bulkResult.created_pos.length > 0 && (
             <ul className="samples-bulk-result__list">
@@ -325,7 +327,7 @@ export default function SamplesSection({ projectId, darkMode }) {
                     className="btn btn--soft btn--sm"
                     onClick={() => navigate(`/app/orders?po=${po.id}`)}
                   >
-                    Veure PO
+                    {t('samplesSection.viewPo')}
                   </button>
                 </li>
               ))}
@@ -336,7 +338,7 @@ export default function SamplesSection({ projectId, darkMode }) {
 
       {rowsForTable.length === 0 ? (
         <p className="samples-empty">
-          Encara no hi ha mostres. Marca cotitzacions com MOSTRES des de Proveïdors.
+          {t('samplesSection.empty')}
         </p>
       ) : (
         <table className="samples-table">
@@ -353,16 +355,16 @@ export default function SamplesSection({ projectId, darkMode }) {
                   onChange={toggleSelectAll}
                 />
               </th>
-              <th>Proveïdor</th>
-              <th>Incoterm</th>
-              <th>MOQ</th>
-              <th>Preu unitat</th>
-              <th>Lead time</th>
-              <th>Estat</th>
-              <th>Data</th>
-              <th>Tria</th>
-              <th>Enviament</th>
-              <th className="samples-table__actions-col">Accions</th>
+              <th>{t('samplesSection.headers.supplier')}</th>
+              <th>{t('samplesSection.headers.incoterm')}</th>
+              <th>{t('samplesSection.headers.moq')}</th>
+              <th>{t('samplesSection.headers.unitPrice')}</th>
+              <th>{t('samplesSection.headers.leadTime')}</th>
+              <th>{t('samplesSection.headers.status')}</th>
+              <th>{t('samplesSection.headers.date')}</th>
+              <th>{t('samplesSection.headers.choice')}</th>
+              <th>{t('samplesSection.headers.shipping')}</th>
+              <th className="samples-table__actions-col">{t('samplesSection.headers.actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -405,7 +407,7 @@ export default function SamplesSection({ projectId, darkMode }) {
                         disabled={updatingId === row.id || demo}
                         onClick={() => toggleChoice(row, 'SHORTLIST')}
                       >
-                        TRIA
+                        {t('samplesSection.choices.shortlist')}
                       </button>
                       <button
                         type="button"
@@ -413,7 +415,7 @@ export default function SamplesSection({ projectId, darkMode }) {
                         disabled={updatingId === row.id || demo}
                         onClick={() => toggleChoice(row, 'WINNER')}
                       >
-                        GUANYA
+                        {t('samplesSection.choices.winner')}
                       </button>
                     </div>
                   </td>
@@ -435,7 +437,7 @@ export default function SamplesSection({ projectId, darkMode }) {
                             rel="noopener noreferrer"
                             className="sample-shipping__link"
                           >
-                            Obrir
+                            {t('samplesSection.openLink')}
                           </a>
                         )}
                       </div>
@@ -449,7 +451,7 @@ export default function SamplesSection({ projectId, darkMode }) {
                         disabled={demo}
                         onClick={() => openTrackModal(row)}
                       >
-                        Tracking
+                        {t('samplesSection.actions.tracking')}
                       </button>
                       {!row.po_id ? (
                         <button
@@ -458,18 +460,18 @@ export default function SamplesSection({ projectId, darkMode }) {
                           disabled={demo}
                           onClick={() => openPoModal(row)}
                         >
-                          Crear PO mostra
+                          {t('samplesSection.actions.createSamplePo')}
                         </button>
                       ) : (
                         <>
-                          <span className="sample-po-pill">PO creada</span>
+                          <span className="sample-po-pill">{t('samplesSection.actions.poCreated')}</span>
                           <button
                             type="button"
                             className="btn btn--sm btn--soft"
                             disabled={demo}
                             onClick={() => !demo && navigate(`/app/orders?po=${row.po_id}`)}
                           >
-                            Veure PO
+                            {t('samplesSection.viewPo')}
                           </button>
                         </>
                       )}
@@ -479,7 +481,7 @@ export default function SamplesSection({ projectId, darkMode }) {
                         disabled={updatingId === row.id || demo}
                         onClick={() => setStatus(row.id, 'REQUESTED')}
                       >
-                        SOL·LICITADA
+                        {t('samplesSection.actions.requested')}
                       </button>
                       <button
                         type="button"
@@ -487,7 +489,7 @@ export default function SamplesSection({ projectId, darkMode }) {
                         disabled={updatingId === row.id || demo}
                         onClick={() => setStatus(row.id, 'RECEIVED')}
                       >
-                        REBuda
+                        {t('samplesSection.actions.received')}
                       </button>
                       <button
                         type="button"
@@ -495,7 +497,7 @@ export default function SamplesSection({ projectId, darkMode }) {
                         disabled={updatingId === row.id || demo}
                         onClick={() => setStatus(row.id, 'REJECTED')}
                       >
-                        REBUTJADA
+                        {t('samplesSection.actions.rejected')}
                       </button>
                     </div>
                   </td>

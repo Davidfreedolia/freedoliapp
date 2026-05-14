@@ -3076,5 +3076,41 @@
       "date": "Data",
       "location": "Ubicació"
     }
+  },
+  "samplesSection": {
+    "title": "Mostres",
+    "empty": "Encara no hi ha mostres. Marca cotitzacions com MOSTRES des de Proveïdors.",
+    "bulkGenerate": "Generar comanda de mostres ({{count}})",
+    "viewPo": "Veure PO",
+    "openLink": "Obrir",
+    "bulkResult": {
+      "created": "POs creades: {{count}}",
+      "linked": "Enllaçades: {{count}}",
+      "skipped": "Omeses: {{count}}"
+    },
+    "headers": {
+      "supplier": "Proveïdor",
+      "incoterm": "Incoterm",
+      "moq": "MOQ",
+      "unitPrice": "Preu unitat",
+      "leadTime": "Lead time",
+      "status": "Estat",
+      "date": "Data",
+      "choice": "Tria",
+      "shipping": "Enviament",
+      "actions": "Accions"
+    },
+    "choices": {
+      "shortlist": "TRIA",
+      "winner": "GUANYA"
+    },
+    "actions": {
+      "tracking": "Tracking",
+      "createSamplePo": "Crear PO mostra",
+      "poCreated": "PO creada",
+      "requested": "Sol·licitada",
+      "received": "Rebuda",
+      "rejected": "Rebutjada"
+    }
   }
 }

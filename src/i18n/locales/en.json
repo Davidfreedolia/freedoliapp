@@ -2876,5 +2876,41 @@
       "date": "Date",
       "location": "Location"
     }
+  },
+  "samplesSection": {
+    "title": "Samples",
+    "empty": "No samples yet. Mark quotes as SAMPLES from Suppliers.",
+    "bulkGenerate": "Generate sample order ({{count}})",
+    "viewPo": "View PO",
+    "openLink": "Open",
+    "bulkResult": {
+      "created": "POs created: {{count}}",
+      "linked": "Linked: {{count}}",
+      "skipped": "Skipped: {{count}}"
+    },
+    "headers": {
+      "supplier": "Supplier",
+      "incoterm": "Incoterm",
+      "moq": "MOQ",
+      "unitPrice": "Unit price",
+      "leadTime": "Lead time",
+      "status": "Status",
+      "date": "Date",
+      "choice": "Choice",
+      "shipping": "Shipping",
+      "actions": "Actions"
+    },
+    "choices": {
+      "shortlist": "SHORTLIST",
+      "winner": "WINNER"
+    },
+    "actions": {
+      "tracking": "Tracking",
+      "createSamplePo": "Create sample PO",
+      "poCreated": "PO created",
+      "requested": "Requested",
+      "received": "Received",
+      "rejected": "Rejected"
+    }
   }
 }
