@@ -555,7 +555,7 @@ export default function Projects() {
                 <div
                   className="projects-card__thumbFallback"
                   style={{ display: thumbnailUrl ? 'none' : 'flex' }}
-                  title="ASIN image not available yet"
+                  title={t('projectsPage.asinImageNotAvailable')}
                 >
                   <Package size={18} />
                 </div>
@@ -575,7 +575,7 @@ export default function Projects() {
                   ) : null}
                   <span>SKU: {highlightText(skuValue, searchTerm)}</span>
                   <span style={{ opacity: 0.7 }}> · </span>
-                  <span>Created: {createdLabel}</span>
+                  <span>{t('projectsPage.created', { date: createdLabel })}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                   <PhaseMark phaseId={currentPhaseId} size={16} />
@@ -638,7 +638,7 @@ export default function Projects() {
                         whiteSpace: 'nowrap'
                       }}
                     >
-                      BLOCKED
+                      {t('projectsPage.blocked')}
                     </span>
                   )}
                 </div>
@@ -649,7 +649,7 @@ export default function Projects() {
                 ) : null}
                 {activeMarketplaces.length ? (
                   <div className="project-card__marketplaces">
-                    <span className="project-card__marketplacesLabel">Marketplaces actius</span>
+                    <span className="project-card__marketplacesLabel">{t('projectsPage.activeMarketplaces')}</span>
                     <div className="project-card__marketplacesTags">
                       {activeMarketplaces.map((m, idx) => {
                         const code = typeof m === 'string'
@@ -758,17 +758,17 @@ export default function Projects() {
                       const { updateProject } = await import('../lib/supabase')
                       const { showToast } = await import('../components/Toast')
                       await updateProject(project.id, { decision: 'HOLD' })
-                      showToast('Projecte restaurat', 'success')
+                      showToast(t('projectsPage.toasts.restored'), 'success')
                       await Promise.all([refreshProjects(), refetch()])
                     } catch (err) {
                       const { showToast } = await import('../components/Toast')
-                      showToast('Error: ' + (err.message || 'Error desconegut'), 'error')
+                      showToast(t('projectsPage.toasts.error', { error: err.message || t('common.unknownError') }), 'error')
                     }
                   }}
                   style={{ height: '28px' }}
-                  title="Restaurar projecte"
+                  title={t('projectsPage.restore')}
                 >
-                  Restaura
+                  {t('projectsPage.restore')}
                 </Button>
               )}
             </div>
@@ -786,14 +786,14 @@ export default function Projects() {
           title={
             <span className="page-title-with-icon">
               <FolderKanban size={22} />
-              Projectes
+              {t('projectsPage.title')}
             </span>
           }
         />
 
         <div className="projects-page__content" style={{ ...styles.content, padding: 0 }}>
         <p className="projects-page__intro">
-          Aquest és el catàleg de tots els teus productes/projectes. Obre un projecte per veure’n el detall i les fases.
+          {t('projectsPage.intro')}
         </p>
         {/* Toolbar */}
         <div className="projects-page__toolbarShell">
@@ -803,7 +803,7 @@ export default function Projects() {
               <Search size={18} style={styles.searchIcon} aria-hidden="true" />
               <input
                 type="text"
-                placeholder="Buscar projectes..."
+                placeholder={t('projectsPage.searchPlaceholder')}
                 value={searchInput}
                 onChange={e => setSearchInput(e.target.value)}
                 style={styles.searchInput}
@@ -821,9 +821,9 @@ export default function Projects() {
                     setSearchInput('')
                     setSearchTerm('')
                   }}
-                  title="Clear (Esc)"
+                  title={t('projectsPage.clearEsc')}
                 >
-                  Clear
+                  {t('projectsPage.clear')}
                 </Button>
               ) : null}
             </div>
@@ -845,7 +845,7 @@ export default function Projects() {
                 onChange={(e) => setFilterPhase(e.target.value ? parseInt(e.target.value) : null)}
                 className="projects-filter__select"
               >
-                <option value="">Totes les fases</option>
+                <option value="">{t('projectsPage.allPhases')}</option>
                 {PHASES_LIST.map(phase => (
                   <option key={phase.id} value={phase.id}>
                     {phase.name}
@@ -859,9 +859,9 @@ export default function Projects() {
                 data-marketplace-filter="true"
                 data-selected-count={mpFilter.length}
                 className="projects-marketplace-filter"
-                title="Filtra per marketplace"
+                title={t('projectsPage.filterByMarketplace')}
               >
-                <span className="projects-marketplace-filter__label">Marketplace</span>
+                <span className="projects-marketplace-filter__label">{t('projectsPage.marketplace')}</span>
 
                 {mpFilter.length ? (
                   <div className="projects-marketplace-filter__chips">
@@ -872,17 +872,17 @@ export default function Projects() {
                         onClick={() => toggleMarketplace(code)}
                         className="projects-marketplace-filter__chip"
                         data-mp-chip="true"
-                        title={`Treure filtre ${code}`}
+                        title={t('projectsPage.removeFilter', { code })}
                       >
                         <span className="projects-marketplace-filter__chipText">{code}</span>
-                        <span className="projects-marketplace-filter__chipX" aria-hidden="true" title="Eliminar">
+                        <span className="projects-marketplace-filter__chipX" aria-hidden="true" title={t('common.delete')}>
                           ✕
                         </span>
                       </button>
                     ))}
                   </div>
                 ) : (
-                  <span className="projects-marketplace-filter__empty">Tots</span>
+                  <span className="projects-marketplace-filter__empty">{t('projectsPage.all')}</span>
                 )}
 
                 <div className="projects-marketplace-filter__add">
@@ -890,9 +890,9 @@ export default function Projects() {
                     type="button"
                     className="projects-marketplace-filter__addBtn"
                     onClick={() => setShowMpAdd(true)}
-                    title="Afegir marketplace"
+                    title={t('projectsPage.addMarketplace')}
                   >
-                    + Afegir
+                    + {t('projectsPage.add')}
                   </button>
                   {showMpAdd && availableMarketplaces.some((c) => !mpFilter.includes(c)) ? (
                     <select
@@ -905,9 +905,9 @@ export default function Projects() {
                         e.target.value = ''
                       }}
                       onBlur={() => setShowMpAdd(false)}
-                      title="Afegir marketplace al filtre"
+                      title={t('projectsPage.addMarketplaceToFilter')}
                     >
-                      <option value="" disabled>+ Afegir</option>
+                      <option value="" disabled>+ {t('projectsPage.add')}</option>
                       {availableMarketplaces
                         .filter((c) => !mpFilter.includes(c))
                         .map((code) => (
@@ -922,9 +922,9 @@ export default function Projects() {
                     type="button"
                     onClick={() => setMpFilter([])}
                     className="projects-marketplace-filter__clear"
-                    title="Netejar filtres"
+                    title={t('projectsPage.clearFilters')}
                   >
-                    Clear
+                    {t('projectsPage.clear')}
                   </button>
                 ) : null}
               </div>
@@ -1216,12 +1216,12 @@ function ProjectsListView({ projects = [], onOpen = () => {} }) {
                   </colgroup>
                   <thead>
                     <tr>
-                      <TH>Nom</TH>
+                      <TH>{t('projectsPage.tableHeaders.name')}</TH>
                       <TH>ASIN</TH>
-                      <TH>Fase</TH>
-                      <TH>Proveïdor</TH>
+                      <TH>{t('projectsPage.tableHeaders.phase')}</TH>
+                      <TH>{t('projectsPage.tableHeaders.supplier')}</TH>
                       <TH>SKU</TH>
-                      <TH>Accions</TH>
+                      <TH>{t('projectsPage.tableHeaders.actions')}</TH>
                     </tr>
                   </thead>
                   <tbody>

@@ -3130,5 +3130,36 @@
       "deleted": "Recurring expense deleted",
       "deleteError": "Error deleting recurring expense"
     }
+  },
+  "projectsPage": {
+    "title": "Projects",
+    "intro": "This is the catalog of all your products/projects. Open a project to see its detail and phases.",
+    "searchPlaceholder": "Search projects…",
+    "clear": "Clear",
+    "clearEsc": "Clear (Esc)",
+    "clearFilters": "Clear filters",
+    "allPhases": "All phases",
+    "filterByMarketplace": "Filter by marketplace",
+    "marketplace": "Marketplace",
+    "removeFilter": "Remove filter {{code}}",
+    "all": "All",
+    "addMarketplace": "Add marketplace",
+    "addMarketplaceToFilter": "Add marketplace to filter",
+    "add": "Add",
+    "asinImageNotAvailable": "ASIN image not available yet",
+    "created": "Created: {{date}}",
+    "blocked": "BLOCKED",
+    "activeMarketplaces": "Active marketplaces",
+    "restore": "Restore project",
+    "tableHeaders": {
+      "name": "Name",
+      "phase": "Phase",
+      "supplier": "Supplier",
+      "actions": "Actions"
+    },
+    "toasts": {
+      "restored": "Project restored",
+      "error": "Error: {{error}}"
+    }
   }
 }

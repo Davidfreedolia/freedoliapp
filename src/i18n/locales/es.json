@@ -3145,5 +3145,36 @@
       "deleted": "Gasto recurrente eliminado",
       "deleteError": "Error eliminando gasto recurrente"
     }
+  },
+  "projectsPage": {
+    "title": "Proyectos",
+    "intro": "Este es el catálogo de todos tus productos/proyectos. Abre un proyecto para ver su detalle y las fases.",
+    "searchPlaceholder": "Buscar proyectos…",
+    "clear": "Limpiar",
+    "clearEsc": "Limpiar (Esc)",
+    "clearFilters": "Limpiar filtros",
+    "allPhases": "Todas las fases",
+    "filterByMarketplace": "Filtra por marketplace",
+    "marketplace": "Marketplace",
+    "removeFilter": "Quitar filtro {{code}}",
+    "all": "Todos",
+    "addMarketplace": "Añadir marketplace",
+    "addMarketplaceToFilter": "Añadir marketplace al filtro",
+    "add": "Añadir",
+    "asinImageNotAvailable": "Imagen del ASIN aún no disponible",
+    "created": "Creado: {{date}}",
+    "blocked": "BLOQUEADO",
+    "activeMarketplaces": "Marketplaces activos",
+    "restore": "Restaurar proyecto",
+    "tableHeaders": {
+      "name": "Nombre",
+      "phase": "Fase",
+      "supplier": "Proveedor",
+      "actions": "Acciones"
+    },
+    "toasts": {
+      "restored": "Proyecto restaurado",
+      "error": "Error: {{error}}"
+    }
   }
 }

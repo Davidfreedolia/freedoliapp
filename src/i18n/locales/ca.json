@@ -3330,5 +3330,36 @@
       "deleted": "Despesa recurrent eliminada",
       "deleteError": "Error eliminant despesa recurrent"
     }
+  },
+  "projectsPage": {
+    "title": "Projectes",
+    "intro": "Aquest és el catàleg de tots els teus productes/projectes. Obre un projecte per veure-n el detall i les fases.",
+    "searchPlaceholder": "Buscar projectes…",
+    "clear": "Netejar",
+    "clearEsc": "Netejar (Esc)",
+    "clearFilters": "Netejar filtres",
+    "allPhases": "Totes les fases",
+    "filterByMarketplace": "Filtra per marketplace",
+    "marketplace": "Marketplace",
+    "removeFilter": "Treure filtre {{code}}",
+    "all": "Tots",
+    "addMarketplace": "Afegir marketplace",
+    "addMarketplaceToFilter": "Afegir marketplace al filtre",
+    "add": "Afegir",
+    "asinImageNotAvailable": "Imatge d'ASIN encara no disponible",
+    "created": "Creat: {{date}}",
+    "blocked": "BLOQUEJAT",
+    "activeMarketplaces": "Marketplaces actius",
+    "restore": "Restaurar projecte",
+    "tableHeaders": {
+      "name": "Nom",
+      "phase": "Fase",
+      "supplier": "Proveïdor",
+      "actions": "Accions"
+    },
+    "toasts": {
+      "restored": "Projecte restaurat",
+      "error": "Error: {{error}}"
+    }
   }
 }
