@@ -3017,5 +3017,69 @@
       "inventoryLink": "Inventory",
       "tracking": "Product live — track metrics and alerts from the Dashboard."
     }
+  },
+  "competitiveAsin": {
+    "title": "Competitor ASIN & Snapshot",
+    "loading": "Loading competitor ASIN…",
+    "viewOnAmazon": "View on Amazon",
+    "captured": "ASIN captured",
+    "snapshotTitle": "Competitor snapshot",
+    "detailsTitle": "Amazon Product Details",
+    "detailsSubtitle": "Paste the details block to fill fields",
+    "fields": {
+      "competitorAsin": "Competitor ASIN (required)",
+      "amazonUrl": "Amazon URL (optional)",
+      "competitorPrice": "Competitor price",
+      "estimatedCategory": "Estimated category",
+      "fbaSize": "FBA size",
+      "estimatedWeight": "Estimated weight (g)",
+      "brand": "Brand",
+      "dimensionsOptional": "Dimensions (optional)",
+      "pasteDetails": "Paste \"Product Details\"",
+      "model": "Model",
+      "countryOfOrigin": "Country of origin",
+      "dimensionsCm": "Dimensions (cm)",
+      "weight": "Weight (g)",
+      "bsrMain": "BSR main",
+      "bsrMainCategory": "BSR main category",
+      "bsrSub": "BSR sub",
+      "bsrSubCategory": "BSR sub category",
+      "rating": "Rating",
+      "reviewCount": "Review count",
+      "launchDate": "Launch date",
+      "mainImageUrl": "Main image (URL)"
+    },
+    "placeholders": {
+      "amazonUrl": "Paste an Amazon URL to extract the ASIN",
+      "amazonUrlShort": "Paste the URL to extract the ASIN"
+    },
+    "sizeTiers": {
+      "select": "Select size",
+      "smallStandard": "Small standard",
+      "largeStandard": "Large standard",
+      "smallOversize": "Small oversize",
+      "mediumOversize": "Medium oversize",
+      "largeOversize": "Large oversize",
+      "specialOversize": "Special oversize"
+    },
+    "actions": {
+      "capture": "Capture ASIN",
+      "change": "Change",
+      "saveCompetitorData": "Save competitor data",
+      "parse": "Parse"
+    },
+    "helpers": {
+      "needAsin": "An ASIN is required to unlock the competitor snapshot.",
+      "savedLocally": "Saved locally per project."
+    },
+    "errors": {
+      "invalidFormat": "Invalid format. Enter an Amazon URL or a 10-character ASIN.",
+      "noWorkspace": "No active workspace",
+      "saveAsin": "Error saving ASIN: {{error}}"
+    },
+    "warnings": {
+      "pasteFirst": "Paste the product details block to analyze it.",
+      "noFields": "No fields detected. Review the pasted text."
+    }
   }
 }

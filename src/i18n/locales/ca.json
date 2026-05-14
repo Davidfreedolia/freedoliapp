@@ -3217,5 +3217,69 @@
       "inventoryLink": "Inventari",
       "tracking": "Producte en venda — fes seguiment de mètriques i alertes des del Dashboard."
     }
+  },
+  "competitiveAsin": {
+    "title": "ASIN competidor & Snapshot",
+    "loading": "Carregant ASIN competidor…",
+    "viewOnAmazon": "Veure a Amazon",
+    "captured": "ASIN capturat",
+    "snapshotTitle": "Snapshot de competidor",
+    "detailsTitle": "Amazon Product Details",
+    "detailsSubtitle": "Enganxa el bloc de detalls per omplir camps",
+    "fields": {
+      "competitorAsin": "ASIN competidor (obligatori)",
+      "amazonUrl": "URL d'Amazon (opcional)",
+      "competitorPrice": "Preu competidor",
+      "estimatedCategory": "Categoria estimada",
+      "fbaSize": "Mida FBA",
+      "estimatedWeight": "Pes estimat (g)",
+      "brand": "Marca",
+      "dimensionsOptional": "Dimensions (opcional)",
+      "pasteDetails": "Pega \"Detalles del producto\"",
+      "model": "Model",
+      "countryOfOrigin": "País d'origen",
+      "dimensionsCm": "Dimensions (cm)",
+      "weight": "Pes (g)",
+      "bsrMain": "BSR principal",
+      "bsrMainCategory": "Categoria BSR principal",
+      "bsrSub": "BSR secundari",
+      "bsrSubCategory": "Categoria BSR secundària",
+      "rating": "Rating",
+      "reviewCount": "Nº valoracions",
+      "launchDate": "Data llançament",
+      "mainImageUrl": "Imatge principal (URL)"
+    },
+    "placeholders": {
+      "amazonUrl": "Pega una URL d'Amazon per extreure l'ASIN",
+      "amazonUrlShort": "Pega la URL per extreure l'ASIN"
+    },
+    "sizeTiers": {
+      "select": "Selecciona mida",
+      "smallStandard": "Petit estàndard",
+      "largeStandard": "Gran estàndard",
+      "smallOversize": "Petit oversize",
+      "mediumOversize": "Mitjà oversize",
+      "largeOversize": "Gran oversize",
+      "specialOversize": "Especial oversize"
+    },
+    "actions": {
+      "capture": "Capturar ASIN",
+      "change": "Canviar",
+      "saveCompetitorData": "Guardar dades competidor",
+      "parse": "Parsejar"
+    },
+    "helpers": {
+      "needAsin": "Cal un ASIN per desbloquejar el snapshot de competència.",
+      "savedLocally": "Guardat localment per projecte."
+    },
+    "errors": {
+      "invalidFormat": "Format invàlid. Introdueix una URL d'Amazon o un ASIN de 10 caràcters.",
+      "noWorkspace": "No hi ha Workspace actiu",
+      "saveAsin": "Error guardant l'ASIN: {{error}}"
+    },
+    "warnings": {
+      "pasteFirst": "Enganxa el bloc de detalls del producte per analitzar-lo.",
+      "noFields": "No s'han detectat camps. Revisa el text enganxat."
+    }
   }
 }

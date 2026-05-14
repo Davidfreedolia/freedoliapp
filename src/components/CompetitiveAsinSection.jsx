@@ -1,20 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Barcode, ExternalLink, Save } from 'lucide-react'
 import Button from './Button'
 import { getProductIdentifiers, upsertProductIdentifiers } from '../lib/supabase'
 import { getPhaseSurfaceStyles } from '../utils/phaseStyles'
 import { useApp } from '../context/AppContext'
 import { getButtonStyles, useButtonState } from '../utils/buttonStyles'
-
-const SIZE_TIERS = [
-  { value: '', label: 'Selecciona mida' },
-  { value: 'small_standard', label: 'Petit estàndard' },
-  { value: 'large_standard', label: 'Gran estàndard' },
-  { value: 'small_oversize', label: 'Petit oversize' },
-  { value: 'medium_oversize', label: 'Mitjà oversize' },
-  { value: 'large_oversize', label: 'Gran oversize' },
-  { value: 'special_oversize', label: 'Especial oversize' }
-]
 
 const extractMarketplace = (host) => {
   if (!host) return 'es'
@@ -59,7 +50,17 @@ const getAmazonUrl = (asin, marketplace = 'es') => {
 const COMPETITOR_STORAGE_PREFIX = 'competitive_asin_meta_'
 
 export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle }) {
+  const { t } = useTranslation()
   const { activeOrgId } = useApp()
+  const SIZE_TIERS = [
+    { value: '', label: t('competitiveAsin.sizeTiers.select') },
+    { value: 'small_standard',   label: t('competitiveAsin.sizeTiers.smallStandard') },
+    { value: 'large_standard',   label: t('competitiveAsin.sizeTiers.largeStandard') },
+    { value: 'small_oversize',   label: t('competitiveAsin.sizeTiers.smallOversize') },
+    { value: 'medium_oversize',  label: t('competitiveAsin.sizeTiers.mediumOversize') },
+    { value: 'large_oversize',   label: t('competitiveAsin.sizeTiers.largeOversize') },
+    { value: 'special_oversize', label: t('competitiveAsin.sizeTiers.specialOversize') }
+  ]
   const [loading, setLoading] = useState(true)
   const [savingAsin, setSavingAsin] = useState(false)
   const [asinInput, setAsinInput] = useState('')
@@ -129,14 +130,14 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
     const extracted = extractAsin(inputValue)
     const asinValue = typeof extracted === 'string' ? extracted : extracted?.asin
     if (!asinValue) {
-      setAsinError('Format invàlid. Introdueix una URL d\'Amazon o un ASIN de 10 caràcters.')
+      setAsinError(t('competitiveAsin.errors.invalidFormat'))
       return
     }
 
     setSavingAsin(true)
     try {
       if (!activeOrgId) {
-        setAsinError('No hi ha Workspace actiu')
+        setAsinError(t('competitiveAsin.errors.noWorkspace'))
         setSavingAsin(false)
         return
       }
@@ -155,7 +156,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
       setAsinInput('')
     } catch (err) {
       console.error('Error guardant ASIN:', err)
-      setAsinError('Error guardant l\'ASIN: ' + (err.message || 'Error desconegut'))
+      setAsinError(t('competitiveAsin.errors.saveAsin', { error: err.message || t('common.unknownError') }))
     } finally {
       setSavingAsin(false)
     }
@@ -218,7 +219,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
     setParseWarning('')
     const text = detailsText || ''
     if (!text.trim()) {
-      setParseWarning('Enganxa el bloc de detalls del producte per analitzar-lo.')
+      setParseWarning(t('competitiveAsin.warnings.pasteFirst'))
       return
     }
 
@@ -298,7 +299,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
     }
 
     if (!matched) {
-      setParseWarning('No s\'han detectat camps. Revisa el text enganxat.')
+      setParseWarning(t('competitiveAsin.warnings.noFields'))
       return
     }
 
@@ -312,7 +313,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
         ...(hasPhaseStyle ? phaseSurface.cardStyle : {}),
         background: hasPhaseStyle ? phaseSurface.cardStyle.background : undefined
       }}>
-        <div style={styles.loading}>Carregant ASIN competidor...</div>
+        <div style={styles.loading}>{t('competitiveAsin.loading')}</div>
       </div>
     )
   }
@@ -329,7 +330,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
           color: darkMode ? '#ffffff' : '#111827'
         }}>
           <Barcode size={20} />
-          ASIN competidor & Snapshot
+          {t('competitiveAsin.title')}
         </h3>
         {capturedAsin && (
           <a
@@ -339,7 +340,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             style={styles.link}
           >
             <ExternalLink size={14} />
-            Veure a Amazon
+            {t('competitiveAsin.viewOnAmazon')}
           </a>
         )}
       </div>
@@ -352,7 +353,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
                 ...styles.label,
                 color: darkMode ? '#e5e7eb' : '#374151'
               }}>
-                ASIN competidor (obligatori)
+                {t('competitiveAsin.fields.competitorAsin')}
               </label>
               <div style={styles.asinInputRow}>
                 <input
@@ -374,13 +375,13 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
                 ...styles.label,
                 color: darkMode ? '#e5e7eb' : '#374151'
               }}>
-                URL d'Amazon (opcional)
+                {t('competitiveAsin.fields.amazonUrl')}
               </label>
               <input
                 type="text"
                 value={amazonUrl}
                 onChange={(e) => setAmazonUrl(e.target.value)}
-                placeholder="Pega una URL d'Amazon per extreure l'ASIN"
+                placeholder={t('competitiveAsin.placeholders.amazonUrl')}
                 style={{
                   ...styles.input,
                   backgroundColor: '#ffffff',
@@ -399,14 +400,14 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
                 marginTop: '8px'
               }}
             >
-              {savingAsin ? 'Guardant...' : 'Capturar ASIN'}
+              {savingAsin ? t('common.saving') : t('competitiveAsin.actions.capture')}
             </button>
             <div style={{
               marginTop: '8px',
               fontSize: '12px',
               color: darkMode ? '#9ca3af' : '#6b7280'
             }}>
-              Cal un ASIN per desbloquejar el snapshot de competència.
+              {t('competitiveAsin.helpers.needAsin')}
             </div>
           </>
         ) : (
@@ -415,13 +416,13 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             color: darkMode ? '#e5e7eb' : '#111827'
           }}>
             <div>
-              ASIN capturat: <strong>{capturedAsin}</strong>
+              {t('competitiveAsin.captured')}: <strong>{capturedAsin}</strong>
               {marketplace && (
                 <span style={styles.marketplace}>({marketplace.toUpperCase()})</span>
               )}
             </div>
             <Button variant="secondary" onClick={handleClearAsin}>
-              Canviar
+              {t('competitiveAsin.actions.change')}
             </Button>
           </div>
         )}
@@ -438,14 +439,14 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             fontWeight: '600',
             color: darkMode ? '#ffffff' : '#111827'
           }}>
-            Snapshot de competidor
+            {t('competitiveAsin.snapshotTitle')}
           </div>
           <div style={styles.metaGrid}>
         <div style={styles.field}>
           <label style={{
             ...styles.label,
             color: darkMode ? '#e5e7eb' : '#374151'
-          }}>Preu competidor</label>
+          }}>{t('competitiveAsin.fields.competitorPrice')}</label>
           <input
             type="number"
             value={meta.competitor_price}
@@ -463,7 +464,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
           <label style={{
             ...styles.label,
             color: darkMode ? '#e5e7eb' : '#374151'
-          }}>Categoria estimada</label>
+          }}>{t('competitiveAsin.fields.estimatedCategory')}</label>
           <input
             type="text"
             value={meta.category_guess}
@@ -481,7 +482,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
           <label style={{
             ...styles.label,
             color: darkMode ? '#e5e7eb' : '#374151'
-          }}>Mida FBA</label>
+          }}>{t('competitiveAsin.fields.fbaSize')}</label>
           <select
             value={meta.size_tier}
             onChange={(e) => setMeta({ ...meta, size_tier: e.target.value })}
@@ -501,7 +502,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
           <label style={{
             ...styles.label,
             color: darkMode ? '#e5e7eb' : '#374151'
-          }}>Pes estimat (g)</label>
+          }}>{t('competitiveAsin.fields.estimatedWeight')}</label>
           <input
             type="number"
             value={meta.weight_g}
@@ -519,7 +520,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
           <label style={{
             ...styles.label,
             color: darkMode ? '#e5e7eb' : '#374151'
-          }}>Marca</label>
+          }}>{t('competitiveAsin.fields.brand')}</label>
           <input
             type="text"
             value={meta.brand}
@@ -537,7 +538,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
           <label style={{
             ...styles.label,
             color: darkMode ? '#e5e7eb' : '#374151'
-          }}>Dimensions (opcional)</label>
+          }}>{t('competitiveAsin.fields.dimensionsOptional')}</label>
           <input
             type="text"
             value={meta.package_dimensions}
@@ -566,13 +567,13 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
               })}
             >
               <Save size={16} />
-              Guardar dades competidor
+              {t('competitiveAsin.actions.saveCompetitorData')}
             </button>
             <span style={{
               ...styles.helper,
               color: darkMode ? '#9ca3af' : '#6b7280'
             }}>
-              Guardat localment per projecte.
+              {t('competitiveAsin.helpers.savedLocally')}
             </span>
           </div>
         </>
@@ -586,13 +587,13 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             fontWeight: '600',
             color: darkMode ? '#ffffff' : '#111827'
           }}>
-            Amazon Product Details
+            {t('competitiveAsin.detailsTitle')}
           </h4>
           <span style={{
             fontSize: '12px',
             color: darkMode ? '#9ca3af' : '#6b7280'
           }}>
-            Enganxa el bloc de detalls per omplir camps
+            {t('competitiveAsin.detailsSubtitle')}
           </span>
         </div>
 
@@ -619,12 +620,12 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
           <label style={{
             ...styles.label,
             color: darkMode ? '#e5e7eb' : '#374151'
-          }}>URL d'Amazon (opcional)</label>
+          }}>{t('competitiveAsin.fields.amazonUrl')}</label>
           <input
             type="text"
             value={amazonUrl}
             onChange={(e) => setAmazonUrl(e.target.value)}
-            placeholder="Pega la URL per extreure l'ASIN"
+            placeholder={t('competitiveAsin.placeholders.amazonUrlShort')}
             style={{
               ...styles.input,
               backgroundColor: '#ffffff',
@@ -638,7 +639,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
           <label style={{
             ...styles.label,
             color: darkMode ? '#e5e7eb' : '#374151'
-          }}>Pega "Detalles del producto"</label>
+          }}>{t('competitiveAsin.fields.pasteDetails')}</label>
           <textarea
             value={detailsText}
             onChange={(e) => setDetailsText(e.target.value)}
@@ -662,13 +663,13 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             onClick={handleParseDetails}
             style={styles.secondaryButton}
           >
-            Parsejar
+            {t('competitiveAsin.actions.parse')}
           </button>
           <button
             onClick={handleSaveMeta}
             style={styles.captureButton}
           >
-            Guardar
+            {t('common.save')}
           </button>
         </div>
 
@@ -677,7 +678,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             <label style={{
               ...styles.label,
               color: darkMode ? '#e5e7eb' : '#374151'
-            }}>Marca</label>
+            }}>{t('competitiveAsin.fields.brand')}</label>
             <input
               type="text"
               value={meta.brand}
@@ -694,7 +695,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             <label style={{
               ...styles.label,
               color: darkMode ? '#e5e7eb' : '#374151'
-            }}>Model</label>
+            }}>{t('competitiveAsin.fields.model')}</label>
             <input
               type="text"
               value={meta.model}
@@ -711,7 +712,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             <label style={{
               ...styles.label,
               color: darkMode ? '#e5e7eb' : '#374151'
-            }}>País d'origen</label>
+            }}>{t('competitiveAsin.fields.countryOfOrigin')}</label>
             <input
               type="text"
               value={meta.country_of_origin}
@@ -728,7 +729,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             <label style={{
               ...styles.label,
               color: darkMode ? '#e5e7eb' : '#374151'
-            }}>Dimensions (cm)</label>
+            }}>{t('competitiveAsin.fields.dimensionsCm')}</label>
             <input
               type="text"
               value={meta.dimensions_cm}
@@ -745,7 +746,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             <label style={{
               ...styles.label,
               color: darkMode ? '#e5e7eb' : '#374151'
-            }}>Pes (g)</label>
+            }}>{t('competitiveAsin.fields.weight')}</label>
             <input
               type="number"
               value={meta.weight_g}
@@ -762,7 +763,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             <label style={{
               ...styles.label,
               color: darkMode ? '#e5e7eb' : '#374151'
-            }}>BSR principal</label>
+            }}>{t('competitiveAsin.fields.bsrMain')}</label>
             <input
               type="text"
               value={meta.bsr_main_rank}
@@ -780,7 +781,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             <label style={{
               ...styles.label,
               color: darkMode ? '#e5e7eb' : '#374151'
-            }}>Categoria BSR principal</label>
+            }}>{t('competitiveAsin.fields.bsrMainCategory')}</label>
             <input
               type="text"
               value={meta.bsr_main_category}
@@ -797,7 +798,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             <label style={{
               ...styles.label,
               color: darkMode ? '#e5e7eb' : '#374151'
-            }}>BSR secundari</label>
+            }}>{t('competitiveAsin.fields.bsrSub')}</label>
             <input
               type="text"
               value={meta.bsr_sub_rank}
@@ -815,7 +816,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             <label style={{
               ...styles.label,
               color: darkMode ? '#e5e7eb' : '#374151'
-            }}>Categoria BSR secundària</label>
+            }}>{t('competitiveAsin.fields.bsrSubCategory')}</label>
             <input
               type="text"
               value={meta.bsr_sub_category}
@@ -832,7 +833,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             <label style={{
               ...styles.label,
               color: darkMode ? '#e5e7eb' : '#374151'
-            }}>Rating</label>
+            }}>{t('competitiveAsin.fields.rating')}</label>
             <input
               type="text"
               value={meta.rating}
@@ -849,7 +850,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             <label style={{
               ...styles.label,
               color: darkMode ? '#e5e7eb' : '#374151'
-            }}>Nº valoracions</label>
+            }}>{t('competitiveAsin.fields.reviewCount')}</label>
             <input
               type="text"
               value={meta.review_count}
@@ -866,7 +867,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             <label style={{
               ...styles.label,
               color: darkMode ? '#e5e7eb' : '#374151'
-            }}>Data llançament</label>
+            }}>{t('competitiveAsin.fields.launchDate')}</label>
             <input
               type="text"
               value={meta.launch_date}
@@ -883,7 +884,7 @@ export default function CompetitiveAsinSection({ projectId, darkMode, phaseStyle
             <label style={{
               ...styles.label,
               color: darkMode ? '#e5e7eb' : '#374151'
-            }}>Imatge principal (URL)</label>
+            }}>{t('competitiveAsin.fields.mainImageUrl')}</label>
             <input
               type="text"
               value={meta.main_image_url}

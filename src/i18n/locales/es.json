@@ -3032,5 +3032,69 @@
       "inventoryLink": "Inventario",
       "tracking": "Producto en venta — haz seguimiento de métricas y alertas desde el Dashboard."
     }
+  },
+  "competitiveAsin": {
+    "title": "ASIN competidor & Snapshot",
+    "loading": "Cargando ASIN competidor…",
+    "viewOnAmazon": "Ver en Amazon",
+    "captured": "ASIN capturado",
+    "snapshotTitle": "Snapshot del competidor",
+    "detailsTitle": "Amazon Product Details",
+    "detailsSubtitle": "Pega el bloque de detalles para rellenar los campos",
+    "fields": {
+      "competitorAsin": "ASIN competidor (obligatorio)",
+      "amazonUrl": "URL de Amazon (opcional)",
+      "competitorPrice": "Precio competidor",
+      "estimatedCategory": "Categoría estimada",
+      "fbaSize": "Tamaño FBA",
+      "estimatedWeight": "Peso estimado (g)",
+      "brand": "Marca",
+      "dimensionsOptional": "Dimensiones (opcional)",
+      "pasteDetails": "Pega \"Detalles del producto\"",
+      "model": "Modelo",
+      "countryOfOrigin": "País de origen",
+      "dimensionsCm": "Dimensiones (cm)",
+      "weight": "Peso (g)",
+      "bsrMain": "BSR principal",
+      "bsrMainCategory": "Categoría BSR principal",
+      "bsrSub": "BSR secundario",
+      "bsrSubCategory": "Categoría BSR secundaria",
+      "rating": "Rating",
+      "reviewCount": "Nº valoraciones",
+      "launchDate": "Fecha lanzamiento",
+      "mainImageUrl": "Imagen principal (URL)"
+    },
+    "placeholders": {
+      "amazonUrl": "Pega una URL de Amazon para extraer el ASIN",
+      "amazonUrlShort": "Pega la URL para extraer el ASIN"
+    },
+    "sizeTiers": {
+      "select": "Selecciona tamaño",
+      "smallStandard": "Pequeño estándar",
+      "largeStandard": "Grande estándar",
+      "smallOversize": "Pequeño oversize",
+      "mediumOversize": "Mediano oversize",
+      "largeOversize": "Grande oversize",
+      "specialOversize": "Especial oversize"
+    },
+    "actions": {
+      "capture": "Capturar ASIN",
+      "change": "Cambiar",
+      "saveCompetitorData": "Guardar datos competidor",
+      "parse": "Parsear"
+    },
+    "helpers": {
+      "needAsin": "Se necesita un ASIN para desbloquear el snapshot de competencia.",
+      "savedLocally": "Guardado localmente por proyecto."
+    },
+    "errors": {
+      "invalidFormat": "Formato inválido. Introduce una URL de Amazon o un ASIN de 10 caracteres.",
+      "noWorkspace": "No hay Workspace activo",
+      "saveAsin": "Error guardando el ASIN: {{error}}"
+    },
+    "warnings": {
+      "pasteFirst": "Pega el bloque de detalles del producto para analizarlo.",
+      "noFields": "No se han detectado campos. Revisa el texto pegado."
+    }
   }
 }
