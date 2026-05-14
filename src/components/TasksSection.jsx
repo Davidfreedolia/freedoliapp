@@ -5,10 +5,13 @@ import { useApp } from '../context/AppContext'
 import { getTasks, createTask, updateTask, deleteTask, markTaskDone, snoozeTask } from '../lib/supabase'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { ca, es, enUS } from 'date-fns/locale'
+
+const DATE_FNS_LOCALES = { ca, es, en: enUS }
 
 export default function TasksSection({ entityType, entityId, darkMode }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const dfLocale = DATE_FNS_LOCALES[i18n.language] || DATE_FNS_LOCALES.ca
   const { activeOrgId } = useApp()
   const { isMobile } = useBreakpoint()
   const [tasks, setTasks] = useState([])
@@ -112,15 +115,16 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
     const diffDays = Math.ceil((due - now) / (1000 * 60 * 60 * 24))
     
     if (diffDays < 0) {
-      return { text: `Overdue ${Math.abs(diffDays)} days`, color: 'var(--danger-1)' }
+      const days = Math.abs(diffDays)
+      return { text: t('tasks.overdue', { days, count: days }), color: 'var(--danger-1)' }
     } else if (diffDays === 0) {
-      return { text: 'Due today', color: 'var(--warning-1)' }
+      return { text: t('tasks.dueToday', 'Due today'), color: 'var(--warning-1)' }
     } else if (diffDays === 1) {
-      return { text: 'Due tomorrow', color: 'var(--warning-1)' }
+      return { text: t('tasks.dueTomorrow', 'Due tomorrow'), color: 'var(--warning-1)' }
     } else {
-      return { 
-        text: format(due, 'MMM d, yyyy', { locale: es }) || format(due, 'MMM d, yyyy'), 
-        color: 'var(--text-2)' 
+      return {
+        text: format(due, 'MMM d, yyyy', { locale: dfLocale }) || format(due, 'MMM d, yyyy'),
+        color: 'var(--text-2)'
       }
     }
   }
@@ -136,7 +140,7 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
           color: darkMode ? '#ffffff' : 'var(--text-1)'
         }}>
           <CheckCircle2 size={18} />
-          Tasks
+          {t('tasks.title', 'Tasks')}
         </h3>
         {!showAddForm && (
           <button
@@ -144,7 +148,7 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
             style={sectionStyles.addButton}
           >
             <Plus size={16} />
-            Add task
+            {t('calendar.newTask', 'Add task')}
           </button>
         )}
       </div>
@@ -157,7 +161,7 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
         }}>
           <input
             type="text"
-            placeholder="Task title"
+            placeholder={t('calendar.taskTitlePlaceholder', 'Task title')}
             value={newTask.title}
             onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
             style={{
@@ -168,7 +172,7 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
             }}
           />
           <textarea
-            placeholder="Notes (optional)"
+            placeholder={t('common.notesOptional', 'Notes (optional)')}
             value={newTask.notes}
             onChange={(e) => setNewTask({ ...newTask, notes: e.target.value })}
             rows={2}
@@ -202,9 +206,9 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
                 borderColor: darkMode ? 'var(--text-1)' : 'var(--border-1)'
               }}
             >
-              <option value="low">Low</option>
-              <option value="normal">Normal</option>
-              <option value="high">High</option>
+              <option value="low">{t('calendar.priorityLow', 'Low')}</option>
+              <option value="normal">{t('calendar.priorityNormal', 'Normal')}</option>
+              <option value="high">{t('calendar.priorityHigh', 'High')}</option>
             </select>
           </div>
           <div style={sectionStyles.formActions}>
@@ -216,7 +220,7 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
               style={sectionStyles.cancelButton}
             >
               <X size={16} />
-              Cancel
+              {t('common.cancel', 'Cancel')}
             </button>
             <button
               onClick={handleAddTask}
@@ -226,7 +230,7 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
                 opacity: (saving || !newTask.title.trim()) ? 0.6 : 1
               }}
             >
-              {saving ? 'Adding...' : 'Add task'}
+              {saving ? t('common.saving', 'Adding…') : t('calendar.newTask', 'Add task')}
             </button>
           </div>
         </div>
@@ -298,7 +302,7 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
                       ...sectionStyles.actionButton,
                       color: 'var(--success-1)'
                     }}
-                    title="Mark done"
+                    title={t('tasks.markDone', 'Mark done')}
                   >
                     <CheckCircle2 size={16} />
                   </button>
@@ -308,7 +312,7 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
                       ...sectionStyles.actionButton,
                       color: 'var(--warning-1)'
                     }}
-                    title="Snooze +3d"
+                    title={t('tasks.snooze3d', 'Snooze +3d')}
                   >
                     <Clock size={16} />
                   </button>
@@ -318,7 +322,7 @@ export default function TasksSection({ entityType, entityId, darkMode }) {
                       ...sectionStyles.actionButton,
                       color: 'var(--danger-1)'
                     }}
-                    title="Delete"
+                    title={t('stickyNotes.delete', 'Delete')}
                   >
                     <Trash2 size={16} />
                   </button>

@@ -35,6 +35,7 @@ import { useApp } from '../context/AppContext'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { usePlanFeatures } from '../hooks/usePlanFeatures'
 import { isBillingLimitsDisabled } from '../lib/featureFlags'
+import { useIsSuperAdmin } from '../hooks/useIsSuperAdmin'
 
 // Prefetch functions per rutes probables
 // Carrega el chunk abans que es necessiti per millorar UX
@@ -194,8 +195,8 @@ const SIDEBAR_GROUPS = [
       { path: '/app/billing', icon: CreditCard, labelKey: 'nav.billing' },
       { path: '/app/settings', icon: Settings, labelKey: 'nav.settings' },
       { path: '/app/help', icon: HelpCircle, labelKey: 'nav.help' },
-      { path: '/app/diagnostics', icon: Bug, labelKey: 'nav.diagnostics' },
-      { path: '/app/admin', icon: ShieldCheck, labelKey: 'nav.admin' },
+      { path: '/app/diagnostics', icon: Bug, labelKey: 'nav.diagnostics', adminOnly: true },
+      { path: '/app/admin', icon: ShieldCheck, labelKey: 'nav.admin', adminOnly: true },
     ],
   },
 ]
@@ -203,6 +204,7 @@ const SIDEBAR_GROUPS = [
 export default function Sidebar() {
   const { sidebarCollapsed, setSidebarCollapsed, darkMode } = useApp()
   const { features: planFeatures, loading: planLoading } = usePlanFeatures()
+  const { isSuperAdmin } = useIsSuperAdmin()
   const { isMobile, isTablet, isDesktop } = useBreakpoint()
   const { t } = useTranslation()
   const [logoError, setLogoError] = useState(false)
@@ -272,6 +274,9 @@ export default function Sidebar() {
             )}
             {group.items
               .filter((item) => {
+                // Admin-only items: only the platform super-admin sees them.
+                // The route itself is also gated by AdminGate (defense-in-depth).
+                if (item.adminOnly && !isSuperAdmin) return false
                 // Beta bypass: VITE_DISABLE_SEAT_LIMIT shows every page
                 // regardless of plan, so beta testers see the full app.
                 if (isBillingLimitsDisabled()) return true

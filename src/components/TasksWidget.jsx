@@ -7,11 +7,14 @@ import { showToast } from './Toast'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { useApp } from '../context/AppContext'
 import { formatDistanceToNow, parseISO, format } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { ca, es, enUS } from 'date-fns/locale'
+
+const DATE_FNS_LOCALES = { ca, es, en: enUS }
 
 export default function TasksWidget({ darkMode, limit = 10 }) {
   const navigate = useNavigate()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const dfLocale = DATE_FNS_LOCALES[i18n.language] || DATE_FNS_LOCALES.ca
   const { isMobile } = useBreakpoint()
   const { activeOrgId } = useApp()
   const [tasks, setTasks] = useState([])
@@ -167,7 +170,7 @@ export default function TasksWidget({ darkMode, limit = 10 }) {
     } else if (diffDays <= 7) {
       return { text: t('tasks.dueInDays', { days: diffDays }), color: 'var(--warning-1)' }
     } else {
-      return { text: format(due, 'MMM d', { locale: es }) || format(due, 'MMM d'), color: 'var(--text-2)' }
+      return { text: format(due, 'MMM d', { locale: dfLocale }) || format(due, 'MMM d'), color: 'var(--text-2)' }
     }
   }
 

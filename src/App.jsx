@@ -593,8 +593,8 @@ function App() {
                 <Route path="help" element={<AppPageWrap context="page:Help"><Help /></AppPageWrap>} />
                 <Route path="calendar" element={<AppPageWrap context="page:Calendar"><Calendar /></AppPageWrap>} />
                 <Route path="inbox" element={<AppPageWrap context="page:TaskInbox"><TaskInbox /></AppPageWrap>} />
-                <Route path="diagnostics" element={<AppPageWrap context="page:Diagnostics"><Diagnostics /></AppPageWrap>} />
-                <Route path="dev/seed" element={<AppPageWrap context="page:DevSeed"><DevSeed /></AppPageWrap>} />
+                <Route path="diagnostics" element={<AdminGate><AppPageWrap context="page:Diagnostics"><Diagnostics /></AppPageWrap></AdminGate>} />
+                <Route path="dev/seed" element={<AdminGate><AppPageWrap context="page:DevSeed"><DevSeed /></AppPageWrap></AdminGate>} />
                 <Route path="docs/*" element={<AppPageWrap context="page:Docs"><Docs /></AppPageWrap>} />
                 <Route path="billing/locked" element={<BillingLocked />} />
                 <Route path="billing/over-seat" element={<BillingOverSeat />} />

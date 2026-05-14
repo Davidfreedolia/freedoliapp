@@ -6,6 +6,7 @@ import Button from '../components/Button'
 import { supabase, getCurrentUserId } from '../lib/supabase'
 import { useApp } from '../context/AppContext'
 import { useWorkspace } from '../contexts/WorkspaceContext'
+import { useIsSuperAdmin } from '../hooks/useIsSuperAdmin'
 import { showToast } from '../components/Toast'
 
 const SPAPI_STATE_KEY = 'spapi_oauth_state'
@@ -23,6 +24,7 @@ export default function AmazonImports() {
   const { t } = useTranslation()
   const { darkMode } = useApp()
   const { activeOrgId } = useWorkspace() || {}
+  const { isSuperAdmin } = useIsSuperAdmin()
   const [jobs, setJobs] = useState([])
   const [spapiConnections, setSpapiConnections] = useState([])
   const [loading, setLoading] = useState(true)
@@ -431,13 +433,15 @@ export default function AmazonImports() {
                           {processingId === job.id ? t('amazonImports.processingInProgress') : t('amazonImports.process')}
                         </Button>
                       )}
-                      <a
-                        href="/app/diagnostics"
-                        style={{ marginLeft: 8, fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 4 }}
-                      >
-                        <ExternalLink size={12} />
-                        {t('amazonImports.viewOps')}
-                      </a>
+                      {isSuperAdmin && (
+                        <a
+                          href="/app/diagnostics"
+                          style={{ marginLeft: 8, fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                        >
+                          <ExternalLink size={12} />
+                          {t('amazonImports.viewOps')}
+                        </a>
+                      )}
                     </td>
                   </tr>
                 ))}

@@ -12,7 +12,9 @@ import {
 } from '../lib/supabase'
 import { showToast } from '../components/Toast'
 import { parseISO, format, isToday, isPast, isTomorrow } from 'date-fns'
-import { ca } from 'date-fns/locale'
+import { ca, es, enUS } from 'date-fns/locale'
+
+const DATE_FNS_LOCALES = { ca, es, en: enUS }
 
 // Paleta corporativa
 const C = {
@@ -31,31 +33,31 @@ const C = {
   amber:      '#F0B429',
 }
 
-const SOURCE_LABELS = {
-  manual: 'Manual',
-  sticky_note: 'Nota',
-  alert: 'Alerta',
-  decision: 'Decisió',
-  gate: 'Gate',
+const SOURCE_KEYS = {
+  manual: 'sourceManual',
+  sticky_note: 'sourceStickyNote',
+  alert: 'sourceAlert',
+  decision: 'sourceDecision',
+  gate: 'sourceGate',
 }
 
-function getDueInfo(dueDate) {
+function getDueInfo(dueDate, t, dfLocale) {
   if (!dueDate) return { text: null, color: C.muted }
   const due = parseISO(dueDate)
-  if (isPast(due) && !isToday(due)) return { text: format(due, 'd MMM', { locale: ca }), color: C.coral }
-  if (isToday(due))   return { text: 'Avui',   color: C.amber }
-  if (isTomorrow(due)) return { text: 'Demà',  color: C.amber }
-  return { text: format(due, 'd MMM', { locale: ca }), color: C.muted }
+  if (isPast(due) && !isToday(due)) return { text: format(due, 'd MMM', { locale: dfLocale }), color: C.coral }
+  if (isToday(due))   return { text: t('tasks.inbox.dueToday', 'Avui'), color: C.amber }
+  if (isTomorrow(due)) return { text: t('tasks.inbox.dueTomorrow', 'Demà'), color: C.amber }
+  return { text: format(due, 'd MMM', { locale: dfLocale }), color: C.muted }
 }
 
-function groupTasks(tasks) {
-  const overdue  = tasks.filter(t => t.due_date && isPast(parseISO(t.due_date)) && !isToday(parseISO(t.due_date)))
-  const today    = tasks.filter(t => t.due_date && isToday(parseISO(t.due_date)))
-  const upcoming = tasks.filter(t => !t.due_date || (!isPast(parseISO(t.due_date)) && !isToday(parseISO(t.due_date))))
+function groupTasks(tasks, t) {
+  const overdue  = tasks.filter(x => x.due_date && isPast(parseISO(x.due_date)) && !isToday(parseISO(x.due_date)))
+  const today    = tasks.filter(x => x.due_date && isToday(parseISO(x.due_date)))
+  const upcoming = tasks.filter(x => !x.due_date || (!isPast(parseISO(x.due_date)) && !isToday(parseISO(x.due_date))))
   return [
-    { key: 'overdue',  label: 'Vencudes',  tasks: overdue,  accent: C.coral },
-    { key: 'today',    label: 'Avui',       tasks: today,    accent: C.amber },
-    { key: 'upcoming', label: 'Properes',   tasks: upcoming, accent: C.petrol },
+    { key: 'overdue',  label: t('tasks.inbox.groupOverdue',  'Vencudes'), tasks: overdue,  accent: C.coral },
+    { key: 'today',    label: t('tasks.inbox.groupToday',    'Avui'),     tasks: today,    accent: C.amber },
+    { key: 'upcoming', label: t('tasks.inbox.groupUpcoming', 'Properes'), tasks: upcoming, accent: C.petrol },
   ].filter(g => g.tasks.length > 0)
 }
 
@@ -89,7 +91,8 @@ function CircleCheck({ done, loading, onClick }) {
 }
 
 export default function TaskInbox() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const dfLocale = DATE_FNS_LOCALES[i18n.language] || DATE_FNS_LOCALES.ca
   const navigate = useNavigate()
   const { darkMode, activeOrgId } = useApp()
   const [tasks, setTasks] = useState([])
@@ -134,7 +137,7 @@ export default function TaskInbox() {
     setActionLoading(taskId)
     try {
       await snoozeTask(taskId, days)
-      showToast(`Ajornada ${days}d`, 'success')
+      showToast(t('tasks.inbox.postponed', { days, defaultValue: `Ajornada ${days}d` }), 'success')
       await loadTasks()
     } catch (err) { showToast(err?.message || 'Error', 'error') }
     setActionLoading(null)
@@ -150,9 +153,9 @@ export default function TaskInbox() {
     if (routes[task.entity_type]) navigate(routes[task.entity_type])
   }
 
-  const open   = tasks.filter(t => t.status === 'open')
-  const done   = tasks.filter(t => t.status === 'done')
-  const groups = groupTasks(open)
+  const open   = tasks.filter(x => x.status === 'open')
+  const done   = tasks.filter(x => x.status === 'done')
+  const groups = groupTasks(open, t)
 
   const toggleSection = (key) => setCollapsed(p => ({ ...p, [key]: !p[key] }))
 
@@ -167,7 +170,7 @@ export default function TaskInbox() {
         {/* Títol + tabs */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, paddingTop: 20, paddingBottom: 0 }}>
           <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: C.petrol, letterSpacing: '-0.3px' }}>
-            Safata de Tasques
+            {t('tasks.inbox.title', 'Safata de tasques')}
           </h1>
           <ChevronDown size={16} color={muted} />
         </div>
@@ -187,7 +190,7 @@ export default function TaskInbox() {
                 transition: 'all 0.15s',
               }}
             >
-              {tab === 'list' ? 'Llista' : 'Calendari'}
+              {tab === 'list' ? t('tasks.inbox.tabList', 'Llista') : t('tasks.inbox.tabCalendar', 'Calendari')}
             </button>
           ))}
         </div>
@@ -207,11 +210,11 @@ export default function TaskInbox() {
             cursor: 'pointer',
           }}
         >
-          <Plus size={16} /> Nova tasca
+          <Plus size={16} /> {t('tasks.inbox.newTask', 'Nova tasca')}
         </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <span style={{ fontSize: 12, color: muted }}>
-            {open.length} tasques obertes
+            {t('tasks.inbox.tasksOpen', { count: open.length, defaultValue: `${open.length} tasques obertes` })}
           </span>
           <button
             type="button"
@@ -221,7 +224,7 @@ export default function TaskInbox() {
               background: 'transparent', cursor: 'pointer', fontWeight: 500,
             }}
           >
-            {showDone ? 'Ocultar completades' : 'Veure completades'}
+            {showDone ? t('tasks.inbox.hideCompleted', 'Ocultar completades') : t('tasks.inbox.showCompleted', 'Veure completades')}
           </button>
         </div>
       </div>
@@ -229,15 +232,15 @@ export default function TaskInbox() {
       {/* CONTINGUT */}
       <div style={{ flex: 1, padding: '24px 32px', maxWidth: 900 }}>
         {loading ? (
-          <div style={{ padding: 40, textAlign: 'center', color: muted }}>Carregant...</div>
+          <div style={{ padding: 40, textAlign: 'center', color: muted }}>{t('tasks.inbox.loading', 'Carregant…')}</div>
         ) : open.length === 0 && !showDone ? (
           <div style={{
             margin: '48px auto', maxWidth: 400, textAlign: 'center',
             padding: 40, background: surface, borderRadius: 12, border: `1px solid ${border}`,
           }}>
             <div style={{ fontSize: 40, marginBottom: 16 }}>✅</div>
-            <p style={{ color: text, fontWeight: 600, fontSize: 16, margin: '0 0 8px' }}>Tot al dia!</p>
-            <p style={{ color: muted, fontSize: 14, margin: 0 }}>No hi ha tasques pendents.</p>
+            <p style={{ color: text, fontWeight: 600, fontSize: 16, margin: '0 0 8px' }}>{t('tasks.inbox.allCaughtUpTitle', 'Tot al dia!')}</p>
+            <p style={{ color: muted, fontSize: 14, margin: 0 }}>{t('tasks.inbox.allCaughtUpBody', 'No hi ha tasques pendents.')}</p>
           </div>
         ) : (
           <>
@@ -286,6 +289,7 @@ export default function TaskInbox() {
                         onSnooze={(d) => handleSnooze(task.id, d)}
                         onOpen={() => handleOpenEntity(task)}
                         border={border} text={text} muted={muted} darkMode={darkMode}
+                        t={t} dfLocale={dfLocale}
                       />
                     ))}
                   </div>
@@ -309,7 +313,7 @@ export default function TaskInbox() {
                     ? <ChevronRight size={14} color={muted} />
                     : <ChevronDown  size={14} color={muted} />
                   }
-                  <span style={{ fontSize: 13, fontWeight: 600, color: muted }}>Completades</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: muted }}>{t('tasks.inbox.groupCompleted', 'Completades')}</span>
                   <span style={{
                     marginLeft: 6, fontSize: 11, color: muted,
                     background: `${muted}20`, borderRadius: 10, padding: '1px 7px',
@@ -331,6 +335,7 @@ export default function TaskInbox() {
                         onOpen={() => handleOpenEntity(task)}
                         border={border} text={text} muted={muted} darkMode={darkMode}
                         isDone
+                        t={t} dfLocale={dfLocale}
                       />
                     ))}
                   </div>
@@ -344,16 +349,19 @@ export default function TaskInbox() {
   )
 }
 
-function TaskRow({ task, last, loading, onDone, onSnooze, onOpen, border, text, muted, darkMode, isDone }) {
+function TaskRow({ task, last, loading, onDone, onSnooze, onOpen, border, text, muted, darkMode, isDone, t, dfLocale }) {
   const [hovered, setHovered] = useState(false)
-  const due = getDueInfo(task.due_date)
-  const source = SOURCE_LABELS[task.source] || task.source || 'Manual'
+  const due = getDueInfo(task.due_date, t, dfLocale)
+  const sourceKey = SOURCE_KEYS[task.source]
+  const source = sourceKey
+    ? t(`tasks.inbox.${sourceKey}`)
+    : (task.source || t('tasks.inbox.sourceFallback', 'Manual'))
 
   // Badge de prioritat
   const priorityBadge = task.priority === 'high'
-    ? { label: 'Alta', bg: `${C.coral}18`, color: C.coral }
+    ? { label: t('tasks.inbox.priorityHigh', 'Alta'), bg: `${C.coral}18`, color: C.coral }
     : task.priority === 'low'
-    ? { label: 'Baixa', bg: `${C.muted}18`, color: C.muted }
+    ? { label: t('tasks.inbox.priorityLow', 'Baixa'), bg: `${C.muted}18`, color: C.muted }
     : null
 
   return (
@@ -421,7 +429,7 @@ function TaskRow({ task, last, loading, onDone, onSnooze, onOpen, border, text, 
           <div style={{ display: 'flex', gap: 4 }}>
             <button
               type="button" onClick={() => onSnooze(1)}
-              title="Ajornar 1 dia"
+              title={t('tasks.inbox.snooze1Day', 'Ajornar 1 dia')}
               style={{
                 padding: '3px 7px', fontSize: 11, border: `1px solid ${C.amber}`,
                 color: C.amber, background: `${C.amber}18`, borderRadius: 6,
@@ -430,7 +438,7 @@ function TaskRow({ task, last, loading, onDone, onSnooze, onOpen, border, text, 
             >+1d</button>
             <button
               type="button" onClick={() => onSnooze(3)}
-              title="Ajornar 3 dies"
+              title={t('tasks.inbox.snooze3Days', 'Ajornar 3 dies')}
               style={{
                 padding: '3px 7px', fontSize: 11, border: `1px solid ${C.amber}`,
                 color: C.amber, background: `${C.amber}18`, borderRadius: 6,

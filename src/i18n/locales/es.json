@@ -36,7 +36,8 @@
     "and": "y",
     "more": "más",
     "actions": "Acciones",
-    "saving": "Guardando…"
+    "saving": "Guardando…",
+    "notesOptional": "Notas (opcional)"
   },
   "shell": {
     "notFoundTitle": "Página no encontrada",
@@ -1346,7 +1347,30 @@
     "taskNotFound": "Tarea no encontrada",
     "taskRescheduled": "Tarea reprogramada",
     "rescheduleError": "Error al reprogramar la tarea",
-    "showStickyDerived": "Mostrar tareas de notas"
+    "showStickyDerived": "Mostrar tareas de notas",
+    "gantt": "Gantt",
+    "filtersBtn": "Filtros",
+    "clearFilters": "Limpiar filtros",
+    "loadingEvents": "Cargando eventos…",
+    "noEventInRange": "Sin eventos en este rango.",
+    "noProjectFallback": "Sin proyecto",
+    "projectColumn": "Proyecto",
+    "typeLabel": "Tipo",
+    "allTypes": "Todos",
+    "rbcNext": "Sig",
+    "rbcPrev": "Ant",
+    "rbcShowMore": "+{{count}} más",
+    "types": {
+      "milestone": "Hito",
+      "meeting": "Reunión",
+      "deadline": "Fecha límite",
+      "delivery": "Entrega",
+      "production": "Producción",
+      "sample": "Muestras",
+      "launch": "Lanzamiento",
+      "review": "Revisión",
+      "other": "Otro"
+    }
   },
   "stickyNotes": {
     "title": "Notas",
@@ -1454,7 +1478,29 @@
       "empty": "Ninguna tarea coincide con los filtros.",
       "openEntity": "Abrir entidad",
       "viewAll": "Ver todo",
-      "openDecision": "Abrir decisión"
+      "openDecision": "Abrir decisión",
+      "tabList": "Lista",
+      "tabCalendar": "Calendario",
+      "newTask": "Nueva tarea",
+      "tasksOpen": "{{count}} tarea abierta",
+      "tasksOpen_plural": "{{count}} tareas abiertas",
+      "showCompleted": "Ver completadas",
+      "hideCompleted": "Ocultar completadas",
+      "loading": "Cargando…",
+      "allCaughtUpTitle": "¡Todo al día!",
+      "allCaughtUpBody": "No hay tareas pendientes.",
+      "groupOverdue": "Vencidas",
+      "groupToday": "Hoy",
+      "groupUpcoming": "Próximas",
+      "groupCompleted": "Completadas",
+      "dueToday": "Hoy",
+      "dueTomorrow": "Mañana",
+      "priorityHigh": "Alta",
+      "priorityLow": "Baja",
+      "snooze1Day": "Aplazar 1 día",
+      "snooze3Days": "Aplazar 3 días",
+      "postponed": "Aplazada {{days}}d",
+      "sourceFallback": "Manual"
     }
   },
   "decisionsDropdown": {

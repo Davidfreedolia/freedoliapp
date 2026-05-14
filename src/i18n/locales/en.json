@@ -36,7 +36,8 @@
     "and": "and",
     "more": "more",
     "actions": "Actions",
-    "saving": "Saving…"
+    "saving": "Saving…",
+    "notesOptional": "Notes (optional)"
   },
   "shell": {
     "notFoundTitle": "Page not found",
@@ -1276,7 +1277,30 @@
     "taskNotFound": "Task not found",
     "taskRescheduled": "Task rescheduled",
     "rescheduleError": "Error rescheduling task",
-    "showStickyDerived": "Show sticky-derived tasks"
+    "showStickyDerived": "Show sticky-derived tasks",
+    "gantt": "Gantt",
+    "filtersBtn": "Filters",
+    "clearFilters": "Clear filters",
+    "loadingEvents": "Loading events…",
+    "noEventInRange": "No events in this range.",
+    "noProjectFallback": "No project",
+    "projectColumn": "Project",
+    "typeLabel": "Type",
+    "allTypes": "All",
+    "rbcNext": "Next",
+    "rbcPrev": "Prev",
+    "rbcShowMore": "+{{count}} more",
+    "types": {
+      "milestone": "Milestone",
+      "meeting": "Meeting",
+      "deadline": "Deadline",
+      "delivery": "Delivery",
+      "production": "Production",
+      "sample": "Samples",
+      "launch": "Launch",
+      "review": "Review",
+      "other": "Other"
+    }
   },
   "stickyNotes": {
     "title": "Notes",
@@ -1439,7 +1463,29 @@
       "empty": "No tasks match the filters.",
       "openEntity": "Open entity",
       "viewAll": "View all",
-      "openDecision": "Open decision"
+      "openDecision": "Open decision",
+      "tabList": "List",
+      "tabCalendar": "Calendar",
+      "newTask": "New task",
+      "tasksOpen": "{{count}} open task",
+      "tasksOpen_plural": "{{count}} open tasks",
+      "showCompleted": "Show completed",
+      "hideCompleted": "Hide completed",
+      "loading": "Loading…",
+      "allCaughtUpTitle": "All caught up!",
+      "allCaughtUpBody": "No pending tasks.",
+      "groupOverdue": "Overdue",
+      "groupToday": "Today",
+      "groupUpcoming": "Upcoming",
+      "groupCompleted": "Completed",
+      "dueToday": "Today",
+      "dueTomorrow": "Tomorrow",
+      "priorityHigh": "High",
+      "priorityLow": "Low",
+      "snooze1Day": "Snooze 1 day",
+      "snooze3Days": "Snooze 3 days",
+      "postponed": "Snoozed {{days}}d",
+      "sourceFallback": "Manual"
     }
   },
   "decisionsDropdown": {

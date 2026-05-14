@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { Calendar, momentLocalizer } from 'react-big-calendar'
 import moment from 'moment'
 import 'moment/locale/ca'
+import 'moment/locale/es'
+// English is built into moment, no import required
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import { useTranslation } from 'react-i18next'
 import { useBreakpoint } from '../hooks/useBreakpoint'
@@ -21,24 +23,25 @@ const getMomentLocale = (lang) => ({ ca: 'ca', en: 'en', es: 'es' }[lang] || 'ca
 const configureLocale = (locale) => moment.updateLocale(locale, { week: { dow: 1, doy: 4 } })
 moment.locale('ca'); configureLocale('ca')
 
-/* ─── Color scheme per tipus ─────────────────────────────────────────────── */
+/* ─── Color scheme per tipus (labels resolved via i18n) ──────────────────── */
 export const TYPE_META = {
-  milestone:  { bg: 'var(--brand-1)', fg: '#fff', label: 'Milestone' },
-  meeting:    { bg: 'var(--cta-1)', fg: '#fff', label: 'Reunió' },
-  deadline:   { bg: 'var(--danger-1)', fg: '#fff', label: 'Deadline' },
-  delivery:   { bg: 'var(--success-1)', fg: '#fff', label: 'Lliurament' },
-  production: { bg: 'var(--warning-1)', fg: '#fff', label: 'Producció' },
-  sample:     { bg: 'var(--brand-2)', fg: '#fff', label: 'Mostres' },
-  launch:     { bg: 'var(--coral-1)', fg: '#fff', label: 'Llançament' },
-  review:     { bg: 'var(--brand-1)', fg: '#fff', label: 'Revisió' },
-  other:      { bg: '#64748b', fg: '#fff', label: 'Altre' },
+  milestone:  { bg: 'var(--brand-1)', fg: '#fff', i18nKey: 'milestone' },
+  meeting:    { bg: 'var(--cta-1)', fg: '#fff', i18nKey: 'meeting' },
+  deadline:   { bg: 'var(--danger-1)', fg: '#fff', i18nKey: 'deadline' },
+  delivery:   { bg: 'var(--success-1)', fg: '#fff', i18nKey: 'delivery' },
+  production: { bg: 'var(--warning-1)', fg: '#fff', i18nKey: 'production' },
+  sample:     { bg: 'var(--brand-2)', fg: '#fff', i18nKey: 'sample' },
+  launch:     { bg: 'var(--coral-1)', fg: '#fff', i18nKey: 'launch' },
+  review:     { bg: 'var(--brand-1)', fg: '#fff', i18nKey: 'review' },
+  other:      { bg: '#64748b', fg: '#fff', i18nKey: 'other' },
 }
 const getTypeMeta = (type) => TYPE_META[type] || TYPE_META.other
 
 /* ─── Gantt View ─────────────────────────────────────────────────────────── */
-function GanttView({ events, dateRange, darkMode, onEventClick }) {
+function GanttView({ events, dateRange, darkMode, onEventClick, t, locale }) {
   const containerRef = useRef()
   const today = new Date(); today.setHours(0,0,0,0)
+  const intlLocale = ({ ca: 'ca-ES', es: 'es-ES', en: 'en-US' }[locale] || 'ca-ES')
 
   // Generate array of days in range
   const days = useMemo(() => {
@@ -56,14 +59,15 @@ function GanttView({ events, dateRange, darkMode, onEventClick }) {
   // Group events by project
   const projectGroups = useMemo(() => {
     const groups = new Map()
+    const fallback = t('calendar.noProjectFallback', 'Sense projecte')
     events.forEach(ev => {
       const pid = ev.resource?.project?.id || 'unknown'
-      const pname = ev.resource?.project?.name || ev.resource?.project?.code || 'Sense projecte'
+      const pname = ev.resource?.project?.name || ev.resource?.project?.code || fallback
       if (!groups.has(pid)) groups.set(pid, { id: pid, name: pname, events: [] })
       groups.get(pid).events.push(ev)
     })
     return Array.from(groups.values()).sort((a, b) => a.name.localeCompare(b.name))
-  }, [events])
+  }, [events, t])
 
   const dayWidth = 36 // px per day
   const rowHeight = 40
@@ -91,10 +95,10 @@ function GanttView({ events, dateRange, darkMode, onEventClick }) {
         <div style={{ width: labelWidth, flexShrink: 0, position: 'sticky', left: 0, zIndex: 10, background: surfaceBg, borderRight: `1px solid ${border}` }}>
           {/* Header placeholder */}
           <div style={{ height: 52, borderBottom: `1px solid ${border}`, display: 'flex', alignItems: 'center', padding: '0 14px' }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: text2Color, textTransform: 'uppercase', letterSpacing: 0.5 }}>Projecte</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: text2Color, textTransform: 'uppercase', letterSpacing: 0.5 }}>{t('calendar.projectColumn', 'Projecte')}</span>
           </div>
           {projectGroups.length === 0 && (
-            <div style={{ padding: '24px 14px', fontSize: 13, color: text2Color }}>Cap event en aquest rang.</div>
+            <div style={{ padding: '24px 14px', fontSize: 13, color: text2Color }}>{t('calendar.noEventInRange', 'Cap event en aquest rang.')}</div>
           )}
           {projectGroups.map((pg, ri) => (
             <div key={pg.id} style={{
@@ -125,7 +129,7 @@ function GanttView({ events, dateRange, darkMode, onEventClick }) {
                 }}>
                   {/* Month label on 1st day */}
                   <span style={{ fontSize: 9, fontWeight: 700, color: text2Color, textTransform: 'uppercase', letterSpacing: 0.4, lineHeight: 1 }}>
-                    {isFirst ? d.toLocaleDateString('ca-ES', { month: 'short' }).toUpperCase() : ''}
+                    {isFirst ? d.toLocaleDateString(intlLocale, { month: 'short' }).toUpperCase() : ''}
                   </span>
                   <span style={{
                     fontSize: 12, fontWeight: isTod ? 800 : 500,
@@ -137,7 +141,7 @@ function GanttView({ events, dateRange, darkMode, onEventClick }) {
                     {d.getDate()}
                   </span>
                   <span style={{ fontSize: 9, color: text2Color, letterSpacing: 0.3 }}>
-                    {d.toLocaleDateString('ca-ES', { weekday: 'short' }).slice(0,2).toUpperCase()}
+                    {d.toLocaleDateString(intlLocale, { weekday: 'short' }).slice(0,2).toUpperCase()}
                   </span>
                 </div>
               )
@@ -202,17 +206,18 @@ function GanttView({ events, dateRange, darkMode, onEventClick }) {
 }
 
 /* ─── Legend strip ───────────────────────────────────────────────────────── */
-function LegendStrip({ activeFilter, onFilter, darkMode }) {
+function LegendStrip({ activeFilter, onFilter, darkMode, t }) {
   return (
     <div style={{
       display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 6,
       padding: '8px 0', marginBottom: 4
     }}>
       <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: 0.5, marginRight: 4 }}>
-        Tipus:
+        {t('calendar.typeLabel', 'Tipus')}:
       </span>
       {Object.entries(TYPE_META).map(([key, meta]) => {
         const active = activeFilter === key || activeFilter === null
+        const label = t(`calendar.types.${meta.i18nKey}`, meta.i18nKey)
         return (
           <button
             key={key}
@@ -231,7 +236,7 @@ function LegendStrip({ activeFilter, onFilter, darkMode }) {
             }}
           >
             <span style={{ width: 8, height: 8, borderRadius: '50%', background: meta.bg, flexShrink: 0 }} />
-            {meta.label}
+            {label}
           </button>
         )
       })}
@@ -241,7 +246,7 @@ function LegendStrip({ activeFilter, onFilter, darkMode }) {
           onClick={() => onFilter(null)}
           style={{ fontSize: 11, color: 'var(--text-2)', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 3 }}
         >
-          <X size={12} /> Tots
+          <X size={12} /> {t('calendar.allTypes', 'Tots')}
         </button>
       )}
     </div>
@@ -250,7 +255,13 @@ function LegendStrip({ activeFilter, onFilter, darkMode }) {
 
 /* ─── Main Page ──────────────────────────────────────────────────────────── */
 const VIEWS = ['month', 'week', 'day', 'agenda', 'gantt']
-const VIEW_LABELS = { month: 'Mes', week: 'Setmana', day: 'Dia', agenda: 'Agenda', gantt: 'Gantt' }
+const VIEW_LABEL_KEYS = {
+  month: 'calendar.month',
+  week: 'calendar.week',
+  day: 'calendar.day',
+  agenda: 'calendar.agenda',
+  gantt: 'calendar.gantt',
+}
 
 export default function CalendarPage() {
   const { darkMode, projects: contextProjects, activeOrgId } = useApp()
@@ -380,7 +391,7 @@ export default function CalendarPage() {
 
   /* ── Formats ── */
   const calFormats = useMemo(() => ({
-    weekdayFormat: (date) => ['Dg','Dl','Dm','Dc','Dj','Dv','Ds'][date.getDay()],
+    weekdayFormat: (date) => moment(date).locale(currentMomentLocale).format('dd'),
     dayFormat:   (date) => moment(date).locale(currentMomentLocale).format('D'),
     monthHeaderFormat: (date) => {
       const s = moment(date).locale(currentMomentLocale).format('MMMM YYYY')
@@ -408,7 +419,7 @@ export default function CalendarPage() {
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-      <Header title={<span className="page-title-with-icon"><CalendarIcon size={22} /> Calendari</span>} />
+      <Header title={<span className="page-title-with-icon"><CalendarIcon size={22} /> {t('calendar.title', 'Calendari')}</span>} />
 
       <div style={{ padding: isMobile ? '16px' : '24px 32px', overflowY: 'auto', flex: 1 }}>
 
@@ -417,9 +428,9 @@ export default function CalendarPage() {
 
           {/* Navigation */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <button onClick={goPrev} style={navBtnStyle(darkMode)} title="Anterior"><ChevronLeft size={16} /></button>
-            <button onClick={goToday} style={{ ...navBtnStyle(darkMode), padding: '5px 12px', fontWeight: 600, fontSize: 13 }}>Avui</button>
-            <button onClick={goNext} style={navBtnStyle(darkMode)} title="Següent"><ChevronRight size={16} /></button>
+            <button onClick={goPrev} style={navBtnStyle(darkMode)} title={t('calendar.previous', 'Anterior')}><ChevronLeft size={16} /></button>
+            <button onClick={goToday} style={{ ...navBtnStyle(darkMode), padding: '5px 12px', fontWeight: 600, fontSize: 13 }}>{t('calendar.today', 'Avui')}</button>
+            <button onClick={goNext} style={navBtnStyle(darkMode)} title={t('calendar.next', 'Següent')}><ChevronRight size={16} /></button>
           </div>
 
           {/* Current period label */}
@@ -447,7 +458,7 @@ export default function CalendarPage() {
                 }}
               >
                 {v === 'gantt' && <BarChart2 size={13} />}
-                {VIEW_LABELS[v]}
+                {t(VIEW_LABEL_KEYS[v], v)}
               </button>
             ))}
           </div>
@@ -467,7 +478,7 @@ export default function CalendarPage() {
                 color: (filterProjectId) ? 'var(--c-cta-500)' : undefined
               }}
             >
-              <Filter size={14} /> Filtres{filterProjectId ? ' ·' : ''}
+              <Filter size={14} /> {t('calendar.filtersBtn', 'Filtres')}{filterProjectId ? ' ·' : ''}
             </button>
 
             {showFilters && (
@@ -478,19 +489,19 @@ export default function CalendarPage() {
                 boxShadow: darkMode ? '0 8px 24px rgba(0,0,0,0.4)' : '0 8px 24px rgba(0,0,0,0.12)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                  <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-1)' }}>Filtres</span>
+                  <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-1)' }}>{t('calendar.filtersBtn', 'Filtres')}</span>
                   <button onClick={() => setShowFilters(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-2)' }}>
                     <X size={16} />
                   </button>
                 </div>
 
-                <label style={filterLabelStyle}>Projecte</label>
+                <label style={filterLabelStyle}>{t('calendar.project', 'Projecte')}</label>
                 <select
                   value={filterProjectId || ''}
                   onChange={(e) => setFilterProjectId(e.target.value || null)}
                   style={filterSelectStyle(darkMode)}
                 >
-                  <option value="">Tots els projectes</option>
+                  <option value="">{t('calendar.allProjects', 'Tots els projectes')}</option>
                   {projects.map(p => (
                     <option key={p.id} value={p.id}>{p.name}{p.code ? ` (${p.code})` : ''}</option>
                   ))}
@@ -502,7 +513,7 @@ export default function CalendarPage() {
                     onClick={() => { setFilterProjectId(null); setShowFilters(false) }}
                     style={{ marginTop: 12, fontSize: 12, color: 'var(--c-cta-500)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}
                   >
-                    Netejar filtres
+                    {t('calendar.clearFilters', 'Netejar filtres')}
                   </button>
                 )}
               </div>
@@ -511,12 +522,12 @@ export default function CalendarPage() {
         </div>
 
         {/* ── Legend ── */}
-        <LegendStrip activeFilter={filterType} onFilter={setFilterType} darkMode={darkMode} />
+        <LegendStrip activeFilter={filterType} onFilter={setFilterType} darkMode={darkMode} t={t} />
 
         {/* ── Content ── */}
         {loading && (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300, color: 'var(--text-2)', fontSize: 14 }}>
-            Carregant esdeveniments…
+            {t('calendar.loadingEvents', 'Carregant esdeveniments…')}
           </div>
         )}
 
@@ -532,6 +543,8 @@ export default function CalendarPage() {
             dateRange={ganttRange}
             darkMode={darkMode}
             onEventClick={handleEventClick}
+            t={t}
+            locale={i18n.language}
           />
         )}
 
@@ -557,11 +570,18 @@ export default function CalendarPage() {
               culture={currentMomentLocale}
               formats={calFormats}
               messages={{
-                next: 'Seg', previous: 'Ant', today: 'Avui',
-                month: 'Mes', week: 'Setmana', day: 'Dia', agenda: 'Agenda',
-                date: 'Data', time: 'Hora', event: 'Esdeveniment',
-                noEventsInRange: 'Cap esdeveniment en aquest rang.',
-                showMore: (n) => `+${n} més`
+                next: t('calendar.rbcNext', 'Seg'),
+                previous: t('calendar.rbcPrev', 'Ant'),
+                today: t('calendar.today', 'Avui'),
+                month: t('calendar.month', 'Mes'),
+                week: t('calendar.week', 'Setmana'),
+                day: t('calendar.day', 'Dia'),
+                agenda: t('calendar.agenda', 'Agenda'),
+                date: t('calendar.date', 'Data'),
+                time: t('calendar.time', 'Hora'),
+                event: t('calendar.event', 'Esdeveniment'),
+                noEventsInRange: t('calendar.noEventInRange', 'Cap esdeveniment en aquest rang.'),
+                showMore: (n) => t('calendar.rbcShowMore', { count: n, defaultValue: `+${n} més` })
               }}
               key={i18n.language}
             />

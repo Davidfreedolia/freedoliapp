@@ -36,7 +36,8 @@
     "and": "i",
     "more": "més",
     "actions": "Accions",
-    "saving": "Guardant…"
+    "saving": "Guardant…",
+    "notesOptional": "Notes (opcional)"
   },
   "shell": {
     "notFoundTitle": "Pàgina no trobada",
@@ -1346,7 +1347,30 @@
     "taskNotFound": "Tasca no trobada",
     "taskRescheduled": "Tasca reprogramada",
     "rescheduleError": "Error al reprogramar la tasca",
-    "showStickyDerived": "Mostrar tasques de notes"
+    "showStickyDerived": "Mostrar tasques de notes",
+    "gantt": "Gantt",
+    "filtersBtn": "Filtres",
+    "clearFilters": "Netejar filtres",
+    "loadingEvents": "Carregant esdeveniments…",
+    "noEventInRange": "Cap event en aquest rang.",
+    "noProjectFallback": "Sense projecte",
+    "projectColumn": "Projecte",
+    "typeLabel": "Tipus",
+    "allTypes": "Tots",
+    "rbcNext": "Seg",
+    "rbcPrev": "Ant",
+    "rbcShowMore": "+{{count}} més",
+    "types": {
+      "milestone": "Fita",
+      "meeting": "Reunió",
+      "deadline": "Límit",
+      "delivery": "Lliurament",
+      "production": "Producció",
+      "sample": "Mostres",
+      "launch": "Llançament",
+      "review": "Revisió",
+      "other": "Altre"
+    }
   },
   "stickyNotes": {
     "title": "Notes",
@@ -1639,7 +1663,29 @@
       "empty": "Cap tasca coincideix amb els filtres.",
       "openEntity": "Obrir entitat",
       "viewAll": "Veure tot",
-      "openDecision": "Obrir decisió"
+      "openDecision": "Obrir decisió",
+      "tabList": "Llista",
+      "tabCalendar": "Calendari",
+      "newTask": "Nova tasca",
+      "tasksOpen": "{{count}} tasca oberta",
+      "tasksOpen_plural": "{{count}} tasques obertes",
+      "showCompleted": "Veure completades",
+      "hideCompleted": "Ocultar completades",
+      "loading": "Carregant…",
+      "allCaughtUpTitle": "Tot al dia!",
+      "allCaughtUpBody": "No hi ha tasques pendents.",
+      "groupOverdue": "Vencudes",
+      "groupToday": "Avui",
+      "groupUpcoming": "Properes",
+      "groupCompleted": "Completades",
+      "dueToday": "Avui",
+      "dueTomorrow": "Demà",
+      "priorityHigh": "Alta",
+      "priorityLow": "Baixa",
+      "snooze1Day": "Ajornar 1 dia",
+      "snooze3Days": "Ajornar 3 dies",
+      "postponed": "Ajornada {{days}}d",
+      "sourceFallback": "Manual"
     }
   },
   "decisionsDropdown": {
