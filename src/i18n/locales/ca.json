@@ -591,6 +591,65 @@
         "cta": "Obrir negociació"
       }
     },
+    "compare": {
+      "eyebrow": "Comparativa honesta",
+      "title": "En què som diferents (i en què no)",
+      "sub": "Helium 10 és el millor cercador de productes. Sellerboard és la millor calculadora de P&L. Nosaltres som la cola operativa que tu muntes amb Notion + Asana + Slack avui.",
+      "feature": "Feature",
+      "tu": "Tu",
+      "aria": {
+        "yes": "Sí",
+        "no": "No",
+        "partial": "Parcial"
+      },
+      "row": {
+        "workflow": "Pipeline operatiu end-to-end (research → live)",
+        "byok": "BYOK IA · cap quota per anàlisi",
+        "refund": "Recuperació de diners FBA automàtica",
+        "quotes": "Comparativa IA de pressupostos de proveïdors",
+        "po": "PO amb signatura digital comprador/proveïdor",
+        "listing": "Optimitzador de listing amb IA",
+        "keywords": "Recerca de keywords",
+        "productDb": "Base de dades de productes (milions d'ASINs)",
+        "pnl": "P&L per SKU amb FBA fees reals",
+        "decisions": "Motor de decisions · safata diària",
+        "langs": "Multi-idioma natiu (ca / es / en)",
+        "chrome": "Extensió Chrome",
+        "gdpr": "GDPR Art. 17/20 nativa · regió UE",
+        "startPrice": "Preu inicial"
+      },
+      "footnote": "«Parcial» = la funció existeix de forma limitada en aquell producte. Per exemple, Helium 10 té un sistema bàsic de detecció de reembossaments però no està connectat al flux de gestió de la teva marca; nosaltres sí."
+    },
+    "builtFor": {
+      "eyebrow": "Qui ho fa servir",
+      "title": "Pensat per a marques FBA que ja venen",
+      "sub": "Si encara estàs cercant el teu primer producte, queda't a Helium 10. Si ja tens marca i necessites operar-la millor, llegeix:",
+      "p1": {
+        "title": "Propietari de marca FBA",
+        "sku": "5–20 SKUs · €100k–500k/any",
+        "body": "Tens producte i ven, però vius entre Sheets, WhatsApp amb fàbrica i 6 pestanyes obertes. Volem ser la teva pantalla única: pipeline, finances, decisions i IA."
+      },
+      "p2": {
+        "title": "Agència o consultor FBA",
+        "sku": "Gestiona 3–15 comptes",
+        "body": "Cada client al seu workspace, cap fuga de dades entre tenants. Decisions IA que pots presentar al client amb evidència. Reporting blanc-etiqueta al pla Agency."
+      },
+      "p3": {
+        "title": "Operacions / cofounder",
+        "sku": "Equip 2–6 persones",
+        "body": "Roles, signatures digitals als POs, refund recovery automàtic. El sistema que el teu fundador exigirà quan creixeu prou per separar funcions."
+      },
+      "founderName": "David — fundador de Freedoliapp",
+      "betaBadge": "En beta tancada",
+      "founderQuote": "He estat venent a Amazon prou anys per cansar-me de saltar entre 10 eines. Freedoliapp és la plataforma que volia tenir: pipeline operatiu + IA que treballa amb la teva clau + recuperació de diners automàtica. Estem en beta, no et venc fum. Si ets un dels primers 20 a entrar, parles directament amb mi.",
+      "contactCta": "Escriu-me directament"
+    },
+    "trust": {
+      "gdpr":   "GDPR · Art. 17 + 20",
+      "byok":   "BYOK · cap cost ocult",
+      "cancel": "Cancel·la quan vulguis",
+      "stripe": "Stripe live · pagaments segurs"
+    },
     "hero": {
       "title": "Gestiona les teves operacions d'Amazon des d'un sol lloc.",
       "subtitle": "El sistema operatiu per a negocis de producte que gestionen proveïdors, comandes de compra, inventari i benefici.",
@@ -915,26 +974,30 @@
     },
     "faq": {
       "label": "FAQ",
-      "title": "Preguntes freqüents",
+      "title": "Preguntes que ens fan abans de pagar",
       "q1": {
-        "q": "Hi ha trial gratuït?",
-        "a": "Sí — tots els plans inclouen 14 dies de prova gratuïta. Sense targeta de crèdit."
+        "q": "Què vol dir «BYOK» i quant em costa la IA?",
+        "a": "BYOK = Bring Your Own Key. Connectes el teu compte d'Anthropic / OpenAI / Gemini / Mistral / Groq o Ollama (local, gratuït). La IA consumeix el teu pressupost — típicament €5-25/mes amb ús normal. Nosaltres no posem cap quota per anàlisi i no marquem cap marge. Si encara no tens compte d'IA, també tens 5 anàlisis gratis al mes amb la nostra clau del sistema."
       },
       "q2": {
-        "q": "Puc canviar de pla en qualsevol moment?",
-        "a": "Sí, els canvis de pla s'apliquen immediatament. Es fa un ajust prorratejat a la facturació."
+        "q": "Són segures les meves dades d'Amazon i de proveïdors?",
+        "a": "Dades a Supabase (regió UE, infraestructura ISO 27001). Tot xifrat en trànsit i en repòs. Aïllament per fila (RLS) per workspace — ni nosaltres podem barrejar dades entre clients. Compliment GDPR Art. 17 (eliminació) i Art. 20 (portabilitat) des de Settings. Mai venem dades, mai entrenem models amb les teves dades."
       },
       "q3": {
-        "q": "Funciona amb diversos marketplaces d'Amazon?",
-        "a": "Sí. Connecta ES, DE, FR, IT, UK, US i més en un únic workspace. Les dades s'unifiquen a tots els marketplaces."
+        "q": "En què és diferent de Helium 10 o Sellerboard?",
+        "a": "Helium 10 és el millor cercador de productes. Sellerboard és la millor calculadora de P&L. Nosaltres no competim amb cap dels dos. Som la plataforma operativa que tu muntes avui amb Notion + Asana + Sheets + Slack: pipeline end-to-end, gestió de proveïdors, PO amb signatures, decisions, refund recovery automàtica i IA integrada al teu flux. Es complementa amb H10 (pots BYOK Keepa) en comptes de reemplaçar-lo."
       },
       "q4": {
-        "q": "Què necessito per connectar Amazon SP-API?",
-        "a": "Un compte de Seller Central amb accés API. La configuració tarda uns 5 minuts amb l'assistent guiat. Disponible als plans Growth i Scale."
+        "q": "Funciona si venc fora de la UE (US, MX, UK, JP...)?",
+        "a": "Sí. Suportem 12 marketplaces Amazon (ES, US, UK, DE, FR, IT, NL, PL, SE, MX, CA, BR). La interfície està en 3 idiomes (ca/es/en) i les dades es processen a la regió UE. Els reports SPAPI funcionen amb qualsevol marketplace on tinguis accés."
       },
       "q5": {
-        "q": "Són segures les meves dades?",
-        "a": "Les dades s'emmagatzemen a Supabase (regió EU, infraestructura ISO 27001). Totes les connexions estan xifrades i la seguretat s'aplica a nivell de fila per organització."
+        "q": "Què passa si cancel·lo? Perdré totes les meves dades?",
+        "a": "No. Pots cancel·lar des de Settings → Facturació en qualsevol moment, sense penalitzacions. Abans d'esborrar res, exportes TOTES les teves dades amb un sol clic (Art. 20 GDPR) en CSV + JSON. Et donem 30 dies addicionals després de la cancel·lació per recuperar dades si canvies d'opinió."
+      },
+      "q6": {
+        "q": "Quant temps trigaré a tenir-ho funcionant?",
+        "a": "Crear compte: 30 segons. Connectar Amazon SP-API: 5 minuts amb assistent guiat. Importar dades de Sellerboard o un Excel: 2-3 minuts. Configurar la teva clau d'IA: 1 minut. En menys de 15 minuts pots tenir un projecte amb el teu primer pressupost de proveïdor analitzat per IA."
       }
     },
     "cta": {

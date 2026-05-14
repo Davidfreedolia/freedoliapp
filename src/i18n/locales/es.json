@@ -591,6 +591,65 @@
         "cta": "Abrir negociación"
       }
     },
+    "compare": {
+      "eyebrow": "Comparativa honesta",
+      "title": "En qué somos diferentes (y en qué no)",
+      "sub": "Helium 10 es el mejor buscador de productos. Sellerboard es la mejor calculadora de P&L. Nosotros somos el pegamento operativo que montas hoy con Notion + Asana + Slack.",
+      "feature": "Feature",
+      "tu": "Tú",
+      "aria": {
+        "yes": "Sí",
+        "no": "No",
+        "partial": "Parcial"
+      },
+      "row": {
+        "workflow": "Pipeline operativo end-to-end (research → live)",
+        "byok": "BYOK IA · sin cuotas por análisis",
+        "refund": "Recuperación de dinero FBA automática",
+        "quotes": "Comparativa IA de presupuestos de proveedores",
+        "po": "PO con firma digital comprador/proveedor",
+        "listing": "Optimizador de listing con IA",
+        "keywords": "Búsqueda de keywords",
+        "productDb": "Base de datos de productos (millones de ASINs)",
+        "pnl": "P&L por SKU con FBA fees reales",
+        "decisions": "Motor de decisiones · bandeja diaria",
+        "langs": "Multi-idioma nativo (ca / es / en)",
+        "chrome": "Extensión Chrome",
+        "gdpr": "GDPR Art. 17/20 nativa · región UE",
+        "startPrice": "Precio inicial"
+      },
+      "footnote": "«Parcial» = la función existe de forma limitada en ese producto. Por ejemplo, Helium 10 tiene un sistema básico de detección de reembolsos pero no está conectado al flujo de gestión de tu marca; nosotros sí."
+    },
+    "builtFor": {
+      "eyebrow": "Quién lo usa",
+      "title": "Pensado para marcas FBA que ya venden",
+      "sub": "Si aún estás buscando tu primer producto, quédate en Helium 10. Si ya tienes marca y necesitas operarla mejor, sigue leyendo:",
+      "p1": {
+        "title": "Propietario de marca FBA",
+        "sku": "5–20 SKUs · €100k–500k/año",
+        "body": "Tienes producto y vende, pero vives entre Sheets, WhatsApp con la fábrica y 6 pestañas abiertas. Queremos ser tu pantalla única: pipeline, finanzas, decisiones e IA."
+      },
+      "p2": {
+        "title": "Agencia o consultor FBA",
+        "sku": "Gestiona 3–15 cuentas",
+        "body": "Cada cliente en su workspace, sin fugas de datos entre tenants. Decisiones IA que puedes presentar al cliente con evidencia. Reporting white-label en el plan Agency."
+      },
+      "p3": {
+        "title": "Operaciones / cofounder",
+        "sku": "Equipo 2–6 personas",
+        "body": "Roles, firmas digitales en las POs, refund recovery automático. El sistema que tu fundador exigirá cuando crezcáis lo suficiente para separar funciones."
+      },
+      "founderName": "David — fundador de Freedoliapp",
+      "betaBadge": "En beta cerrada",
+      "founderQuote": "He estado vendiendo en Amazon suficientes años para cansarme de saltar entre 10 herramientas. Freedoliapp es la plataforma que quería tener: pipeline operativo + IA que trabaja con tu clave + recuperación de dinero automática. Estamos en beta, no te vendo humo. Si eres uno de los primeros 20 en entrar, hablas directamente conmigo.",
+      "contactCta": "Escríbeme directamente"
+    },
+    "trust": {
+      "gdpr":   "GDPR · Art. 17 + 20",
+      "byok":   "BYOK · sin costes ocultos",
+      "cancel": "Cancela cuando quieras",
+      "stripe": "Stripe live · pagos seguros"
+    },
     "hero": {
       "title": "Gestiona tus operaciones de Amazon desde un solo lugar.",
       "subtitle": "El sistema operativo para negocios de producto que gestionan proveedores, pedidos de compra, inventario y beneficio.",
@@ -915,26 +974,30 @@
     },
     "faq": {
       "label": "FAQ",
-      "title": "Preguntas frecuentes",
+      "title": "Preguntas que nos hacen antes de pagar",
       "q1": {
-        "q": "¿Hay trial gratuito?",
-        "a": "Sí — todos los planes incluyen 14 días de prueba gratuita. Sin tarjeta de crédito."
+        "q": "¿Qué significa «BYOK» y cuánto me cuesta la IA?",
+        "a": "BYOK = Bring Your Own Key. Conectas tu cuenta de Anthropic / OpenAI / Gemini / Mistral / Groq u Ollama (local, gratis). La IA consume tu presupuesto — típicamente €5-25/mes con uso normal. Nosotros no ponemos cuotas por análisis y no marcamos margen. Si aún no tienes cuenta de IA, también tienes 5 análisis gratis al mes con nuestra clave del sistema."
       },
       "q2": {
-        "q": "¿Puedo cambiar de plan en cualquier momento?",
-        "a": "Sí, los cambios de plan se aplican de inmediato. Se realiza un ajuste prorrateado en la facturación."
+        "q": "¿Mis datos de Amazon y proveedores están seguros?",
+        "a": "Datos en Supabase (región UE, infraestructura ISO 27001). Todo cifrado en tránsito y en reposo. Aislamiento por fila (RLS) por workspace — ni nosotros podemos mezclar datos entre clientes. Cumplimiento GDPR Art. 17 (eliminación) y Art. 20 (portabilidad) desde Settings. Nunca vendemos datos, nunca entrenamos modelos con tus datos."
       },
       "q3": {
-        "q": "¿Funciona con varios marketplaces de Amazon?",
-        "a": "Sí. Conecta ES, DE, FR, IT, UK, US y más en un único workspace. Los datos se unifican en todos los marketplaces."
+        "q": "¿En qué se diferencia de Helium 10 o Sellerboard?",
+        "a": "Helium 10 es el mejor buscador de productos. Sellerboard es la mejor calculadora de P&L. Nosotros no competimos con ninguno. Somos la plataforma operativa que montas hoy con Notion + Asana + Sheets + Slack: pipeline end-to-end, gestión de proveedores, PO con firmas, decisiones, refund recovery automático e IA integrada en tu flujo. Se complementa con H10 (puedes BYOK Keepa) en vez de reemplazarlo."
       },
       "q4": {
-        "q": "¿Qué necesito para conectar Amazon SP-API?",
-        "a": "Una cuenta de Seller Central con acceso API. La configuración tarda unos 5 minutos con el asistente guiado. Disponible en los planes Growth y Scale."
+        "q": "¿Funciona si vendo fuera de la UE (US, MX, UK, JP...)?",
+        "a": "Sí. Soportamos 12 marketplaces Amazon (ES, US, UK, DE, FR, IT, NL, PL, SE, MX, CA, BR). La interfaz está en 3 idiomas (ca/es/en) y los datos se procesan en la región UE. Los reports SPAPI funcionan con cualquier marketplace al que tengas acceso."
       },
       "q5": {
-        "q": "¿Son seguros mis datos?",
-        "a": "Los datos se almacenan en Supabase (región EU, infraestructura ISO 27001). Todas las conexiones están cifradas y la seguridad se aplica a nivel de fila por organización."
+        "q": "¿Qué pasa si cancelo? ¿Perderé todos mis datos?",
+        "a": "No. Puedes cancelar desde Settings → Facturación en cualquier momento, sin penalizaciones. Antes de borrar nada, exportas TODOS tus datos con un clic (Art. 20 GDPR) en CSV + JSON. Te damos 30 días adicionales tras la cancelación para recuperar datos si cambias de opinión."
+      },
+      "q6": {
+        "q": "¿Cuánto tardaré en tenerlo funcionando?",
+        "a": "Crear cuenta: 30 segundos. Conectar Amazon SP-API: 5 minutos con asistente guiado. Importar datos de Sellerboard o un Excel: 2-3 minutos. Configurar tu clave de IA: 1 minuto. En menos de 15 minutos puedes tener un proyecto con tu primer presupuesto de proveedor analizado por IA."
       }
     },
     "cta": {

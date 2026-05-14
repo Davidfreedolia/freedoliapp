@@ -27,11 +27,12 @@ import {
 } from 'lucide-react'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '../styles/landing.css'
-import { TestimonialsCarousel } from '../components/landing/TestimonialsCarousel'
 import AiSuiteSection from '../components/landing/AiSuiteSection'
 import HeroMockup from '../components/landing/HeroMockup'
 import VisualMockupOps from '../components/landing/VisualMockupOps'
 import VisualMockupAi from '../components/landing/VisualMockupAi'
+import ComparisonSection from '../components/landing/ComparisonSection'
+import BuiltForSection from '../components/landing/BuiltForSection'
 
 /* ─── Static data ─────────────────────────────────────────────────────────── */
 
@@ -186,7 +187,7 @@ export default function Landing() {
   ]
 
   /* ── FAQ ── */
-  const FAQS = [1,2,3,4,5].map(i => ({
+  const FAQS = [1,2,3,4,5,6].map(i => ({
     q: t(`landing.faq.q${i}.q`),
     a: t(`landing.faq.q${i}.a`),
   }))
@@ -509,8 +510,12 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── 8. TESTIMONIALS CAROUSEL (CANVI 5) ──────────────────────────── */}
-      <TestimonialsCarousel />
+      {/* ── 7.5. COMPARISON vs Helium 10 / Sellerboard ─────────────────── */}
+      <ComparisonSection />
+
+      {/* ── 8. BUILT FOR — replaces the old stock-photo testimonials with
+              honest personas + founder note + beta-status badge ───── */}
+      <BuiltForSection />
 
       {/* ── 9. PRICING ───────────────────────────────────────────────────── */}
       <section className="py-5" id="pricing" style={{ background: '#F6F8F3' }}>
@@ -616,6 +621,41 @@ export default function Landing() {
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 10.5. TRUST BAR — risk-reversal pills above the final CTA. ─── */}
+      <section style={{ padding: '24px 0 0' }}>
+        <div className="container">
+          <div style={{
+            maxWidth: 980, margin: '0 auto',
+            display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center',
+            gap: 12,
+          }}>
+            {[
+              { iconBg: 'rgba(63,191,154,0.16)', iconColor: 'var(--success-ink, #2B7A66)', icon: '✓', key: 'landing.trust.gdpr',   defaultText: 'GDPR · Art. 17 + 20' },
+              { iconBg: 'rgba(110,203,195,0.18)', iconColor: 'var(--brand-1, #1F5F63)',     icon: '⚡', key: 'landing.trust.byok',   defaultText: 'BYOK · cap cost ocult' },
+              { iconBg: 'rgba(244,226,122,0.20)', iconColor: '#7A5F22',                      icon: '↺', key: 'landing.trust.cancel', defaultText: 'Cancel·la quan vulguis' },
+              { iconBg: 'rgba(31,95,99,0.10)',    iconColor: 'var(--brand-1, #1F5F63)',     icon: '🔒', key: 'landing.trust.stripe', defaultText: 'Stripe live · pagaments segurs' },
+            ].map((chip, i) => (
+              <span key={i} style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                padding: '8px 14px 8px 10px', borderRadius: 999,
+                background: 'var(--surface-bg, #fff)',
+                border: '1px solid rgba(31,95,99,0.12)',
+                boxShadow: '0 4px 12px rgba(15,36,38,0.05)',
+                fontSize: 13, fontWeight: 600, color: '#243333',
+              }}>
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  width: 22, height: 22, borderRadius: '50%',
+                  background: chip.iconBg, color: chip.iconColor,
+                  fontSize: 12, fontWeight: 700,
+                }}>{chip.icon}</span>
+                {t(chip.key, chip.defaultText)}
+              </span>
+            ))}
           </div>
         </div>
       </section>
