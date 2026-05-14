@@ -19,7 +19,14 @@ Llista viva de coses que **només pots fer tu** (no es poden fer des de codi). C
 > Mentrestant: 5-10 beta testers gratis ≠ activitat econòmica. **Cap pagament real** fins a aquí.
 
 ### Re-deploy Supabase Edge Functions (rate limiting + Stripe tax pre-wire)
-Necessari **immediatament** perquè el codi nou de rate-limiting + el flag de Stripe automatic_tax estigui actiu. Vercel només desplega el frontend; les Functions són un deploy a part.
+> ✅ **Fet el 2026-05-14 via Supabase MCP.** Estat actual:
+> - `stripe-checkout-session` → v8 ACTIVE
+> - `stripe-portal-session` → v7 ACTIVE
+> - `asin-enrich` → v13 ACTIVE
+> - `ai-research-analyst` → v5 ACTIVE
+> - `ai-quote-analyst` → v2 ACTIVE (creada nova)
+>
+> Si en el futur cal tornar a desplegar manualment després d'un canvi al codi, fes servir l'opció A o B de sota.
 
 Opció A — via Supabase CLI (instal·lat? `npm i -g supabase`):
 ```
@@ -29,11 +36,11 @@ supabase functions deploy stripe-checkout-session
 supabase functions deploy stripe-portal-session
 supabase functions deploy ai-research-analyst
 supabase functions deploy asin-enrich
-# ai-quote-analyst: ✅ desplegat via MCP el 2026-05-14 (v2 ACTIVE)
+supabase functions deploy ai-quote-analyst
 ```
 
 Opció B — manualment al dashboard de Supabase:
-- Edge Functions → cada una de les 4 pendents → "Deploy" amb el codi més recent
+- Edge Functions → cada funció → "Deploy" amb el codi més recent
 
 Després verifica que cap usuari diu que les seves crides fallen amb 429 inesperat — els límits són:
 - Stripe checkout: 5/min/user
