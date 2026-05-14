@@ -1,17 +1,19 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { 
-  Plus, 
-  Trash2, 
-  Upload, 
-  FileText, 
-  X, 
-  Save, 
-  AlertTriangle, 
+import {
+  Plus,
+  Trash2,
+  Upload,
+  FileText,
+  X,
+  Save,
+  AlertTriangle,
   TrendingUp,
-  DollarSign
+  DollarSign,
+  Sparkles
 } from 'lucide-react'
+import { analyzeQuotesWithAi } from '../lib/ai/aiProvider'
 import { 
   getSupplierQuotes, 
   createSupplierQuote, 
@@ -55,6 +57,11 @@ export default function QuotesSection({ projectId, darkMode }) {
   // eslint-disable-next-line no-unused-vars
   const [uploadingFile, setUploadingFile] = useState(false)
   const [manualDraft, setManualDraft] = useState(null)
+  // AI quote analysis state
+  const [aiAnalysis, setAiAnalysis] = useState(null)
+  const [aiAnalyzing, setAiAnalyzing] = useState(false)
+  const [aiError, setAiError] = useState(null)
+  const [aiPanelOpen, setAiPanelOpen] = useState(false)
   
   const [newQuote, setNewQuote] = useState({
     supplier_id: '',
@@ -297,6 +304,56 @@ export default function QuotesSection({ projectId, darkMode }) {
       lead_time_days: '',
       payment_terms: ''
     })
+  }
+
+  /**
+   * Trigger the BYOK AI to compare all real (non-demo) supplier quotes for
+   * this project. Falls back to a deterministic verdict if the org has no
+   * AI provider configured. The edge function rate-limits per-user.
+   */
+  const handleAnalyzeWithAi = async () => {
+    const realQuotes = (quotes || []).filter((q) => q?.id && !String(q.id).startsWith('demo-'))
+    if (realQuotes.length < 2) {
+      setAiError(t('quotesAi.errorNeedTwo', 'Necessites com a mínim 2 pressupostos per comparar.'))
+      setAiPanelOpen(true)
+      return
+    }
+    setAiAnalyzing(true)
+    setAiError(null)
+    setAiAnalysis(null)
+    setAiPanelOpen(true)
+    try {
+      const payload = {
+        project: {
+          id: projectId,
+          target_quantity: targetQuantity,
+          target_landed_cost: projectProfitability?.target_landed_cost ?? null,
+          currency: realQuotes[0]?.currency || 'USD',
+        },
+        quotes: realQuotes.map((q) => ({
+          id: q.id,
+          supplier_name: q.suppliers?.name || q.supplier_name_raw || null,
+          currency: q.currency || null,
+          incoterm: q.incoterm || null,
+          payment_terms: q.payment_terms || null,
+          moq: q.moq ?? null,
+          lead_time_days: q.lead_time_days ?? null,
+          notes: q.notes || null,
+          price_breaks: (q.supplier_quote_price_breaks || []).map((b) => ({
+            min_qty: b.min_qty ?? null,
+            unit_price: b.unit_price ?? null,
+          })),
+          shipping_estimate: q.shipping_estimate ?? null,
+        })),
+      }
+      const result = await analyzeQuotesWithAi(payload)
+      setAiAnalysis(result)
+    } catch (err) {
+      console.error('AI quote analysis failed:', err)
+      setAiError(err?.message || t('quotesAi.errorGeneric', "No s'ha pogut completar l'anàlisi."))
+    } finally {
+      setAiAnalyzing(false)
+    }
   }
 
   const handleSaveManualDraft = async () => {
@@ -998,12 +1055,47 @@ export default function QuotesSection({ projectId, darkMode }) {
 
         return (
         <div style={styles.comparisonSection}>
-          <h4 style={{
-            ...styles.comparisonTitle,
-            color: darkMode ? '#ffffff' : 'var(--text-1)'
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+            flexWrap: 'wrap',
+            marginBottom: 8
           }}>
-            Comparison (Qty: {targetQuantity})
-          </h4>
+            <h4 style={{
+              ...styles.comparisonTitle,
+              color: darkMode ? '#ffffff' : 'var(--text-1)',
+              margin: 0
+            }}>
+              Comparison (Qty: {targetQuantity})
+            </h4>
+            {quotesForTable.filter((q) => q?.id && !String(q.id).startsWith('demo-')).length >= 2 && (
+              <button
+                type="button"
+                onClick={handleAnalyzeWithAi}
+                disabled={aiAnalyzing}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '7px 14px',
+                  fontSize: 13,
+                  fontWeight: 600,
+                  borderRadius: 8,
+                  border: '1px solid var(--brand-1)',
+                  background: aiAnalyzing ? 'var(--surface-bg-2)' : 'var(--brand-1)',
+                  color: aiAnalyzing ? 'var(--text-2)' : '#fff',
+                  cursor: aiAnalyzing ? 'wait' : 'pointer',
+                  transition: 'opacity 0.15s'
+                }}
+                title={t('quotesAi.analyzeButton', 'Analitzar amb IA')}
+              >
+                <Sparkles size={14} />
+                {aiAnalyzing ? t('quotesAi.analyzing', 'Analitzant…') : t('quotesAi.analyzeButton', 'Analitzar amb IA')}
+              </button>
+            )}
+          </div>
           <table className="quotes-table">
             <thead>
               <tr>
@@ -1151,6 +1243,194 @@ export default function QuotesSection({ projectId, darkMode }) {
           <p style={{ color: darkMode ? 'var(--muted-1)' : 'var(--text-2)' }}>
             Encara no hi ha cotitzacions. Afegeix la primera per comparar.
           </p>
+        </div>
+      )}
+
+      {/* AI Verdict Panel */}
+      {aiPanelOpen && (
+        <div style={{
+          marginTop: 16,
+          padding: 16,
+          borderRadius: 12,
+          border: `1px solid var(--border-1)`,
+          background: darkMode ? '#15151f' : 'var(--surface-bg)',
+          boxShadow: 'var(--shadow-soft)'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+            marginBottom: 12
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Sparkles size={16} color="var(--brand-1)" />
+              <h4 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: darkMode ? '#fff' : 'var(--text-1)' }}>
+                {t('quotesAi.panelTitle', 'Veredicte IA')}
+              </h4>
+            </div>
+            <button
+              type="button"
+              onClick={() => setAiPanelOpen(false)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--text-2)',
+                cursor: 'pointer',
+                padding: 4,
+                display: 'inline-flex',
+                alignItems: 'center'
+              }}
+              title={t('quotesAi.close', 'Tancar')}
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          {aiAnalyzing && (
+            <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-2)', fontSize: 13 }}>
+              {t('quotesAi.analyzing', 'Analitzant pressupostos…')}
+            </div>
+          )}
+
+          {aiError && !aiAnalyzing && (
+            <div style={{
+              padding: 12,
+              borderRadius: 8,
+              background: 'rgba(229, 83, 83, 0.10)',
+              border: '1px solid rgba(229, 83, 83, 0.32)',
+              color: 'var(--danger-ink, #B0413F)',
+              fontSize: 13
+            }}>
+              {aiError}
+            </div>
+          )}
+
+          {aiAnalysis && !aiAnalyzing && !aiError && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, fontSize: 13, color: 'var(--text-1)' }}>
+              {/* Provider notice */}
+              <div style={{ fontSize: 11, color: 'var(--text-2)' }}>
+                {aiAnalysis._meta?.source === 'fallback'
+                  ? t('quotesAi.providerFallback', 'Anàlisi deterministica (sense IA).')
+                  : aiAnalysis._meta?.provider_source === 'user'
+                    ? t('quotesAi.providerUser', { provider: aiAnalysis._meta.provider, defaultValue: 'Generat amb el teu proveïdor d\'IA.' })
+                    : t('quotesAi.providerSystem', 'Generat amb el proveïdor d\'IA del sistema.')}
+              </div>
+
+              {/* Summary */}
+              {aiAnalysis.verdict?.summary && (
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>
+                    {t('quotesAi.sectionSummary', 'Resum executiu')}
+                  </div>
+                  <p style={{ margin: 0, lineHeight: 1.5 }}>{aiAnalysis.verdict.summary}</p>
+                </div>
+              )}
+
+              {/* Ranking */}
+              {Array.isArray(aiAnalysis.ranking) && aiAnalysis.ranking.length > 0 && (
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>
+                    {t('quotesAi.sectionRanking', 'Rànquing')}
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {[...aiAnalysis.ranking].sort((a, b) => (b.score ?? 0) - (a.score ?? 0)).map((r, idx) => (
+                      <div
+                        key={r.quote_id || idx}
+                        style={{
+                          padding: 10,
+                          borderRadius: 8,
+                          background: 'var(--surface-bg-2)',
+                          border: `1px solid var(--border-1)`,
+                          borderLeft: `3px solid ${idx === 0 ? 'var(--success-1)' : 'var(--border-1)'}`
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+                          <strong style={{ fontSize: 13 }}>{r.supplier_name || '—'}</strong>
+                          {r.score != null && (
+                            <span style={{ fontSize: 11, color: 'var(--text-2)' }}>
+                              {t('quotesAi.score', 'Puntuació')}: <strong style={{ color: idx === 0 ? 'var(--success-ink, #2B7A66)' : 'var(--text-1)' }}>{r.score}/100</strong>
+                            </span>
+                          )}
+                        </div>
+                        {r.landed_cost_per_unit_estimate != null && Number.isFinite(Number(r.landed_cost_per_unit_estimate)) && (
+                          <div style={{ fontSize: 11, color: 'var(--text-2)', marginTop: 4 }}>
+                            {t('quotesAi.landedCost', 'Cost aproximat per unitat')}: <strong>{Number(r.landed_cost_per_unit_estimate).toFixed(2)} {r.currency || ''}</strong>
+                          </div>
+                        )}
+                        {Array.isArray(r.strengths) && r.strengths.length > 0 && (
+                          <div style={{ marginTop: 6, fontSize: 12 }}>
+                            <span style={{ color: 'var(--success-ink, #2B7A66)', fontWeight: 600 }}>✓ {t('quotesAi.strengths', 'Punts forts')}: </span>
+                            {r.strengths.join(' · ')}
+                          </div>
+                        )}
+                        {Array.isArray(r.weaknesses) && r.weaknesses.length > 0 && (
+                          <div style={{ marginTop: 4, fontSize: 12 }}>
+                            <span style={{ color: 'var(--danger-ink, #B0413F)', fontWeight: 600 }}>✗ {t('quotesAi.weaknesses', 'Punts febles')}: </span>
+                            {r.weaknesses.join(' · ')}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Risks */}
+              {Array.isArray(aiAnalysis.risks) && aiAnalysis.risks.length > 0 && (
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>
+                    {t('quotesAi.sectionRisks', 'Riscos detectats')}
+                  </div>
+                  <ul style={{ margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    {aiAnalysis.risks.map((risk, idx) => (
+                      <li key={idx} style={{ fontSize: 12 }}>
+                        <strong style={{
+                          color: risk.severity === 'high' ? 'var(--danger-ink, #B0413F)'
+                            : risk.severity === 'medium' ? 'var(--warning-ink, #7A5F22)'
+                            : 'var(--text-2)'
+                        }}>
+                          [{risk.severity || 'low'}]
+                        </strong>{' '}
+                        {risk.description}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Negotiation levers */}
+              {Array.isArray(aiAnalysis.negotiation_levers) && aiAnalysis.negotiation_levers.length > 0 && (
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>
+                    {t('quotesAi.sectionLevers', 'Palanques de negociació')}
+                  </div>
+                  <ul style={{ margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    {aiAnalysis.negotiation_levers.map((lv, idx) => (
+                      <li key={idx} style={{ fontSize: 12 }}>
+                        <strong>{lv.lever}</strong>
+                        {lv.expected_impact && <span style={{ color: 'var(--text-2)' }}> — {lv.expected_impact}</span>}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Next steps */}
+              {Array.isArray(aiAnalysis.next_steps) && aiAnalysis.next_steps.length > 0 && (
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>
+                    {t('quotesAi.sectionNextSteps', 'Pròxims passos')}
+                  </div>
+                  <ul style={{ margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    {aiAnalysis.next_steps.map((step, idx) => (
+                      <li key={idx} style={{ fontSize: 12 }}>{step}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 

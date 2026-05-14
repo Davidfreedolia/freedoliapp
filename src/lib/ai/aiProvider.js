@@ -186,3 +186,23 @@ export function findProviderDescriptor(id) {
     null
   )
 }
+
+/**
+ * Compare supplier quotes for one project via the `ai-quote-analyst` edge fn.
+ * The edge function resolves the org's BYOK provider automatically.
+ *
+ * @param {object} payload
+ * @param {{ id?: string, name?: string, target_quantity?: number|null, target_landed_cost?: number|null, currency?: string|null }} payload.project
+ * @param {Array<object>} payload.quotes — must contain at least 2 quotes
+ * @returns {Promise<{ verdict: object, ranking: Array, risks: Array, negotiation_levers: Array, next_steps: string[], _meta: object }>}
+ */
+export async function analyzeQuotesWithAi({ project, quotes }) {
+  if (!Array.isArray(quotes) || quotes.length < 2) {
+    throw new Error('need_at_least_two_quotes')
+  }
+  const { data, error } = await supabase.functions.invoke('ai-quote-analyst', {
+    body: { project: project ?? null, quotes },
+  })
+  if (error) throw error
+  return data
+}

@@ -3333,5 +3333,28 @@
   "crossWorkspace": {
     "label": "Super-admin mode",
     "message": "You are viewing a workspace ({{workspace}}) where you are not a member. Any action will affect another tenant's data."
+  },
+  "quotesAi": {
+    "analyzeButton": "Analyze with AI",
+    "analyzing": "Analyzing quotes…",
+    "errorGeneric": "Analysis failed. Please try again.",
+    "errorNeedTwo": "You need at least 2 quotes to compare.",
+    "panelTitle": "AI verdict",
+    "providerFallback": "Deterministic analysis (no AI). Connect your provider in Settings.",
+    "providerUser": "Generated with your AI provider ({{provider}}).",
+    "providerSystem": "Generated with the system AI provider.",
+    "sectionSummary": "Executive summary",
+    "sectionRanking": "Ranking",
+    "sectionRisks": "Risks detected",
+    "sectionLevers": "Negotiation levers",
+    "sectionNextSteps": "Next steps",
+    "score": "Score",
+    "strengths": "Strengths",
+    "weaknesses": "Weaknesses",
+    "landedCost": "Approx. cost per unit",
+    "noRisks": "No notable risks.",
+    "noLevers": "No additional levers identified.",
+    "noSteps": "No additional steps.",
+    "close": "Close"
   }
 }

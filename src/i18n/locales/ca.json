@@ -3533,5 +3533,28 @@
   "crossWorkspace": {
     "label": "Mode super-admin",
     "message": "Estàs veient un workspace ({{workspace}}) on no ets membre. Qualsevol acció afectarà dades d'un altre tenant."
+  },
+  "quotesAi": {
+    "analyzeButton": "Analitzar amb IA",
+    "analyzing": "Analitzant pressupostos…",
+    "errorGeneric": "No s'ha pogut completar l'anàlisi. Torna-ho a provar.",
+    "errorNeedTwo": "Necessites com a mínim 2 pressupostos per comparar.",
+    "panelTitle": "Veredicte IA",
+    "providerFallback": "Anàlisi deterministica (sense IA). Connecta el teu proveïdor a Settings.",
+    "providerUser": "Generat amb el teu proveïdor d'IA ({{provider}}).",
+    "providerSystem": "Generat amb el proveïdor d'IA del sistema.",
+    "sectionSummary": "Resum executiu",
+    "sectionRanking": "Rànquing",
+    "sectionRisks": "Riscos detectats",
+    "sectionLevers": "Palanques de negociació",
+    "sectionNextSteps": "Pròxims passos",
+    "score": "Puntuació",
+    "strengths": "Punts forts",
+    "weaknesses": "Punts febles",
+    "landedCost": "Cost aproximat per unitat",
+    "noRisks": "Cap risc destacat.",
+    "noLevers": "No s'identifiquen palanques addicionals.",
+    "noSteps": "Cap pas addicional.",
+    "close": "Tancar"
   }
 }

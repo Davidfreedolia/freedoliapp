@@ -29,10 +29,11 @@ supabase functions deploy stripe-checkout-session
 supabase functions deploy stripe-portal-session
 supabase functions deploy ai-research-analyst
 supabase functions deploy asin-enrich
+supabase functions deploy ai-quote-analyst
 ```
 
 Opció B — manualment al dashboard de Supabase:
-- Edge Functions → cada una de les 4 → "Deploy" amb el codi més recent
+- Edge Functions → cada una de les 5 → "Deploy" amb el codi més recent
 
 Després verifica que cap usuari diu que les seves crides fallen amb 429 inesperat — els límits són:
 - Stripe checkout: 5/min/user

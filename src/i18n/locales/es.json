@@ -3348,5 +3348,28 @@
   "crossWorkspace": {
     "label": "Modo super-admin",
     "message": "Estás viendo un workspace ({{workspace}}) donde no eres miembro. Cualquier acción afectará datos de otro tenant."
+  },
+  "quotesAi": {
+    "analyzeButton": "Analizar con IA",
+    "analyzing": "Analizando presupuestos…",
+    "errorGeneric": "No se ha podido completar el análisis. Inténtalo de nuevo.",
+    "errorNeedTwo": "Necesitas al menos 2 presupuestos para comparar.",
+    "panelTitle": "Veredicto IA",
+    "providerFallback": "Análisis determinista (sin IA). Conecta tu proveedor en Settings.",
+    "providerUser": "Generado con tu proveedor de IA ({{provider}}).",
+    "providerSystem": "Generado con el proveedor de IA del sistema.",
+    "sectionSummary": "Resumen ejecutivo",
+    "sectionRanking": "Ranking",
+    "sectionRisks": "Riesgos detectados",
+    "sectionLevers": "Palancas de negociación",
+    "sectionNextSteps": "Próximos pasos",
+    "score": "Puntuación",
+    "strengths": "Puntos fuertes",
+    "weaknesses": "Puntos débiles",
+    "landedCost": "Coste aproximado por unidad",
+    "noRisks": "Sin riesgos destacados.",
+    "noLevers": "Sin palancas adicionales identificadas.",
+    "noSteps": "Sin pasos adicionales.",
+    "close": "Cerrar"
   }
 }
