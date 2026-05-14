@@ -1116,6 +1116,7 @@ export default function Projects() {
  * Columns: Nom | ASIN | Fase | Proveïdor | SKU | Accions
  */
 function ProjectsListView({ projects = [], onOpen = () => {} }) {
+  const t = useT()
   const [collapsed, setCollapsed] = useState(() => new Set())
   const navigate = useNavigate()
   const groups = useMemo(() => {

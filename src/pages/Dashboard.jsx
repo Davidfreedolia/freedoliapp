@@ -23,7 +23,7 @@ import {
   Receipt
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { getPurchaseOrders, getDashboardPreferences, getPosNotReady, getPosWaitingManufacturer, createOrGetTaskFromOrigin } from '../lib/supabase'
+import { getPurchaseOrders, getDashboardPreferences, updateDashboardPreferences, getPosNotReady, getPosWaitingManufacturer, createOrGetTaskFromOrigin } from '../lib/supabase'
 import { supabase } from '../lib/supabase'
 import { computeProjectBusinessSnapshot } from '../lib/businessSnapshot'
 import { computeProjectStockSignal } from '../lib/stockSignal'

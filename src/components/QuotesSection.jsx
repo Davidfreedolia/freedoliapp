@@ -52,6 +52,8 @@ export default function QuotesSection({ projectId, darkMode }) {
   const [supplierPrefill, setSupplierPrefill] = useState(null)
   const [quoteToLink, setQuoteToLink] = useState(null)
   const [createSupplierSaving, setCreateSupplierSaving] = useState(false)
+  // eslint-disable-next-line no-unused-vars
+  const [uploadingFile, setUploadingFile] = useState(false)
   const [manualDraft, setManualDraft] = useState(null)
   
   const [newQuote, setNewQuote] = useState({

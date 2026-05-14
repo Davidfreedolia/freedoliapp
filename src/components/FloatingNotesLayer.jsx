@@ -14,6 +14,7 @@ const COLORS = {
 }
 
 export default function FloatingNotesLayer() {
+  const t = useT()
   const { darkMode } = useApp()
   const { notes, updateNote, removeNote, bringToFront, refresh } = useNotes()
   const [dragging, setDragging] = useState(null)

@@ -42,6 +42,9 @@ export default function ManufacturerPackModal({
     includeName: true
   })
   const [validationErrors, setValidationErrors] = useState([])
+  const [driveUploaded, setDriveUploaded] = useState(false)
+  // Drive is "ready" when the workspace has a Google Drive folder configured.
+  const driveReady = Boolean(companySettings?.google_drive_folder_id || companySettings?.drive_folder_id)
 
   useEffect(() => {
     if (isOpen) {

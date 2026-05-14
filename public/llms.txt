@@ -1,0 +1,32 @@
+# Freedoliapp
+
+> The control tower for Amazon FBA operations. Centralises suppliers, purchase orders, samples, inventory, decisions and profit in a single workspace so Amazon sellers can run their business from one place instead of ten spreadsheets.
+
+Freedoliapp is a SaaS product for Amazon FBA sellers and small operators. It replaces a stack of disconnected tools (Sellerboard, Helium 10, Jungle Scout, Keepa, Holded) with a single workspace covering the full operational pipeline: research → viability → suppliers → samples → production → listing → live.
+
+The platform is multi-tenant (workspace-isolated via Postgres RLS) and supports Catalan, Spanish and English. Hosted on Vercel, data on Supabase.
+
+## Product
+
+- [Landing page](https://freedoliapp.com): product overview and pricing
+- [Pricing](https://freedoliapp.com#pricing): Starter €29, Growth €79, Scale €199 (monthly; ~17% discount yearly)
+- [Free trial](https://freedoliapp.com/trial): 14-day trial, no credit card required
+
+## Capabilities
+
+- Project pipeline with 7 phases (Research, Viability, Suppliers, Samples, Production, Listing, Live)
+- Supplier management + quote comparison + sample tracking
+- Purchase Orders with logistics flow (production → pickup → forwarder → shipping → customs → Amazon FBA)
+- Inventory ledger + Weighted Average Cost (WAC)
+- Decision Inbox with AI-suggested actions, feedback loop and analytics
+- Recurring expenses + invoices + financial ledger
+- Amazon SP-API integration + Settlement CSV import
+- Profitability calculator (FBA fees, freight, duties, COGS, ads)
+- Manufacturer pack PDFs (PO, FNSKU labels, packing list, carton labels)
+
+## Optional
+
+- [Privacy Policy](https://freedoliapp.com/privacy)
+- [Terms of Service](https://freedoliapp.com/terms)
+- [Data Processing Agreement](https://freedoliapp.com/dpa)
+- [Cookie Policy](https://freedoliapp.com/cookies)

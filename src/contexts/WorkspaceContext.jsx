@@ -7,8 +7,11 @@ import { createWorkspace } from '../lib/workspace/createWorkspace'
 const STORAGE_KEY = 'freedoli_active_org_id'
 const STORAGE_USER_KEY = 'freedoli_active_org_user_id'
 const wsTs = () => new Date().toISOString()
-const wsLog = (phase, payload = {}) => console.info('[WorkspaceContext]', { ts: wsTs(), phase, ...payload })
-const wsWarn = (phase, payload = {}) => console.warn('[WorkspaceContext]', { ts: wsTs(), phase, ...payload })
+// Verbose lifecycle traces — useful during dev/staging triage, kept silent in
+// production to avoid flooding the browser console.
+const WS_DEBUG = import.meta.env.DEV
+const wsLog = (phase, payload = {}) => { if (WS_DEBUG) console.info('[WorkspaceContext]', { ts: wsTs(), phase, ...payload }) }
+const wsWarn = (phase, payload = {}) => { if (WS_DEBUG) console.warn('[WorkspaceContext]', { ts: wsTs(), phase, ...payload }) }
 const serializeError = (error) => {
   if (!error) return null
   return {

@@ -78,6 +78,7 @@ const PAYMENT_TERMS = [
 const INCOTERMS = ['EXW', 'FOB', 'CIF', 'CFR', 'DDP', 'DAP', 'FCA', 'CPT']
 
 export default function Forwarders() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { darkMode, demoMode, activeOrgId } = useApp()
   const { isMobile, isTablet } = useBreakpoint()

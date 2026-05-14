@@ -1577,8 +1577,9 @@ export const getProjectsMissingGtin = async (activeOrgId) => {
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
 
-  // Legacy demo mode check (for backward compatibility)
-  if (isDemoMode() && !demoMode) {
+  // Legacy demo mode check (for backward compatibility). `demoMode` was a
+  // local flag that was removed; the global isDemoMode() is now the only source.
+  if (isDemoMode()) {
     return await mockGetProjectsMissingGtin()
   }
 
@@ -1821,8 +1822,9 @@ export const getPosWaitingManufacturer = async (limit = 10) => {
   const { getDemoMode } = await import('./demoModeFilter')
   const demoMode = await getDemoMode()
   
-  // Legacy demo mode check (for backward compatibility)
-  if (isDemoMode() && !demoMode) {
+  // Legacy demo mode check (for backward compatibility). `demoMode` was a
+  // local flag that was removed; the global isDemoMode() is now the only source.
+  if (isDemoMode()) {
     return await mockGetPosWaitingManufacturer(limit)
   }
   
@@ -2762,8 +2764,9 @@ export const getTasks = async (filters = {}) => {
   // Dynamic imports to avoid circular dependencies
   const { isDemoMode, mockGetTasks } = await import('../demo/demoMode')
   
-  // Legacy demo mode check (for backward compatibility)
-  if (isDemoMode() && !demoMode) {
+  // Legacy demo mode check (for backward compatibility). `demoMode` was a
+  // local flag that was removed; the global isDemoMode() is now the only source.
+  if (isDemoMode()) {
     const tasks = await mockGetTasks(filters.entityId || filters.projectId || null)
     // Apply filters client-side
     let filtered = tasks

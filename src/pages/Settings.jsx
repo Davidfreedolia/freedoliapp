@@ -735,9 +735,14 @@ export default function Settings() {
                     if (!confirm('Vols generar dades demo? Això crearà 10 projectes, POs, quotes, GTINs, finances, tasks i notes.')) return
                     setResettingDemo(true)
                     try {
-                      // Activar demo_mode
+                      // Activar demo_mode (persistència + refresh del context)
                       await updateCompanySettings({ demo_mode: true }, activeOrgId ?? undefined)
-                      setDemoMode(true)
+                      // toggleDemoMode(true) actualitza el context global perquè
+                      // el flag local `demoMode` reflecteixi el nou estat sense
+                      // recarregar la pàgina.
+                      if (!demoMode) {
+                        try { await toggleDemoMode(true) } catch (_) {}
+                      }
                       
                       // Check if demo data already exists
                       const hasDemo = await checkDemoExists()

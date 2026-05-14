@@ -284,7 +284,7 @@ export default function Landing() {
                 <a
                   href="/register"
                   className="btn btn-lg px-5 py-3 fw-semibold"
-                  style={{ background: '#6ECBC3', color: '#fff', borderRadius: 12 }}
+                  style={{ background: '#6ECBC3', color: '#0d3a3d', borderRadius: 12 }}
                 >
                   {t('hero.cta_primary')}
                 </a>
@@ -347,12 +347,14 @@ export default function Landing() {
             {LOGO_TOOLS.map(tool => (
               <img
                 key={tool.id}
-                src={`https://logo.clearbit.com/${tool.domain}`}
+                /* Use Google's favicon service as the primary source — clearbit
+                   DNS-resolution failures were polluting the browser console.
+                   Google's service is rock-solid and we already used it as the
+                   onError fallback. */
+                src={`https://www.google.com/s2/favicons?domain=${tool.domain}&sz=64`}
                 alt={tool.name}
+                loading="lazy"
                 style={{ height: 28, opacity: 0.6, filter: 'grayscale(30%)' }}
-                onError={e => {
-                  e.target.src = `https://www.google.com/s2/favicons?domain=${tool.domain}&sz=64`
-                }}
               />
             ))}
           </div>
@@ -376,7 +378,7 @@ export default function Landing() {
                   <div className="ld-feature-card__icon">
                     <f.Icon size={22} color="#1F5F63" />
                   </div>
-                  <h5 className="ld-feature-card__title">{t(f.titleKey)}</h5>
+                  <h3 className="ld-feature-card__title">{t(f.titleKey)}</h3>
                   <p className="ld-feature-card__desc mb-0">{t(f.textKey)}</p>
                 </div>
               </div>

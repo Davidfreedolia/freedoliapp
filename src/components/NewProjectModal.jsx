@@ -42,6 +42,9 @@ export default function NewProjectModal({ isOpen, onClose, onSuccess }) {
   })
   const [projectCodes, setProjectCodes] = useState({ projectCode: '', sku: '' })
   const [researchWizardOpen, setResearchWizardOpen] = useState(false)
+  // Toggled to true while the create flow is provisioning Google Drive folders
+  // for the new project (used to swap the spinner label).
+  const [creatingFolders, setCreatingFolders] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     description: ''

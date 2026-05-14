@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf'
 import 'jspdf-autotable'
+import { safeJsonArray } from './safeJson'
 
 /**
  * Genera un PDF de Packing List per enviar al fabricant
