@@ -1,7 +1,15 @@
 /**
- * D23.3–D23.6 — Internal Admin Console. Trials + Workspaces + Subscriptions + Conversions; read-only.
+ * D23.3–D23.6 — Internal Admin Console. Trials + Workspaces + Subscriptions
+ * + Conversions; read-only cross-tenant view for the platform super-admin.
+ *
+ * Route is gated by `AdminGate` (see src/App.jsx). Data access is enforced
+ * by Postgres RLS: see migration 20260514120000_super_admin_and_trial_rls.sql
+ * for `is_super_admin()` + the OR-clauses that grant read-only cross-tenant
+ * access to this single account.
  */
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
+import { ShieldCheck } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import Button from '../components/ui/Button'
 
@@ -24,6 +32,7 @@ function formatConversionHours(createdAt, convertedAt) {
 }
 
 export default function AdminConsole() {
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [rows, setRows] = useState([])
@@ -174,21 +183,10 @@ export default function AdminConsole() {
     }
   }, [])
 
-  useEffect(() => {
-    load()
-  }, [load])
-
-  useEffect(() => {
-    loadWorkspaces()
-  }, [loadWorkspaces])
-
-  useEffect(() => {
-    loadSubscriptions()
-  }, [loadSubscriptions])
-
-  useEffect(() => {
-    loadConversions()
-  }, [loadConversions])
+  useEffect(() => { load() }, [load])
+  useEffect(() => { loadWorkspaces() }, [loadWorkspaces])
+  useEffect(() => { loadSubscriptions() }, [loadSubscriptions])
+  useEffect(() => { loadConversions() }, [loadConversions])
 
   const isEmpty = rows.length === 0
   const workspacesEmpty = workspacesRows.length === 0
@@ -197,34 +195,44 @@ export default function AdminConsole() {
 
   return (
     <div style={styles.page}>
+      {/* Super-admin warning banner — always visible at the top of this page. */}
+      <div style={styles.adminBanner} role="status" aria-live="polite">
+        <ShieldCheck size={18} style={{ flexShrink: 0 }} />
+        <div>
+          <div style={styles.adminBannerTitle}>{t('adminConsole.banner.title')}</div>
+          <div style={styles.adminBannerBody}>{t('adminConsole.banner.body')}</div>
+        </div>
+      </div>
+
       <header style={styles.header}>
-        <h1 style={styles.title}>Internal Admin Console</h1>
-        <p style={styles.subtitle}>Internal operational visibility for trials and workspaces</p>
+        <h1 style={styles.title}>{t('adminConsole.title')}</h1>
+        <p style={styles.subtitle}>{t('adminConsole.subtitle')}</p>
       </header>
 
+      {/* Trials */}
       <section style={styles.section} aria-labelledby="trials-heading">
-        <h2 id="trials-heading" style={styles.sectionTitle}>Trials</h2>
+        <h2 id="trials-heading" style={styles.sectionTitle}>{t('adminConsole.trials.title')}</h2>
         {loading ? (
-          <div style={styles.loading}>Loading…</div>
+          <div style={styles.loading}>{t('common.loading')}</div>
         ) : error ? (
           <div style={styles.errorWrap}>
             <p style={styles.errorText}>{error}</p>
             <Button variant="primary" size="md" onClick={load}>
-              Tornar a intentar
+              {t('common.retry')}
             </Button>
           </div>
         ) : isEmpty ? (
-          <div style={styles.empty}>No trial registrations.</div>
+          <div style={styles.empty}>{t('adminConsole.trials.empty')}</div>
         ) : (
           <div style={styles.tableWrap}>
             <table style={styles.table}>
               <thead>
                 <tr>
-                  <th style={styles.th}>Email</th>
-                  <th style={styles.th}>Created</th>
-                  <th style={styles.th}>Workspace</th>
-                  <th style={styles.th}>Status</th>
-                  <th style={styles.th}>Converted</th>
+                  <th style={styles.th}>{t('adminConsole.trials.headers.email')}</th>
+                  <th style={styles.th}>{t('adminConsole.trials.headers.created')}</th>
+                  <th style={styles.th}>{t('adminConsole.trials.headers.workspace')}</th>
+                  <th style={styles.th}>{t('adminConsole.trials.headers.status')}</th>
+                  <th style={styles.th}>{t('adminConsole.trials.headers.converted')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -243,30 +251,31 @@ export default function AdminConsole() {
         )}
       </section>
 
+      {/* Workspaces */}
       <section style={styles.section} aria-labelledby="workspaces-heading">
-        <h2 id="workspaces-heading" style={styles.sectionTitle}>Workspaces</h2>
-        <p style={styles.sectionSubtitle}>Internal visibility into tenant workspaces</p>
+        <h2 id="workspaces-heading" style={styles.sectionTitle}>{t('adminConsole.workspaces.title')}</h2>
+        <p style={styles.sectionSubtitle}>{t('adminConsole.workspaces.subtitle')}</p>
         {workspacesLoading ? (
-          <div style={styles.loading}>Loading…</div>
+          <div style={styles.loading}>{t('common.loading')}</div>
         ) : workspacesError ? (
           <div style={styles.errorWrap}>
             <p style={styles.errorText}>{workspacesError}</p>
             <Button variant="secondary" size="md" onClick={loadWorkspaces}>
-              Tornar a intentar
+              {t('common.retry')}
             </Button>
           </div>
         ) : workspacesEmpty ? (
-          <div style={styles.empty}>No workspaces.</div>
+          <div style={styles.empty}>{t('adminConsole.workspaces.empty')}</div>
         ) : (
           <div style={styles.tableWrap}>
             <table style={styles.table}>
               <thead>
                 <tr>
-                  <th style={styles.th}>Workspace</th>
-                  <th style={styles.th}>Name</th>
-                  <th style={styles.th}>Owner</th>
-                  <th style={styles.th}>Created</th>
-                  <th style={styles.th}>Plan</th>
+                  <th style={styles.th}>{t('adminConsole.workspaces.headers.workspace')}</th>
+                  <th style={styles.th}>{t('adminConsole.workspaces.headers.name')}</th>
+                  <th style={styles.th}>{t('adminConsole.workspaces.headers.owner')}</th>
+                  <th style={styles.th}>{t('adminConsole.workspaces.headers.created')}</th>
+                  <th style={styles.th}>{t('adminConsole.workspaces.headers.plan')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -285,30 +294,31 @@ export default function AdminConsole() {
         )}
       </section>
 
+      {/* Subscriptions */}
       <section style={styles.section} aria-labelledby="subscriptions-heading">
-        <h2 id="subscriptions-heading" style={styles.sectionTitle}>Subscriptions</h2>
-        <p style={styles.sectionSubtitle}>stripe subscription state per workspace</p>
+        <h2 id="subscriptions-heading" style={styles.sectionTitle}>{t('adminConsole.subscriptions.title')}</h2>
+        <p style={styles.sectionSubtitle}>{t('adminConsole.subscriptions.subtitle')}</p>
         {subscriptionsLoading ? (
-          <div style={styles.loading}>Loading…</div>
+          <div style={styles.loading}>{t('common.loading')}</div>
         ) : subscriptionsError ? (
           <div style={styles.errorWrap}>
             <p style={styles.errorText}>{subscriptionsError}</p>
             <Button variant="secondary" size="md" onClick={loadSubscriptions}>
-              Tornar a intentar
+              {t('common.retry')}
             </Button>
           </div>
         ) : subscriptionsEmpty ? (
-          <div style={styles.empty}>No subscriptions.</div>
+          <div style={styles.empty}>{t('adminConsole.subscriptions.empty')}</div>
         ) : (
           <div style={styles.tableWrap}>
             <table style={styles.table}>
               <thead>
                 <tr>
-                  <th style={styles.th}>Workspace</th>
-                  <th style={styles.th}>Stripe Subscription</th>
-                  <th style={styles.th}>Status</th>
-                  <th style={styles.th}>Plan</th>
-                  <th style={styles.th}>Period End</th>
+                  <th style={styles.th}>{t('adminConsole.subscriptions.headers.workspace')}</th>
+                  <th style={styles.th}>{t('adminConsole.subscriptions.headers.stripeSubscription')}</th>
+                  <th style={styles.th}>{t('adminConsole.subscriptions.headers.status')}</th>
+                  <th style={styles.th}>{t('adminConsole.subscriptions.headers.plan')}</th>
+                  <th style={styles.th}>{t('adminConsole.subscriptions.headers.periodEnd')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -327,30 +337,31 @@ export default function AdminConsole() {
         )}
       </section>
 
+      {/* Conversions */}
       <section style={styles.section} aria-labelledby="conversions-heading">
-        <h2 id="conversions-heading" style={styles.sectionTitle}>Conversions</h2>
-        <p style={styles.sectionSubtitle}>trial to paid conversion visibility</p>
+        <h2 id="conversions-heading" style={styles.sectionTitle}>{t('adminConsole.conversions.title')}</h2>
+        <p style={styles.sectionSubtitle}>{t('adminConsole.conversions.subtitle')}</p>
         {conversionsLoading ? (
-          <div style={styles.loading}>Loading…</div>
+          <div style={styles.loading}>{t('common.loading')}</div>
         ) : conversionsError ? (
           <div style={styles.errorWrap}>
             <p style={styles.errorText}>{conversionsError}</p>
             <Button variant="secondary" size="md" onClick={loadConversions}>
-              Tornar a intentar
+              {t('common.retry')}
             </Button>
           </div>
         ) : conversionsEmpty ? (
-          <div style={styles.empty}>No conversions.</div>
+          <div style={styles.empty}>{t('adminConsole.conversions.empty')}</div>
         ) : (
           <div style={styles.tableWrap}>
             <table style={styles.table}>
               <thead>
                 <tr>
-                  <th style={styles.th}>Email</th>
-                  <th style={styles.th}>Workspace</th>
-                  <th style={styles.th}>Trial Created</th>
-                  <th style={styles.th}>Converted</th>
-                  <th style={styles.th}>Conversion Time</th>
+                  <th style={styles.th}>{t('adminConsole.conversions.headers.email')}</th>
+                  <th style={styles.th}>{t('adminConsole.conversions.headers.workspace')}</th>
+                  <th style={styles.th}>{t('adminConsole.conversions.headers.trialCreated')}</th>
+                  <th style={styles.th}>{t('adminConsole.conversions.headers.converted')}</th>
+                  <th style={styles.th}>{t('adminConsole.conversions.headers.conversionTime')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -378,6 +389,30 @@ const styles = {
     maxWidth: 1200,
     margin: '0 auto',
   },
+  adminBanner: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: 12,
+    padding: '14px 16px',
+    marginBottom: '1.5rem',
+    background: 'rgba(229, 83, 83, 0.06)',
+    border: '1px solid rgba(229, 83, 83, 0.32)',
+    borderRadius: 12,
+    color: 'var(--danger-1, #B0413F)',
+  },
+  adminBannerTitle: {
+    fontSize: 13,
+    fontWeight: 700,
+    letterSpacing: '0.02em',
+    textTransform: 'uppercase',
+    color: 'var(--danger-1, #B0413F)',
+    marginBottom: 2,
+  },
+  adminBannerBody: {
+    fontSize: 13,
+    color: 'var(--text-1)',
+    lineHeight: 1.5,
+  },
   header: {
     marginBottom: '1.5rem',
   },
@@ -386,10 +421,11 @@ const styles = {
     fontWeight: 700,
     color: 'var(--text-1, #111827)',
     margin: 0,
+    letterSpacing: '-0.02em',
   },
   subtitle: {
     fontSize: '0.9375rem',
-    color: 'var(--text-secondary, #6b7280)',
+    color: 'var(--text-2, #6b7280)',
     margin: '0.25rem 0 0',
   },
   section: {
@@ -397,36 +433,37 @@ const styles = {
   },
   sectionTitle: {
     fontSize: '1.125rem',
-    fontWeight: 600,
+    fontWeight: 700,
     color: 'var(--text-1, #111827)',
     margin: '0 0 0.25rem',
+    letterSpacing: '-0.01em',
   },
   sectionSubtitle: {
     fontSize: '0.875rem',
-    color: 'var(--text-secondary, #6b7280)',
+    color: 'var(--text-2, #6b7280)',
     margin: '0 0 1rem',
   },
   loading: {
     padding: '2rem',
-    color: 'var(--text-secondary, #6b7280)',
+    color: 'var(--text-2, #6b7280)',
   },
   errorWrap: {
     padding: '2rem',
     textAlign: 'center',
   },
   errorText: {
-    color: 'var(--text-secondary, #6b7280)',
+    color: 'var(--danger-1, #B0413F)',
     marginBottom: '1rem',
   },
   empty: {
     padding: '2rem',
-    color: 'var(--text-secondary, #6b7280)',
+    color: 'var(--text-2, #6b7280)',
   },
   tableWrap: {
     overflowX: 'auto',
-    border: '1px solid var(--border-color, #e5e7eb)',
-    borderRadius: 8,
-    background: 'var(--card-bg, #fff)',
+    border: '1px solid var(--border-1, #e5e7eb)',
+    borderRadius: 12,
+    background: 'var(--surface-bg, #fff)',
   },
   table: {
     width: '100%',
@@ -436,14 +473,18 @@ const styles = {
   th: {
     textAlign: 'left',
     padding: '0.75rem 1rem',
-    fontWeight: 600,
-    color: 'var(--text-1, #111827)',
-    borderBottom: '1px solid var(--border-color, #e5e7eb)',
+    fontWeight: 700,
+    color: 'var(--text-2)',
+    fontSize: 11,
+    letterSpacing: '0.06em',
+    textTransform: 'uppercase',
+    borderBottom: '1px solid var(--border-1)',
+    background: 'var(--surface-bg-2)',
     whiteSpace: 'nowrap',
   },
   td: {
     padding: '0.75rem 1rem',
-    borderBottom: '1px solid var(--border-color, #e5e7eb)',
-    color: 'var(--text-1, #111827)',
+    borderBottom: '1px solid var(--border-1)',
+    color: 'var(--text-1)',
   },
 }

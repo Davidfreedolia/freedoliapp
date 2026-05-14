@@ -3219,5 +3219,68 @@
       "oauthFailed": "No se ha podido iniciar OAuth",
       "connectError": "Error conectando con Amazon SP-API"
     }
+  },
+  "adminConsole": {
+    "title": "Consola de administración",
+    "subtitle": "Visibilidad operativa interna sobre trials, workspaces y facturación.",
+    "banner": {
+      "title": "⚠ Vista de super administrador",
+      "body": "Estás viendo datos de TODOS los workspaces. Esta página solo es visible para david@freedolia.com. La lectura entre tenants está reforzada por RLS en la base de datos; ningún otro usuario puede acceder a esta información."
+    },
+    "trials": {
+      "title": "Trials",
+      "empty": "No hay registros de trial.",
+      "headers": {
+        "email": "Correo",
+        "created": "Creado",
+        "workspace": "Workspace",
+        "status": "Estado",
+        "converted": "Convertido"
+      }
+    },
+    "workspaces": {
+      "title": "Workspaces",
+      "subtitle": "Visibilidad interna de los workspaces de cada tenant",
+      "empty": "No hay workspaces.",
+      "headers": {
+        "workspace": "Workspace",
+        "name": "Nombre",
+        "owner": "Propietario",
+        "created": "Creado",
+        "plan": "Plan"
+      }
+    },
+    "subscriptions": {
+      "title": "Suscripciones",
+      "subtitle": "Estado de la suscripción de Stripe por workspace",
+      "empty": "No hay suscripciones.",
+      "headers": {
+        "workspace": "Workspace",
+        "stripeSubscription": "Suscripción Stripe",
+        "status": "Estado",
+        "plan": "Plan",
+        "periodEnd": "Fin del periodo"
+      }
+    },
+    "conversions": {
+      "title": "Conversiones",
+      "subtitle": "Visibilidad de la conversión de trial a pago",
+      "empty": "No hay conversiones.",
+      "headers": {
+        "email": "Correo",
+        "workspace": "Workspace",
+        "trialCreated": "Trial creado",
+        "converted": "Convertido",
+        "conversionTime": "Tiempo de conversión"
+      }
+    }
+  },
+  "superAdminBadge": {
+    "label": "Super Admin",
+    "tooltip": "Sesión de super administrador · clic para abrir la consola"
+  },
+  "crossWorkspace": {
+    "label": "Modo super-admin",
+    "message": "Estás viendo un workspace ({{workspace}}) donde no eres miembro. Cualquier acción afectará datos de otro tenant."
   }
 }

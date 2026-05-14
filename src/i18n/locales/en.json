@@ -3204,5 +3204,68 @@
       "oauthFailed": "Could not start OAuth",
       "connectError": "Error connecting with Amazon SP-API"
     }
+  },
+  "adminConsole": {
+    "title": "Admin Console",
+    "subtitle": "Internal operational visibility for trials, workspaces and billing.",
+    "banner": {
+      "title": "⚠ Super-admin view",
+      "body": "You are viewing data from ALL workspaces. This page is only visible to david@freedolia.com. Cross-tenant reads are enforced by Postgres RLS; no other user can access this information."
+    },
+    "trials": {
+      "title": "Trials",
+      "empty": "No trial registrations.",
+      "headers": {
+        "email": "Email",
+        "created": "Created",
+        "workspace": "Workspace",
+        "status": "Status",
+        "converted": "Converted"
+      }
+    },
+    "workspaces": {
+      "title": "Workspaces",
+      "subtitle": "Internal visibility into tenant workspaces",
+      "empty": "No workspaces.",
+      "headers": {
+        "workspace": "Workspace",
+        "name": "Name",
+        "owner": "Owner",
+        "created": "Created",
+        "plan": "Plan"
+      }
+    },
+    "subscriptions": {
+      "title": "Subscriptions",
+      "subtitle": "Stripe subscription state per workspace",
+      "empty": "No subscriptions.",
+      "headers": {
+        "workspace": "Workspace",
+        "stripeSubscription": "Stripe Subscription",
+        "status": "Status",
+        "plan": "Plan",
+        "periodEnd": "Period End"
+      }
+    },
+    "conversions": {
+      "title": "Conversions",
+      "subtitle": "Trial to paid conversion visibility",
+      "empty": "No conversions.",
+      "headers": {
+        "email": "Email",
+        "workspace": "Workspace",
+        "trialCreated": "Trial Created",
+        "converted": "Converted",
+        "conversionTime": "Conversion Time"
+      }
+    }
+  },
+  "superAdminBadge": {
+    "label": "Super Admin",
+    "tooltip": "Super-admin session · click to open the console"
+  },
+  "crossWorkspace": {
+    "label": "Super-admin mode",
+    "message": "You are viewing a workspace ({{workspace}}) where you are not a member. Any action will affect another tenant's data."
   }
 }

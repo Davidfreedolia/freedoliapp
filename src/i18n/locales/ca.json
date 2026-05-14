@@ -3404,5 +3404,68 @@
       "oauthFailed": "No s'ha pogut iniciar OAuth",
       "connectError": "Error connectant amb Amazon SP-API"
     }
+  },
+  "adminConsole": {
+    "title": "Consola d'administració",
+    "subtitle": "Visibilitat operativa interna sobre trials, workspaces i facturació.",
+    "banner": {
+      "title": "⚠ Vista de super administrador",
+      "body": "Estàs veient dades de TOTS els workspaces. Aquesta pàgina només és visible per a david@freedolia.com. La lectura entre tenants està enforceada per RLS a la base de dades; cap altre usuari no pot accedir a aquesta informació."
+    },
+    "trials": {
+      "title": "Trials",
+      "empty": "No hi ha registres de trial.",
+      "headers": {
+        "email": "Correu",
+        "created": "Creat",
+        "workspace": "Workspace",
+        "status": "Estat",
+        "converted": "Convertit"
+      }
+    },
+    "workspaces": {
+      "title": "Workspaces",
+      "subtitle": "Visibilitat interna dels workspaces de cada tenant",
+      "empty": "No hi ha workspaces.",
+      "headers": {
+        "workspace": "Workspace",
+        "name": "Nom",
+        "owner": "Propietari",
+        "created": "Creat",
+        "plan": "Pla"
+      }
+    },
+    "subscriptions": {
+      "title": "Subscripcions",
+      "subtitle": "Estat de la subscripció de Stripe per workspace",
+      "empty": "No hi ha subscripcions.",
+      "headers": {
+        "workspace": "Workspace",
+        "stripeSubscription": "Subscripció Stripe",
+        "status": "Estat",
+        "plan": "Pla",
+        "periodEnd": "Fi del període"
+      }
+    },
+    "conversions": {
+      "title": "Conversions",
+      "subtitle": "Visibilitat de la conversió de trial a pagament",
+      "empty": "No hi ha conversions.",
+      "headers": {
+        "email": "Correu",
+        "workspace": "Workspace",
+        "trialCreated": "Trial creat",
+        "converted": "Convertit",
+        "conversionTime": "Temps de conversió"
+      }
+    }
+  },
+  "superAdminBadge": {
+    "label": "Super Admin",
+    "tooltip": "Sessió de super administrador · clica per obrir la consola"
+  },
+  "crossWorkspace": {
+    "label": "Mode super-admin",
+    "message": "Estàs veient un workspace ({{workspace}}) on no ets membre. Qualsevol acció afectarà dades d'un altre tenant."
   }
 }

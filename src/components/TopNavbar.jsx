@@ -11,6 +11,7 @@ import { useBreakpoint } from '../hooks/useBreakpoint'
 import DecisionBadge from './decisions/DecisionBadge'
 import BusinessAlertsBadge from './alerts/BusinessAlertsBadge'
 import AppLanguageControl from './AppLanguageControl'
+import SuperAdminBadge from './SuperAdminBadge'
 
 export default function TopNavbar() {
   const { darkMode } = useApp()
@@ -62,6 +63,7 @@ export default function TopNavbar() {
 
         {/* Dreta: controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <SuperAdminBadge />
           <BusinessAlertsBadge />
           <DecisionBadge />
           <AppLanguageControl />

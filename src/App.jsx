@@ -12,6 +12,7 @@ import ErrorBoundary from './components/ErrorBoundary'
 import FloatingNotesLayer from './components/FloatingNotesLayer'
 import HelpAssistant from './components/assistant/HelpAssistant'
 import TopNavbar from './components/TopNavbar'
+import CrossWorkspaceBanner from './components/CrossWorkspaceBanner'
 import BillingBanner from './components/billing/BillingBanner'
 import WorkspaceLimitAlert from './components/billing/WorkspaceLimitAlert'
 import MarginCompressionAlertStrip from './components/profit/MarginCompressionAlertStrip'
@@ -133,6 +134,16 @@ const Docs = lazyWithErrorBoundary(() => import('./pages/Docs'), 'Docs')
 const SupplierDetail = lazyWithErrorBoundary(() => import('./pages/SupplierDetail'), 'SupplierDetail')
 const ForwarderDetail = lazyWithErrorBoundary(() => import('./pages/ForwarderDetail'), 'ForwarderDetail')
 
+/**
+ * Super-admin allowlist (client side).
+ *
+ * Source of truth at the DB layer is the `public.is_super_admin()` SQL
+ * function (see migration 20260514120000_super_admin_and_trial_rls.sql).
+ * Keep both in sync. Even if this client check is bypassed, RLS blocks
+ * unauthorized reads at the database.
+ *
+ * To add another super-admin: update both this set AND the SQL function.
+ */
 const ADMIN_EMAILS = new Set(['david@freedolia.com'])
 const gateTs = () => new Date().toISOString()
 const gateLog = (phase, payload = {}) => console.info('[OnboardingGate]', { ts: gateTs(), phase, ...payload })
@@ -475,6 +486,7 @@ function AppContent() {
         <BillingBanner />
         <WorkspaceLimitAlert usage={usage} onUpgrade={handleUpgradeForLimit} />
         <TopNavbar sidebarWidth={sidebarWidth} />
+        <CrossWorkspaceBanner />
         <MarginCompressionAlertStrip />
         <StockoutAlertStrip />
         <ErrorBoundary context="app:main" darkMode={darkMode}>
