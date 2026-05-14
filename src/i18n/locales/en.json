@@ -511,6 +511,47 @@
     }
   },
   "landing": {
+    "aiSuite": {
+      "eyebrow": "New · 6 AI tools + Chrome extension",
+      "titleStart": "AI does the boring work.",
+      "titleEm": "You recover real money.",
+      "lede": "Plug in your own AI account (Anthropic, OpenAI, Gemini, Mistral, Groq, Ollama) and unlock a suite of tools built for serious FBA sellers. No analysis caps. No lipstick on a pig.",
+      "tag": {
+        "topRoi": "Top ROI",
+        "unique": "Unique",
+        "byok": "BYOK",
+        "byoc": "BYOC",
+        "new": "New"
+      },
+      "refund": {
+        "title": "Automated FBA refund recovery",
+        "unit": "recovered in beta",
+        "text": "AI scans 18 months of Amazon events: lost inventory, duplicate fees, returns without refund, charge anomalies. We give you the exact text to file the case with Seller Support. No commission on what you recover.",
+        "meta1": "No commission",
+        "meta2": "Covers 18 months",
+        "meta3": "With your AI"
+      },
+      "quotes": {
+        "title": "AI quote comparison",
+        "text": "Drag-and-drop supplier PDFs. AI ranks them by price, MOQ, lead time and payment terms, flags suspicious signals and gives you concrete negotiation levers."
+      },
+      "listing": {
+        "title": "Listing Optimizer",
+        "text": "Paste your current listing. AI rewrites it for SEO + conversion within Amazon limits (200 / 250 / 2000 chars), with per-section scoring."
+      },
+      "keywords": {
+        "title": "Keyword Research",
+        "text": "Amazon autocomplete + AI: 25-40 keywords by intent, volume, competition and suggested CPC. Without paying Cerebro."
+      },
+      "keepa": {
+        "title": "Keepa history",
+        "text": "Price, BSR, ratings and reviews charts inside every research. If you already pay Keepa, connect your key and it costs you nothing extra."
+      },
+      "chrome": {
+        "title": "Chrome extension",
+        "text": "Capture any Amazon ASIN in one click. 12 marketplaces. The research page opens with the product already prefilled."
+      }
+    },
     "hero": {
       "title": "Run your Amazon operations from one place.",
       "subtitle": "The operating system for product businesses managing suppliers, purchase orders, inventory and profit.",
@@ -1141,7 +1182,11 @@
     "groupInventory": "Inventory",
     "groupFinance": "Finance",
     "groupIntelligence": "Intelligence",
-    "groupSystem": "System"
+    "groupTools": "AI tools",
+    "groupSystem": "System",
+    "listingOptimizer": "Listing Optimizer",
+    "keywordResearch": "Keyword Research",
+    "refundRecovery": "Refund Recovery"
   },
   "dashboard": {
     "firstValue": {
@@ -2774,7 +2819,7 @@
     "subtitle": "Visual pipeline, FBA profitability calculator, import from 16 tools and AI analysis. All integrated.",
     "cta_primary": "Start for free",
     "cta_secondary": "Watch demo",
-    "badge": "🚀 Now in closed beta — limited spots",
+    "badge": "New · 6 AI tools + Chrome extension",
     "stat1": {
       "value": "500+",
       "label": "Active sellers"
@@ -3390,5 +3435,82 @@
     "noLevers": "No additional levers identified.",
     "noSteps": "No additional steps.",
     "close": "Close"
+  },
+  "common.copy": "Copy",
+  "tools": {
+    "listing": {
+      "title": "Listing Optimizer",
+      "intro": "Paste your current listing and the AI will rewrite it for SEO + conversion within Amazon limits (200 / 250 / 2000 chars). Uses your own AI key.",
+      "inputTitle": "Current listing",
+      "outputTitle": "Optimized version",
+      "outputEmpty": "Paste your listing and click \"Optimize with AI\". The AI will generate optimized title, bullets, description and backend keywords.",
+      "marketplace": "Marketplace",
+      "brand": "Brand (optional)",
+      "titleField": "Title",
+      "titlePlaceholder": "Current product title",
+      "bullets": "Bullet points (5)",
+      "description": "Description",
+      "descriptionPlaceholder": "Current description",
+      "targetKeywords": "Target keywords (one per line or comma-separated)",
+      "backendKw": "Backend keywords",
+      "optimize": "Optimize with AI",
+      "optimizing": "Optimizing with AI…",
+      "improvements": "Improvements applied",
+      "keywordCoverage": "Keyword coverage",
+      "used": "Used",
+      "missed": "Missed",
+      "errorTitleRequired": "Title is required",
+      "noProvider": "Connect your AI account in Settings.",
+      "genericError": "The optimizer could not complete the request."
+    },
+    "keywords": {
+      "title": "Keyword Research",
+      "intro": "Enter a term or an ASIN. The system queries Amazon autocomplete and your AI generates 25-40 keywords grouped by intent with estimated volume, competition and suggested CPC.",
+      "seedTerm": "Seed term",
+      "seedPlaceholder": "e.g. non-slip yoga mat",
+      "seedAsin": "Or ASIN",
+      "marketplace": "Marketplace",
+      "run": "Search",
+      "running": "Querying Amazon autocomplete + generating AI report…",
+      "summary": "Executive summary",
+      "autocomplete": "Amazon suggestions",
+      "tableTitle": "{{n}} keywords found",
+      "copyAll": "Copy all",
+      "kw": "Keyword",
+      "intent": "Intent",
+      "volume": "Volume",
+      "competition": "Competition",
+      "cpc": "CPC",
+      "longTail": "Long-tail",
+      "questions": "Buyer questions",
+      "negatives": "Negative keywords",
+      "errorSeedRequired": "Enter a term or an ASIN.",
+      "noProvider": "Connect your AI account in Settings.",
+      "genericError": "Could not generate the report."
+    },
+    "refunds": {
+      "title": "FBA Refund Recovery",
+      "intro": "We analyze your imported Amazon financial events and the AI detects missed reimbursements: lost inventory, duplicated fees, returns without refund, etc. We give you the exact text to open the case in Seller Support.",
+      "scanCardTitle": "Scan the last 18 months",
+      "scanCardBody": "Amazon allows opening cases for 18 months. This is the default scan window.",
+      "scanCta": "Scan now",
+      "scanning": "Analyzing financial events with AI…",
+      "events": "Events analyzed",
+      "suspicious": "Suspicious",
+      "estimated": "Estimated recoverable",
+      "action": "Seller Support action",
+      "openSeller": "Open Seller Central",
+      "allClean": "No missed reimbursements found in this period. Clean audit!",
+      "noData": "Import your settlement reports first.",
+      "noProvider": "Connect your AI account in Settings.",
+      "genericError": "Could not complete the scan.",
+      "cat": {
+        "lost": "Lost inventory",
+        "damaged": "Damaged inventory",
+        "return": "Return not refunded",
+        "fee": "Fee anomaly",
+        "duplicate": "Duplicate charge"
+      }
+    }
   }
 }

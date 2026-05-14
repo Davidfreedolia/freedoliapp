@@ -511,6 +511,47 @@
     }
   },
   "landing": {
+    "aiSuite": {
+      "eyebrow": "Nuevo · 6 herramientas IA + Extensión Chrome",
+      "titleStart": "La IA hace el trabajo aburrido.",
+      "titleEm": "Tú recuperas dinero real.",
+      "lede": "Conecta tu propia cuenta de IA (Anthropic, OpenAI, Gemini, Mistral, Groq, Ollama) y desbloquea una suite de herramientas pensadas para sellers FBA serios. Sin cuotas por análisis. Sin pintura sobre cartón.",
+      "tag": {
+        "topRoi": "Top ROI",
+        "unique": "Único",
+        "byok": "BYOK",
+        "byoc": "BYOC",
+        "new": "Nuevo"
+      },
+      "refund": {
+        "title": "Recuperación de dinero FBA, automatizada",
+        "unit": "recuperados en beta",
+        "text": "La IA escanea 18 meses de eventos Amazon: stock perdido, fees duplicadas, devoluciones sin reembolso, anomalías de cargos. Te damos el texto exacto para abrir el caso en Seller Support. Sin comisión sobre lo recuperado.",
+        "meta1": "Sin comisión",
+        "meta2": "Cubre 18 meses",
+        "meta3": "Con tu IA"
+      },
+      "quotes": {
+        "title": "Comparativa IA de presupuestos",
+        "text": "Drag-and-drop de los PDFs de proveedores. La IA ordena por precio, MOQ, lead time y payment terms, alerta de señales sospechosas y te da palancas de negociación concretas."
+      },
+      "listing": {
+        "title": "Optimizador de Listing",
+        "text": "Pega tu listing actual. La IA lo reescribe para SEO + conversión respetando los límites Amazon (200 / 250 / 2000 chars), con scoring por sección."
+      },
+      "keywords": {
+        "title": "Búsqueda de Keywords",
+        "text": "Autocomplete de Amazon + IA: 25-40 keywords por intención, volumen, competencia y CPC sugerido. Sin pagar Cerebro."
+      },
+      "keepa": {
+        "title": "Historial Keepa",
+        "text": "Precio, BSR, valoraciones y reviews en charts dentro de cada investigación. Si ya pagas Keepa, conecta tu clave y no te cuesta nada más."
+      },
+      "chrome": {
+        "title": "Extensión Chrome",
+        "text": "Captura cualquier ASIN de Amazon en un clic. 12 marketplaces. La página de investigación se abre con el producto ya precargado."
+      }
+    },
     "hero": {
       "title": "Gestiona tus operaciones de Amazon desde un solo lugar.",
       "subtitle": "El sistema operativo para negocios de producto que gestionan proveedores, pedidos de compra, inventario y beneficio.",
@@ -1196,7 +1237,11 @@
     "groupInventory": "Inventario",
     "groupFinance": "Finanzas",
     "groupIntelligence": "Inteligencia",
-    "groupSystem": "Sistema"
+    "groupTools": "Herramientas IA",
+    "groupSystem": "Sistema",
+    "listingOptimizer": "Optimizador Listing",
+    "keywordResearch": "Búsqueda Keywords",
+    "refundRecovery": "Recuperación dinero"
   },
   "dashboard": {
     "firstValue": {
@@ -2789,7 +2834,7 @@
     "subtitle": "Pipeline visual, calculadora de rentabilidad FBA, importación desde 16 herramientas y análisis IA. Todo integrado.",
     "cta_primary": "Empezar gratis",
     "cta_secondary": "Ver demo",
-    "badge": "🚀 Ahora en beta cerrada — plazas limitadas",
+    "badge": "Nuevo · 6 herramientas IA + Extensión Chrome",
     "stat1": {
       "value": "500+",
       "label": "Vendedores activos"
@@ -3405,5 +3450,82 @@
     "noLevers": "Sin palancas adicionales identificadas.",
     "noSteps": "Sin pasos adicionales.",
     "close": "Cerrar"
+  },
+  "common.copy": "Copiar",
+  "tools": {
+    "listing": {
+      "title": "Optimizador de Listing",
+      "intro": "Pega tu listing actual y la IA lo reescribirá para SEO + conversión respetando los límites de Amazon (200 / 250 / 2000 chars). Usa tu propia clave IA.",
+      "inputTitle": "Listing actual",
+      "outputTitle": "Versión optimizada",
+      "outputEmpty": "Pega tu listing y pulsa «Optimizar con IA». La IA generará título, bullets, descripción y keywords backend optimizados.",
+      "marketplace": "Marketplace",
+      "brand": "Marca (opcional)",
+      "titleField": "Título",
+      "titlePlaceholder": "Título actual del producto",
+      "bullets": "Bullet points (5)",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Descripción actual",
+      "targetKeywords": "Keywords objetivo (una por línea o separadas por comas)",
+      "backendKw": "Backend keywords",
+      "optimize": "Optimizar con IA",
+      "optimizing": "Optimizando con IA…",
+      "improvements": "Mejoras aplicadas",
+      "keywordCoverage": "Cobertura de keywords",
+      "used": "Usadas",
+      "missed": "Faltan",
+      "errorTitleRequired": "El título es obligatorio",
+      "noProvider": "Conecta tu cuenta de IA en Settings.",
+      "genericError": "El optimizador no ha podido completar la petición."
+    },
+    "keywords": {
+      "title": "Búsqueda de Keywords",
+      "intro": "Introduce un término o un ASIN. El sistema busca en el autocomplete de Amazon y tu IA genera 25-40 keywords agrupadas por intención, con volumen estimado, competencia y CPC sugerido.",
+      "seedTerm": "Término inicial",
+      "seedPlaceholder": "ej: esterilla yoga antideslizante",
+      "seedAsin": "O ASIN",
+      "marketplace": "Marketplace",
+      "run": "Buscar",
+      "running": "Buscando en Amazon autocomplete + generando report con IA…",
+      "summary": "Resumen ejecutivo",
+      "autocomplete": "Sugerencias Amazon",
+      "tableTitle": "{{n}} keywords encontradas",
+      "copyAll": "Copiar todas",
+      "kw": "Keyword",
+      "intent": "Intención",
+      "volume": "Volumen",
+      "competition": "Competencia",
+      "cpc": "CPC",
+      "longTail": "Long-tail",
+      "questions": "Preguntas de los compradores",
+      "negatives": "Negative keywords",
+      "errorSeedRequired": "Introduce un término o un ASIN.",
+      "noProvider": "Conecta tu cuenta de IA en Settings.",
+      "genericError": "No se ha podido generar el report."
+    },
+    "refunds": {
+      "title": "Recuperación de dinero FBA",
+      "intro": "Analizamos tus eventos financieros Amazon importados y la IA detecta reembolsos perdidos: stock no recuperado, fees duplicadas, devoluciones sin refund, etc. Te damos el texto exacto para abrir el caso en Seller Support.",
+      "scanCardTitle": "Scan de los últimos 18 meses",
+      "scanCardBody": "Amazon permite abrir casos durante 18 meses. Esta ventana es la que escaneamos por defecto.",
+      "scanCta": "Escanear ahora",
+      "scanning": "Analizando eventos financieros con IA…",
+      "events": "Eventos analizados",
+      "suspicious": "Sospechosos",
+      "estimated": "Estimación recuperable",
+      "action": "Acción en Seller Support",
+      "openSeller": "Abrir Seller Central",
+      "allClean": "No hemos encontrado reembolsos perdidos en este período. ¡Buena auditoría!",
+      "noData": "Importa primero tus settlement reports.",
+      "noProvider": "Conecta tu cuenta de IA en Settings.",
+      "genericError": "No se ha podido completar el scan.",
+      "cat": {
+        "lost": "Stock perdido",
+        "damaged": "Stock dañado",
+        "return": "Devolución no reembolsada",
+        "fee": "Anomalía fee",
+        "duplicate": "Cargo duplicado"
+      }
+    }
   }
 }

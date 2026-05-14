@@ -511,6 +511,47 @@
     }
   },
   "landing": {
+    "aiSuite": {
+      "eyebrow": "Nou · 6 eines IA + Extensió Chrome",
+      "titleStart": "L'IA fa la feina avorrida.",
+      "titleEm": "Tu recuperes diners reals.",
+      "lede": "Connecta el teu propi compte d'IA (Anthropic, OpenAI, Gemini, Mistral, Groq, Ollama) i desbloqueja una suite d'eines pensades per a sellers FBA seriosos. Sense quotes per anàlisi. Sense pintura sobre cartró.",
+      "tag": {
+        "topRoi": "Top ROI",
+        "unique": "Únic",
+        "byok": "BYOK",
+        "byoc": "BYOC",
+        "new": "Nou"
+      },
+      "refund": {
+        "title": "Recuperació de diners FBA, automatitzada",
+        "unit": "recuperats al beta",
+        "text": "L'IA escaneja 18 mesos d'events Amazon: estoc perdut, fees duplicades, devolucions sense reemborsament, anomalies de càrrecs. Et donem el text exacte per obrir el cas a Seller Support. Sense comissió sobre el recuperat.",
+        "meta1": "Sense comissió",
+        "meta2": "Cobreix 18 mesos",
+        "meta3": "Amb la teva IA"
+      },
+      "quotes": {
+        "title": "Comparativa IA de pressupostos",
+        "text": "Drag-and-drop dels PDFs dels proveïdors. La IA ordena per preu, MOQ, lead time i payment terms, alerta de senyals sospitosos i et dóna palanques de negociació concretes."
+      },
+      "listing": {
+        "title": "Optimitzador de Listing",
+        "text": "Enganxa el teu listing actual. L'IA el reescriu per a SEO + conversió respectant els límits Amazon (200 / 250 / 2000 chars), amb scoring per secció."
+      },
+      "keywords": {
+        "title": "Recerca de Keywords",
+        "text": "Autocomplete d'Amazon + IA: 25-40 keywords per intenció, volum, competència i CPC suggerit. Sense pagar Cerebro."
+      },
+      "keepa": {
+        "title": "Historial Keepa",
+        "text": "Preu, BSR, valoracions i reviews en charts dins de cada recerca. Si ja pagues Keepa, connecta la teva clau i no et costa res més."
+      },
+      "chrome": {
+        "title": "Extensió Chrome",
+        "text": "Captura qualsevol ASIN d'Amazon en un clic. 12 marketplaces. La pàgina de recerca s'obre amb el producte ja precarregat."
+      }
+    },
     "hero": {
       "title": "Gestiona les teves operacions d'Amazon des d'un sol lloc.",
       "subtitle": "El sistema operatiu per a negocis de producte que gestionen proveïdors, comandes de compra, inventari i benefici.",
@@ -1196,7 +1237,11 @@
     "groupInventory": "Inventari",
     "groupFinance": "Finances",
     "groupIntelligence": "Intel·ligència",
-    "groupSystem": "Sistema"
+    "groupTools": "Eines IA",
+    "groupSystem": "Sistema",
+    "listingOptimizer": "Optimitzador Listing",
+    "keywordResearch": "Recerca Keywords",
+    "refundRecovery": "Recuperació diners"
   },
   "dashboard": {
     "firstValue": {
@@ -2974,7 +3019,7 @@
     "subtitle": "Pipeline visual, calculadora de rendibilitat FBA, importació des de 16 eines i anàlisi IA. Tot integrat.",
     "cta_primary": "Comença gratis",
     "cta_secondary": "Veure demo",
-    "badge": "🚀 Ara en beta tancada — places limitades",
+    "badge": "Nou · 6 eines IA + Extensió Chrome",
     "stat1": {
       "value": "500+",
       "label": "Venedors actius"
@@ -3590,5 +3635,82 @@
     "noLevers": "No s'identifiquen palanques addicionals.",
     "noSteps": "Cap pas addicional.",
     "close": "Tancar"
+  },
+  "common.copy": "Copiar",
+  "tools": {
+    "listing": {
+      "title": "Optimitzador de Listing",
+      "intro": "Enganxa el teu listing actual i la IA el reescriurà per a SEO + conversió respectant els límits d'Amazon (200 / 250 / 2000 chars). Utilitza la teva pròpia clau IA.",
+      "inputTitle": "Listing actual",
+      "outputTitle": "Versió optimitzada",
+      "outputEmpty": "Enganxa el teu listing i clica «Optimitzar amb IA». L'IA generarà títol, bullets, descripció i keywords backend optimitzats.",
+      "marketplace": "Marketplace",
+      "brand": "Marca (opcional)",
+      "titleField": "Títol",
+      "titlePlaceholder": "Títol actual del producte",
+      "bullets": "Bullet points (5)",
+      "description": "Descripció",
+      "descriptionPlaceholder": "Descripció actual",
+      "targetKeywords": "Keywords objectiu (una per línia o separades per comes)",
+      "backendKw": "Backend keywords",
+      "optimize": "Optimitzar amb IA",
+      "optimizing": "Optimitzant amb IA…",
+      "improvements": "Millores aplicades",
+      "keywordCoverage": "Cobertura de keywords",
+      "used": "Usades",
+      "missed": "Falten",
+      "errorTitleRequired": "El títol és obligatori",
+      "noProvider": "Connecta el teu compte d'IA a Settings.",
+      "genericError": "L'optimitzador no ha pogut completar la petició."
+    },
+    "keywords": {
+      "title": "Recerca de Keywords",
+      "intro": "Introdueix un terme o un ASIN. El sistema cerca a l'autocomplete d'Amazon i la teva IA genera 25-40 keywords agrupades per intenció, amb volum estimat, competència i CPC suggerit.",
+      "seedTerm": "Terme inicial",
+      "seedPlaceholder": "ex: yoga mat antilliscant",
+      "seedAsin": "O ASIN",
+      "marketplace": "Marketplace",
+      "run": "Cercar",
+      "running": "Cercant a Amazon autocomplete + generant report amb IA…",
+      "summary": "Resum executiu",
+      "autocomplete": "Suggeriments Amazon",
+      "tableTitle": "{{n}} keywords trobades",
+      "copyAll": "Copiar totes",
+      "kw": "Keyword",
+      "intent": "Intenció",
+      "volume": "Volum",
+      "competition": "Competència",
+      "cpc": "CPC",
+      "longTail": "Long-tail",
+      "questions": "Preguntes dels compradors",
+      "negatives": "Negative keywords",
+      "errorSeedRequired": "Introdueix un terme o un ASIN.",
+      "noProvider": "Connecta el teu compte d'IA a Settings.",
+      "genericError": "No s'ha pogut generar el report."
+    },
+    "refunds": {
+      "title": "Recuperació de diners FBA",
+      "intro": "Analitzem els teus events financers Amazon importats i la IA detecta reembossaments perduts: estoc no recuperat, fees duplicades, devolucions sense refund, etc. Et donem el text exacte per obrir el cas a Seller Support.",
+      "scanCardTitle": "Scan dels últims 18 mesos",
+      "scanCardBody": "Amazon permet obrir casos durant 18 mesos. Aquesta finestra és la que escanegem per defecte.",
+      "scanCta": "Escanejar ara",
+      "scanning": "Analitzant events financers amb IA…",
+      "events": "Events analitzats",
+      "suspicious": "Sospitosos",
+      "estimated": "Estimació recuperable",
+      "action": "Acció a Seller Support",
+      "openSeller": "Obrir Seller Central",
+      "allClean": "No hem trobat reembossaments perduts en aquest període. Bona feina d'auditoria!",
+      "noData": "Importa primer els teus settlement reports.",
+      "noProvider": "Connecta el teu compte d'IA a Settings.",
+      "genericError": "No s'ha pogut completar el scan.",
+      "cat": {
+        "lost": "Estoc perdut",
+        "damaged": "Estoc fet malbé",
+        "return": "Devolució no reemborsada",
+        "fee": "Anomalia fee",
+        "duplicate": "Càrrec duplicat"
+      }
+    }
   }
 }

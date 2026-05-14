@@ -28,7 +28,10 @@ import {
   Link2,
   Sparkles,
   Database,
-  BookOpen
+  BookOpen,
+  Wand2,
+  Search as SearchIcon,
+  Banknote
 } from 'lucide-react'
 import Button from './Button'
 import { useApp } from '../context/AppContext'
@@ -184,6 +187,15 @@ const SIDEBAR_GROUPS = [
       { path: '/app/decisions', icon: Inbox, labelKey: 'nav.decisions', feature: 'decision_engine' },
       { path: '/app/automations', icon: Workflow, labelKey: 'nav.automations', feature: 'automations' },
       { path: '/app/analytics', icon: TrendingUp, labelKey: 'nav.analytics', feature: 'advanced_analytics' },
+    ],
+  },
+  {
+    id: 'tools',
+    labelKey: 'nav.groupTools',
+    items: [
+      { path: '/app/tools/listing-optimizer', icon: Wand2, labelKey: 'nav.listingOptimizer' },
+      { path: '/app/tools/keywords', icon: SearchIcon, labelKey: 'nav.keywordResearch' },
+      { path: '/app/tools/refunds', icon: Banknote, labelKey: 'nav.refundRecovery' },
     ],
   },
   {

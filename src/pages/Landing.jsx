@@ -25,6 +25,7 @@ import { BarChart2, Layout, Brain, Download, DollarSign, HelpCircle, Globe } fro
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '../styles/landing.css'
 import { TestimonialsCarousel } from '../components/landing/TestimonialsCarousel'
+import AiSuiteSection from '../components/landing/AiSuiteSection'
 
 /* ─── Static data ─────────────────────────────────────────────────────────── */
 
@@ -266,16 +267,45 @@ export default function Landing() {
 
             {/* text left */}
             <div className="col-12 col-md-6 text-white">
-              {/* eyebrow badge */}
+              {/* eyebrow badge — pulsing yellow dot, links to new AI suite section */}
               <div className="mb-3">
-                <span style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  background: 'rgba(110,203,195,0.18)', border: '1px solid rgba(110,203,195,0.4)',
-                  borderRadius: 20, padding: '5px 14px', fontSize: 13, fontWeight: 600,
-                  color: 'var(--brand-2)', letterSpacing: '0.01em',
-                }}>
+                <a
+                  href="#ai-suite"
+                  className="hero-badge-link"
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 8,
+                    background: 'rgba(244, 226, 122, 0.14)',
+                    border: '1px solid rgba(244, 226, 122, 0.42)',
+                    borderRadius: 999, padding: '6px 14px',
+                    fontSize: 12, fontWeight: 600,
+                    color: 'var(--soft-yellow, #F4E27A)',
+                    letterSpacing: '0.08em', textTransform: 'uppercase',
+                    fontFamily: '"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace',
+                    textDecoration: 'none',
+                    transition: 'background 200ms ease, border-color 200ms ease, transform 200ms ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(244, 226, 122, 0.22)'
+                    e.currentTarget.style.borderColor = 'rgba(244, 226, 122, 0.62)'
+                    e.currentTarget.style.transform = 'translateY(-1px)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(244, 226, 122, 0.14)'
+                    e.currentTarget.style.borderColor = 'rgba(244, 226, 122, 0.42)'
+                    e.currentTarget.style.transform = 'translateY(0)'
+                  }}
+                >
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      display: 'inline-block', width: 7, height: 7, borderRadius: '50%',
+                      background: 'var(--soft-yellow, #F4E27A)',
+                      boxShadow: '0 0 0 0 rgba(244, 226, 122, 0.65)',
+                      animation: 'ldPulse 1.8s ease-in-out infinite',
+                    }}
+                  />
                   {t('hero.badge')}
-                </span>
+                </a>
               </div>
 
               <h1 className="display-4 fw-bold mb-4">{t('hero.title')}</h1>
@@ -335,6 +365,10 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* ── 2.5. AI SUITE SHOWCASE — new centerpiece for the suite of AI
+              tools added in 2026-05. Editorial asymmetric layout. ───── */}
+      <AiSuiteSection />
 
       {/* ── 3. LOGOS STRIP (CANVI 2) ─────────────────────────────────────── */}
       <section
