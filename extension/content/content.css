@@ -1,0 +1,103 @@
+/* Floating action button injected on Amazon product pages.
+ * Visually anchored bottom-right with a comfortable safe-area so it never
+ * overlaps Amazon's own footer banners. Brand colors mirror Freedoliapp's
+ * design tokens (--brand-1 petrol, --brand-2 turquesa).
+ */
+
+#freedoliapp-fab {
+  position: fixed;
+  right: 24px;
+  bottom: 28px;
+  z-index: 2147483647; /* highest possible — beat any Amazon overlay */
+
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 11px 18px;
+  border: 1px solid rgba(31, 95, 99, 0.22);
+  border-radius: 999px;
+
+  background: linear-gradient(135deg, #1F5F63 0%, #2A7A7E 100%);
+  color: #F6F8F3;
+  font-family: 'Roboto', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+
+  box-shadow:
+    0 10px 30px rgba(15, 36, 38, 0.28),
+    0 2px 6px rgba(15, 36, 38, 0.18);
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease, background 200ms ease;
+
+  /* Reset Amazon-side button styles */
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+  text-decoration: none;
+  user-select: none;
+}
+
+#freedoliapp-fab:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #245E62 0%, #3A8F94 100%);
+  box-shadow:
+    0 16px 40px rgba(15, 36, 38, 0.34),
+    0 4px 10px rgba(15, 36, 38, 0.22);
+}
+
+#freedoliapp-fab:active {
+  transform: translateY(0);
+}
+
+#freedoliapp-fab:focus-visible {
+  box-shadow:
+    0 0 0 3px rgba(110, 203, 195, 0.6),
+    0 10px 30px rgba(15, 36, 38, 0.28);
+}
+
+#freedoliapp-fab .freedoliapp-fab__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: rgba(246, 248, 243, 0.16);
+  color: #F4E27A;
+}
+
+#freedoliapp-fab .freedoliapp-fab__label {
+  font-weight: 600;
+}
+
+#freedoliapp-fab .freedoliapp-fab__sub {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(246, 248, 243, 0.14);
+  color: #F6F8F3;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  font-family: 'Roboto Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}
+
+@media (max-width: 720px) {
+  #freedoliapp-fab {
+    right: 14px;
+    bottom: 14px;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  #freedoliapp-fab .freedoliapp-fab__sub {
+    display: none;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  #freedoliapp-fab {
+    background: linear-gradient(135deg, #1F5F63 0%, #3A8F94 100%);
+    border-color: rgba(110, 203, 195, 0.32);
+  }
+}

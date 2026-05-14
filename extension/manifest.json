@@ -1,0 +1,64 @@
+{
+  "manifest_version": 3,
+  "name": "Freedoliapp — Amazon FBA Scout",
+  "short_name": "Freedoliapp",
+  "version": "0.1.0",
+  "description": "Envia qualsevol ASIN d'Amazon al teu workspace Freedoliapp en un clic. Recerca de productes, anàlisi IA i decisions, integrats al teu flux.",
+  "default_locale": "ca",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "action": {
+    "default_title": "Enviar a Freedoliapp",
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.amazon.com/*",
+        "https://www.amazon.es/*",
+        "https://www.amazon.de/*",
+        "https://www.amazon.fr/*",
+        "https://www.amazon.it/*",
+        "https://www.amazon.co.uk/*",
+        "https://www.amazon.nl/*",
+        "https://www.amazon.pl/*",
+        "https://www.amazon.se/*",
+        "https://www.amazon.com.mx/*",
+        "https://www.amazon.ca/*",
+        "https://www.amazon.com.br/*"
+      ],
+      "js": ["content/content.js"],
+      "css": ["content/content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": ["storage", "activeTab"],
+  "host_permissions": [
+    "https://*.amazon.com/*",
+    "https://*.amazon.es/*",
+    "https://*.amazon.de/*",
+    "https://*.amazon.fr/*",
+    "https://*.amazon.it/*",
+    "https://*.amazon.co.uk/*",
+    "https://*.amazon.nl/*",
+    "https://*.amazon.pl/*",
+    "https://*.amazon.se/*",
+    "https://*.amazon.com.mx/*",
+    "https://*.amazon.ca/*",
+    "https://*.amazon.com.br/*"
+  ],
+  "homepage_url": "https://freedoliapp.com"
+}

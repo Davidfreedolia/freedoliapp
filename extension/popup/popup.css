@@ -1,0 +1,229 @@
+/* Popup palette mirrors the Freedoliapp web app for visual continuity. */
+
+:root {
+  --brand-1: #1F5F63;
+  --brand-2: #6ECBC3;
+  --bg-app:  #F6F8F3;
+  --surface: #FFFFFF;
+  --text-1:  #243333;
+  --text-2:  #5F7476;
+  --border:  #D8E1DE;
+  --coral:   #F26C6C;
+  --warning: #F0B429;
+  --success: #3FBF9A;
+  --soft-yellow: #F4E27A;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 320px;
+  font-family: 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  background: var(--bg-app);
+  color: var(--text-1);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+/* ────────── Header ────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, var(--brand-1) 0%, #2A7A7E 100%);
+  color: var(--bg-app);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand__logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(246, 248, 243, 0.16);
+  color: var(--soft-yellow);
+}
+
+.brand__name {
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+}
+
+.header__link {
+  font-size: 12px;
+  color: rgba(246, 248, 243, 0.92);
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(246, 248, 243, 0.4);
+  padding-bottom: 1px;
+  transition: color 150ms ease, border-color 150ms ease;
+}
+
+.header__link:hover {
+  color: var(--soft-yellow);
+  border-color: var(--soft-yellow);
+}
+
+/* ────────── Main ────────── */
+.main {
+  padding: 16px;
+}
+
+.state {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.kicker {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+
+.asin-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.asin {
+  flex: 0 0 auto;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(31, 95, 99, 0.10);
+  color: var(--brand-1);
+  font-family: 'Roboto Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.chip {
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(110, 203, 195, 0.18);
+  color: var(--brand-1);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.title {
+  font-size: 13px;
+  color: var(--text-1);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.price {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--brand-1);
+}
+
+.empty-body {
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+
+/* ────────── Actions ────────── */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: transform 120ms ease, background 150ms ease, box-shadow 150ms ease;
+  text-decoration: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.btn-primary {
+  background: var(--brand-1);
+  color: var(--bg-app);
+  border-color: var(--brand-1);
+  box-shadow: 0 6px 14px rgba(31, 95, 99, 0.22);
+}
+
+.btn-primary:hover {
+  background: #184B4F;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(31, 95, 99, 0.28);
+}
+
+.btn-secondary {
+  background: var(--surface);
+  color: var(--brand-1);
+  border-color: var(--border);
+}
+
+.btn-secondary:hover {
+  border-color: var(--brand-1);
+  background: rgba(31, 95, 99, 0.04);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* ────────── Footer ────────── */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: 11px;
+}
+
+.footer a {
+  color: var(--text-2);
+  text-decoration: none;
+}
+
+.footer a:hover {
+  color: var(--brand-1);
+}
+
+.footer__version {
+  font-family: 'Roboto Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  letter-spacing: 0.04em;
+}

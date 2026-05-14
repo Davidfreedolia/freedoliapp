@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Sparkles, Clock, Search, Trash2 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
@@ -10,6 +11,7 @@ import ResearchReport from '../components/research/ResearchReport'
 export default function Research() {
   const { t } = useTranslation()
   const { activeOrgId, darkMode } = useApp()
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const [reports, setReports] = useState([])
   const [loading, setLoading] = useState(false)
@@ -17,6 +19,29 @@ export default function Research() {
   const [selected, setSelected] = useState(null)
   const [searchText, setSearchText] = useState('')
   const [error, setError] = useState(null)
+
+  // Deep-link from Chrome extension (or any external link):
+  //   /app/research?asin=B0XXXXXXXX&marketplace=ES&description=...&autostart=1
+  // Reads once on mount, opens the wizard with the prefilled values, then
+  // clears the params so refresh doesn't re-trigger.
+  const [deepLink] = useState(() => {
+    const asin = (searchParams.get('asin') || '').toUpperCase()
+    const marketplace = (searchParams.get('marketplace') || 'ES').toUpperCase()
+    const description = searchParams.get('description') || ''
+    const autostart = searchParams.get('autostart') === '1'
+    return /^B0[A-Z0-9]{8}$/.test(asin) || description.trim()
+      ? { asin: /^B0[A-Z0-9]{8}$/.test(asin) ? asin : '', marketplace, description, autostart }
+      : null
+  })
+
+  useEffect(() => {
+    if (deepLink) {
+      setWizardOpen(true)
+      // Strip params so a refresh doesn't keep firing.
+      setSearchParams({}, { replace: true })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const loadReports = async () => {
     if (!activeOrgId) return
@@ -192,6 +217,9 @@ export default function Research() {
         isOpen={wizardOpen}
         onClose={() => setWizardOpen(false)}
         darkMode={darkMode}
+        initialAsin={deepLink?.asin || ''}
+        initialDescription={deepLink?.description || ''}
+        initialMarketplace={deepLink?.marketplace || 'ES'}
         onCompleted={() => { loadReports() }}
       />
     </div>
