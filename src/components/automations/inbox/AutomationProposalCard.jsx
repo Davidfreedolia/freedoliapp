@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import Card from '../../ui/Card'
 import Button from '../../ui/Button'
 import Badge from '../../ui/Badge'
@@ -17,6 +18,7 @@ function initialsFromIdentity(identity) {
 }
 
 export default function AutomationProposalCard({ proposal, permissions, onOpen, onApprove, onReject }) {
+  const { t } = useTranslation()
   const canApprove = Boolean(permissions?.canApprove)
   const canReject = Boolean(permissions?.canReject)
 
@@ -24,7 +26,7 @@ export default function AutomationProposalCard({ proposal, permissions, onOpen, 
   const riskVariant = mapRiskBadgeVariant(riskBand)
 
   const decisionTitle = proposal?.decision?.title ?? proposal?.decision?.decisionType ?? '—'
-  const decisionSource = proposal?.decision?.id ? `Decision ${proposal.decision.id}` : '—'
+  const decisionSource = proposal?.decision?.id ? t('automations.proposalCard.decisionId', { id: proposal.decision.id }) : '—'
 
   return (
     <Card className="ui-card--elevated" style={{ padding: 16 }}>
@@ -44,7 +46,7 @@ export default function AutomationProposalCard({ proposal, permissions, onOpen, 
             color: 'var(--text-2, #6b7280)',
             flex: '0 0 auto',
           }}
-          aria-label="Thumbnail"
+          aria-label={t('automations.proposalCard.thumbnail')}
         >
           {initialsFromIdentity(proposal?.productIdentity)}
         </div>
@@ -59,30 +61,30 @@ export default function AutomationProposalCard({ proposal, permissions, onOpen, 
                 {proposal?.productIdentity ?? '—'}
               </div>
               <div style={{ marginTop: 6, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                <Badge variant={riskVariant}>{riskBand ?? 'risk: —'}</Badge>
+                <Badge variant={riskVariant}>{riskBand ?? t('automations.proposalCard.riskUnknown')}</Badge>
                 <Badge variant="neutral">{proposal?.proposalStatus ?? '—'}</Badge>
               </div>
             </div>
 
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
               <Button variant="secondary" size="sm" onClick={() => onOpen?.(proposal)}>
-                Open
+                {t('common.buttons.open')}
               </Button>
               <Button variant="primary" size="sm" disabled={!canApprove} onClick={() => onApprove?.(proposal)}>
-                Approve
+                {t('automations.common.approve')}
               </Button>
               <Button variant="danger" size="sm" disabled={!canReject} onClick={() => onReject?.(proposal)}>
-                Reject
+                {t('automations.common.reject')}
               </Button>
             </div>
           </div>
 
           <div style={{ marginTop: 10, fontSize: 13, color: 'var(--text-2, #6b7280)' }}>
             <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <strong style={{ color: 'var(--text-1, #111827)' }}>Decision</strong>: {decisionTitle}
+              <strong style={{ color: 'var(--text-1, #111827)' }}>{t('automations.proposalCard.decision')}</strong>: {decisionTitle}
             </div>
             <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <strong style={{ color: 'var(--text-1, #111827)' }}>Source</strong>: {decisionSource}
+              <strong style={{ color: 'var(--text-1, #111827)' }}>{t('automations.proposalCard.source')}</strong>: {decisionSource}
             </div>
           </div>
 

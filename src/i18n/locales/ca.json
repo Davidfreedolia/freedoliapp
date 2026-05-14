@@ -1553,7 +1553,13 @@
     "activity": {
       "title": "Activitat d'automatitzacions",
       "subtitle": "Esdeveniments recents de propostes d'automatització de l'org {{orgId}}.",
-      "empty": "No hi ha esdeveniments recents."
+      "empty": "No hi ha esdeveniments recents.",
+      "proposalLine": "proposta {{id}}",
+      "executionLine": "execució {{id}}"
+    },
+    "activityFilters": {
+      "eventType": "Tipus d'esdeveniment",
+      "allEvents": "Tots els esdeveniments"
     },
     "analytics": {
       "title": "Analítica d'automatitzacions",
@@ -1631,6 +1637,13 @@
         "running": "executant",
         "queued": "en cua"
       }
+    },
+    "proposalCard": {
+      "thumbnail": "Miniatura",
+      "riskUnknown": "risc: —",
+      "decision": "Decisió",
+      "source": "Origen",
+      "decisionId": "Decisió {{id}}"
     }
   },
   "projectDetail": {

@@ -1353,7 +1353,13 @@
     "activity": {
       "title": "Automation Activity",
       "subtitle": "Recent automation proposal events for org {{orgId}}.",
-      "empty": "No recent events."
+      "empty": "No recent events.",
+      "proposalLine": "proposal {{id}}",
+      "executionLine": "execution {{id}}"
+    },
+    "activityFilters": {
+      "eventType": "Event type",
+      "allEvents": "All events"
     },
     "analytics": {
       "title": "Automation analytics",
@@ -1431,6 +1437,13 @@
         "running": "running",
         "queued": "queued"
       }
+    },
+    "proposalCard": {
+      "thumbnail": "Thumbnail",
+      "riskUnknown": "risk: —",
+      "decision": "Decision",
+      "source": "Source",
+      "decisionId": "Decision {{id}}"
     }
   },
   "projectDetail": {

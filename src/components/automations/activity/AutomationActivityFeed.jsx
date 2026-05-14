@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import Card from '../../ui/Card'
 import Badge from '../../ui/Badge'
 
@@ -11,9 +12,10 @@ function eventVariant(type) {
 }
 
 export default function AutomationActivityFeed({ events }) {
+  const { t } = useTranslation()
   const list = Array.isArray(events) ? events : []
   if (list.length === 0) {
-    return <div style={{ padding: 16, color: 'var(--text-2, #6b7280)' }}>No activity events.</div>
+    return <div style={{ padding: 16, color: 'var(--text-2, #6b7280)' }}>{t('automations.activity.empty')}</div>
   }
 
   return (
@@ -24,8 +26,8 @@ export default function AutomationActivityFeed({ events }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
               <Badge variant={eventVariant(ev.eventType)}>{ev.eventType}</Badge>
               <div style={{ fontSize: 13, color: 'var(--text-2, #6b7280)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                proposal {ev.proposalId}
-                {ev.executionId ? ` · execution ${ev.executionId}` : ''}
+                {t('automations.activity.proposalLine', { id: ev.proposalId })}
+                {ev.executionId ? ` · ${t('automations.activity.executionLine', { id: ev.executionId })}` : ''}
               </div>
             </div>
             <div style={{ fontSize: 12, color: 'var(--text-2, #6b7280)' }}>
@@ -37,4 +39,3 @@ export default function AutomationActivityFeed({ events }) {
     </div>
   )
 }
-

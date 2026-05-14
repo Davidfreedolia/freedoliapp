@@ -1368,7 +1368,13 @@
     "activity": {
       "title": "Actividad de automatizaciones",
       "subtitle": "Eventos recientes de propuestas de automatización de la org {{orgId}}.",
-      "empty": "No hay eventos recientes."
+      "empty": "No hay eventos recientes.",
+      "proposalLine": "propuesta {{id}}",
+      "executionLine": "ejecución {{id}}"
+    },
+    "activityFilters": {
+      "eventType": "Tipo de evento",
+      "allEvents": "Todos los eventos"
     },
     "analytics": {
       "title": "Analítica de automatizaciones",
@@ -1446,6 +1452,13 @@
         "running": "ejecutando",
         "queued": "en cola"
       }
+    },
+    "proposalCard": {
+      "thumbnail": "Miniatura",
+      "riskUnknown": "riesgo: —",
+      "decision": "Decisión",
+      "source": "Origen",
+      "decisionId": "Decisión {{id}}"
     }
   },
   "projectDetail": {

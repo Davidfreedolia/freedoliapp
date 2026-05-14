@@ -1,10 +1,12 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import AutomationProposalCard from './AutomationProposalCard'
 
 export default function AutomationProposalList({ proposals, permissions, onOpen, onApprove, onReject }) {
+  const { t } = useTranslation()
   const list = Array.isArray(proposals) ? proposals : []
   if (list.length === 0) {
-    return <div style={{ padding: 16, color: 'var(--text-2, #6b7280)' }}>No proposals found.</div>
+    return <div style={{ padding: 16, color: 'var(--text-2, #6b7280)' }}>{t('automations.inbox.empty')}</div>
   }
 
   return (
@@ -22,4 +24,3 @@ export default function AutomationProposalList({ proposals, permissions, onOpen,
     </div>
   )
 }
-
