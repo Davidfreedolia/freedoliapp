@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useApp } from '../../context/AppContext'
 import { getDecisionInboxPage } from '../../lib/decisions/getDecisionInboxPage'
 import { Link } from 'react-router-dom'
@@ -6,6 +7,7 @@ import { Link } from 'react-router-dom'
 const MAX_ITEMS = 3
 
 export default function HomeTopDecisions() {
+  const { t } = useTranslation()
   const { activeOrgId } = useApp()
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(false)
@@ -43,22 +45,22 @@ export default function HomeTopDecisions() {
   return (
     <div className="dashboard-home-card dashboard-home-card--list">
       <div className="dashboard-home-card__header">
-        <div className="dashboard-home-card__title">Top Decisions</div>
+        <div className="dashboard-home-card__title">{t('home.topDecisions.title')}</div>
         <Link to="/app/decisions" className="dashboard-home-card__cta">
-          View all decisions
+          {t('home.topDecisions.cta')}
         </Link>
       </div>
       {loading ? (
-        <div className="dashboard-home-card__placeholder">Loading…</div>
+        <div className="dashboard-home-card__placeholder">{t('common.loading')}</div>
       ) : items.length === 0 ? (
-        <div className="dashboard-home-card__placeholder">No high-priority decisions right now.</div>
+        <div className="dashboard-home-card__placeholder">{t('home.topDecisions.empty')}</div>
       ) : (
         <ul className="dashboard-home-card__list">
           {items.map((item) => (
             <li key={item.id} className="dashboard-home-card__listRow dashboard-home-card__listRow--stacked">
               <div className="dashboard-home-card__listPrimary">{item.title}</div>
               <div className="dashboard-home-card__metaWrap">
-                <span>{item.severity ? `Severity: ${item.severity}` : null}</span>
+                <span>{item.severity ? `${t('home.topDecisions.severityPrefix')} ${item.severity}` : null}</span>
                 {item.explanation && (
                   <span className="truncate" title={item.explanation}>
                     {item.explanation}
@@ -72,4 +74,3 @@ export default function HomeTopDecisions() {
     </div>
   )
 }
-

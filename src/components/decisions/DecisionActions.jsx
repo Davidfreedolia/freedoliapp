@@ -1,6 +1,8 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 
 export default function DecisionActions({ item, onAction, loading }) {
+  const { t } = useTranslation()
   if (!item) return null
 
   const { status } = item
@@ -17,23 +19,22 @@ export default function DecisionActions({ item, onAction, loading }) {
         disabled={!canAcknowledge || disabled}
         onClick={() => onAction('acknowledged')}
       >
-        Acknowledge
+        {t('decisionActions.acknowledge')}
       </button>
       <button
         type="button"
         disabled={!canAct || disabled}
         onClick={() => onAction('acted')}
       >
-        Mark as done
+        {t('decisionActions.markAsDone')}
       </button>
       <button
         type="button"
         disabled={!canDismiss || disabled}
         onClick={() => onAction('dismissed')}
       >
-        Dismiss
+        {t('decisionActions.dismiss')}
       </button>
     </div>
   )
 }
-

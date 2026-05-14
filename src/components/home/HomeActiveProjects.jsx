@@ -1,27 +1,29 @@
 /**
  * D21.6 — Active sourcing projects per la Home.
- * Dades reals de projects.active del composador (useProjectsListState + filterActiveProjects).
- * Màxim 5; nom, status, metadada útil (updated_at).
  */
+import { useTranslation } from 'react-i18next'
+
 const MAX_ITEMS = 5
 
-function formatDate(v) {
+function formatDate(v, lng) {
   if (!v) return null
   try {
-    return new Date(v).toLocaleDateString('ca-ES', { day: 'numeric', month: 'short' })
+    const locale = lng === 'es' ? 'es-ES' : lng === 'en' ? 'en-US' : 'ca-ES'
+    return new Date(v).toLocaleDateString(locale, { day: 'numeric', month: 'short' })
   } catch {
     return null
   }
 }
 
 export default function HomeActiveProjects({ projects = [], loading }) {
+  const { t, i18n } = useTranslation()
   const list = Array.isArray(projects) ? projects.slice(0, MAX_ITEMS) : []
 
   if (loading) {
     return (
       <div style={styles.wrap}>
-        <div style={styles.title}>Active sourcing projects</div>
-        <div style={styles.placeholder}>Carregant…</div>
+        <div style={styles.title}>{t('home.activeProjects.title')}</div>
+        <div style={styles.placeholder}>{t('common.loading')}</div>
       </div>
     )
   }
@@ -29,23 +31,23 @@ export default function HomeActiveProjects({ projects = [], loading }) {
   if (list.length === 0) {
     return (
       <div style={styles.wrap}>
-        <div style={styles.title}>Active sourcing projects</div>
-        <div style={styles.placeholder}>No hi ha projectes actius.</div>
+        <div style={styles.title}>{t('home.activeProjects.title')}</div>
+        <div style={styles.placeholder}>{t('home.activeProjects.empty')}</div>
       </div>
     )
   }
 
   return (
     <div style={styles.wrap}>
-      <div style={styles.title}>Active sourcing projects</div>
+      <div style={styles.title}>{t('home.activeProjects.title')}</div>
       <ul style={styles.list}>
         {list.map((p) => (
           <li key={p.id} style={styles.row}>
             <div style={styles.name}>{p.name || '—'}</div>
             <div style={styles.meta}>
               {p.status != null && p.status !== '' && <span style={styles.status}>{p.status}</span>}
-              {formatDate(p.updated_at) && (
-                <span style={styles.date}>{formatDate(p.updated_at)}</span>
+              {formatDate(p.updated_at, i18n.language) && (
+                <span style={styles.date}>{formatDate(p.updated_at, i18n.language)}</span>
               )}
             </div>
           </li>

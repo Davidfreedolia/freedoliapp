@@ -1076,10 +1076,10 @@ export default function Dashboard() {
                     </button>
                   </div>
                   <div className="po-checklist">
-                    <span className="fd-badge fd-badge--neutral">Etiquetatge</span>
-                    <span className="fd-badge fd-badge--neutral">Packaging</span>
+                    <span className="fd-badge fd-badge--neutral">{t('dashboard.poChecklist.labelling')}</span>
+                    <span className="fd-badge fd-badge--neutral">{t('dashboard.poChecklist.packaging')}</span>
                     <span className="fd-badge fd-badge--neutral">FNSKU</span>
-                    <span className="fd-badge fd-badge--neutral">Cartons</span>
+                    <span className="fd-badge fd-badge--neutral">{t('dashboard.poChecklist.cartons')}</span>
                   </div>
                 </div>
               ))}

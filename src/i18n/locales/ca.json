@@ -326,6 +326,47 @@
     "profitTrend": {
       "title": "Tendència de benefici (30d)",
       "empty": "Sense dades de tendència."
+    },
+    "activeProjects": {
+      "title": "Projectes de sourcing actius",
+      "empty": "No hi ha projectes actius."
+    },
+    "reorderCandidates": {
+      "title": "Candidats a reposició",
+      "empty": "No cal cap reposició ara mateix.",
+      "lowConfidence": "(confiança baixa)",
+      "reorderLabel": "Reposició:",
+      "reorderTooltip": "Unitats de reposició suggerides",
+      "stockoutIn": "Trencament d'estoc en:",
+      "stock": "Estoc:",
+      "incoming": "Entrant:",
+      "day": "{{n}} dia",
+      "days": "{{n}} dies"
+    },
+    "topAsins": {
+      "title": "Top ASINs",
+      "empty": "No hi ha dades de productes."
+    },
+    "topDecisions": {
+      "title": "Decisions destacades",
+      "cta": "Veure totes les decisions",
+      "empty": "No hi ha decisions d'alta prioritat ara mateix.",
+      "severityPrefix": "Severitat:"
+    },
+    "alerts": {
+      "marginDrop": "caiguda",
+      "daysOfStock": "dies",
+      "defaultEmpty": "Sense alertes."
+    },
+    "billingUsage": {
+      "title": "Ús del pla",
+      "empty": "No hi ha dades de facturació.",
+      "plan": "Pla",
+      "status": "Estat",
+      "trialEnds": "Final del trial",
+      "periodEnds": "Final del període",
+      "seats": "Usuaris",
+      "projects": "Projectes"
     }
   },
   "financesPage": {
@@ -1101,24 +1142,29 @@
       "missing": "Falten"
     },
     "waitingManufacturer": {
-      "title": "Waiting Manufacturer",
+      "title": "Esperant el fabricant",
       "empty": "Tots els packs enviats al fabricant. Res bloquejat."
     },
+    "poChecklist": {
+      "labelling": "Etiquetatge",
+      "packaging": "Packaging",
+      "cartons": "Cartrons"
+    },
     "posNotAmazonReady": {
-      "title": "POs Not Amazon Ready",
+      "title": "POs no preparades per Amazon",
       "empty": "Totes les POs estan llestes per Amazon"
     },
     "shipmentsInTransit": {
-      "title": "Shipments In Transit",
+      "title": "Enviaments en trànsit",
       "empty": "Tots els enviaments entregats. Tot al dia.",
       "tableNotExists": "El seguiment d'enviaments no està configurat encara"
     },
     "researchNoDecision": {
-      "title": "Research No Decision",
+      "title": "Recerca sense decisió",
       "empty": "No hi ha recerca pendent. Bon treball."
     },
     "staleTracking": {
-      "title": "Stale Tracking",
+      "title": "Seguiment desactualitzat",
       "empty": "Tots els trackings actualitzats"
     },
     "tasks": {
@@ -1486,6 +1532,49 @@
   },
   "decisionsInbox": {
     "title": "Safata de decisions"
+  },
+  "alertsBadge": {
+    "title": "Alertes ({{count}})",
+    "more": "+{{count}} més",
+    "types": {
+      "pack": "Pack",
+      "shipment": "Enviament",
+      "research": "Recerca"
+    }
+  },
+  "decisionActions": {
+    "acknowledge": "Reconèixer",
+    "markAsDone": "Marcar com a fet",
+    "dismiss": "Descartar"
+  },
+  "decisionFilters": {
+    "status": {
+      "openAck": "Obertes + Reconegudes",
+      "openOnly": "Només obertes",
+      "all": "Tots els estats",
+      "acted": "Actuades",
+      "dismissed": "Descartades",
+      "expired": "Caducades"
+    },
+    "type": {
+      "all": "Tots els tipus",
+      "reorder": "Reposició"
+    },
+    "severity": {
+      "all": "Totes les severitats",
+      "high": "Alta",
+      "medium": "Mitjana",
+      "low": "Baixa"
+    },
+    "confidence": {
+      "all": "Tota la confiança",
+      "high": "Alta",
+      "medium": "Mitjana",
+      "low": "Baixa"
+    }
+  },
+  "decisionNotificationItem": {
+    "createTask": "Crear tasca"
   },
   "decisionDetail": {
     "selectPrompt": "Selecciona una decisió per veure els detalls.",

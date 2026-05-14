@@ -326,6 +326,47 @@
     "profitTrend": {
       "title": "Profit trend (30d)",
       "empty": "No trend data yet."
+    },
+    "activeProjects": {
+      "title": "Active sourcing projects",
+      "empty": "No active projects."
+    },
+    "reorderCandidates": {
+      "title": "Reorder candidates",
+      "empty": "No reorder actions needed right now.",
+      "lowConfidence": "(low confidence)",
+      "reorderLabel": "Reorder:",
+      "reorderTooltip": "Suggested reorder units",
+      "stockoutIn": "Stockout in:",
+      "stock": "Stock:",
+      "incoming": "Incoming:",
+      "day": "{{n}} day",
+      "days": "{{n}} days"
+    },
+    "topAsins": {
+      "title": "Top ASINs",
+      "empty": "No product data."
+    },
+    "topDecisions": {
+      "title": "Top decisions",
+      "cta": "View all decisions",
+      "empty": "No high-priority decisions right now.",
+      "severityPrefix": "Severity:"
+    },
+    "alerts": {
+      "marginDrop": "drop",
+      "daysOfStock": "days",
+      "defaultEmpty": "No alerts."
+    },
+    "billingUsage": {
+      "title": "Plan usage",
+      "empty": "No billing data.",
+      "plan": "Plan",
+      "status": "Status",
+      "trialEnds": "Trial ends",
+      "periodEnds": "Period ends",
+      "seats": "Seats",
+      "projects": "Projects"
     }
   },
   "financesPage": {
@@ -1033,8 +1074,13 @@
     "layoutSaveError": "Error saving layout",
     "dragToMove": "Drag to move",
     "waitingManufacturer": {
-      "title": "Waiting Manufacturer",
+      "title": "Waiting on manufacturer",
       "empty": "All manufacturer packs sent. Nothing blocked."
+    },
+    "poChecklist": {
+      "labelling": "Labelling",
+      "packaging": "Packaging",
+      "cartons": "Cartons"
     },
     "posNotAmazonReady": {
       "title": "POs Not Amazon Ready",
@@ -1286,6 +1332,49 @@
   },
   "decisionsInbox": {
     "title": "Decision Inbox"
+  },
+  "alertsBadge": {
+    "title": "Alerts ({{count}})",
+    "more": "+{{count}} more",
+    "types": {
+      "pack": "Pack",
+      "shipment": "Shipment",
+      "research": "Research"
+    }
+  },
+  "decisionActions": {
+    "acknowledge": "Acknowledge",
+    "markAsDone": "Mark as done",
+    "dismiss": "Dismiss"
+  },
+  "decisionFilters": {
+    "status": {
+      "openAck": "Open + Acknowledged",
+      "openOnly": "Open only",
+      "all": "All statuses",
+      "acted": "Acted",
+      "dismissed": "Dismissed",
+      "expired": "Expired"
+    },
+    "type": {
+      "all": "All types",
+      "reorder": "Reorder"
+    },
+    "severity": {
+      "all": "All severities",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "confidence": {
+      "all": "All confidence",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    }
+  },
+  "decisionNotificationItem": {
+    "createTask": "Create task"
   },
   "decisionDetail": {
     "selectPrompt": "Select a decision to view details.",

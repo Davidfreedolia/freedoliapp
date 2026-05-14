@@ -326,6 +326,47 @@
     "profitTrend": {
       "title": "Tendencia de beneficio (30d)",
       "empty": "Sin datos de tendencia."
+    },
+    "activeProjects": {
+      "title": "Proyectos de sourcing activos",
+      "empty": "No hay proyectos activos."
+    },
+    "reorderCandidates": {
+      "title": "Candidatos a reposición",
+      "empty": "No se necesita reponer nada ahora mismo.",
+      "lowConfidence": "(confianza baja)",
+      "reorderLabel": "Reposición:",
+      "reorderTooltip": "Unidades de reposición sugeridas",
+      "stockoutIn": "Rotura de stock en:",
+      "stock": "Stock:",
+      "incoming": "Entrante:",
+      "day": "{{n}} día",
+      "days": "{{n}} días"
+    },
+    "topAsins": {
+      "title": "Top ASINs",
+      "empty": "No hay datos de productos."
+    },
+    "topDecisions": {
+      "title": "Decisiones destacadas",
+      "cta": "Ver todas las decisiones",
+      "empty": "No hay decisiones de alta prioridad ahora mismo.",
+      "severityPrefix": "Severidad:"
+    },
+    "alerts": {
+      "marginDrop": "caída",
+      "daysOfStock": "días",
+      "defaultEmpty": "Sin alertas."
+    },
+    "billingUsage": {
+      "title": "Uso del plan",
+      "empty": "No hay datos de facturación.",
+      "plan": "Plan",
+      "status": "Estado",
+      "trialEnds": "Fin del trial",
+      "periodEnds": "Fin del periodo",
+      "seats": "Usuarios",
+      "projects": "Proyectos"
     }
   },
   "financesPage": {
@@ -1101,8 +1142,13 @@
       "missing": "Faltan"
     },
     "waitingManufacturer": {
-      "title": "Esperando Fabricante",
+      "title": "Esperando al fabricante",
       "empty": "Todos los packs del fabricante enviados. Nada bloqueado."
+    },
+    "poChecklist": {
+      "labelling": "Etiquetado",
+      "packaging": "Packaging",
+      "cartons": "Cajas"
     },
     "posNotAmazonReady": {
       "title": "POs No Preparadas para Amazon",
@@ -1301,6 +1347,49 @@
   },
   "decisionsInbox": {
     "title": "Bandeja de decisiones"
+  },
+  "alertsBadge": {
+    "title": "Alertas ({{count}})",
+    "more": "+{{count}} más",
+    "types": {
+      "pack": "Pack",
+      "shipment": "Envío",
+      "research": "Investigación"
+    }
+  },
+  "decisionActions": {
+    "acknowledge": "Reconocer",
+    "markAsDone": "Marcar como hecho",
+    "dismiss": "Descartar"
+  },
+  "decisionFilters": {
+    "status": {
+      "openAck": "Abiertas + Reconocidas",
+      "openOnly": "Solo abiertas",
+      "all": "Todos los estados",
+      "acted": "Actuadas",
+      "dismissed": "Descartadas",
+      "expired": "Caducadas"
+    },
+    "type": {
+      "all": "Todos los tipos",
+      "reorder": "Reposición"
+    },
+    "severity": {
+      "all": "Todas las severidades",
+      "high": "Alta",
+      "medium": "Media",
+      "low": "Baja"
+    },
+    "confidence": {
+      "all": "Toda la confianza",
+      "high": "Alta",
+      "medium": "Media",
+      "low": "Baja"
+    }
+  },
+  "decisionNotificationItem": {
+    "createTask": "Crear tarea"
   },
   "decisionDetail": {
     "selectPrompt": "Selecciona una decisión para ver los detalles.",

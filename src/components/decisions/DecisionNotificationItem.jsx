@@ -1,12 +1,14 @@
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 const severityColors = {
-  high: 'var(--status-critical, #b91c1c)',
-  medium: 'var(--status-warning, #d97706)',
-  low: 'var(--status-info, #2563eb)',
+  high: 'var(--danger-1, #E55353)',
+  medium: 'var(--warning-1, #F0B429)',
+  low: 'var(--brand-1, #1F5F63)',
 }
 
 export default function DecisionNotificationItem({ item, onClick, onCreateTask }) {
+  const { t } = useTranslation()
   const [creatingTask, setCreatingTask] = useState(false)
   if (!item) return null
   const color = severityColors[item.severity] || severityColors.low
@@ -29,9 +31,9 @@ export default function DecisionNotificationItem({ item, onClick, onCreateTask }
       style={{
         padding: '8px 10px',
         borderRadius: 8,
-        border: '1px solid var(--border-1, #1f2933)',
+        border: '1px solid var(--border-1, #D8E1DE)',
         marginBottom: 4,
-        background: 'var(--surface-bg-1, #0f172a)',
+        background: 'var(--surface-bg, #ffffff)',
       }}
     >
       <button
@@ -75,7 +77,7 @@ export default function DecisionNotificationItem({ item, onClick, onCreateTask }
         <div
           style={{
             fontSize: 11,
-            color: 'var(--text-secondary, #6b7280)',
+            color: 'var(--text-2, #5F7476)',
             display: 'flex',
             justifyContent: 'space-between',
             gap: 8,
@@ -101,7 +103,7 @@ export default function DecisionNotificationItem({ item, onClick, onCreateTask }
             cursor: creatingTask ? 'wait' : 'pointer',
           }}
         >
-          {creatingTask ? '…' : 'Create task'}
+          {creatingTask ? '…' : t('decisionNotificationItem.createTask')}
         </button>
       )}
     </div>

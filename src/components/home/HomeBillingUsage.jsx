@@ -1,12 +1,13 @@
 /**
  * D21.6 — Billing usage per la Home.
- * Dades reals de operations.billingUsage (usage + billing del composador).
- * Només es mostren camps que existeixen; sense inventar mètriques.
  */
-function formatDate(v) {
+import { useTranslation } from 'react-i18next'
+
+function formatDate(v, lng) {
   if (!v) return null
   try {
-    return new Date(v).toLocaleDateString('ca-ES', { day: 'numeric', month: 'short', year: 'numeric' })
+    const locale = lng === 'es' ? 'es-ES' : lng === 'en' ? 'en-US' : 'ca-ES'
+    return new Date(v).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })
   } catch {
     return null
   }
@@ -23,13 +24,14 @@ function Row({ label, value }) {
 }
 
 export default function HomeBillingUsage({ billingUsage, loading }) {
+  const { t, i18n } = useTranslation()
   const hasData = billingUsage != null && (billingUsage.usage != null || billingUsage.billing != null)
 
   if (loading) {
     return (
       <div style={styles.wrap}>
-        <div style={styles.title}>Billing usage</div>
-        <div style={styles.placeholder}>Carregant…</div>
+        <div style={styles.title}>{t('home.billingUsage.title')}</div>
+        <div style={styles.placeholder}>{t('common.loading')}</div>
       </div>
     )
   }
@@ -37,8 +39,8 @@ export default function HomeBillingUsage({ billingUsage, loading }) {
   if (!hasData) {
     return (
       <div style={styles.wrap}>
-        <div style={styles.title}>Billing usage</div>
-        <div style={styles.placeholder}>No hi ha dades de facturació.</div>
+        <div style={styles.title}>{t('home.billingUsage.title')}</div>
+        <div style={styles.placeholder}>{t('home.billingUsage.empty')}</div>
       </div>
     )
   }
@@ -46,8 +48,8 @@ export default function HomeBillingUsage({ billingUsage, loading }) {
   const { usage, billing } = billingUsage
   const plan = billing?.plan != null && billing.plan !== '' ? String(billing.plan) : null
   const status = billing?.status != null && billing.status !== '' ? String(billing.status) : null
-  const trialEndsAt = billing?.trial_ends_at ? formatDate(billing.trial_ends_at) : null
-  const periodEndsAt = billing?.current_period_end_at ? formatDate(billing.current_period_end_at) : null
+  const trialEndsAt = billing?.trial_ends_at ? formatDate(billing.trial_ends_at, i18n.language) : null
+  const periodEndsAt = billing?.current_period_end_at ? formatDate(billing.current_period_end_at, i18n.language) : null
   const seatsUsed = usage?.seats?.used
   const seatsLimit = usage?.seats?.limit
   const projectsUsed = usage?.projects?.used
@@ -68,14 +70,14 @@ export default function HomeBillingUsage({ billingUsage, loading }) {
 
   return (
     <div style={styles.wrap}>
-      <div style={styles.title}>Billing usage</div>
+      <div style={styles.title}>{t('home.billingUsage.title')}</div>
       <div style={styles.body}>
-        <Row label="Plan" value={plan} />
-        <Row label="Status" value={status} />
-        <Row label="Trial ends" value={trialEndsAt} />
-        <Row label="Period ends" value={periodEndsAt} />
-        <Row label="Seats" value={seatsText} />
-        <Row label="Projects" value={projectsText} />
+        <Row label={t('home.billingUsage.plan')} value={plan} />
+        <Row label={t('home.billingUsage.status')} value={status} />
+        <Row label={t('home.billingUsage.trialEnds')} value={trialEndsAt} />
+        <Row label={t('home.billingUsage.periodEnds')} value={periodEndsAt} />
+        <Row label={t('home.billingUsage.seats')} value={seatsText} />
+        <Row label={t('home.billingUsage.projects')} value={projectsText} />
       </div>
     </div>
   )

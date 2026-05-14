@@ -1,20 +1,22 @@
 /**
- * D21.4 — Panell d’alertes per la Home (margin o stockout).
- * Fins a 5 items; empty state net; format simple ASIN + mètrica clau.
+ * D21.4 — Panell d'alertes per la Home (margin o stockout).
  */
 import { AlertTriangle } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 const MAX_ITEMS = 5
 
-function formatPercent(ratio) {
-  return Number.isFinite(ratio)
-    ? new Intl.NumberFormat('ca-ES', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(ratio)
-    : '—'
+function formatPercent(ratio, lng) {
+  if (!Number.isFinite(ratio)) return '—'
+  const locale = lng === 'es' ? 'es-ES' : lng === 'en' ? 'en-US' : 'ca-ES'
+  return new Intl.NumberFormat(locale, { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(ratio)
 }
 
-export default function HomeAlertsPanel({ title, items = [], type, emptyMessage = 'No alertes.' }) {
+export default function HomeAlertsPanel({ title, items = [], type, emptyMessage }) {
+  const { t, i18n } = useTranslation()
   const list = Array.isArray(items) ? items.slice(0, MAX_ITEMS) : []
   const isEmpty = list.length === 0
+  const resolvedEmpty = emptyMessage ?? t('home.alerts.defaultEmpty')
 
   return (
     <div
@@ -54,7 +56,7 @@ export default function HomeAlertsPanel({ title, items = [], type, emptyMessage 
             color: 'var(--text-2, #6b7280)',
           }}
         >
-          {emptyMessage}
+          {resolvedEmpty}
         </div>
       ) : (
         <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
@@ -70,12 +72,12 @@ export default function HomeAlertsPanel({ title, items = [], type, emptyMessage 
               <span style={{ fontWeight: 500, color: 'var(--text-1)' }}>{item.asin || '—'}</span>
               {type === 'margin' && (
                 <span style={{ marginLeft: 8, color: 'var(--text-2)' }}>
-                  drop {formatPercent(item.marginDrop)}
+                  {t('home.alerts.marginDrop')} {formatPercent(item.marginDrop, i18n.language)}
                 </span>
               )}
               {type === 'stockout' && (
                 <span style={{ marginLeft: 8, color: 'var(--text-2)' }}>
-                  {Number.isFinite(item.daysOfStock) ? `${Number(item.daysOfStock).toFixed(1)} days` : '—'}
+                  {Number.isFinite(item.daysOfStock) ? `${Number(item.daysOfStock).toFixed(1)} ${t('home.alerts.daysOfStock')}` : '—'}
                 </span>
               )}
             </li>

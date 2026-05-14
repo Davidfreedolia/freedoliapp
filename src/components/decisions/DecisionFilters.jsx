@@ -1,34 +1,37 @@
 import React from 'react'
-
-const STATUS_OPTIONS = [
-  { value: 'open_ack', label: 'Open + Acknowledged' },
-  { value: 'open_only', label: 'Open only' },
-  { value: 'all', label: 'All statuses' },
-  { value: 'acted', label: 'Acted' },
-  { value: 'dismissed', label: 'Dismissed' },
-  { value: 'expired', label: 'Expired' },
-]
-
-const TYPE_OPTIONS = [
-  { value: 'all', label: 'All types' },
-  { value: 'reorder', label: 'Reorder' },
-]
-
-const SEVERITY_OPTIONS = [
-  { value: 'all', label: 'All severities' },
-  { value: 'high', label: 'High' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'low', label: 'Low' },
-]
-
-const CONFIDENCE_OPTIONS = [
-  { value: 'all', label: 'All confidence' },
-  { value: 'high', label: 'High' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'low', label: 'Low' },
-]
+import { useTranslation } from 'react-i18next'
 
 export default function DecisionFilters({ filters, onChange }) {
+  const { t } = useTranslation()
+
+  const STATUS_OPTIONS = [
+    { value: 'open_ack',  label: t('decisionFilters.status.openAck') },
+    { value: 'open_only', label: t('decisionFilters.status.openOnly') },
+    { value: 'all',       label: t('decisionFilters.status.all') },
+    { value: 'acted',     label: t('decisionFilters.status.acted') },
+    { value: 'dismissed', label: t('decisionFilters.status.dismissed') },
+    { value: 'expired',   label: t('decisionFilters.status.expired') },
+  ]
+
+  const TYPE_OPTIONS = [
+    { value: 'all',     label: t('decisionFilters.type.all') },
+    { value: 'reorder', label: t('decisionFilters.type.reorder') },
+  ]
+
+  const SEVERITY_OPTIONS = [
+    { value: 'all',    label: t('decisionFilters.severity.all') },
+    { value: 'high',   label: t('decisionFilters.severity.high') },
+    { value: 'medium', label: t('decisionFilters.severity.medium') },
+    { value: 'low',    label: t('decisionFilters.severity.low') },
+  ]
+
+  const CONFIDENCE_OPTIONS = [
+    { value: 'all',    label: t('decisionFilters.confidence.all') },
+    { value: 'high',   label: t('decisionFilters.confidence.high') },
+    { value: 'medium', label: t('decisionFilters.confidence.medium') },
+    { value: 'low',    label: t('decisionFilters.confidence.low') },
+  ]
+
   const handleChange = (key) => (e) => {
     onChange({ ...filters, [key]: e.target.value })
   }
@@ -58,4 +61,3 @@ export default function DecisionFilters({ filters, onChange }) {
     </div>
   )
 }
-

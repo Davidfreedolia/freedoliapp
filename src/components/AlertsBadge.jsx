@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { AlertTriangle, X } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { getAlerts, getDashboardPreferences } from '../lib/supabase'
 
 export default function AlertsBadge({ darkMode }) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { activeOrgId } = useApp()
   const [alerts, setAlerts] = useState([])
@@ -110,7 +112,7 @@ export default function AlertsBadge({ darkMode }) {
               fontWeight: '600',
               color: darkMode ? '#ffffff' : '#111827'
             }}>
-              Alertes ({alerts.length})
+              {t('alertsBadge.title', { count: alerts.length })}
             </h4>
             <button
               onClick={(e) => {
@@ -179,9 +181,9 @@ export default function AlertsBadge({ darkMode }) {
                       color: severityColor,
                       textTransform: 'uppercase'
                     }}>
-                      {alert.type === 'manufacturer_pack' ? 'Pack' :
-                       alert.type === 'shipment' ? 'Enviament' :
-                       'Recerca'}
+                      {alert.type === 'manufacturer_pack' ? t('alertsBadge.types.pack') :
+                       alert.type === 'shipment' ? t('alertsBadge.types.shipment') :
+                       t('alertsBadge.types.research')}
                     </span>
                   </div>
                   <div style={{
@@ -209,7 +211,7 @@ export default function AlertsBadge({ darkMode }) {
                 paddingTop: '4px',
                 borderTop: `1px solid ${darkMode ? '#374151' : '#e5e7eb'}`
               }}>
-                +{alerts.length - 5} més
+                {t('alertsBadge.more', { count: alerts.length - 5 })}
               </div>
             )}
           </div>
