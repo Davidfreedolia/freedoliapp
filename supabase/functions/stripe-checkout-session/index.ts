@@ -27,6 +27,16 @@ const PRICE_IDS: Record<string, string> = {
   agency: Deno.env.get("STRIPE_PRICE_AGENCY") || STRIPE_PRICE_ID_CORE || "",
 };
 
+// Log the configured mode at boot — quick sanity check after a key
+// rotation that the function picked up the right secret.
+console.info(
+  `[stripe-checkout-session] booted in ${
+    STRIPE_SECRET_KEY?.startsWith("sk_live_") ? "LIVE"
+      : STRIPE_SECRET_KEY?.startsWith("sk_test_") ? "TEST"
+      : "UNKNOWN"
+  } mode`,
+);
+
 const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2023-10-16" });
 const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
 

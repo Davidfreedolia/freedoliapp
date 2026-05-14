@@ -42,13 +42,78 @@ Després verifica que cap usuari diu que les seves crides fallen amb 429 inesper
 
 Si trobes que algun és massa restrictiu, edita `supabase/functions/_shared/rateLimit.ts` o el `capacity`/`refillPerSecond` de la funció concreta.
 
-### Stripe live mode (depèn de l'alta)
-- [ ] Quan tinguis l'alta, ves a Stripe Dashboard → Account Status → activar pagaments en viu
-- [ ] Verificar identitat (DNI/escriptura SL)
-- [ ] Configurar Stripe Tax (Settings → Tax → Activate)
-- [ ] Pujar les claus live (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `VITE_STRIPE_PUBLISHABLE_KEY`) a Vercel + Supabase Functions
-- [ ] Re-crear el webhook de Stripe apuntant a la URL live de la funció `stripe_webhook`
-- [ ] **Activar `STRIPE_ENABLE_AUTOMATIC_TAX=true`** com a secret a Supabase Functions per a la funció `stripe-checkout-session`. El codi ja està pre-cablejat (veure commit) — només cal flipar el flag i Stripe començarà a cobrar VAT automàticament basat en l'adreça del client + recollirà el VAT ID B2B.
+### Stripe live mode — checklist exacta
+
+> ⚠️ **Lectura abans de fer-ho**: Stripe acceptarà l'alta amb el teu DNI personal. PERÒ Hisenda diferencia entre el que Stripe permet i el que la llei permet. Cobrar SaaS recurrent sense alta autonom és **activitat econòmica encoberta**: si la quantia és petita i puntual ningú es queixa, però:
+> - Quan acumulis >3.000-5.000€/any és quasi segur que t'inspeccionin
+> - Si un client demana factura amb IVA, no la pots emetre legalment
+> - La RGPD demana "responsable del tractament identificat" — si no hi ha empresa, el responsable ets tu personalment amb totes les conseqüències
+>
+> El **codi ja està live-ready**: només cal flipar config. La decisió de fer-ho és teva — això són les passes mecàniques.
+
+**Pas 1 — Stripe Dashboard (https://dashboard.stripe.com/)**
+
+- [ ] Settings → Account details → completar dades (DNI/NIE, adreça, IBAN per pagaments)
+- [ ] Settings → Account → Activate payments → completar identity verification
+- [ ] Quan estigui aprovat, top-left switcher: **Test mode → Live mode**
+- [ ] Settings → Subscriptions:
+  - [ ] Smart Retries → ON
+  - [ ] Dunning emails → totes les notificacions ON
+  - [ ] Cancel subscription after failed attempts → 4 intents
+- [ ] (Opcional, quan tinguis l'alta) Settings → Tax → Activate → afegir país Spain
+
+**Pas 2 — Crear preus en mode live**
+
+Els 3 preus actuals (Starter €29, Growth €79, Scale €199) estan creats en test mode. Has de recrear-los en live:
+
+- [ ] Stripe (live mode) → Products → crear 3 productes:
+  - "Freedoliapp Starter" — recurrent mensual 29 EUR + anual 348 EUR (o el que decideixis)
+  - "Freedoliapp Growth" — 79 EUR mes
+  - "Freedoliapp Scale" — 199 EUR mes
+- [ ] Copia els `price_id` de cadascun (comencen amb `price_...`)
+
+**Pas 3 — Secrets a Supabase Functions**
+
+URL: https://supabase.com/dashboard/project/edjwsrkcxcktnbbskpjy/functions
+
+Per cada funció (`stripe-checkout-session`, `stripe-portal-session`, `stripe_webhook`):
+- [ ] Settings → Secrets → afegir/actualitzar:
+  - `STRIPE_SECRET_KEY` = clau **live** (`sk_live_...`) — Stripe Dashboard → Developers → API keys
+  - `STRIPE_PRICE_GROWTH` = `price_xxx` (live)
+  - `STRIPE_PRICE_PRO` = `price_xxx` (live)
+  - `STRIPE_PRICE_AGENCY` = `price_xxx` (live)
+  - `SITE_URL` = `https://freedoliapp.com` (ja per defecte; només confirma)
+- [ ] **`STRIPE_ENABLE_AUTOMATIC_TAX=true`** quan tinguis alta + Stripe Tax activat. Mentrestant deixa-ho a `false` o no l'afegeixis — sense això Stripe rebutjaria la sessió per falta de tax setup.
+
+**Pas 4 — Webhook live**
+
+- [ ] Stripe Dashboard (live) → Developers → Webhooks → "Add endpoint"
+- [ ] URL: `https://edjwsrkcxcktnbbskpjy.supabase.co/functions/v1/stripe_webhook`
+- [ ] Events: `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid`, `invoice.payment_succeeded`, `invoice.payment_failed`
+- [ ] Copia el "Signing secret" (`whsec_...`)
+- [ ] Supabase → Edge Functions → `stripe_webhook` → Secrets → `STRIPE_WEBHOOK_SECRET` = `whsec_...` (live)
+
+**Pas 5 — Vercel env vars**
+
+- [ ] `VITE_STRIPE_PUBLISHABLE_KEY` = `pk_live_...` (Stripe → Developers → API keys → Publishable key)
+- [ ] Production scope. **No** afegir a Preview/Dev — manté el test mode per al dev workflow.
+- [ ] Re-deploy Vercel (Settings → Deployments → re-deploy)
+
+**Pas 6 — Re-deploy Edge Functions**
+
+Veure secció "Re-deploy Supabase Edge Functions" més avall.
+
+**Pas 7 — Smoke test**
+
+- [ ] Crear un usuari de prova nou (correu real)
+- [ ] Fer signup → trial → upgrade flow amb la teva **targeta real**, ~30€
+- [ ] Verificar:
+  - Subscription apareix a Stripe Dashboard (live)
+  - `billing_subscriptions` table té la row al Supabase
+  - Customer Portal funciona (botó "Manage billing")
+- [ ] Cancel·lar la subscripció i reembossar-te (Stripe → refund)
+
+**Si fas tax automatic_tax abans de l'alta**, Stripe Checkout dirà error tipus "tax_origin_not_configured" — això és el bloqueig que t'estalvia el flag. Mantén `STRIPE_ENABLE_AUTOMATIC_TAX` a `false` fins que tinguis alta + Stripe Tax activat.
 
 ---
 

@@ -17,6 +17,14 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 
+console.info(
+  `[stripe-portal-session] booted in ${
+    STRIPE_SECRET_KEY?.startsWith("sk_live_") ? "LIVE"
+      : STRIPE_SECRET_KEY?.startsWith("sk_test_") ? "TEST"
+      : "UNKNOWN"
+  } mode`,
+);
+
 const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2023-10-16" });
 const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
 

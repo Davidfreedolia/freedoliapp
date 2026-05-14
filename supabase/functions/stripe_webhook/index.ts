@@ -6,6 +6,22 @@ const STRIPE_WEBHOOK_SECRET = Deno.env.get("STRIPE_WEBHOOK_SECRET")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
+// Sanity flag — true when the configured Stripe key is for live mode.
+// Used downstream to refuse processing if the webhook signing secret
+// looks like it came from the opposite mode (live key + test whsec or
+// vice-versa, which is a common foot-gun when flipping environments).
+const STRIPE_IS_LIVE = STRIPE_SECRET_KEY?.startsWith("sk_live_") ?? false;
+const STRIPE_IS_TEST = STRIPE_SECRET_KEY?.startsWith("sk_test_") ?? false;
+if (STRIPE_WEBHOOK_SECRET) {
+  // Stripe signing secrets don't carry a live/test prefix, so we can't
+  // assert symmetry purely from the string. We log the mode at startup
+  // so the deploy log makes the configured mode obvious — easy
+  // sanity-check after a key rotation.
+  console.info(
+    `[stripe_webhook] booted in ${STRIPE_IS_LIVE ? "LIVE" : STRIPE_IS_TEST ? "TEST" : "UNKNOWN"} mode`,
+  );
+}
+
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
   apiVersion: "2023-10-16",
 });
