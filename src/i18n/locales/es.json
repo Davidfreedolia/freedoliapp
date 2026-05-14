@@ -1348,6 +1348,60 @@
   "decisionsInbox": {
     "title": "Bandeja de decisiones"
   },
+  "automations": {
+    "inbox": {
+      "title": "Bandeja de automatizaciones",
+      "subtitle": "Revisa propuestas, aprobaciones e intenciones de ejecución para la org {{orgId}}.",
+      "role": "rol: {{role}}",
+      "approved": "Aprobada",
+      "rejected": "Rechazada",
+      "approveBlocked": "Aprobación bloqueada: {{reason}}",
+      "rejectBlocked": "Rechazo bloqueado: {{reason}}",
+      "filters": {
+        "status": "Estado",
+        "actionType": "Tipo de acción",
+        "allStatuses": "Todos los estados",
+        "allActionTypes": "Todos los tipos"
+      },
+      "empty": "No hay propuestas con estos filtros."
+    },
+    "activity": {
+      "title": "Actividad de automatizaciones",
+      "subtitle": "Eventos recientes de propuestas de automatización de la org {{orgId}}.",
+      "empty": "No hay eventos recientes."
+    },
+    "analytics": {
+      "title": "Analítica de automatizaciones",
+      "subtitle": "Embudo, velocidad, fiabilidad y riesgo de las propuestas de automatización.",
+      "metricsTitle": "Métricas",
+      "funnelTitle": "Embudo de propuestas",
+      "velocityTitle": "Velocidad",
+      "reliabilityTitle": "Fiabilidad de ejecución",
+      "riskTitle": "Distribución del riesgo",
+      "empty": "No hay datos de analítica."
+    },
+    "proposalDetail": {
+      "back": "Volver a la bandeja",
+      "context": "Contexto de la propuesta",
+      "payload": "Carga útil",
+      "ruleSource": "Origen de la regla",
+      "timeline": "Cronología operativa",
+      "timelineHint": "Muestra el estado operativo del producto (no el estado de automatización).",
+      "events": "Historial de eventos",
+      "noEvents": "Sin eventos.",
+      "decisionLine": "Decisión: {{title}} · estado {{status}}",
+      "approvalPanel": "Aprobación",
+      "executionPanel": "Ejecución",
+      "notFound": "No se encontró la propuesta."
+    },
+    "common": {
+      "approve": "Aprobar",
+      "reject": "Rechazar",
+      "execute": "Ejecutar",
+      "view": "Ver",
+      "loading": "Cargando…"
+    }
+  },
   "alertsBadge": {
     "title": "Alertas ({{count}})",
     "more": "+{{count}} más",

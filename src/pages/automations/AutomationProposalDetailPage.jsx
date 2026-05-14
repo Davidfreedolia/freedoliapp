@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useWorkspace } from '../../contexts/WorkspaceContext'
 import { useAutomationPermissions } from '../../hooks/automations/useAutomationPermissions'
 import PageLoader from '../../components/PageLoader'
@@ -31,6 +32,7 @@ function KeyValueTable({ rows }) {
 }
 
 export default function AutomationProposalDetailPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { proposalId } = useParams()
   const { activeOrgId, memberships, isWorkspaceReady } = useWorkspace()
@@ -75,8 +77,8 @@ export default function AutomationProposalDetailPage() {
   if (!proposal) {
     return (
       <div style={{ padding: 20 }}>
-        <div style={{ marginBottom: 12, fontSize: 16, fontWeight: 800 }}>Proposal not found</div>
-        <Button variant="secondary" onClick={() => navigate('/app/automations')}>Back to Inbox</Button>
+        <div style={{ marginBottom: 12, fontSize: 16, fontWeight: 800 }}>{t('automations.proposalDetail.notFound')}</div>
+        <Button variant="secondary" onClick={() => navigate('/app/automations')}>{t('automations.proposalDetail.back')}</Button>
       </div>
     )
   }
@@ -108,44 +110,44 @@ export default function AutomationProposalDetailPage() {
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <Button variant="secondary" onClick={() => navigate('/app/automations')}>Back</Button>
+          <Button variant="secondary" onClick={() => navigate('/app/automations')}>{t('automations.proposalDetail.back')}</Button>
         </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: 14, alignItems: 'start' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <Card className="ui-card--elevated" style={{ padding: 16 }}>
-            <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 10, color: 'var(--text-1, #111827)' }}>Proposal Context</div>
+            <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 10, color: 'var(--text-1, #111827)' }}>{t('automations.proposalDetail.context')}</div>
             <div style={{ fontSize: 13, color: 'var(--text-2, #6b7280)', marginBottom: 10 }}>
-              Decision: {decision?.title ?? decision?.decision_type ?? '—'} · status {decision?.status ?? '—'}
+              {t('automations.proposalDetail.decisionLine', { title: decision?.title ?? decision?.decision_type ?? '—', status: decision?.status ?? '—' })}
             </div>
             <KeyValueTable rows={contextRows} />
           </Card>
 
           <Card className="ui-card--elevated" style={{ padding: 16 }}>
-            <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 10, color: 'var(--text-1, #111827)' }}>Proposal Payload</div>
+            <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 10, color: 'var(--text-1, #111827)' }}>{t('automations.proposalDetail.payload')}</div>
             <div style={{ fontSize: 12, color: 'var(--text-2, #6b7280)', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
               {proposal.payload ? JSON.stringify(proposal.payload, null, 2) : '—'}
             </div>
           </Card>
 
           <Card className="ui-card--elevated" style={{ padding: 16 }}>
-            <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 10, color: 'var(--text-1, #111827)' }}>Rule Source</div>
+            <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 10, color: 'var(--text-1, #111827)' }}>{t('automations.proposalDetail.ruleSource')}</div>
             <KeyValueTable rows={ruleRows} />
           </Card>
 
           <Card className="ui-card--elevated" style={{ padding: 16 }}>
-            <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 10, color: 'var(--text-1, #111827)' }}>Operational Timeline</div>
+            <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 10, color: 'var(--text-1, #111827)' }}>{t('automations.proposalDetail.timeline')}</div>
             <OperationalTimeline currentStage={proposal?.contextSnapshot?.operational_stage ?? null} />
             <div style={{ marginTop: 10, fontSize: 12, color: 'var(--text-2, #6b7280)' }}>
-              This shows product operational status (not automation status).
+              {t('automations.proposalDetail.timelineHint')}
             </div>
           </Card>
 
           <Card className="ui-card--elevated" style={{ padding: 16 }}>
-            <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 10, color: 'var(--text-1, #111827)' }}>Event History</div>
+            <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 10, color: 'var(--text-1, #111827)' }}>{t('automations.proposalDetail.events')}</div>
             {events.length === 0 ? (
-              <div style={{ color: 'var(--text-2, #6b7280)', fontSize: 13 }}>No events.</div>
+              <div style={{ color: 'var(--text-2, #6b7280)', fontSize: 13 }}>{t('automations.proposalDetail.noEvents')}</div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {events.map((e) => (

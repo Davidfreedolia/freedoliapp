@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useWorkspace } from '../../contexts/WorkspaceContext'
 import { useAutomationPermissions } from '../../hooks/automations/useAutomationPermissions'
 import PageLoader from '../../components/PageLoader'
@@ -11,6 +12,7 @@ import { approveAutomationProposal } from '../../lib/automations/mutations/appro
 import { rejectAutomationProposal } from '../../lib/automations/mutations/rejectAutomationProposal'
 
 export default function AutomationInboxPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { activeOrgId, memberships, isWorkspaceReady } = useWorkspace()
 
@@ -59,10 +61,10 @@ export default function AutomationInboxPage() {
     if (!activeOrgId || !proposal?.id) return
     const res = await approveAutomationProposal({ orgId: activeOrgId, proposalId: proposal.id })
     if (res?.ok) {
-      showToast('Approved', 'success')
+      showToast(t('automations.inbox.approved'), 'success')
       load()
     } else {
-      showToast(`Approve blocked: ${res?.reason ?? 'unknown'}`, 'warning', 4500)
+      showToast(t('automations.inbox.approveBlocked', { reason: res?.reason ?? 'unknown' }), 'warning', 4500)
     }
   }
 
@@ -71,10 +73,10 @@ export default function AutomationInboxPage() {
     if (!activeOrgId || !proposal?.id) return
     const res = await rejectAutomationProposal({ orgId: activeOrgId, proposalId: proposal.id })
     if (res?.ok) {
-      showToast('Rejected', 'success')
+      showToast(t('automations.inbox.rejected'), 'success')
       load()
     } else {
-      showToast(`Reject blocked: ${res?.reason ?? 'unknown'}`, 'warning', 4500)
+      showToast(t('automations.inbox.rejectBlocked', { reason: res?.reason ?? 'unknown' }), 'warning', 4500)
     }
   }
 
@@ -86,12 +88,12 @@ export default function AutomationInboxPage() {
     <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
         <div>
-          <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-1, #111827)' }}>Automation Inbox</div>
+          <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-1, #111827)' }}>{t('automations.inbox.title')}</div>
           <div style={{ marginTop: 4, fontSize: 13, color: 'var(--text-2, #6b7280)' }}>
-            Review proposals, approvals, and execution intents for org {activeOrgId || '—'}.
+            {t('automations.inbox.subtitle', { orgId: activeOrgId || '—' })}
           </div>
         </div>
-        <div style={{ fontSize: 12, color: 'var(--text-2, #6b7280)' }}>role: {userRole}</div>
+        <div style={{ fontSize: 12, color: 'var(--text-2, #6b7280)' }}>{t('automations.inbox.role', { role: userRole })}</div>
       </div>
 
       <AutomationInboxFilters filters={filters} onChange={setFilters} />

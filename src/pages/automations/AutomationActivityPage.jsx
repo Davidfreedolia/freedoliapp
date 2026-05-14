@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useWorkspace } from '../../contexts/WorkspaceContext'
 import PageLoader from '../../components/PageLoader'
 import AutomationActivityFilters from '../../components/automations/activity/AutomationActivityFilters'
@@ -6,6 +7,7 @@ import AutomationActivityFeed from '../../components/automations/activity/Automa
 import { getAutomationActivity } from '../../lib/automations/queries/getAutomationActivity'
 
 export default function AutomationActivityPage() {
+  const { t } = useTranslation()
   const { activeOrgId, memberships, isWorkspaceReady } = useWorkspace()
 
   const userRole = useMemo(() => {
@@ -43,12 +45,12 @@ export default function AutomationActivityPage() {
     <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
         <div>
-          <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-1, #111827)' }}>Automation Activity</div>
+          <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-1, #111827)' }}>{t('automations.activity.title')}</div>
           <div style={{ marginTop: 4, fontSize: 13, color: 'var(--text-2, #6b7280)' }}>
-            Global timeline of automation events for org {activeOrgId || '—'}.
+            {t('automations.activity.subtitle', { orgId: activeOrgId || '—' })}
           </div>
         </div>
-        <div style={{ fontSize: 12, color: 'var(--text-2, #6b7280)' }}>role: {userRole}</div>
+        <div style={{ fontSize: 12, color: 'var(--text-2, #6b7280)' }}>{t('automations.inbox.role', { role: userRole })}</div>
       </div>
 
       <AutomationActivityFilters filters={filters} onChange={setFilters} />

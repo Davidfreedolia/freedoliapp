@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useWorkspace } from '../../contexts/WorkspaceContext'
 import PageLoader from '../../components/PageLoader'
 import AutomationMetricsGrid from '../../components/automations/analytics/AutomationMetricsGrid'
@@ -15,6 +16,7 @@ import {
 } from '../../lib/automations/queries/automationAnalyticsBundle'
 
 export default function AutomationAnalyticsPage() {
+  const { t } = useTranslation()
   const { activeOrgId, memberships, isWorkspaceReady } = useWorkspace()
 
   const userRole = useMemo(() => {
@@ -91,12 +93,12 @@ export default function AutomationAnalyticsPage() {
     <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
         <div>
-          <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-1, #111827)' }}>Automation analytics</div>
+          <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-1, #111827)' }}>{t('automations.analytics.title')}</div>
           <div style={{ marginTop: 4, fontSize: 13, color: 'var(--text-2, #6b7280)' }}>
-            Read-only automation metrics for org {activeOrgId || '—'}.
+            {t('automations.analytics.subtitle')}
           </div>
         </div>
-        <div style={{ fontSize: 12, color: 'var(--text-2, #6b7280)' }}>role: {userRole}</div>
+        <div style={{ fontSize: 12, color: 'var(--text-2, #6b7280)' }}>{t('automations.inbox.role', { role: userRole })}</div>
       </div>
 
       <AutomationMetricsGrid summary={summary} loading={loading} empty={allZero} />

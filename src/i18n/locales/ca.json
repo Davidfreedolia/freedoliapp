@@ -1533,6 +1533,60 @@
   "decisionsInbox": {
     "title": "Safata de decisions"
   },
+  "automations": {
+    "inbox": {
+      "title": "Safata d'automatitzacions",
+      "subtitle": "Revisa propostes, aprovacions i intencions d'execució per a l'org {{orgId}}.",
+      "role": "rol: {{role}}",
+      "approved": "Aprovada",
+      "rejected": "Rebutjada",
+      "approveBlocked": "Aprovació bloquejada: {{reason}}",
+      "rejectBlocked": "Rebuig bloquejat: {{reason}}",
+      "filters": {
+        "status": "Estat",
+        "actionType": "Tipus d'acció",
+        "allStatuses": "Tots els estats",
+        "allActionTypes": "Tots els tipus"
+      },
+      "empty": "No hi ha propostes amb aquests filtres."
+    },
+    "activity": {
+      "title": "Activitat d'automatitzacions",
+      "subtitle": "Esdeveniments recents de propostes d'automatització de l'org {{orgId}}.",
+      "empty": "No hi ha esdeveniments recents."
+    },
+    "analytics": {
+      "title": "Analítica d'automatitzacions",
+      "subtitle": "Embut, velocitat, fiabilitat i risc de les propostes d'automatització.",
+      "metricsTitle": "Mètriques",
+      "funnelTitle": "Embut de propostes",
+      "velocityTitle": "Velocitat",
+      "reliabilityTitle": "Fiabilitat d'execució",
+      "riskTitle": "Distribució del risc",
+      "empty": "No hi ha dades d'analítica."
+    },
+    "proposalDetail": {
+      "back": "Tornar a la safata",
+      "context": "Context de la proposta",
+      "payload": "Càrrega útil",
+      "ruleSource": "Origen de la regla",
+      "timeline": "Cronologia operativa",
+      "timelineHint": "Mostra l'estat operatiu del producte (no l'estat d'automatització).",
+      "events": "Historial d'esdeveniments",
+      "noEvents": "Sense esdeveniments.",
+      "decisionLine": "Decisió: {{title}} · estat {{status}}",
+      "approvalPanel": "Aprovació",
+      "executionPanel": "Execució",
+      "notFound": "No s'ha trobat la proposta."
+    },
+    "common": {
+      "approve": "Aprovar",
+      "reject": "Rebutjar",
+      "execute": "Executar",
+      "view": "Veure",
+      "loading": "Carregant…"
+    }
+  },
   "alertsBadge": {
     "title": "Alertes ({{count}})",
     "more": "+{{count}} més",

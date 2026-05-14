@@ -1333,6 +1333,60 @@
   "decisionsInbox": {
     "title": "Decision Inbox"
   },
+  "automations": {
+    "inbox": {
+      "title": "Automation Inbox",
+      "subtitle": "Review proposals, approvals, and execution intents for org {{orgId}}.",
+      "role": "role: {{role}}",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "approveBlocked": "Approve blocked: {{reason}}",
+      "rejectBlocked": "Reject blocked: {{reason}}",
+      "filters": {
+        "status": "Status",
+        "actionType": "Action type",
+        "allStatuses": "All statuses",
+        "allActionTypes": "All action types"
+      },
+      "empty": "No proposals match the current filters."
+    },
+    "activity": {
+      "title": "Automation Activity",
+      "subtitle": "Recent automation proposal events for org {{orgId}}.",
+      "empty": "No recent events."
+    },
+    "analytics": {
+      "title": "Automation analytics",
+      "subtitle": "Funnel, velocity, reliability and risk distribution of automation proposals.",
+      "metricsTitle": "Metrics",
+      "funnelTitle": "Proposal funnel",
+      "velocityTitle": "Velocity",
+      "reliabilityTitle": "Execution reliability",
+      "riskTitle": "Risk distribution",
+      "empty": "No analytics data."
+    },
+    "proposalDetail": {
+      "back": "Back to inbox",
+      "context": "Proposal Context",
+      "payload": "Proposal Payload",
+      "ruleSource": "Rule Source",
+      "timeline": "Operational Timeline",
+      "timelineHint": "This shows product operational status (not automation status).",
+      "events": "Event History",
+      "noEvents": "No events.",
+      "decisionLine": "Decision: {{title}} · status {{status}}",
+      "approvalPanel": "Approval",
+      "executionPanel": "Execution",
+      "notFound": "Proposal not found."
+    },
+    "common": {
+      "approve": "Approve",
+      "reject": "Reject",
+      "execute": "Execute",
+      "view": "View",
+      "loading": "Loading…"
+    }
+  },
   "alertsBadge": {
     "title": "Alerts ({{count}})",
     "more": "+{{count}} more",
