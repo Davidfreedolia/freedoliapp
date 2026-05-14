@@ -3281,5 +3281,54 @@
       "pasteFirst": "Enganxa el bloc de detalls del producte per analitzar-lo.",
       "noFields": "No s'han detectat camps. Revisa el text enganxat."
     }
+  },
+  "recurringExpenses": {
+    "title": "Despeses Recurrents Mensuals",
+    "newRecurring": "Nova Recurrent",
+    "empty": "No hi ha despeses recurrents. Crea una per començar.",
+    "active": "Activa",
+    "inactive": "Inactiva",
+    "viewOccurrences": "Veure instàncies",
+    "newSupplierTitle": "Nou Proveïdor",
+    "occurrencesTitle": "Instàncies",
+    "kpis": {
+      "pending": "Pendents",
+      "paid": "Pagades",
+      "upcoming": "Properes"
+    },
+    "headers": {
+      "description": "Descripció",
+      "amount": "Import",
+      "dayOfMonth": "Dia del mes",
+      "category": "Categoria",
+      "project": "Projecte",
+      "status": "Estat",
+      "actions": "Accions"
+    },
+    "modal": {
+      "editTitle": "Editar Despesa Recurrent",
+      "newTitle": "Nova Despesa Recurrent"
+    },
+    "toasts": {
+      "loadError": "Error carregant despeses recurrents",
+      "loadOccurrencesError": "Error carregant instàncies",
+      "supplierNameRequired": "El nom del proveïdor és obligatori",
+      "supplierCreated": "Proveïdor creat correctament",
+      "supplierCreateError": "Error creant proveïdor",
+      "occurrenceExists": "Ja existeix una instància per aquest mes",
+      "occurrenceGenerated": "Instància generada correctament",
+      "occurrenceGenerateError": "Error generant instància",
+      "markedPaid": "Marcat com pagat",
+      "markPaidError": "Error marcant com pagat",
+      "addInvoiceError": "Error afegint factura: {{error}}",
+      "statusUpdatedInvoiceAdded": "Estat actualitzat: factura afegida",
+      "requiredFields": "Descripció, import i dia del mes són obligatoris",
+      "selectCategory": "Selecciona una categoria",
+      "updated": "Despesa recurrent actualitzada",
+      "created": "Despesa recurrent creada",
+      "saveError": "Error guardant despesa recurrent",
+      "deleted": "Despesa recurrent eliminada",
+      "deleteError": "Error eliminant despesa recurrent"
+    }
   }
 }

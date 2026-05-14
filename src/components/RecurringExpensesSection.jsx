@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Plus, Edit, Trash2, X, Save, CheckCircle2, Clock, TrendingUp, DollarSign, FileText, Calendar, MoreVertical } from 'lucide-react'
 import { 
   getRecurringExpenses, 
@@ -20,6 +21,7 @@ import { showToast } from './Toast'
 import ReceiptUploader from './ReceiptUploader'
 
 export default function RecurringExpensesSection({ darkMode, categories, demoMode, activeOrgId, expenseCategories = [], onExpensesGenerated }) {
+  const { t } = useTranslation()
   const [recurringExpenses, setRecurringExpenses] = useState([])
   const [projects, setProjects] = useState([])
   const [suppliers, setSuppliers] = useState([])
@@ -64,7 +66,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
       setSuppliers(supps || [])
     } catch (err) {
       console.error('Error loading recurring expenses:', err)
-      showToast('Error carregant despeses recurrents', 'error')
+      showToast(t('recurringExpenses.toasts.loadError'), 'error')
     } finally {
       setLoading(false)
     }
@@ -77,7 +79,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
       setOccurrences(data || [])
     } catch (err) {
       console.error('Error loading occurrences:', err)
-      showToast('Error carregant instàncies', 'error')
+      showToast(t('recurringExpenses.toasts.loadOccurrencesError'), 'error')
     } finally {
       setLoadingOccurrences(false)
     }
@@ -85,7 +87,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
   
   const handleCreateSupplier = async () => {
     if (!newSupplierName.trim()) {
-      showToast('El nom del proveïdor és obligatori', 'error')
+      showToast(t('recurringExpenses.toasts.supplierNameRequired'), 'error')
       return
     }
     
@@ -99,10 +101,10 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
       setEditingRecurring({ ...editingRecurring, supplier_id: newSupplier.id })
       setShowSupplierModal(false)
       setNewSupplierName('')
-      showToast('Proveïdor creat correctament', 'success')
+      showToast(t('recurringExpenses.toasts.supplierCreated'), 'success')
     } catch (err) {
       console.error('Error creating supplier:', err)
-      showToast('Error creant proveïdor', 'error')
+      showToast(t('recurringExpenses.toasts.supplierCreateError'), 'error')
     } finally {
       setCreatingSupplier(false)
     }
@@ -117,19 +119,19 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
       
       const existing = occurrences.find(occ => occ.month === monthStr)
       if (existing) {
-        showToast('Ja existeix una instància per aquest mes', 'warning')
+        showToast(t('recurringExpenses.toasts.occurrenceExists'), 'warning')
         return
       }
       
       await generateRecurringExpenseOccurrence(recurringExpenseId)
       await loadOccurrences(recurringExpenseId)
-      showToast('Instància generada correctament', 'success')
+      showToast(t('recurringExpenses.toasts.occurrenceGenerated'), 'success')
     } catch (err) {
       console.error('Error generating occurrence:', err)
       if (err.message?.includes('already exists') || err.code === '23505') {
-        showToast('Ja existeix una instància per aquest mes', 'warning')
+        showToast(t('recurringExpenses.toasts.occurrenceExists'), 'warning')
       } else {
-        showToast('Error generant instància', 'error')
+        showToast(t('recurringExpenses.toasts.occurrenceGenerateError'), 'error')
       }
     }
   }
@@ -168,10 +170,10 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
       }
       
       await loadOccurrences(selectedRecurringId)
-      showToast('Marcat com pagat', 'success')
+      showToast(t('recurringExpenses.toasts.markedPaid'), 'success')
     } catch (err) {
       console.error('Error marking as paid:', err)
-      showToast('Error marcant com pagat', 'error')
+      showToast(t('recurringExpenses.toasts.markPaidError'), 'error')
     }
   }
   
@@ -199,7 +201,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
       await loadOccurrences(selectedRecurringId)
     } catch (err) {
       console.error('Error adding invoice:', err)
-      showToast(`Error afegint factura: ${err.message}`, 'error')
+      showToast(t('recurringExpenses.toasts.addInvoiceError', { error: err.message }), 'error')
     }
   }
   
@@ -216,7 +218,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
             await updateRecurringExpenseOccurrence(selectedOccurrenceForReceipt.id, {
               status: 'expected'
             })
-            showToast('Estat actualitzat: factura afegida', 'success')
+            showToast(t('recurringExpenses.toasts.statusUpdatedInvoiceAdded'), 'success')
           }
         }
         
@@ -272,13 +274,13 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
 
   const handleSave = async () => {
     if (!editingRecurring.description || !editingRecurring.amount || !editingRecurring.day_of_month) {
-      showToast('Descripció, import i dia del mes són obligatoris', 'error')
+      showToast(t('recurringExpenses.toasts.requiredFields'), 'error')
       return
     }
 
     // Require category for recurring expenses (needed for expense generation)
     if (!editingRecurring.category_id) {
-      showToast('Selecciona una categoria', 'error')
+      showToast(t('recurringExpenses.toasts.selectCategory'), 'error')
       return
     }
 
@@ -286,17 +288,17 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
     try {
       if (editingRecurring.id) {
         await updateRecurringExpense(editingRecurring.id, editingRecurring)
-        showToast('Despesa recurrent actualitzada', 'success')
+        showToast(t('recurringExpenses.toasts.updated'), 'success')
       } else {
         await createRecurringExpense({ ...editingRecurring, ...(activeOrgId ? { org_id: activeOrgId } : {}) }, activeOrgId ?? undefined)
-        showToast('Despesa recurrent creada', 'success')
+        showToast(t('recurringExpenses.toasts.created'), 'success')
       }
       await loadData()
       setShowModal(false)
       setEditingRecurring(null)
     } catch (err) {
       console.error('Error saving recurring expense:', err)
-      showToast('Error guardant despesa recurrent', 'error')
+      showToast(t('recurringExpenses.toasts.saveError'), 'error')
     } finally {
       setSaving(false)
     }
@@ -307,11 +309,11 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
 
     try {
       await deleteRecurringExpense(id)
-      showToast('Despesa recurrent eliminada', 'success')
+      showToast(t('recurringExpenses.toasts.deleted'), 'success')
       await loadData()
     } catch (err) {
       console.error('Error deleting recurring expense:', err)
-      showToast('Error eliminant despesa recurrent', 'error')
+      showToast(t('recurringExpenses.toasts.deleteError'), 'error')
     }
   }
 
@@ -477,7 +479,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
   return (
     <div style={styles.section}>
       <div style={styles.header}>
-        <h2 style={styles.title}>Despeses Recurrents Mensuals</h2>
+        <h2 style={styles.title}>{t('recurringExpenses.title')}</h2>
         <div style={styles.actions}>
           <button
             onClick={handleNew}
@@ -488,7 +490,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
             }}
           >
             <Plus size={16} />
-            Nova Recurrent
+            {t('recurringExpenses.newRecurring')}
           </button>
         </div>
       </div>
@@ -496,19 +498,19 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
       {/* KPIs */}
       <div style={styles.kpis}>
         <div style={styles.kpiCard}>
-          <div style={styles.kpiLabel}>Pending</div>
+          <div style={styles.kpiLabel}>{t('recurringExpenses.kpis.pending')}</div>
           <div style={{ ...styles.kpiValue, color: '#ef4444' }}>
             {kpis.pending.count} ({formatCurrency(kpis.pending.amount)})
           </div>
         </div>
         <div style={styles.kpiCard}>
-          <div style={styles.kpiLabel}>Paid</div>
+          <div style={styles.kpiLabel}>{t('recurringExpenses.kpis.paid')}</div>
           <div style={{ ...styles.kpiValue, color: '#22c55e' }}>
             {kpis.paid.count} ({formatCurrency(kpis.paid.amount)})
           </div>
         </div>
         <div style={styles.kpiCard}>
-          <div style={styles.kpiLabel}>Upcoming</div>
+          <div style={styles.kpiLabel}>{t('recurringExpenses.kpis.upcoming')}</div>
           <div style={{ ...styles.kpiValue, color: '#3b82f6' }}>
             {kpis.upcoming.count} ({formatCurrency(kpis.upcoming.amount)})
           </div>
@@ -518,23 +520,23 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
       {/* Table */}
       {loading ? (
         <div style={{ textAlign: 'center', padding: '40px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
-          Carregant...
+          {t('common.loading')}
         </div>
       ) : recurringExpenses.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '40px', color: darkMode ? '#9ca3af' : '#6b7280' }}>
-          No hi ha despeses recurrents. Crea una per començar.
+          {t('recurringExpenses.empty')}
         </div>
       ) : (
         <table style={styles.table}>
           <thead>
             <tr>
-              <th style={styles.th}>Descripció</th>
-              <th style={styles.th}>Import</th>
-              <th style={styles.th}>Dia del mes</th>
-              <th style={styles.th}>Categoria</th>
-              <th style={styles.th}>Projecte</th>
-              <th style={styles.th}>Estat</th>
-              <th style={styles.th}>Accions</th>
+              <th style={styles.th}>{t('recurringExpenses.headers.description')}</th>
+              <th style={styles.th}>{t('recurringExpenses.headers.amount')}</th>
+              <th style={styles.th}>{t('recurringExpenses.headers.dayOfMonth')}</th>
+              <th style={styles.th}>{t('recurringExpenses.headers.category')}</th>
+              <th style={styles.th}>{t('recurringExpenses.headers.project')}</th>
+              <th style={styles.th}>{t('recurringExpenses.headers.status')}</th>
+              <th style={styles.th}>{t('recurringExpenses.headers.actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -555,7 +557,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
                     backgroundColor: recurring.is_active ? '#22c55e15' : '#6b728015',
                     color: recurring.is_active ? '#22c55e' : '#6b7280'
                   }}>
-                    {recurring.is_active ? 'Activa' : 'Inactiva'}
+                    {recurring.is_active ? t('recurringExpenses.active') : t('recurringExpenses.inactive')}
                   </span>
                 </td>
                 <td style={styles.td}>
@@ -572,7 +574,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
                         alignItems: 'center',
                         gap: '4px'
                       }}
-                      title="Veure instàncies"
+                      title={t('recurringExpenses.viewOccurrences')}
                     >
                       <Calendar size={16} />
                     </button>
@@ -614,7 +616,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
           <div style={styles.modal} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeader}>
               <h3 style={styles.modalTitle}>
-                {editingRecurring.id ? 'Editar Despesa Recurrent' : 'Nova Despesa Recurrent'}
+                {editingRecurring.id ? t('recurringExpenses.modal.editTitle') : t('recurringExpenses.modal.newTitle')}
               </h3>
               <button
                 onClick={() => setShowModal(false)}
@@ -813,7 +815,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
         <div style={styles.modalOverlay} onClick={() => setShowSupplierModal(false)}>
           <div style={styles.modal} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeader}>
-              <h3 style={styles.modalTitle}>Nou Proveïdor</h3>
+              <h3 style={styles.modalTitle}>{t('recurringExpenses.newSupplierTitle')}</h3>
               <button
                 onClick={() => setShowSupplierModal(false)}
                 style={{
@@ -880,7 +882,7 @@ export default function RecurringExpensesSection({ darkMode, categories, demoMod
         }}>
           <div style={{ ...styles.modal, maxWidth: '800px' }} onClick={e => e.stopPropagation()}>
             <div style={styles.modalHeader}>
-              <h3 style={styles.modalTitle}>Instàncies</h3>
+              <h3 style={styles.modalTitle}>{t('recurringExpenses.occurrencesTitle')}</h3>
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                 <button
                   onClick={() => handleGenerateThisMonth(selectedRecurringId)}

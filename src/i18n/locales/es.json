@@ -3096,5 +3096,54 @@
       "pasteFirst": "Pega el bloque de detalles del producto para analizarlo.",
       "noFields": "No se han detectado campos. Revisa el texto pegado."
     }
+  },
+  "recurringExpenses": {
+    "title": "Gastos Recurrentes Mensuales",
+    "newRecurring": "Nueva Recurrente",
+    "empty": "No hay gastos recurrentes. Crea uno para empezar.",
+    "active": "Activa",
+    "inactive": "Inactiva",
+    "viewOccurrences": "Ver instancias",
+    "newSupplierTitle": "Nuevo Proveedor",
+    "occurrencesTitle": "Instancias",
+    "kpis": {
+      "pending": "Pendientes",
+      "paid": "Pagados",
+      "upcoming": "Próximos"
+    },
+    "headers": {
+      "description": "Descripción",
+      "amount": "Importe",
+      "dayOfMonth": "Día del mes",
+      "category": "Categoría",
+      "project": "Proyecto",
+      "status": "Estado",
+      "actions": "Acciones"
+    },
+    "modal": {
+      "editTitle": "Editar Gasto Recurrente",
+      "newTitle": "Nuevo Gasto Recurrente"
+    },
+    "toasts": {
+      "loadError": "Error cargando gastos recurrentes",
+      "loadOccurrencesError": "Error cargando instancias",
+      "supplierNameRequired": "El nombre del proveedor es obligatorio",
+      "supplierCreated": "Proveedor creado correctamente",
+      "supplierCreateError": "Error creando proveedor",
+      "occurrenceExists": "Ya existe una instancia para este mes",
+      "occurrenceGenerated": "Instancia generada correctamente",
+      "occurrenceGenerateError": "Error generando instancia",
+      "markedPaid": "Marcado como pagado",
+      "markPaidError": "Error marcando como pagado",
+      "addInvoiceError": "Error añadiendo factura: {{error}}",
+      "statusUpdatedInvoiceAdded": "Estado actualizado: factura añadida",
+      "requiredFields": "Descripción, importe y día del mes son obligatorios",
+      "selectCategory": "Selecciona una categoría",
+      "updated": "Gasto recurrente actualizado",
+      "created": "Gasto recurrente creado",
+      "saveError": "Error guardando gasto recurrente",
+      "deleted": "Gasto recurrente eliminado",
+      "deleteError": "Error eliminando gasto recurrente"
+    }
   }
 }

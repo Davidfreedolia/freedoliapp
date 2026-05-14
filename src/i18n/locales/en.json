@@ -3081,5 +3081,54 @@
       "pasteFirst": "Paste the product details block to analyze it.",
       "noFields": "No fields detected. Review the pasted text."
     }
+  },
+  "recurringExpenses": {
+    "title": "Monthly Recurring Expenses",
+    "newRecurring": "New Recurring",
+    "empty": "No recurring expenses yet. Create one to get started.",
+    "active": "Active",
+    "inactive": "Inactive",
+    "viewOccurrences": "View occurrences",
+    "newSupplierTitle": "New Supplier",
+    "occurrencesTitle": "Occurrences",
+    "kpis": {
+      "pending": "Pending",
+      "paid": "Paid",
+      "upcoming": "Upcoming"
+    },
+    "headers": {
+      "description": "Description",
+      "amount": "Amount",
+      "dayOfMonth": "Day of month",
+      "category": "Category",
+      "project": "Project",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "modal": {
+      "editTitle": "Edit Recurring Expense",
+      "newTitle": "New Recurring Expense"
+    },
+    "toasts": {
+      "loadError": "Error loading recurring expenses",
+      "loadOccurrencesError": "Error loading occurrences",
+      "supplierNameRequired": "Supplier name is required",
+      "supplierCreated": "Supplier created successfully",
+      "supplierCreateError": "Error creating supplier",
+      "occurrenceExists": "An occurrence already exists for this month",
+      "occurrenceGenerated": "Occurrence generated successfully",
+      "occurrenceGenerateError": "Error generating occurrence",
+      "markedPaid": "Marked as paid",
+      "markPaidError": "Error marking as paid",
+      "addInvoiceError": "Error adding invoice: {{error}}",
+      "statusUpdatedInvoiceAdded": "Status updated: invoice added",
+      "requiredFields": "Description, amount and day of month are required",
+      "selectCategory": "Select a category",
+      "updated": "Recurring expense updated",
+      "created": "Recurring expense created",
+      "saveError": "Error saving recurring expense",
+      "deleted": "Recurring expense deleted",
+      "deleteError": "Error deleting recurring expense"
+    }
   }
 }
