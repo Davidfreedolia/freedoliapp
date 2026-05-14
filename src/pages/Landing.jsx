@@ -21,11 +21,17 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { BarChart2, Layout, Brain, Download, DollarSign, HelpCircle, Globe } from 'lucide-react'
+import {
+  BarChart2, Layout, Brain, Download, DollarSign, HelpCircle, Globe,
+  Sparkles, KeyRound, FolderKanban, Briefcase, Languages, ShieldCheck,
+} from 'lucide-react'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '../styles/landing.css'
 import { TestimonialsCarousel } from '../components/landing/TestimonialsCarousel'
 import AiSuiteSection from '../components/landing/AiSuiteSection'
+import HeroMockup from '../components/landing/HeroMockup'
+import VisualMockupOps from '../components/landing/VisualMockupOps'
+import VisualMockupAi from '../components/landing/VisualMockupAi'
 
 /* ─── Static data ─────────────────────────────────────────────────────────── */
 
@@ -39,36 +45,89 @@ const LOGO_TOOLS = [
 ]
 
 const FEATURES = [
-  { Icon: BarChart2,   titleKey: 'feature1.title', textKey: 'feature1.text' },
-  { Icon: Layout,      titleKey: 'feature2.title', textKey: 'feature2.text' },
-  { Icon: Brain,       titleKey: 'feature3.title', textKey: 'feature3.text' },
-  { Icon: Download,    titleKey: 'feature4.title', textKey: 'feature4.text' },
-  { Icon: DollarSign,  titleKey: 'feature5.title', textKey: 'feature5.text' },
-  { Icon: HelpCircle,  titleKey: 'feature6.title', textKey: 'feature6.text' },
+  { Icon: KeyRound,    titleKey: 'feature1.title', textKey: 'feature1.text' }, // BYOK
+  { Icon: FolderKanban,titleKey: 'feature2.title', textKey: 'feature2.text' }, // pipeline end-to-end
+  { Icon: Brain,       titleKey: 'feature3.title', textKey: 'feature3.text' }, // decision engine
+  { Icon: Download,    titleKey: 'feature4.title', textKey: 'feature4.text' }, // SPAPI + imports
+  { Icon: Briefcase,   titleKey: 'feature5.title', textKey: 'feature5.text' }, // PO + signatures
+  { Icon: ShieldCheck, titleKey: 'feature6.title', textKey: 'feature6.text' }, // GDPR + multi-tenant
 ]
 
 /* ─── Sub-components ──────────────────────────────────────────────────────── */
 
-/** Reusable image + text section. `reverse` flips image to the right on md+. */
-function VisualSection({ imgSrc, titleKey, textKey, reverse = false }) {
+/**
+ * Reusable visual + text section. Accepts either a pre-rendered `mockup`
+ * JSX element (preferred — fully CSS/SVG-driven, scales infinitely) or
+ * a legacy `imgSrc` PNG path. `reverse` flips the layout on md+.
+ *
+ * Supports an optional `bulletsKey` array (rendered as a 3-point checklist
+ * below the description) and an optional `chipKey` (an eyebrow chip above
+ * the title) so each section can hit its own commercial angle.
+ */
+function VisualSection({
+  imgSrc,
+  mockup,
+  titleKey,
+  textKey,
+  chipKey,
+  bulletKeys = [],
+  reverse = false,
+}) {
   const { t } = useTranslation()
   return (
     <section className="py-5">
       <div className="container">
         <div className={`row align-items-center g-5${reverse ? ' flex-md-row-reverse' : ''}`}>
           <div className="col-12 col-md-6">
-            <img
-              src={imgSrc}
-              alt={t(titleKey)}
-              className="img-fluid rounded-4"
-              style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.1)' }}
-            />
+            {mockup
+              ? mockup
+              : (
+                <img
+                  src={imgSrc}
+                  alt={t(titleKey)}
+                  className="img-fluid rounded-4"
+                  style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.1)' }}
+                />
+              )
+            }
           </div>
           <div className="col-12 col-md-6">
-            <h2 className="display-6 fw-bold mb-4" style={{ color: '#1A1A2E' }}>
+            {chipKey && (
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '4px 10px', borderRadius: 999,
+                background: 'rgba(31,95,99,0.08)',
+                color: 'var(--brand-1, #1F5F63)',
+                fontSize: 11, fontWeight: 700, letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                fontFamily: '"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace',
+                marginBottom: 16,
+              }}>
+                {t(chipKey)}
+              </span>
+            )}
+            <h2 className="display-6 fw-bold mb-4" style={{ color: '#1A1A2E', lineHeight: 1.1 }}>
               {t(titleKey)}
             </h2>
-            <p className="lead text-muted">{t(textKey)}</p>
+            <p className="lead text-muted" style={{ fontSize: 17, lineHeight: 1.55 }}>{t(textKey)}</p>
+            {bulletKeys.length > 0 && (
+              <ul style={{ marginTop: 18, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {bulletKeys.map((k) => (
+                  <li key={k} style={{
+                    display: 'flex', alignItems: 'flex-start', gap: 10,
+                    fontSize: 15, color: '#243333',
+                  }}>
+                    <span style={{
+                      display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                      width: 20, height: 20, borderRadius: '50%', flexShrink: 0,
+                      background: 'rgba(63,191,154,0.16)', color: 'var(--success-ink, #2B7A66)',
+                      fontSize: 12, fontWeight: 700, marginTop: 1,
+                    }}>✓</span>
+                    <span style={{ lineHeight: 1.5 }}>{t(k)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       </div>
@@ -342,25 +401,10 @@ export default function Landing() {
               </div>
             </div>
 
-            {/* mockup right */}
+            {/* mockup right — pure CSS/SVG, replaces the legacy PNG that had
+                untranslated i18n keys leaking into the screenshot */}
             <div className="col-12 col-md-6 d-flex justify-content-center mt-5 mt-md-0">
-              <img
-                src="/images/landing/landing-hero-dashboard.png"
-                alt="FreedoliApp dashboard"
-                className="img-fluid rounded-4"
-                style={{
-                  maxWidth: 560,
-                  boxShadow: '0 32px 80px rgba(0,0,0,0.4)',
-                  transform: 'perspective(1000px) rotateY(-8deg) rotateX(3deg)',
-                  transition: 'transform 0.4s ease',
-                }}
-                onMouseEnter={e => {
-                  e.target.style.transform = 'perspective(1000px) rotateY(-2deg) rotateX(1deg)'
-                }}
-                onMouseLeave={e => {
-                  e.target.style.transform = 'perspective(1000px) rotateY(-8deg) rotateX(3deg)'
-                }}
-              />
+              <HeroMockup />
             </div>
           </div>
         </div>
@@ -423,14 +467,18 @@ export default function Landing() {
 
       {/* ── 5–6. VISUAL SECTIONS (CANVI 4) ──────────────────────────────── */}
       <VisualSection
-        imgSrc="/images/landing/landing-orders-workflow.png"
+        mockup={<VisualMockupOps />}
+        chipKey="visual_a.chip"
         titleKey="visual_a.title"
         textKey="visual_a.text"
+        bulletKeys={['visual_a.b1', 'visual_a.b2', 'visual_a.b3']}
       />
       <VisualSection
-        imgSrc="/images/landing/landing-decisions-dashboard.png"
+        mockup={<VisualMockupAi />}
+        chipKey="visual_b.chip"
         titleKey="visual_b.title"
         textKey="visual_b.text"
+        bulletKeys={['visual_b.b1', 'visual_b.b2', 'visual_b.b3']}
         reverse
       />
 

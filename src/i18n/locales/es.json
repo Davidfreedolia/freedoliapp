@@ -552,6 +552,45 @@
         "text": "Captura cualquier ASIN de Amazon en un clic. 12 marketplaces. La página de investigación se abre con el producto ya precargado."
       }
     },
+    "visualOps": {
+      "kicker": "Proyecto FBA #042 · IA asistiendo",
+      "done": "Hecho",
+      "phase": {
+        "research": "Research + viabilidad",
+        "viability": "Cálculo de margen y riesgo",
+        "suppliers": "Proveedores + presupuestos",
+        "samples": "Muestras + aprobación",
+        "shipment": "PO + envío",
+        "live": "Live en Amazon"
+      },
+      "phaseHint": {
+        "research": "IA: 12 keywords",
+        "viability": "GO — 32% margen",
+        "suppliers": "4 presupuestos · IA OK"
+      },
+      "aiTag": "IA · Sugerencia",
+      "aiMsg": "El proveedor B tiene MOQ 200 más bajo pero 5 días más de lead time. Si caja es prioridad ahora, recomiendo B."
+    },
+    "visualAi": {
+      "kicker": "Decisiones de hoy · IA priorizadas",
+      "urgent": "urgentes",
+      "kpi": {
+        "margin": "Margen medio",
+        "cash": "Caja 30d",
+        "stockout": "Stockouts"
+      },
+      "trend": "Profit · 30 días",
+      "insight1": {
+        "title": "Reordenar SKU-7382 antes del 28/05",
+        "body": "Velocidad actual 14u/día, stock para 11 días. Confianza IA: 92%.",
+        "cta": "Ver decisión"
+      },
+      "insight2": {
+        "title": "Proveedor C subió el precio 8% sin avisar",
+        "body": "IA detectó la subida en la última PO. Recomienda renegociar o ir a B.",
+        "cta": "Abrir negociación"
+      }
+    },
     "hero": {
       "title": "Gestiona tus operaciones de Amazon desde un solo lugar.",
       "subtitle": "El sistema operativo para negocios de producto que gestionan proveedores, pedidos de compra, inventario y beneficio.",
@@ -2830,81 +2869,110 @@
     }
   },
   "hero": {
-    "title": "Gestiona tu negocio Amazon FBA desde un solo lugar",
-    "subtitle": "Pipeline visual, calculadora de rentabilidad FBA, importación desde 16 herramientas y análisis IA. Todo integrado.",
-    "cta_primary": "Empezar gratis",
-    "cta_secondary": "Ver demo",
+    "title": "La IA hace el trabajo aburrido. Tú te quedas el margen.",
+    "subtitle": "Plataforma operativa para sellers FBA: research → proveedores → PO → envío → live. Con 6 herramientas de IA que conectas con tu propia clave (Claude, GPT, Gemini) y sin cuotas por análisis.",
+    "cta_primary": "Empezar trial · 14 días",
+    "cta_secondary": "Ver las herramientas IA",
     "badge": "Nuevo · 6 herramientas IA + Extensión Chrome",
+    "mockAlt": "Captura del producto mostrando la herramienta de recuperación de dinero FBA con IA",
     "stat1": {
-      "value": "500+",
-      "label": "Vendedores activos"
+      "value": "€2.347",
+      "label": "Recuperados en beta"
     },
     "stat2": {
-      "value": "12k€",
-      "label": "Ahorro medio/mes"
+      "value": "6",
+      "label": "Herramientas IA · 0€ extra"
     },
     "stat3": {
-      "value": "5min",
-      "label": "Para tomar decisiones"
+      "value": "12",
+      "label": "Marketplaces Amazon"
+    },
+    "mock": {
+      "refundTitle": "Recuperación dinero FBA",
+      "estimated": "Estimación recuperable · 18 meses",
+      "events": "12 sospechosos · 1.842 events analizados",
+      "aiTag": "IA · Claude Sonnet",
+      "aiMsg": "ha encontrado 3 reembolsos con evidencia suficiente. Texto para Seller Support listo.",
+      "cat": {
+        "lost": "Stock perdido",
+        "fee": "Fee duplicada",
+        "ret": "Devolución no reembolsada"
+      },
+      "tool": {
+        "quotes": "Presupuestos",
+        "listing": "Listing",
+        "keywords": "Keywords",
+        "keepa": "Keepa"
+      },
+      "connected": "SPAPI · Stripe · BYOK IA",
+      "scanReady": "Scan listo"
     }
   },
   "logos": {
-    "label": "Importación compatible con:"
+    "label": "Conecta con las herramientas que ya usas:"
   },
   "feature1": {
-    "title": "Dashboard en tiempo real",
-    "text": "Revenue, beneficio, margen neto e inventario — todo de un vistazo."
+    "title": "BYOK · Sin cuotas de IA",
+    "text": "Conecta tu cuenta de Anthropic, OpenAI, Gemini, Mistral, Groq u Ollama. Tú controlas el coste, no nosotros. Sin límites por análisis."
   },
   "feature2": {
-    "title": "Pipeline de productos visual",
-    "text": "Kanban con drag & drop, 7 fases del ciclo del producto."
+    "title": "Pipeline end-to-end del producto",
+    "text": "Research → proveedores → muestras → PO → envío → almacén → live en Amazon. Todo en una sola herramienta con kanban y 7 fases."
   },
   "feature3": {
-    "title": "Investigación con IA",
-    "text": "La IA analiza ASINs, busca proveedores y genera informes de viabilidad."
+    "title": "Motor de decisiones IA",
+    "text": "Bandeja de decisiones priorizadas con evidencia: reordenes, anomalías de fees, cambios de precio del proveedor. Tú decides, la IA recopila."
   },
   "feature4": {
-    "title": "Importa desde 16 herramientas",
-    "text": "Migra de Sellerboard, Helium 10, Holded o cualquier Excel en minutos."
+    "title": "SP-API + 16 imports",
+    "text": "Settlement reports, FBA fees e inventario directos desde Amazon. Migra de Sellerboard, Helium 10, Holded o cualquier Excel en minutos."
   },
   "feature5": {
-    "title": "Finanzas desglosadas",
-    "text": "COGS, fees FBA, PPC, envíos y devoluciones — separados por producto."
+    "title": "Órdenes con firma digital",
+    "text": "Crea PO, edita partidas, firma con comprador/proveedor y exporta PDF con el sello de la empresa. Historial completo de cada orden."
   },
   "feature6": {
-    "title": "Asistente integrado",
-    "text": "Responde tus dudas según la página donde estés. Sin esperas."
+    "title": "Multi-workspace · GDPR ready",
+    "text": "Diferentes marcas en workspaces separados con RLS por equipo. Export de datos completo y derecho al olvido cumpliendo Art. 17/20 GDPR."
   },
   "visual_a": {
-    "title": "Todo tu negocio Amazon en un solo lugar",
-    "text": "Deja de alternar entre 10 herramientas. FreedoliApp centraliza tus datos en un dashboard único, en tiempo real."
+    "chip": "El pipeline acaba en Amazon",
+    "title": "Cada producto, desde la idea hasta el live",
+    "text": "Mientras Helium 10 te da keywords y Sellerboard te da P&L, Freedoliapp lleva tu producto de la idea hasta Amazon. La IA va comentando cada fase con datos reales de tus proveedores y settlement reports.",
+    "b1": "7 fases del ciclo (Research → Live) en una pantalla",
+    "b2": "Drag-and-drop de presupuestos PDF · la IA los compara automáticamente",
+    "b3": "Firmas digitales en la PO, trazabilidad de fábrica a FBA"
   },
   "visual_b": {
-    "title": "Decisión en 5 minutos, no en 5 horas",
-    "text": "La IA calcula la rentabilidad real con tarifas FBA actualizadas y te dice si vale la pena invertir."
+    "chip": "Decisiones cada mañana",
+    "title": "Tu segundo cerebro para la marca FBA",
+    "text": "La IA escanea settlement reports, precios de proveedores y el ritmo de ventas cada noche. Por la mañana tienes una bandeja de 5-15 decisiones priorizadas con el cálculo hecho y el texto para actuar. No más abrir 8 pestañas para decidir.",
+    "b1": "Refund recovery: encuentra dinero perdido en Amazon · sin comisión",
+    "b2": "Alertas proactivas: subida de precio de un proveedor, stockout en X días",
+    "b3": "Todo con explicación de la IA · sin caja negra · auditable"
   },
   "step1": {
     "title": "Regístrate",
-    "text": "Crea tu cuenta en 30 segundos"
+    "text": "30 segundos. Sin tarjeta de crédito."
   },
   "step2": {
     "title": "Conecta",
-    "text": "Importa desde Sellerboard, Helium 10 o Excel"
+    "text": "SPAPI · tu clave de IA · Stripe · imports"
   },
   "step3": {
-    "title": "Analiza",
-    "text": "La IA analiza productos y proveedores automáticamente"
+    "title": "La IA trabaja",
+    "text": "Análisis, comparativas, alertas, escaneo de reembolsos"
   },
   "step4": {
-    "title": "Gestiona",
-    "text": "Pipeline visual, finanzas y inventario centralizado"
+    "title": "Tú decides",
+    "text": "Bandeja de decisiones priorizadas cada mañana"
   },
   "step5": {
-    "title": "Crece",
-    "text": "Decide con datos, no con intuición"
+    "title": "Creces",
+    "text": "Margen + caja estable + stock justo"
   },
   "how_it_works": {
-    "title": "¿Cómo funciona?"
+    "title": "Cómo funciona"
   },
   "testimonials": {
     "title": "Lo que dicen nuestros sellers"

@@ -552,6 +552,45 @@
         "text": "Capture any Amazon ASIN in one click. 12 marketplaces. The research page opens with the product already prefilled."
       }
     },
+    "visualOps": {
+      "kicker": "FBA project #042 · AI assisting",
+      "done": "Done",
+      "phase": {
+        "research": "Research + viability",
+        "viability": "Margin & risk calc",
+        "suppliers": "Suppliers + quotes",
+        "samples": "Samples + approval",
+        "shipment": "PO + shipment",
+        "live": "Live on Amazon"
+      },
+      "phaseHint": {
+        "research": "AI: 12 keywords",
+        "viability": "GO — 32% margin",
+        "suppliers": "4 quotes · AI OK"
+      },
+      "aiTag": "AI · Suggestion",
+      "aiMsg": "Supplier B has MOQ 200 lower but 5 days more lead time. If cash is the priority now, I recommend B."
+    },
+    "visualAi": {
+      "kicker": "Today's decisions · AI-prioritized",
+      "urgent": "urgent",
+      "kpi": {
+        "margin": "Avg margin",
+        "cash": "Cash 30d",
+        "stockout": "Stockouts"
+      },
+      "trend": "Profit · 30 days",
+      "insight1": {
+        "title": "Reorder SKU-7382 before 28/05",
+        "body": "Current velocity 14u/day, stock for 11 days. AI confidence: 92%.",
+        "cta": "View decision"
+      },
+      "insight2": {
+        "title": "Supplier C raised prices 8% without notice",
+        "body": "AI flagged the hike in the last PO. Recommends renegotiating or switching to B.",
+        "cta": "Open negotiation"
+      }
+    },
     "hero": {
       "title": "Run your Amazon operations from one place.",
       "subtitle": "The operating system for product businesses managing suppliers, purchase orders, inventory and profit.",
@@ -2815,81 +2854,110 @@
     }
   },
   "hero": {
-    "title": "Manage your Amazon FBA business from one place",
-    "subtitle": "Visual pipeline, FBA profitability calculator, import from 16 tools and AI analysis. All integrated.",
-    "cta_primary": "Start for free",
-    "cta_secondary": "Watch demo",
+    "title": "AI does the boring work. You keep the margin.",
+    "subtitle": "An operating system for FBA sellers: research → suppliers → PO → shipment → live. With 6 AI tools you plug into using your own key (Claude, GPT, Gemini) and zero analysis quotas.",
+    "cta_primary": "Start trial · 14 days",
+    "cta_secondary": "See the AI tools",
     "badge": "New · 6 AI tools + Chrome extension",
+    "mockAlt": "Product screenshot showing the AI-powered FBA refund recovery tool",
     "stat1": {
-      "value": "500+",
-      "label": "Active sellers"
+      "value": "€2,347",
+      "label": "Recovered in beta"
     },
     "stat2": {
-      "value": "12k€",
-      "label": "Average savings/mo"
+      "value": "6",
+      "label": "AI tools · €0 extra"
     },
     "stat3": {
-      "value": "5min",
-      "label": "To make decisions"
+      "value": "12",
+      "label": "Amazon marketplaces"
+    },
+    "mock": {
+      "refundTitle": "FBA Refund Recovery",
+      "estimated": "Recoverable estimate · 18 months",
+      "events": "12 suspicious · 1,842 events analyzed",
+      "aiTag": "AI · Claude Sonnet",
+      "aiMsg": "found 3 reimbursements with sufficient evidence. Seller Support text ready to paste.",
+      "cat": {
+        "lost": "Lost inventory",
+        "fee": "Duplicate fee",
+        "ret": "Return not refunded"
+      },
+      "tool": {
+        "quotes": "Quotes",
+        "listing": "Listing",
+        "keywords": "Keywords",
+        "keepa": "Keepa"
+      },
+      "connected": "SPAPI · Stripe · BYOK AI",
+      "scanReady": "Scan ready"
     }
   },
   "logos": {
-    "label": "Compatible with:"
+    "label": "Plug into the tools you already use:"
   },
   "feature1": {
-    "title": "Real-time Dashboard",
-    "text": "Revenue, profit, net margin and inventory — all at a glance."
+    "title": "BYOK · No AI quotas",
+    "text": "Plug in your Anthropic, OpenAI, Gemini, Mistral, Groq or Ollama account. You control the cost, not us. Zero analysis caps."
   },
   "feature2": {
-    "title": "Visual Product Pipeline",
-    "text": "Kanban with drag & drop, 7 product lifecycle phases."
+    "title": "End-to-end product pipeline",
+    "text": "Research → suppliers → samples → PO → shipment → warehouse → live on Amazon. All in one tool with a 7-phase kanban."
   },
   "feature3": {
-    "title": "AI-Powered Research",
-    "text": "AI analyses ASINs, finds suppliers and generates viability reports."
+    "title": "AI decision engine",
+    "text": "A prioritized decisions inbox with evidence: reorders, fee anomalies, supplier price changes. You decide, the AI gathers."
   },
   "feature4": {
-    "title": "Import from 16 Tools",
-    "text": "Migrate from Sellerboard, Helium 10, Holded or any Excel in minutes."
+    "title": "SP-API + 16 imports",
+    "text": "Settlement reports, FBA fees and inventory directly from Amazon. Migrate from Sellerboard, Helium 10, Holded or any spreadsheet in minutes."
   },
   "feature5": {
-    "title": "Detailed Finances",
-    "text": "COGS, FBA fees, PPC, shipping and returns — separated by product."
+    "title": "POs with digital signatures",
+    "text": "Create a PO, edit line items, sign with buyer/supplier and export PDF with your company stamp. Full history on every order."
   },
   "feature6": {
-    "title": "Built-in Assistant",
-    "text": "Answers your questions based on the page you're on. No waiting."
+    "title": "Multi-workspace · GDPR ready",
+    "text": "Different brands in separate workspaces with per-team RLS. Full data export and right-to-erasure, fully GDPR Art. 17/20 compliant."
   },
   "visual_a": {
-    "title": "All your Amazon business in one place",
-    "text": "Stop switching between 10 tools. FreedoliApp centralises your data in a single real-time dashboard."
+    "chip": "Pipeline ends at Amazon",
+    "title": "Every product, from idea to live",
+    "text": "Helium 10 gives you keywords. Sellerboard gives you P&L. Freedoliapp ships your product from idea to Amazon live. The AI comments at every phase using real data from your suppliers and settlement reports.",
+    "b1": "7 lifecycle phases (Research → Live) on one screen",
+    "b2": "Drag-and-drop supplier PDFs · AI compares them for you",
+    "b3": "Digital signatures on the PO, traceability from factory to FBA"
   },
   "visual_b": {
-    "title": "Decision in 5 minutes, not 5 hours",
-    "text": "AI calculates real profitability with updated FBA fees and tells you whether it's worth investing."
+    "chip": "Decisions every morning",
+    "title": "A second brain for your FBA brand",
+    "text": "The AI scans settlement reports, supplier prices and your sales velocity every night. By morning you have 5-15 prioritized decisions with the maths done and the text to act on them. No more opening 8 tabs to make one call.",
+    "b1": "Refund recovery: surfaces lost money on Amazon · no commission",
+    "b2": "Proactive alerts: supplier price hikes, stockouts in X days",
+    "b3": "Everything is explainable · no black box · fully auditable"
   },
   "step1": {
     "title": "Sign up",
-    "text": "Create your account in 30 seconds"
+    "text": "30 seconds. No credit card."
   },
   "step2": {
     "title": "Connect",
-    "text": "Import from Sellerboard, Helium 10 or Excel"
+    "text": "SPAPI · your AI key · Stripe · imports"
   },
   "step3": {
-    "title": "Analyse",
-    "text": "AI analyses products and suppliers automatically"
+    "title": "AI works",
+    "text": "Analysis, comparisons, alerts, refund scanning"
   },
   "step4": {
-    "title": "Manage",
-    "text": "Visual pipeline, finances and centralised inventory"
+    "title": "You decide",
+    "text": "Prioritized decisions inbox every morning"
   },
   "step5": {
-    "title": "Grow",
-    "text": "Decide with data, not intuition"
+    "title": "You grow",
+    "text": "Margin up + cash stable + stock right-sized"
   },
   "how_it_works": {
-    "title": "How does it work?"
+    "title": "How it works"
   },
   "testimonials": {
     "title": "What our sellers say"

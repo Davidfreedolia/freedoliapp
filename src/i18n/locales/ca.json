@@ -552,6 +552,45 @@
         "text": "Captura qualsevol ASIN d'Amazon en un clic. 12 marketplaces. La pàgina de recerca s'obre amb el producte ja precarregat."
       }
     },
+    "visualOps": {
+      "kicker": "Projecte FBA #042 · IA assistint",
+      "done": "Fet",
+      "phase": {
+        "research": "Recerca + viabilitat",
+        "viability": "Càlcul de marge i risc",
+        "suppliers": "Proveïdors + pressupostos",
+        "samples": "Mostres + aprovació",
+        "shipment": "PO + enviament",
+        "live": "Live a Amazon"
+      },
+      "phaseHint": {
+        "research": "IA: 12 keywords",
+        "viability": "GO — 32% marge",
+        "suppliers": "4 pressupostos · IA OK"
+      },
+      "aiTag": "IA · Suggeriment",
+      "aiMsg": "El proveïdor B té MOQ 200 més baix però 5 dies més de lead time. Si caixa és prioritat ara, recomano B."
+    },
+    "visualAi": {
+      "kicker": "Decisions d'avui · IA prioritzades",
+      "urgent": "urgents",
+      "kpi": {
+        "margin": "Marge mig",
+        "cash": "Caixa 30d",
+        "stockout": "Stockouts"
+      },
+      "trend": "Profit · 30 dies",
+      "insight1": {
+        "title": "Cal reordenar SKU-7382 abans del 28/05",
+        "body": "Velocitat actual 14u/dia, stock per 11 dies. Confiança IA: 92%.",
+        "cta": "Veure decisió"
+      },
+      "insight2": {
+        "title": "Proveïdor C va apujar preu 8% sense avisar",
+        "body": "IA ha detectat la pujada en l'última PO. Recomana renegociar o anar a B.",
+        "cta": "Obrir negociació"
+      }
+    },
     "hero": {
       "title": "Gestiona les teves operacions d'Amazon des d'un sol lloc.",
       "subtitle": "El sistema operatiu per a negocis de producte que gestionen proveïdors, comandes de compra, inventari i benefici.",
@@ -3015,81 +3054,110 @@
     }
   },
   "hero": {
-    "title": "Gestiona el teu negoci Amazon FBA des d'un sol lloc",
-    "subtitle": "Pipeline visual, calculadora de rendibilitat FBA, importació des de 16 eines i anàlisi IA. Tot integrat.",
-    "cta_primary": "Comença gratis",
-    "cta_secondary": "Veure demo",
+    "title": "L'IA fa la feina avorrida. Tu et quedes el marge.",
+    "subtitle": "Plataforma operativa per a sellers FBA: research → proveïdors → PO → enviament → live. Amb 6 eines d'IA que connectes amb la teva pròpia clau (Claude, GPT, Gemini) i sense quotes per anàlisi.",
+    "cta_primary": "Comença el trial · 14 dies",
+    "cta_secondary": "Veure les eines IA",
     "badge": "Nou · 6 eines IA + Extensió Chrome",
+    "mockAlt": "Captura del producte mostrant l'eina de recuperació de diners FBA amb IA",
     "stat1": {
-      "value": "500+",
-      "label": "Venedors actius"
+      "value": "€2.347",
+      "label": "Recuperats al beta"
     },
     "stat2": {
-      "value": "12k€",
-      "label": "Estalvi mig/mes"
+      "value": "6",
+      "label": "Eines IA · 0€ extra"
     },
     "stat3": {
-      "value": "5min",
-      "label": "Per prendre decisions"
+      "value": "12",
+      "label": "Marketplaces Amazon"
+    },
+    "mock": {
+      "refundTitle": "Recuperació diners FBA",
+      "estimated": "Estimació recuperable · 18 mesos",
+      "events": "12 sospitosos · 1.842 events analitzats",
+      "aiTag": "IA · Claude Sonnet",
+      "aiMsg": "ha trobat 3 reembossaments amb evidència suficient. Text per Seller Support llest.",
+      "cat": {
+        "lost": "Estoc perdut",
+        "fee": "Fee duplicada",
+        "ret": "Devolució no reembossada"
+      },
+      "tool": {
+        "quotes": "Pressupostos",
+        "listing": "Listing",
+        "keywords": "Keywords",
+        "keepa": "Keepa"
+      },
+      "connected": "SPAPI · Stripe · BYOK IA",
+      "scanReady": "Scan llest"
     }
   },
   "logos": {
-    "label": "Importació compatible amb:"
+    "label": "Connecta amb les eines que ja fas servir:"
   },
   "feature1": {
-    "title": "Dashboard en temps real",
-    "text": "Revenue, benefici, marge net i inventari — tot d'un cop d'ull."
+    "title": "BYOK · Sense quotes d'IA",
+    "text": "Connecta el teu compte d'Anthropic, OpenAI, Gemini, Mistral, Groq o Ollama. Tu controles el cost, no nosaltres. Sense límits per anàlisi."
   },
   "feature2": {
-    "title": "Pipeline de productes visual",
-    "text": "Kanban amb drag & drop, 7 fases del cicle del producte."
+    "title": "Pipeline end-to-end del producte",
+    "text": "Research → proveïdors → mostres → PO → enviament → magatzem → live a Amazon. Tot en una sola eina amb kanban i 7 fases."
   },
   "feature3": {
-    "title": "Recerca amb IA",
-    "text": "La IA analitza ASINs, troba proveïdors i genera informes de viabilitat."
+    "title": "Motor de decisions IA",
+    "text": "Safata de decisions prioritzades amb evidència: re-ordres, anomalies de fees, canvis de preu del proveïdor. Tu decideixes, l'IA recopila."
   },
   "feature4": {
-    "title": "Importa des de 16 eines",
-    "text": "Migra de Sellerboard, Helium 10, Holded o qualsevol Excel en minuts."
+    "title": "SP-API + 16 imports",
+    "text": "Settlement reports, FBA fees i inventari directes des d'Amazon. Migra de Sellerboard, Helium 10, Holded o qualsevol Excel en minuts."
   },
   "feature5": {
-    "title": "Finances desglossades",
-    "text": "COGS, fees FBA, PPC, enviaments i devolucions — per producte."
+    "title": "Comandes amb signatura digital",
+    "text": "Crea PO, edita partides, signa amb el comprador/proveïdor i exporta PDF amb el segell de l'empresa. Història completa de cada comanda."
   },
   "feature6": {
-    "title": "Assistent integrat",
-    "text": "Respon les teves dubtes segons la pàgina on estiguis. Sense esperes."
+    "title": "Multi-workspace · GDPR ready",
+    "text": "Diferents marques en workspaces separats amb RLS per a cada equip. Export de dades complet i dret a l'oblit complint Art. 17/20 GDPR."
   },
   "visual_a": {
-    "title": "Tot el teu negoci Amazon en un sol lloc",
-    "text": "Deixa d'alternar entre 10 eines. FreedoliApp centralitza les teves dades en un dashboard únic, en temps real."
+    "chip": "El pipeline acaba a Amazon",
+    "title": "Cada producte, des de la idea fins al live",
+    "text": "Mentre Helium 10 et dóna keywords i Sellerboard et dóna P&L, Freedoliapp porta el teu producte de la idea fins a Amazon. La IA va comentant a cada fase amb dades reals dels teus proveïdors i settlement reports.",
+    "b1": "7 fases del cicle (Research → Live) en una pantalla",
+    "b2": "Drag-and-drop de pressupostos PDF · IA els compara automàticament",
+    "b3": "Signatures digitals al PO, traçabilitat des de fàbrica fins a FBA"
   },
   "visual_b": {
-    "title": "Decisió en 5 minuts, no en 5 hores",
-    "text": "La IA calcula la rendibilitat real amb tarifes FBA actualitzades i et diu si val la pena invertir."
+    "chip": "Decisions cada matí",
+    "title": "El teu segon cervell per a la marca FBA",
+    "text": "La IA escaneja settlement reports, preus de proveïdors i el ritme de vendes cada nit. Al matí tens una safata de 5-15 decisions prioritzades amb el càlcul fet i el text per actuar. No més obrir 8 pestanyes per decidir.",
+    "b1": "Refund recovery: troba diners perduts a Amazon · sense comissió",
+    "b2": "Alertes proactives: pujada de preu d'un proveïdor, stockout en X dies",
+    "b3": "Tot amb explicació de l'IA · cap caixa negra · auditable"
   },
   "step1": {
     "title": "Registra't",
-    "text": "Crea el teu compte en 30 segons"
+    "text": "30 segons. Cap targeta de crèdit."
   },
   "step2": {
     "title": "Connecta",
-    "text": "Importa des de Sellerboard, Helium 10 o Excel"
+    "text": "SPAPI · la teva clau d'IA · Stripe · imports"
   },
   "step3": {
-    "title": "Analitza",
-    "text": "La IA analitza productes i proveïdors automàticament"
+    "title": "L'IA treballa",
+    "text": "Anàlisi, comparatives, alertes, escaneig de reembossaments"
   },
   "step4": {
-    "title": "Gestiona",
-    "text": "Pipeline visual, finances i inventari centralitzat"
+    "title": "Tu decideixes",
+    "text": "Safata de decisions prioritzades cada matí"
   },
   "step5": {
-    "title": "Creix",
-    "text": "Decideix amb dades, no amb intuïció"
+    "title": "Creixes",
+    "text": "Margin growth + caixa estable + estoc just"
   },
   "how_it_works": {
-    "title": "Com funciona?"
+    "title": "Com funciona"
   },
   "testimonials": {
     "title": "El que diuen els nostres sellers"
