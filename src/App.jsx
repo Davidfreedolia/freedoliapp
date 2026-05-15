@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate, Outlet } from 'react-router-dom'
-import React, { Suspense, useEffect, useState } from 'react'
+import React, { Suspense, useEffect, useState, useRef } from 'react'
 import { AppProvider, useApp } from './context/AppContext'
 import { WorkspaceProvider, useWorkspace } from './contexts/WorkspaceContext'
 import { useTranslation } from 'react-i18next'
@@ -524,6 +524,29 @@ function ScreenshotModeBodyClass() {
   return null
 }
 
+/**
+ * AnalyticsTracker — fires the freeSEOlia page-view tracker on every
+ * react-router navigation. The initial page load is already counted by
+ * the inline snippet in index.html, so we skip the very first effect
+ * run to avoid double-counting the entry page.
+ */
+function AnalyticsTracker() {
+  const location = useLocation()
+  const firstRun = useRef(true)
+
+  useEffect(() => {
+    if (firstRun.current) {
+      firstRun.current = false
+      return
+    }
+    if (typeof window !== 'undefined' && typeof window.__fseoTrack === 'function') {
+      window.__fseoTrack()
+    }
+  }, [location.pathname])
+
+  return null
+}
+
 function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
@@ -531,6 +554,7 @@ function App() {
         <AppProvider>
           <CookieBannerWrapper />
           <ScreenshotModeBodyClass />
+          <AnalyticsTracker />
           <Routes>
             {/* ── Pàgines públiques — sense OnboardingGate ── */}
             <Route path="/" element={<Landing />} />

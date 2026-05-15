@@ -128,6 +128,35 @@
   ]
 }
     </script>
+
+    <!-- freeSEOlia analytics — visites privacy-friendly.
+         Exposem window.__fseoTrack perquè el SPA (react-router) pugui
+         re-disparar la mesura a cada canvi de ruta, no només al primer load. -->
+    <script>
+    (function(){
+      var SITE_ID = "4d01d02c-d3ea-4885-8908-8f7282caa788";
+      var ENDPOINT = "https://limsfvefbienxanrqrdt.supabase.co/functions/v1/track";
+      function track(){
+        try {
+          var data = {
+            site_id: SITE_ID,
+            path: location.pathname,
+            referrer: document.referrer || null,
+            locale: navigator.language,
+            screen: matchMedia('(max-width: 768px)').matches ? 'mobile' : 'desktop'
+          };
+          fetch(ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+            keepalive: true
+          }).catch(function(){});
+        } catch (e) { /* analytics must never break the app */ }
+      }
+      window.__fseoTrack = track;
+      track();
+    })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

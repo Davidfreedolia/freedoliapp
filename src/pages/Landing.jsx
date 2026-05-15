@@ -33,17 +33,10 @@ import VisualMockupOps from '../components/landing/VisualMockupOps'
 import VisualMockupAi from '../components/landing/VisualMockupAi'
 import ComparisonSection from '../components/landing/ComparisonSection'
 import BuiltForSection from '../components/landing/BuiltForSection'
+import BuiltOnRow from '../components/landing/BuiltOnRow'
+import LiveStatsBar from '../components/landing/LiveStatsBar'
 
 /* ─── Static data ─────────────────────────────────────────────────────────── */
-
-const LOGO_TOOLS = [
-  { id: 'sellerboard',  name: 'Sellerboard',  domain: 'sellerboard.com' },
-  { id: 'helium10',     name: 'Helium 10',    domain: 'helium10.com' },
-  { id: 'junglescout',  name: 'Jungle Scout', domain: 'junglescout.com' },
-  { id: 'keepa',        name: 'Keepa',        domain: 'keepa.com' },
-  { id: 'holded',       name: 'Holded',       domain: 'holded.com' },
-  { id: 'amazon',       name: 'Amazon',       domain: 'amazon.com' },
-]
 
 const FEATURES = [
   { Icon: KeyRound,    titleKey: 'feature1.title', textKey: 'feature1.text' }, // BYOK
@@ -379,7 +372,7 @@ export default function Landing() {
                   {t('hero.cta_primary')}
                 </a>
                 <a
-                  href="#how"
+                  href="#ai-suite"
                   className="btn btn-lg btn-outline-light px-5 py-3 fw-semibold"
                   style={{ borderRadius: 12 }}
                 >
@@ -415,30 +408,11 @@ export default function Landing() {
               tools added in 2026-05. Editorial asymmetric layout. ───── */}
       <AiSuiteSection />
 
-      {/* ── 3. LOGOS STRIP (CANVI 2) ─────────────────────────────────────── */}
-      <section
-        className="py-4"
-        style={{ background: 'rgba(0,0,0,0.03)', borderTop: '1px solid #E5E7EB' }}
-      >
-        <div className="container">
-          <p className="text-center text-muted small mb-3">{t('logos.label')}</p>
-          <div className="d-flex flex-wrap justify-content-center align-items-center gap-4">
-            {LOGO_TOOLS.map(tool => (
-              <img
-                key={tool.id}
-                /* Use Google's favicon service as the primary source — clearbit
-                   DNS-resolution failures were polluting the browser console.
-                   Google's service is rock-solid and we already used it as the
-                   onError fallback. */
-                src={`https://www.google.com/s2/favicons?domain=${tool.domain}&sz=64`}
-                alt={tool.name}
-                loading="lazy"
-                style={{ height: 28, opacity: 0.6, filter: 'grayscale(30%)' }}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ── 3. BUILT-ON ROW + LIVE STATS — replaces the old favicon logos
+              strip (which leaned on Google's favicon service and implied
+              partnerships that don't exist). ───────────────────────── */}
+      <BuiltOnRow />
+      <LiveStatsBar />
 
       {/* ── 4. FEATURES 6-CARD GRID (CANVI 3) ───────────────────────────── */}
       <section className="py-5 bg-white" id="features">

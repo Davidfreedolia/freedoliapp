@@ -650,6 +650,18 @@
       "cancel": "Cancel anytime",
       "stripe": "Stripe live · secure payments"
     },
+    "builtOn": {
+      "label": "Built on trusted infrastructure",
+      "note": "Data in the EU region · end-to-end encryption · your AI key, your account. No middleman."
+    },
+    "liveStats": {
+      "label": "The platform, live",
+      "events": "Amazon events scanned",
+      "analyses": "AI analyses processed",
+      "functions": "Edge functions in production",
+      "providers": "AI providers supported",
+      "markets": "Amazon marketplaces"
+    },
     "hero": {
       "title": "Run your Amazon operations from one place.",
       "subtitle": "The operating system for product businesses managing suppliers, purchase orders, inventory and profit.",
@@ -2937,10 +2949,22 @@
     },
     "mock": {
       "refundTitle": "FBA Refund Recovery",
+      "quotesTitle": "Quote comparison",
+      "keywordsTitle": "Keyword research",
+      "liveDemo": "Live demo",
       "estimated": "Recoverable estimate · 18 months",
       "events": "12 suspicious · 1,842 events analyzed",
       "aiTag": "AI · Claude Sonnet",
       "aiMsg": "found 3 reimbursements with sufficient evidence. Seller Support text ready to paste.",
+      "aiMsg0": "found 3 reimbursements with sufficient evidence.",
+      "aiMsg1": "recommends Shenzhen Locks: better payment terms and lead time.",
+      "aiMsg2": "38 keywords grouped by intent with estimated CPC.",
+      "best": "Best",
+      "q1": "FOB · 30/70 · 25-day lead time",
+      "q2": "EXW · 100% upfront · high MOQ",
+      "q3": "Low price but risk signals",
+      "play": "Play",
+      "pause": "Pause",
       "cat": {
         "lost": "Lost inventory",
         "fee": "Duplicate fee",

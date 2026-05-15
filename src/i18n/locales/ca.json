@@ -650,6 +650,18 @@
       "cancel": "Cancel·la quan vulguis",
       "stripe": "Stripe live · pagaments segurs"
     },
+    "builtOn": {
+      "label": "Construït sobre infraestructura de confiança",
+      "note": "Dades a la regió UE · xifrat extrem a extrem · la teva clau d'IA, el teu compte. Cap intermediari."
+    },
+    "liveStats": {
+      "label": "La plataforma, en directe",
+      "events": "Events Amazon escanejats",
+      "analyses": "Anàlisis IA processades",
+      "functions": "Funcions edge en producció",
+      "providers": "Proveïdors d'IA suportats",
+      "markets": "Marketplaces Amazon"
+    },
     "hero": {
       "title": "Gestiona les teves operacions d'Amazon des d'un sol lloc.",
       "subtitle": "El sistema operatiu per a negocis de producte que gestionen proveïdors, comandes de compra, inventari i benefici.",
@@ -3137,10 +3149,22 @@
     },
     "mock": {
       "refundTitle": "Recuperació diners FBA",
+      "quotesTitle": "Comparativa de pressupostos",
+      "keywordsTitle": "Recerca de keywords",
+      "liveDemo": "Demo en directe",
       "estimated": "Estimació recuperable · 18 mesos",
       "events": "12 sospitosos · 1.842 events analitzats",
       "aiTag": "IA · Claude Sonnet",
       "aiMsg": "ha trobat 3 reembossaments amb evidència suficient. Text per Seller Support llest.",
+      "aiMsg0": "ha trobat 3 reembossaments amb evidència suficient.",
+      "aiMsg1": "recomana Shenzhen Locks: millors payment terms i lead time.",
+      "aiMsg2": "38 keywords agrupades per intenció amb CPC estimat.",
+      "best": "Millor",
+      "q1": "FOB · 30/70 · 25 dies lead time",
+      "q2": "EXW · 100% avançat · MOQ alt",
+      "q3": "Preu baix però senyals de risc",
+      "play": "Reprodueix",
+      "pause": "Pausa",
       "cat": {
         "lost": "Estoc perdut",
         "fee": "Fee duplicada",

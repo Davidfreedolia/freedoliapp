@@ -650,6 +650,18 @@
       "cancel": "Cancela cuando quieras",
       "stripe": "Stripe live · pagos seguros"
     },
+    "builtOn": {
+      "label": "Construido sobre infraestructura de confianza",
+      "note": "Datos en la región UE · cifrado extremo a extremo · tu clave de IA, tu cuenta. Sin intermediarios."
+    },
+    "liveStats": {
+      "label": "La plataforma, en directo",
+      "events": "Eventos Amazon escaneados",
+      "analyses": "Análisis IA procesados",
+      "functions": "Funciones edge en producción",
+      "providers": "Proveedores de IA soportados",
+      "markets": "Marketplaces Amazon"
+    },
     "hero": {
       "title": "Gestiona tus operaciones de Amazon desde un solo lugar.",
       "subtitle": "El sistema operativo para negocios de producto que gestionan proveedores, pedidos de compra, inventario y beneficio.",
@@ -2952,10 +2964,22 @@
     },
     "mock": {
       "refundTitle": "Recuperación dinero FBA",
+      "quotesTitle": "Comparativa de presupuestos",
+      "keywordsTitle": "Búsqueda de keywords",
+      "liveDemo": "Demo en directo",
       "estimated": "Estimación recuperable · 18 meses",
       "events": "12 sospechosos · 1.842 events analizados",
       "aiTag": "IA · Claude Sonnet",
       "aiMsg": "ha encontrado 3 reembolsos con evidencia suficiente. Texto para Seller Support listo.",
+      "aiMsg0": "ha encontrado 3 reembolsos con evidencia suficiente.",
+      "aiMsg1": "recomienda Shenzhen Locks: mejores payment terms y lead time.",
+      "aiMsg2": "38 keywords agrupadas por intención con CPC estimado.",
+      "best": "Mejor",
+      "q1": "FOB · 30/70 · 25 días lead time",
+      "q2": "EXW · 100% adelantado · MOQ alto",
+      "q3": "Precio bajo pero señales de riesgo",
+      "play": "Reproducir",
+      "pause": "Pausa",
       "cat": {
         "lost": "Stock perdido",
         "fee": "Fee duplicada",
