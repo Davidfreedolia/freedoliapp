@@ -29,6 +29,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import '../styles/landing.css'
 import AiSuiteSection from '../components/landing/AiSuiteSection'
 import HeroMockup from '../components/landing/HeroMockup'
+import { HubCards } from '../components/landing/HubCards'
 import VisualMockupOps from '../components/landing/VisualMockupOps'
 import VisualMockupAi from '../components/landing/VisualMockupAi'
 import ComparisonSection from '../components/landing/ComparisonSection'
@@ -567,6 +568,9 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* ── 9b. CARDS DEL HUB — gestionades des de l'admin de Freedolia ── */}
+      <HubCards />
 
       {/* ── 10. FAQ ──────────────────────────────────────────────────────── */}
       <section className="py-5">
