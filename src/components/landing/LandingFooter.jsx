@@ -8,6 +8,7 @@ const PRODUCTS = [
   { name: 'Freedoliapp', url: 'https://freedoliapp.com' },
   { name: 'freeSEOlia', url: 'https://freeseolia.com' },
   { name: 'Freehubia', url: 'https://freehubia.com' },
+  { name: 'Freekalia', url: 'https://freekalia.com' },
 ]
 
 const ECOSYSTEM = [
@@ -16,6 +17,7 @@ const ECOSYSTEM = [
   { name: 'freeSEOlia', url: 'https://freeseolia.com' },
   { name: 'Freedoliapp', url: 'https://freedoliapp.com' },
   { name: 'Freehubia', url: 'https://freehubia.com' },
+  { name: 'Freekalia', url: 'https://freekalia.com' },
   { name: 'David Says Hi', url: 'https://davidsayshi.com' },
 ]
 
