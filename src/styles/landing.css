@@ -662,6 +662,10 @@
   display: grid; grid-template-columns: 1.5fr repeat(4, 1fr);
   gap: 40px; margin-bottom: 48px;
 }
+/* El grid mana. Les classes col-* de Bootstrap deixaven cada columna al 16 %
+   de la seva cel·la i el text sortia gairebé paraula per línia. */
+.ld-footer .ld-footer__top { margin-left: 0; margin-right: 0; }
+.ld-footer .ld-footer__top > * { width: auto; max-width: none; padding-left: 0; padding-right: 0; }
 .ld-footer__brand-name {
   font-family: var(--ld-display); font-size: 22px;
   color: var(--ld-turq); margin-bottom: 10px;
