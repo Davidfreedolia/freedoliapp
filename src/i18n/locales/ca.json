@@ -833,7 +833,13 @@
       "account": "Compte",
       "free_trial": "Trial gratuït",
       "cookies": "Cookies",
-      "rights": "Tots els drets reservats."
+      "rights": "Tots els drets reservats.",
+      "fd_agency": "Agència d'IA",
+      "fd_automation": "Automatització a mida",
+      "fd_chatbot": "Xatbot personalitzat",
+      "fd_ai_consulting": "Consultoria IA",
+      "fd_web": "Webs i landing pages",
+      "fd_blog": "Blog"
     },
     "nav": {
       "features": "Funcionalitats",

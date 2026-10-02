@@ -37,6 +37,19 @@ import BuiltForSection from '../components/landing/BuiltForSection'
 import BuiltOnRow from '../components/landing/BuiltOnRow'
 import LiveStatsBar from '../components/landing/LiveStatsBar'
 
+// Enllaços a Freedolia (l'agència que fa Freedoliapp) al peu de la portada.
+// La portada no usa el footer compartit (LandingFooter), així que fins ara
+// no enllaçava ni els serveis ni el blog de freedolia.com.
+const FREEDOLIA_LANGS = ['ca', 'es', 'en']
+const FREEDOLIA_LINKS = [
+  { key: 'fd_agency', path: '' },
+  { key: 'fd_automation', path: 'serveis/automatitzacio' },
+  { key: 'fd_chatbot', path: 'serveis/chatbot' },
+  { key: 'fd_ai_consulting', path: 'serveis/consultoria_ia' },
+  { key: 'fd_web', path: 'serveis/web_landing' },
+  { key: 'fd_blog', path: 'blog' },
+]
+
 /* ─── Static data ─────────────────────────────────────────────────────────── */
 
 const FEATURES = [
@@ -135,6 +148,7 @@ function VisualSection({
 export default function Landing() {
   const navigate     = useNavigate()
   const { t, i18n } = useTranslation()
+  const fdLang = FREEDOLIA_LANGS.includes((i18n.language || '').slice(0, 2)) ? i18n.language.slice(0, 2) : 'ca'
   const [scrolled,     setScrolled]     = useState(false)
   const [yearly,       setYearly]       = useState(false)
   const [openFaq,      setOpenFaq]      = useState(null)
@@ -687,6 +701,18 @@ export default function Landing() {
                 <li><Link to="/privacy" className="ld-footer__link">{t('landing.footer.privacy')}</Link></li>
                 <li><Link to="/terms"   className="ld-footer__link">{t('landing.footer.terms')}</Link></li>
                 <li><Link to="/cookies" className="ld-footer__link">{t('landing.footer.cookies')}</Link></li>
+              </ul>
+            </div>
+            <div className="col-6 col-md-2">
+              <div className="ld-footer__col-title">Freedolia</div>
+              <ul className="ld-footer__links">
+                {FREEDOLIA_LINKS.map(({ key, path }) => (
+                  <li key={key}>
+                    <a href={`https://freedolia.com/${fdLang}${path ? '/' + path : ''}`} className="ld-footer__link" target="_blank" rel="noopener">
+                      {t(`landing.footer.${key}`)}
+                    </a>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>

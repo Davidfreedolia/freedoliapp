@@ -833,7 +833,13 @@
       "account": "Account",
       "free_trial": "Free trial",
       "cookies": "Cookies",
-      "rights": "All rights reserved."
+      "rights": "All rights reserved.",
+      "fd_agency": "AI agency",
+      "fd_automation": "Custom automation",
+      "fd_chatbot": "Custom chatbot",
+      "fd_ai_consulting": "AI consulting",
+      "fd_web": "Websites & landing pages",
+      "fd_blog": "Blog"
     },
     "nav": {
       "features": "Features",
